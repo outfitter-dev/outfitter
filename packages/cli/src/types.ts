@@ -326,6 +326,12 @@ export interface CursorOptions {
 
 	/** Tool name for XDG path resolution */
 	readonly toolName: string;
+
+	/** Whether there are more results (defaults to true) */
+	readonly hasMore?: boolean;
+
+	/** Total count of results (if known) */
+	readonly total?: number;
 }
 
 // =============================================================================
