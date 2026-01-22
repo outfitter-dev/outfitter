@@ -438,7 +438,7 @@ describe("CancelledError", () => {
 
 	it("exitCode() returns correct value", () => {
 		const error = new CancelledError({ message: "Operation cancelled" });
-		expect(error.exitCode()).toBe(10);
+		expect(error.exitCode()).toBe(130); // POSIX: 128 + SIGINT(2)
 	});
 
 	it("statusCode() returns correct HTTP code", () => {
@@ -462,7 +462,7 @@ describe("getExitCode", () => {
 		expect(getExitCode("network")).toBe(7);
 		expect(getExitCode("internal")).toBe(8);
 		expect(getExitCode("auth")).toBe(9);
-		expect(getExitCode("cancelled")).toBe(10);
+		expect(getExitCode("cancelled")).toBe(130); // POSIX: 128 + SIGINT(2)
 	});
 });
 

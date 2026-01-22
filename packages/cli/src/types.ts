@@ -335,23 +335,18 @@ export interface CursorOptions {
 }
 
 // =============================================================================
-// Error Types
+// Error Types (re-exported from @outfitter/contracts)
 // =============================================================================
 
 /**
- * Error indicating a cancelled operation.
+ * Re-export error classes from contracts for convenience.
+ * These are the canonical error types for the CLI.
  */
-export interface CancelledError extends Error {
-	readonly _tag: "CancelledError";
-}
-
-/**
- * Error indicating invalid input.
- */
-export interface ValidationError extends Error {
-	readonly _tag: "ValidationError";
-	readonly field?: string;
-}
+export {
+	CancelledError,
+	ValidationError,
+	type ErrorCategory,
+} from "@outfitter/contracts";
 
 // =============================================================================
 // Result Type Re-export

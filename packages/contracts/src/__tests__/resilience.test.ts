@@ -61,7 +61,7 @@ describe("retry<T>()", () => {
 		expect(result.isErr()).toBe(true);
 		expect(attempts).toBe(3);
 		if (result.isErr()) {
-			expect(result.unwrapErr().message).toBe("Attempt 3 failed");
+			expect(result.error.message).toBe("Attempt 3 failed");
 		}
 	});
 
@@ -181,7 +181,7 @@ describe("retry<T>()", () => {
 		expect(result.isErr()).toBe(true);
 		expect(attempts).toBe(2); // First attempt + one retry
 		if (result.isErr()) {
-			expect(result.unwrapErr()._tag).toBe("ValidationError");
+			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
 
@@ -230,7 +230,7 @@ describe("withTimeout<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			expect(result.unwrapErr()._tag).toBe("TimeoutError");
+			expect(result.error._tag).toBe("TimeoutError");
 		}
 	});
 
@@ -247,7 +247,7 @@ describe("withTimeout<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr() as TimeoutError;
+			const error = result.error as TimeoutError;
 			expect(error.operation).toBe("database query");
 		}
 	});
@@ -265,7 +265,7 @@ describe("withTimeout<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr() as TimeoutError;
+			const error = result.error as TimeoutError;
 			expect(error.timeoutMs).toBe(10);
 		}
 	});
@@ -307,7 +307,7 @@ describe("withTimeout<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			expect(result.unwrapErr()._tag).toBe("NetworkError");
+			expect(result.error._tag).toBe("NetworkError");
 		}
 	});
 });

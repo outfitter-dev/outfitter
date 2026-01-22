@@ -38,8 +38,26 @@ export interface ShortIdOptions {
  * const prefixed = shortId({ prefix: "usr_" }); // "usr_a1b2c3d4"
  * ```
  */
-export function shortId(_options?: ShortIdOptions): ShortId {
-	throw new Error("Not implemented");
+const CHARSETS = {
+	alphanumeric: "0123456789abcdefghijklmnopqrstuvwxyz",
+	hex: "0123456789abcdef",
+	base62: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+} as const;
+
+export function shortId(options?: ShortIdOptions): ShortId {
+	const length = options?.length ?? 8;
+	const charset = CHARSETS[options?.charset ?? "alphanumeric"];
+	const prefix = options?.prefix ?? "";
+
+	const bytes = new Uint8Array(length);
+	crypto.getRandomValues(bytes);
+
+	let result = "";
+	for (const byte of bytes) {
+		result += charset[byte % charset.length];
+	}
+
+	return (prefix + result) as ShortId;
 }
 
 /**
@@ -50,6 +68,26 @@ export function shortId(_options?: ShortIdOptions): ShortId {
  * @returns True if the string is a valid short ID
  * @throws Error - Not implemented yet
  */
-export function isShortId(_value: string, _options?: ShortIdOptions): _value is ShortId {
-	throw new Error("Not implemented");
+export function isShortId(value: string, options?: ShortIdOptions): value is ShortId {
+	const length = options?.length ?? 8;
+	const charset = CHARSETS[options?.charset ?? "alphanumeric"];
+	const prefix = options?.prefix ?? "";
+
+	if (prefix && !value.startsWith(prefix)) {
+		return false;
+	}
+
+	const idPart = prefix ? value.slice(prefix.length) : value;
+
+	if (idPart.length !== length) {
+		return false;
+	}
+
+	for (const char of idPart) {
+		if (!charset.includes(char)) {
+			return false;
+		}
+	}
+
+	return true;
 }

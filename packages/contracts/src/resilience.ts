@@ -1,5 +1,5 @@
-import type { Result } from "better-result";
-import type { KitError, TimeoutError } from "./errors.js";
+import { Result } from "better-result";
+import { type KitError, TimeoutError } from "./errors.js";
 
 /**
  * Options for retry behavior.
@@ -42,6 +42,47 @@ export interface TimeoutOptions {
 }
 
 /**
+ * Default retry predicate - retries transient errors.
+ */
+function defaultIsRetryable(error: KitError): boolean {
+	return (
+		error.category === "network" || error.category === "timeout" || error.category === "rate_limit"
+	);
+}
+
+/**
+ * Calculate delay with exponential backoff and optional jitter.
+ */
+function calculateDelay(
+	attempt: number,
+	initialDelayMs: number,
+	maxDelayMs: number,
+	backoffMultiplier: number,
+	jitter: boolean,
+): number {
+	// Calculate base delay: initialDelayMs * multiplier^(attempt-1)
+	const baseDelay = initialDelayMs * backoffMultiplier ** (attempt - 1);
+
+	// Cap at maxDelayMs
+	const cappedDelay = Math.min(baseDelay, maxDelayMs);
+
+	// Apply jitter if enabled (random value between 0.5x and 1.5x)
+	if (jitter) {
+		const jitterFactor = 0.5 + Math.random();
+		return Math.floor(cappedDelay * jitterFactor);
+	}
+
+	return cappedDelay;
+}
+
+/**
+ * Sleep for a specified duration.
+ */
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
  * Retry an async operation with exponential backoff.
  *
  * Automatically retries transient errors (network, timeout, rate_limit)
@@ -65,14 +106,65 @@ export interface TimeoutOptions {
  *   }
  * );
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
-export function retry<T>(
-	_fn: () => Promise<Result<T, KitError>>,
-	_options?: RetryOptions,
+export async function retry<T>(
+	fn: () => Promise<Result<T, KitError>>,
+	options?: RetryOptions,
 ): Promise<Result<T, KitError>> {
-	throw new Error("Not implemented");
+	const maxAttempts = options?.maxAttempts ?? 3;
+	const initialDelayMs = options?.initialDelayMs ?? 1000;
+	const maxDelayMs = options?.maxDelayMs ?? 30000;
+	const backoffMultiplier = options?.backoffMultiplier ?? 2;
+	const jitter = options?.jitter ?? true;
+	const isRetryable = options?.isRetryable ?? defaultIsRetryable;
+	const onRetry = options?.onRetry;
+	const signal = options?.signal;
+
+	let lastError: KitError | undefined;
+	let attempt = 0;
+
+	while (attempt < maxAttempts) {
+		attempt++;
+
+		// Check for cancellation
+		if (signal?.aborted) {
+			return Result.err(
+				lastError ??
+					new TimeoutError({ message: "Operation cancelled", operation: "retry", timeoutMs: 0 }),
+			);
+		}
+
+		const result = await fn();
+
+		if (result.isOk()) {
+			return result;
+		}
+
+		lastError = result.error;
+
+		// Check if we should retry
+		if (attempt >= maxAttempts || !isRetryable(lastError)) {
+			return result;
+		}
+
+		// Calculate delay for next attempt
+		const delayMs = calculateDelay(attempt, initialDelayMs, maxDelayMs, backoffMultiplier, jitter);
+
+		// Invoke onRetry callback
+		if (onRetry) {
+			onRetry(attempt, lastError, delayMs);
+		}
+
+		// Wait before retrying
+		await sleep(delayMs);
+	}
+
+	// Should not reach here since loop will always either:
+	// 1. Return success result
+	// 2. Return error result when maxAttempts reached or error not retryable
+	// But TypeScript needs a return, and lastError will always be defined if we get here
+	// because we only exit the loop early on success or error condition
+	throw new Error("Unexpected: retry loop completed without returning a result");
 }
 
 /**
@@ -93,16 +185,38 @@ export function retry<T>(
  *   { timeoutMs: 5000, operation: "database query" }
  * );
  *
- * if (result.isErr() && result.unwrapErr()._tag === "TimeoutError") {
+ * if (result.isErr() && result.error._tag === "TimeoutError") {
  *   // Handle timeout
  * }
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
-export function withTimeout<T, E extends KitError>(
-	_fn: () => Promise<Result<T, E>>,
-	_options: TimeoutOptions,
+export async function withTimeout<T, E extends KitError>(
+	fn: () => Promise<Result<T, E>>,
+	options: TimeoutOptions,
 ): Promise<Result<T, E | TimeoutError>> {
-	throw new Error("Not implemented");
+	const { timeoutMs, operation = "operation" } = options;
+
+	let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+	const timeoutPromise = new Promise<Result<T, TimeoutError>>((resolve) => {
+		timeoutId = setTimeout(() => {
+			resolve(
+				Result.err(
+					new TimeoutError({
+						message: `${operation} timed out after ${timeoutMs}ms`,
+						operation,
+						timeoutMs,
+					}),
+				),
+			);
+		}, timeoutMs);
+	});
+
+	try {
+		return await Promise.race([fn(), timeoutPromise]);
+	} finally {
+		if (timeoutId !== undefined) {
+			clearTimeout(timeoutId);
+		}
+	}
 }

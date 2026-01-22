@@ -35,8 +35,11 @@ export function isNonEmptyArray<T>(array: T[]): array is NonEmptyArray<T> {
  * @throws Error - If the array is empty
  * @throws Error - Not implemented yet
  */
-export function toNonEmptyArray<T>(_array: T[]): NonEmptyArray<T> {
-	throw new Error("Not implemented");
+export function toNonEmptyArray<T>(array: T[]): NonEmptyArray<T> {
+	if (array.length === 0) {
+		throw new Error("Array is empty");
+	}
+	return array as NonEmptyArray<T>;
 }
 
 /**
@@ -75,8 +78,20 @@ export function last<T>(array: NonEmptyArray<T>): T {
  * ```
  */
 export function groupBy<T, K extends string | number | symbol>(
-	_items: T[],
-	_keyFn: (item: T) => K,
+	items: T[],
+	keyFn: (item: T) => K,
 ): Map<K, NonEmptyArray<T>> {
-	throw new Error("Not implemented");
+	const result = new Map<K, NonEmptyArray<T>>();
+
+	for (const item of items) {
+		const key = keyFn(item);
+		const existing = result.get(key);
+		if (existing) {
+			existing.push(item);
+		} else {
+			result.set(key, [item]);
+		}
+	}
+
+	return result;
 }

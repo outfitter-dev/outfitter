@@ -72,9 +72,9 @@ export function hasProperty<K extends string>(value: unknown, key: K): value is 
  * ```
  */
 export function createGuard<T>(
-	_predicate: (value: unknown) => boolean,
+	predicate: (value: unknown) => boolean,
 ): (value: unknown) => value is T {
-	throw new Error("Not implemented");
+	return (value: unknown): value is T => predicate(value);
 }
 
 /**
@@ -87,9 +87,11 @@ export function createGuard<T>(
  * @throws Error - Not implemented yet
  */
 export function assertType<T>(
-	_value: unknown,
-	_guard: (value: unknown) => value is T,
-	_message?: string,
-): asserts _value is T {
-	throw new Error("Not implemented");
+	value: unknown,
+	guard: (value: unknown) => value is T,
+	message?: string,
+): asserts value is T {
+	if (!guard(value)) {
+		throw new Error(message ?? "Type assertion failed");
+	}
 }

@@ -27,6 +27,16 @@ export interface CreateContextOptions {
 }
 
 /**
+ * No-op logger for when no logger is provided.
+ */
+const noopLogger: Logger = {
+	debug: () => {},
+	info: () => {},
+	warn: () => {},
+	error: () => {},
+};
+
+/**
  * Create a HandlerContext for a new request.
  *
  * Auto-generates requestId using Bun.randomUUIDv7() if not provided.
@@ -44,11 +54,27 @@ export interface CreateContextOptions {
  *
  * const result = await handler(input, ctx);
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
-export function createContext(_options: CreateContextOptions): HandlerContext {
-	throw new Error("Not implemented");
+export function createContext(options: CreateContextOptions): HandlerContext {
+	const ctx: HandlerContext = {
+		requestId: options.requestId ?? generateRequestId(),
+		logger: options.logger ?? noopLogger,
+		cwd: options.cwd ?? process.cwd(),
+		env: options.env ?? {},
+	};
+
+	// Only add optional properties if they have defined values
+	if (options.config !== undefined) {
+		ctx.config = options.config;
+	}
+	if (options.signal !== undefined) {
+		ctx.signal = options.signal;
+	}
+	if (options.workspaceRoot !== undefined) {
+		ctx.workspaceRoot = options.workspaceRoot;
+	}
+
+	return ctx;
 }
 
 /**
@@ -64,9 +90,7 @@ export function createContext(_options: CreateContextOptions): HandlerContext {
  * const requestId = generateRequestId();
  * // "018e4f3c-1a2b-7000-8000-000000000001"
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
 export function generateRequestId(): string {
-	throw new Error("Not implemented");
+	return Bun.randomUUIDv7();
 }

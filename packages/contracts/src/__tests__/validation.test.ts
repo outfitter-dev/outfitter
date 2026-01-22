@@ -55,7 +55,7 @@ describe("createValidator<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			expect(error._tag).toBe("ValidationError");
 		}
 	});
@@ -71,7 +71,7 @@ describe("createValidator<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			// Error message should include information about the validation failure
 			expect(error.message.length).toBeGreaterThan(0);
 		}
@@ -150,7 +150,7 @@ describe("validateInput<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			// The error should indicate which field failed
 			expect(error.field || error.message).toBeTruthy();
 		}
@@ -177,7 +177,7 @@ describe("validateInput<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			// Message should include path to nested field
 			expect(error.message).toBeTruthy();
 		}
@@ -218,7 +218,7 @@ describe("validateInput<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			// Error should reference the path (e.g., "level1.level2.level3")
 			expect(error.message.length).toBeGreaterThan(0);
 		}

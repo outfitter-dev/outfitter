@@ -1,5 +1,7 @@
 import type { Result } from "better-result";
-import type { KitError, SerializedError } from "./errors.js";
+import { type KitError, type SerializedError, statusCodeMap } from "./errors.js";
+import { serializeError } from "./serialization.js";
+import { generateRequestId } from "./context.js";
 
 /**
  * Metadata attached to every response envelope.
@@ -65,6 +67,22 @@ export interface HttpResponse<T> {
 }
 
 /**
+ * Build envelope metadata with defaults.
+ */
+function buildMeta(overrides?: Partial<EnvelopeMeta>): EnvelopeMeta {
+	const meta: EnvelopeMeta = {
+		requestId: overrides?.requestId ?? generateRequestId(),
+		timestamp: new Date().toISOString(),
+	};
+
+	if (overrides?.durationMs !== undefined) {
+		meta.durationMs = overrides.durationMs;
+	}
+
+	return meta;
+}
+
+/**
  * Convert a Result to a response envelope.
  *
  * @typeParam T - Success data type
@@ -78,14 +96,26 @@ export interface HttpResponse<T> {
  * const result = await getNote({ id: "abc123" }, ctx);
  * const envelope = toEnvelope(result, { requestId: ctx.requestId });
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
 export function toEnvelope<T, E extends KitError>(
-	_result: Result<T, E>,
-	_meta?: Partial<EnvelopeMeta>,
+	result: Result<T, E>,
+	meta?: Partial<EnvelopeMeta>,
 ): Envelope<T> {
-	throw new Error("Not implemented");
+	const envelopeMeta = buildMeta(meta);
+
+	if (result.isOk()) {
+		return {
+			ok: true,
+			data: result.value,
+			meta: envelopeMeta,
+		};
+	}
+
+	return {
+		ok: false,
+		error: serializeError(result.error),
+		meta: envelopeMeta,
+	};
 }
 
 /**
@@ -105,9 +135,22 @@ export function toEnvelope<T, E extends KitError>(
  * // { status: 200, body: { ok: true, data: note, meta: {...} } }
  * // or { status: 404, body: { ok: false, error: {...}, meta: {...} } }
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
-export function toHttpResponse<T, E extends KitError>(_result: Result<T, E>): HttpResponse<T> {
-	throw new Error("Not implemented");
+export function toHttpResponse<T, E extends KitError>(result: Result<T, E>): HttpResponse<T> {
+	const envelope = toEnvelope(result);
+
+	if (envelope.ok) {
+		return {
+			status: 200,
+			body: envelope,
+		};
+	}
+
+	// Get status code from error category
+	const status = statusCodeMap[envelope.error.category];
+
+	return {
+		status,
+		body: envelope,
+	};
 }

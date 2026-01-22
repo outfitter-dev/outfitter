@@ -47,5 +47,17 @@
 			"semicolons": "always",
 			"trailingCommas": "all"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/serialization.ts"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"useLiteralKeys": "off"
+					}
+				}
+			}
+		}
+	]
 }

@@ -25,6 +25,8 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
+		"@outfitter/contracts": "workspace:*",
+		"@outfitter/types": "workspace:*",
 		"better-result": "^2.5.1",
 		"commander": "^14.0.2"
 	},

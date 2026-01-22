@@ -27,8 +27,8 @@ export type Branded<T, Brand extends string> = T & { readonly __brand: Brand };
  * @returns The branded value
  * @throws Error - Not implemented yet
  */
-export function brand<T, Brand extends string>(_value: T): Branded<T, Brand> {
-	throw new Error("Not implemented");
+export function brand<T, Brand extends string>(value: T): Branded<T, Brand> {
+	return value as Branded<T, Brand>;
 }
 
 /**
@@ -38,8 +38,8 @@ export function brand<T, Brand extends string>(_value: T): Branded<T, Brand> {
  * @returns The unbranded value
  * @throws Error - Not implemented yet
  */
-export function unbrand<T, Brand extends string>(_value: Branded<T, Brand>): T {
-	throw new Error("Not implemented");
+export function unbrand<T, Brand extends string>(value: Branded<T, Brand>): T {
+	return value as T;
 }
 
 /**

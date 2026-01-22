@@ -336,7 +336,7 @@ describe("safeParse<T>()", () => {
 
 		expect(result.isErr()).toBe(true);
 		if (result.isErr()) {
-			const error = result.unwrapErr();
+			const error = result.error;
 			// Error message should include some indication of where the error occurred
 			expect(error.message.length).toBeGreaterThan(0);
 		}

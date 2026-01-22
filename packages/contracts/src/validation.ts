@@ -1,6 +1,35 @@
-import type { Result } from "better-result";
+import { Result } from "better-result";
 import type { z } from "zod";
-import type { ValidationError } from "./errors.js";
+import { ValidationError } from "./errors.js";
+
+/**
+ * Format Zod issues into a human-readable error message.
+ *
+ * @param issues - Array of Zod validation issues
+ * @returns Formatted error message string
+ */
+function formatZodIssues(issues: z.ZodIssue[]): string {
+	return issues
+		.map((issue) => {
+			const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+			return `${path}: ${issue.message}`;
+		})
+		.join("; ");
+}
+
+/**
+ * Extract the first field path from Zod issues (if any).
+ *
+ * @param issues - Array of Zod validation issues
+ * @returns Field path string or undefined
+ */
+function extractField(issues: z.ZodIssue[]): string | undefined {
+	const firstIssue = issues[0];
+	if (firstIssue && firstIssue.path.length > 0) {
+		return firstIssue.path.join(".");
+	}
+	return undefined;
+}
 
 /**
  * Create a validator function from a Zod schema.
@@ -19,13 +48,13 @@ import type { ValidationError } from "./errors.js";
  * const validateNote = createValidator(NoteSchema);
  * const result = validateNote(input); // Result<Note, ValidationError>
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
 export function createValidator<T>(
-	_schema: z.ZodType<T>,
+	schema: z.ZodType<T>,
 ): (input: unknown) => Result<T, ValidationError> {
-	throw new Error("Not implemented");
+	return (input: unknown): Result<T, ValidationError> => {
+		return validateInput(schema, input);
+	};
 }
 
 /**
@@ -45,12 +74,22 @@ export function createValidator<T>(
  *   console.error(result.unwrapErr().message);
  * }
  * ```
- *
- * @throws Error - Not implemented in scaffold
  */
-export function validateInput<T>(
-	_schema: z.ZodType<T>,
-	_input: unknown,
-): Result<T, ValidationError> {
-	throw new Error("Not implemented");
+export function validateInput<T>(schema: z.ZodType<T>, input: unknown): Result<T, ValidationError> {
+	const parseResult = schema.safeParse(input);
+
+	if (parseResult.success) {
+		return Result.ok(parseResult.data);
+	}
+
+	const message = formatZodIssues(parseResult.error.issues);
+	const field = extractField(parseResult.error.issues);
+
+	// Build error with optional field only if defined
+	const errorProps: { message: string; field?: string } = { message };
+	if (field !== undefined) {
+		errorProps.field = field;
+	}
+
+	return Result.err(new ValidationError(errorProps));
 }

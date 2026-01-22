@@ -16,6 +16,8 @@
       "name": "@outfitter/cli",
       "version": "0.0.1",
       "dependencies": {
+        "@outfitter/contracts": "workspace:*",
+        "@outfitter/types": "workspace:*",
         "better-result": "^2.5.1",
         "commander": "^14.0.2",
       },
