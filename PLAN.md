@@ -722,6 +722,75 @@ config       logging        file-ops      state          ui
 
 ## Execution Notes
 
+### Graphite Stack Strategy
+
+Phase 1 established a Graphite stacked PR workflow for TDD-based package implementation. This pattern should be replicated for subsequent phases.
+
+**Branch Naming Convention:**
+
+| Phase | Branch Pattern | Purpose |
+|-------|----------------|---------|
+| RED | `<package>/<feature>-tests` | Failing tests that define the contract |
+| GREEN | `<package>/<feature>-impl` | Implementation that makes tests pass |
+| DOCS | `<package>/docs` | README, CHANGELOG, TSDoc |
+
+**Phase 1 Stack Example:**
+
+```
+main
+└── cli/scaffold          # Package structure, tsconfig, dependencies
+    └── cli/harvest-map   # HARVEST_MAP.md documenting patterns found
+        └── cli/output-tests   # RED: 38 failing output tests
+            └── cli/output-impl    # GREEN: output.ts implementation
+                └── cli/input-tests    # RED: 74 failing input tests
+                    └── cli/input-impl     # GREEN: input.ts implementation
+                        └── cli/pagination-tests  # RED: 22 failing pagination tests
+                            └── cli/pagination-impl   # GREEN: pagination.ts implementation
+                                └── cli/docs          # README.md, CHANGELOG.md
+```
+
+**Subagent Orchestration:**
+
+| Phase | Agent | Purpose |
+|-------|-------|---------|
+| Planning | `Plan` | Research codebase, design test strategy, estimate scope |
+| Harvest/Research | `analyst` | Create HARVEST_MAP.md, analyze patterns |
+| RED (tests) | `senior-dev` | Write failing tests that define the contract |
+| GREEN (impl) | `senior-dev` | Implement code to pass tests |
+| Docs | `analyst` | Generate README.md, CHANGELOG.md |
+| Review | `ranger` | Code review before merge (if needed) |
+
+**Workflow Commands:**
+
+```bash
+# Create branch with staged changes
+gt create 'cli/feature-tests' -am "test(cli): add feature tests"
+
+# Amend current branch (within same branch)
+gt modify -acm "test(cli): add edge case tests"
+
+# Submit full stack
+gt submit --stack --no-interactive
+
+# Navigate stack
+gt up / gt down / gt top / gt bottom
+```
+
+**TodoWrite Integration:**
+
+Track agent delegations explicitly for context compaction resilience:
+
+```
+- [x] [analyst] cli/harvest-map - PR #3
+- [x] [senior-dev] cli/output-tests - PR #4
+- [x] [senior-dev] cli/output-impl - PR #5
+- [ ] [ranger] Review full stack before merge
+```
+
+Include agent IDs for resumable sessions when iterating on complex implementations.
+
+---
+
 ### Parallelization Opportunities
 
 - **Phase 2a + 2b**: contracts and types can develop in parallel
