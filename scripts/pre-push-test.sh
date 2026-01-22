@@ -19,13 +19,52 @@ NC='\033[0m' # No Color
 # Get current branch name
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Check if this is a TDD RED phase branch
+# Check if this is a TDD RED phase branch (tests expected to fail)
 is_red_phase_branch() {
     local branch="$1"
     # Match patterns: *-tests, */tests, *_tests
     if [[ "$branch" =~ -tests$ ]] || [[ "$branch" =~ /tests$ ]] || [[ "$branch" =~ _tests$ ]]; then
         return 0
     fi
+    return 1
+}
+
+# Check if this is a scaffold branch (minimal tests, may depend on RED phase branches)
+is_scaffold_branch() {
+    local branch="$1"
+    # Match patterns: *-scaffold, */scaffold, *_scaffold
+    if [[ "$branch" =~ -scaffold$ ]] || [[ "$branch" =~ /scaffold$ ]] || [[ "$branch" =~ _scaffold$ ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# Check if any branch in the stack (or locally) is a RED phase branch
+has_red_phase_branch_in_context() {
+    # First try gt ls (works in interactive shell)
+    local branches
+    branches=$(gt ls 2>/dev/null | sed 's/^[│├└─◉◯ ]*//' | sed 's/ (.*//' | grep -v '^$' | head -20)
+
+    # If gt ls fails or is empty (common in hooks), fall back to git branches
+    if [[ -z "$branches" ]]; then
+        # Get all local branches that look like they're part of a stack
+        # (have cli/, types/, contracts/ prefixes)
+        branches=$(git branch --list 'cli/*' 'types/*' 'contracts/*' 2>/dev/null | sed 's/^[* ]*//')
+    fi
+
+    if [[ -z "$branches" ]]; then
+        return 1
+    fi
+
+    while IFS= read -r branch; do
+        [[ -z "$branch" ]] && continue
+        # Skip the current branch
+        [[ "$branch" == "$BRANCH" ]] && continue
+        if is_red_phase_branch "$branch"; then
+            return 0
+        fi
+    done <<< "$branches"
+
     return 1
 }
 
@@ -115,6 +154,16 @@ main() {
         echo ""
         echo "Remember: GREEN phase (implementation) must make these tests pass!"
         exit 0
+    fi
+
+    # Scaffold branches may depend on RED phase ancestors - check and skip if so
+    if is_scaffold_branch "$BRANCH"; then
+        if has_red_phase_branch_in_context; then
+            echo -e "${YELLOW}Scaffold branch${NC} with RED phase branch in context: ${BLUE}$BRANCH${NC}"
+            echo -e "${YELLOW}Skipping test execution${NC} - RED phase tests expected to fail"
+            echo ""
+            exit 0
+        fi
     fi
 
     # Not a RED phase branch - run tests normally

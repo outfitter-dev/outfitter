@@ -1,0 +1,46 @@
+{
+	"name": "@outfitter/contracts",
+	"version": "0.0.1",
+	"description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "bun build ./src/index.ts --outdir ./dist --target bun && tsc --emitDeclarationOnly --outDir ./dist",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"better-result": "^2.5.0",
+		"zod": "^3.25.0"
+	},
+	"devDependencies": {
+		"@outfitter/types": "workspace:*",
+		"@types/bun": "latest",
+		"typescript": "^5.8.0"
+	},
+	"keywords": [
+		"outfitter",
+		"contracts",
+		"errors",
+		"result",
+		"typescript"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/outfitter-dev/kit.git",
+		"directory": "packages/contracts"
+	}
+}
