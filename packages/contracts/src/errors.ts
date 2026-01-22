@@ -35,7 +35,7 @@ export const exitCodeMap: Record<ErrorCategory, number> = {
 	network: 7,
 	internal: 8,
 	auth: 9,
-	cancelled: 10,
+	cancelled: 130, // POSIX convention: 128 + SIGINT(2)
 };
 
 /**

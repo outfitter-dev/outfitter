@@ -9,8 +9,8 @@
 
 import path from "node:path";
 import { Err, Ok, type Result } from "better-result";
+import { CancelledError, ValidationError } from "@outfitter/contracts";
 import type {
-	CancelledError,
 	CollectIdsOptions,
 	ConfirmDestructiveOptions,
 	ExpandFileOptions,
@@ -20,33 +20,7 @@ import type {
 	ParseGlobOptions,
 	Range,
 	SortCriteria,
-	ValidationError,
 } from "./types.js";
-
-// =============================================================================
-// Error Factories
-// =============================================================================
-
-/**
- * Creates a ValidationError with the given message and optional field.
- */
-function createValidationError(message: string, field?: string): ValidationError {
-	const error = new Error(message) as ValidationError;
-	(error as { _tag: "ValidationError" })._tag = "ValidationError";
-	if (field) {
-		(error as { field: string }).field = field;
-	}
-	return error;
-}
-
-/**
- * Creates a CancelledError with the given message.
- */
-function createCancelledError(message: string): CancelledError {
-	const error = new Error(message) as CancelledError;
-	(error as { _tag: "CancelledError" })._tag = "CancelledError";
-	return error;
-}
 
 // =============================================================================
 // Security Helpers
@@ -441,7 +415,7 @@ export async function parseGlob(pattern: string, options?: ParseGlobOptions): Pr
  */
 export function parseKeyValue(
 	input: string | readonly string[],
-): Result<KeyValuePair[], ValidationError> {
+): Result<KeyValuePair[], InstanceType<typeof ValidationError>> {
 	const pairs: KeyValuePair[] = [];
 
 	// Normalize input to array
@@ -461,14 +435,16 @@ export function parseKeyValue(
 			const eqIndex = trimmed.indexOf("=");
 
 			if (eqIndex === -1) {
-				return new Err(createValidationError(`Missing '=' in key-value pair: ${trimmed}`));
+				return new Err(
+					new ValidationError({ message: `Missing '=' in key-value pair: ${trimmed}` }),
+				);
 			}
 
 			const key = trimmed.slice(0, eqIndex).trim();
 			const value = trimmed.slice(eqIndex + 1);
 
 			if (!key) {
-				return new Err(createValidationError("Empty key in key-value pair"));
+				return new Err(new ValidationError({ message: "Empty key in key-value pair" }));
 			}
 
 			pairs.push({ key, value });
@@ -498,7 +474,10 @@ export function parseKeyValue(
  * // => Result<{ type: "date", start: Date, end: Date }, ValidationError>
  * ```
  */
-export function parseRange(input: string, type: "number" | "date"): Result<Range, ValidationError> {
+export function parseRange(
+	input: string,
+	type: "number" | "date",
+): Result<Range, InstanceType<typeof ValidationError>> {
 	const trimmed = input.trim();
 
 	if (type === "date") {
@@ -509,11 +488,11 @@ export function parseRange(input: string, type: "number" | "date"): Result<Range
 			// Single date - start and end are the same
 			const dateStr = parts[0];
 			if (dateStr === undefined) {
-				return new Err(createValidationError("Empty date input"));
+				return new Err(new ValidationError({ message: "Empty date input" }));
 			}
 			const date = new Date(dateStr.trim());
 			if (Number.isNaN(date.getTime())) {
-				return new Err(createValidationError(`Invalid date format: ${dateStr}`));
+				return new Err(new ValidationError({ message: `Invalid date format: ${dateStr}` }));
 			}
 			return new Ok({ type: "date", start: date, end: date });
 		}
@@ -522,26 +501,28 @@ export function parseRange(input: string, type: "number" | "date"): Result<Range
 			const startStr = parts[0];
 			const endStr = parts[1];
 			if (startStr === undefined || endStr === undefined) {
-				return new Err(createValidationError("Invalid date range format"));
+				return new Err(new ValidationError({ message: "Invalid date range format" }));
 			}
 			const start = new Date(startStr.trim());
 			const end = new Date(endStr.trim());
 
 			if (Number.isNaN(start.getTime())) {
-				return new Err(createValidationError(`Invalid date format: ${startStr}`));
+				return new Err(new ValidationError({ message: `Invalid date format: ${startStr}` }));
 			}
 			if (Number.isNaN(end.getTime())) {
-				return new Err(createValidationError(`Invalid date format: ${endStr}`));
+				return new Err(new ValidationError({ message: `Invalid date format: ${endStr}` }));
 			}
 
 			if (start.getTime() > end.getTime()) {
-				return new Err(createValidationError("Start date must be before or equal to end date"));
+				return new Err(
+					new ValidationError({ message: "Start date must be before or equal to end date" }),
+				);
 			}
 
 			return new Ok({ type: "date", start, end });
 		}
 
-		return new Err(createValidationError(`Invalid date range format: ${input}`));
+		return new Err(new ValidationError({ message: `Invalid date range format: ${input}` }));
 	}
 
 	// Numeric range uses "-" separator (but we need to handle negative numbers)
@@ -573,7 +554,7 @@ export function parseRange(input: string, type: "number" | "date"): Result<Range
 	}
 
 	if (separatorIndex === -1) {
-		return new Err(createValidationError(`Invalid numeric range format: ${input}`));
+		return new Err(new ValidationError({ message: `Invalid numeric range format: ${input}` }));
 	}
 
 	const minStr = trimmed.slice(0, separatorIndex).trim();
@@ -583,14 +564,14 @@ export function parseRange(input: string, type: "number" | "date"): Result<Range
 	const max = Number(maxStr);
 
 	if (Number.isNaN(min)) {
-		return new Err(createValidationError(`Invalid number: ${minStr}`));
+		return new Err(new ValidationError({ message: `Invalid number: ${minStr}` }));
 	}
 	if (Number.isNaN(max)) {
-		return new Err(createValidationError(`Invalid number: ${maxStr}`));
+		return new Err(new ValidationError({ message: `Invalid number: ${maxStr}` }));
 	}
 
 	if (min > max) {
-		return new Err(createValidationError("Min must be less than or equal to max"));
+		return new Err(new ValidationError({ message: "Min must be less than or equal to max" }));
 	}
 
 	return new Ok({ type: "number", min, max });
@@ -615,7 +596,9 @@ export function parseRange(input: string, type: "number" | "date"): Result<Range
  * // ], ValidationError>
  * ```
  */
-export function parseFilter(input: string): Result<FilterExpression[], ValidationError> {
+export function parseFilter(
+	input: string,
+): Result<FilterExpression[], InstanceType<typeof ValidationError>> {
 	const trimmed = input.trim();
 
 	if (!trimmed) {
@@ -642,7 +625,9 @@ export function parseFilter(input: string): Result<FilterExpression[], Validatio
 		const colonIndex = partTrimmed.indexOf(":");
 
 		if (colonIndex === -1) {
-			return new Err(createValidationError(`Missing ':' in filter expression: ${part.trim()}`));
+			return new Err(
+				new ValidationError({ message: `Missing ':' in filter expression: ${part.trim()}` }),
+			);
 		}
 
 		const field = partTrimmed.slice(0, colonIndex).trim();
@@ -700,7 +685,9 @@ export function parseFilter(input: string): Result<FilterExpression[], Validatio
  * // ], ValidationError>
  * ```
  */
-export function parseSortSpec(input: string): Result<SortCriteria[], ValidationError> {
+export function parseSortSpec(
+	input: string,
+): Result<SortCriteria[], InstanceType<typeof ValidationError>> {
 	const trimmed = input.trim();
 
 	if (!trimmed) {
@@ -731,7 +718,9 @@ export function parseSortSpec(input: string): Result<SortCriteria[], ValidationE
 
 			if (direction !== "asc" && direction !== "desc") {
 				return new Err(
-					createValidationError(`Invalid sort direction: ${direction}. Must be 'asc' or 'desc'.`),
+					new ValidationError({
+						message: `Invalid sort direction: ${direction}. Must be 'asc' or 'desc'.`,
+					}),
 				);
 			}
 
@@ -762,7 +751,7 @@ export function parseSortSpec(input: string): Result<SortCriteria[], ValidationE
 export function normalizeId(
 	input: string,
 	options?: NormalizeIdOptions,
-): Result<string, ValidationError> {
+): Result<string, InstanceType<typeof ValidationError>> {
 	const { trim = false, lowercase = false, minLength, maxLength, pattern } = options ?? {};
 
 	let normalized = input;
@@ -777,17 +766,30 @@ export function normalizeId(
 
 	// Validate length constraints
 	if (minLength !== undefined && normalized.length < minLength) {
-		return new Err(createValidationError(`ID must be at least ${minLength} characters long`, "id"));
+		return new Err(
+			new ValidationError({
+				message: `ID must be at least ${minLength} characters long`,
+				field: "id",
+			}),
+		);
 	}
 
 	if (maxLength !== undefined && normalized.length > maxLength) {
-		return new Err(createValidationError(`ID must be at most ${maxLength} characters long`, "id"));
+		return new Err(
+			new ValidationError({
+				message: `ID must be at most ${maxLength} characters long`,
+				field: "id",
+			}),
+		);
 	}
 
 	// Validate pattern
 	if (pattern && !pattern.test(normalized)) {
 		return new Err(
-			createValidationError(`ID does not match required pattern: ${pattern.source}`, "id"),
+			new ValidationError({
+				message: `ID does not match required pattern: ${pattern.source}`,
+				field: "id",
+			}),
 		);
 	}
 
@@ -822,7 +824,7 @@ export function normalizeId(
  */
 export async function confirmDestructive(
 	options: ConfirmDestructiveOptions,
-): Promise<Result<boolean, CancelledError>> {
+): Promise<Result<boolean, InstanceType<typeof CancelledError>>> {
 	const { message, bypassFlag = false, itemCount } = options;
 
 	// If bypass flag is set, skip confirmation
@@ -836,9 +838,11 @@ export async function confirmDestructive(
 	const isDumbTerminal = process.env["TERM"] === "dumb";
 
 	if (!isTTY || isDumbTerminal) {
-		// Can't prompt in non-TTY or dumb terminal - throw error as tests expect
-		throw createCancelledError(
-			"Cannot prompt for confirmation in non-interactive mode. Use --yes to bypass.",
+		// Can't prompt in non-TTY or dumb terminal - return Err
+		return new Err(
+			new CancelledError({
+				message: "Cannot prompt for confirmation in non-interactive mode. Use --yes to bypass.",
+			}),
 		);
 	}
 

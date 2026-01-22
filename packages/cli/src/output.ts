@@ -4,28 +4,13 @@
  * @packageDocumentation
  */
 
+import { exitCodeMap, safeStringify as contractsSafeStringify } from "@outfitter/contracts";
+import type { ErrorCategory } from "@outfitter/contracts";
 import type { OutputMode, OutputOptions } from "./types.js";
 
 // =============================================================================
-// Exit Code Mapping
+// Exit Code Handling
 // =============================================================================
-
-/**
- * Maps error categories to CLI exit codes.
- * Based on SPEC.md error taxonomy.
- */
-const EXIT_CODE_MAP: Record<string, number> = {
-	validation: 1,
-	not_found: 2,
-	conflict: 3,
-	permission: 4,
-	timeout: 5,
-	rate_limit: 6,
-	network: 7,
-	internal: 8,
-	auth: 9,
-	cancelled: 130,
-};
 
 /**
  * Default exit code for unknown error categories.
@@ -81,29 +66,28 @@ function detectMode(options?: OutputOptions): OutputMode {
 }
 
 /**
- * Safe JSON stringify that handles circular references.
+ * Type guard for valid output modes.
+ */
+function isValidMode(mode: string): mode is OutputMode {
+	return ["human", "json", "jsonl", "tree", "table"].includes(mode);
+}
+
+/**
+ * Type guard for valid error categories.
+ */
+function isValidCategory(category: string): category is ErrorCategory {
+	return category in exitCodeMap;
+}
+
+/**
+ * Safe JSON stringify that handles circular references and undefined values.
+ * Wraps contracts' safeStringify with undefined → null conversion for CLI JSON output.
  */
 function safeStringify(value: unknown, pretty?: boolean): string {
-	const seen = new WeakSet();
-
-	const replacer = (_key: string, val: unknown): unknown => {
-		// Handle undefined
-		if (val === undefined) {
-			return null;
-		}
-
-		// Handle circular references
-		if (typeof val === "object" && val !== null) {
-			if (seen.has(val)) {
-				return "[Circular]";
-			}
-			seen.add(val);
-		}
-
-		return val;
-	};
-
-	return JSON.stringify(value, replacer, pretty ? 2 : undefined);
+	// Use contracts' safeStringify which handles BigInt and circular references
+	// We wrap the value to convert undefined to null for CLI JSON compatibility
+	const wrappedValue = value === undefined ? null : value;
+	return contractsSafeStringify(wrappedValue, pretty ? 2 : undefined);
 }
 
 /**
@@ -140,6 +124,7 @@ function formatHuman(data: unknown): string {
 
 /**
  * Extracts KitError-compatible properties from an error.
+ * Works with both actual KitError instances and duck-typed errors.
  */
 interface KitErrorLike {
 	_tag: string | undefined;
@@ -162,15 +147,13 @@ function getErrorProperties(error: Error): KitErrorLike {
 
 /**
  * Gets the exit code for an error based on its category.
+ * Uses exitCodeMap from @outfitter/contracts for known categories.
  */
 function getExitCode(error: Error): number {
 	const { category } = getErrorProperties(error);
 
-	if (category !== undefined) {
-		const code = EXIT_CODE_MAP[category];
-		if (code !== undefined) {
-			return code;
-		}
+	if (category !== undefined && isValidCategory(category)) {
+		return exitCodeMap[category];
 	}
 
 	return DEFAULT_EXIT_CODE;
@@ -179,7 +162,7 @@ function getExitCode(error: Error): number {
 /**
  * Serializable error structure for JSON output.
  */
-interface SerializedError {
+interface SerializedCliError {
 	message: string;
 	_tag?: string;
 	category?: string;
@@ -187,12 +170,13 @@ interface SerializedError {
 }
 
 /**
- * Serializes an error to JSON format.
+ * Serializes an error to JSON format for CLI output.
+ * Handles both KitError instances and plain Error objects.
  */
 function serializeErrorToJson(error: Error): string {
 	const { _tag, category, context } = getErrorProperties(error);
 
-	const result: SerializedError = {
+	const result: SerializedCliError = {
 		message: error.message,
 	};
 
