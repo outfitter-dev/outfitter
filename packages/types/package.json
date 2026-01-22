@@ -45,6 +45,12 @@
 				"default": "./dist/guards.js"
 			}
 		},
+		"./deep": {
+			"import": {
+				"types": "./dist/deep.d.ts",
+				"default": "./dist/deep.js"
+			}
+		},
 		"./package.json": "./package.json"
 	},
 	"sideEffects": false,
