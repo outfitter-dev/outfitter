@@ -328,32 +328,6 @@ export class AuthError extends TaggedError("AuthError")<{
 }
 
 /**
- * Runtime assertion failed.
- *
- * Used by assertion utilities that return Result types instead of throwing.
- * Enables explicit error handling for invariant checks and validations.
- *
- * @example
- * ```typescript
- * new AssertionError({ message: "Value is null or undefined" });
- * ```
- */
-export class AssertionError extends TaggedError("AssertionError")<{
-	message: string;
-	context?: Record<string, unknown>;
-}>() {
-	readonly category = "validation" as const;
-
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
-
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
-}
-
-/**
  * Operation cancelled by user or signal.
  *
  * @example
@@ -389,8 +363,7 @@ export type AnyKitError =
 	| InstanceType<typeof NetworkError>
 	| InstanceType<typeof InternalError>
 	| InstanceType<typeof AuthError>
-	| InstanceType<typeof CancelledError>
-	| InstanceType<typeof AssertionError>;
+	| InstanceType<typeof CancelledError>;
 
 /**
  * Type alias for backwards compatibility with handler signatures.
