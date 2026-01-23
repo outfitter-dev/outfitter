@@ -85,16 +85,16 @@ const ANSI = {
  * Checks if the current environment supports colors.
  */
 export function supportsColor(options?: TerminalOptions): boolean {
-	// FORCE_COLOR always wins
-	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["FORCE_COLOR"] !== undefined && process.env["FORCE_COLOR"] !== "") {
-		return true;
-	}
-
-	// NO_COLOR disables colors
+	// NO_COLOR takes priority (per https://no-color.org/)
 	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
 	if (process.env["NO_COLOR"] !== undefined && process.env["NO_COLOR"] !== "") {
 		return false;
+	}
+
+	// FORCE_COLOR enables colors if NO_COLOR is not set
+	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
+	if (process.env["FORCE_COLOR"] !== undefined && process.env["FORCE_COLOR"] !== "") {
+		return true;
 	}
 
 	// Check isTTY option if provided
@@ -491,6 +491,12 @@ export function renderTree(tree: Record<string, unknown>): string {
  */
 export function renderProgress(options: ProgressOptions): string {
 	const { current, total, width = 20, showPercent = false } = options;
+
+	// Guard against total <= 0 to avoid NaN/Infinity and RangeError from repeat()
+	if (total <= 0) {
+		const bar = "░".repeat(width);
+		return showPercent ? `[${bar}] 0%` : `[${bar}]`;
+	}
 
 	const percent = Math.min(100, Math.max(0, (current / total) * 100));
 	const filled = Math.round((percent / 100) * width);
