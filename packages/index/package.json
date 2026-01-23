@@ -21,12 +21,6 @@
 				"default": "./dist/index.js"
 			}
 		},
-		"./fts5": {
-			"import": {
-				"types": "./dist/fts5.d.ts",
-				"default": "./dist/fts5.js"
-			}
-		},
 		"./package.json": "./package.json"
 	},
 	"sideEffects": false,
