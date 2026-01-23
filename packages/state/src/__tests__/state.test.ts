@@ -822,6 +822,25 @@ describe("Pagination Helpers", () => {
 				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
 			}
 		});
+
+		it("falls back to default limit when limit is non-positive", async () => {
+			const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import("../index.js");
+			const items = Array.from({ length: 50 }, (_, i) => i + 1);
+
+			const cursorResult = createCursor({
+				id: "zero-limit",
+				position: 0,
+				metadata: { limit: 0 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
+				expect(nextCursor?.position).toBe(DEFAULT_PAGE_LIMIT);
+			}
+		});
 	});
 
 	describe("loadCursor() and saveCursor()", () => {
