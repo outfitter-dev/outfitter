@@ -1,21 +1,32 @@
 {
+	"$schema": "https://json.schemastore.org/tsconfig",
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"lib": ["ESNext"],
+		"types": ["@types/bun"],
+
 		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"noEmit": true,
-		"declaration": true,
-		"declarationDir": "dist",
-		"outDir": "dist",
-		"rootDir": "src",
-		"types": ["bun-types"],
 		"noImplicitAny": true,
 		"strictNullChecks": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "./dist",
+		"rootDir": "./src",
+
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"resolveJsonModule": true
 	},
-	"include": ["src"],
+	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]
 }
