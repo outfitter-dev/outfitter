@@ -27,6 +27,7 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
+		"@outfitter/config": "workspace:*",
 		"@outfitter/contracts": "workspace:*",
 		"object-treeify": "^1.1.33",
 		"wrap-ansi": "^9.0.0",
