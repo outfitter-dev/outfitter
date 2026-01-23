@@ -699,12 +699,6 @@ describe("Redaction", () => {
 	});
 
 	it("explicit enabled:false opts out even with global rules", () => {
-		// Configure global redaction
-		configureRedaction({
-			patterns: [/global-pattern-\w+/gi],
-			keys: ["globalKey"],
-		});
-
 		const records: LogRecord[] = [];
 		const sink: Sink = { write: (record) => records.push(record) };
 
@@ -713,6 +707,12 @@ describe("Redaction", () => {
 			name: "test-opt-out",
 			sinks: [sink],
 			redaction: { enabled: false },
+		});
+
+		// Configure global redaction after logger creation
+		configureRedaction({
+			patterns: [/global-pattern-\w+/gi],
+			keys: ["globalKey"],
 		});
 
 		logger.info("Data with secrets", {
