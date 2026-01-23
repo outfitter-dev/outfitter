@@ -5,8 +5,8 @@
 		"moduleResolution": "bundler",
 		"strict": true,
 		"esModuleInterop": true,
+		"verbatimModuleSyntax": true,
 		"skipLibCheck": true,
-		"noEmit": true,
 		"declaration": true,
 		"declarationDir": "dist",
 		"outDir": "dist",
@@ -14,7 +14,9 @@
 		"types": ["bun-types"],
 		"noImplicitAny": true,
 		"strictNullChecks": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "dist"]

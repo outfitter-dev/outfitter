@@ -65,6 +65,9 @@ program.register(
 				});
 				if (response.ok) {
 					logger.info`Daemon stopped`;
+				} else {
+					logger.error`Failed to stop daemon (status ${response.status} ${response.statusText})`;
+					process.exit(1);
 				}
 			} catch {
 				logger.error`Failed to stop daemon`;

@@ -8,6 +8,10 @@ import { createLogger } from "@outfitter/logging";
 
 const logger = createLogger({ name: "{{binName}}" });
 
+type HelloArgs = {
+	name?: unknown;
+};
+
 export function createMCPServer(): Server {
 	const server = new Server(
 		{
@@ -45,19 +49,29 @@ export function createMCPServer(): Server {
 	server.setRequestHandler(CallToolRequestSchema, async (request) => {
 		const { name, arguments: args } = request.params;
 
-		if (name === "hello") {
-			const greeting = args?.name ?? "World";
-			logger.info`Greeting ${greeting}`;
-			return {
-				content: [
-					{
-						type: "text" as const,
-						text: `Hello, ${greeting}!`,
-					},
-				],
-			};
+		const handlers: Record<string, (input: HelloArgs) => { content: { type: "text"; text: string }[] }> = {
+			hello: (input) => {
+				const greeting =
+					typeof input.name === "string" && input.name.trim().length > 0 ? input.name : "World";
+
+				logger.info`Greeting ${greeting}`;
+				return {
+					content: [
+						{
+							type: "text" as const,
+							text: `Hello, ${greeting}!`,
+						},
+					],
+				};
+			},
+		};
+
+		const handler = handlers[name];
+		if (handler) {
+			return handler((args ?? {}) as HelloArgs);
 		}
 
+		logger.warn`Unknown tool ${name}`;
 		throw new Error(`Unknown tool: ${name}`);
 	});
 
