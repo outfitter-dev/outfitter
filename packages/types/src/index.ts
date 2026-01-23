@@ -8,9 +8,17 @@
 export {
 	brand,
 	unbrand,
+	positiveInt,
+	nonEmptyString,
+	email,
+	uuid,
 	type Branded,
 	type Unbrand,
 	type BrandOf,
+	type PositiveInt,
+	type NonEmptyString,
+	type Email,
+	type UUID,
 } from "./branded";
 
 // Short ID generation
