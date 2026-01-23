@@ -686,4 +686,19 @@ describe("Cursor Encoding", () => {
 			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
+
+	it("decodeCursor returns ValidationError for negative position", () => {
+		const invalidData = {
+			id: "cursor-negative",
+			position: -1,
+			createdAt: Date.now(),
+		};
+		const encoded = Buffer.from(JSON.stringify(invalidData)).toString("base64url");
+		const result = decodeCursor(encoded);
+
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
+			expect(result.error._tag).toBe("ValidationError");
+		}
+	});
 });
