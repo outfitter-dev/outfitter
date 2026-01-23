@@ -12,6 +12,7 @@ try {
 	await mkdir(destination, { recursive: true });
 	await cp(source, destination, { recursive: true });
 } catch (error) {
-	console.error("Failed to sync templates:", error);
+	const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+	process.stderr.write(`Failed to sync templates: ${message}\n`);
 	process.exitCode = 1;
 }
