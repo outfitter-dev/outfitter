@@ -3,7 +3,7 @@
  *
  * TDD RED PHASE: These tests define expected behavior for relative time formatting.
  */
-import { describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { formatRelative } from "../index.js";
 
 // ============================================================================
@@ -22,6 +22,19 @@ const YEAR = 365 * DAY;
 // ============================================================================
 
 describe("formatRelative()", () => {
+	let originalNow: typeof Date.now;
+	let fixedNow: number;
+
+	beforeEach(() => {
+		originalNow = Date.now;
+		fixedNow = Date.now();
+		Date.now = () => fixedNow;
+	});
+
+	afterEach(() => {
+		Date.now = originalNow;
+	});
+
 	describe("past times", () => {
 		it("returns 'just now' for times less than 10 seconds ago", () => {
 			const now = Date.now();
