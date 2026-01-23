@@ -117,6 +117,31 @@ export class ValidationError extends TaggedError("ValidationError")<{
 }
 
 /**
+ * Assertion failed (invariant violation).
+ *
+ * Used by assertion utilities that return Result types instead of throwing.
+ * Categorized as validation since assertions check input/state validity.
+ *
+ * @example
+ * ```typescript
+ * new AssertionError({ message: "Value is null or undefined" });
+ * ```
+ */
+export class AssertionError extends TaggedError("AssertionError")<{
+	message: string;
+}>() {
+	readonly category = "validation" as const;
+
+	exitCode(): number {
+		return getExitCode(this.category);
+	}
+
+	statusCode(): number {
+		return getStatusCode(this.category);
+	}
+}
+
+/**
  * Requested resource not found.
  *
  * @example
@@ -329,6 +354,7 @@ export class CancelledError extends TaggedError("CancelledError")<{
  */
 export type AnyKitError =
 	| InstanceType<typeof ValidationError>
+	| InstanceType<typeof AssertionError>
 	| InstanceType<typeof NotFoundError>
 	| InstanceType<typeof ConflictError>
 	| InstanceType<typeof PermissionError>

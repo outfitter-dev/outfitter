@@ -13,6 +13,15 @@ export { Result, TaggedError } from "better-result";
 // Result utilities (extensions to better-result)
 export { combine2, combine3, orElse, unwrapOrElse } from "./result/index.js";
 
+// Assertion utilities
+export {
+	type NonEmptyArray,
+	isNonEmptyArray,
+	assertDefined,
+	assertNonEmpty,
+	assertMatches,
+} from "./assert/index.js";
+
 // Errors
 export {
 	// Types
@@ -29,6 +38,7 @@ export {
 	getStatusCode,
 	// Concrete errors
 	ValidationError,
+	AssertionError,
 	NotFoundError,
 	ConflictError,
 	PermissionError,
