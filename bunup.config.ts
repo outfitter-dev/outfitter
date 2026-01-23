@@ -38,6 +38,10 @@ export default defineWorkspace(
 			name: "@outfitter/index",
 			root: "packages/index",
 		},
+		{
+			name: "@outfitter/kit",
+			root: "packages/kit",
+		},
 	],
 	{
 		// Entry points: all source files except tests
