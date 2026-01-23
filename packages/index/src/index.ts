@@ -1,7 +1,7 @@
 /**
  * @outfitter/index
  *
- * Public entrypoint for index types.
+ * Type definitions for the Outfitter FTS5 index package.
  *
  * @packageDocumentation
  */
