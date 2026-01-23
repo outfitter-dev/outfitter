@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/ui",
 	"description": "Color tokens, output shapes, and terminal renderers for Outfitter",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"type": "module",
 	"files": [
 		"dist"

@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/types",
 	"description": "Branded types, type guards, and type utilities for Outfitter",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
 	"files": [
 		"dist"
