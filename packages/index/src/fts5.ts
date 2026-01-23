@@ -218,8 +218,8 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
 
 			try {
 				// Use BM25 ranking and snippet for highlights
-				// BM25 returns negative scores where less negative = more relevant
-				// ORDER BY DESC puts best matches (closest to 0) first
+				// BM25 returns lower scores for more relevant matches (often negative)
+				// ORDER BY ASC puts best matches (smallest scores) first
 				const rows = db
 					.query(
 						`
@@ -231,7 +231,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
 						snippet(${tableName}, 1, '<b>', '</b>', '...', 32) as highlight
 					FROM ${tableName}
 					WHERE ${tableName} MATCH ?
-					ORDER BY bm25(${tableName}) DESC
+					ORDER BY bm25(${tableName}) ASC
 					LIMIT ? OFFSET ?
 				`,
 					)

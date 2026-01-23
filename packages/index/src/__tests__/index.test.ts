@@ -338,10 +338,12 @@ describe("Search Operations", () => {
 		expect(Result.isOk(result)).toBe(true);
 		if (Result.isOk(result)) {
 			const scores = result.value.map((r) => r.score);
-			// BM25 returns negative scores, closer to 0 is better
-			// So scores should be in ascending order (most negative to least negative)
+			// BM25 returns lower scores for better matches (more negative = more relevant)
+			// So scores should be in ascending order (smallest to largest)
 			for (let i = 1; i < scores.length; i++) {
-				expect(scores[i]).toBeLessThanOrEqual((scores[i - 1] ?? Number.POSITIVE_INFINITY) + 0.001);
+				expect(scores[i]).toBeGreaterThanOrEqual(
+					(scores[i - 1] ?? Number.NEGATIVE_INFINITY) - 0.001,
+				);
 			}
 		}
 	});
