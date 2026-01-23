@@ -165,7 +165,7 @@ export const getBackoffDelay = (attempt: number, options: BackoffOptions = {}): 
 		}
 	}
 
-	// Cap at maxDelayMs
+	// Cap at maxDelayMs before jitter calculation
 	delay = Math.min(delay, maxDelayMs);
 
 	// Add jitter (+/-10%) to prevent thundering herd
@@ -175,7 +175,8 @@ export const getBackoffDelay = (attempt: number, options: BackoffOptions = {}): 
 		delay = Math.round(delay + jitter);
 	}
 
-	return delay;
+	// Re-cap after jitter to ensure we never exceed maxDelayMs
+	return Math.min(delay, maxDelayMs);
 };
 
 /**
