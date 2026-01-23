@@ -8,10 +8,11 @@
  * @packageDocumentation
  */
 
-import type { Result } from "@outfitter/contracts";
-import type {
+import {
+	type Result,
+	Result as R,
 	ConflictError,
-	InternalError,
+	type InternalError,
 	NotFoundError,
 	ValidationError,
 } from "@outfitter/contracts";
@@ -81,11 +82,18 @@ export interface FileLock {
  * @param options - Search options
  * @returns Result containing workspace root path or NotFoundError
  */
-export function findWorkspaceRoot(
+export async function findWorkspaceRoot(
 	_startPath: string,
 	_options?: FindWorkspaceRootOptions,
 ): Promise<Result<string, InstanceType<typeof NotFoundError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns NotFoundError until implemented
+	return R.err(
+		new NotFoundError({
+			message: "Workspace root not found",
+			resourceType: "workspace",
+			resourceId: _startPath,
+		}),
+	);
 }
 
 /**
@@ -94,10 +102,17 @@ export function findWorkspaceRoot(
  * @param absolutePath - Absolute path to convert
  * @returns Result containing relative path or error
  */
-export function getRelativePath(
+export async function getRelativePath(
 	_absolutePath: string,
 ): Promise<Result<string, InstanceType<typeof NotFoundError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns NotFoundError until implemented
+	return R.err(
+		new NotFoundError({
+			message: "Workspace root not found for relative path resolution",
+			resourceType: "workspace",
+			resourceId: _absolutePath,
+		}),
+	);
 }
 
 /**
@@ -107,8 +122,9 @@ export function getRelativePath(
  * @param workspaceRoot - Workspace root directory
  * @returns True if path is inside workspace
  */
-export function isInsideWorkspace(_path: string, _workspaceRoot: string): Promise<boolean> {
-	throw new Error("Not implemented");
+export async function isInsideWorkspace(_path: string, _workspaceRoot: string): Promise<boolean> {
+	// Stub: returns false until implemented
+	return false;
 }
 
 // ============================================================================
@@ -126,7 +142,13 @@ export function securePath(
 	_path: string,
 	_basePath: string,
 ): Result<string, InstanceType<typeof ValidationError>> {
-	throw new Error("Not implemented");
+	// Stub: returns ValidationError until implemented
+	return R.err(
+		new ValidationError({
+			message: "Path security validation not implemented",
+			field: "path",
+		}),
+	);
 }
 
 /**
@@ -137,7 +159,8 @@ export function securePath(
  * @returns True if path is safe
  */
 export function isPathSafe(_path: string, _basePath: string): boolean {
-	throw new Error("Not implemented");
+	// Stub: returns false until implemented
+	return false;
 }
 
 /**
@@ -151,7 +174,13 @@ export function resolveSafePath(
 	_basePath: string,
 	..._segments: string[]
 ): Result<string, InstanceType<typeof ValidationError>> {
-	throw new Error("Not implemented");
+	// Stub: returns ValidationError until implemented
+	return R.err(
+		new ValidationError({
+			message: "Safe path resolution not implemented",
+			field: "path",
+		}),
+	);
 }
 
 // ============================================================================
@@ -165,11 +194,12 @@ export function resolveSafePath(
  * @param options - Glob options
  * @returns Result containing array of matching file paths
  */
-export function glob(
+export async function glob(
 	_pattern: string,
 	_options?: GlobOptions,
 ): Promise<Result<string[], InstanceType<typeof InternalError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns empty array until implemented
+	return R.ok([]);
 }
 
 /**
@@ -183,7 +213,8 @@ export function globSync(
 	_pattern: string,
 	_options?: GlobOptions,
 ): Result<string[], InstanceType<typeof InternalError>> {
-	throw new Error("Not implemented");
+	// Stub: returns empty array until implemented
+	return R.ok([]);
 }
 
 // ============================================================================
@@ -196,10 +227,16 @@ export function globSync(
  * @param path - Path to the file to lock
  * @returns Result containing FileLock or ConflictError if already locked
  */
-export function acquireLock(
+export async function acquireLock(
 	_path: string,
 ): Promise<Result<FileLock, InstanceType<typeof ConflictError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns ConflictError until implemented
+	return R.err(
+		new ConflictError({
+			message: "File locking not implemented",
+			context: { path: _path },
+		}),
+	);
 }
 
 /**
@@ -208,10 +245,11 @@ export function acquireLock(
  * @param lock - Lock to release
  * @returns Result indicating success or error
  */
-export function releaseLock(
+export async function releaseLock(
 	_lock: FileLock,
 ): Promise<Result<void, InstanceType<typeof InternalError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns success (no-op) until implemented
+	return R.ok(undefined);
 }
 
 /**
@@ -222,11 +260,17 @@ export function releaseLock(
  * @param callback - Callback to execute while holding lock
  * @returns Result containing callback return value or error
  */
-export function withLock<T>(
+export async function withLock<T>(
 	_path: string,
 	_callback: () => Promise<T>,
 ): Promise<Result<T, InstanceType<typeof ConflictError> | InstanceType<typeof InternalError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns ConflictError until implemented
+	return R.err(
+		new ConflictError({
+			message: "File locking not implemented",
+			context: { path: _path },
+		}),
+	);
 }
 
 /**
@@ -235,8 +279,9 @@ export function withLock<T>(
  * @param path - Path to check
  * @returns True if file is locked
  */
-export function isLocked(_path: string): Promise<boolean> {
-	throw new Error("Not implemented");
+export async function isLocked(_path: string): Promise<boolean> {
+	// Stub: returns false until implemented
+	return false;
 }
 
 // ============================================================================
@@ -251,12 +296,13 @@ export function isLocked(_path: string): Promise<boolean> {
  * @param options - Write options
  * @returns Result indicating success or error
  */
-export function atomicWrite(
+export async function atomicWrite(
 	_path: string,
 	_content: string,
 	_options?: AtomicWriteOptions,
 ): Promise<Result<void, InstanceType<typeof InternalError>>> {
-	throw new Error("Not implemented");
+	// Stub: returns success (no-op) until implemented
+	return R.ok(undefined);
 }
 
 /**
@@ -267,12 +313,13 @@ export function atomicWrite(
  * @param options - Write options
  * @returns Result indicating success or error
  */
-export function atomicWriteJson<T>(
+export async function atomicWriteJson<T>(
 	_path: string,
 	_data: T,
 	_options?: AtomicWriteOptions,
 ): Promise<
 	Result<void, InstanceType<typeof InternalError> | InstanceType<typeof ValidationError>>
 > {
-	throw new Error("Not implemented");
+	// Stub: returns success (no-op) until implemented
+	return R.ok(undefined);
 }
