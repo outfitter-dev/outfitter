@@ -14,6 +14,8 @@
  * They will FAIL until implementation is complete.
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { z } from "zod";
 import {
 	getConfigDir,
@@ -142,15 +144,53 @@ describe("loadConfig()", () => {
 	});
 
 	describe("successful loading", () => {
+		// Fixture paths for this describe block
+		const testConfigDir = "/tmp/test-config/test-app";
+		const xdgConfigDir = "/tmp/xdg-config-test/myapp";
+		const strictAppDir = "/tmp/xdg-config-test/strict-app";
+
+		// Valid config matching TestConfigSchema
+		const validTomlConfig = `[server]
+port = 3000
+host = "localhost"
+
+[database]
+url = "postgres://localhost/testdb"
+poolSize = 5
+
+[features]
+debug = true
+experimental = false
+`;
+
+		// Valid config matching StrictSchema
+		const strictTomlConfig = `name = "test-application"
+count = 42
+`;
+
+		beforeEach(() => {
+			// Create fixture directories
+			mkdirSync(testConfigDir, { recursive: true });
+			mkdirSync(xdgConfigDir, { recursive: true });
+			mkdirSync(strictAppDir, { recursive: true });
+
+			// Create config files
+			writeFileSync(join(testConfigDir, "config.toml"), validTomlConfig);
+			writeFileSync(join(xdgConfigDir, "config.toml"), validTomlConfig);
+			writeFileSync(join(strictAppDir, "config.toml"), strictTomlConfig);
+		});
+
+		afterEach(() => {
+			// Clean up fixture directories
+			rmSync("/tmp/test-config", { recursive: true, force: true });
+			rmSync("/tmp/xdg-config-test", { recursive: true, force: true });
+		});
+
 		it("returns Result.ok with validated config on success", async () => {
-			// This test requires a fixture file to exist
-			// In implementation, we'd set up a temp directory with a config file
 			const result = await loadConfig("test-app", TestConfigSchema, {
 				searchPaths: ["/tmp/test-config"],
 			});
 
-			// Since no file exists, this should fail with NotFoundError
-			// This test documents expected SUCCESS behavior
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
 				const config = result.unwrap();
@@ -163,11 +203,11 @@ describe("loadConfig()", () => {
 			const result = await loadConfig("myapp", TestConfigSchema);
 
 			// Expected path: /tmp/xdg-config-test/myapp/config.toml
-			// This will fail until we create the fixture
 			expect(result.isOk()).toBe(true);
 		});
 
 		it("validates config against Zod schema", async () => {
+			process.env.XDG_CONFIG_HOME = "/tmp/xdg-config-test";
 			const StrictSchema = z.object({
 				name: z.string().min(1),
 				count: z.number().int().positive(),
