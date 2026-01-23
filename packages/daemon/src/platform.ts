@@ -52,6 +52,7 @@ export function isUnixPlatform(): boolean {
  */
 function getRuntimeDir(): string {
 	// XDG_RUNTIME_DIR takes precedence
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgRuntime = process.env["XDG_RUNTIME_DIR"];
 	if (xdgRuntime) {
 		return xdgRuntime;
@@ -61,6 +62,7 @@ function getRuntimeDir(): string {
 
 	if (platform === "darwin") {
 		// macOS: use TMPDIR
+		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 		return process.env["TMPDIR"] ?? os.tmpdir();
 	}
 
@@ -70,6 +72,7 @@ function getRuntimeDir(): string {
 	}
 
 	// Windows: use TEMP
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	return process.env["TEMP"] ?? os.tmpdir();
 }
 
