@@ -28,12 +28,14 @@ export interface CreateContextOptions {
 
 /**
  * No-op logger for when no logger is provided.
+ * Returns itself for child() to maintain the no-op behavior.
  */
 const noopLogger: Logger = {
 	debug: () => {},
 	info: () => {},
 	warn: () => {},
 	error: () => {},
+	child: () => noopLogger,
 };
 
 /**
