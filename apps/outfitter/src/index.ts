@@ -9,3 +9,18 @@
 
 // Init command
 export { initCommand, runInit, type InitOptions, InitError } from "./commands/init";
+
+// Doctor command
+export {
+	doctorCommand,
+	runDoctor,
+	type DoctorOptions,
+	type DoctorResult,
+	type DoctorSummary,
+	type CheckResult,
+	type BunVersionCheck,
+	type PackageJsonCheck,
+	type DependenciesCheck,
+	type ConfigFilesCheck,
+	type DirectoriesCheck,
+} from "./commands/doctor";
