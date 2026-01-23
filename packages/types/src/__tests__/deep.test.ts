@@ -288,6 +288,36 @@ describe("deep path types", () => {
 			expect(key2).toBe("optional");
 		});
 
+		it("handles optional object properties in DeepKeys", () => {
+			// This is the specific case from PR #21 feedback
+			// Optional object properties should still recurse to emit nested keys
+			type T = { config?: { host: string } };
+			type Keys = DeepKeys<T>;
+
+			// Should produce "config" | "config.host"
+			const key1: Keys = "config";
+			const key2: Keys = "config.host";
+			// @ts-expect-error - "config.invalid" is not a valid path
+			const _invalid: Keys = "config.invalid";
+
+			expect(key1).toBe("config");
+			expect(key2).toBe("config.host");
+		});
+
+		it("handles deeply nested optional object properties", () => {
+			type T = { outer?: { inner?: { value: string } } };
+			type Keys = DeepKeys<T>;
+
+			// Should recurse through multiple optional levels
+			const key1: Keys = "outer";
+			const key2: Keys = "outer.inner";
+			const key3: Keys = "outer.inner.value";
+
+			expect(key1).toBe("outer");
+			expect(key2).toBe("outer.inner");
+			expect(key3).toBe("outer.inner.value");
+		});
+
 		it("handles optional nested properties in DeepGet", () => {
 			type T = { config?: { host: string } };
 

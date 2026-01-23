@@ -38,10 +38,10 @@ export type DeepKeys<T> = T extends object
 	? T extends readonly unknown[]
 		? never // Arrays are leaf nodes - don't recurse
 		: {
-				[K in keyof T & string]: T[K] extends object
-					? T[K] extends readonly unknown[]
+				[K in keyof T & string]: NonNullable<T[K]> extends object
+					? NonNullable<T[K]> extends readonly unknown[]
 						? K // Arrays are leaf nodes
-						: K | `${K}.${DeepKeys<T[K]>}`
+						: K | `${K}.${DeepKeys<NonNullable<T[K]>>}`
 					: K;
 			}[keyof T & string]
 	: never;
