@@ -18,79 +18,218 @@ import { Result, NotFoundError, ValidationError } from "@outfitter/contracts";
 
 /**
  * A pagination cursor representing a position in a result set.
+ *
+ * Cursors are immutable (frozen) objects that encapsulate pagination state.
+ * They are intentionally opaque to prevent direct manipulation - use
+ * {@link advanceCursor} to create a new cursor with an updated position.
+ *
+ * @example
+ * ```typescript
+ * const result = createCursor({
+ *   position: 0,
+ *   metadata: { query: "status:open" },
+ *   ttl: 3600000, // 1 hour
+ * });
+ *
+ * if (result.isOk()) {
+ *   const cursor = result.value;
+ *   console.log(cursor.id);        // UUID
+ *   console.log(cursor.position);  // 0
+ *   console.log(cursor.expiresAt); // Unix timestamp
+ * }
+ * ```
  */
 export interface Cursor {
-	/** Unique identifier for this cursor */
+	/** Unique identifier for this cursor (UUID format) */
 	readonly id: string;
-	/** Current position/offset in the result set */
+	/** Current position/offset in the result set (zero-based) */
 	readonly position: number;
-	/** Optional metadata associated with this cursor */
+	/** Optional user-defined metadata associated with this cursor */
 	readonly metadata?: Record<string, unknown>;
-	/** Time-to-live in milliseconds (optional) */
+	/** Time-to-live in milliseconds (optional, omitted if cursor never expires) */
 	readonly ttl?: number;
-	/** Unix timestamp when this cursor expires (if TTL was set) */
+	/** Unix timestamp (ms) when this cursor expires (computed from createdAt + ttl) */
 	readonly expiresAt?: number;
-	/** Timestamp when this cursor was created */
+	/** Unix timestamp (ms) when this cursor was created */
 	readonly createdAt: number;
 }
 
 /**
- * Options for creating a cursor.
+ * Options for creating a pagination cursor.
+ *
+ * @example
+ * ```typescript
+ * // Minimal options (ID auto-generated, no TTL)
+ * const opts1: CreateCursorOptions = { position: 0 };
+ *
+ * // Full options with custom ID, metadata, and TTL
+ * const opts2: CreateCursorOptions = {
+ *   id: "my-cursor-id",
+ *   position: 50,
+ *   metadata: { query: "status:open", pageSize: 25 },
+ *   ttl: 30 * 60 * 1000, // 30 minutes
+ * };
+ * ```
  */
 export interface CreateCursorOptions {
-	/** Optional cursor ID (generated if not provided) */
+	/** Custom cursor ID (UUID generated if not provided) */
 	id?: string;
-	/** Starting position in the result set */
+	/** Starting position in the result set (must be non-negative) */
 	position: number;
-	/** Optional metadata to associate with the cursor */
+	/** User-defined metadata to associate with the cursor */
 	metadata?: Record<string, unknown>;
-	/** Time-to-live in milliseconds (optional) */
+	/** Time-to-live in milliseconds (cursor never expires if omitted) */
 	ttl?: number;
 }
 
 /**
- * A store for managing cursors.
+ * A store for managing pagination cursors.
+ *
+ * Cursor stores handle storage, retrieval, and expiration of cursors.
+ * Expired cursors are automatically excluded from `get()` and `has()` operations.
+ *
+ * @example
+ * ```typescript
+ * const store = createCursorStore();
+ *
+ * // Store a cursor
+ * const cursor = createCursor({ position: 0 });
+ * if (cursor.isOk()) {
+ *   store.set(cursor.value);
+ * }
+ *
+ * // Retrieve by ID
+ * const result = store.get("cursor-id");
+ * if (result.isOk()) {
+ *   console.log(result.value.position);
+ * }
+ *
+ * // Cleanup expired cursors
+ * const pruned = store.prune();
+ * console.log(`Removed ${pruned} expired cursors`);
+ * ```
  */
 export interface CursorStore {
-	/** Save a cursor to the store */
+	/**
+	 * Save or update a cursor in the store.
+	 * @param cursor - The cursor to store (replaces existing if same ID)
+	 */
 	set(cursor: Cursor): void;
-	/** Retrieve a cursor by ID */
+	/**
+	 * Retrieve a cursor by ID.
+	 * @param id - The cursor ID to look up
+	 * @returns Result with cursor or NotFoundError (also returned for expired cursors)
+	 */
 	get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>>;
-	/** Check if a cursor exists */
+	/**
+	 * Check if a cursor exists and is not expired.
+	 * @param id - The cursor ID to check
+	 * @returns True if cursor exists and is valid, false otherwise
+	 */
 	has(id: string): boolean;
-	/** Delete a cursor by ID */
+	/**
+	 * Delete a cursor by ID.
+	 * @param id - The cursor ID to delete (no-op if not found)
+	 */
 	delete(id: string): void;
-	/** Remove all cursors */
+	/**
+	 * Remove all cursors from the store.
+	 */
 	clear(): void;
-	/** List all cursor IDs */
+	/**
+	 * List all cursor IDs in the store (including expired).
+	 * @returns Array of cursor IDs
+	 */
 	list(): string[];
-	/** Remove all expired cursors, returns count of pruned cursors */
+	/**
+	 * Remove all expired cursors from the store.
+	 * @returns Number of cursors that were pruned
+	 */
 	prune(): number;
 }
 
 /**
- * A scoped cursor store with namespace isolation.
+ * A cursor store with namespace isolation.
+ *
+ * Scoped stores prefix all cursor IDs with the scope name, preventing
+ * collisions between different contexts (e.g., "issues" vs "pull-requests").
+ *
+ * Scopes can be nested: creating a scoped store from another scoped store
+ * produces IDs like "parent:child:cursor-id".
+ *
+ * @example
+ * ```typescript
+ * const store = createCursorStore();
+ * const issueStore = createScopedStore(store, "issues");
+ * const prStore = createScopedStore(store, "prs");
+ *
+ * // These don't conflict - different namespaces
+ * issueStore.set(cursor1);  // Stored as "issues:abc123"
+ * prStore.set(cursor2);     // Stored as "prs:abc123"
+ *
+ * // Clear only affects the scope
+ * issueStore.clear();  // Only clears issue cursors
+ * ```
  */
 export interface ScopedStore extends CursorStore {
-	/** Get the current scope name */
+	/**
+	 * Get the full scope path for this store.
+	 * @returns Scope string (e.g., "parent:child" for nested scopes)
+	 */
 	getScope(): string;
 }
 
 /**
- * Options for creating a persistent store.
+ * Options for creating a persistent cursor store.
+ *
+ * @example
+ * ```typescript
+ * const options: PersistentStoreOptions = {
+ *   path: "/home/user/.config/myapp/cursors.json",
+ * };
+ *
+ * const store = await createPersistentStore(options);
+ * ```
  */
 export interface PersistentStoreOptions {
-	/** File path for cursor persistence */
+	/** Absolute file path for cursor persistence (JSON format) */
 	path: string;
 }
 
 /**
- * A persistent cursor store that survives process restarts.
+ * A cursor store that persists to disk and survives process restarts.
+ *
+ * Persistent stores use atomic writes (temp file + rename) to prevent
+ * corruption. They automatically load existing data on initialization
+ * and handle corrupted files gracefully by starting empty.
+ *
+ * @example
+ * ```typescript
+ * const store = await createPersistentStore({
+ *   path: "~/.config/myapp/cursors.json",
+ * });
+ *
+ * // Use like any cursor store
+ * store.set(cursor);
+ *
+ * // Flush to disk before exit
+ * await store.flush();
+ *
+ * // Cleanup resources
+ * store.dispose();
+ * ```
  */
 export interface PersistentStore extends CursorStore {
-	/** Flush changes to disk */
+	/**
+	 * Flush all in-memory cursors to disk.
+	 * Uses atomic write (temp file + rename) to prevent corruption.
+	 * @returns Promise that resolves when write is complete
+	 */
 	flush(): Promise<void>;
-	/** Dispose of the store and cleanup resources */
+	/**
+	 * Dispose of the store and cleanup resources.
+	 * Call this when the store is no longer needed.
+	 */
 	dispose(): void;
 }
 
@@ -99,10 +238,30 @@ export interface PersistentStore extends CursorStore {
 // ============================================================================
 
 /**
- * Create a new cursor with the given options.
+ * Create a new pagination cursor.
  *
- * @param options - Cursor creation options
- * @returns Result containing the cursor or ValidationError
+ * Cursors are immutable and frozen. To update position, use {@link advanceCursor}.
+ * If no ID is provided, a UUID is generated automatically.
+ *
+ * @param options - Cursor creation options including position, optional ID, metadata, and TTL
+ * @returns Result containing frozen Cursor or ValidationError if position is negative
+ *
+ * @example
+ * ```typescript
+ * // Basic cursor at position 0
+ * const result = createCursor({ position: 0 });
+ *
+ * // Cursor with metadata and TTL
+ * const result = createCursor({
+ *   position: 0,
+ *   metadata: { filter: "active" },
+ *   ttl: 3600000, // 1 hour
+ * });
+ *
+ * if (result.isOk()) {
+ *   store.set(result.value);
+ * }
+ * ```
  */
 export function createCursor(
 	options: CreateCursorOptions,
@@ -137,9 +296,27 @@ export function createCursor(
 /**
  * Advance a cursor to a new position, returning a new immutable cursor.
  *
- * @param cursor - The cursor to advance
- * @param newPosition - The new position
- * @returns A new cursor with the updated position
+ * The original cursor is not modified. All properties (ID, metadata, TTL,
+ * expiresAt, createdAt) are preserved in the new cursor.
+ *
+ * @param cursor - The cursor to advance (not modified)
+ * @param newPosition - The new position value (typically cursor.position + pageSize)
+ * @returns A new frozen Cursor with the updated position
+ *
+ * @example
+ * ```typescript
+ * const cursor = createCursor({ position: 0 });
+ * if (cursor.isOk()) {
+ *   // Advance by page size of 25
+ *   const nextPage = advanceCursor(cursor.value, cursor.value.position + 25);
+ *
+ *   console.log(cursor.value.position); // 0 (unchanged)
+ *   console.log(nextPage.position);     // 25
+ *
+ *   // Store the advanced cursor
+ *   store.set(nextPage);
+ * }
+ * ```
  */
 export function advanceCursor(cursor: Cursor, newPosition: number): Cursor {
 	// Build new cursor preserving optional properties
@@ -156,10 +333,33 @@ export function advanceCursor(cursor: Cursor, newPosition: number): Cursor {
 }
 
 /**
- * Check if a cursor has expired.
+ * Check if a cursor has expired based on its TTL.
  *
- * @param cursor - The cursor to check
- * @returns True if the cursor has expired, false otherwise
+ * Cursors without a TTL (no `expiresAt` property) never expire and
+ * this function will always return `false` for them.
+ *
+ * @param cursor - The cursor to check for expiration
+ * @returns `true` if cursor has expired, `false` if still valid or has no TTL
+ *
+ * @example
+ * ```typescript
+ * const cursor = createCursor({ position: 0, ttl: 1000 }); // 1 second TTL
+ *
+ * if (cursor.isOk()) {
+ *   console.log(isExpired(cursor.value)); // false (just created)
+ *
+ *   // Wait 2 seconds...
+ *   await new Promise(resolve => setTimeout(resolve, 2000));
+ *
+ *   console.log(isExpired(cursor.value)); // true (expired)
+ * }
+ *
+ * // Cursors without TTL never expire
+ * const eternal = createCursor({ position: 0 });
+ * if (eternal.isOk()) {
+ *   console.log(isExpired(eternal.value)); // always false
+ * }
+ * ```
  */
 export function isExpired(cursor: Cursor): boolean {
 	// Cursors without TTL never expire
@@ -176,7 +376,39 @@ export function isExpired(cursor: Cursor): boolean {
 /**
  * Create an in-memory cursor store.
  *
- * @returns A new cursor store
+ * The store automatically handles expiration: `get()` and `has()` return
+ * not-found/false for expired cursors. Use `prune()` to remove expired
+ * cursors from memory.
+ *
+ * @returns A new cursor store implementing both CursorStore and ScopedStore interfaces
+ *
+ * @example
+ * ```typescript
+ * const store = createCursorStore();
+ *
+ * // Create and store a cursor
+ * const cursor = createCursor({
+ *   position: 0,
+ *   metadata: { query: "status:open" },
+ *   ttl: 3600000, // 1 hour
+ * });
+ *
+ * if (cursor.isOk()) {
+ *   store.set(cursor.value);
+ *
+ *   // Retrieve later
+ *   const result = store.get(cursor.value.id);
+ *   if (result.isOk()) {
+ *     console.log(result.value.position);
+ *   }
+ * }
+ *
+ * // List all cursors
+ * console.log(store.list()); // ["cursor-id", ...]
+ *
+ * // Cleanup expired
+ * const pruned = store.prune();
+ * ```
  */
 export function createCursorStore(): CursorStore & ScopedStore {
 	const cursors = new Map<string, Cursor>();
@@ -262,8 +494,49 @@ interface StorageFormat {
 /**
  * Create a persistent cursor store that saves to disk.
  *
- * @param options - Persistence options including file path
- * @returns Promise resolving to a persistent cursor store
+ * The store loads existing cursors from the file on initialization.
+ * Changes are kept in memory until `flush()` is called. Uses atomic
+ * writes (temp file + rename) to prevent corruption.
+ *
+ * If the file is corrupted or invalid JSON, the store starts empty
+ * rather than throwing an error.
+ *
+ * @param options - Persistence options including the file path
+ * @returns Promise resolving to a PersistentStore
+ *
+ * @example
+ * ```typescript
+ * // Create persistent store
+ * const store = await createPersistentStore({
+ *   path: "/home/user/.config/myapp/cursors.json",
+ * });
+ *
+ * // Use like any cursor store
+ * const cursor = createCursor({ position: 0 });
+ * if (cursor.isOk()) {
+ *   store.set(cursor.value);
+ * }
+ *
+ * // Flush to disk (call before process exit)
+ * await store.flush();
+ *
+ * // Cleanup when done
+ * store.dispose();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Combine with scoped stores for organized persistence
+ * const persistent = await createPersistentStore({
+ *   path: "~/.config/myapp/cursors.json",
+ * });
+ *
+ * const issuesCursors = createScopedStore(persistent, "issues");
+ * const prsCursors = createScopedStore(persistent, "prs");
+ *
+ * // All scopes share the same persistence file
+ * await persistent.flush();
+ * ```
  */
 export async function createPersistentStore(
 	options: PersistentStoreOptions,
@@ -396,9 +669,52 @@ export async function createPersistentStore(
 /**
  * Create a scoped cursor store with namespace isolation.
  *
- * @param store - The parent store to scope
- * @param scope - The namespace for this scope
- * @returns A scoped cursor store
+ * Scoped stores prefix all cursor IDs with the scope name, preventing
+ * collisions between different contexts (e.g., "issues" vs "pull-requests").
+ *
+ * Scopes can be nested: `createScopedStore(scopedStore, "child")` creates
+ * IDs like "parent:child:cursor-id".
+ *
+ * When retrieving cursors, the scope prefix is automatically stripped,
+ * so consumers see clean IDs without the namespace prefix.
+ *
+ * @param store - Parent store to scope (CursorStore or another ScopedStore for nesting)
+ * @param scope - Namespace for this scope (will be prefixed to all cursor IDs)
+ * @returns ScopedStore with isolated cursor management
+ *
+ * @example
+ * ```typescript
+ * const store = createCursorStore();
+ * const issueStore = createScopedStore(store, "issues");
+ * const prStore = createScopedStore(store, "prs");
+ *
+ * // These don't conflict - different namespaces
+ * issueStore.set(cursor1);  // Stored as "issues:abc123"
+ * prStore.set(cursor2);     // Stored as "prs:abc123"
+ *
+ * // Retrieved cursors have clean IDs
+ * const result = issueStore.get("abc123");
+ * if (result.isOk()) {
+ *   result.value.id; // "abc123" (not "issues:abc123")
+ * }
+ *
+ * // Clear only affects the scope
+ * issueStore.clear();  // Only clears issue cursors
+ * prStore.list();      // PR cursors still exist
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Nested scopes for hierarchical organization
+ * const store = createCursorStore();
+ * const githubStore = createScopedStore(store, "github");
+ * const issuesStore = createScopedStore(githubStore, "issues");
+ *
+ * issuesStore.getScope(); // "github:issues"
+ *
+ * // Cursor stored as "github:issues:cursor-id"
+ * issuesStore.set(cursor);
+ * ```
  */
 export function createScopedStore(store: CursorStore | ScopedStore, scope: string): ScopedStore {
 	// Get parent scope if available
