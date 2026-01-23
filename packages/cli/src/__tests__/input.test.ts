@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -25,6 +25,14 @@ import {
 // =============================================================================
 // Test Utilities
 // =============================================================================
+
+const cancelSymbol = Symbol("clack-cancel");
+const confirmMock = mock.fn();
+
+mock.module("@clack/prompts", () => ({
+	confirm: confirmMock,
+	isCancel: (value: unknown) => value === cancelSymbol,
+}));
 
 /**
  * Creates a temporary directory for test fixtures.
@@ -82,6 +90,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	process.env = originalEnv;
+	mock.clearAllMocks();
 	Object.defineProperty(process.stdout, "isTTY", {
 		value: originalIsTTY,
 		writable: true,
@@ -781,42 +790,67 @@ describe("confirmDestructive()", () => {
 		if (result.isOk()) {
 			expect(result.value).toBe(true);
 		}
+		expect(confirmMock).not.toHaveBeenCalled();
 	});
 
 	test("returns Ok(true) when user confirms (mock)", async () => {
-		// This test requires mocking @clack/prompts or similar
-		// For RED phase, we just verify the function throws "not implemented"
 		Object.defineProperty(process.stdout, "isTTY", {
 			value: true,
 			writable: true,
 			configurable: true,
 		});
 
-		// The mock would need to intercept the prompt and return true
-		// For now, we expect the not implemented error
-		await expect(
-			confirmDestructive({
-				message: "Delete items?",
-				bypassFlag: false,
-			}),
-		).rejects.toThrow();
+		confirmMock.mockResolvedValueOnce(true);
+
+		const result = await confirmDestructive({
+			message: "Delete items?",
+			bypassFlag: false,
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
+			expect(result.value).toBe(true);
+		}
 	});
 
 	test("returns Err(CancelledError) when user declines", async () => {
-		// This test requires mocking @clack/prompts or similar
-		// For RED phase, we just verify the function throws "not implemented"
 		Object.defineProperty(process.stdout, "isTTY", {
 			value: true,
 			writable: true,
 			configurable: true,
 		});
 
-		await expect(
-			confirmDestructive({
-				message: "Delete items?",
-				bypassFlag: false,
-			}),
-		).rejects.toThrow();
+		confirmMock.mockResolvedValueOnce(false);
+
+		const result = await confirmDestructive({
+			message: "Delete items?",
+			bypassFlag: false,
+		});
+
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
+			expect(result.error.message).toContain("cancelled");
+		}
+	});
+
+	test("returns Err(CancelledError) when prompt is cancelled", async () => {
+		Object.defineProperty(process.stdout, "isTTY", {
+			value: true,
+			writable: true,
+			configurable: true,
+		});
+
+		confirmMock.mockResolvedValueOnce(cancelSymbol);
+
+		const result = await confirmDestructive({
+			message: "Delete items?",
+			bypassFlag: false,
+		});
+
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
+			expect(result.error.message).toContain("cancelled");
+		}
 	});
 
 	test("includes itemCount in prompt", async () => {
@@ -827,14 +861,18 @@ describe("confirmDestructive()", () => {
 			configurable: true,
 		});
 
-		// Verify that itemCount is used - for RED phase, expect not implemented
-		await expect(
-			confirmDestructive({
-				message: "Delete items?",
-				bypassFlag: false,
-				itemCount: 10,
-			}),
-		).rejects.toThrow();
+		confirmMock.mockResolvedValueOnce(true);
+
+		const result = await confirmDestructive({
+			message: "Delete items?",
+			bypassFlag: false,
+			itemCount: 10,
+		});
+
+		expect(result.isOk()).toBe(true);
+		expect(confirmMock).toHaveBeenCalledTimes(1);
+		const call = confirmMock.mock.calls[0]?.[0];
+		expect(call?.message).toContain("(10 items)");
 	});
 
 	test("handles non-TTY (returns Err)", async () => {

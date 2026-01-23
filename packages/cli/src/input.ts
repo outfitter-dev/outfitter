@@ -852,8 +852,16 @@ export async function confirmDestructive(
 		promptMessage = `${message} (${itemCount} items)`;
 	}
 
-	// For interactive confirmation, we would use @clack/prompts
-	// Since @clack/prompts is not in dependencies, we throw for now
-	// This matches the test expectation that TTY mode throws (for mocking)
-	throw new Error(`Interactive confirmation not available: ${promptMessage}. Use --yes to bypass.`);
+	const { confirm, isCancel } = await import("@clack/prompts");
+	const response = await confirm({ message: promptMessage });
+
+	if (isCancel(response) || response === false) {
+		return new Err(
+			new CancelledError({
+				message: "Operation cancelled by user.",
+			}),
+		);
+	}
+
+	return new Ok(true);
 }
