@@ -182,7 +182,7 @@ interface DoctorResult {
 
 ## Requirements
 
-- Bun >= 1.0.0
+- Bun >= 1.3.6
 
 ## Related Packages
 
