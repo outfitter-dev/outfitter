@@ -7,6 +7,8 @@
  * @packageDocumentation
  */
 
+import { writeFileSync } from "node:fs";
+
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -162,56 +164,263 @@ export interface GlobalRedactionConfig {
 }
 
 // ============================================================================
-// Stub Implementations - Minimal no-op stubs for TDD red phase
+// Internal State and Constants
 // ============================================================================
 
-// Track all created loggers for flush()
-const registeredSinks: Sink[] = [];
+/** Level priority ordering (lower = less severe) */
+const LEVEL_PRIORITY: Record<LogLevel, number> = {
+	trace: 0,
+	debug: 1,
+	info: 2,
+	warn: 3,
+	error: 4,
+	fatal: 5,
+	silent: 6,
+};
+
+/** Default sensitive keys that should always be redacted (case-insensitive) */
+const DEFAULT_SENSITIVE_KEYS = ["password", "secret", "token", "apikey"];
+
+/** Global redaction configuration */
+const globalRedactionConfig: GlobalRedactionConfig = {
+	patterns: [],
+	keys: [],
+};
+
+/** Global registry of all sinks for flush() */
+const registeredSinks = new Set<Sink>();
+
+// ============================================================================
+// Internal Helper Functions
+// ============================================================================
 
 /**
- * Create a no-op logger instance stub.
- * This is a minimal implementation that allows tests to run and fail on
- * assertions rather than on instantiation.
- *
- * @internal
+ * Check if a level passes the minimum level filter.
  */
-function createNoOpLogger(config: LoggerConfig): LoggerInstance {
-	const context = { ...config.context };
-	// Store level for potential use in filtering (stub doesn't filter)
-	const state = { level: config.level ?? ("info" as LogLevel) };
-	const sinks = [...(config.sinks ?? [])];
+function shouldLog(level: LogLevel, minLevel: LogLevel): boolean {
+	if (minLevel === "silent") return false;
+	return LEVEL_PRIORITY[level] >= LEVEL_PRIORITY[minLevel];
+}
 
-	// Track sinks for flush
-	for (const sink of sinks) {
-		if (!registeredSinks.includes(sink)) {
-			registeredSinks.push(sink);
+/**
+ * Check if a key should be redacted (case-insensitive).
+ */
+function isRedactedKey(key: string, additionalKeys: string[]): boolean {
+	const lowerKey = key.toLowerCase();
+	const allKeys = [...DEFAULT_SENSITIVE_KEYS, ...additionalKeys];
+	return allKeys.some((k) => lowerKey === k.toLowerCase());
+}
+
+/**
+ * Apply regex patterns to redact values in strings.
+ */
+function applyPatterns(value: string, patterns: RegExp[], replacement: string): string {
+	let result = value;
+	for (const pattern of patterns) {
+		// Reset lastIndex for global patterns
+		pattern.lastIndex = 0;
+		result = result.replace(pattern, replacement);
+	}
+	return result;
+}
+
+/**
+ * Recursively redact sensitive data from an object.
+ */
+function redactValue(
+	value: unknown,
+	keys: string[],
+	patterns: RegExp[],
+	replacement: string,
+	currentKey?: string,
+): unknown {
+	// Check if this key should be fully redacted
+	if (currentKey !== undefined && isRedactedKey(currentKey, keys)) {
+		return replacement;
+	}
+
+	// Handle string values - apply patterns
+	if (typeof value === "string") {
+		return applyPatterns(value, patterns, replacement);
+	}
+
+	// Handle arrays - recurse into each element
+	if (Array.isArray(value)) {
+		return value.map((item) => redactValue(item, keys, patterns, replacement));
+	}
+
+	// Handle Error objects - serialize them
+	if (value instanceof Error) {
+		return {
+			name: value.name,
+			message: value.message,
+			stack: value.stack,
+		};
+	}
+
+	// Handle plain objects - recurse into properties
+	if (value !== null && typeof value === "object") {
+		const result: Record<string, unknown> = {};
+		for (const [k, v] of Object.entries(value)) {
+			result[k] = redactValue(v, keys, patterns, replacement, k);
+		}
+		return result;
+	}
+
+	// Return primitives as-is
+	return value;
+}
+
+/**
+ * Process metadata: apply redaction and serialize errors.
+ */
+function processMetadata(
+	metadata: Record<string, unknown> | undefined,
+	redactionConfig: RedactionConfig | undefined,
+): Record<string, unknown> | undefined {
+	if (!metadata) return undefined;
+
+	// Serialize errors even without redaction
+	const processed: Record<string, unknown> = {};
+
+	for (const [key, value] of Object.entries(metadata)) {
+		if (value instanceof Error) {
+			processed[key] = {
+				name: value.name,
+				message: value.message,
+				stack: value.stack,
+			};
+		} else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+			// Recursively process nested objects to handle nested errors
+			processed[key] = processNestedForErrors(value);
+		} else {
+			processed[key] = value;
 		}
 	}
 
-	// No-op log method - does nothing in stub
-	const noop = (_message: string, _metadata?: Record<string, unknown>): void => {
-		// Stub: no-op
+	// Apply redaction if enabled (enabled defaults to true when redactionConfig is provided)
+	if (redactionConfig && redactionConfig.enabled !== false) {
+		const allPatterns = [
+			...(redactionConfig.patterns ?? []),
+			...(globalRedactionConfig.patterns ?? []),
+		];
+		const allKeys = [...(redactionConfig.keys ?? []), ...(globalRedactionConfig.keys ?? [])];
+		const replacement = redactionConfig.replacement ?? "[REDACTED]";
+
+		return redactValue(processed, allKeys, allPatterns, replacement) as Record<string, unknown>;
+	}
+
+	return processed;
+}
+
+/**
+ * Recursively process nested objects to serialize errors.
+ */
+function processNestedForErrors(obj: object): unknown {
+	if (obj instanceof Error) {
+		return {
+			name: obj.name,
+			message: obj.message,
+			stack: obj.stack,
+		};
+	}
+
+	if (Array.isArray(obj)) {
+		return obj.map((item) => {
+			if (item !== null && typeof item === "object") {
+				return processNestedForErrors(item);
+			}
+			return item;
+		});
+	}
+
+	const result: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(obj)) {
+		if (value instanceof Error) {
+			result[key] = {
+				name: value.name,
+				message: value.message,
+				stack: value.stack,
+			};
+		} else if (value !== null && typeof value === "object") {
+			result[key] = processNestedForErrors(value);
+		} else {
+			result[key] = value;
+		}
+	}
+	return result;
+}
+
+// ============================================================================
+// Logger Implementation
+// ============================================================================
+
+/**
+ * Internal logger implementation.
+ */
+interface InternalLoggerState {
+	name: string;
+	level: LogLevel;
+	context: Record<string, unknown>;
+	sinks: Sink[];
+	redaction: RedactionConfig | undefined;
+}
+
+/**
+ * Create a logger instance from internal state.
+ */
+function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
+	const log = (
+		level: Exclude<LogLevel, "silent">,
+		message: string,
+		metadata?: Record<string, unknown>,
+	): void => {
+		if (!shouldLog(level, state.level)) return;
+
+		const processedMetadata = processMetadata({ ...state.context, ...metadata }, state.redaction);
+		const record: LogRecord = {
+			timestamp: Date.now(),
+			level,
+			category: state.name,
+			message,
+			...(processedMetadata !== undefined ? { metadata: processedMetadata } : {}),
+		};
+
+		// Write to all sinks
+		for (const sink of state.sinks) {
+			try {
+				let formatted: string | undefined;
+				if (sink.formatter) {
+					formatted = sink.formatter.format(record);
+				}
+				sink.write(record, formatted);
+			} catch {
+				// Sink errors should not crash the logger
+			}
+		}
 	};
 
 	return {
-		trace: noop,
-		debug: noop,
-		info: noop,
-		warn: noop,
-		error: noop,
-		fatal: noop,
-		getContext: () => ({ ...context }),
-		setLevel: (level: LogLevel) => {
+		trace: (message, metadata) => log("trace", message, metadata),
+		debug: (message, metadata) => log("debug", message, metadata),
+		info: (message, metadata) => log("info", message, metadata),
+		warn: (message, metadata) => log("warn", message, metadata),
+		error: (message, metadata) => log("error", message, metadata),
+		fatal: (message, metadata) => log("fatal", message, metadata),
+		getContext: () => ({ ...state.context }),
+		setLevel: (level) => {
 			state.level = level;
 		},
-		addSink: (sink: Sink) => {
-			sinks.push(sink);
-			if (!registeredSinks.includes(sink)) {
-				registeredSinks.push(sink);
-			}
+		addSink: (sink) => {
+			state.sinks.push(sink);
+			registeredSinks.add(sink);
 		},
 	};
 }
+
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Create a configured logger instance.
@@ -231,7 +440,20 @@ function createNoOpLogger(config: LoggerConfig): LoggerInstance {
  * ```
  */
 export function createLogger(config: LoggerConfig): LoggerInstance {
-	return createNoOpLogger(config);
+	const state: InternalLoggerState = {
+		name: config.name,
+		level: config.level ?? "info",
+		context: config.context ?? {},
+		sinks: [...(config.sinks ?? [])],
+		redaction: config.redaction,
+	};
+
+	// Register sinks globally for flush()
+	for (const sink of state.sinks) {
+		registeredSinks.add(sink);
+	}
+
+	return createLoggerFromState(state);
 }
 
 /**
@@ -252,9 +474,24 @@ export function createChildLogger(
 	parent: LoggerInstance,
 	context: Record<string, unknown>,
 ): LoggerInstance {
+	// Access the parent's internal state through its public API
+	const parentContext = parent.getContext();
+
 	// Merge parent context with child context
-	const mergedContext = { ...parent.getContext(), ...context };
-	return createLogger({ name: "child", context: mergedContext });
+	const mergedContext = { ...parentContext, ...context };
+
+	// Create child logger that delegates to parent but with merged context
+	return {
+		trace: (message, metadata) => parent.trace(message, { ...context, ...metadata }),
+		debug: (message, metadata) => parent.debug(message, { ...context, ...metadata }),
+		info: (message, metadata) => parent.info(message, { ...context, ...metadata }),
+		warn: (message, metadata) => parent.warn(message, { ...context, ...metadata }),
+		error: (message, metadata) => parent.error(message, { ...context, ...metadata }),
+		fatal: (message, metadata) => parent.fatal(message, { ...context, ...metadata }),
+		getContext: () => mergedContext,
+		setLevel: (level) => parent.setLevel(level),
+		addSink: (sink) => parent.addSink(sink),
+	};
 }
 
 /**
@@ -271,13 +508,14 @@ export function createChildLogger(
  */
 export function createJsonFormatter(): Formatter {
 	return {
-		format: (record: LogRecord): string => {
-			const output = {
-				timestamp: record.timestamp,
-				level: record.level,
-				category: record.category,
-				message: record.message,
-				...record.metadata,
+		format(record: LogRecord): string {
+			const { timestamp, level, category, message, metadata } = record;
+			const output: Record<string, unknown> = {
+				timestamp,
+				level,
+				category,
+				message,
+				...metadata,
 			};
 			return JSON.stringify(output);
 		},
@@ -298,27 +536,54 @@ export function createJsonFormatter(): Formatter {
  * ```
  */
 export function createPrettyFormatter(options?: PrettyFormatterOptions): Formatter {
-	const useColors = options?.colors ?? true;
+	const useColors = options?.colors ?? false;
+	const showTimestamp = options?.timestamp ?? true;
 
-	// ANSI color codes for different levels
-	const levelColors: Record<string, string> = {
-		trace: "\u001b[90m", // gray
-		debug: "\u001b[36m", // cyan
-		info: "\u001b[32m", // green
-		warn: "\u001b[33m", // yellow
-		error: "\u001b[31m", // red
-		fatal: "\u001b[35m", // magenta
+	const ANSI = {
+		reset: "\u001b[0m",
+		dim: "\u001b[2m",
+		yellow: "\u001b[33m",
+		red: "\u001b[31m",
+		cyan: "\u001b[36m",
+		green: "\u001b[32m",
+		magenta: "\u001b[35m",
 	};
-	const reset = "\u001b[0m";
+
+	const levelColors: Record<Exclude<LogLevel, "silent">, string> = {
+		trace: ANSI.dim,
+		debug: ANSI.cyan,
+		info: ANSI.green,
+		warn: ANSI.yellow,
+		error: ANSI.red,
+		fatal: ANSI.magenta,
+	};
 
 	return {
-		format: (record: LogRecord): string => {
-			const timestamp = new Date(record.timestamp).toISOString();
-			const level = record.level.toUpperCase();
-			const colorCode = useColors ? (levelColors[record.level] ?? "") : "";
-			const resetCode = useColors ? reset : "";
+		format(record: LogRecord): string {
+			const { timestamp, level, category, message, metadata } = record;
+			const isoTime = new Date(timestamp).toISOString();
+			const levelUpper = level.toUpperCase();
 
-			return `${timestamp} ${colorCode}[${level}]${resetCode} ${record.category}: ${record.message}`;
+			let output = "";
+
+			if (showTimestamp) {
+				output += `${isoTime} `;
+			}
+
+			if (useColors) {
+				const color = levelColors[level];
+				output += `${color}[${levelUpper}]${ANSI.reset} `;
+			} else {
+				output += `[${levelUpper}] `;
+			}
+
+			output += `${category}: ${message}`;
+
+			if (metadata && Object.keys(metadata).length > 0) {
+				output += ` ${JSON.stringify(metadata)}`;
+			}
+
+			return output;
 		},
 	};
 }
@@ -338,22 +603,25 @@ export function createPrettyFormatter(options?: PrettyFormatterOptions): Formatt
  * ```
  */
 export function createConsoleSink(): Sink {
-	const formatter = createPrettyFormatter();
+	const formatter = createPrettyFormatter({ colors: true });
 
-	return {
+	const sink: Sink = {
 		formatter,
-		write: (record: LogRecord, formatted?: string): void => {
+		write(record: LogRecord, formatted?: string): void {
 			const output = formatted ?? formatter.format(record);
 			const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
 
-			// warn, error, fatal go to stderr; others go to stdout
-			if (record.level === "warn" || record.level === "error" || record.level === "fatal") {
+			// info and below go to stdout, warn and above go to stderr
+			if (LEVEL_PRIORITY[record.level] >= LEVEL_PRIORITY.warn) {
 				process.stderr.write(outputWithNewline);
 			} else {
 				process.stdout.write(outputWithNewline);
 			}
 		},
 	};
+
+	registeredSinks.add(sink);
+	return sink;
 }
 
 /**
@@ -372,38 +640,39 @@ export function createConsoleSink(): Sink {
  */
 export function createFileSink(options: FileSinkOptions): Sink {
 	const formatter = createJsonFormatter();
-	const pendingWrites: string[] = [];
+	const buffer: string[] = [];
+	const { path } = options;
+	// append defaults to true
+	const append = options.append ?? true;
+
+	// Clear file synchronously if not appending to prevent race with flush()
+	if (!append) {
+		writeFileSync(path, "");
+	}
 
 	const sink: Sink = {
 		formatter,
-		write: (record: LogRecord, formatted?: string): void => {
+		write(record: LogRecord, formatted?: string): void {
 			const output = formatted ?? formatter.format(record);
 			const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
-			pendingWrites.push(outputWithNewline);
+			buffer.push(outputWithNewline);
 		},
-		flush: async (): Promise<void> => {
-			if (pendingWrites.length > 0) {
-				const content = pendingWrites.join("");
-				pendingWrites.length = 0;
-				// Stub: basic write (proper implementation would handle append mode)
-				const file = Bun.file(options.path);
-				const existing = options.append !== false ? await file.text().catch(() => "") : "";
-				await Bun.write(file, existing + content);
+		async flush(): Promise<void> {
+			if (buffer.length > 0) {
+				const content = buffer.join("");
+				buffer.length = 0;
+
+				// Append to file
+				const file = Bun.file(path);
+				const existing = (await file.exists()) ? await file.text() : "";
+				await Bun.write(path, existing + content);
 			}
 		},
 	};
 
-	// Register for global flush
-	registeredSinks.push(sink);
-
+	registeredSinks.add(sink);
 	return sink;
 }
-
-// Global redaction config storage
-const globalRedactionConfig: GlobalRedactionConfig = {
-	patterns: [],
-	keys: [],
-};
 
 /**
  * Configure global redaction patterns and keys that apply to all loggers.
@@ -444,11 +713,13 @@ export function configureRedaction(config: GlobalRedactionConfig): void {
  * ```
  */
 export async function flush(): Promise<void> {
-	await Promise.all(
-		registeredSinks.map(async (sink) => {
-			if (sink.flush) {
-				await sink.flush();
-			}
-		}),
-	);
+	const flushPromises: Promise<void>[] = [];
+
+	for (const sink of registeredSinks) {
+		if (sink.flush) {
+			flushPromises.push(sink.flush());
+		}
+	}
+
+	await Promise.all(flushPromises);
 }
