@@ -1,9 +1,10 @@
 /**
  * @outfitter/index
  *
- * Type definitions for the Outfitter FTS5 index package.
+ * FTS5 index types and implementation for Outfitter.
  *
  * @packageDocumentation
  */
 
+export { createIndex } from "./fts5.js";
 export * from "./types.js";
