@@ -6,7 +6,8 @@
  * @packageDocumentation
  */
 
-import { type Result, TaggedError } from "@outfitter/contracts";
+import type { Result, TaggedErrorClass } from "@outfitter/contracts";
+import { TaggedError } from "@outfitter/contracts";
 import type { Handler, HandlerContext, KitError, Logger } from "@outfitter/contracts";
 import type { z } from "zod";
 
@@ -183,6 +184,19 @@ export interface ResourceDefinition {
 // MCP Error
 // ============================================================================
 
+const McpErrorBase: TaggedErrorClass<
+	"McpError",
+	{
+		message: string;
+		code: number;
+		context?: Record<string, unknown>;
+	}
+> = TaggedError("McpError")<{
+	message: string;
+	code: number;
+	context?: Record<string, unknown>;
+}>();
+
 /**
  * MCP-specific error with JSON-RPC error code.
  *
@@ -206,11 +220,7 @@ export interface ResourceDefinition {
  * });
  * ```
  */
-export class McpError extends TaggedError("McpError")<{
-	message: string;
-	code: number;
-	context?: Record<string, unknown>;
-}>() {
+export class McpError extends McpErrorBase {
 	/** Error category for Kit error taxonomy compatibility */
 	readonly category = "internal" as const;
 }
