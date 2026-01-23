@@ -57,3 +57,6 @@ export {
 	type ValueOf,
 	type Mutable,
 } from "./utilities";
+
+// Deep path utilities
+export type { DeepKeys, DeepGet, DeepSet } from "./deep";
