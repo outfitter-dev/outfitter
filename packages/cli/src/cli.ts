@@ -70,6 +70,8 @@ export function createCLI(config: CLIConfig): CLI {
 		exit(exitCode);
 	});
 
+	let cli: CLI;
+
 	const register = (builder: CommandBuilder): CLI => {
 		program.addCommand(builder.build());
 		return cli;
@@ -89,7 +91,7 @@ export function createCLI(config: CLIConfig): CLI {
 		}
 	};
 
-	const cli: CLI = {
+	cli = {
 		program,
 		register,
 		parse,
