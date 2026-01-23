@@ -9,13 +9,14 @@
  */
 
 import {
-	type Result,
-	Result as R,
 	ConflictError,
-	type InternalError,
+	InternalError,
 	NotFoundError,
+	Result,
 	ValidationError,
 } from "@outfitter/contracts";
+import { mkdir, rename, stat, unlink, writeFile as fsWriteFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
 
 // ============================================================================
 // Types
@@ -76,6 +77,19 @@ export interface FileLock {
 // ============================================================================
 
 /**
+ * Checks if a marker exists at the given directory.
+ */
+async function markerExistsAt(dir: string, marker: string): Promise<boolean> {
+	try {
+		const markerPath = join(dir, marker);
+		await stat(markerPath);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+/**
  * Finds the workspace root by searching for marker files/directories.
  *
  * @param startPath - Path to start searching from
@@ -83,15 +97,47 @@ export interface FileLock {
  * @returns Result containing workspace root path or NotFoundError
  */
 export async function findWorkspaceRoot(
-	_startPath: string,
-	_options?: FindWorkspaceRootOptions,
+	startPath: string,
+	options?: FindWorkspaceRootOptions,
 ): Promise<Result<string, InstanceType<typeof NotFoundError>>> {
-	// Stub: returns NotFoundError until implemented
-	return R.err(
+	const markers = options?.markers ?? [".git", "package.json"];
+	const stopAt = options?.stopAt;
+
+	let currentDir = resolve(startPath);
+	const root = resolve("/");
+
+	while (true) {
+		// Check for any marker at this level
+		for (const marker of markers) {
+			if (await markerExistsAt(currentDir, marker)) {
+				return Result.ok(currentDir);
+			}
+		}
+
+		// Check if we've hit the stop boundary
+		if (stopAt && currentDir === resolve(stopAt)) {
+			break;
+		}
+
+		// Check if we've hit the filesystem root
+		if (currentDir === root) {
+			break;
+		}
+
+		// Move up one directory
+		const parentDir = dirname(currentDir);
+		if (parentDir === currentDir) {
+			// Reached root, no more parents
+			break;
+		}
+		currentDir = parentDir;
+	}
+
+	return Result.err(
 		new NotFoundError({
-			message: "Workspace root not found",
+			message: "No workspace root found",
 			resourceType: "workspace",
-			resourceId: _startPath,
+			resourceId: startPath,
 		}),
 	);
 }
@@ -103,16 +149,17 @@ export async function findWorkspaceRoot(
  * @returns Result containing relative path or error
  */
 export async function getRelativePath(
-	_absolutePath: string,
+	absolutePath: string,
 ): Promise<Result<string, InstanceType<typeof NotFoundError>>> {
-	// Stub: returns NotFoundError until implemented
-	return R.err(
-		new NotFoundError({
-			message: "Workspace root not found for relative path resolution",
-			resourceType: "workspace",
-			resourceId: _absolutePath,
-		}),
-	);
+	const workspaceResult = await findWorkspaceRoot(dirname(absolutePath));
+
+	if (workspaceResult.isErr()) {
+		return workspaceResult;
+	}
+
+	const relativePath = relative(workspaceResult.value, absolutePath);
+	// Normalize to forward slashes for consistency
+	return Result.ok(relativePath.split(sep).join("/"));
 }
 
 /**
@@ -122,9 +169,12 @@ export async function getRelativePath(
  * @param workspaceRoot - Workspace root directory
  * @returns True if path is inside workspace
  */
-export async function isInsideWorkspace(_path: string, _workspaceRoot: string): Promise<boolean> {
-	// Stub: returns false until implemented
-	return false;
+export async function isInsideWorkspace(path: string, workspaceRoot: string): Promise<boolean> {
+	const resolvedPath = resolve(path);
+	const resolvedRoot = resolve(workspaceRoot);
+
+	// Check if the resolved path starts with the workspace root
+	return resolvedPath.startsWith(resolvedRoot + sep) || resolvedPath === resolvedRoot;
 }
 
 // ============================================================================
@@ -139,16 +189,62 @@ export async function isInsideWorkspace(_path: string, _workspaceRoot: string): 
  * @returns Result containing resolved safe path or ValidationError
  */
 export function securePath(
-	_path: string,
-	_basePath: string,
+	path: string,
+	basePath: string,
 ): Result<string, InstanceType<typeof ValidationError>> {
-	// Stub: returns ValidationError until implemented
-	return R.err(
-		new ValidationError({
-			message: "Path security validation not implemented",
-			field: "path",
-		}),
-	);
+	// Check for null bytes
+	if (path.includes("\x00")) {
+		return Result.err(
+			new ValidationError({
+				message: "Path contains null bytes",
+				field: "path",
+			}),
+		);
+	}
+
+	// Normalize backslashes to forward slashes
+	const normalizedPath = path.replace(/\\/g, "/");
+
+	// Check for path traversal
+	if (normalizedPath.includes("..")) {
+		return Result.err(
+			new ValidationError({
+				message: "Path contains traversal sequence",
+				field: "path",
+			}),
+		);
+	}
+
+	// Check for absolute paths
+	if (normalizedPath.startsWith("/")) {
+		return Result.err(
+			new ValidationError({
+				message: "Absolute paths are not allowed",
+				field: "path",
+			}),
+		);
+	}
+
+	// Remove leading ./ if present
+	const cleanPath = normalizedPath.replace(/^\.\//, "");
+
+	// Resolve the final path
+	const resolvedPath = join(basePath, cleanPath);
+
+	// Double-check the resolved path is within basePath (defense in depth)
+	const normalizedResolved = normalize(resolvedPath);
+	const normalizedBase = normalize(basePath);
+
+	if (!normalizedResolved.startsWith(normalizedBase)) {
+		return Result.err(
+			new ValidationError({
+				message: "Path escapes base directory",
+				field: "path",
+			}),
+		);
+	}
+
+	return Result.ok(resolvedPath);
 }
 
 /**
@@ -158,9 +254,8 @@ export function securePath(
  * @param basePath - Base directory to resolve against
  * @returns True if path is safe
  */
-export function isPathSafe(_path: string, _basePath: string): boolean {
-	// Stub: returns false until implemented
-	return false;
+export function isPathSafe(path: string, basePath: string): boolean {
+	return Result.isOk(securePath(path, basePath));
 }
 
 /**
@@ -171,21 +266,121 @@ export function isPathSafe(_path: string, _basePath: string): boolean {
  * @returns Result containing resolved path or ValidationError
  */
 export function resolveSafePath(
-	_basePath: string,
-	..._segments: string[]
+	basePath: string,
+	...segments: string[]
 ): Result<string, InstanceType<typeof ValidationError>> {
-	// Stub: returns ValidationError until implemented
-	return R.err(
-		new ValidationError({
-			message: "Safe path resolution not implemented",
-			field: "path",
-		}),
-	);
+	// Check each segment for security issues
+	for (const segment of segments) {
+		// Check for null bytes
+		if (segment.includes("\x00")) {
+			return Result.err(
+				new ValidationError({
+					message: "Path segment contains null bytes",
+					field: "path",
+				}),
+			);
+		}
+
+		// Check for path traversal
+		if (segment.includes("..")) {
+			return Result.err(
+				new ValidationError({
+					message: "Path segment contains traversal sequence",
+					field: "path",
+				}),
+			);
+		}
+
+		// Block absolute segments to prevent path escapes
+		if (isAbsolute(segment)) {
+			return Result.err(
+				new ValidationError({
+					message: "Absolute path segments are not allowed",
+					field: "path",
+				}),
+			);
+		}
+	}
+
+	// Join all segments
+	const resolvedPath = join(basePath, ...segments);
+
+	// Verify the resolved path is within basePath using path-boundary check
+	const normalizedResolved = normalize(resolvedPath);
+	const normalizedBase = normalize(basePath);
+
+	// Use path-boundary check: must equal base or start with base + separator
+	if (
+		normalizedResolved !== normalizedBase &&
+		!normalizedResolved.startsWith(normalizedBase + sep)
+	) {
+		return Result.err(
+			new ValidationError({
+				message: "Path escapes base directory",
+				field: "path",
+			}),
+		);
+	}
+
+	return Result.ok(resolvedPath);
 }
 
 // ============================================================================
 // Glob Patterns
 // ============================================================================
+
+/**
+ * Processes ignore patterns, handling negation patterns.
+ * Returns a filtering function that determines if a file should be included.
+ */
+function createIgnoreFilter(
+	ignore: string[] | undefined,
+	cwd: string,
+): (filePath: string) => boolean {
+	if (!ignore || ignore.length === 0) {
+		return () => true; // Include all files
+	}
+
+	// Separate regular ignore patterns from negation patterns
+	const ignorePatterns: string[] = [];
+	const negationPatterns: string[] = [];
+
+	for (const pattern of ignore) {
+		if (pattern.startsWith("!")) {
+			negationPatterns.push(pattern.slice(1));
+		} else {
+			ignorePatterns.push(pattern);
+		}
+	}
+
+	return (filePath: string) => {
+		// Get relative path for pattern matching
+		const relativePath = relative(cwd, filePath);
+
+		// Check if file matches any ignore pattern
+		let isIgnored = false;
+		for (const pattern of ignorePatterns) {
+			const glob = new Bun.Glob(pattern);
+			if (glob.match(relativePath)) {
+				isIgnored = true;
+				break;
+			}
+		}
+
+		// If ignored, check if it matches any negation pattern (to un-ignore)
+		if (isIgnored) {
+			for (const pattern of negationPatterns) {
+				const glob = new Bun.Glob(pattern);
+				if (glob.match(relativePath)) {
+					isIgnored = false;
+					break;
+				}
+			}
+		}
+
+		return !isIgnored;
+	};
+}
 
 /**
  * Finds files matching a glob pattern.
@@ -195,11 +390,38 @@ export function resolveSafePath(
  * @returns Result containing array of matching file paths
  */
 export async function glob(
-	_pattern: string,
-	_options?: GlobOptions,
+	pattern: string,
+	options?: GlobOptions,
 ): Promise<Result<string[], InstanceType<typeof InternalError>>> {
-	// Stub: returns empty array until implemented
-	return R.ok([]);
+	try {
+		const cwd = options?.cwd ?? process.cwd();
+		const bunGlob = new Bun.Glob(pattern);
+
+		const files: string[] = [];
+		const ignoreFilter = createIgnoreFilter(options?.ignore, cwd);
+
+		// Use conditional spread for optional boolean properties (exactOptionalPropertyTypes)
+		const scanOptions = {
+			cwd,
+			...(options?.dot !== undefined && { dot: options.dot }),
+			...(options?.followSymlinks !== undefined && { followSymlinks: options.followSymlinks }),
+		};
+
+		for await (const file of bunGlob.scan(scanOptions)) {
+			const absolutePath = join(cwd, file);
+			if (ignoreFilter(absolutePath)) {
+				files.push(absolutePath);
+			}
+		}
+
+		return Result.ok(files);
+	} catch (error) {
+		return Result.err(
+			new InternalError({
+				message: error instanceof Error ? error.message : "Glob operation failed",
+			}),
+		);
+	}
 }
 
 /**
@@ -210,11 +432,38 @@ export async function glob(
  * @returns Result containing array of matching file paths
  */
 export function globSync(
-	_pattern: string,
-	_options?: GlobOptions,
+	pattern: string,
+	options?: GlobOptions,
 ): Result<string[], InstanceType<typeof InternalError>> {
-	// Stub: returns empty array until implemented
-	return R.ok([]);
+	try {
+		const cwd = options?.cwd ?? process.cwd();
+		const bunGlob = new Bun.Glob(pattern);
+
+		const files: string[] = [];
+		const ignoreFilter = createIgnoreFilter(options?.ignore, cwd);
+
+		// Use conditional spread for optional boolean properties (exactOptionalPropertyTypes)
+		const scanOptions = {
+			cwd,
+			...(options?.dot !== undefined && { dot: options.dot }),
+			...(options?.followSymlinks !== undefined && { followSymlinks: options.followSymlinks }),
+		};
+
+		for (const file of bunGlob.scanSync(scanOptions)) {
+			const absolutePath = join(cwd, file);
+			if (ignoreFilter(absolutePath)) {
+				files.push(absolutePath);
+			}
+		}
+
+		return Result.ok(files);
+	} catch (error) {
+		return Result.err(
+			new InternalError({
+				message: error instanceof Error ? error.message : "Glob operation failed",
+			}),
+		);
+	}
 }
 
 // ============================================================================
@@ -228,15 +477,48 @@ export function globSync(
  * @returns Result containing FileLock or ConflictError if already locked
  */
 export async function acquireLock(
-	_path: string,
+	path: string,
 ): Promise<Result<FileLock, InstanceType<typeof ConflictError>>> {
-	// Stub: returns ConflictError until implemented
-	return R.err(
-		new ConflictError({
-			message: "File locking not implemented",
-			context: { path: _path },
-		}),
-	);
+	const lockPath = `${path}.lock`;
+
+	// Check if lock file already exists
+	const lockFile = Bun.file(lockPath);
+	if (await lockFile.exists()) {
+		return Result.err(
+			new ConflictError({
+				message: `File is already locked: ${path}`,
+			}),
+		);
+	}
+
+	const lock: FileLock = {
+		path,
+		lockPath,
+		pid: process.pid,
+		timestamp: Date.now(),
+	};
+
+	// Create lock file with lock information
+	try {
+		await fsWriteFile(
+			lockPath,
+			JSON.stringify({ pid: lock.pid, timestamp: lock.timestamp }),
+			{ flag: "wx" }, // Fail if file exists (atomic check-and-create)
+		);
+	} catch (error) {
+		// If file already exists (race condition), return conflict error
+		if (error instanceof Error && "code" in error && error.code === "EEXIST") {
+			return Result.err(
+				new ConflictError({
+					message: `File is already locked: ${path}`,
+				}),
+			);
+		}
+		// Re-throw unexpected errors
+		throw error;
+	}
+
+	return Result.ok(lock);
 }
 
 /**
@@ -246,10 +528,18 @@ export async function acquireLock(
  * @returns Result indicating success or error
  */
 export async function releaseLock(
-	_lock: FileLock,
+	lock: FileLock,
 ): Promise<Result<void, InstanceType<typeof InternalError>>> {
-	// Stub: returns success (no-op) until implemented
-	return R.ok(undefined);
+	try {
+		await unlink(lock.lockPath);
+		return Result.ok(undefined);
+	} catch (error) {
+		return Result.err(
+			new InternalError({
+				message: error instanceof Error ? error.message : "Failed to release lock",
+			}),
+		);
+	}
 }
 
 /**
@@ -261,16 +551,42 @@ export async function releaseLock(
  * @returns Result containing callback return value or error
  */
 export async function withLock<T>(
-	_path: string,
-	_callback: () => Promise<T>,
+	path: string,
+	callback: () => Promise<T>,
 ): Promise<Result<T, InstanceType<typeof ConflictError> | InstanceType<typeof InternalError>>> {
-	// Stub: returns ConflictError until implemented
-	return R.err(
-		new ConflictError({
-			message: "File locking not implemented",
-			context: { path: _path },
-		}),
-	);
+	const lockResult = await acquireLock(path);
+
+	if (lockResult.isErr()) {
+		return lockResult;
+	}
+
+	const lock = lockResult.value;
+
+	try {
+		const result = await callback();
+		const releaseResult = await releaseLock(lock);
+		// Surface release failures to caller
+		if (releaseResult.isErr()) {
+			return releaseResult;
+		}
+		return Result.ok(result);
+	} catch (error) {
+		// Always attempt to release the lock, even on error
+		const releaseResult = await releaseLock(lock);
+		// If release also fails, include that in the error
+		if (releaseResult.isErr()) {
+			return Result.err(
+				new InternalError({
+					message: `Callback failed: ${error instanceof Error ? error.message : "Unknown error"}; lock release also failed: ${releaseResult.error.message}`,
+				}),
+			);
+		}
+		return Result.err(
+			new InternalError({
+				message: error instanceof Error ? error.message : "Callback failed",
+			}),
+		);
+	}
 }
 
 /**
@@ -279,9 +595,9 @@ export async function withLock<T>(
  * @param path - Path to check
  * @returns True if file is locked
  */
-export async function isLocked(_path: string): Promise<boolean> {
-	// Stub: returns false until implemented
-	return false;
+export async function isLocked(path: string): Promise<boolean> {
+	const lockPath = `${path}.lock`;
+	return Bun.file(lockPath).exists();
 }
 
 // ============================================================================
@@ -297,12 +613,54 @@ export async function isLocked(_path: string): Promise<boolean> {
  * @returns Result indicating success or error
  */
 export async function atomicWrite(
-	_path: string,
-	_content: string,
-	_options?: AtomicWriteOptions,
+	path: string,
+	content: string,
+	options?: AtomicWriteOptions,
 ): Promise<Result<void, InstanceType<typeof InternalError>>> {
-	// Stub: returns success (no-op) until implemented
-	return R.ok(undefined);
+	const createParentDirs = options?.createParentDirs ?? true;
+	const parentDir = dirname(path);
+	// Add random suffix for uniqueness in concurrent writes
+	const randomSuffix = Math.random().toString(36).slice(2, 10);
+	const tempPath = `${path}.${process.pid}.${Date.now()}.${randomSuffix}.tmp`;
+
+	try {
+		// Create parent directories if needed
+		if (createParentDirs) {
+			await mkdir(parentDir, { recursive: true });
+		}
+
+		// Get existing file permissions if needed
+		let mode = options?.mode ?? 0o644;
+		if (options?.preservePermissions) {
+			try {
+				const stats = await stat(path);
+				mode = stats.mode;
+			} catch {
+				// File doesn't exist, use default mode
+			}
+		}
+
+		// Write to temp file
+		await fsWriteFile(tempPath, content, { mode });
+
+		// Rename temp file to target (atomic operation on most filesystems)
+		await rename(tempPath, path);
+
+		return Result.ok(undefined);
+	} catch (error) {
+		// Clean up temp file if it exists
+		try {
+			await unlink(tempPath);
+		} catch {
+			// Ignore cleanup errors
+		}
+
+		return Result.err(
+			new InternalError({
+				message: error instanceof Error ? error.message : "Atomic write failed",
+			}),
+		);
+	}
 }
 
 /**
@@ -314,12 +672,21 @@ export async function atomicWrite(
  * @returns Result indicating success or error
  */
 export async function atomicWriteJson<T>(
-	_path: string,
-	_data: T,
-	_options?: AtomicWriteOptions,
+	path: string,
+	data: T,
+	options?: AtomicWriteOptions,
 ): Promise<
 	Result<void, InstanceType<typeof InternalError> | InstanceType<typeof ValidationError>>
 > {
-	// Stub: returns success (no-op) until implemented
-	return R.ok(undefined);
+	try {
+		const content = JSON.stringify(data);
+		return await atomicWrite(path, content, options);
+	} catch (error) {
+		return Result.err(
+			new ValidationError({
+				message: error instanceof Error ? error.message : "Failed to serialize JSON",
+				field: "data",
+			}),
+		);
+	}
 }

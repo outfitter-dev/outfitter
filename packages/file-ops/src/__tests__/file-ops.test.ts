@@ -17,7 +17,6 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Result } from "@outfitter/contracts";
 import {
 	acquireLock,
 	atomicWrite,
@@ -79,8 +78,8 @@ describe("Workspace Detection", () => {
 
 		const result = await findWorkspaceRoot(nestedDir);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(testDir);
 		}
 	});
@@ -93,8 +92,8 @@ describe("Workspace Detection", () => {
 
 		const result = await findWorkspaceRoot(nestedDir);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(testDir);
 		}
 	});
@@ -109,8 +108,8 @@ describe("Workspace Detection", () => {
 			stopAt: testDir, // Stop before reaching actual filesystem root
 		});
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
 			expect(result.error._tag).toBe("NotFoundError");
 		}
 	});
@@ -128,8 +127,8 @@ describe("Workspace Detection", () => {
 			markers: [".git", "package.json"],
 		});
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// Should find the directory with .git (same as package.json here)
 			expect(result.value).toBe(testDir);
 		}
@@ -145,8 +144,8 @@ describe("Workspace Detection", () => {
 			markers: [".workspace"],
 		});
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(testDir);
 		}
 	});
@@ -162,7 +161,7 @@ describe("Workspace Detection", () => {
 			stopAt: testDir,
 		});
 
-		expect(Result.isErr(result)).toBe(true);
+		expect(result.isErr()).toBe(true);
 	});
 
 	it("getRelativePath returns path relative to workspace root", async () => {
@@ -175,8 +174,8 @@ describe("Workspace Detection", () => {
 
 		const result = await getRelativePath(filePath);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe("packages/core/index.ts");
 		}
 	});
@@ -212,8 +211,8 @@ describe("Path Security", () => {
 	it("securePath rejects paths with .. traversal", () => {
 		const result = securePath("../../../etc/passwd", testDir);
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
 			expect(result.error._tag).toBe("ValidationError");
 			expect(result.error.message).toContain("traversal");
 		}
@@ -222,8 +221,8 @@ describe("Path Security", () => {
 	it("securePath rejects absolute paths when basePath provided", () => {
 		const result = securePath("/etc/passwd", testDir);
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
 			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
@@ -231,8 +230,8 @@ describe("Path Security", () => {
 	it("securePath normalizes paths (removes ./ prefix)", () => {
 		const result = securePath("./src/index.ts", testDir);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(join(testDir, "src/index.ts"));
 		}
 	});
@@ -241,8 +240,8 @@ describe("Path Security", () => {
 		// Null bytes and other invalid characters
 		const result = securePath("file\x00name.ts", testDir);
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
 			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
@@ -250,8 +249,8 @@ describe("Path Security", () => {
 	it("securePath allows valid relative paths", () => {
 		const result = securePath("src/lib/utils.ts", testDir);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
 		}
 	});
@@ -265,8 +264,8 @@ describe("Path Security", () => {
 	it("resolveSafePath combines base and relative securely", () => {
 		const result = resolveSafePath(testDir, "packages", "core", "src");
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(join(testDir, "packages", "core", "src"));
 		}
 	});
@@ -275,8 +274,8 @@ describe("Path Security", () => {
 		// Should normalize backslashes on all platforms
 		const result = securePath("src\\lib\\utils.ts", testDir);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// Should be normalized to forward slashes
 			expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
 		}
@@ -310,8 +309,8 @@ describe("Glob Patterns", () => {
 	it("glob returns matching files for simple patterns", async () => {
 		const result = await glob("src/*.ts", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toContain(join(testDir, "src", "index.ts"));
 			expect(result.value).toHaveLength(1);
 		}
@@ -320,8 +319,8 @@ describe("Glob Patterns", () => {
 	it("glob supports ** for recursive matching", async () => {
 		const result = await glob("src/**/*.ts", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toContain(join(testDir, "src", "index.ts"));
 			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
 			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.test.ts"));
@@ -333,8 +332,8 @@ describe("Glob Patterns", () => {
 	it("glob supports {a,b} alternation", async () => {
 		const result = await glob("src/**/*.{ts,js}", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toContain(join(testDir, "src", "utils", "parse.js"));
 			expect(result.value.length).toBeGreaterThan(4);
 		}
@@ -343,8 +342,8 @@ describe("Glob Patterns", () => {
 	it("glob supports [abc] character classes", async () => {
 		const result = await glob("src/**/*.[tj]s", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// Should match both .ts and .js files
 			expect(result.value.length).toBeGreaterThan(0);
 		}
@@ -356,8 +355,8 @@ describe("Glob Patterns", () => {
 			ignore: ["**/*.test.ts", "**/node_modules/**"],
 		});
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// Should not include test files
 			expect(result.value).not.toContain(join(testDir, "src", "lib", "helpers.test.ts"));
 			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
@@ -367,8 +366,8 @@ describe("Glob Patterns", () => {
 	it("glob returns empty array for no matches", async () => {
 		const result = await glob("**/*.xyz", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toEqual([]);
 		}
 	});
@@ -379,8 +378,8 @@ describe("Glob Patterns", () => {
 			ignore: ["**/*.ts", "!**/index.ts"],
 		});
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// With negation, should only match index.ts
 			expect(result.value).toContain(join(testDir, "src", "index.ts"));
 		}
@@ -389,8 +388,8 @@ describe("Glob Patterns", () => {
 	it("globSync provides synchronous API", () => {
 		const result = globSync("src/*.ts", { cwd: testDir });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toContain(join(testDir, "src", "index.ts"));
 		}
 	});
@@ -415,8 +414,8 @@ describe("File Locking", () => {
 
 		const result = await acquireLock(targetFile);
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			// Lock file should exist
 			const lockPath = `${targetFile}.lock`;
 			const lockExists = await Bun.file(lockPath).exists();
@@ -433,18 +432,18 @@ describe("File Locking", () => {
 
 		// Acquire first lock
 		const lock1 = await acquireLock(targetFile);
-		expect(Result.isOk(lock1)).toBe(true);
+		expect(lock1.isOk()).toBe(true);
 
 		// Try to acquire second lock - should fail
 		const lock2 = await acquireLock(targetFile);
 
-		expect(Result.isErr(lock2)).toBe(true);
-		if (Result.isErr(lock2)) {
+		expect(lock2.isErr()).toBe(true);
+		if (lock2.isErr()) {
 			expect(lock2.error._tag).toBe("ConflictError");
 		}
 
 		// Cleanup
-		if (Result.isOk(lock1)) {
+		if (lock1.isOk()) {
 			await releaseLock(lock1.value);
 		}
 	});
@@ -454,11 +453,11 @@ describe("File Locking", () => {
 		await writeFile(targetFile, "{}");
 
 		const lockResult = await acquireLock(targetFile);
-		expect(Result.isOk(lockResult)).toBe(true);
+		expect(lockResult.isOk()).toBe(true);
 
-		if (Result.isOk(lockResult)) {
+		if (lockResult.isOk()) {
 			const releaseResult = await releaseLock(lockResult.value);
-			expect(Result.isOk(releaseResult)).toBe(true);
+			expect(releaseResult.isOk()).toBe(true);
 
 			// Lock file should no longer exist
 			const lockPath = `${targetFile}.lock`;
@@ -478,8 +477,8 @@ describe("File Locking", () => {
 		});
 
 		expect(callbackExecuted).toBe(true);
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			expect(result.value).toBe(42);
 		}
 	});
@@ -510,7 +509,7 @@ describe("File Locking", () => {
 		});
 
 		// Should return error result
-		expect(Result.isErr(result)).toBe(true);
+		expect(result.isErr()).toBe(true);
 
 		// But lock should still be released
 		const lockPath = `${targetFile}.lock`;
@@ -523,9 +522,9 @@ describe("File Locking", () => {
 		await writeFile(targetFile, "{}");
 
 		const lockResult = await acquireLock(targetFile);
-		expect(Result.isOk(lockResult)).toBe(true);
+		expect(lockResult.isOk()).toBe(true);
 
-		if (Result.isOk(lockResult)) {
+		if (lockResult.isOk()) {
 			const lock = lockResult.value;
 			expect(lock.pid).toBe(process.pid);
 			expect(typeof lock.timestamp).toBe("number");
@@ -544,13 +543,13 @@ describe("File Locking", () => {
 
 		// Acquire lock
 		const lockResult = await acquireLock(targetFile);
-		expect(Result.isOk(lockResult)).toBe(true);
+		expect(lockResult.isOk()).toBe(true);
 
 		// Now should be locked
 		expect(await isLocked(targetFile)).toBe(true);
 
 		// Release and check again
-		if (Result.isOk(lockResult)) {
+		if (lockResult.isOk()) {
 			await releaseLock(lockResult.value);
 		}
 		expect(await isLocked(targetFile)).toBe(false);
@@ -576,7 +575,7 @@ describe("Atomic Writes", () => {
 
 		const result = await atomicWrite(targetFile, content);
 
-		expect(Result.isOk(result)).toBe(true);
+		expect(result.isOk()).toBe(true);
 
 		// File should exist with correct content
 		const written = await Bun.file(targetFile).text();
@@ -596,7 +595,7 @@ describe("Atomic Writes", () => {
 			preservePermissions: true,
 		});
 
-		expect(Result.isOk(result)).toBe(true);
+		expect(result.isOk()).toBe(true);
 	});
 
 	it("atomicWrite is atomic (all-or-nothing)", async () => {
@@ -608,8 +607,8 @@ describe("Atomic Writes", () => {
 		// In practice, this tests the temp-file-then-rename strategy
 		const result = await atomicWrite(targetFile, '{"version": 2}');
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
 			const content = await Bun.file(targetFile).text();
 			expect(content).toBe('{"version": 2}');
 		}
@@ -622,7 +621,7 @@ describe("Atomic Writes", () => {
 
 		// Should be a proper Result type
 		expect("value" in result || "error" in result).toBe(true);
-		expect(Result.isOk(result) || Result.isErr(result)).toBe(true);
+		expect(result.isOk() || result.isErr()).toBe(true);
 	});
 
 	it("atomicWriteJson handles JSON serialization", async () => {
@@ -631,7 +630,7 @@ describe("Atomic Writes", () => {
 
 		const result = await atomicWriteJson(targetFile, data);
 
-		expect(Result.isOk(result)).toBe(true);
+		expect(result.isOk()).toBe(true);
 
 		const written = await Bun.file(targetFile).json();
 		expect(written).toEqual(data);
@@ -649,7 +648,7 @@ describe("Atomic Writes", () => {
 			createParentDirs: false,
 		});
 
-		expect(Result.isErr(result)).toBe(true);
+		expect(result.isErr()).toBe(true);
 
 		// No temp files should be left behind
 		const tempFiles = await Array.fromAsync(new Bun.Glob("*.tmp").scan(testDir));
@@ -663,7 +662,7 @@ describe("Atomic Writes", () => {
 			createParentDirs: true,
 		});
 
-		expect(Result.isOk(result)).toBe(true);
+		expect(result.isOk()).toBe(true);
 
 		const content = await Bun.file(targetFile).text();
 		expect(content).toBe("content");
@@ -678,7 +677,7 @@ describe("Atomic Writes", () => {
 		const results = await Promise.all(writes);
 
 		// All writes should succeed (no corruption)
-		const successCount = results.filter((r) => Result.isOk(r)).length;
+		const successCount = results.filter((r) => r.isOk()).length;
 		expect(successCount).toBe(10);
 
 		// File should contain valid JSON (one of the writes)
