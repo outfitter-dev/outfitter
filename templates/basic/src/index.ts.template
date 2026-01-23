@@ -1,0 +1,26 @@
+/**
+ * {{name}}
+ *
+ * {{description}}
+ *
+ * @packageDocumentation
+ */
+
+/**
+ * Main entry point for {{name}}.
+ *
+ * @example
+ * ```typescript
+ * import { main } from "{{name}}";
+ *
+ * main();
+ * ```
+ */
+export function main(): void {
+	console.log("Hello from {{name}}!");
+}
+
+// Run if executed directly
+if (import.meta.main) {
+	main();
+}
