@@ -19,6 +19,5 @@ program.register(
 		.action(async ({ args }) => {
 			const name = args[0] ?? "World";
 			logger.info`Hello, ${name}!`;
-			console.log(`Hello, ${name}!`);
 		}),
 );
