@@ -634,12 +634,18 @@ export function createTokens(options?: TokenOptions): Tokens {
 	}
 	// FORCE_COLOR env takes precedence over NO_COLOR
 	// Supports FORCE_COLOR=1, FORCE_COLOR=2, FORCE_COLOR=3 (common for color levels)
-	else if (process.env["FORCE_COLOR"] !== undefined && process.env["FORCE_COLOR"] !== "") {
-		colorEnabled = true;
+	else if (process.env["FORCE_COLOR"] !== undefined) {
+		const value = process.env["FORCE_COLOR"];
+		if (value === "") {
+			colorEnabled = true;
+		} else {
+			const numeric = Number(value);
+			colorEnabled = Number.isNaN(numeric) ? true : numeric > 0;
+		}
 	}
 	// NO_COLOR env disables colors
-	// Per no-color.org spec, ANY non-empty value disables colors
-	else if (process.env["NO_COLOR"] !== undefined && process.env["NO_COLOR"] !== "") {
+	// Per no-color.org spec, any value disables colors
+	else if (process.env["NO_COLOR"] !== undefined) {
 		colorEnabled = false;
 	}
 	// colorLevel 1-3 enables colors
