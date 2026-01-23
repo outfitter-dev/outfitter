@@ -295,6 +295,27 @@ export interface LoggerInstance {
 	 * @param sink - Sink to add to this logger's output destinations
 	 */
 	addSink(sink: Sink): void;
+
+	/**
+	 * Creates a child logger with additional context.
+	 *
+	 * Context from the child is merged with the parent's context,
+	 * with child context taking precedence for duplicate keys.
+	 * Child loggers are composable (can create nested children).
+	 *
+	 * @param context - Additional context to include in all log messages
+	 * @returns A new LoggerInstance with the merged context
+	 *
+	 * @example
+	 * ```typescript
+	 * const requestLogger = logger.child({ requestId: "abc123" });
+	 * requestLogger.info("Processing request"); // includes requestId
+	 *
+	 * const opLogger = requestLogger.child({ operation: "create" });
+	 * opLogger.debug("Starting"); // includes requestId + operation
+	 * ```
+	 */
+	child(context: Record<string, unknown>): LoggerInstance;
 }
 
 /**
@@ -401,6 +422,43 @@ const LEVEL_PRIORITY: Record<LogLevel, number> = {
 
 /** Default sensitive keys that should always be redacted (case-insensitive) */
 const DEFAULT_SENSITIVE_KEYS = ["password", "secret", "token", "apikey"];
+
+/**
+ * Default patterns for redacting secrets from log messages.
+ * Applied to message strings and stringified metadata values.
+ *
+ * Patterns include:
+ * - Bearer tokens (Authorization headers)
+ * - API key patterns (api_key=xxx, apikey: xxx)
+ * - GitHub Personal Access Tokens (ghp_xxx)
+ * - GitHub OAuth tokens (gho_xxx)
+ * - GitHub App tokens (ghs_xxx)
+ * - GitHub refresh tokens (ghr_xxx)
+ * - PEM-encoded private keys
+ *
+ * @example
+ * ```typescript
+ * import { DEFAULT_PATTERNS } from "@outfitter/logging";
+ *
+ * // Use with custom logger configuration
+ * const logger = createLogger({
+ *   name: "app",
+ *   redaction: {
+ *     enabled: true,
+ *     patterns: [...DEFAULT_PATTERNS, /my-custom-secret-\w+/gi],
+ *   },
+ * });
+ * ```
+ */
+export const DEFAULT_PATTERNS: RegExp[] = [
+	/Bearer\s+[A-Za-z0-9\-_.~+/]+=*/gi, // Bearer tokens
+	/(?:api[_-]?key|apikey)[=:]\s*["']?[A-Za-z0-9\-_.]+["']?/gi, // API keys
+	/ghp_[A-Za-z0-9]{36}/g, // GitHub PATs
+	/gho_[A-Za-z0-9]{36}/g, // GitHub OAuth tokens
+	/ghs_[A-Za-z0-9]{36}/g, // GitHub App tokens
+	/ghr_[A-Za-z0-9]{36}/g, // GitHub refresh tokens
+	/-----BEGIN[\s\S]*?PRIVATE\s*KEY-----[\s\S]*?-----END[\s\S]*?PRIVATE\s*KEY-----/gi, // PEM keys
+];
 
 /** Global redaction configuration */
 const globalRedactionConfig: GlobalRedactionConfig = {
@@ -534,6 +592,7 @@ function processMetadata(
 	// 2. Global redaction rules exist (patterns or keys)
 	if (redactionConfig || hasGlobalRules) {
 		const allPatterns = [
+			...DEFAULT_PATTERNS,
 			...(redactionConfig?.patterns ?? []),
 			...(globalRedactionConfig.patterns ?? []),
 		];
@@ -611,11 +670,31 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
 		if (!shouldLog(level, state.level)) return;
 
 		const processedMetadata = processMetadata({ ...state.context, ...metadata }, state.redaction);
+
+		// Process message for redaction if enabled
+		let processedMessage = message;
+		if (state.redaction?.enabled !== false) {
+			// Check if redaction should be applied
+			const hasGlobalRules =
+				(globalRedactionConfig.patterns?.length ?? 0) > 0 ||
+				(globalRedactionConfig.keys?.length ?? 0) > 0;
+
+			if (state.redaction || hasGlobalRules) {
+				const allPatterns = [
+					...DEFAULT_PATTERNS,
+					...(state.redaction?.patterns ?? []),
+					...(globalRedactionConfig.patterns ?? []),
+				];
+				const replacement = state.redaction?.replacement ?? "[REDACTED]";
+				processedMessage = applyPatterns(message, allPatterns, replacement);
+			}
+		}
+
 		const record: LogRecord = {
 			timestamp: Date.now(),
 			level,
 			category: state.name,
-			message,
+			message: processedMessage,
 			...(processedMetadata !== undefined ? { metadata: processedMetadata } : {}),
 		};
 
@@ -647,6 +726,17 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
 		addSink: (sink) => {
 			state.sinks.push(sink);
 			registeredSinks.add(sink);
+		},
+		child: (context) => {
+			// Create child logger with merged context (child takes precedence)
+			const childState: InternalLoggerState = {
+				name: state.name,
+				level: state.level,
+				context: { ...state.context, ...context },
+				sinks: state.sinks, // Share sinks with parent
+				redaction: state.redaction,
+			};
+			return createLoggerFromState(childState);
 		},
 	};
 }
@@ -714,7 +804,7 @@ export function createChildLogger(
 	const mergedContext = { ...parentContext, ...context };
 
 	// Create child logger that delegates to parent but with merged context
-	return {
+	const childLogger: LoggerInstance = {
 		trace: (message, metadata) => parent.trace(message, { ...context, ...metadata }),
 		debug: (message, metadata) => parent.debug(message, { ...context, ...metadata }),
 		info: (message, metadata) => parent.info(message, { ...context, ...metadata }),
@@ -724,7 +814,9 @@ export function createChildLogger(
 		getContext: () => mergedContext,
 		setLevel: (level) => parent.setLevel(level),
 		addSink: (sink) => parent.addSink(sink),
+		child: (newContext) => createChildLogger(childLogger, newContext),
 	};
+	return childLogger;
 }
 
 /**
