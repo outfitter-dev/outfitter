@@ -56,46 +56,46 @@ function cleanupTmpDir(dir: string): void {
 
 describe("Cursor Creation", () => {
 	it("createCursor creates a new cursor with ID and position", () => {
-		const result = createCursor({ id: "cursor-1", position: 0 });
+		const cursorResult = createCursor({ id: "cursor-1", position: 0 });
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
-			expect(result.value.id).toBe("cursor-1");
-			expect(result.value.position).toBe(0);
+		expect(Result.isOk(cursorResult)).toBe(true);
+		if (Result.isOk(cursorResult)) {
+			expect(cursorResult.value.id).toBe("cursor-1");
+			expect(cursorResult.value.position).toBe(0);
 		}
 	});
 
 	it("createCursor generates unique cursor ID if not provided", () => {
-		const result1 = createCursor({ position: 0 });
-		const result2 = createCursor({ position: 0 });
+		const cursor1Result = createCursor({ position: 0 });
+		const cursor2Result = createCursor({ position: 0 });
 
-		expect(Result.isOk(result1)).toBe(true);
-		expect(Result.isOk(result2)).toBe(true);
-		if (Result.isOk(result1) && Result.isOk(result2)) {
-			expect(result1.value.id).toBeDefined();
-			expect(result2.value.id).toBeDefined();
-			expect(result1.value.id).not.toBe(result2.value.id);
+		expect(Result.isOk(cursor1Result)).toBe(true);
+		expect(Result.isOk(cursor2Result)).toBe(true);
+		if (Result.isOk(cursor1Result) && Result.isOk(cursor2Result)) {
+			expect(cursor1Result.value.id).toBeDefined();
+			expect(cursor2Result.value.id).toBeDefined();
+			expect(cursor1Result.value.id).not.toBe(cursor2Result.value.id);
 		}
 	});
 
 	it("createCursor accepts optional metadata", () => {
-		const result = createCursor({
+		const cursorResult = createCursor({
 			id: "cursor-1",
 			position: 10,
 			metadata: { query: "test", pageSize: 50 },
 		});
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
-			expect(result.value.metadata).toEqual({ query: "test", pageSize: 50 });
+		expect(Result.isOk(cursorResult)).toBe(true);
+		if (Result.isOk(cursorResult)) {
+			expect(cursorResult.value.metadata).toEqual({ query: "test", pageSize: 50 });
 		}
 	});
 
 	it("createCursor validates position is non-negative", () => {
 		const result = createCursor({ id: "cursor-1", position: -1 });
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
 			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
@@ -176,8 +176,8 @@ describe("Cursor Store", () => {
 	it("store.get returns Result.err(NotFoundError) for unknown ID", () => {
 		const result = store.get("nonexistent");
 
-		expect(Result.isErr(result)).toBe(true);
-		if (Result.isErr(result)) {
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
 			expect(result.error._tag).toBe("NotFoundError");
 			expect(result.error.resourceType).toBe("cursor");
 			expect(result.error.resourceId).toBe("nonexistent");
@@ -563,8 +563,8 @@ describe("TTL and Expiration", () => {
 			}
 
 			const result = store.get("expires-fast");
-			expect(Result.isErr(result)).toBe(true);
-			if (Result.isErr(result)) {
+			expect(Result.isError(result)).toBe(true);
+			if (Result.isError(result)) {
 				expect(result.error._tag).toBe("NotFoundError");
 			}
 		}
