@@ -519,14 +519,26 @@ function processMetadata(
 		}
 	}
 
-	// Apply redaction if enabled (enabled defaults to true when redactionConfig is provided)
-	if (redactionConfig && redactionConfig.enabled !== false) {
+	// Honor explicit opt-out even with global rules
+	if (redactionConfig?.enabled === false) {
+		return processed;
+	}
+
+	// Check if global redaction rules exist
+	const hasGlobalRules =
+		(globalRedactionConfig.patterns?.length ?? 0) > 0 ||
+		(globalRedactionConfig.keys?.length ?? 0) > 0;
+
+	// Apply redaction if:
+	// 1. redactionConfig is provided and enabled !== false, OR
+	// 2. Global redaction rules exist (patterns or keys)
+	if (redactionConfig || hasGlobalRules) {
 		const allPatterns = [
-			...(redactionConfig.patterns ?? []),
+			...(redactionConfig?.patterns ?? []),
 			...(globalRedactionConfig.patterns ?? []),
 		];
-		const allKeys = [...(redactionConfig.keys ?? []), ...(globalRedactionConfig.keys ?? [])];
-		const replacement = redactionConfig.replacement ?? "[REDACTED]";
+		const allKeys = [...(redactionConfig?.keys ?? []), ...(globalRedactionConfig.keys ?? [])];
+		const replacement = redactionConfig?.replacement ?? "[REDACTED]";
 
 		return redactValue(processed, allKeys, allPatterns, replacement) as Record<string, unknown>;
 	}

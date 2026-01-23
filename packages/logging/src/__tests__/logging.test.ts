@@ -668,6 +668,65 @@ describe("Redaction", () => {
 		expect(records[0].metadata?.customKey).toBe("[REDACTED]");
 	});
 
+	it("global redaction patterns apply without explicit enabled flag", () => {
+		// Configure global patterns (adds to existing global config)
+		configureRedaction({
+			patterns: [/auto-redact-secret-\w+/gi],
+			keys: ["autoRedactKey"],
+		});
+
+		const records: LogRecord[] = [];
+		const sink: Sink = { write: (record) => records.push(record) };
+
+		// Create logger WITHOUT redaction: { enabled: true }
+		const logger = createLogger({
+			name: "test-auto-redact",
+			sinks: [sink],
+			// Note: no redaction config passed
+		});
+
+		logger.info("Data with secrets", {
+			value: "auto-redact-secret-xyz789",
+			autoRedactKey: "should-be-hidden",
+			safeKey: "visible-value",
+		});
+
+		// Global patterns should be applied automatically
+		expect(records[0].metadata?.value).toContain("[REDACTED]");
+		expect(records[0].metadata?.autoRedactKey).toBe("[REDACTED]");
+		// Non-sensitive keys should remain visible
+		expect(records[0].metadata?.safeKey).toBe("visible-value");
+	});
+
+	it("explicit enabled:false opts out even with global rules", () => {
+		// Configure global redaction
+		configureRedaction({
+			patterns: [/global-pattern-\w+/gi],
+			keys: ["globalKey"],
+		});
+
+		const records: LogRecord[] = [];
+		const sink: Sink = { write: (record) => records.push(record) };
+
+		// Explicitly opt out of redaction
+		const logger = createLogger({
+			name: "test-opt-out",
+			sinks: [sink],
+			redaction: { enabled: false },
+		});
+
+		logger.info("Data with secrets", {
+			value: "global-pattern-xyz789",
+			globalKey: "should-be-visible",
+			password: "also-visible",
+		});
+
+		// Nothing should be redacted when explicitly disabled
+		expect(records[0].metadata?.value).toBe("global-pattern-xyz789");
+		expect(records[0].metadata?.globalKey).toBe("should-be-visible");
+		expect(records[0].metadata?.password).toBe("also-visible");
+	});
+
 	it("Redaction patterns support regex", () => {
 		const records: LogRecord[] = [];
 		const sink: Sink = { write: (record) => records.push(record) };
