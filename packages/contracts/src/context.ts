@@ -31,10 +31,12 @@ export interface CreateContextOptions {
  * Returns itself for child() to maintain the no-op behavior.
  */
 const noopLogger: Logger = {
+	trace: () => {},
 	debug: () => {},
 	info: () => {},
 	warn: () => {},
 	error: () => {},
+	fatal: () => {},
 	child: () => noopLogger,
 };
 

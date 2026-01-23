@@ -188,10 +188,12 @@ describe("Logger interface", () => {
 
 function createMockLogger(): Logger {
 	const createLogger = (): Logger => ({
+		trace: (_message: string, _metadata?: Record<string, unknown>) => {},
 		debug: (_message: string, _context?: Record<string, unknown>) => {},
 		info: (_message: string, _context?: Record<string, unknown>) => {},
 		warn: (_message: string, _context?: Record<string, unknown>) => {},
 		error: (_message: string, _context?: Record<string, unknown>) => {},
+		fatal: (_message: string, _metadata?: Record<string, unknown>) => {},
 		child: (_context: Record<string, unknown>): Logger => createLogger(),
 	});
 	return createLogger();
