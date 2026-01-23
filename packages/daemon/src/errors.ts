@@ -7,11 +7,75 @@
  * @packageDocumentation
  */
 
+import type { TaggedErrorClass } from "@outfitter/contracts";
 import { TaggedError } from "@outfitter/contracts";
 
 // ============================================================================
 // Connection Error Types
 // ============================================================================
+
+const StaleSocketErrorBase: TaggedErrorClass<
+	"StaleSocketError",
+	{
+		message: string;
+		socketPath: string;
+		pid?: number;
+	}
+> = TaggedError("StaleSocketError")<{
+	message: string;
+	socketPath: string;
+	pid?: number;
+}>();
+
+const ConnectionRefusedErrorBase: TaggedErrorClass<
+	"ConnectionRefusedError",
+	{
+		message: string;
+		socketPath: string;
+	}
+> = TaggedError("ConnectionRefusedError")<{
+	message: string;
+	socketPath: string;
+}>();
+
+const ConnectionTimeoutErrorBase: TaggedErrorClass<
+	"ConnectionTimeoutError",
+	{
+		message: string;
+		socketPath: string;
+		timeoutMs: number;
+	}
+> = TaggedError("ConnectionTimeoutError")<{
+	message: string;
+	socketPath: string;
+	timeoutMs: number;
+}>();
+
+const ProtocolErrorBase: TaggedErrorClass<
+	"ProtocolError",
+	{
+		message: string;
+		socketPath: string;
+		details?: string;
+	}
+> = TaggedError("ProtocolError")<{
+	message: string;
+	socketPath: string;
+	details?: string;
+}>();
+
+const LockErrorBase: TaggedErrorClass<
+	"LockError",
+	{
+		message: string;
+		lockPath: string;
+		pid?: number;
+	}
+> = TaggedError("LockError")<{
+	message: string;
+	lockPath: string;
+	pid?: number;
+}>();
 
 /**
  * Socket exists but daemon process is dead.
@@ -28,11 +92,7 @@ import { TaggedError } from "@outfitter/contracts";
  * });
  * ```
  */
-export class StaleSocketError extends TaggedError("StaleSocketError")<{
-	message: string;
-	socketPath: string;
-	pid?: number;
-}>() {}
+export class StaleSocketError extends StaleSocketErrorBase {}
 
 /**
  * Daemon is not running (connection refused).
@@ -48,10 +108,7 @@ export class StaleSocketError extends TaggedError("StaleSocketError")<{
  * });
  * ```
  */
-export class ConnectionRefusedError extends TaggedError("ConnectionRefusedError")<{
-	message: string;
-	socketPath: string;
-}>() {}
+export class ConnectionRefusedError extends ConnectionRefusedErrorBase {}
 
 /**
  * Daemon did not respond within timeout.
@@ -68,11 +125,7 @@ export class ConnectionRefusedError extends TaggedError("ConnectionRefusedError"
  * });
  * ```
  */
-export class ConnectionTimeoutError extends TaggedError("ConnectionTimeoutError")<{
-	message: string;
-	socketPath: string;
-	timeoutMs: number;
-}>() {}
+export class ConnectionTimeoutError extends ConnectionTimeoutErrorBase {}
 
 /**
  * Invalid response format from daemon.
@@ -89,11 +142,7 @@ export class ConnectionTimeoutError extends TaggedError("ConnectionTimeoutError"
  * });
  * ```
  */
-export class ProtocolError extends TaggedError("ProtocolError")<{
-	message: string;
-	socketPath: string;
-	details?: string;
-}>() {}
+export class ProtocolError extends ProtocolErrorBase {}
 
 // ============================================================================
 // Lock Error Types
@@ -114,11 +163,7 @@ export class ProtocolError extends TaggedError("ProtocolError")<{
  * });
  * ```
  */
-export class LockError extends TaggedError("LockError")<{
-	message: string;
-	lockPath: string;
-	pid?: number;
-}>() {}
+export class LockError extends LockErrorBase {}
 
 // ============================================================================
 // Union Types

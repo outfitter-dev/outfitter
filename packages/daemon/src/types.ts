@@ -7,13 +7,24 @@
  * @packageDocumentation
  */
 
-import type { Result } from "@outfitter/contracts";
+import type { Result, TaggedErrorClass } from "@outfitter/contracts";
 import { TaggedError } from "@outfitter/contracts";
 import type { LoggerInstance } from "@outfitter/logging";
 
 // ============================================================================
 // Error Types
 // ============================================================================
+
+const DaemonErrorBase: TaggedErrorClass<
+	"DaemonError",
+	{
+		code: DaemonErrorCode;
+		message: string;
+	}
+> = TaggedError("DaemonError")<{
+	code: DaemonErrorCode;
+	message: string;
+}>();
 
 /**
  * Error codes for daemon operations.
@@ -48,10 +59,7 @@ export type DaemonErrorCode =
  * }
  * ```
  */
-export class DaemonError extends TaggedError("DaemonError")<{
-	code: DaemonErrorCode;
-	message: string;
-}>() {}
+export class DaemonError extends DaemonErrorBase {}
 
 // ============================================================================
 // State Types

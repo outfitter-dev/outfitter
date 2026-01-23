@@ -1,4 +1,5 @@
 import { TaggedError } from "better-result";
+import type { TaggedErrorClass } from "better-result";
 
 /**
  * Error categories for classification, exit codes, and HTTP status mapping.
@@ -93,6 +94,128 @@ export function getStatusCode(category: ErrorCategory): number {
 // Concrete Error Classes
 // ============================================================================
 
+// Base classes avoid TS9021 warnings from extending expressions.
+const ValidationErrorBase: TaggedErrorClass<
+	"ValidationError",
+	{
+		message: string;
+		field?: string;
+	}
+> = TaggedError("ValidationError")<{
+	message: string;
+	field?: string;
+}>();
+
+const AssertionErrorBase: TaggedErrorClass<
+	"AssertionError",
+	{
+		message: string;
+	}
+> = TaggedError("AssertionError")<{
+	message: string;
+}>();
+
+const NotFoundErrorBase: TaggedErrorClass<
+	"NotFoundError",
+	{
+		message: string;
+		resourceType: string;
+		resourceId: string;
+	}
+> = TaggedError("NotFoundError")<{
+	message: string;
+	resourceType: string;
+	resourceId: string;
+}>();
+
+const ConflictErrorBase: TaggedErrorClass<
+	"ConflictError",
+	{
+		message: string;
+		context?: Record<string, unknown>;
+	}
+> = TaggedError("ConflictError")<{
+	message: string;
+	context?: Record<string, unknown>;
+}>();
+
+const PermissionErrorBase: TaggedErrorClass<
+	"PermissionError",
+	{
+		message: string;
+		context?: Record<string, unknown>;
+	}
+> = TaggedError("PermissionError")<{
+	message: string;
+	context?: Record<string, unknown>;
+}>();
+
+const TimeoutErrorBase: TaggedErrorClass<
+	"TimeoutError",
+	{
+		message: string;
+		operation: string;
+		timeoutMs: number;
+	}
+> = TaggedError("TimeoutError")<{
+	message: string;
+	operation: string;
+	timeoutMs: number;
+}>();
+
+const RateLimitErrorBase: TaggedErrorClass<
+	"RateLimitError",
+	{
+		message: string;
+		retryAfterSeconds?: number;
+	}
+> = TaggedError("RateLimitError")<{
+	message: string;
+	retryAfterSeconds?: number;
+}>();
+
+const NetworkErrorBase: TaggedErrorClass<
+	"NetworkError",
+	{
+		message: string;
+		context?: Record<string, unknown>;
+	}
+> = TaggedError("NetworkError")<{
+	message: string;
+	context?: Record<string, unknown>;
+}>();
+
+const InternalErrorBase: TaggedErrorClass<
+	"InternalError",
+	{
+		message: string;
+		context?: Record<string, unknown>;
+	}
+> = TaggedError("InternalError")<{
+	message: string;
+	context?: Record<string, unknown>;
+}>();
+
+const AuthErrorBase: TaggedErrorClass<
+	"AuthError",
+	{
+		message: string;
+		reason?: "missing" | "invalid" | "expired";
+	}
+> = TaggedError("AuthError")<{
+	message: string;
+	reason?: "missing" | "invalid" | "expired";
+}>();
+
+const CancelledErrorBase: TaggedErrorClass<
+	"CancelledError",
+	{
+		message: string;
+	}
+> = TaggedError("CancelledError")<{
+	message: string;
+}>();
+
 /**
  * Input validation failed.
  *
@@ -101,10 +224,7 @@ export function getStatusCode(category: ErrorCategory): number {
  * new ValidationError({ message: "Email format invalid", field: "email" });
  * ```
  */
-export class ValidationError extends TaggedError("ValidationError")<{
-	message: string;
-	field?: string;
-}>() {
+export class ValidationError extends ValidationErrorBase {
 	readonly category = "validation" as const;
 
 	exitCode(): number {
@@ -141,9 +261,7 @@ export class ValidationError extends TaggedError("ValidationError")<{
  *
  * @see ValidationError - For user input validation failures (HTTP 400)
  */
-export class AssertionError extends TaggedError("AssertionError")<{
-	message: string;
-}>() {
+export class AssertionError extends AssertionErrorBase {
 	readonly category = "internal" as const;
 
 	exitCode(): number {
@@ -163,11 +281,7 @@ export class AssertionError extends TaggedError("AssertionError")<{
  * new NotFoundError({ message: "note not found: abc123", resourceType: "note", resourceId: "abc123" });
  * ```
  */
-export class NotFoundError extends TaggedError("NotFoundError")<{
-	message: string;
-	resourceType: string;
-	resourceId: string;
-}>() {
+export class NotFoundError extends NotFoundErrorBase {
 	readonly category = "not_found" as const;
 
 	exitCode(): number {
@@ -187,10 +301,7 @@ export class NotFoundError extends TaggedError("NotFoundError")<{
  * new ConflictError({ message: "Resource was modified by another process" });
  * ```
  */
-export class ConflictError extends TaggedError("ConflictError")<{
-	message: string;
-	context?: Record<string, unknown>;
-}>() {
+export class ConflictError extends ConflictErrorBase {
 	readonly category = "conflict" as const;
 
 	exitCode(): number {
@@ -210,10 +321,7 @@ export class ConflictError extends TaggedError("ConflictError")<{
  * new PermissionError({ message: "Cannot delete read-only resource" });
  * ```
  */
-export class PermissionError extends TaggedError("PermissionError")<{
-	message: string;
-	context?: Record<string, unknown>;
-}>() {
+export class PermissionError extends PermissionErrorBase {
 	readonly category = "permission" as const;
 
 	exitCode(): number {
@@ -233,11 +341,7 @@ export class PermissionError extends TaggedError("PermissionError")<{
  * new TimeoutError({ message: "Database query timed out after 5000ms", operation: "Database query", timeoutMs: 5000 });
  * ```
  */
-export class TimeoutError extends TaggedError("TimeoutError")<{
-	message: string;
-	operation: string;
-	timeoutMs: number;
-}>() {
+export class TimeoutError extends TimeoutErrorBase {
 	readonly category = "timeout" as const;
 
 	exitCode(): number {
@@ -257,10 +361,7 @@ export class TimeoutError extends TaggedError("TimeoutError")<{
  * new RateLimitError({ message: "Rate limit exceeded, retry after 60s", retryAfterSeconds: 60 });
  * ```
  */
-export class RateLimitError extends TaggedError("RateLimitError")<{
-	message: string;
-	retryAfterSeconds?: number;
-}>() {
+export class RateLimitError extends RateLimitErrorBase {
 	readonly category = "rate_limit" as const;
 
 	exitCode(): number {
@@ -280,10 +381,7 @@ export class RateLimitError extends TaggedError("RateLimitError")<{
  * new NetworkError({ message: "Connection refused to api.example.com" });
  * ```
  */
-export class NetworkError extends TaggedError("NetworkError")<{
-	message: string;
-	context?: Record<string, unknown>;
-}>() {
+export class NetworkError extends NetworkErrorBase {
 	readonly category = "network" as const;
 
 	exitCode(): number {
@@ -303,10 +401,7 @@ export class NetworkError extends TaggedError("NetworkError")<{
  * new InternalError({ message: "Unexpected state in processor" });
  * ```
  */
-export class InternalError extends TaggedError("InternalError")<{
-	message: string;
-	context?: Record<string, unknown>;
-}>() {
+export class InternalError extends InternalErrorBase {
 	readonly category = "internal" as const;
 
 	exitCode(): number {
@@ -326,10 +421,7 @@ export class InternalError extends TaggedError("InternalError")<{
  * new AuthError({ message: "Invalid API key", reason: "invalid" });
  * ```
  */
-export class AuthError extends TaggedError("AuthError")<{
-	message: string;
-	reason?: "missing" | "invalid" | "expired";
-}>() {
+export class AuthError extends AuthErrorBase {
 	readonly category = "auth" as const;
 
 	exitCode(): number {
@@ -349,9 +441,7 @@ export class AuthError extends TaggedError("AuthError")<{
  * new CancelledError({ message: "Operation cancelled by user" });
  * ```
  */
-export class CancelledError extends TaggedError("CancelledError")<{
-	message: string;
-}>() {
+export class CancelledError extends CancelledErrorBase {
 	readonly category = "cancelled" as const;
 
 	exitCode(): number {

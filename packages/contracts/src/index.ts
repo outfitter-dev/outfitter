@@ -9,6 +9,7 @@
 
 // Re-export Result from better-result for convenience
 export { Result, TaggedError } from "better-result";
+export type { TaggedErrorClass } from "better-result";
 
 // Result utilities (extensions to better-result)
 export { combine2, combine3, orElse, unwrapOrElse } from "./result/index.js";

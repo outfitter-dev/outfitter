@@ -42,6 +42,7 @@ export type { Env } from "./env.js";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { TaggedErrorClass } from "@outfitter/contracts";
 import { NotFoundError, Result, TaggedError, ValidationError } from "@outfitter/contracts";
 import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
@@ -51,6 +52,20 @@ import type { ZodSchema } from "zod";
 // ============================================================================
 // Error Types
 // ============================================================================
+
+type ParseErrorFields = {
+	/** Human-readable error message describing the parse failure */
+	message: string;
+	/** Name of the file that failed to parse */
+	filename: string;
+	/** Line number where the error occurred (if available) */
+	line?: number;
+	/** Column number where the error occurred (if available) */
+	column?: number;
+};
+
+const ParseErrorBase: TaggedErrorClass<"ParseError", ParseErrorFields> =
+	TaggedError("ParseError")<ParseErrorFields>();
 
 /**
  * Error thrown when a configuration file cannot be parsed.
@@ -66,16 +81,7 @@ import type { ZodSchema } from "zod";
  * }
  * ```
  */
-export class ParseError extends TaggedError("ParseError")<{
-	/** Human-readable error message describing the parse failure */
-	message: string;
-	/** Name of the file that failed to parse */
-	filename: string;
-	/** Line number where the error occurred (if available) */
-	line?: number;
-	/** Column number where the error occurred (if available) */
-	column?: number;
-}>() {
+export class ParseError extends ParseErrorBase {
 	readonly category = "validation" as const;
 }
 
@@ -103,7 +109,9 @@ export class ParseError extends TaggedError("ParseError")<{
  * ```
  */
 export function getConfigDir(appName: string): string {
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const home = process.env["HOME"] ?? "";
 
 	const baseDir = xdgConfigHome ?? join(home, ".config");
@@ -130,7 +138,9 @@ export function getConfigDir(appName: string): string {
  * ```
  */
 export function getDataDir(appName: string): string {
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgDataHome = process.env["XDG_DATA_HOME"];
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const home = process.env["HOME"] ?? "";
 
 	const baseDir = xdgDataHome ?? join(home, ".local", "share");
@@ -157,7 +167,9 @@ export function getDataDir(appName: string): string {
  * ```
  */
 export function getCacheDir(appName: string): string {
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgCacheHome = process.env["XDG_CACHE_HOME"];
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const home = process.env["HOME"] ?? "";
 
 	const baseDir = xdgCacheHome ?? join(home, ".cache");
@@ -184,7 +196,9 @@ export function getCacheDir(appName: string): string {
  * ```
  */
 export function getStateDir(appName: string): string {
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgStateHome = process.env["XDG_STATE_HOME"];
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const home = process.env["HOME"] ?? "";
 
 	const baseDir = xdgStateHome ?? join(home, ".local", "state");
@@ -562,7 +576,9 @@ function findConfigFile(dir: string): string | undefined {
  * @internal
  */
 function getDefaultSearchPaths(appName: string): string[] {
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
 	const home = process.env["HOME"] ?? "";
 	const defaultConfigPath = join(home, ".config", appName);
 
