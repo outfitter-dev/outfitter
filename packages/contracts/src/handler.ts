@@ -4,12 +4,36 @@ import type { KitError } from "./errors.js";
 /**
  * Logger interface for handler context.
  * Implementations provided by @outfitter/logging.
+ *
+ * All log methods accept an optional context object that will be merged
+ * with any context inherited from parent loggers created via `child()`.
  */
 export interface Logger {
 	debug(message: string, context?: Record<string, unknown>): void;
 	info(message: string, context?: Record<string, unknown>): void;
 	warn(message: string, context?: Record<string, unknown>): void;
 	error(message: string, context?: Record<string, unknown>): void;
+
+	/**
+	 * Creates a child logger with additional context.
+	 *
+	 * Context from the child is merged with the parent's context,
+	 * with child context taking precedence for duplicate keys.
+	 * Child loggers are composable (can create nested children).
+	 *
+	 * @param context - Additional context to include in all log messages
+	 * @returns A new Logger instance with the merged context
+	 *
+	 * @example
+	 * ```typescript
+	 * const requestLogger = ctx.logger.child({ requestId: ctx.requestId });
+	 * requestLogger.info("Processing request"); // includes requestId
+	 *
+	 * const opLogger = requestLogger.child({ operation: "create" });
+	 * opLogger.debug("Starting"); // includes requestId + operation
+	 * ```
+	 */
+	child(context: Record<string, unknown>): Logger;
 }
 
 /**

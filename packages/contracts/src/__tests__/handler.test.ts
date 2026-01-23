@@ -4,9 +4,9 @@
  * Tests cover:
  * - Handler type (compile-time)
  * - HandlerContext interface (4 tests)
- * - Logger interface (4 tests)
+ * - Logger interface (6 tests)
  *
- * Total: 8 tests
+ * Total: 10 tests
  */
 import { describe, expect, it } from "bun:test";
 import { Result } from "better-result";
@@ -157,6 +157,29 @@ describe("Logger interface", () => {
 		logger.error("Test message");
 		logger.error("Test with context", { key: "value" });
 	});
+
+	it("has child method that creates derived logger with context", () => {
+		const logger = createMockLogger();
+		expect(typeof logger.child).toBe("function");
+
+		// Should accept context and return a Logger
+		const childLogger = logger.child({ requestId: "abc123" });
+		expect(typeof childLogger.debug).toBe("function");
+		expect(typeof childLogger.info).toBe("function");
+		expect(typeof childLogger.warn).toBe("function");
+		expect(typeof childLogger.error).toBe("function");
+		expect(typeof childLogger.child).toBe("function");
+	});
+
+	it("child logger is composable (can create nested children)", () => {
+		const logger = createMockLogger();
+		const child1 = logger.child({ service: "auth" });
+		const child2 = child1.child({ operation: "login" });
+
+		// Verify child loggers have correct interface
+		expect(typeof child2.debug).toBe("function");
+		expect(typeof child2.child).toBe("function");
+	});
 });
 
 // ============================================================================
@@ -164,10 +187,12 @@ describe("Logger interface", () => {
 // ============================================================================
 
 function createMockLogger(): Logger {
-	return {
+	const createLogger = (): Logger => ({
 		debug: (_message: string, _context?: Record<string, unknown>) => {},
 		info: (_message: string, _context?: Record<string, unknown>) => {},
 		warn: (_message: string, _context?: Record<string, unknown>) => {},
 		error: (_message: string, _context?: Record<string, unknown>) => {},
-	};
+		child: (_context: Record<string, unknown>): Logger => createLogger(),
+	});
+	return createLogger();
 }

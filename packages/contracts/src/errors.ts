@@ -120,17 +120,31 @@ export class ValidationError extends TaggedError("ValidationError")<{
  * Assertion failed (invariant violation).
  *
  * Used by assertion utilities that return Result types instead of throwing.
- * Categorized as validation since assertions check input/state validity.
+ * AssertionError indicates a programming bug — an invariant that should
+ * never be violated was broken. These are internal errors, not user input
+ * validation failures.
+ *
+ * **Category rationale**: Uses `internal` (not `validation`) because:
+ * - Assertions check **invariants** (programmer assumptions), not user input
+ * - A failed assertion means "this should be impossible if the code is correct"
+ * - User-facing validation uses {@link ValidationError} with helpful field info
+ * - HTTP 500 is correct: this is a server bug, not a client mistake
  *
  * @example
  * ```typescript
- * new AssertionError({ message: "Value is null or undefined" });
+ * // In domain logic after validation has passed
+ * const result = assertDefined(cachedValue, "Cache should always have value after init");
+ * if (result.isErr()) {
+ *   return result; // Propagate as internal error
+ * }
  * ```
+ *
+ * @see ValidationError - For user input validation failures (HTTP 400)
  */
 export class AssertionError extends TaggedError("AssertionError")<{
 	message: string;
 }>() {
-	readonly category = "validation" as const;
+	readonly category = "internal" as const;
 
 	exitCode(): number {
 		return getExitCode(this.category);
