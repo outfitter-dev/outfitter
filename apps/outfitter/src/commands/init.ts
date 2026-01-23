@@ -221,13 +221,21 @@ function readPackageInfo(targetDir: string): PackageInfo {
 		const bin = parsed["bin"];
 		let resolvedBin: string | undefined;
 		if (typeof bin === "string") {
-			if (resolvedName) {
-				resolvedBin = deriveBinName(resolvedName);
-			}
+			resolvedBin = resolvedName ? deriveBinName(resolvedName) : undefined;
 		} else if (typeof bin === "object" && bin !== null) {
-			const keys = Object.keys(bin as Record<string, unknown>);
+			const entries = Object.entries(bin as Record<string, unknown>).filter(
+				([, value]) => typeof value === "string",
+			);
+			const keys = entries.map(([key]) => key);
 			if (keys.length > 0) {
-				resolvedBin = keys[0];
+				const derived = resolvedName ? deriveBinName(resolvedName) : undefined;
+				if (derived && keys.includes(derived)) {
+					resolvedBin = derived;
+				} else if (resolvedName && keys.includes(resolvedName)) {
+					resolvedBin = resolvedName;
+				} else {
+					resolvedBin = keys[0];
+				}
 			}
 		}
 
