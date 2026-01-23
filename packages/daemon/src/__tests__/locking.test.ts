@@ -49,11 +49,20 @@ async function cleanupTestDir(dir: string): Promise<void> {
 
 /**
  * Get a PID that is guaranteed to not exist.
- * Uses a high PID number that's unlikely to be in use.
+ * Uses a quick scan for an ESRCH result from process.kill.
  */
 function getDeadPid(): number {
-	// PIDs are typically limited to values less than 2^22 on most systems
-	// Use a very high value that's almost certainly not in use
+	for (let candidate = 100000; candidate < 101000; candidate++) {
+		try {
+			process.kill(candidate, 0);
+		} catch (error) {
+			if (error instanceof Error && "code" in error && error.code === "ESRCH") {
+				return candidate;
+			}
+		}
+	}
+
+	// Fallback: high PID that's almost certainly not in use
 	return 999999;
 }
 
