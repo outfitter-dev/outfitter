@@ -8,6 +8,7 @@
  */
 
 import type { Result } from "@outfitter/contracts";
+import { unlink } from "node:fs/promises";
 import { LockError } from "./errors.js";
 
 // ============================================================================
@@ -54,9 +55,11 @@ export function isProcessAlive(pid: number): boolean {
 		// Signal 0 doesn't kill, just checks if process exists
 		process.kill(pid, 0);
 		return true;
-	} catch {
+	} catch (error) {
 		// ESRCH = no such process, EPERM = exists but no permission
-		// Both mean process exists or doesn't - EPERM means it exists
+		if (error instanceof Error && "code" in error && error.code === "EPERM") {
+			return true;
+		}
 		return false;
 	}
 }
@@ -211,9 +214,7 @@ export async function releaseDaemonLock(handle: LockHandle): Promise<void> {
 
 		// Only remove if PID matches (our lock)
 		if (filePid === pid) {
-			await Bun.write(lockPath, ""); // Clear file
-			// Note: Proper implementation would use unlink
-			// For now, clearing is a stub behavior
+			await unlink(lockPath);
 		}
 	} catch {
 		// Best effort - if we can't release, just return

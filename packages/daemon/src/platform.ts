@@ -140,8 +140,6 @@ export function getPidPath(toolName: string): string {
 /**
  * Get the directory containing daemon files for a tool.
  *
- * Creates the directory if it doesn't exist (on Unix platforms).
- *
  * @param toolName - Name of the tool (e.g., "waymark", "firewatch")
  * @returns Absolute path to the daemon directory
  *
