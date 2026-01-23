@@ -24,6 +24,9 @@ export {
 // Short ID generation
 export { shortId, isShortId, type ShortId, type ShortIdOptions } from "./short-id";
 
+// Deterministic hash ID generation
+export { hashId } from "./hash-id";
+
 // Type guards
 export {
 	isDefined,
