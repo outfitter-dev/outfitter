@@ -221,7 +221,7 @@ function readPackageInfo(targetDir: string): PackageInfo {
 		const bin = parsed["bin"];
 		let resolvedBin: string | undefined;
 		if (typeof bin === "string") {
-			resolvedBin = resolvedName ? deriveBinName(resolvedName) : undefined;
+			resolvedBin = bin.length > 0 ? bin : undefined;
 		} else if (typeof bin === "object" && bin !== null) {
 			const entries = Object.entries(bin as Record<string, unknown>).filter(
 				([, value]) => typeof value === "string",
