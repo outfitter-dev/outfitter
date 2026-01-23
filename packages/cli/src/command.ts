@@ -4,7 +4,58 @@
  * @packageDocumentation
  */
 
-import type { CommandBuilder } from "./types.js";
+import { Command } from "commander";
+import type { CommandBuilder, CommandFlags, CommandAction } from "./types.js";
+
+class CommandBuilderImpl implements CommandBuilder {
+	private readonly command: Command;
+
+	constructor(name: string) {
+		this.command = new Command(name);
+	}
+
+	description(text: string): this {
+		this.command.description(text);
+		return this;
+	}
+
+	option(flags: string, description: string, defaultValue?: unknown): this {
+		this.command.option(
+			flags,
+			description,
+			defaultValue as string | boolean | string[] | undefined,
+		);
+		return this;
+	}
+
+	requiredOption(flags: string, description: string, defaultValue?: unknown): this {
+		this.command.requiredOption(
+			flags,
+			description,
+			defaultValue as string | boolean | string[] | undefined,
+		);
+		return this;
+	}
+
+	alias(alias: string): this {
+		this.command.alias(alias);
+		return this;
+	}
+
+	action<TFlags extends CommandFlags = CommandFlags>(handler: CommandAction<TFlags>): this {
+		this.command.action(async (...args: unknown[]) => {
+			const command = args[args.length - 1] as Command;
+			const flags = command.opts() as TFlags;
+			const positional = command.args as string[];
+			await handler({ args: positional, flags, command });
+		});
+		return this;
+	}
+
+	build(): Command {
+		return this.command;
+	}
+}
 
 /**
  * Create a new command builder with the given name.
@@ -42,6 +93,6 @@ import type { CommandBuilder } from "./types.js";
  *   });
  * ```
  */
-export function command(_name: string): CommandBuilder {
-	throw new Error("command not implemented");
+export function command(name: string): CommandBuilder {
+	return new CommandBuilderImpl(name);
 }

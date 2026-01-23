@@ -4,7 +4,16 @@
  * @packageDocumentation
  */
 
-import type { CLI, CLIConfig } from "./types.js";
+import { Command } from "commander";
+import type { CLI, CLIConfig, CommandBuilder } from "./types.js";
+
+function isCommanderHelp(error: { code?: string }): boolean {
+	return (
+		error.code === "commander.helpDisplayed" ||
+		error.code === "commander.version" ||
+		error.code === "commander.help"
+	);
+}
 
 /**
  * Create a new CLI instance with the given configuration.
@@ -37,6 +46,54 @@ import type { CLI, CLIConfig } from "./types.js";
  * await cli.parse();
  * ```
  */
-export function createCLI(_config: CLIConfig): CLI {
-	throw new Error("createCLI not implemented");
+export function createCLI(config: CLIConfig): CLI {
+	const program = new Command();
+
+	program.name(config.name).version(config.version);
+	if (config.description) {
+		program.description(config.description);
+	}
+
+	const exit = config.onExit ?? ((code: number): never => process.exit(code));
+
+	program.exitOverride((error) => {
+		if (isCommanderHelp(error)) {
+			exit(0);
+		}
+
+		if (config.onError) {
+			config.onError(error);
+		}
+
+		const exitCode =
+			typeof error.exitCode === "number" && Number.isFinite(error.exitCode) ? error.exitCode : 1;
+		exit(exitCode);
+	});
+
+	const register = (builder: CommandBuilder): CLI => {
+		program.addCommand(builder.build());
+		return cli;
+	};
+
+	const parse = async (argv?: readonly string[]): Promise<void> => {
+		try {
+			await program.parseAsync(argv ?? process.argv);
+		} catch (error) {
+			const err = error instanceof Error ? error : new Error(String(error));
+			if (config.onError) {
+				config.onError(err);
+			}
+			const errorExitCode = (error as { exitCode?: number }).exitCode;
+			const exitCode = typeof errorExitCode === "number" ? errorExitCode : 1;
+			exit(exitCode);
+		}
+	};
+
+	const cli: CLI = {
+		program,
+		register,
+		parse,
+	};
+
+	return cli;
 }
