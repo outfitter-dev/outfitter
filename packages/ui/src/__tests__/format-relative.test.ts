@@ -225,5 +225,15 @@ describe("formatRelative()", () => {
 			const result = formatRelative("invalid-date");
 			expect(typeof result).toBe("string");
 		});
+
+		it("returns 'invalid date' for invalid Date objects", () => {
+			const result = formatRelative(new Date("invalid"));
+			expect(result).toBe("invalid date");
+		});
+
+		it("returns 'invalid date' for non-finite timestamps", () => {
+			expect(formatRelative(Number.NaN)).toBe("invalid date");
+			expect(formatRelative(Number.POSITIVE_INFINITY)).toBe("invalid date");
+		});
 	});
 });
