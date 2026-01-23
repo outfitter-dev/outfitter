@@ -1,0 +1,54 @@
+# {{projectName}}
+
+{{description}}
+
+MCP (Model Context Protocol) server for integration with AI assistants.
+
+## Installation
+
+```bash
+bun add {{projectName}}
+```
+
+## Usage with Claude Desktop
+
+Add to your Claude Desktop config:
+
+```json
+{
+  "mcpServers": {
+    "{{binName}}": {
+      "command": "{{binName}}"
+    }
+  }
+}
+```
+
+## Available Tools
+
+### hello
+
+Say hello to someone.
+
+**Parameters:**
+- `name` (string, optional): Name to greet. Default: "World"
+
+## Development
+
+```bash
+# Install dependencies
+bun install
+
+# Run in development
+bun run dev
+
+# Build
+bun run build
+
+# Run tests
+bun run test
+```
+
+## License
+
+MIT

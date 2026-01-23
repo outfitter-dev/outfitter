@@ -1,0 +1,38 @@
+{
+	"name": "{{projectName}}",
+	"version": "0.1.0",
+	"description": "{{description}}",
+	"type": "module",
+	"bin": {
+		"{{binName}}": "./dist/server.js"
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "bun build src/server.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
+		"dev": "bun --watch src/server.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test",
+		"lint": "biome check .",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.0.0",
+		"@outfitter/mcp": "^0.1.0",
+		"@outfitter/contracts": "^0.1.0",
+		"@outfitter/config": "^0.1.0",
+		"@outfitter/logging": "^0.1.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@types/bun": "^1.0.0",
+		"typescript": "^5.5.0"
+	},
+	"license": "MIT"
+}

@@ -1,0 +1,65 @@
+/**
+ * {{projectName}} - MCP server definition
+ */
+
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { createLogger } from "@outfitter/logging";
+
+const logger = createLogger({ name: "{{binName}}" });
+
+export function createMCPServer(): Server {
+	const server = new Server(
+		{
+			name: "{{binName}}",
+			version: "0.1.0",
+		},
+		{
+			capabilities: {
+				tools: {},
+			},
+		}
+	);
+
+	// List available tools
+	server.setRequestHandler(ListToolsRequestSchema, async () => ({
+		tools: [
+			{
+				name: "hello",
+				description: "Say hello to someone",
+				inputSchema: {
+					type: "object" as const,
+					properties: {
+						name: {
+							type: "string",
+							description: "Name to greet",
+							default: "World",
+						},
+					},
+				},
+			},
+		],
+	}));
+
+	// Handle tool calls
+	server.setRequestHandler(CallToolRequestSchema, async (request) => {
+		const { name, arguments: args } = request.params;
+
+		if (name === "hello") {
+			const greeting = args?.name ?? "World";
+			logger.info`Greeting ${greeting}`;
+			return {
+				content: [
+					{
+						type: "text" as const,
+						text: `Hello, ${greeting}!`,
+					},
+				],
+			};
+		}
+
+		throw new Error(`Unknown tool: ${name}`);
+	});
+
+	return server;
+}

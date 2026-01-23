@@ -1,0 +1,15 @@
+#!/usr/bin/env bun
+/**
+ * {{projectName}} MCP server entry point
+ */
+
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createMCPServer } from "./mcp.js";
+
+async function main() {
+	const server = createMCPServer();
+	const transport = new StdioServerTransport();
+	await server.connect(transport);
+}
+
+main().catch(console.error);
