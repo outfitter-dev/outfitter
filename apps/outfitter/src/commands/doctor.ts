@@ -118,28 +118,7 @@ export interface DoctorResult {
 // Version Comparison
 // =============================================================================
 
-/**
- * Compares two semantic version strings.
- * Returns true if `current` is >= `required`.
- */
-function isVersionSatisfied(current: string, required: string): boolean {
-	const parseVersion = (v: string): number[] => {
-		return v.split(".").map((n) => Number.parseInt(n, 10) || 0);
-	};
-
-	const currentParts = parseVersion(current);
-	const requiredParts = parseVersion(required);
-
-	for (let i = 0; i < Math.max(currentParts.length, requiredParts.length); i++) {
-		const curr = currentParts[i] ?? 0;
-		const req = requiredParts[i] ?? 0;
-
-		if (curr > req) return true;
-		if (curr < req) return false;
-	}
-
-	return true; // Equal versions
-}
+const MIN_BUN_VERSION = "1.3.6";
 
 // =============================================================================
 // Individual Checks
@@ -149,10 +128,10 @@ function isVersionSatisfied(current: string, required: string): boolean {
  * Checks the Bun version.
  */
 function checkBunVersion(): BunVersionCheck {
-	const required = "1.3.6";
+	const required = MIN_BUN_VERSION;
 	const current = Bun.version;
 
-	const passed = isVersionSatisfied(current, required);
+	const passed = Bun.semver.satisfies(current, `>=${required}`);
 
 	return {
 		passed,
