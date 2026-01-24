@@ -26,6 +26,51 @@ export {
 } from "./types.js";
 
 // ============================================================================
+// Connection Errors
+// ============================================================================
+
+export {
+	// Error classes
+	StaleSocketError,
+	ConnectionRefusedError,
+	ConnectionTimeoutError,
+	ProtocolError,
+	LockError,
+	// Union types
+	type DaemonConnectionError,
+} from "./errors.js";
+
+// ============================================================================
+// Platform
+// ============================================================================
+
+export {
+	// Platform detection
+	isUnixPlatform,
+	// Path resolution
+	getSocketPath,
+	getLockPath,
+	getPidPath,
+	getDaemonDir,
+} from "./platform.js";
+
+// ============================================================================
+// Locking
+// ============================================================================
+
+export {
+	// Types
+	type LockHandle,
+	// Lock operations
+	acquireDaemonLock,
+	releaseDaemonLock,
+	// Liveness checks
+	isProcessAlive,
+	isDaemonAlive,
+	readLockPid,
+} from "./locking.js";
+
+// ============================================================================
 // Lifecycle
 // ============================================================================
 
