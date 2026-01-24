@@ -21,6 +21,12 @@
 				"default": "./dist/types.js"
 			}
 		},
+		"./server": {
+			"import": {
+				"types": "./dist/server.d.ts",
+				"default": "./dist/server.js"
+			}
+		},
 		"./package.json": "./package.json"
 	},
 	"sideEffects": false,

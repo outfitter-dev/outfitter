@@ -163,12 +163,13 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 			logger.debug("Registering tool", { name: tool.name });
 
 			const jsonSchema = zodToJsonSchema(tool.inputSchema);
+			const handler: StoredTool["handler"] = (input, ctx) => tool.handler(input as TInput, ctx);
 
 			tools.set(tool.name, {
 				name: tool.name,
 				description: tool.description,
 				inputSchema: jsonSchema,
-				handler: tool.handler as StoredTool["handler"],
+				handler,
 				zodSchema: tool.inputSchema,
 			});
 
