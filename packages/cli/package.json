@@ -58,6 +58,7 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
+		"@clack/prompts": "^0.11.0",
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/types": "workspace:*",
 		"better-result": "^2.5.1",
