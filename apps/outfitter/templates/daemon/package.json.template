@@ -1,5 +1,5 @@
 {
-	"name": "{{projectName}}",
+	"name": "{{packageName}}",
 	"version": "0.1.0",
 	"description": "{{description}}",
 	"type": "module",
@@ -18,9 +18,12 @@
 	"scripts": {
 		"build": "bun build src/cli.ts src/daemon.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
 		"dev": "bun --watch src/daemon.ts -- --foreground",
+		"dev:daemon": "bun --watch src/daemon.ts -- --foreground",
 		"typecheck": "tsc --noEmit",
 		"test": "bun test",
+		"test:watch": "bun test --watch",
 		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
 		"format": "biome format --write ."
 	},
 	"dependencies": {
