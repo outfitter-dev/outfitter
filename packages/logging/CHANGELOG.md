@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to this package will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2026-01-22
+
+### Added
+
+- `createLogger()` - Create configured logger instances with level filtering, sinks, and redaction
+- `createChildLogger()` - Create child loggers with inherited configuration and merged context
+- `configureRedaction()` - Configure global redaction patterns and keys
+- `flush()` - Flush all pending log writes before process exit
+- `createJsonFormatter()` - JSON output formatter for log aggregation
+- `createPrettyFormatter()` - Human-readable formatter with optional ANSI colors
+- `createConsoleSink()` - Console output with stdout/stderr routing by level
+- `createFileSink()` - File output with buffered writes
+- Automatic redaction of sensitive data (password, token, secret, apikey)
+- Support for custom redaction patterns (regex) and keys
+- Recursive redaction for nested objects
+- Error object serialization with name, message, and stack trace
+- Runtime level changes via `setLevel()`
+- Dynamic sink addition via `addSink()`
