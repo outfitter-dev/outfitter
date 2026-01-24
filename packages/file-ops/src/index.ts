@@ -24,51 +24,92 @@ import { dirname, isAbsolute, join, normalize, relative, resolve, sep } from "no
 
 /**
  * Options for workspace root detection.
+ *
+ * Configure which marker files trigger workspace detection and where to stop searching.
  */
 export interface FindWorkspaceRootOptions {
-	/** Marker files/directories to search for (default: [".git", "package.json"]) */
+	/**
+	 * Marker files/directories to search for.
+	 * Search stops when any marker is found at a directory level.
+	 * @defaultValue [".git", "package.json"]
+	 */
 	markers?: string[];
-	/** Stop searching at this directory (default: filesystem root) */
+	/**
+	 * Stop searching at this directory boundary.
+	 * The search will not continue above this path.
+	 * @defaultValue filesystem root
+	 */
 	stopAt?: string;
 }
 
 /**
  * Options for glob operations.
+ *
+ * Configure base directory, exclusion patterns, and file matching behavior.
  */
 export interface GlobOptions {
-	/** Base directory for glob matching */
+	/**
+	 * Base directory for glob matching.
+	 * All returned paths will be absolute paths within this directory.
+	 * @defaultValue process.cwd()
+	 */
 	cwd?: string;
-	/** Patterns to exclude from results */
+	/**
+	 * Patterns to exclude from results.
+	 * Supports negation with "!" prefix to re-include previously excluded files.
+	 */
 	ignore?: string[];
-	/** Follow symlinks (default: false) */
+	/**
+	 * Follow symbolic links when scanning directories.
+	 * @defaultValue false
+	 */
 	followSymlinks?: boolean;
-	/** Include dot files (default: false) */
+	/**
+	 * Include files and directories starting with a dot in results.
+	 * @defaultValue false
+	 */
 	dot?: boolean;
 }
 
 /**
  * Options for atomic write operations.
+ *
+ * Configure directory creation, permission handling, and file modes.
  */
 export interface AtomicWriteOptions {
-	/** Create parent directories if they don't exist (default: true) */
+	/**
+	 * Create parent directories if they do not exist.
+	 * Uses recursive mkdir when enabled.
+	 * @defaultValue true
+	 */
 	createParentDirs?: boolean;
-	/** Preserve file permissions from existing file (default: false) */
+	/**
+	 * Preserve file permissions from existing file.
+	 * If the target file does not exist, falls back to the mode option.
+	 * @defaultValue false
+	 */
 	preservePermissions?: boolean;
-	/** File mode for new files (default: 0o644) */
+	/**
+	 * Unix file mode for newly created files.
+	 * @defaultValue 0o644
+	 */
 	mode?: number;
 }
 
 /**
  * Represents an acquired file lock.
+ *
+ * Contains metadata about the lock including the owning process ID and
+ * acquisition timestamp. Used with acquireLock and releaseLock functions.
  */
 export interface FileLock {
-	/** Path to the locked file */
+	/** Absolute path to the locked file */
 	path: string;
-	/** Path to the lock file */
+	/** Path to the .lock file that indicates the lock */
 	lockPath: string;
-	/** Process ID that holds the lock */
+	/** Process ID of the lock holder */
 	pid: number;
-	/** Timestamp when lock was acquired */
+	/** Unix timestamp (milliseconds) when the lock was acquired */
 	timestamp: number;
 }
 
@@ -90,11 +131,15 @@ async function markerExistsAt(dir: string, marker: string): Promise<boolean> {
 }
 
 /**
- * Finds the workspace root by searching for marker files/directories.
+ * Finds the workspace root by searching upward for marker files/directories.
  *
- * @param startPath - Path to start searching from
- * @param options - Search options
- * @returns Result containing workspace root path or NotFoundError
+ * Searches from startPath up to the filesystem root (or stopAt if specified),
+ * returning the first directory containing any of the marker files.
+ * Default markers are ".git" and "package.json".
+ *
+ * @param startPath - Path to start searching from (can be file or directory)
+ * @param options - Search options including custom markers and stop boundary
+ * @returns Result containing absolute workspace root path, or NotFoundError if no markers found
  */
 export async function findWorkspaceRoot(
 	startPath: string,
@@ -145,8 +190,11 @@ export async function findWorkspaceRoot(
 /**
  * Gets the path relative to the workspace root.
  *
- * @param absolutePath - Absolute path to convert
- * @returns Result containing relative path or error
+ * Finds the workspace root from the file's directory and returns the
+ * path relative to that root. Uses forward slashes for cross-platform consistency.
+ *
+ * @param absolutePath - Absolute path to convert to workspace-relative
+ * @returns Result containing relative path with forward slashes, or NotFoundError if no workspace found
  */
 export async function getRelativePath(
 	absolutePath: string,
@@ -165,9 +213,12 @@ export async function getRelativePath(
 /**
  * Checks if a path is inside a workspace directory.
  *
- * @param path - Path to check
- * @param workspaceRoot - Workspace root directory
- * @returns True if path is inside workspace
+ * Resolves both paths to absolute form and checks if path is equal to
+ * or a descendant of workspaceRoot. Does not follow symlinks.
+ *
+ * @param path - Path to check (can be relative or absolute)
+ * @param workspaceRoot - Workspace root directory to check against
+ * @returns True if path is inside or equal to workspace root, false otherwise
  */
 export async function isInsideWorkspace(path: string, workspaceRoot: string): Promise<boolean> {
 	const resolvedPath = resolve(path);
@@ -182,11 +233,20 @@ export async function isInsideWorkspace(path: string, workspaceRoot: string): Pr
 // ============================================================================
 
 /**
- * Validates and secures a path, preventing path traversal attacks.
+ * Validates and secures a user-provided path, preventing path traversal attacks.
  *
- * @param path - Path to validate
+ * Security checks performed:
+ * - Null bytes are rejected immediately
+ * - Path traversal sequences (..) are rejected
+ * - Absolute paths are rejected
+ * - Final resolved path is verified to remain within basePath (defense in depth)
+ *
+ * Always use this function when handling user-provided paths instead of
+ * directly using path.join with untrusted input.
+ *
+ * @param path - User-provided path to validate (must be relative)
  * @param basePath - Base directory to resolve against
- * @returns Result containing resolved safe path or ValidationError
+ * @returns Result containing resolved absolute safe path, or ValidationError if path is unsafe
  */
 export function securePath(
 	path: string,
@@ -250,9 +310,12 @@ export function securePath(
 /**
  * Checks if a path is safe (no traversal, valid characters).
  *
- * @param path - Path to check
+ * Convenience wrapper around securePath that returns a boolean.
+ * Use this for quick validation; use securePath when you need the resolved path.
+ *
+ * @param path - Path to check (should be relative)
  * @param basePath - Base directory to resolve against
- * @returns True if path is safe
+ * @returns True if path passes all security checks, false otherwise
  */
 export function isPathSafe(path: string, basePath: string): boolean {
 	return Result.isOk(securePath(path, basePath));
@@ -261,9 +324,17 @@ export function isPathSafe(path: string, basePath: string): boolean {
 /**
  * Safely resolves path segments into an absolute path.
  *
- * @param basePath - Base directory
- * @param segments - Path segments to join
- * @returns Result containing resolved path or ValidationError
+ * Validates each segment for security issues before joining. Use this
+ * instead of path.join when any segment may come from user input.
+ *
+ * Security checks per segment:
+ * - Null bytes are rejected
+ * - Path traversal (..) is rejected
+ * - Absolute path segments are rejected
+ *
+ * @param basePath - Base directory (must be absolute)
+ * @param segments - Path segments to join (each validated individually)
+ * @returns Result containing resolved absolute path, or ValidationError if any segment is unsafe
  */
 export function resolveSafePath(
 	basePath: string,
@@ -385,9 +456,18 @@ function createIgnoreFilter(
 /**
  * Finds files matching a glob pattern.
  *
+ * Uses Bun.Glob internally for fast pattern matching. Returns absolute paths.
+ * Supports standard glob syntax including recursive matching, alternation, and character classes.
+ *
+ * Pattern syntax:
+ * - Single asterisk matches any characters except path separator
+ * - Double asterisk matches any characters including path separator (recursive)
+ * - Curly braces for alternation
+ * - Square brackets for character classes
+ *
  * @param pattern - Glob pattern to match
- * @param options - Glob options
- * @returns Result containing array of matching file paths
+ * @param options - Glob options including cwd, ignore patterns, and file type filters
+ * @returns Result containing array of absolute file paths, or InternalError on failure
  */
 export async function glob(
 	pattern: string,
@@ -427,9 +507,13 @@ export async function glob(
 /**
  * Synchronous version of glob.
  *
+ * Use the async glob function when possible. This synchronous version
+ * blocks the event loop and should only be used in initialization code
+ * or synchronous contexts.
+ *
  * @param pattern - Glob pattern to match
- * @param options - Glob options
- * @returns Result containing array of matching file paths
+ * @param options - Glob options including cwd, ignore patterns, and file type filters
+ * @returns Result containing array of absolute file paths, or InternalError on failure
  */
 export function globSync(
 	pattern: string,
@@ -473,8 +557,16 @@ export function globSync(
 /**
  * Acquires an advisory lock on a file.
  *
- * @param path - Path to the file to lock
- * @returns Result containing FileLock or ConflictError if already locked
+ * Creates a .lock file next to the target file with lock metadata (PID, timestamp).
+ * Uses atomic file creation (wx flag) to prevent race conditions.
+ *
+ * Important: This is advisory locking. All processes must cooperate by using
+ * these locking APIs. The filesystem does not enforce the lock.
+ *
+ * Prefer using withLock for automatic lock release.
+ *
+ * @param path - Absolute path to the file to lock
+ * @returns Result containing FileLock on success, or ConflictError if already locked
  */
 export async function acquireLock(
 	path: string,
@@ -522,10 +614,13 @@ export async function acquireLock(
 }
 
 /**
- * Releases a file lock.
+ * Releases a file lock by removing the .lock file.
  *
- * @param lock - Lock to release
- * @returns Result indicating success or error
+ * Should only be called with a lock obtained from acquireLock.
+ * Prefer using withLock for automatic lock management.
+ *
+ * @param lock - Lock object returned from acquireLock
+ * @returns Result indicating success, or InternalError if lock file cannot be removed
  */
 export async function releaseLock(
 	lock: FileLock,
@@ -543,12 +638,18 @@ export async function releaseLock(
 }
 
 /**
- * Executes a callback while holding a lock on a file.
- * Lock is automatically released after callback completes (success or error).
+ * Executes a callback while holding an exclusive lock on a file.
  *
- * @param path - Path to the file to lock
- * @param callback - Callback to execute while holding lock
- * @returns Result containing callback return value or error
+ * Lock is automatically released after callback completes, whether it
+ * succeeds or throws an error. This is the recommended way to use file locking.
+ *
+ * Uses advisory file locking via .lock files. The lock is NOT enforced
+ * by the filesystem - all processes must cooperate by using this API.
+ *
+ * @typeParam T - Return type of the callback
+ * @param path - Absolute path to the file to lock
+ * @param callback - Async callback to execute while holding lock
+ * @returns Result containing callback return value, ConflictError if locked, or InternalError on failure
  */
 export async function withLock<T>(
 	path: string,
@@ -592,8 +693,11 @@ export async function withLock<T>(
 /**
  * Checks if a file is currently locked.
  *
- * @param path - Path to check
- * @returns True if file is locked
+ * Checks for the existence of a .lock file. Does not verify if the
+ * process holding the lock is still running (no stale lock detection).
+ *
+ * @param path - Absolute path to check
+ * @returns True if a lock file exists, false otherwise
  */
 export async function isLocked(path: string): Promise<boolean> {
 	const lockPath = `${path}.lock`;
@@ -605,12 +709,21 @@ export async function isLocked(path: string): Promise<boolean> {
 // ============================================================================
 
 /**
- * Writes content to a file atomically (write to temp, then rename).
+ * Writes content to a file atomically using temp-file-then-rename strategy.
  *
- * @param path - Target file path
- * @param content - Content to write
- * @param options - Write options
- * @returns Result indicating success or error
+ * How it works:
+ * 1. Creates a unique temp file in the same directory
+ * 2. Writes content to temp file
+ * 3. Renames temp file to target (atomic on most filesystems)
+ * 4. Cleans up temp file on failure
+ *
+ * This prevents partial writes and file corruption. The file either
+ * contains the old content or the new content, never a partial state.
+ *
+ * @param path - Absolute path to target file
+ * @param content - String content to write
+ * @param options - Write options including directory creation and permission handling
+ * @returns Result indicating success, or InternalError on failure
  */
 export async function atomicWrite(
 	path: string,
@@ -666,10 +779,14 @@ export async function atomicWrite(
 /**
  * Writes JSON data to a file atomically.
  *
- * @param path - Target file path
- * @param data - Data to serialize and write
- * @param options - Write options
- * @returns Result indicating success or error
+ * Serializes data to JSON and writes using atomicWrite.
+ * Returns ValidationError if serialization fails.
+ *
+ * @typeParam T - Type of data to serialize
+ * @param path - Absolute path to target file
+ * @param data - Data to serialize and write (must be JSON-serializable)
+ * @param options - Write options including directory creation and permission handling
+ * @returns Result indicating success, ValidationError if serialization fails, or InternalError on write failure
  */
 export async function atomicWriteJson<T>(
 	path: string,
