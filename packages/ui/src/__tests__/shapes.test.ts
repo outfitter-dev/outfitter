@@ -342,12 +342,13 @@ describe("Standalone renderers", () => {
 		// Ensure existing renderers still work standalone
 		const tableResult = renderTable([{ a: 1 }]);
 		const listResult = renderList(["item"]);
-		const treeResult = renderTree({ root: null });
+		const treeResult = renderTree({ root: { child: null } });
 		const jsonResult = renderJson({ key: "value" });
 
 		expect(tableResult).toContain("1");
 		expect(listResult).toContain("item");
 		expect(treeResult).toContain("root");
+		expect(treeResult).toContain("child");
 		expect(jsonResult).toContain("key");
 	});
 });
