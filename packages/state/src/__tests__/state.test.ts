@@ -52,6 +52,21 @@ function cleanupTmpDir(dir: string): void {
 	}
 }
 
+const base64Encoder = new TextEncoder();
+
+function toBase64(value: string): string {
+	const bytes = base64Encoder.encode(value);
+	let binary = "";
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+	return btoa(binary);
+}
+
+function toBase64Url(value: string): string {
+	return toBase64(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 // ============================================================================
 // 1. Cursor Creation (6 tests)
 // ============================================================================
@@ -666,7 +681,7 @@ describe("Cursor Encoding", () => {
 	it("decodeCursor returns ValidationError for invalid JSON", () => {
 		// Valid base64 but not valid JSON
 		// "not json" in URL-safe base64
-		const invalidJson = Buffer.from("not json").toString("base64url");
+		const invalidJson = toBase64Url("not json");
 		const result = decodeCursor(invalidJson);
 
 		expect(Result.isError(result)).toBe(true);
@@ -678,7 +693,7 @@ describe("Cursor Encoding", () => {
 	it("decodeCursor returns ValidationError for missing required fields", () => {
 		// Valid JSON but missing required cursor fields
 		const incompleteData = { position: 10 }; // missing id, createdAt
-		const encoded = Buffer.from(JSON.stringify(incompleteData)).toString("base64url");
+		const encoded = toBase64Url(JSON.stringify(incompleteData));
 		const result = decodeCursor(encoded);
 
 		expect(Result.isError(result)).toBe(true);
@@ -693,7 +708,7 @@ describe("Cursor Encoding", () => {
 			position: -1,
 			createdAt: Date.now(),
 		};
-		const encoded = Buffer.from(JSON.stringify(invalidData)).toString("base64url");
+		const encoded = toBase64Url(JSON.stringify(invalidData));
 		const result = decodeCursor(encoded);
 
 		expect(Result.isError(result)).toBe(true);

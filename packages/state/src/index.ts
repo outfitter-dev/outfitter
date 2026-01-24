@@ -377,6 +377,33 @@ function toBase64Url(base64: string): string {
 	return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+const base64Encoder = new TextEncoder();
+const base64Decoder = new TextDecoder();
+
+/**
+ * Converts UTF-8 text to standard base64.
+ */
+function toBase64(value: string): string {
+	const bytes = base64Encoder.encode(value);
+	let binary = "";
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+	return btoa(binary);
+}
+
+/**
+ * Converts standard base64 to UTF-8 text.
+ */
+function fromBase64(base64: string): string {
+	const binary = atob(base64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i += 1) {
+		bytes[i] = binary.charCodeAt(i);
+	}
+	return base64Decoder.decode(bytes);
+}
+
 /**
  * Converts URL-safe base64 to standard base64.
  * Replaces - with +, _ with /, and adds padding if needed.
@@ -413,7 +440,7 @@ function fromBase64Url(base64Url: string): string {
 export function encodeCursor(cursor: Cursor): string {
 	const json = JSON.stringify(cursor);
 	// Encode to standard base64, then convert to URL-safe
-	const base64 = Buffer.from(json).toString("base64");
+	const base64 = toBase64(json);
 	return toBase64Url(base64);
 }
 
@@ -448,7 +475,7 @@ export function decodeCursor(
 	let json: string;
 	try {
 		const base64 = fromBase64Url(encoded);
-		json = Buffer.from(base64, "base64").toString("utf-8");
+		json = fromBase64(base64);
 	} catch {
 		return Result.err(
 			new ValidationError({
