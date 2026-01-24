@@ -3,10 +3,10 @@
  *
  * Tests cover:
  * - ErrorCategory type (2 tests)
- * - BaseKitError / Error Classes (8 + 20 tests)
+ * - BaseKitError / Error Classes (8 + 26 tests, including AssertionError)
  * - Exit/Status Code Maps (6 tests)
  *
- * Total: 36 tests
+ * Total: 42 tests
  */
 import { describe, expect, it } from "bun:test";
 import {
@@ -16,6 +16,7 @@ import {
 	getExitCode,
 	getStatusCode,
 	ValidationError,
+	AssertionError,
 	NotFoundError,
 	ConflictError,
 	PermissionError,
@@ -167,6 +168,42 @@ describe("ValidationError", () => {
 		const error = new ValidationError({ message: "Invalid input" });
 		expect(error.statusCode()).toBe(statusCodeMap.validation);
 		expect(error.statusCode()).toBe(400);
+	});
+});
+
+describe("AssertionError", () => {
+	it("extends TaggedError", () => {
+		const error = new AssertionError({ message: "Invariant violated" });
+		expect(error._tag).toBeDefined();
+	});
+
+	it("has correct _tag", () => {
+		const error = new AssertionError({ message: "Invariant violated" });
+		expect(error._tag).toBe("AssertionError");
+	});
+
+	it("has category 'internal' (programming bugs, not user input)", () => {
+		// AssertionError indicates invariant violations — programming errors
+		// These are internal issues, not user input validation failures
+		const error = new AssertionError({ message: "Invariant violated" });
+		expect(error.category).toBe("internal");
+	});
+
+	it("exposes message property", () => {
+		const error = new AssertionError({ message: "Value must be non-null" });
+		expect(error.message).toBe("Value must be non-null");
+	});
+
+	it("exitCode() returns internal category exit code", () => {
+		const error = new AssertionError({ message: "Invariant violated" });
+		expect(error.exitCode()).toBe(exitCodeMap.internal);
+		expect(error.exitCode()).toBe(8);
+	});
+
+	it("statusCode() returns internal category HTTP code", () => {
+		const error = new AssertionError({ message: "Invariant violated" });
+		expect(error.statusCode()).toBe(statusCodeMap.internal);
+		expect(error.statusCode()).toBe(500);
 	});
 });
 
