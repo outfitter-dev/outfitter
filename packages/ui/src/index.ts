@@ -418,6 +418,52 @@ const ANSI = {
 // Terminal Detection
 // ============================================================================
 
+function getEnvValue(key: "NO_COLOR" | "FORCE_COLOR"): string | undefined {
+	return process.env[key];
+}
+
+function hasNoColorEnv(): boolean {
+	return getEnvValue("NO_COLOR") !== undefined;
+}
+
+function resolveForceColorEnv(): boolean | undefined {
+	const value = getEnvValue("FORCE_COLOR");
+	if (value === undefined) {
+		return undefined;
+	}
+	if (value === "") {
+		return true;
+	}
+	const numeric = Number(value);
+	if (!Number.isNaN(numeric)) {
+		return numeric > 0;
+	}
+	return true;
+}
+
+function resolveColorEnv(options?: { forceColorFirst?: boolean }): boolean | undefined {
+	const forced = resolveForceColorEnv();
+	const noColor = hasNoColorEnv();
+
+	if (options?.forceColorFirst) {
+		if (forced !== undefined) {
+			return forced;
+		}
+		if (noColor) {
+			return false;
+		}
+	} else {
+		if (noColor) {
+			return false;
+		}
+		if (forced !== undefined) {
+			return forced;
+		}
+	}
+
+	return undefined;
+}
+
 /**
  * Checks if the current environment supports ANSI colors.
  *
@@ -443,25 +489,9 @@ const ANSI = {
  * ```
  */
 export function supportsColor(options?: TerminalOptions): boolean {
-	// NO_COLOR takes priority (per https://no-color.org/)
-	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["NO_COLOR"] !== undefined) {
-		return false;
-	}
-
-	// FORCE_COLOR enables colors if NO_COLOR is not set
-	// Accept numeric levels: 0 disables, 1+ enables
-	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["FORCE_COLOR"] !== undefined) {
-		const value = process.env["FORCE_COLOR"];
-		if (value === "") {
-			return true;
-		}
-		const numeric = Number(value);
-		if (!Number.isNaN(numeric)) {
-			return numeric > 0;
-		}
-		return true;
+	const env = resolveColorEnv();
+	if (env !== undefined) {
+		return env;
 	}
 
 	// Check isTTY option if provided
@@ -620,42 +650,28 @@ export function createTheme(): Theme {
  * const status = `${tokens.info}Status:${reset} ${tokens.success}OK${reset}`;
  * ```
  */
-export function createTokens(options?: TokenOptions): Tokens {
-	// Determine if colors should be enabled
-	let colorEnabled: boolean;
-
+function resolveTokenColorEnabled(options?: TokenOptions): boolean {
 	// colorLevel: 0 always disables colors
 	if (options?.colorLevel === 0) {
-		colorEnabled = false;
+		return false;
 	}
 	// forceColor option takes precedence over environment
-	else if (options?.forceColor === true) {
-		colorEnabled = true;
+	if (options?.forceColor === true) {
+		return true;
 	}
-	// FORCE_COLOR env takes precedence over NO_COLOR
-	// Supports FORCE_COLOR=1, FORCE_COLOR=2, FORCE_COLOR=3 (common for color levels)
-	else if (process.env["FORCE_COLOR"] !== undefined) {
-		const value = process.env["FORCE_COLOR"];
-		if (value === "") {
-			colorEnabled = true;
-		} else {
-			const numeric = Number(value);
-			colorEnabled = Number.isNaN(numeric) ? true : numeric > 0;
-		}
+	// Explicit color level overrides environment
+	if (options?.colorLevel !== undefined) {
+		return options.colorLevel > 0;
 	}
-	// NO_COLOR env disables colors
-	// Per no-color.org spec, any value disables colors
-	else if (process.env["NO_COLOR"] !== undefined) {
-		colorEnabled = false;
+	const env = resolveColorEnv({ forceColorFirst: true });
+	if (env !== undefined) {
+		return env;
 	}
-	// colorLevel 1-3 enables colors
-	else if (options?.colorLevel !== undefined && options.colorLevel > 0) {
-		colorEnabled = true;
-	}
-	// Fall back to TTY detection
-	else {
-		colorEnabled = process.stdout.isTTY ?? false;
-	}
+	return process.stdout.isTTY ?? false;
+}
+
+export function createTokens(options?: TokenOptions): Tokens {
+	const colorEnabled = resolveTokenColorEnabled(options);
 
 	// Return empty strings when colors are disabled
 	if (!colorEnabled) {
@@ -1676,7 +1692,7 @@ export function render(shape: Shape, options?: RenderOptions): string {
 	// Auto-selection based on shape type
 	if (isCollection(shape)) {
 		// Check if items are objects (use table) or primitives (use list)
-		const hasObjectItems = shape.items.length > 0 && shape.items.every(isPlainObject);
+		const hasObjectItems = shape.items.every(isPlainObject);
 
 		if (hasObjectItems) {
 			const items = shape.items as Array<Record<string, unknown>>;
