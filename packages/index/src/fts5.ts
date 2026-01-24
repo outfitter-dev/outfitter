@@ -36,6 +36,16 @@ const DEFAULT_LIMIT = 25;
 /** Default offset for search results */
 const DEFAULT_OFFSET = 0;
 
+/** Allowed tokenizer values for SQL interpolation */
+const VALID_TOKENIZERS: Record<TokenizerType, true> = {
+	unicode61: true,
+	porter: true,
+	trigram: true,
+};
+
+/** SQLite identifier rules for table names (prevent injection) */
+const TABLE_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
 // ============================================================================
 // Storage Error Factory
 // ============================================================================
@@ -49,6 +59,19 @@ function createStorageError(message: string, cause?: unknown): StorageError {
 		message,
 		cause,
 	};
+}
+
+function assertValidTableName(tableName: string): void {
+	if (!TABLE_NAME_PATTERN.test(tableName)) {
+		throw new Error(`Invalid table name: ${tableName}`);
+	}
+}
+
+function assertValidTokenizer(tokenizer: string): TokenizerType {
+	if (!Object.hasOwn(VALID_TOKENIZERS, tokenizer)) {
+		throw new Error(`Invalid tokenizer: ${tokenizer}`);
+	}
+	return tokenizer as TokenizerType;
 }
 
 // ============================================================================
@@ -96,7 +119,9 @@ function createStorageError(message: string, cause?: unknown): StorageError {
  */
 export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
 	const tableName = options.tableName ?? DEFAULT_TABLE_NAME;
-	const tokenizer = options.tokenizer ?? DEFAULT_TOKENIZER;
+	assertValidTableName(tableName);
+
+	const tokenizer = assertValidTokenizer(options.tokenizer ?? DEFAULT_TOKENIZER);
 
 	// Ensure parent directory exists
 	const dir = dirname(options.path);

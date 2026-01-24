@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Database } from "bun:sqlite";
 import { Result } from "@outfitter/contracts";
-import { createIndex, type Index, type IndexDocument } from "../index.js";
+import { createIndex, type Index, type IndexDocument, type TokenizerType } from "../index.js";
 
 // ============================================================================
 // Test Utilities
@@ -108,6 +108,20 @@ describe("Index Creation", () => {
 		db.close();
 
 		expect(sql?.sql).toContain("tokenize='porter'");
+	});
+
+	it("createIndex rejects invalid table names", () => {
+		const dbPath = join(tmpDir, "test.db");
+
+		expect(() => createIndex({ path: dbPath, tableName: "docs; DROP TABLE users;" })).toThrow();
+	});
+
+	it("createIndex rejects invalid tokenizer values", () => {
+		const dbPath = join(tmpDir, "test.db");
+
+		expect(() =>
+			createIndex({ path: dbPath, tokenizer: "bad-tokenizer" as unknown as TokenizerType }),
+		).toThrow();
 	});
 
 	it("createIndex enables WAL mode for better concurrency", () => {
@@ -231,14 +245,28 @@ describe("Document Operations", () => {
 		// First add some valid docs
 		await index.addMany([{ id: "valid-1", content: "Valid content" }]);
 
-		// Verify initial state
+		const invalidDocs: IndexDocument[] = [
+			{ id: "valid-2", content: "Second content" },
+			// JSON.stringify will throw on BigInt
+			{
+				id: "invalid-1",
+				content: "Bad content",
+				metadata: { size: BigInt(1) } as unknown as Record<string, unknown>,
+			},
+		];
+
+		const result = await index.addMany(invalidDocs);
+
+		expect(Result.isError(result)).toBe(true);
+
+		// Verify the transaction rolled back (no new docs)
 		const db = new Database(dbPath);
-		const initialCount = db.query("SELECT COUNT(*) as count FROM documents").get() as {
-			count: number;
-		};
+		const count = db.query("SELECT COUNT(*) as count FROM documents").get() as { count: number };
+		const validRow = db.query("SELECT id FROM documents WHERE id = ?").get("valid-2");
 		db.close();
 
-		expect(initialCount.count).toBe(1);
+		expect(count.count).toBe(1);
+		expect(validRow).toBeNull();
 	});
 
 	it("remove() deletes a document from the index", async () => {
@@ -591,7 +619,7 @@ describe("Resource Management", () => {
 		expect(Result.isError(result)).toBe(true);
 	});
 
-	it("WAL files are present during active connection", () => {
+	it("WAL files are present during active connection", async () => {
 		const dbPath = join(tmpDir, "test.db");
 		const index = createIndex({ path: dbPath });
 
@@ -599,7 +627,7 @@ describe("Resource Management", () => {
 		const walPath = `${dbPath}-wal`;
 
 		// Write something to trigger WAL file creation
-		index.add({ id: "wal-test", content: "WAL test" });
+		await index.add({ id: "wal-test", content: "WAL test" });
 
 		// WAL file should exist during active connection
 		expect(existsSync(walPath)).toBe(true);
