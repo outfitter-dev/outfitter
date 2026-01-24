@@ -418,6 +418,29 @@ const ANSI = {
 // Terminal Detection
 // ============================================================================
 
+function getEnvValue(key: "NO_COLOR" | "FORCE_COLOR"): string | undefined {
+	return process.env[key];
+}
+
+function hasNoColorEnv(): boolean {
+	return getEnvValue("NO_COLOR") !== undefined;
+}
+
+function resolveForceColorEnv(): boolean | undefined {
+	const value = getEnvValue("FORCE_COLOR");
+	if (value === undefined) {
+		return undefined;
+	}
+	if (value === "") {
+		return true;
+	}
+	const numeric = Number(value);
+	if (!Number.isNaN(numeric)) {
+		return numeric > 0;
+	}
+	return true;
+}
+
 /**
  * Checks if the current environment supports ANSI colors.
  *
@@ -444,24 +467,15 @@ const ANSI = {
  */
 export function supportsColor(options?: TerminalOptions): boolean {
 	// NO_COLOR takes priority (per https://no-color.org/)
-	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["NO_COLOR"] !== undefined) {
+	if (hasNoColorEnv()) {
 		return false;
 	}
 
 	// FORCE_COLOR enables colors if NO_COLOR is not set
 	// Accept numeric levels: 0 disables, 1+ enables
-	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["FORCE_COLOR"] !== undefined) {
-		const value = process.env["FORCE_COLOR"];
-		if (value === "") {
-			return true;
-		}
-		const numeric = Number(value);
-		if (!Number.isNaN(numeric)) {
-			return numeric > 0;
-		}
-		return true;
+	const forced = resolveForceColorEnv();
+	if (forced !== undefined) {
+		return forced;
 	}
 
 	// Check isTTY option if provided
@@ -632,29 +646,23 @@ export function createTokens(options?: TokenOptions): Tokens {
 	else if (options?.forceColor === true) {
 		colorEnabled = true;
 	}
-	// FORCE_COLOR env takes precedence over NO_COLOR
-	// Supports FORCE_COLOR=1, FORCE_COLOR=2, FORCE_COLOR=3 (common for color levels)
-	else if (process.env["FORCE_COLOR"] !== undefined) {
-		const value = process.env["FORCE_COLOR"];
-		if (value === "") {
-			colorEnabled = true;
+	// Explicit color level overrides environment
+	else if (options?.colorLevel !== undefined) {
+		colorEnabled = options.colorLevel > 0;
+	} else {
+		// FORCE_COLOR env takes precedence over NO_COLOR
+		// Supports FORCE_COLOR=1, FORCE_COLOR=2, FORCE_COLOR=3 (common for color levels)
+		const forced = resolveForceColorEnv();
+		if (forced !== undefined) {
+			colorEnabled = forced;
+		} else if (hasNoColorEnv()) {
+			// NO_COLOR env disables colors
+			// Per no-color.org spec, any value disables colors
+			colorEnabled = false;
 		} else {
-			const numeric = Number(value);
-			colorEnabled = Number.isNaN(numeric) ? true : numeric > 0;
+			// Fall back to TTY detection
+			colorEnabled = process.stdout.isTTY ?? false;
 		}
-	}
-	// NO_COLOR env disables colors
-	// Per no-color.org spec, any value disables colors
-	else if (process.env["NO_COLOR"] !== undefined) {
-		colorEnabled = false;
-	}
-	// colorLevel 1-3 enables colors
-	else if (options?.colorLevel !== undefined && options.colorLevel > 0) {
-		colorEnabled = true;
-	}
-	// Fall back to TTY detection
-	else {
-		colorEnabled = process.stdout.isTTY ?? false;
 	}
 
 	// Return empty strings when colors are disabled
@@ -1676,7 +1684,7 @@ export function render(shape: Shape, options?: RenderOptions): string {
 	// Auto-selection based on shape type
 	if (isCollection(shape)) {
 		// Check if items are objects (use table) or primitives (use list)
-		const hasObjectItems = shape.items.length > 0 && shape.items.every(isPlainObject);
+		const hasObjectItems = shape.items.every(isPlainObject);
 
 		if (hasObjectItems) {
 			const items = shape.items as Array<Record<string, unknown>>;
