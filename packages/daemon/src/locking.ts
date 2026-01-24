@@ -51,6 +51,11 @@ export interface LockHandle {
  * ```
  */
 export function isProcessAlive(pid: number): boolean {
+	// Negative PIDs are invalid - they have special meaning in kill()
+	if (pid <= 0) {
+		return false;
+	}
+
 	try {
 		// Signal 0 doesn't kill, just checks if process exists
 		process.kill(pid, 0);
