@@ -11,6 +11,7 @@
 
 import { Command } from "commander";
 import { initCommand } from "./commands/init";
+import { doctorCommand } from "./commands/doctor";
 
 // =============================================================================
 // CLI Setup
@@ -31,6 +32,7 @@ function createProgram(): Command {
 
 	// Register commands
 	initCommand(program);
+	doctorCommand(program);
 
 	return program;
 }
