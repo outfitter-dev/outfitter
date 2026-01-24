@@ -70,13 +70,6 @@ export function createCLI(config: CLIConfig): CLI {
 		exit(exitCode);
 	});
 
-	let cli: CLI;
-
-	const register = (builder: CommandBuilder): CLI => {
-		program.addCommand(builder.build());
-		return cli;
-	};
-
 	const parse = async (argv?: readonly string[]): Promise<void> => {
 		try {
 			await program.parseAsync(argv ?? process.argv);
@@ -91,9 +84,12 @@ export function createCLI(config: CLIConfig): CLI {
 		}
 	};
 
-	cli = {
+	const cli: CLI = {
 		program,
-		register,
+		register: (builder: CommandBuilder): CLI => {
+			program.addCommand(builder.build());
+			return cli;
+		},
 		parse,
 	};
 
