@@ -139,7 +139,7 @@ export function parseEnv<T extends z.ZodRawShape>(
 /**
  * Schema for common application environment variables.
  */
-const appEnvSchema = z.object({
+const appEnvShape = {
 	NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
 	// Terminal detection
@@ -154,7 +154,9 @@ const appEnvSchema = z.object({
 	XDG_STATE_HOME: z.string().optional(),
 	XDG_CACHE_HOME: z.string().optional(),
 	HOME: z.string().optional(),
-});
+} satisfies z.ZodRawShape;
+
+const appEnvSchema: z.ZodObject<typeof appEnvShape> = z.object(appEnvShape);
 
 /**
  * Type for the pre-parsed application environment.
@@ -186,7 +188,7 @@ export type Env = z.infer<typeof appEnvSchema>;
  * }
  * ```
  */
-export const env = parseEnv(appEnvSchema);
+export const env: Env = parseEnv(appEnvSchema);
 
 // ============================================================================
 // Dynamic Environment Access
