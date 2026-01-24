@@ -30,6 +30,8 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
 		"typecheck": "tsc --noEmit",
+		"sync:templates": "bun run ../../scripts/sync-templates.ts",
+		"prepack": "bun run sync:templates",
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
