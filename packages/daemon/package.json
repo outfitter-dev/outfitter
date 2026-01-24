@@ -1,0 +1,52 @@
+{
+	"name": "@outfitter/daemon",
+	"description": "Daemon lifecycle, IPC, and health checks for Outfitter",
+	"version": "0.0.0",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"sideEffects": false,
+	"scripts": {
+		"build": "bunup --filter @outfitter/daemon",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	},
+	"dependencies": {
+		"@outfitter/contracts": "workspace:*",
+		"@outfitter/file-ops": "workspace:*",
+		"@outfitter/logging": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"typescript": "^5.8.0"
+	},
+	"keywords": [
+		"outfitter",
+		"daemon",
+		"lifecycle",
+		"ipc",
+		"health",
+		"typescript"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/outfitter-dev/kit.git",
+		"directory": "packages/daemon"
+	}
+}
