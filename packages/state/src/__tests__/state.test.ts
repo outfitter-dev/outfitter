@@ -717,3 +717,219 @@ describe("Cursor Encoding", () => {
 		}
 	});
 });
+
+// ============================================================================
+// 7. Pagination Helpers (9 tests)
+// ============================================================================
+
+describe("Pagination Helpers", () => {
+	describe("paginate()", () => {
+		it("extracts correct page slice based on cursor position and limit", async () => {
+			const { paginate, createCursor } = await import("../index.js");
+			const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+			// Cursor at position 0 with limit 3
+			const cursorResult = createCursor({
+				id: "page-cursor",
+				position: 0,
+				metadata: { limit: 3 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page).toEqual([1, 2, 3]);
+				expect(nextCursor).not.toBeNull();
+				expect(nextCursor?.position).toBe(3);
+			}
+		});
+
+		it("returns null nextCursor when exhausted (offset + limit >= items.length)", async () => {
+			const { paginate, createCursor } = await import("../index.js");
+			const items = [1, 2, 3, 4, 5];
+
+			// Cursor at position 3 with limit 3 -> only 2 items left
+			const cursorResult = createCursor({
+				id: "last-page",
+				position: 3,
+				metadata: { limit: 3 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page).toEqual([4, 5]);
+				expect(nextCursor).toBeNull();
+			}
+		});
+
+		it("handles empty array", async () => {
+			const { paginate, createCursor } = await import("../index.js");
+			const items: number[] = [];
+
+			const cursorResult = createCursor({
+				id: "empty-cursor",
+				position: 0,
+				metadata: { limit: 10 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page).toEqual([]);
+				expect(nextCursor).toBeNull();
+			}
+		});
+
+		it("handles exact fit (items.length === offset + limit)", async () => {
+			const { paginate, createCursor } = await import("../index.js");
+			const items = [1, 2, 3, 4, 5];
+
+			// Position 0, limit 5 = exact fit
+			const cursorResult = createCursor({
+				id: "exact-fit",
+				position: 0,
+				metadata: { limit: 5 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page).toEqual([1, 2, 3, 4, 5]);
+				expect(nextCursor).toBeNull();
+			}
+		});
+
+		it("uses default limit when not specified in metadata", async () => {
+			const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import("../index.js");
+			const items = Array.from({ length: 100 }, (_, i) => i + 1);
+
+			const cursorResult = createCursor({
+				id: "no-limit",
+				position: 0,
+				// No limit in metadata
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page } = paginate(items, cursorResult.value);
+
+				// Should use default limit
+				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
+			}
+		});
+
+		it("falls back to default limit when limit is non-positive", async () => {
+			const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import("../index.js");
+			const items = Array.from({ length: 50 }, (_, i) => i + 1);
+
+			const cursorResult = createCursor({
+				id: "zero-limit",
+				position: 0,
+				metadata: { limit: 0 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const { page, nextCursor } = paginate(items, cursorResult.value);
+
+				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
+				expect(nextCursor?.position).toBe(DEFAULT_PAGE_LIMIT);
+			}
+		});
+	});
+
+	describe("loadCursor() and saveCursor()", () => {
+		it("loadCursor returns Ok(null) when cursor not found", async () => {
+			const { loadCursor, createPaginationStore } = await import("../index.js");
+			const store = createPaginationStore();
+
+			const result = loadCursor("nonexistent", store);
+
+			expect(Result.isOk(result)).toBe(true);
+			if (Result.isOk(result)) {
+				expect(result.value).toBeNull();
+			}
+		});
+
+		it("loadCursor returns stored cursor when found", async () => {
+			const { loadCursor, saveCursor, createCursor, createPaginationStore } = await import(
+				"../index.js"
+			);
+			const store = createPaginationStore();
+
+			const cursorResult = createCursor({
+				id: "stored-cursor",
+				position: 42,
+				metadata: { limit: 25 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				saveCursor(cursorResult.value, store);
+				const result = loadCursor("stored-cursor", store);
+
+				expect(Result.isOk(result)).toBe(true);
+				if (Result.isOk(result)) {
+					expect(result.value).not.toBeNull();
+					expect(result.value?.id).toBe("stored-cursor");
+					expect(result.value?.position).toBe(42);
+				}
+			}
+		});
+
+		it("saveCursor persists cursor to store", async () => {
+			const { saveCursor, createCursor, createPaginationStore } = await import("../index.js");
+			const store = createPaginationStore();
+
+			const cursorResult = createCursor({
+				id: "save-test",
+				position: 100,
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				const saveResult = saveCursor(cursorResult.value, store);
+
+				expect(Result.isOk(saveResult)).toBe(true);
+				// Verify it's in the store
+				expect(store.get("save-test")).not.toBeNull();
+			}
+		});
+
+		it("default memory store works across load/save", async () => {
+			const { loadCursor, saveCursor, createCursor, getDefaultPaginationStore } = await import(
+				"../index.js"
+			);
+
+			// Verify the default store is accessible
+			const _store = getDefaultPaginationStore();
+			expect(_store).toBeDefined();
+
+			const cursorResult = createCursor({
+				id: "default-store-test",
+				position: 50,
+				metadata: { limit: 10 },
+			});
+			expect(Result.isOk(cursorResult)).toBe(true);
+
+			if (Result.isOk(cursorResult)) {
+				// Save without explicit store (uses default)
+				saveCursor(cursorResult.value);
+
+				// Load without explicit store (uses default)
+				const result = loadCursor("default-store-test");
+
+				expect(Result.isOk(result)).toBe(true);
+				if (Result.isOk(result)) {
+					expect(result.value?.id).toBe("default-store-test");
+					expect(result.value?.position).toBe(50);
+				}
+			}
+		});
+	});
+});
