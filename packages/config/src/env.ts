@@ -136,10 +136,23 @@ export function parseEnv<T extends z.ZodRawShape>(
 // App-Level Environment
 // ============================================================================
 
+type AppEnvShape = {
+	NODE_ENV: z.ZodDefault<z.ZodEnum<["development", "test", "production"]>>;
+	NO_COLOR: typeof optionalBooleanSchema;
+	FORCE_COLOR: typeof optionalBooleanSchema;
+	CI: typeof optionalBooleanSchema;
+	TERM: z.ZodOptional<z.ZodString>;
+	XDG_CONFIG_HOME: z.ZodOptional<z.ZodString>;
+	XDG_DATA_HOME: z.ZodOptional<z.ZodString>;
+	XDG_STATE_HOME: z.ZodOptional<z.ZodString>;
+	XDG_CACHE_HOME: z.ZodOptional<z.ZodString>;
+	HOME: z.ZodOptional<z.ZodString>;
+};
+
 /**
  * Schema for common application environment variables.
  */
-const appEnvShape = {
+const appEnvSchema: z.ZodObject<AppEnvShape> = z.object({
 	NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
 	// Terminal detection
@@ -154,9 +167,7 @@ const appEnvShape = {
 	XDG_STATE_HOME: z.string().optional(),
 	XDG_CACHE_HOME: z.string().optional(),
 	HOME: z.string().optional(),
-} satisfies z.ZodRawShape;
-
-const appEnvSchema: z.ZodObject<typeof appEnvShape> = z.object(appEnvShape);
+});
 
 /**
  * Type for the pre-parsed application environment.
