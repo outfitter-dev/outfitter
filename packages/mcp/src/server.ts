@@ -53,6 +53,7 @@ interface StoredTool {
 	name: string;
 	description: string;
 	inputSchema: unknown;
+	deferLoading: boolean;
 	// biome-ignore lint/suspicious/noExplicitAny: Handler types vary
 	handler: (input: any, ctx: HandlerContext) => Promise<Result<unknown, KitError>>;
 	// biome-ignore lint/suspicious/noExplicitAny: Zod schema type
@@ -162,13 +163,23 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 		): void {
 			logger.debug("Registering tool", { name: tool.name });
 
+			const description = tool.description?.trim() ?? "";
+			if (description.length < 8) {
+				logger.warn("Tool description may be too short for search discovery", {
+					name: tool.name,
+					description,
+				});
+			}
+
 			const jsonSchema = zodToJsonSchema(tool.inputSchema);
 			const handler: StoredTool["handler"] = (input, ctx) => tool.handler(input as TInput, ctx);
+			const deferLoading = tool.deferLoading ?? true;
 
 			tools.set(tool.name, {
 				name: tool.name,
-				description: tool.description,
+				description,
 				inputSchema: jsonSchema,
+				deferLoading,
 				handler,
 				zodSchema: tool.inputSchema,
 			});
@@ -187,6 +198,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 				name: tool.name,
 				description: tool.description,
 				inputSchema: tool.inputSchema as Record<string, unknown>,
+				defer_loading: tool.deferLoading,
 			}));
 		},
 

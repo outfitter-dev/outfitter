@@ -107,6 +107,12 @@ export interface ToolDefinition<TInput, TOutput, TError extends KitError = KitEr
 	description: string;
 
 	/**
+	 * Whether the tool should be deferred for tool search.
+	 * Defaults to true for domain tools; core tools set this to false.
+	 */
+	deferLoading?: boolean;
+
+	/**
 	 * Zod schema for validating and parsing input.
 	 * The schema defines the expected input structure.
 	 */
@@ -132,6 +138,9 @@ export interface SerializedTool {
 
 	/** JSON Schema representation of the input schema */
 	inputSchema: Record<string, unknown>;
+
+	/** MCP tool-search hint: whether tool is deferred */
+	defer_loading?: boolean;
 }
 
 // ============================================================================
