@@ -32,6 +32,10 @@
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist"
 	},
+	"dependencies": {
+		"@outfitter/contracts": "workspace:*",
+		"@outfitter/mcp": "workspace:*"
+	},
 	"devDependencies": {
 		"@types/bun": "latest",
 		"typescript": "^5.8.0"
