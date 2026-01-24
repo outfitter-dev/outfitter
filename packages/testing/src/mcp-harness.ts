@@ -8,8 +8,14 @@
  * @packageDocumentation
  */
 
-import type { Result } from "@outfitter/contracts";
-import type { McpError, McpServer, SerializedTool } from "@outfitter/mcp";
+import type { KitError, Result } from "@outfitter/contracts";
+import {
+	createMcpServer,
+	type McpError,
+	type McpServer,
+	type SerializedTool,
+	type ToolDefinition,
+} from "@outfitter/mcp";
 import { loadFixture } from "./fixtures.js";
 
 // ============================================================================
@@ -64,6 +70,17 @@ export interface McpHarnessOptions {
 	readonly fixturesDir?: string;
 }
 
+export interface McpTestHarnessOptions {
+	/** Tools to register on the test MCP server. */
+	readonly tools: ToolDefinition<unknown, unknown, KitError>[];
+	/** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
+	readonly fixturesDir?: string;
+	/** Optional server name for diagnostics. */
+	readonly name?: string;
+	/** Optional server version for diagnostics. */
+	readonly version?: string;
+}
+
 // ============================================================================
 // Implementation
 // ============================================================================
@@ -111,3 +128,29 @@ export function createMcpHarness(server: McpServer, options: McpHarnessOptions =
 		},
 	};
 }
+
+/**
+ * Creates an MCP test harness from tool definitions.
+ *
+ * This is a spec-compatible wrapper that builds a test server,
+ * registers tools, and returns the standard MCP harness.
+ */
+export function createMCPTestHarness(options: McpTestHarnessOptions): McpHarness {
+	const server = createMcpServer({
+		name: options.name ?? "mcp-test",
+		version: options.version ?? "0.0.0",
+	});
+
+	for (const tool of options.tools) {
+		server.registerTool(tool);
+	}
+
+	return createMcpHarness(server, {
+		...(options.fixturesDir !== undefined ? { fixturesDir: options.fixturesDir } : {}),
+	});
+}
+
+/**
+ * Alias for createMCPTestHarness to support alternate casing.
+ */
+export const createMcpTestHarness = createMCPTestHarness;

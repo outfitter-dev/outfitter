@@ -7,10 +7,16 @@
 
 import { describe, expect, it } from "bun:test";
 import { Result } from "@outfitter/contracts";
-import { McpError, type McpServer, type SerializedTool } from "@outfitter/mcp";
+import { McpError, defineTool, type McpServer, type SerializedTool } from "@outfitter/mcp";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createMcpHarness, type McpToolResponse } from "../mcp-harness.js";
+import { z } from "zod";
+import {
+	createMCPTestHarness,
+	createMcpHarness,
+	createMcpTestHarness,
+	type McpToolResponse,
+} from "../mcp-harness.js";
 
 // ============================================================================
 // Test Fixtures: Mock MCP Server
@@ -62,6 +68,30 @@ describe("createMcpHarness()", () => {
 		expect(harness.searchTools).toBeDefined();
 		expect(harness.loadFixture).toBeDefined();
 		expect(harness.reset).toBeDefined();
+	});
+});
+
+describe("createMCPTestHarness()", () => {
+	it("builds a server from tool definitions", async () => {
+		const tool = defineTool({
+			name: "echo",
+			description: "Echo input back",
+			inputSchema: z.object({ value: z.string() }),
+			handler: async (input) =>
+				Result.ok({
+					content: [{ type: "text", text: input.value }],
+				}),
+		});
+
+		const harness = createMCPTestHarness({ tools: [tool] });
+		const result = await harness.callTool("echo", { value: "hello" });
+
+		expect(result.isOk()).toBe(true);
+		expect(result.unwrap().content[0].text).toBe("hello");
+	});
+
+	it("supports alternate casing alias", () => {
+		expect(createMcpTestHarness).toBe(createMCPTestHarness);
 	});
 });
 

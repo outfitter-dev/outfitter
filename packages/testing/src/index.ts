@@ -24,6 +24,7 @@ export { createFixture, loadFixture, withTempDir, withEnv } from "./fixtures.js"
 // ============================================================================
 
 export { createCliHarness, type CliHarness, type CliResult } from "./cli-harness.js";
+export { captureCLI, mockStdin, type CliTestResult } from "./cli-helpers.js";
 
 // ============================================================================
 // MCP Harness
@@ -31,6 +32,21 @@ export { createCliHarness, type CliHarness, type CliResult } from "./cli-harness
 
 export {
 	createMcpHarness,
+	createMCPTestHarness,
+	createMcpTestHarness,
 	type McpHarness,
 	type McpToolResponse,
+	type McpTestHarnessOptions,
 } from "./mcp-harness.js";
+
+// ============================================================================
+// Mock Factories
+// ============================================================================
+
+export {
+	createTestConfig,
+	createTestContext,
+	createTestLogger,
+	type LogEntry,
+	type TestLogger,
+} from "./mock-factories.js";

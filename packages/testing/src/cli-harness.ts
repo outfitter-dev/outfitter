@@ -112,8 +112,7 @@ export function createCliHarness(command: string): CliHarness {
 					if (exitCode !== null) {
 						finalExitCode = exitCode;
 					} else if (signal !== null) {
-						const signalNumber =
-							constants.signals[signal as keyof typeof constants.signals];
+						const signalNumber = constants.signals[signal as keyof typeof constants.signals];
 						finalExitCode = signalNumber !== undefined ? 128 + signalNumber : 1;
 					} else {
 						finalExitCode = 1;
