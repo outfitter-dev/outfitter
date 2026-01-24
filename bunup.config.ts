@@ -34,6 +34,10 @@ export default defineWorkspace(
 			name: "@outfitter/cli",
 			root: "packages/cli",
 		},
+		{
+			name: "@outfitter/index",
+			root: "packages/index",
+		},
 	],
 	{
 		// Entry points: all source files except tests
