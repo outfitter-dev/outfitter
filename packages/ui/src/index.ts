@@ -186,8 +186,8 @@ const ANSI = {
  * Checks if the current environment supports ANSI colors.
  *
  * Detection priority:
- * 1. `NO_COLOR` env variable - if set and non-empty, returns false (per no-color.org)
- * 2. `FORCE_COLOR` env variable - if set and non-empty, returns true
+ * 1. `NO_COLOR` env variable - if set (even empty), returns false (per no-color.org)
+ * 2. `FORCE_COLOR` env variable - if set, returns true (numeric levels > 0)
  * 3. Falls back to TTY detection via `process.stdout.isTTY`
  *
  * @param options - Optional overrides for TTY detection
@@ -209,13 +209,22 @@ const ANSI = {
 export function supportsColor(options?: TerminalOptions): boolean {
 	// NO_COLOR takes priority (per https://no-color.org/)
 	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["NO_COLOR"] !== undefined && process.env["NO_COLOR"] !== "") {
+	if (process.env["NO_COLOR"] !== undefined) {
 		return false;
 	}
 
 	// FORCE_COLOR enables colors if NO_COLOR is not set
+	// Accept numeric levels: 0 disables, 1+ enables
 	// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-	if (process.env["FORCE_COLOR"] !== undefined && process.env["FORCE_COLOR"] !== "") {
+	if (process.env["FORCE_COLOR"] !== undefined) {
+		const value = process.env["FORCE_COLOR"];
+		if (value === "") {
+			return true;
+		}
+		const numeric = Number(value);
+		if (!Number.isNaN(numeric)) {
+			return numeric > 0;
+		}
 		return true;
 	}
 

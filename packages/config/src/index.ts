@@ -26,6 +26,20 @@
  * @packageDocumentation
  */
 
+// ============================================================================
+// Environment Variable Access
+// ============================================================================
+
+export {
+	env,
+	parseEnv,
+	portSchema,
+	booleanSchema,
+	optionalBooleanSchema,
+	getEnvBoolean,
+} from "./env.js";
+export type { Env } from "./env.js";
+
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { NotFoundError, Result, TaggedError, ValidationError } from "@outfitter/contracts";

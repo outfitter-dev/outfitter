@@ -110,6 +110,7 @@
       "name": "@outfitter/ui",
       "version": "0.0.0",
       "dependencies": {
+        "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "cli-truncate": "^4.0.0",
         "object-treeify": "^1.1.33",
