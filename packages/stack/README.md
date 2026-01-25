@@ -1,6 +1,6 @@
-# @outfitter/kit
+# @outfitter/stack
 
-Version coordination meta-package for Outfitter Kit.
+Version coordination meta-package for Outfitter.
 
 ## Purpose
 
@@ -9,56 +9,56 @@ This package ensures compatible versions across all `@outfitter/*` packages. Ins
 ## Installation
 
 ```bash
-bun add @outfitter/kit
+bun add @outfitter/stack
 ```
 
 ## When to Use
 
-Use `@outfitter/kit` when:
+Use `@outfitter/stack` when:
 
 1. **Building applications** that use multiple Outfitter packages
 2. **Ensuring compatibility** between package versions
 3. **Checking version requirements** programmatically
 
 ```bash
-# Install kit alongside the packages you need
-bun add @outfitter/kit @outfitter/cli @outfitter/logging @outfitter/config
+# Install stack alongside the packages you need
+bun add @outfitter/stack @outfitter/cli @outfitter/logging @outfitter/config
 ```
 
-The kit's `peerDependencies` will warn if you have incompatible versions installed.
+The stack's `peerDependencies` will warn if you have incompatible versions installed.
 
 ## Version Matrix
 
 See [VERSIONS.md](./VERSIONS.md) for the complete compatibility matrix.
 
-### Current Release (0.1.0-rc.0)
+### Current Release (0.1.0-rc.1)
 
 | Package | Minimum Version |
 |---------|-----------------|
-| @outfitter/agents | 0.1.0-rc.0 |
-| @outfitter/contracts | 0.1.0-rc.0 |
-| @outfitter/types | 0.1.0-rc.0 |
-| @outfitter/cli | 0.1.0-rc.0 |
-| @outfitter/config | 0.1.0-rc.0 |
-| @outfitter/logging | 0.1.0-rc.0 |
-| @outfitter/file-ops | 0.1.0-rc.0 |
-| @outfitter/state | 0.1.0-rc.0 |
-| @outfitter/ui | 0.1.0-rc.0 |
-| @outfitter/mcp | 0.1.0-rc.0 |
-| @outfitter/index | 0.1.0-rc.0 |
-| @outfitter/daemon | 0.1.0-rc.0 |
-| @outfitter/testing | 0.1.0-rc.0 |
+| @outfitter/agents | 0.1.0-rc.1 |
+| @outfitter/contracts | 0.1.0-rc.1 |
+| @outfitter/types | 0.1.0-rc.1 |
+| @outfitter/cli | 0.1.0-rc.1 |
+| @outfitter/config | 0.1.0-rc.1 |
+| @outfitter/logging | 0.1.0-rc.1 |
+| @outfitter/file-ops | 0.1.0-rc.1 |
+| @outfitter/state | 0.1.0-rc.1 |
+| @outfitter/ui | 0.1.0-rc.1 |
+| @outfitter/mcp | 0.1.0-rc.1 |
+| @outfitter/index | 0.1.0-rc.1 |
+| @outfitter/daemon | 0.1.0-rc.1 |
+| @outfitter/testing | 0.1.0-rc.1 |
 
 ## Exports
 
-### KIT_VERSION
+### STACK_VERSION
 
-The current kit version (matches package.json).
+The current stack version (matches package.json).
 
 ```typescript
-import { KIT_VERSION } from "@outfitter/kit";
+import { STACK_VERSION } from "@outfitter/stack";
 
-console.log(`Using Outfitter Kit ${KIT_VERSION}`);
+console.log(`Using Outfitter Stack ${STACK_VERSION}`);
 ```
 
 ### MINIMUM_VERSIONS
@@ -66,7 +66,7 @@ console.log(`Using Outfitter Kit ${KIT_VERSION}`);
 Minimum compatible versions for each package.
 
 ```typescript
-import { MINIMUM_VERSIONS } from "@outfitter/kit";
+import { MINIMUM_VERSIONS } from "@outfitter/stack";
 
 // Check if a package meets the minimum version
 const cliMinimum = MINIMUM_VERSIONS["@outfitter/cli"]; // "0.1.0-rc.0"
@@ -74,10 +74,10 @@ const cliMinimum = MINIMUM_VERSIONS["@outfitter/cli"]; // "0.1.0-rc.0"
 
 ### OutfitterPackage
 
-Type for valid package names in the kit.
+Type for valid package names in the stack.
 
 ```typescript
-import { type OutfitterPackage, MINIMUM_VERSIONS } from "@outfitter/kit";
+import { type OutfitterPackage, MINIMUM_VERSIONS } from "@outfitter/stack";
 
 function getMinVersion(pkg: OutfitterPackage): string {
   return MINIMUM_VERSIONS[pkg];
@@ -91,7 +91,7 @@ getMinVersion("@outfitter/invalid"); // TypeScript error
 
 | Export | Type | Description |
 |--------|------|-------------|
-| `KIT_VERSION` | `string` | Current kit version |
+| `STACK_VERSION` | `string` | Current stack version |
 | `MINIMUM_VERSIONS` | `Record<OutfitterPackage, string>` | Minimum versions for all packages |
 | `OutfitterPackage` | `type` | Union type of valid package names |
 

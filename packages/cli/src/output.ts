@@ -116,8 +116,8 @@ function formatHuman(data: unknown): string {
 }
 
 /**
- * Extracts KitError-compatible properties from an error.
- * Works with both actual KitError instances and duck-typed errors.
+ * Extracts OutfitterError-compatible properties from an error.
+ * Works with both actual OutfitterError instances and duck-typed errors.
  */
 interface KitErrorLike {
 	_tag: string | undefined;
@@ -164,7 +164,7 @@ interface SerializedCliError {
 
 /**
  * Serializes an error to JSON format for CLI output.
- * Handles both KitError instances and plain Error objects.
+ * Handles both OutfitterError instances and plain Error objects.
  */
 function serializeErrorToJson(error: Error): string {
 	const { _tag, category, context } = getErrorProperties(error);

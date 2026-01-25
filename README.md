@@ -1,4 +1,4 @@
-# Outfitter Kit
+# Outfitter
 
 Bun-first shared infrastructure for Outfitter projects.
 

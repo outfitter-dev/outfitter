@@ -1,12 +1,12 @@
-# Outfitter Kit — Implementation Plan
+# Outfitter — Implementation Plan
 
 ## Overview
 
-This plan sequences the implementation of Outfitter Kit using a **hybrid harvest-then-build** approach:
+This plan sequences the implementation of Outfitter using a **hybrid harvest-then-build** approach:
 
 1. **Harvest** behavioral tests from existing repos (waymark, firewatch)
 2. **Build** fresh packages that pass those tests
-3. **Migrate** existing repos to consume the kit
+3. **Migrate** existing repos to consume Outfitter
 
 ### Guiding Principles (Non-Negotiable)
 
@@ -55,7 +55,7 @@ These principles govern **every phase** of implementation. Violating them is nev
 
 ### Blessed Dependencies
 
-External packages used across the kit. Bun-native APIs are preferred; these fill gaps.
+External packages used across Outfitter. Bun-native APIs are preferred; these fill gaps.
 
 | Concern | Package | Used By | Notes |
 |---------|---------|---------|-------|
@@ -93,7 +93,7 @@ External packages used across the kit. Bun-native APIs are preferred; these fill
 
 | Task | Done Criteria |
 |------|---------------|
-| Create `kit` repo | Repo exists, README.md with purpose |
+| Create `outfitter` repo | Repo exists, README.md with purpose |
 | Configure Bun workspaces | `bun.lock` resolves, workspaces in `packages/` and `apps/` |
 | Configure Turborepo | `turbo.json` with build/test/lint tasks, caching works |
 | Configure Changesets | `.changeset/` configured, `bun changeset` works |
@@ -113,7 +113,7 @@ External packages used across the kit. Bun-native APIs are preferred; these fill
 | `pre-commit` | format check, lint, **typecheck** | Affected packages only |
 | `pre-push` | full test suite, **ast-grep patterns** | Affected packages |
 
-**ast-grep rules** (kit-specific pattern enforcement):
+**ast-grep rules** (Outfitter-specific pattern enforcement):
 - Handlers must return `Result<T, E>`, not throw
 - No raw `console.log` (use `@outfitter/logging`)
 - No `any` type annotations
@@ -122,7 +122,7 @@ External packages used across the kit. Bun-native APIs are preferred; these fill
 ### 0.3 Directory Structure
 
 ```
-kit/
+outfitter/
 ├── packages/           # Publishable packages
 ├── apps/               # Runnable CLIs / daemons
 ├── docs/               # System documentation
@@ -236,7 +236,7 @@ kit/
 | `HandlerContext` | Context interface with signal, logger, config, requestId |
 | `Logger` interface | Structured logging contract |
 | `ResolvedConfig` interface | Merged config with type-safe accessor |
-| `KitError` base class | Extends `TaggedError` from better-result |
+| `OutfitterError` base class | Extends `TaggedError` from better-result |
 | Error taxonomy | `ValidationError`, `NotFoundError`, `ConflictError`, `AuthError`, etc. |
 | `ErrorCategory` type | Union of category strings |
 | Exit/status code maps | `exitCodeMap`, `statusCodeMap` constants |
@@ -521,7 +521,7 @@ kit/
 - Tool definitions validate against MCP schema
 - Core tools (`query`, `docs`, `config`) available by default
 - Deferred tools not loaded until searched
-- Error responses use `KitError` serialization
+- Error responses use `OutfitterError` serialization
 - Transport negotiation selects correct mode
 
 **Done criteria**:
@@ -585,7 +585,7 @@ kit/
 - Generated project passes lint/type/test
 - Dev commands (`bun run dev`, `bun run test:watch`) work
 
-### 6.2 `@outfitter/kit` Meta-package
+### 6.2 `@outfitter/stack` Meta-package
 
 | Component | Description |
 |-----------|-------------|
@@ -613,7 +613,7 @@ kit/
 | `@outfitter/actions` | GitHub Actions for CI/CD |
 | `@outfitter/release` | Release automation (changesets integration) |
 
-**Note**: These packages support the kit's development workflow and are lower priority than runtime packages. Can be built incrementally as needs arise.
+**Note**: These packages support Outfitter's development workflow and are lower priority than runtime packages. Can be built incrementally as needs arise.
 
 **Phase 6 complete when**: `outfitter init` scaffolds working projects.
 
@@ -621,7 +621,7 @@ kit/
 
 ## Phase 7: Migration & Validation
 
-**Goal**: Migrate existing repos to consume kit packages.
+**Goal**: Migrate existing repos to consume Outfitter packages.
 
 ### 7.1 Waymark Migration
 
@@ -632,7 +632,7 @@ kit/
 | Replace index code | Use `@outfitter/index` |
 | Add MCP server | Use `@outfitter/mcp` |
 
-**Done criteria**: waymark tests pass with kit packages.
+**Done criteria**: waymark tests pass with Outfitter packages.
 
 ### 7.2 Firewatch Migration
 
@@ -642,7 +642,7 @@ kit/
 | Replace daemon code | Use `@outfitter/daemon` |
 | Add config standardization | Use `@outfitter/config` |
 
-**Done criteria**: firewatch tests pass with kit packages.
+**Done criteria**: firewatch tests pass with Outfitter packages.
 
 ### 7.3 Migration Infrastructure
 
@@ -823,7 +823,7 @@ Each package is a self-contained unit suitable for agent delegation:
 
 ## Success Criteria
 
-The kit is complete when:
+Outfitter is complete when:
 
 1. **All packages published** to npm under `@outfitter/*`
 2. **Two repos migrated** (waymark, firewatch) with tests passing

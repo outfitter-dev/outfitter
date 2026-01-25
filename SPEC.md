@@ -1,10 +1,10 @@
-# Outfitter Kit — SPEC.md
+# Outfitter — SPEC.md
 
 ## Purpose
 
 Create a **Bun-first**, **strictly typed**, **test-driven**, and **opinionated** shared infrastructure monorepo for Outfitter projects.
 
-The kit provides reusable **libraries + runtimes** (CLI, MCP, server, daemon, indexing primitives), while allowing each project to keep its own shape and domain needs. It also ships an umbrella dev/ops/tooling CLI named **`outfitter`**.
+Outfitter provides reusable **libraries + runtimes** (CLI, MCP, server, daemon, indexing primitives), while allowing each project to keep its own shape and domain needs. It also ships an umbrella dev/ops/tooling CLI named **`outfitter`**.
 
 This spec is a *living contract* that prioritizes:
 
@@ -18,11 +18,11 @@ Before diving into the specification, understand these foundational concepts:
 
 ### MCP (Model Context Protocol)
 
-Anthropic's open standard for AI assistants to interact with external tools and data sources. An MCP server exposes "tools" that Claude and other AI agents can discover and invoke. The kit provides infrastructure for building these servers with minimal boilerplate.
+Anthropic's open standard for AI assistants to interact with external tools and data sources. An MCP server exposes "tools" that Claude and other AI agents can discover and invoke. Outfitter provides infrastructure for building these servers with minimal boilerplate.
 
 ### Result<T, E> Pattern
 
-A type representing either success (T) or error (E), avoiding exceptions. The kit uses the `better-result` library for this pattern. Handlers return Results; transport layers (CLI, MCP) handle unwrapping and formatting. This enables explicit error handling and composition without try/catch proliferation.
+A type representing either success (T) or error (E), avoiding exceptions. Outfitter uses the `better-result` library for this pattern. Handlers return Results; transport layers (CLI, MCP) handle unwrapping and formatting. This enables explicit error handling and composition without try/catch proliferation.
 
 ### Temperature Model
 
@@ -35,14 +35,14 @@ Packages are classified by change frequency:
 
 ### Bun-first
 
-Designing primarily for Bun runtime while maintaining Node compatibility where needed. Native Bun APIs are preferred over npm packages when available—they're faster, have zero dependencies, and align with the kit's philosophy. See the [dependency decision checklist](#dependency-decision-checklist) for the evaluation process.
+Designing primarily for Bun runtime while maintaining Node compatibility where needed. Native Bun APIs are preferred over npm packages when available—they're faster, have zero dependencies, and align with Outfitter's philosophy. See the [dependency decision checklist](#dependency-decision-checklist) for the evaluation process.
 
 ## Runtime Requirements
 
 | Runtime | Version | Notes |
 |---------|---------|-------|
 | Bun | ^1.3.6 | Required. All features depend on Bun runtime. |
-| Node | Not supported | Bun-only kit. No Node compatibility layer. |
+| Node | Not supported | Bun-only stack. No Node compatibility layer. |
 
 **Version enforcement:**
 
@@ -50,7 +50,7 @@ Designing primarily for Bun runtime while maintaining Node compatibility where n
 const BUN_MIN_VERSION = "1.3.6";
 
 if (typeof Bun === "undefined") {
-  console.error("Outfitter Kit requires Bun runtime. Install from https://bun.sh");
+  console.error("Outfitter requires Bun runtime. Install from https://bun.sh");
   process.exit(1);
 }
 
@@ -159,7 +159,7 @@ import type { Result } from "better-result";
  *
  * @typeParam TInput - Validated input parameters
  * @typeParam TOutput - Success return type
- * @typeParam TError - Error type (must extend KitError)
+ * @typeParam TError - Error type (must extend OutfitterError)
  *
  * @example
  * ```typescript
@@ -170,7 +170,7 @@ import type { Result } from "better-result";
  * };
  * ```
  */
-type Handler<TInput, TOutput, TError extends KitError = KitError> = (
+type Handler<TInput, TOutput, TError extends OutfitterError = OutfitterError> = (
   input: TInput,
   ctx: HandlerContext
 ) => Promise<Result<TOutput, TError>>;
@@ -195,7 +195,7 @@ interface HandlerContext {
 }
 
 /**
- * Logger — structured logging interface used throughout the kit.
+ * Logger — structured logging interface used throughout Outfitter.
  *
  * Implementations are provided by @outfitter/logging (logtape wrapper).
  */
@@ -246,13 +246,13 @@ interface ResolvedConfig {
 
 ## Automated guardrails
 
-The kit enforces standards through automated tooling, not discipline alone. This is critical for agent-assisted development where drift accumulates quickly.
+Outfitter enforces standards through automated tooling, not discipline alone. This is critical for agent-assisted development where drift accumulates quickly.
 
 ### Static analysis
 
 * **Strict TypeScript** — `strict: true`, `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess`. No escape hatches.
 * **Biome + Ultracite** — Formatting and linting with zero-config defaults. Ultracite is an opinionated Biome configuration preset. Run on save, enforced in CI.
-* **ast-grep** — AST-based structural code search/transform for kit-specific pattern enforcement:
+* **ast-grep** — AST-based structural code search/transform for Outfitter-specific pattern enforcement:
   * Handlers must return `Result<T, E>`, not throw
   * No raw `console.log` (use `@outfitter/logging`)
   * No `any` type annotations
@@ -414,7 +414,7 @@ const url = await s3.presign("artifacts/report.pdf", {
 });
 ```
 
-**Use cases in the kit:**
+**Use cases in Outfitter:**
 
 | Use Case | Pattern |
 |----------|---------|
@@ -623,7 +623,7 @@ Changes rarely; highly stable APIs.
 
 #### Error Taxonomy
 
-The kit uses a structured error hierarchy for consistent handling across CLI, MCP, and HTTP transports.
+Outfitter uses a structured error hierarchy for consistent handling across CLI, MCP, and HTTP transports.
 
 ```typescript
 /**
@@ -648,12 +648,12 @@ type ErrorCategory =
   | "cancelled";    // User/signal cancellation (499)
 
 /**
- * Base error interface for all kit errors.
+ * Base error interface for all Outfitter errors.
  *
  * Errors are data, not exceptions. They serialize cleanly to JSON,
  * carry context for debugging, and map to appropriate exit/status codes.
  */
-interface KitError {
+interface OutfitterError {
   /** Discriminant for pattern matching (e.g., "NotFoundError", "ValidationError") */
   readonly _tag: string;
 
@@ -754,9 +754,9 @@ const statusCodeMap: Record<ErrorCategory, number> = {
 import { TaggedError } from "better-result";
 
 /**
- * Base class for all kit errors. Extends TaggedError for discriminated unions.
+ * Base class for all Outfitter errors. Extends TaggedError for discriminated unions.
  */
-abstract class BaseKitError extends TaggedError implements KitError {
+abstract class BaseKitError extends TaggedError implements OutfitterError {
   abstract readonly category: ErrorCategory;
 
   constructor(
@@ -892,7 +892,7 @@ class AuthError extends BaseKitError {
 
 #### Hybrid Error Pattern: Tags + Numeric Codes
 
-The kit uses a hybrid approach combining `_tag` discriminants (for type-safe pattern matching) with optional numeric error codes (for programmatic handling and external system integration). The `_tag` is always present; the `code` is opt-in for cases requiring granular identification.
+Outfitter uses a hybrid approach combining `_tag` discriminants (for type-safe pattern matching) with optional numeric error codes (for programmatic handling and external system integration). The `_tag` is always present; the `code` is opt-in for cases requiring granular identification.
 
 **When to use numeric codes:**
 
@@ -1086,7 +1086,7 @@ Recovery heuristics help determine whether an error is transient (might succeed 
  *   // Consider retry logic
  * }
  */
-function isRecoverable(error: KitError): boolean;
+function isRecoverable(error: OutfitterError): boolean;
 
 /**
  * Check if an error should trigger an automatic retry.
@@ -1109,7 +1109,7 @@ function isRecoverable(error: KitError): boolean;
  *   await retry();
  * }
  */
-function isRetryable(error: KitError): boolean;
+function isRetryable(error: OutfitterError): boolean;
 
 /**
  * Calculate retry delay with exponential backoff and jitter.
@@ -1133,7 +1133,7 @@ function isRetryable(error: KitError): boolean;
  * // Retry the operation
  */
 function getBackoffDelay(
-  error: KitError,
+  error: OutfitterError,
   attempt: number,
   options?: {
     baseDelay?: number;   // Default: 1000ms
@@ -1145,7 +1145,7 @@ function getBackoffDelay(
 
 #### Result Utilities
 
-Extensions to `better-result` for common patterns in the kit.
+Extensions to `better-result` for common patterns in Outfitter.
 
 ```typescript
 /**
@@ -1392,14 +1392,14 @@ Legend:
 
 ### Name
 
-* **`@outfitter/kit`**
+* **`@outfitter/stack`**
 
 ### Behavior: version coordination only
 
-`@outfitter/kit` is a **coordination package**, not a re-export surface. It serves one purpose: ensuring compatible versions across kit packages.
+`@outfitter/stack` is a **coordination package**, not a re-export surface. It serves one purpose: ensuring compatible versions across Outfitter packages.
 
-* **peerDependencies manifest**: declares the blessed version range for each kit package
-* **No re-exports**: consumers import from actual packages (`@outfitter/cli`, not `@outfitter/kit/cli`)
+* **peerDependencies manifest**: declares the blessed version range for each Outfitter package
+* **No re-exports**: consumers import from actual packages (`@outfitter/cli`, not `@outfitter/stack/cli`)
 * **No code**: the package contains no runtime code, only version constraints
 
 ### Why no re-exports
@@ -1413,9 +1413,9 @@ Re-export surfaces create maintenance burden and obscure actual dependencies. Pr
 
 With Bun workspaces + lockfile, version coordination happens automatically within the monorepo. For external consumers:
 
-* `@outfitter/kit` declares peerDependencies on blessed versions
+* `@outfitter/stack` declares peerDependencies on blessed versions
 * Package managers resolve compatible versions
-* Renovate/dependabot can group kit package updates
+* Renovate/dependabot can group Outfitter package updates
 
 ### Usage
 
@@ -1423,7 +1423,7 @@ With Bun workspaces + lockfile, version coordination happens automatically withi
 // package.json
 {
   "dependencies": {
-    "@outfitter/kit": "^1.0.0",
+    "@outfitter/stack": "^1.0.0",
     "@outfitter/cli": "^1.0.0",
     "@outfitter/config": "^1.0.0"
   }
@@ -1438,10 +1438,10 @@ import { loadConfig } from "@outfitter/config";
 
 ### Blessed versions documentation
 
-Each kit release includes a `VERSIONS.md` documenting the tested combination:
+Each release includes a `VERSIONS.md` documenting the tested combination:
 
 ```markdown
-# @outfitter/kit v1.2.0 — Blessed Versions
+# @outfitter/stack v1.2.0 — Blessed Versions
 
 | Package | Version | Notes |
 |---------|---------|-------|
@@ -1456,7 +1456,7 @@ Each kit release includes a `VERSIONS.md` documenting the tested combination:
 
 ### Lane 1: Library consumption
 
-Projects install kit packages directly and import from them. `@outfitter/kit` provides version coordination but no re-exports—imports always come from the actual package.
+Projects install Outfitter packages directly and import from them. `@outfitter/stack` provides version coordination but no re-exports—imports always come from the actual package.
 
 ### Lane 2: Zero-install runner
 
@@ -1538,7 +1538,7 @@ If you're asking "should this be a script or a CLI?" — it's probably a CLI. Sc
 
 ## CLI law
 
-The kit standardizes these conventions as defaults. Tools may drift only with explicit rationale.
+Outfitter standardizes these conventions as defaults. Tools may drift only with explicit rationale.
 
 ### Output contract
 
@@ -1623,7 +1623,7 @@ const files = await parseGlob(args.pattern, { cwd: workspaceRoot });
 
 ## CLI UI system
 
-The kit provides a semantic UI layer that separates **data shape** from **rendering**. Define your output once; render as tree, list, table, or JSON with a flag or context switch.
+Outfitter provides a semantic UI layer that separates **data shape** from **rendering**. Define your output once; render as tree, list, table, or JSON with a flag or context switch.
 
 ### Philosophy
 
@@ -2251,7 +2251,7 @@ const Note = defineResource("note", {
 
 ### Tool schema evolution
 
-MCP has protocol-level versioning but no standard for tool schema versioning. The kit adopts a **schema evolution** approach (inspired by GraphQL) rather than explicit tool versions.
+MCP has protocol-level versioning but no standard for tool schema versioning. Outfitter adopts a **schema evolution** approach (inspired by GraphQL) rather than explicit tool versions.
 
 #### Principles
 
@@ -2549,7 +2549,7 @@ function createRedactor(config: RedactorConfig): Redactor;
 | Layer | Automatic | Notes |
 |-------|-----------|-------|
 | `@outfitter/logging` | ✓ | All log output redacted |
-| `KitError.toJSON()` | ✓ | Error context redacted |
+| `OutfitterError.toJSON()` | ✓ | Error context redacted |
 | CLI `output()` | ✓ | All user-facing output redacted |
 | MCP tool responses | ✓ | Handled by `@outfitter/mcp` |
 | History/state files | ✓ | `@outfitter/state` redacts before write |
@@ -2617,7 +2617,7 @@ This catches unintended output regressions—critical for agent consumers.
 
 ### MCP Tool Testing Harness
 
-Testing MCP tools requires simulating the protocol without a full server. The kit provides a test harness.
+Testing MCP tools requires simulating the protocol without a full server. Outfitter provides a test harness.
 
 ```typescript
 import { describe, test, expect } from "bun:test";
@@ -3007,7 +3007,7 @@ Tools may invert user/project precedence only with explicit rationale.
 
 ### Cache vs index
 
-* The kit supports **hybrid storage**:
+* Outfitter supports **hybrid storage**:
   * SQLite for structured caches/indexes
   * file storage for blobs
 * Default terminology:
@@ -3092,7 +3092,7 @@ await withLock(indexLock, async () => {
 **Lock timeout handling:**
 
 ```typescript
-interface LockTimeoutError extends KitError {
+interface LockTimeoutError extends OutfitterError {
   readonly _tag: "LockTimeoutError";
   readonly category: "timeout";
 
@@ -3443,9 +3443,9 @@ interface RetryOptions {
  * );
  */
 function retry<T>(
-  fn: () => Promise<Result<T, KitError>>,
+  fn: () => Promise<Result<T, OutfitterError>>,
   options: RetryOptions
-): Promise<Result<T, KitError>>;
+): Promise<Result<T, OutfitterError>>;
 
 /**
  * Wrap an async operation with a timeout.
@@ -3723,7 +3723,7 @@ interface EnvelopeMeta {
 /**
  * Convert a Result to a response envelope.
  */
-function toEnvelope<T, E extends KitError>(
+function toEnvelope<T, E extends OutfitterError>(
   result: Result<T, E>,
   meta?: Partial<EnvelopeMeta>
 ): Envelope<T>;
@@ -3731,7 +3731,7 @@ function toEnvelope<T, E extends KitError>(
 /**
  * Convert a Result to HTTP-style response (for MCP over HTTP).
  */
-function toHttpResponse<T, E extends KitError>(
+function toHttpResponse<T, E extends OutfitterError>(
   result: Result<T, E>
 ): { status: number; body: Envelope<T> };
 ```
@@ -3740,16 +3740,16 @@ function toHttpResponse<T, E extends KitError>(
 
 ```typescript
 /**
- * Serialize a KitError to JSON-safe format.
+ * Serialize a OutfitterError to JSON-safe format.
  * Strips stack traces in production, preserves in development.
  */
-function serializeError(error: KitError, options?: { includeStack?: boolean }): SerializedError;
+function serializeError(error: OutfitterError, options?: { includeStack?: boolean }): SerializedError;
 
 /**
  * Deserialize error from JSON (e.g., from MCP response).
- * Returns a typed KitError subclass based on _tag.
+ * Returns a typed OutfitterError subclass based on _tag.
  */
-function deserializeError(data: SerializedError): KitError;
+function deserializeError(data: SerializedError): OutfitterError;
 ```
 
 #### Context Factory
@@ -3891,12 +3891,12 @@ Initial reference repos (all `outfitter-dev/*`):
 ### Version model
 
 * Packages version independently by "temperature."
-* `@outfitter/kit` pins a known-good set.
+* `@outfitter/stack` pins a known-good set.
 
 ### Canary
 
 * Canary releases are supported.
-* `@outfitter/kit` can have a `canary` tag that pins canary versions of hot-tier packages.
+* `@outfitter/stack` can have a `canary` tag that pins canary versions of hot-tier packages.
 
 ## Milestones
 
@@ -3909,7 +3909,7 @@ Initial reference repos (all `outfitter-dev/*`):
   * Biome + Ultracite for formatting/linting
   * Strict TypeScript config (shared `tsconfig.base.json`)
   * Lefthook for pre-commit/pre-push hooks
-  * ast-grep rules for kit-specific patterns
+  * ast-grep rules for Outfitter-specific patterns
   * TSDoc coverage enforcement
 
 ### Milestone 1: Foundation tier stabilization
@@ -3965,7 +3965,7 @@ Initial reference repos (all `outfitter-dev/*`):
 
 * `outfitter` umbrella CLI for scaffolding and repo normalization
 * `outfitter init` templates for cli, mcp, daemon
-* `@outfitter/kit` meta-package published (version coordination only, no re-exports)
+* `@outfitter/stack` meta-package published (version coordination only, no re-exports)
 * `VERSIONS.md` documenting blessed version combinations
 
 ## Error recovery and resilience
@@ -3974,7 +3974,7 @@ This section is intentionally forward-looking. Implementation is not v1-critical
 
 ### Philosophy
 
-Errors are data, not exceptions. The kit's `Result<T, E>` pattern via better-result makes errors explicit and composable. But error *handling* strategy—retry, fallback, circuit breaking—is application-level.
+Errors are data, not exceptions. Outfitter's `Result<T, E>` pattern via better-result makes errors explicit and composable. But error *handling* strategy—retry, fallback, circuit breaking—is application-level.
 
 ### Patterns to support (later)
 
@@ -3985,7 +3985,7 @@ Errors are data, not exceptions. The kit's `Result<T, E>` pattern via better-res
 
 ### Infrastructure hooks
 
-The kit should provide extension points, not implementations:
+Outfitter should provide extension points, not implementations:
 
 ```typescript
 // Hypothetical future API
@@ -4005,7 +4005,7 @@ Whatever resilience patterns we add must compose with `Result<T, E>`. They shoul
 
 ### Breaking Change Policy
 
-The kit follows semantic versioning with explicit migration support:
+Outfitter follows semantic versioning with explicit migration support:
 
 | Version Type | Breaking Changes | Migration Required |
 |--------------|------------------|-------------------|
@@ -4205,4 +4205,4 @@ These items are intentionally deferred for SPEC follow-ups once we validate the 
 
 ## Related documents
 
-* **AGENT_FIRST.md** — Companion document describing the philosophy and principles behind agent-first application design. Covers why we build this way, the surfaces agents consume (CLI, MCP, HTTP, files), and the vision for Expedition (post-kit agent runtime). The Kit is the *how*; Agent-First is the *why*.
+* **AGENT_FIRST.md** — Companion document describing the philosophy and principles behind agent-first application design. Covers why we build this way, the surfaces agents consume (CLI, MCP, HTTP, files), and the vision for Expedition (post-Outfitter agent runtime). Outfitter is the *how*; Agent-First is the *why*.

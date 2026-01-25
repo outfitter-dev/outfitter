@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/contracts",
 	"description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
-	"version": "0.1.0-rc.0",
+	"version": "0.1.0-rc.1",
 	"type": "module",
 	"files": [
 		"dist"
@@ -21,10 +21,40 @@
 				"default": "./dist/index.js"
 			}
 		},
+		"./actions": {
+			"import": {
+				"types": "./dist/actions.d.ts",
+				"default": "./dist/actions.js"
+			}
+		},
 		"./handler": {
 			"import": {
 				"types": "./dist/handler.d.ts",
 				"default": "./dist/handler.js"
+			}
+		},
+		"./recovery": {
+			"import": {
+				"types": "./dist/recovery.d.ts",
+				"default": "./dist/recovery.js"
+			}
+		},
+		"./assert": {
+			"import": {
+				"types": "./dist/assert/index.d.ts",
+				"default": "./dist/assert/index.js"
+			}
+		},
+		"./result": {
+			"import": {
+				"types": "./dist/result/index.d.ts",
+				"default": "./dist/result/index.js"
+			}
+		},
+		"./result/utilities": {
+			"import": {
+				"types": "./dist/result/utilities.d.ts",
+				"default": "./dist/result/utilities.js"
 			}
 		},
 		"./adapters": {
@@ -51,6 +81,12 @@
 				"default": "./dist/serialization.js"
 			}
 		},
+		"./redactor": {
+			"import": {
+				"types": "./dist/redactor.d.ts",
+				"default": "./dist/redactor.js"
+			}
+		},
 		"./errors": {
 			"import": {
 				"types": "./dist/errors.d.ts",
@@ -63,10 +99,10 @@
 				"default": "./dist/context.js"
 			}
 		},
-		"./redactor": {
+		"./capabilities": {
 			"import": {
-				"types": "./dist/redactor.d.ts",
-				"default": "./dist/redactor.js"
+				"types": "./dist/capabilities.d.ts",
+				"default": "./dist/capabilities.js"
 			}
 		},
 		"./package.json": "./package.json"
@@ -99,7 +135,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/outfitter-dev/kit.git",
+		"url": "https://github.com/outfitter-dev/outfitter.git",
 		"directory": "packages/contracts"
 	}
 }

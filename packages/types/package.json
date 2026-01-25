@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/types",
 	"description": "Branded types, type guards, and type utilities for Outfitter",
-	"version": "0.1.0-rc.0",
+	"version": "0.1.0-rc.1",
 	"type": "module",
 	"files": [
 		"dist"
@@ -9,16 +9,22 @@
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
-		"./utilities": {
+		"./deep": {
 			"import": {
-				"types": "./dist/utilities.d.ts",
-				"default": "./dist/utilities.js"
+				"types": "./dist/deep.d.ts",
+				"default": "./dist/deep.js"
 			}
 		},
 		".": {
 			"import": {
 				"types": "./dist/index.d.ts",
 				"default": "./dist/index.js"
+			}
+		},
+		"./utilities": {
+			"import": {
+				"types": "./dist/utilities.d.ts",
+				"default": "./dist/utilities.js"
 			}
 		},
 		"./collections": {
@@ -33,6 +39,12 @@
 				"default": "./dist/short-id.js"
 			}
 		},
+		"./hash-id": {
+			"import": {
+				"types": "./dist/hash-id.d.ts",
+				"default": "./dist/hash-id.js"
+			}
+		},
 		"./branded": {
 			"import": {
 				"types": "./dist/branded.d.ts",
@@ -43,12 +55,6 @@
 			"import": {
 				"types": "./dist/guards.d.ts",
 				"default": "./dist/guards.js"
-			}
-		},
-		"./deep": {
-			"import": {
-				"types": "./dist/deep.d.ts",
-				"default": "./dist/deep.js"
 			}
 		},
 		"./package.json": "./package.json"
@@ -73,7 +79,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/outfitter-dev/kit.git",
+		"url": "https://github.com/outfitter-dev/outfitter.git",
 		"directory": "packages/types"
 	}
 }

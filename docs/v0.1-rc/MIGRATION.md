@@ -6,7 +6,7 @@
 ## Purpose
 Define an agent-guided experience for:
 1) **Init**: smarter scaffold + naming + defaults, driven by an agent.
-2) **Migrate**: adopt Kit in existing repos with minimal divergence and clear checkpoints.
+2) **Migrate**: adopt Outfitter in existing repos with minimal divergence and clear checkpoints.
 
 Tracking: `MONO-80`
 
@@ -14,12 +14,12 @@ Tracking: `MONO-80`
 - Provide a repeatable migration flow with clear checkpoints.
 - Normalize package/scripts/config alignment across repos.
 - Avoid destructive changes; keep PRs small, staged, and reversible.
-- Capture project-specific deltas and feed learnings back into Kit.
+- Capture project-specific deltas and feed learnings back into Outfitter.
 
 ## Non-Goals (for RC)
 - Full automation without human approval.
 - One-click migration for every repo shape.
-- Rewriting app architecture beyond Kit adoption.
+- Rewriting app architecture beyond Outfitter adoption.
 
 ## Agent-Guided Init (Concept)
 - **Prompted flow**: template selection, package/bin names, runtime deps.
@@ -41,7 +41,7 @@ Tracking: `MONO-80`
 - Bun vs Node (default Bun)
 - Lint/format baseline (Biome)
 - Testing (Bun test; Playwright optional)
-- Config/logging defaults (Kit config + logtape)
+- Config/logging defaults (Outfitter config + logtape)
 
 **Data + storage**
 - SQLite default (bun:sqlite) vs Postgres/Supabase/Neon
@@ -69,12 +69,12 @@ Tracking: `MONO-80`
    - Record tooling: lint, format, test, build, CI.
 2) **Align Tooling**
    - Standardize scripts and baseline config where feasible.
-   - Add Kit packages with minimal surface changes.
+   - Add Outfitter packages with minimal surface changes.
 3) **Surface Bridging**
-   - Map CLI/MCP/API to Kit action registry + capability manifest.
+   - Map CLI/MCP/API to Outfitter action registry + capability manifest.
    - Ensure tool search compatibility for MCP.
 4) **Adopt Defaults**
-   - Swap logging/config/testing helpers to Kit variants.
+   - Swap logging/config/testing helpers to Outfitter variants.
    - Add migrations/version headers where relevant (index).
 5) **Verify**
    - Run test/build/typecheck.
@@ -88,72 +88,17 @@ Tracking: `MONO-80`
 ## Repo Survey (Current)
 | Repo | Shape | Surfaces | Notes | Migration Risks |
 | --- | --- | --- | --- | --- |
-| firewatch | Monorepo (`apps/*`, `packages/*`) | CLI (`fw`), MCP (`fw-mcp`) | Bun + TS, oxlint/oxfmt, tests in `apps/*/tests` | Not using Kit contracts/handlers, format mismatch, commander v13, plugin folder not a package |
+| firewatch | Monorepo (`apps/*`, `packages/*`) | CLI (`fw`), MCP (`fw-mcp`) | Bun + TS, oxlint/oxfmt, tests in `apps/*/tests` | Not using Outfitter contracts/handlers, format mismatch, commander v13, plugin folder not a package |
 | north | Monorepo (`packages/north`, `examples`, `harness`) | CLI (`north`), MCP (`north-mcp`), lib | Bun + TS, native deps | `better-sqlite3`/`ast-grep` coupling, tests layout, zod v4, commander v12 |
-| navigator | Monorepo (`packages/*`) + extension | CLI (`nav`), MCP (`navigator-mcp`), HTTP server, extension | Bun + TS, Biome (single quotes) | Formatting mismatch, handler contract mismatch, extension surface complexity |
-| waymark | Monorepo (`apps/mcp`, `packages/*`) | CLI (`wm`/`waymark`), MCP (`waymark-mcp`) | Bun + TS, Turbo, ultracite | zod v4 vs v3 split, logging/prompt stack mismatch |
+| navigator | Monorepo (`packages/*`) + extension | CLI (`nav`), MCP (`navigator-mcp`), HTTP server | Bun + TS, Biome 1.x (single quotes) | Formatting mismatch, handler contract mismatch, commander v13, prompt stack mismatch (extension out of scope) |
+| waymark | Monorepo (`apps/mcp`, `packages/*`) | CLI (`wm`/`waymark`), MCP (`waymark-mcp`) | Bun + TS, Turbo, ultracite | logging/prompt stack mismatch |
 
 ### Repo Deep Dives
-- `docs/v0.1-rc/migrations/firewatch.md`
-- `docs/v0.1-rc/migrations/north.md`
-- `docs/v0.1-rc/migrations/navigator.md`
-- `docs/v0.1-rc/migrations/waymark.md`
-
-### Firewatch Notes
-**Shape**: Workspaces in root (`apps/*`, `packages/*`), plus `packages/claude-plugin/firewatch` (no `package.json`).  
-**Surfaces**: CLI (`fw`), MCP (`fw-mcp`), core/shared libs.  
-**Concerns**:
-- No Kit handler contract or error taxonomy (ad-hoc Result types).
-- Oxlint/oxfmt vs Kit Biome config (format drift).
-- Tests live in `apps/*/tests` and `packages/*/tests`, not `src/__tests__`.
-- CLI uses `commander@^13` (Kit prefers 14+).
-**Migration Checklist**:
-- Introduce `@outfitter/contracts` Result + error taxonomy in core.
-- Rewire CLI/MCP adapters to Kit (`@outfitter/cli`, `@outfitter/mcp`).
-- Align lint/format to Kit Biome; reformat.
-- Normalize test layout or adjust tooling.
-- Decide where `packages/claude-plugin` lives (apps/docs/templates).
-
-### North Notes
-**Shape**: Monorepo with `packages/north`, `examples/nextjs-shadcn`, `harness`.  
-**Surfaces**: CLI + MCP + library.  
-**Concerns**:
-- Native deps (`better-sqlite3`, `@ast-grep/napi`) complicate portability; consider Kit `@outfitter/index`/`bun:sqlite`.
-- Direct use of Commander/MCP SDK; not Kit adapters.
-- Biome config uses spaces; Kit requires tabs/double quotes.
-- zod v4 + commander v12 mismatch.
-**Migration Checklist**:
-- Move handlers to Kit Result contract + errors.
-- Adopt `@outfitter/cli`, `@outfitter/mcp`, `@outfitter/config`, `@outfitter/logging`.
-- Normalize deps (zod v4, commander v14+).
-- Align formatting + test layout.
-
-### Navigator Notes
-**Shape**: Monorepo `packages/*` (core/server/mcp/cli/extension/agents).  
-**Surfaces**: CLI, MCP, HTTP server, Chrome extension.  
-**Concerns**:
-- Format mismatch (single quotes, semicolons as-needed).
-- Tests live in `packages/*/tests`, not `src/__tests__`.
-- Capability manifest exists; needs mapping to Kit action registry.
-- TS strict flags differ from Kit; update required.
-**Migration Checklist**:
-- Preserve capability manifest or map to Kit registry.
-- Port CLI/MCP to Kit adapters; keep server Hono surface.
-- Align Biome config + TS strict flags.
-- Decide how to treat extension within Kit (app vs separate repo).
-
-### Waymark Notes
-**Shape**: Monorepo with `apps/mcp`, `packages/{cli,core,grammar}`, `packages/agents` (content).  
-**Surfaces**: CLI (`wm`/`waymark`), MCP (`waymark-mcp`).  
-**Concerns**:
-- Zod v4 in core/cli vs Zod v3 in MCP; Kit prefers v4.
-- Logging/prompt stack uses pino/ora/inquirer; Kit uses logtape + clack.
-- No Kit handler contract.
-**Migration Checklist**:
-- Normalize zod + adopt Kit Result contract.
-- Replace logging/prompt stack with Kit packages.
-- Align lint/format and tests layout.
-- Decide where `packages/agents` belongs (docs/templates).
+See detailed migration plans with phased checklists:
+- [firewatch.md](migrations/firewatch.md) — verified ✓
+- [north.md](migrations/north.md) — verified ✓
+- [navigator.md](migrations/navigator.md) — verified ✓ (extension out of scope)
+- [waymark.md](migrations/waymark.md) — verified ✓ (zod v3 in MCP needs upgrade)
 
 ## Areas of Concern (Expanded)
 - workspace vs published deps (`workspace:*` in templates vs npm publish)
@@ -162,13 +107,13 @@ Tracking: `MONO-80`
 - Existing testing harness compatibility
 - Version pinning and release flow
 - Formatting config mismatch (Biome tabs/double quotes vs repo defaults)
-- Zod version drift (v4 baseline vs older versions)
+- Zod version drift (waymark `apps/mcp` still on v3; others resolved)
 - Test layout mismatch (`tests/` vs `src/__tests__`)
 - Native deps + bundling constraints (sqlite/ast-grep)
-- Extension/front-end surfaces that don’t fit Kit tiering
+- Extension/front-end surfaces that don’t fit Outfitter tiering
 
 ## Open Questions
 - What should be the default “agent init” prompt set?
 - Which migrations are always safe vs opt-in?
 - How do we record project-specific divergences in a reusable way?
-- Should the migration skill live as a Kit CLI command, or an agent-only workflow?
+- Should the migration skill live as a Outfitter CLI command, or an agent-only workflow?

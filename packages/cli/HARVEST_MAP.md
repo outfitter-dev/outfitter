@@ -109,7 +109,7 @@ export function renderRecords(
 }
 ```
 
-**Key insight**: Waymark uses sync string building, suitable for smaller outputs. Kit should support both patterns based on output size.
+**Key insight**: Waymark uses sync string building, suitable for smaller outputs. Outfitter should support both patterns based on output size.
 
 #### TTY Detection
 
@@ -143,7 +143,7 @@ export function shouldOutputJson(
 }
 ```
 
-**Key insight**: Priority cascade: explicit flag > env var > config default > TTY detection. This is the blessed pattern for Kit.
+**Key insight**: Priority cascade: explicit flag > env var > config default > TTY detection. This is the blessed pattern for Outfitter.
 
 **Source**: `waymark/packages/cli/src/utils/terminal.ts:36-53`
 
@@ -158,7 +158,7 @@ export function shouldUseColor(noColorFlag?: boolean): boolean {
 }
 ```
 
-**Key insight**: Respects `NO_COLOR`, `FORCE_COLOR`, and `TERM=dumb` conventions. Kit MUST honor these.
+**Key insight**: Respects `NO_COLOR`, `FORCE_COLOR`, and `TERM=dumb` conventions. Outfitter MUST honor these.
 
 #### Color Handling
 
@@ -246,7 +246,7 @@ export function matchesFlag(
 }
 ```
 
-**Key insight**: Custom arg iterator with lookahead. Kit uses Commander.js but this pattern is useful for custom parsing.
+**Key insight**: Custom arg iterator with lookahead. Outfitter uses Commander.js but this pattern is useful for custom parsing.
 
 #### CSV/List Parsing
 
@@ -297,7 +297,7 @@ function parseAuthorFilters(value?: string): {
 }
 ```
 
-**Key insight**: Pattern for include/exclude lists with `!` prefix. Kit should standardize this pattern.
+**Key insight**: Pattern for include/exclude lists with `!` prefix. Outfitter should standardize this pattern.
 
 #### stdin Reading
 
@@ -323,7 +323,7 @@ export async function readFromStdin(): Promise<string> {
 }
 ```
 
-**Key insight**: Simple async stdin reading. Kit should expand this to support `@-` and `-` conventions.
+**Key insight**: Simple async stdin reading. Outfitter should expand this to support `@-` and `-` conventions.
 
 ---
 
@@ -371,7 +371,7 @@ export function createConfigError(message: string): CliError {
 }
 ```
 
-**Key insight**: Factory functions for common error types. Kit should build on this but derive from KitError base.
+**Key insight**: Factory functions for common error types. Outfitter should build on this but derive from OutfitterError base.
 
 #### Error Resolution
 
@@ -432,7 +432,7 @@ if (outputJson) {
 }
 ```
 
-**Key insight**: Structured output uses `{ ok: boolean, ... }` envelope pattern. Kit formalizes this as `Envelope<T>`.
+**Key insight**: Structured output uses `{ ok: boolean, ... }` envelope pattern. Outfitter formalizes this as `Envelope<T>`.
 
 ---
 
@@ -608,7 +608,7 @@ function setupShutdownHandlers(): void {
 }
 ```
 
-**Key insight**: Firewatch does cleanup (DB close) on shutdown. Kit should provide shutdown hooks for resource cleanup.
+**Key insight**: Firewatch does cleanup (DB close) on shutdown. Outfitter should provide shutdown hooks for resource cleanup.
 
 #### Spinner Pattern
 
@@ -633,7 +633,7 @@ function shouldEnableSpinner(options: {
 
 ### Output Mode Selection (from firewatch)
 
-Kit should generalize this pattern:
+Outfitter should generalize this pattern:
 
 ```typescript
 // @outfitter/cli output mode detection
@@ -722,25 +722,25 @@ export function resetColorDecision(): void {
 
 ---
 
-## Patterns NOT Suitable for Kit
+## Patterns NOT Suitable for Outfitter
 
 ### 1. Waymark-specific Styling (styles.ts)
 
-The extensive chalk-based styling for waymark syntax (tags, mentions, properties) is domain-specific. Kit provides semantic tokens via `@outfitter/ui`; individual CLIs style their domain objects.
+The extensive chalk-based styling for waymark syntax (tags, mentions, properties) is domain-specific. Outfitter provides semantic tokens via `@outfitter/ui`; individual CLIs style their domain objects.
 
-**Reason**: Too coupled to waymark grammar. Kit tokens are semantic (success, warning, danger), not domain-specific.
+**Reason**: Too coupled to waymark grammar. Outfitter tokens are semantic (success, warning, danger), not domain-specific.
 
 ### 2. Record Cleaning Logic (output.ts cleanRecord)
 
 Waymark's record cleaning removes empty arrays and specific fields. This is schema-specific.
 
-**Reason**: Kit handles generic JSON output. Schema-aware cleaning belongs in domain handlers.
+**Reason**: Outfitter handles generic JSON output. Schema-aware cleaning belongs in domain handlers.
 
 ### 3. Waymark-specific Iterator Patterns
 
-The custom flag parsing with `handleStringListFlag`, `handleJsonFlag`, etc., works around Commander.js limitations for waymark's unified command. Kit relies on Commander.js native patterns.
+The custom flag parsing with `handleStringListFlag`, `handleJsonFlag`, etc., works around Commander.js limitations for waymark's unified command. Outfitter relies on Commander.js native patterns.
 
-**Reason**: Over-engineering for Kit's scope. Commander.js handles most cases.
+**Reason**: Over-engineering for Outfitter's scope. Commander.js handles most cases.
 
 ### 4. Firewatch-specific Repo Detection
 
@@ -752,7 +752,7 @@ The `detectRepo()`, `ensureRepoCache()`, and GitHub-specific patterns are firewa
 
 ## Spec-Driven Features
 
-These features are defined in SPEC.md but do NOT exist in waymark or firewatch. They must be built fresh for Kit.
+These features are defined in SPEC.md but do NOT exist in waymark or firewatch. They must be built fresh for Outfitter.
 
 ### 1. Cursor Persistence (`--next` flag)
 
@@ -760,7 +760,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Waymark/firewatch have offset-based pagination but no state persistence.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - State storage in `@outfitter/state` (XDG state directory)
 - Per-command cursor serialization
 - `--next` flag that loads last cursor
@@ -772,7 +772,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Neither repo implements this.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - State keyed by `(command, context)` tuple
 - Default context when not specified
 - State isolation between contexts
@@ -783,7 +783,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Neither repo implements this systematically.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - `expandFileArg()` utility that reads `@path` files
 - Integration with `collectIds()` for multi-ID collection
 - Support for `@-` reading from stdin
@@ -794,18 +794,18 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Waymark has workspace detection but no constrained glob expansion.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - `parseGlob()` that enforces paths stay within workspace
 - Integration with `@outfitter/file-ops` for `secureResolvePath()`
 - Error on glob patterns that escape workspace
 
 ### 5. Result-Based Error Handling
 
-**SPEC.md requirement**: All handlers return `Result<T, E>` with `KitError` subclasses.
+**SPEC.md requirement**: All handlers return `Result<T, E>` with `OutfitterError` subclasses.
 
 **What exists**: Waymark/firewatch use thrown exceptions.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - CLI adapter converts `Result.err()` to appropriate exit code
 - Structured error serialization for `--json` output
 - Error envelope format: `{ ok: false, error: { _tag, message, ... } }`
@@ -816,7 +816,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Waymark has formatters but no shape abstraction. Firewatch has no abstraction.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - `@outfitter/ui` shapes
 - `@outfitter/cli` output() function that auto-selects renderer
 - Integration with `--json`, `--jsonl`, `--tree`, `--table` flags
@@ -827,7 +827,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 **What exists**: Waymark has some handler separation. Firewatch mixes command logic with output.
 
-**Kit implementation needed**:
+**Outfitter implementation needed**:
 - Clear handler interface: `(input, ctx) => Promise<Result<T, E>>`
 - CLI adapter that maps flags to handler input
 - Handler knows nothing about output format

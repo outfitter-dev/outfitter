@@ -27,7 +27,7 @@ Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.
 [x] `@outfitter/index`: add version headers + migration scaffold; track compactor/watcher hooks in Linear (MONO-78, MONO-79).
 [x] Consider capability manifest (CLI ↔ MCP parity) based on `navigator/packages/core/src/capabilities/manifest.ts` (in the `outfitter/navigator` repo).
 [x] Run scaffold smoke tests for `cli`, `mcp`, `daemon` templates and record results.
-[ ] Migrate Waymark (local) to use kit packages; verify tests + dev workflow.
+[ ] Migrate Waymark (local) to use Outfitter packages; verify tests + dev workflow.
 [ ] Decide Firewatch migration timing (optional for RC).
 
 ## Validation Checklist

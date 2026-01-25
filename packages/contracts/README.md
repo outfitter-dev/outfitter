@@ -1,6 +1,6 @@
 # @outfitter/contracts
 
-Result/Error patterns, error taxonomy, handler contracts, and shared interfaces for the Outfitter kit ecosystem.
+Result/Error patterns, error taxonomy, handler contracts, and shared interfaces for the Outfitter ecosystem.
 
 ## Status
 

@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/mcp",
 	"description": "MCP server framework with typed tools for Outfitter",
-	"version": "0.1.0-rc.0",
+	"version": "0.1.0-rc.1",
 	"type": "module",
 	"files": [
 		"dist"
@@ -58,7 +58,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/outfitter-dev/kit.git",
+		"url": "https://github.com/outfitter-dev/outfitter.git",
 		"directory": "packages/mcp"
 	}
 }

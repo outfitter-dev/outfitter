@@ -8,7 +8,7 @@
  */
 
 import { Result } from "@outfitter/contracts";
-import type { Logger, KitError, HandlerContext } from "@outfitter/contracts";
+import type { Logger, OutfitterError, HandlerContext } from "@outfitter/contracts";
 import { generateRequestId } from "@outfitter/contracts";
 import { zodToJsonSchema } from "./schema.js";
 import {
@@ -55,7 +55,7 @@ interface StoredTool {
 	inputSchema: unknown;
 	deferLoading: boolean;
 	// biome-ignore lint/suspicious/noExplicitAny: Handler types vary
-	handler: (input: any, ctx: HandlerContext) => Promise<Result<unknown, KitError>>;
+	handler: (input: any, ctx: HandlerContext) => Promise<Result<unknown, OutfitterError>>;
 	// biome-ignore lint/suspicious/noExplicitAny: Zod schema type
 	zodSchema: any;
 }
@@ -71,7 +71,7 @@ interface StoredTool {
  * - Tool registration with Zod schema validation
  * - Resource registration
  * - Tool invocation with Result-based error handling
- * - Automatic error translation from KitError to McpError
+ * - Automatic error translation from OutfitterError to McpError
  *
  * @param options - Server configuration options
  * @returns Configured McpServer instance
@@ -126,8 +126,8 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 		return ctx;
 	}
 
-	// Translate KitError to McpError
-	function translateError(error: KitError): InstanceType<typeof McpError> {
+	// Translate OutfitterError to McpError
+	function translateError(error: OutfitterError): InstanceType<typeof McpError> {
 		// Map error categories to JSON-RPC error codes
 		const codeMap: Record<string, number> = {
 			validation: -32602, // Invalid params
@@ -158,7 +158,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 		name,
 		version,
 
-		registerTool<TInput, TOutput, TError extends KitError>(
+		registerTool<TInput, TOutput, TError extends OutfitterError>(
 			tool: ToolDefinition<TInput, TOutput, TError>,
 		): void {
 			logger.debug("Registering tool", { name: tool.name });
@@ -336,7 +336,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
  * });
  * ```
  */
-export function defineTool<TInput, TOutput, TError extends KitError = KitError>(
+export function defineTool<TInput, TOutput, TError extends OutfitterError = OutfitterError>(
 	definition: ToolDefinition<TInput, TOutput, TError>,
 ): ToolDefinition<TInput, TOutput, TError> {
 	return definition;

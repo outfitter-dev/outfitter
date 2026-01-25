@@ -59,4 +59,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PaginationState`, `CursorOptions`
   - `ValidationError`, `CancelledError`
 
-[0.0.1]: https://github.com/outfitter-dev/kit/releases/tag/@outfitter/cli@0.0.1
+[0.0.1]: https://github.com/outfitter-dev/outfitter/releases/tag/@outfitter/cli@0.0.1

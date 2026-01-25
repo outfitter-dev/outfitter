@@ -1,5 +1,5 @@
 import type { Result } from "better-result";
-import { type KitError, type SerializedError, statusCodeMap } from "./errors.js";
+import { type OutfitterError, type SerializedError, statusCodeMap } from "./errors.js";
 import { serializeError } from "./serialization.js";
 import { generateRequestId } from "./context.js";
 
@@ -86,7 +86,7 @@ function buildMeta(overrides?: Partial<EnvelopeMeta>): EnvelopeMeta {
  * Convert a Result to a response envelope.
  *
  * @typeParam T - Success data type
- * @typeParam E - Error type (extends KitError)
+ * @typeParam E - Error type (extends OutfitterError)
  * @param result - Handler result to wrap
  * @param meta - Optional metadata overrides
  * @returns Envelope with success data or serialized error
@@ -97,7 +97,7 @@ function buildMeta(overrides?: Partial<EnvelopeMeta>): EnvelopeMeta {
  * const envelope = toEnvelope(result, { requestId: ctx.requestId });
  * ```
  */
-export function toEnvelope<T, E extends KitError>(
+export function toEnvelope<T, E extends OutfitterError>(
 	result: Result<T, E>,
 	meta?: Partial<EnvelopeMeta>,
 ): Envelope<T> {
@@ -124,7 +124,7 @@ export function toEnvelope<T, E extends KitError>(
  * Maps error category to appropriate HTTP status code.
  *
  * @typeParam T - Success data type
- * @typeParam E - Error type (extends KitError)
+ * @typeParam E - Error type (extends OutfitterError)
  * @param result - Handler result to convert
  * @returns HTTP response with status code and envelope body
  *
@@ -136,7 +136,7 @@ export function toEnvelope<T, E extends KitError>(
  * // or { status: 404, body: { ok: false, error: {...}, meta: {...} } }
  * ```
  */
-export function toHttpResponse<T, E extends KitError>(result: Result<T, E>): HttpResponse<T> {
+export function toHttpResponse<T, E extends OutfitterError>(result: Result<T, E>): HttpResponse<T> {
 	const envelope = toEnvelope(result);
 
 	if (envelope.ok) {

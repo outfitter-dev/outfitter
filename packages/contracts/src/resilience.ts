@@ -1,5 +1,5 @@
 import { Result } from "better-result";
-import { type KitError, TimeoutError } from "./errors.js";
+import { type OutfitterError, TimeoutError } from "./errors.js";
 
 /**
  * Options for retry behavior.
@@ -21,13 +21,13 @@ export interface RetryOptions {
 	jitter?: boolean;
 
 	/** Predicate to determine if error is retryable */
-	isRetryable?: (error: KitError) => boolean;
+	isRetryable?: (error: OutfitterError) => boolean;
 
 	/** Abort signal for cancellation */
 	signal?: AbortSignal;
 
 	/** Callback invoked before each retry */
-	onRetry?: (attempt: number, error: KitError, delayMs: number) => void;
+	onRetry?: (attempt: number, error: OutfitterError, delayMs: number) => void;
 }
 
 /**
@@ -44,7 +44,7 @@ export interface TimeoutOptions {
 /**
  * Default retry predicate - retries transient errors.
  */
-function defaultIsRetryable(error: KitError): boolean {
+function defaultIsRetryable(error: OutfitterError): boolean {
 	return (
 		error.category === "network" || error.category === "timeout" || error.category === "rate_limit"
 	);
@@ -108,9 +108,9 @@ function sleep(ms: number): Promise<void> {
  * ```
  */
 export async function retry<T>(
-	fn: () => Promise<Result<T, KitError>>,
+	fn: () => Promise<Result<T, OutfitterError>>,
 	options?: RetryOptions,
-): Promise<Result<T, KitError>> {
+): Promise<Result<T, OutfitterError>> {
 	const maxAttempts = options?.maxAttempts ?? 3;
 	const initialDelayMs = options?.initialDelayMs ?? 1000;
 	const maxDelayMs = options?.maxDelayMs ?? 30000;
@@ -120,7 +120,7 @@ export async function retry<T>(
 	const onRetry = options?.onRetry;
 	const signal = options?.signal;
 
-	let lastError: KitError | undefined;
+	let lastError: OutfitterError | undefined;
 	let attempt = 0;
 
 	while (attempt < maxAttempts) {
@@ -190,7 +190,7 @@ export async function retry<T>(
  * }
  * ```
  */
-export async function withTimeout<T, E extends KitError>(
+export async function withTimeout<T, E extends OutfitterError>(
 	fn: () => Promise<Result<T, E>>,
 	options: TimeoutOptions,
 ): Promise<Result<T, E | TimeoutError>> {

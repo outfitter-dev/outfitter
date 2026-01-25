@@ -10,7 +10,7 @@
  */
 
 import { Result, ValidationError } from "@outfitter/contracts";
-import type { HandlerContext, KitError } from "@outfitter/contracts";
+import type { HandlerContext, OutfitterError } from "@outfitter/contracts";
 import { z } from "zod";
 import type { ToolDefinition } from "./types.js";
 
@@ -223,7 +223,7 @@ export interface QueryToolOptions<T = unknown> {
 	handler?: (
 		input: NormalizedQueryInput,
 		ctx: HandlerContext,
-	) => Promise<Result<QueryToolResponse<T>, KitError>>;
+	) => Promise<Result<QueryToolResponse<T>, OutfitterError>>;
 }
 
 const querySchema = z

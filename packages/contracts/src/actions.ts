@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { Handler, SyncHandler } from "./handler.js";
-import type { KitError } from "./errors.js";
+import type { OutfitterError } from "./errors.js";
 
 export const ACTION_SURFACES = ["cli", "mcp", "api", "server"] as const;
 
@@ -48,7 +48,7 @@ export interface ActionTrpcSpec {
 	readonly path?: string;
 }
 
-export interface ActionSpec<TInput, TOutput, TError extends KitError = KitError> {
+export interface ActionSpec<TInput, TOutput, TError extends OutfitterError = OutfitterError> {
 	readonly id: string;
 	readonly description?: string;
 	readonly surfaces?: readonly ActionSurface[];
@@ -61,10 +61,10 @@ export interface ActionSpec<TInput, TOutput, TError extends KitError = KitError>
 	readonly trpc?: ActionTrpcSpec;
 }
 
-export type AnyActionSpec = ActionSpec<unknown, unknown, KitError>;
+export type AnyActionSpec = ActionSpec<unknown, unknown, OutfitterError>;
 
 export interface ActionRegistry {
-	add<TInput, TOutput, TError extends KitError = KitError>(
+	add<TInput, TOutput, TError extends OutfitterError = OutfitterError>(
 		action: ActionSpec<TInput, TOutput, TError>,
 	): ActionRegistry;
 	list(): AnyActionSpec[];
@@ -72,7 +72,7 @@ export interface ActionRegistry {
 	forSurface(surface: ActionSurface): AnyActionSpec[];
 }
 
-export function defineAction<TInput, TOutput, TError extends KitError = KitError>(
+export function defineAction<TInput, TOutput, TError extends OutfitterError = OutfitterError>(
 	action: ActionSpec<TInput, TOutput, TError>,
 ): ActionSpec<TInput, TOutput, TError> {
 	return action;

@@ -1,6 +1,6 @@
 {
 	"name": "outfitter",
-	"version": "0.1.0-rc.0",
+	"version": "0.1.0-rc.1",
 	"description": "Outfitter umbrella CLI for scaffolding and project management",
 	"type": "module",
 	"bin": {
@@ -61,7 +61,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/outfitter-dev/kit.git",
+		"url": "https://github.com/outfitter-dev/outfitter.git",
 		"directory": "apps/outfitter"
 	}
 }

@@ -22,7 +22,7 @@ interface CapturedOutput {
 }
 
 /**
- * Mock error with KitError-compatible structure.
+ * Mock error with OutfitterError-compatible structure.
  */
 interface MockKitError extends Error {
 	readonly _tag: string;
