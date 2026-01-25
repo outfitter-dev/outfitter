@@ -44,7 +44,7 @@ import { z } from "zod";
  * schema.parse({ PORT: "99999" }); // throws (out of range)
  * ```
  */
-export const portSchema: z.ZodType<number, z.ZodTypeDef, string> = z
+export const portSchema = z
 	.string()
 	.regex(/^\d+$/)
 	.transform(Number)
@@ -66,7 +66,7 @@ export const portSchema: z.ZodType<number, z.ZodTypeDef, string> = z
  * schema.parse({ DEBUG: "" }); // { DEBUG: false }
  * ```
  */
-export const booleanSchema: z.ZodType<boolean, z.ZodTypeDef, string> = z
+export const booleanSchema = z
 	.enum(["true", "false", "1", "0", ""])
 	.transform((val) => val === "true" || val === "1");
 
@@ -85,11 +85,7 @@ export const booleanSchema: z.ZodType<boolean, z.ZodTypeDef, string> = z
  * schema.parse({ NO_COLOR: undefined }); // { NO_COLOR: undefined }
  * ```
  */
-export const optionalBooleanSchema: z.ZodType<
-	boolean | undefined,
-	z.ZodTypeDef,
-	string | undefined
-> = z
+export const optionalBooleanSchema = z
 	.string()
 	.optional()
 	.transform((val) => {
@@ -136,23 +132,10 @@ export function parseEnv<T extends z.ZodRawShape>(
 // App-Level Environment
 // ============================================================================
 
-type AppEnvShape = {
-	NODE_ENV: z.ZodDefault<z.ZodEnum<["development", "test", "production"]>>;
-	NO_COLOR: typeof optionalBooleanSchema;
-	FORCE_COLOR: typeof optionalBooleanSchema;
-	CI: typeof optionalBooleanSchema;
-	TERM: z.ZodOptional<z.ZodString>;
-	XDG_CONFIG_HOME: z.ZodOptional<z.ZodString>;
-	XDG_DATA_HOME: z.ZodOptional<z.ZodString>;
-	XDG_STATE_HOME: z.ZodOptional<z.ZodString>;
-	XDG_CACHE_HOME: z.ZodOptional<z.ZodString>;
-	HOME: z.ZodOptional<z.ZodString>;
-};
-
 /**
  * Schema for common application environment variables.
  */
-const appEnvSchema: z.ZodObject<AppEnvShape> = z.object({
+const appEnvSchema = z.object({
 	NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
 	// Terminal detection

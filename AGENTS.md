@@ -120,7 +120,7 @@ Use Bun-native APIs before npm packages:
 | Concern | Package |
 |---------|---------|
 | Result type | `better-result` |
-| Schema validation | `zod` (v3.25+) |
+| Schema validation | `zod` (v4) |
 | CLI parsing | `commander` (v14+) |
 | Logging | `@logtape/logtape` |
 | MCP protocol | `@modelcontextprotocol/sdk` |

@@ -41,7 +41,7 @@
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/ui": "workspace:*",
 		"commander": "^14.0.2",
-		"zod": "^3.25.0"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.3.6",
