@@ -24,7 +24,7 @@ import { outfitterActions } from "./actions.js";
 function createProgram() {
 	const cli = createCLI({
 		name: "outfitter",
-		version: "0.1.0",
+		version: "0.1.0-rc.0",
 		description: "Outfitter CLI for scaffolding and project management",
 		onError: (error) => {
 			if (error instanceof Error) {

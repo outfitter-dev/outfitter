@@ -45,7 +45,7 @@ export async function runDaemon(): Promise<void> {
 				return Response.json({
 					status: "ok",
 					uptime: Date.now() - startTime,
-					version: "0.1.0",
+					version: "{{version}}",
 				});
 			}
 

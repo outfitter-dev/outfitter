@@ -31,22 +31,22 @@ The kit's `peerDependencies` will warn if you have incompatible versions install
 
 See [VERSIONS.md](./VERSIONS.md) for the complete compatibility matrix.
 
-### Current Release (0.1.0)
+### Current Release (0.1.0-rc.0)
 
 | Package | Minimum Version |
 |---------|-----------------|
-| @outfitter/contracts | 0.1.0 |
-| @outfitter/types | 0.1.0 |
-| @outfitter/cli | 0.1.0 |
-| @outfitter/config | 0.1.0 |
-| @outfitter/logging | 0.1.0 |
-| @outfitter/file-ops | 0.1.0 |
-| @outfitter/state | 0.1.0 |
-| @outfitter/ui | 0.1.0 |
-| @outfitter/mcp | 0.1.0 |
-| @outfitter/index | 0.1.0 |
-| @outfitter/daemon | 0.1.0 |
-| @outfitter/testing | 0.1.0 |
+| @outfitter/contracts | 0.1.0-rc.0 |
+| @outfitter/types | 0.1.0-rc.0 |
+| @outfitter/cli | 0.1.0-rc.0 |
+| @outfitter/config | 0.1.0-rc.0 |
+| @outfitter/logging | 0.1.0-rc.0 |
+| @outfitter/file-ops | 0.1.0-rc.0 |
+| @outfitter/state | 0.1.0-rc.0 |
+| @outfitter/ui | 0.1.0-rc.0 |
+| @outfitter/mcp | 0.1.0-rc.0 |
+| @outfitter/index | 0.1.0-rc.0 |
+| @outfitter/daemon | 0.1.0-rc.0 |
+| @outfitter/testing | 0.1.0-rc.0 |
 
 ## Exports
 
@@ -68,7 +68,7 @@ Minimum compatible versions for each package.
 import { MINIMUM_VERSIONS } from "@outfitter/kit";
 
 // Check if a package meets the minimum version
-const cliMinimum = MINIMUM_VERSIONS["@outfitter/cli"]; // "0.1.0"
+const cliMinimum = MINIMUM_VERSIONS["@outfitter/cli"]; // "0.1.0-rc.0"
 ```
 
 ### OutfitterPackage
@@ -82,7 +82,7 @@ function getMinVersion(pkg: OutfitterPackage): string {
   return MINIMUM_VERSIONS[pkg];
 }
 
-getMinVersion("@outfitter/cli"); // "0.1.0"
+getMinVersion("@outfitter/cli"); // "0.1.0-rc.0"
 getMinVersion("@outfitter/invalid"); // TypeScript error
 ```
 

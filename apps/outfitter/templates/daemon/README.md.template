@@ -38,7 +38,7 @@ Returns daemon health information:
 {
   "status": "ok",
   "uptime": 12345,
-  "version": "0.1.0"
+  "version": "{{version}}"
 }
 ```
 

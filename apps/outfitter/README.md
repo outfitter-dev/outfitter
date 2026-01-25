@@ -100,7 +100,7 @@ Outfitter Doctor
 ==================================================
 [PASS] Bun Version: 1.3.6 (requires 1.3.6)
 [PASS] package.json
-       my-project@0.1.0
+       my-project@0.1.0-rc.0
 [PASS] Dependencies
        12 dependencies installed
 [PASS] tsconfig.json
@@ -119,7 +119,7 @@ Templates use placeholder syntax for project-specific values:
 | `{{name}}` | Project name (legacy) | Directory name |
 | `{{projectName}}` | Project name | Directory name |
 | `{{binName}}` | Binary name | Project name |
-| `{{version}}` | Initial version | `0.1.0` |
+| `{{version}}` | Initial version | `0.1.0-rc.0` |
 | `{{description}}` | Project description | Generic description |
 
 Files ending in `.template` have their extension removed after processing (e.g., `package.json.template` becomes `package.json`).

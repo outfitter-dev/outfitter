@@ -6,18 +6,18 @@ This document tracks version compatibility across @outfitter packages.
 
 | Package | Version | Status |
 |---------|---------|--------|
-| @outfitter/contracts | 0.1.0 | Stable |
-| @outfitter/types | 0.1.0 | Stable |
-| @outfitter/cli | 0.1.0 | Stable |
-| @outfitter/config | 0.1.0 | Stable |
-| @outfitter/logging | 0.1.0 | Stable |
-| @outfitter/file-ops | 0.1.0 | Stable |
-| @outfitter/state | 0.1.0 | Stable |
-| @outfitter/ui | 0.1.0 | Stable |
-| @outfitter/mcp | 0.1.0 | Stable |
-| @outfitter/index | 0.1.0 | Stable |
-| @outfitter/daemon | 0.1.0 | Stable |
-| @outfitter/testing | 0.1.0 | Stable |
+| @outfitter/contracts | 0.1.0-rc.0 | RC |
+| @outfitter/types | 0.1.0-rc.0 | RC |
+| @outfitter/cli | 0.1.0-rc.0 | RC |
+| @outfitter/config | 0.1.0-rc.0 | RC |
+| @outfitter/logging | 0.1.0-rc.0 | RC |
+| @outfitter/file-ops | 0.1.0-rc.0 | RC |
+| @outfitter/state | 0.1.0-rc.0 | RC |
+| @outfitter/ui | 0.1.0-rc.0 | RC |
+| @outfitter/mcp | 0.1.0-rc.0 | RC |
+| @outfitter/index | 0.1.0-rc.0 | RC |
+| @outfitter/daemon | 0.1.0-rc.0 | RC |
+| @outfitter/testing | 0.1.0-rc.0 | RC |
 
 ## Dependency Tiers
 

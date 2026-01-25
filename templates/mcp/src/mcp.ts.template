@@ -16,7 +16,7 @@ export function createMCPServer(): Server {
 	const server = new Server(
 		{
 			name: "{{binName}}",
-			version: "0.1.0",
+			version: "{{version}}",
 		},
 		{
 			capabilities: {
