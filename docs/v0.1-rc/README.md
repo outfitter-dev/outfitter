@@ -58,6 +58,16 @@ Deferred:
 - HTTP transport (streaming/SSE)
 - Transport auto-negotiation
 
+## Capability Manifest (CLI ↔ MCP Parity)
+To avoid CLI/MCP divergence, the canonical action capability manifest lives in
+`packages/contracts/src/capabilities.ts`.
+
+Defaults:
+- `capability()` assumes `["cli", "mcp"]` (most actions).
+- `capabilityAll()` marks actions available everywhere without repeating surfaces.
+- If you want "always add tools" by default, use `capabilityAll()` for new actions
+  (or treat missing entries as "all surfaces" in downstream tooling).
+
 ## Index v0.1-rc Scope
 In:
 - Version headers + migration scaffolding

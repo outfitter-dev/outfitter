@@ -25,8 +25,8 @@ Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.
 [ ] Publish `0.1.0-*` packages for real installs.
 [x] `@outfitter/mcp`: implement tool-search compatibility + minimal core tools (docs/config/query); explicit stdio transport for RC. Track HTTP + auto-negotiation in Linear (MONO-76, MONO-77).
 [x] `@outfitter/index`: add version headers + migration scaffold; track compactor/watcher hooks in Linear (MONO-78, MONO-79).
-[ ] Consider capability manifest (CLI ↔ MCP parity) based on `navigator/packages/core/src/capabilities/manifest.ts` (in the `outfitter/navigator` repo).
-[ ] Run scaffold smoke tests for `cli`, `mcp`, `daemon` templates and record results.
+[x] Consider capability manifest (CLI ↔ MCP parity) based on `navigator/packages/core/src/capabilities/manifest.ts` (in the `outfitter/navigator` repo).
+[x] Run scaffold smoke tests for `cli`, `mcp`, `daemon` templates and record results.
 [ ] Migrate Waymark (local) to use kit packages; verify tests + dev workflow.
 [ ] Decide Firewatch migration timing (optional for RC).
 
@@ -38,3 +38,4 @@ Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.
 ## Notes
 - `SPEC.md` and `PLAN.md` are frozen as of 2026-01-24.
 - Phase 7 is treated as the v0.1-rc scope, not an additional phase.
+- Scaffold smoke tests: `tmp/smoke-20260124-153400/cli`, `tmp/smoke-20260124-153800/mcp`, `tmp/smoke-20260124-153800/daemon`.

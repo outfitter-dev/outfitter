@@ -136,3 +136,15 @@ export type {
 	AuthAdapter,
 	StorageAdapter,
 } from "./adapters.js";
+
+// Capability manifest
+export {
+	CAPABILITY_SURFACES,
+	DEFAULT_ACTION_SURFACES,
+	ACTION_CAPABILITIES,
+	capability,
+	capabilityAll,
+	getActionsForSurface,
+} from "./capabilities.js";
+
+export type { CapabilitySurface, ActionCapability } from "./capabilities.js";
