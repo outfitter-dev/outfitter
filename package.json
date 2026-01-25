@@ -20,7 +20,8 @@
 		"clean": "turbo run clean && rm -rf node_modules",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "turbo run build && changeset publish"
+		"release": "turbo run build && changeset publish",
+		"publish:rc": "bun run scripts/publish-rc.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.11",
