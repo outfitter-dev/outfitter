@@ -43,6 +43,10 @@ export { createCLI } from "./cli.js";
 // Command builder
 export { command } from "./command.js";
 
+// Action adapter
+export { buildCliCommands } from "./actions.js";
+export type { BuildCliCommandsOptions } from "./actions.js";
+
 // Output utilities
 export { output, exitWithError } from "./output.js";
 

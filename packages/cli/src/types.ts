@@ -45,7 +45,7 @@ export interface CLIConfig {
  */
 export interface CLI {
 	/** Register a command with the CLI */
-	register(command: CommandBuilder): this;
+	register(command: CommandBuilder | Command): this;
 
 	/** Parse arguments and execute the matched command */
 	parse(argv?: readonly string[]): Promise<void>;
