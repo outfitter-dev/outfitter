@@ -2,7 +2,7 @@
  * @outfitter/contracts
  *
  * Result/Error patterns, error taxonomy, handler contracts, and shared
- * interfaces for the Outfitter kit ecosystem.
+ * interfaces for the Outfitter Outfitter ecosystem.
  *
  * @packageDocumentation
  */
@@ -29,7 +29,7 @@ export {
 	type ErrorCategory,
 	type SerializedError,
 	type AnyKitError,
-	type KitError,
+	type OutfitterError,
 	type KitErrorProps,
 	// Maps
 	exitCodeMap,

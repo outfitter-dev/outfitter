@@ -26,7 +26,7 @@ Legend:
 - `outfitter init cli` succeeded locally (2026-01-24).
 - `bun install` inside generated project failed because `@outfitter/*` packages are not published yet.
 
-## Deferred Issues (Linear / MONO / Kit project)
+## Deferred Issues (Linear / MONO / Stack project)
 - MONO-76: MCP: add HTTP transport (streaming)
 - MONO-77: MCP: add transport auto-negotiation (stdio ↔ HTTP)
 - MONO-78: Index: add compactor hooks

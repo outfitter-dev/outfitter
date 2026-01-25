@@ -6,7 +6,7 @@
 ## Purpose
 Define an agent-guided experience for:
 1) **Init**: smarter scaffold + naming + defaults, driven by an agent.
-2) **Migrate**: adopt Kit in existing repos with minimal divergence and clear checkpoints.
+2) **Migrate**: adopt Outfitter in existing repos with minimal divergence and clear checkpoints.
 
 Tracking: `MONO-80`
 
@@ -14,12 +14,12 @@ Tracking: `MONO-80`
 - Provide a repeatable migration flow with clear checkpoints.
 - Normalize package/scripts/config alignment across repos.
 - Avoid destructive changes; keep PRs small, staged, and reversible.
-- Capture project-specific deltas and feed learnings back into Kit.
+- Capture project-specific deltas and feed learnings back into Outfitter.
 
 ## Non-Goals (for RC)
 - Full automation without human approval.
 - One-click migration for every repo shape.
-- Rewriting app architecture beyond Kit adoption.
+- Rewriting app architecture beyond Outfitter adoption.
 
 ## Agent-Guided Init (Concept)
 - **Prompted flow**: template selection, package/bin names, runtime deps.
@@ -41,7 +41,7 @@ Tracking: `MONO-80`
 - Bun vs Node (default Bun)
 - Lint/format baseline (Biome)
 - Testing (Bun test; Playwright optional)
-- Config/logging defaults (Kit config + logtape)
+- Config/logging defaults (Outfitter config + logtape)
 
 **Data + storage**
 - SQLite default (bun:sqlite) vs Postgres/Supabase/Neon
@@ -69,12 +69,12 @@ Tracking: `MONO-80`
    - Record tooling: lint, format, test, build, CI.
 2) **Align Tooling**
    - Standardize scripts and baseline config where feasible.
-   - Add Kit packages with minimal surface changes.
+   - Add Outfitter packages with minimal surface changes.
 3) **Surface Bridging**
-   - Map CLI/MCP/API to Kit action registry + capability manifest.
+   - Map CLI/MCP/API to Outfitter action registry + capability manifest.
    - Ensure tool search compatibility for MCP.
 4) **Adopt Defaults**
-   - Swap logging/config/testing helpers to Kit variants.
+   - Swap logging/config/testing helpers to Outfitter variants.
    - Add migrations/version headers where relevant (index).
 5) **Verify**
    - Run test/build/typecheck.
@@ -88,7 +88,7 @@ Tracking: `MONO-80`
 ## Repo Survey (Current)
 | Repo | Shape | Surfaces | Notes | Migration Risks |
 | --- | --- | --- | --- | --- |
-| firewatch | Monorepo (`apps/*`, `packages/*`) | CLI (`fw`), MCP (`fw-mcp`) | Bun + TS, oxlint/oxfmt, tests in `apps/*/tests` | Not using Kit contracts/handlers, format mismatch, commander v13, plugin folder not a package |
+| firewatch | Monorepo (`apps/*`, `packages/*`) | CLI (`fw`), MCP (`fw-mcp`) | Bun + TS, oxlint/oxfmt, tests in `apps/*/tests` | Not using Outfitter contracts/handlers, format mismatch, commander v13, plugin folder not a package |
 | north | Monorepo (`packages/north`, `examples`, `harness`) | CLI (`north`), MCP (`north-mcp`), lib | Bun + TS, native deps | `better-sqlite3`/`ast-grep` coupling, tests layout, zod v4, commander v12 |
 | navigator | Monorepo (`packages/*`) + extension | CLI (`nav`), MCP (`navigator-mcp`), HTTP server | Bun + TS, Biome 1.x (single quotes) | Formatting mismatch, handler contract mismatch, commander v13, prompt stack mismatch (extension out of scope) |
 | waymark | Monorepo (`apps/mcp`, `packages/*`) | CLI (`wm`/`waymark`), MCP (`waymark-mcp`) | Bun + TS, Turbo, ultracite | logging/prompt stack mismatch |
@@ -110,10 +110,10 @@ See detailed migration plans with phased checklists:
 - Zod version drift (waymark `apps/mcp` still on v3; others resolved)
 - Test layout mismatch (`tests/` vs `src/__tests__`)
 - Native deps + bundling constraints (sqlite/ast-grep)
-- Extension/front-end surfaces that don’t fit Kit tiering
+- Extension/front-end surfaces that don’t fit Outfitter tiering
 
 ## Open Questions
 - What should be the default “agent init” prompt set?
 - Which migrations are always safe vs opt-in?
 - How do we record project-specific divergences in a reusable way?
-- Should the migration skill live as a Kit CLI command, or an agent-only workflow?
+- Should the migration skill live as a Outfitter CLI command, or an agent-only workflow?

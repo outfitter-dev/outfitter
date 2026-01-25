@@ -1,7 +1,7 @@
 import { Result } from "better-result";
 import type { z } from "zod";
 import {
-	type KitError,
+	type OutfitterError,
 	type SerializedError,
 	ValidationError,
 	NotFoundError,
@@ -50,9 +50,9 @@ function isValidErrorTag(tag: string): tag is ErrorTag {
 }
 
 /**
- * Extract context from a KitError based on its type.
+ * Extract context from a OutfitterError based on its type.
  */
-function extractContext(error: KitError): Record<string, unknown> | undefined {
+function extractContext(error: OutfitterError): Record<string, unknown> | undefined {
 	const context: Record<string, unknown> = {};
 
 	// Handle specific error types with known properties
@@ -107,7 +107,7 @@ function extractContext(error: KitError): Record<string, unknown> | undefined {
 }
 
 /**
- * Serialize a KitError to JSON-safe format.
+ * Serialize a OutfitterError to JSON-safe format.
  *
  * Strips stack traces in production, preserves in development.
  * Automatically redacts sensitive values from context.
@@ -122,7 +122,7 @@ function extractContext(error: KitError): Record<string, unknown> | undefined {
  * // { _tag: "NotFoundError", category: "not_found", message: "note not found: abc123", context: { resourceType: "note", resourceId: "abc123" } }
  * ```
  */
-export function serializeError(error: KitError, options?: SerializeErrorOptions): SerializedError {
+export function serializeError(error: OutfitterError, options?: SerializeErrorOptions): SerializedError {
 	const isProduction = process.env["NODE_ENV"] === "production";
 	const includeStack = options?.includeStack ?? !isProduction;
 
@@ -151,10 +151,10 @@ export function serializeError(error: KitError, options?: SerializeErrorOptions)
 /**
  * Deserialize error from JSON (e.g., from MCP response).
  *
- * Returns a typed KitError subclass based on _tag.
+ * Returns a typed OutfitterError subclass based on _tag.
  *
  * @param data - Serialized error data
- * @returns Reconstructed KitError instance
+ * @returns Reconstructed OutfitterError instance
  *
  * @example
  * ```typescript
@@ -164,7 +164,7 @@ export function serializeError(error: KitError, options?: SerializeErrorOptions)
  * }
  * ```
  */
-export function deserializeError(data: SerializedError): KitError {
+export function deserializeError(data: SerializedError): OutfitterError {
 	const tag = data._tag;
 
 	if (!isValidErrorTag(tag)) {

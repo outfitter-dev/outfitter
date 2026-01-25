@@ -8,7 +8,7 @@
 
 import type { Result, TaggedErrorClass } from "@outfitter/contracts";
 import { TaggedError } from "@outfitter/contracts";
-import type { Handler, HandlerContext, KitError, Logger } from "@outfitter/contracts";
+import type { Handler, HandlerContext, OutfitterError, Logger } from "@outfitter/contracts";
 import type { z } from "zod";
 
 // Re-export types for convenience
@@ -66,7 +66,7 @@ export interface McpServerOptions {
  *
  * @typeParam TInput - The validated input type (inferred from Zod schema)
  * @typeParam TOutput - The success output type
- * @typeParam TError - The error type (must extend KitError)
+ * @typeParam TError - The error type (must extend OutfitterError)
  *
  * @example
  * ```typescript
@@ -93,7 +93,7 @@ export interface McpServerOptions {
  * };
  * ```
  */
-export interface ToolDefinition<TInput, TOutput, TError extends KitError = KitError> {
+export interface ToolDefinition<TInput, TOutput, TError extends OutfitterError = OutfitterError> {
 	/**
 	 * Unique tool name (kebab-case recommended).
 	 * Used by clients to invoke the tool.
@@ -230,7 +230,7 @@ const McpErrorBase: TaggedErrorClass<
  * ```
  */
 export class McpError extends McpErrorBase {
-	/** Error category for Kit error taxonomy compatibility */
+	/** Error category for Outfitter error taxonomy compatibility */
 	readonly category = "internal" as const;
 }
 
@@ -279,7 +279,7 @@ export interface McpServer {
 	 * Register a tool with the server.
 	 * @param tool - Tool definition to register
 	 */
-	registerTool<TInput, TOutput, TError extends KitError>(
+	registerTool<TInput, TOutput, TError extends OutfitterError>(
 		tool: ToolDefinition<TInput, TOutput, TError>,
 	): void;
 

@@ -10,7 +10,7 @@
 import { describe, expect, it } from "bun:test";
 import { Result } from "better-result";
 import { retry, withTimeout } from "../resilience.js";
-import { NetworkError, type TimeoutError, ValidationError, type KitError } from "../errors.js";
+import { NetworkError, type TimeoutError, ValidationError, type OutfitterError } from "../errors.js";
 
 // ============================================================================
 // retry<T>() Tests (8 tests)
@@ -166,7 +166,7 @@ describe("retry<T>()", () => {
 
 	it("respects shouldRetry predicate", async () => {
 		let attempts = 0;
-		const fn = async (): Promise<Result<string, KitError>> => {
+		const fn = async (): Promise<Result<string, OutfitterError>> => {
 			attempts++;
 			if (attempts === 1) {
 				return Result.err(new NetworkError({ message: "Transient" }));

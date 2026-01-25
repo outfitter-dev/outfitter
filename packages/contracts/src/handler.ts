@@ -1,5 +1,5 @@
 import type { Result } from "better-result";
-import type { KitError } from "./errors.js";
+import type { OutfitterError } from "./errors.js";
 
 /**
  * Logger interface for handler context.
@@ -89,7 +89,7 @@ export interface HandlerContext {
  *
  * @typeParam TInput - Validated input parameters
  * @typeParam TOutput - Success return type
- * @typeParam TError - Error type (must extend KitError)
+ * @typeParam TError - Error type (must extend OutfitterError)
  *
  * @example
  * ```typescript
@@ -100,7 +100,7 @@ export interface HandlerContext {
  * };
  * ```
  */
-export type Handler<TInput, TOutput, TError extends KitError = KitError> = (
+export type Handler<TInput, TOutput, TError extends OutfitterError = OutfitterError> = (
 	input: TInput,
 	ctx: HandlerContext,
 ) => Promise<Result<TOutput, TError>>;
@@ -108,7 +108,7 @@ export type Handler<TInput, TOutput, TError extends KitError = KitError> = (
 /**
  * Synchronous handler variant for operations that don't need async.
  */
-export type SyncHandler<TInput, TOutput, TError extends KitError = KitError> = (
+export type SyncHandler<TInput, TOutput, TError extends OutfitterError = OutfitterError> = (
 	input: TInput,
 	ctx: HandlerContext,
 ) => Result<TOutput, TError>;

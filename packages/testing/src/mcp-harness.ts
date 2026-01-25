@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import type { KitError, Result } from "@outfitter/contracts";
+import type { OutfitterError, Result } from "@outfitter/contracts";
 import {
 	createMcpServer,
 	type McpError,
@@ -72,7 +72,7 @@ export interface McpHarnessOptions {
 
 export interface McpTestHarnessOptions {
 	/** Tools to register on the test MCP server. */
-	readonly tools: ToolDefinition<unknown, unknown, KitError>[];
+	readonly tools: ToolDefinition<unknown, unknown, OutfitterError>[];
 	/** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
 	readonly fixturesDir?: string;
 	/** Optional server name for diagnostics. */

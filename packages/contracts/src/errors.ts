@@ -67,7 +67,7 @@ export interface SerializedError {
 }
 
 /**
- * Base interface for KitError properties.
+ * Base interface for OutfitterError properties.
  * All concrete error classes must include these fields.
  */
 export interface KitErrorProps {
@@ -473,4 +473,4 @@ export type AnyKitError =
  * Type alias for backwards compatibility with handler signatures.
  * Use AnyKitError for the union type.
  */
-export type KitError = AnyKitError;
+export type OutfitterError = AnyKitError;

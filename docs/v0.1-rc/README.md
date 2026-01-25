@@ -80,7 +80,7 @@ Deferred:
 - **Local dev**: `outfitter init --local/--workspace` rewrites deps for monorepo testing.
 - **Published RC**: templates target `0.1.0-*` for real installs.
 
-## Deferred Issues (Linear / MONO / Kit project)
+## Deferred Issues (Linear / MONO / Stack project)
 - MONO-76: MCP: add HTTP transport (streaming)
 - MONO-77: MCP: add transport auto-negotiation (stdio ↔ HTTP)
 - MONO-78: Index: add compactor hooks

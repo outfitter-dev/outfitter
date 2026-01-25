@@ -1,4 +1,4 @@
-# Firewatch → Kit Migration
+# Firewatch → Outfitter Migration
 
 **Date**: 2026-01-25
 **Status**: Draft (verified 2026-01-25)
@@ -21,12 +21,12 @@
 - **Core**: `packages/core/src/index.ts`
 - **Shared**: `packages/shared/src/index.ts`
 
-## Kit Deltas
-- **Handler contract**: core logic does not use Kit `Result<T,E>` + error taxonomy.
+## Outfitter Deltas
+- **Handler contract**: core logic does not use Outfitter `Result<T,E>` + error taxonomy.
 - **Adapters**: CLI/MCP use raw Commander + MCP SDK instead of `@outfitter/cli` + `@outfitter/mcp`.
-- **Formatting**: oxlint/oxfmt vs Kit Biome conventions (tabs, double quotes).
-- **Tests**: `apps/*/tests` and `packages/*/tests` (Kit expects `src/__tests__`).
-- **Deps**: Commander `^13` (Kit prefers `^14`).
+- **Formatting**: oxlint/oxfmt vs Outfitter Biome conventions (tabs, double quotes).
+- **Tests**: `apps/*/tests` and `packages/*/tests` (Outfitter expects `src/__tests__`).
+- **Deps**: Commander `^13` (Outfitter prefers `^14`).
 - **Non-package assets**: `packages/claude-plugin/firewatch` needs a clear home.
 
 ## Migration Plan (Phased)
@@ -36,8 +36,8 @@
 - Identify plugin asset usage + distribution requirements.
 
 ### Phase 1 — Tooling Alignment
-- Adopt Kit Biome config; remove oxlint/oxfmt or scope them to legacy.
-- Normalize scripts to Kit baseline (build/test/typecheck/lint/format).
+- Adopt Outfitter Biome config; remove oxlint/oxfmt or scope them to legacy.
+- Normalize scripts to Outfitter baseline (build/test/typecheck/lint/format).
 - Decide on test layout migration (`tests/` → `src/__tests__`).
 
 ### Phase 2 — Handler Contract
@@ -59,7 +59,7 @@
 - **Plugin assets**: decide if `packages/claude-plugin/firewatch` becomes `apps/` or `docs/` assets.
 - **Formatting migration**: large diff risk (oxlint/oxfmt → Biome); may need a dedicated formatting PR.
 - **Test layout move**: can be deferred if tooling supports current layout.
-- **MCP error handling**: tools rely on thrown errors propagating up; Kit expects Result types.
+- **MCP error handling**: tools rely on thrown errors propagating up; Outfitter expects Result types.
 - **Ultracite dependency**: will be removed with Biome migration.
 
 ## Verified Status (2026-01-25)
@@ -68,4 +68,4 @@ All documented claims verified accurate. Zod v4 already adopted across the repo.
 ## Quick Wins
 - Add `@outfitter/contracts` + Result in core without changing CLI/MCP.
 - Introduce a minimal action registry map for CLI/MCP parity.
-- Add Kit-compatible scripts without altering code structure.
+- Add Outfitter-compatible scripts without altering code structure.
