@@ -9,9 +9,8 @@
  * @packageDocumentation
  */
 
-import { Command } from "commander";
-import { initCommand } from "./commands/init";
-import { doctorCommand } from "./commands/doctor";
+import { buildCliCommands, createCLI } from "@outfitter/cli";
+import { outfitterActions } from "./actions.js";
 
 // =============================================================================
 // CLI Setup
@@ -22,19 +21,28 @@ import { doctorCommand } from "./commands/doctor";
  *
  * @returns Configured Commander program
  */
-function createProgram(): Command {
-	const program = new Command();
+function createProgram() {
+	const cli = createCLI({
+		name: "outfitter",
+		version: "0.1.0",
+		description: "Outfitter CLI for scaffolding and project management",
+		onError: (error) => {
+			if (error instanceof Error) {
+				// biome-ignore lint/suspicious/noConsole: CLI error output is expected
+				console.error(`Error: ${error.message}`);
+			} else {
+				// biome-ignore lint/suspicious/noConsole: CLI error output is expected
+				console.error("An unexpected error occurred");
+			}
+		},
+		onExit: (code) => process.exit(code),
+	});
 
-	program
-		.name("outfitter")
-		.description("Outfitter CLI for scaffolding and project management")
-		.version("0.1.0");
+	for (const command of buildCliCommands(outfitterActions)) {
+		cli.register(command);
+	}
 
-	// Register commands
-	initCommand(program);
-	doctorCommand(program);
-
-	return program;
+	return cli;
 }
 
 // =============================================================================
@@ -45,20 +53,8 @@ function createProgram(): Command {
  * Main entry point for the CLI.
  */
 async function main(): Promise<void> {
-	const program = createProgram();
-
-	try {
-		await program.parseAsync(process.argv);
-	} catch (error) {
-		if (error instanceof Error) {
-			// biome-ignore lint/suspicious/noConsole: CLI error output is expected
-			console.error(`Error: ${error.message}`);
-		} else {
-			// biome-ignore lint/suspicious/noConsole: CLI error output is expected
-			console.error("An unexpected error occurred");
-		}
-		process.exit(1);
-	}
+	const cli = createProgram();
+	await cli.parse();
 }
 
 // Run the CLI

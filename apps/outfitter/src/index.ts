@@ -10,10 +10,14 @@
 // Init command
 export { initCommand, runInit, type InitOptions, InitError } from "./commands/init";
 
+// Action registry
+export { outfitterActions } from "./actions.js";
+
 // Doctor command
 export {
 	doctorCommand,
 	runDoctor,
+	printDoctorResults,
 	type DoctorOptions,
 	type DoctorResult,
 	type DoctorSummary,

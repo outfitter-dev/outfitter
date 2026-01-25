@@ -331,7 +331,7 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 /**
  * Formats and prints doctor results to the console.
  */
-function printDoctorResults(result: DoctorResult): void {
+export function printDoctorResults(result: DoctorResult): void {
 	const theme = createTheme();
 
 	// biome-ignore lint/suspicious/noConsole: CLI output is expected in this function
