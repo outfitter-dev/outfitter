@@ -148,3 +148,25 @@ export {
 } from "./capabilities.js";
 
 export type { CapabilitySurface, ActionCapability } from "./capabilities.js";
+
+// Action registry
+export {
+	ACTION_SURFACES,
+	DEFAULT_REGISTRY_SURFACES,
+	createActionRegistry,
+	defineAction,
+} from "./actions.js";
+
+export type {
+	ActionSurface,
+	ActionSpec,
+	ActionRegistry,
+	AnyActionSpec,
+	ActionCliOption,
+	ActionCliSpec,
+	ActionCliInputContext,
+	ActionMcpSpec,
+	ActionApiSpec,
+	ActionTrpcSpec,
+	HttpMethod,
+} from "./actions.js";

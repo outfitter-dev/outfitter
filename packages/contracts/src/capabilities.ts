@@ -1,12 +1,12 @@
 /**
  * @outfitter/contracts - Capability manifest
  *
- * Shared action capability manifest for CLI/MCP/server parity.
+ * Shared action capability manifest for CLI/MCP/API/server parity.
  *
  * @packageDocumentation
  */
 
-export const CAPABILITY_SURFACES = ["cli", "mcp", "server"] as const;
+export const CAPABILITY_SURFACES = ["cli", "mcp", "api", "server"] as const;
 
 export type CapabilitySurface = (typeof CAPABILITY_SURFACES)[number];
 
