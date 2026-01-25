@@ -195,9 +195,17 @@ function convertZodType(schema: z.ZodType<unknown>): JsonSchema {
 			const literalValues = Array.isArray(def.values)
 				? def.values
 				: [def.value].filter((value) => value !== undefined);
-			jsonSchema = {
-				const: literalValues[0],
-			};
+			if (literalValues.length > 1) {
+				jsonSchema = {
+					enum: literalValues,
+				};
+				break;
+			}
+			jsonSchema = literalValues.length
+				? {
+						const: literalValues[0],
+					}
+				: {};
 			break;
 		}
 
@@ -294,19 +302,19 @@ function convertString(def: any): JsonSchema {
 
 	if (def.checks) {
 		for (const check of def.checks) {
-			const normalizedCheck = check?._zod?.def ?? check;
+			const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
 
 			if (normalizedCheck?.kind) {
-				switch (check.kind) {
+				switch (normalizedCheck.kind) {
 					case "min":
-						schema.minLength = check.value;
+						schema.minLength = normalizedCheck.value;
 						break;
 					case "max":
-						schema.maxLength = check.value;
+						schema.maxLength = normalizedCheck.value;
 						break;
 					case "length":
-						schema.minLength = check.value;
-						schema.maxLength = check.value;
+						schema.minLength = normalizedCheck.value;
+						schema.maxLength = normalizedCheck.value;
 						break;
 					case "email":
 						schema.pattern = "^[^@]+@[^@]+\\.[^@]+$";
@@ -319,7 +327,10 @@ function convertString(def: any): JsonSchema {
 							"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 						break;
 					case "regex":
-						schema.pattern = check.regex.source;
+						schema.pattern =
+							normalizedCheck.regex?.source ??
+							normalizedCheck.pattern?.source ??
+							(typeof normalizedCheck.pattern === "string" ? normalizedCheck.pattern : undefined);
 						break;
 				}
 				continue;
@@ -338,11 +349,13 @@ function convertString(def: any): JsonSchema {
 					break;
 				case "string_format":
 					if (normalizedCheck.pattern) {
-						schema.pattern = normalizedCheck.pattern.source;
-						break;
+						schema.pattern =
+							typeof normalizedCheck.pattern === "string"
+								? normalizedCheck.pattern
+								: normalizedCheck.pattern.source;
 					}
 
-					if (normalizedCheck.format) {
+					if (normalizedCheck.format && normalizedCheck.format !== "regex") {
 						schema.format = normalizedCheck.format;
 					}
 					break;
@@ -362,15 +375,15 @@ function convertNumber(def: any): JsonSchema {
 
 	if (def.checks) {
 		for (const check of def.checks) {
-			const normalizedCheck = check?._zod?.def ?? check;
+			const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
 
 			if (normalizedCheck?.kind) {
-				switch (check.kind) {
+				switch (normalizedCheck.kind) {
 					case "min":
-						schema.minimum = check.value;
+						schema.minimum = normalizedCheck.value;
 						break;
 					case "max":
-						schema.maximum = check.value;
+						schema.maximum = normalizedCheck.value;
 						break;
 					case "int":
 						schema.type = "integer";
