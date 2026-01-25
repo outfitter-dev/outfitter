@@ -49,3 +49,28 @@ export { createMcpServer, defineTool, defineResource } from "./server.js";
 
 // Schema utilities
 export { type JsonSchema, zodToJsonSchema } from "./schema.js";
+
+// Core tools
+export {
+	createCoreTools,
+	defineDocsTool,
+	defineConfigTool,
+	defineQueryTool,
+	type DocsSection,
+	type DocsToolEntry,
+	type DocsToolInput,
+	type DocsToolResponse,
+	type DocsToolOptions,
+	type ConfigAction,
+	type ConfigToolInput,
+	type ConfigToolResponse,
+	type ConfigToolOptions,
+	type ConfigStore,
+	type QueryToolInput,
+	type QueryToolResponse,
+	type QueryToolOptions,
+	type CoreToolsOptions,
+} from "./core-tools.js";
+
+// Transport helpers
+export { connectStdio, createSdkServer, type McpToolResponse } from "./transport.js";
