@@ -82,7 +82,7 @@
 	},
 	"dependencies": {
 		"better-result": "^2.5.0",
-		"zod": "^3.25.0"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@outfitter/types": "workspace:*",

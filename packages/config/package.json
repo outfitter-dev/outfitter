@@ -29,7 +29,7 @@
 	"dependencies": {
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/types": "workspace:*",
-		"zod": "^3.25.0"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
