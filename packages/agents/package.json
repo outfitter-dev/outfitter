@@ -1,0 +1,36 @@
+{
+	"name": "@outfitter/agents",
+	"version": "0.1.0-rc.0",
+	"description": "Default agent documentation and scaffolding for AI-ready projects",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./bootstrap": {
+			"import": "./dist/bootstrap.js",
+			"types": "./dist/bootstrap.d.ts"
+		}
+	},
+	"files": [
+		"dist",
+		"scaffolding"
+	],
+	"scripts": {
+		"build": "bunup",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@outfitter/contracts": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"bunup": "latest",
+		"typescript": "^5.8.3"
+	},
+	"peerDependencies": {
+		"bun": ">=1.0.0"
+	}
+}

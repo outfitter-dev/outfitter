@@ -16,6 +16,7 @@ export const KIT_VERSION = "0.1.0-rc.0";
  * Minimum compatible versions for each package
  */
 export const MINIMUM_VERSIONS = {
+	"@outfitter/agents": "0.1.0-rc.0",
 	"@outfitter/cli": "0.1.0-rc.0",
 	"@outfitter/config": "0.1.0-rc.0",
 	"@outfitter/contracts": "0.1.0-rc.0",
