@@ -10,24 +10,24 @@
 /**
  * Kit version - matches package.json version
  */
-export const KIT_VERSION = "0.1.0";
+export const KIT_VERSION = "0.1.0-rc.0";
 
 /**
  * Minimum compatible versions for each package
  */
 export const MINIMUM_VERSIONS = {
-	"@outfitter/cli": "0.1.0",
-	"@outfitter/config": "0.1.0",
-	"@outfitter/contracts": "0.1.0",
-	"@outfitter/daemon": "0.1.0",
-	"@outfitter/file-ops": "0.1.0",
-	"@outfitter/index": "0.1.0",
-	"@outfitter/logging": "0.1.0",
-	"@outfitter/mcp": "0.1.0",
-	"@outfitter/state": "0.1.0",
-	"@outfitter/testing": "0.1.0",
-	"@outfitter/types": "0.1.0",
-	"@outfitter/ui": "0.1.0",
+	"@outfitter/cli": "0.1.0-rc.0",
+	"@outfitter/config": "0.1.0-rc.0",
+	"@outfitter/contracts": "0.1.0-rc.0",
+	"@outfitter/daemon": "0.1.0-rc.0",
+	"@outfitter/file-ops": "0.1.0-rc.0",
+	"@outfitter/index": "0.1.0-rc.0",
+	"@outfitter/logging": "0.1.0-rc.0",
+	"@outfitter/mcp": "0.1.0-rc.0",
+	"@outfitter/state": "0.1.0-rc.0",
+	"@outfitter/testing": "0.1.0-rc.0",
+	"@outfitter/types": "0.1.0-rc.0",
+	"@outfitter/ui": "0.1.0-rc.0",
 } as const;
 
 /**

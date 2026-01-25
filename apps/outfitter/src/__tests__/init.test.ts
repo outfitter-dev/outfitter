@@ -165,7 +165,7 @@ describe("init command placeholder replacement", () => {
 		const packageJsonPath = join(tempDir, "package.json");
 		const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
 
-		expect(packageJson.version).toBe("0.1.0");
+		expect(packageJson.version).toBe("0.1.0-rc.0");
 		const content = readFileSync(packageJsonPath, "utf-8");
 		expect(content).not.toContain("{{version}}");
 	});
