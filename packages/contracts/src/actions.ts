@@ -11,7 +11,7 @@ export const DEFAULT_REGISTRY_SURFACES: readonly ActionSurface[] = ACTION_SURFAC
 export interface ActionCliOption {
 	readonly flags: string;
 	readonly description: string;
-	readonly defaultValue?: unknown;
+	readonly defaultValue?: string | boolean | string[];
 	readonly required?: boolean;
 }
 

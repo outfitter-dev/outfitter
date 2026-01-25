@@ -86,8 +86,12 @@ export function createCLI(config: CLIConfig): CLI {
 
 	const cli: CLI = {
 		program,
-		register: (builder: CommandBuilder): CLI => {
-			program.addCommand(builder.build());
+		register: (builderOrCommand: CommandBuilder | Command): CLI => {
+			if ("build" in builderOrCommand) {
+				program.addCommand(builderOrCommand.build());
+			} else {
+				program.addCommand(builderOrCommand);
+			}
 			return cli;
 		},
 		parse,

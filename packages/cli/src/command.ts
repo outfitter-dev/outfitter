@@ -45,7 +45,7 @@ class CommandBuilderImpl implements CommandBuilder {
 	action<TFlags extends CommandFlags = CommandFlags>(handler: CommandAction<TFlags>): this {
 		this.command.action(async (...args: unknown[]) => {
 			const command = args[args.length - 1] as Command;
-			const flags = command.opts() as TFlags;
+			const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
 			const positional = command.args as string[];
 			await handler({ args: positional, flags, command });
 		});
