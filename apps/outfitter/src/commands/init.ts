@@ -40,6 +40,7 @@ export interface InitOptions {
 interface PlaceholderValues {
 	readonly name: string;
 	readonly projectName: string;
+	readonly packageName: string;
 	readonly binName: string;
 	readonly version: string;
 	readonly description: string;
@@ -479,6 +480,7 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 	const values: PlaceholderValues = {
 		name: projectName,
 		projectName,
+		packageName: projectName,
 		binName,
 		version: "0.1.0",
 		description: `A new project created with Outfitter`,

@@ -7,7 +7,7 @@ MCP (Model Context Protocol) server for integration with AI assistants.
 ## Installation
 
 ```bash
-bun add {{projectName}}
+bun add {{packageName}}
 ```
 
 ## Usage with Claude Desktop

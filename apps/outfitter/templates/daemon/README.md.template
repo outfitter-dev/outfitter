@@ -7,7 +7,7 @@ A background daemon with CLI control interface.
 ## Installation
 
 ```bash
-bun add {{projectName}}
+bun add {{packageName}}
 ```
 
 ## Usage
