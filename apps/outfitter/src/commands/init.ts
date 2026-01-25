@@ -10,7 +10,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { confirm, isCancel, text } from "@clack/prompts";
+import { confirm, isCancel, select, text } from "@clack/prompts";
 import { Result } from "@outfitter/contracts";
 import type { Command } from "commander";
 
@@ -24,12 +24,14 @@ import type { Command } from "commander";
 export interface InitOptions {
 	/** Target directory to initialize the project in */
 	readonly targetDir: string;
-	/** Project name (defaults to directory name if not provided) */
+	/** Package name (defaults to directory name if not provided) */
 	readonly name: string | undefined;
 	/** Binary name (defaults to project name if not provided) */
 	readonly bin?: string;
 	/** Template to use (defaults to 'basic') */
 	readonly template: string | undefined;
+	/** Whether to use local/workspace dependencies */
+	readonly local?: boolean;
 	/** Whether to overwrite existing files */
 	readonly force: boolean;
 }
@@ -44,6 +46,8 @@ interface PlaceholderValues {
 	readonly binName: string;
 	readonly version: string;
 	readonly description: string;
+	readonly author: string;
+	readonly year: string;
 }
 
 /**
@@ -249,6 +253,16 @@ function readPackageInfo(targetDir: string): PackageInfo {
 	}
 }
 
+function deriveProjectName(packageName: string): string {
+	if (packageName.startsWith("@")) {
+		const parts = packageName.split("/");
+		if (parts.length > 1 && parts[1]) {
+			return parts[1];
+		}
+	}
+	return packageName;
+}
+
 function deriveBinName(projectName: string): string {
 	if (projectName.startsWith("@")) {
 		const parts = projectName.split("/");
@@ -259,7 +273,7 @@ function deriveBinName(projectName: string): string {
 	return projectName;
 }
 
-async function resolveProjectName(
+async function resolvePackageName(
 	options: InitOptions,
 	resolvedTargetDir: string,
 	packageInfo: PackageInfo,
@@ -269,37 +283,24 @@ async function resolveProjectName(
 	}
 
 	const detectedName = packageInfo.name;
-	if (detectedName) {
-		if (isInteractive()) {
-			const useDetected = await confirm({
-				message: `Detected package name "${detectedName}". Use this as the project name?`,
-			});
+	const fallbackName = basename(resolvedTargetDir);
 
-			if (isCancel(useDetected)) {
-				return Result.err(new InitError("Initialization cancelled."));
-			}
-
-			if (useDetected) {
-				return Result.ok(detectedName);
-			}
-
-			const custom = await text({
-				message: "Project name",
-				placeholder: basename(resolvedTargetDir),
-			});
-
-			if (isCancel(custom)) {
-				return Result.err(new InitError("Initialization cancelled."));
-			}
-
-			const trimmed = String(custom).trim();
-			return Result.ok(trimmed.length > 0 ? trimmed : basename(resolvedTargetDir));
-		} else {
-			return Result.ok(detectedName);
-		}
+	if (!isInteractive()) {
+		return Result.ok(detectedName ?? fallbackName);
 	}
 
-	return Result.ok(basename(resolvedTargetDir));
+	const suggested = detectedName ?? fallbackName;
+	const custom = await text({
+		message: "Package name",
+		placeholder: suggested,
+	});
+
+	if (isCancel(custom)) {
+		return Result.err(new InitError("Initialization cancelled."));
+	}
+
+	const trimmed = String(custom).trim();
+	return Result.ok(trimmed.length > 0 ? trimmed : suggested);
 }
 
 async function resolveBinName(
@@ -354,6 +355,70 @@ async function resolveBinName(
 
 	const trimmed = String(custom).trim();
 	return Result.ok(trimmed.length > 0 ? trimmed : derived);
+}
+
+async function resolveTemplateName(options: InitOptions): Promise<Result<string, InitError>> {
+	if (options.template) {
+		return Result.ok(options.template);
+	}
+
+	if (!isInteractive()) {
+		return Result.ok("basic");
+	}
+
+	const selection = await select({
+		message: "Select a template",
+		options: [
+			{ value: "basic", label: "basic", hint: "Minimal starter" },
+			{ value: "cli", label: "cli", hint: "CLI application" },
+			{ value: "mcp", label: "mcp", hint: "MCP server" },
+			{ value: "daemon", label: "daemon", hint: "Daemon + CLI" },
+		],
+	});
+
+	if (isCancel(selection)) {
+		return Result.err(new InitError("Initialization cancelled."));
+	}
+
+	const value = String(selection).trim();
+	return Result.ok(value.length > 0 ? value : "basic");
+}
+
+function resolveAuthor(): string {
+	const fromEnv =
+		// biome-ignore lint/complexity/useLiteralKeys: env access
+		process.env["GIT_AUTHOR_NAME"] ??
+		// biome-ignore lint/complexity/useLiteralKeys: env access
+		process.env["GIT_COMMITTER_NAME"] ??
+		// biome-ignore lint/complexity/useLiteralKeys: env access
+		process.env["AUTHOR"] ??
+		// biome-ignore lint/complexity/useLiteralKeys: env access
+		process.env["USER"] ??
+		// biome-ignore lint/complexity/useLiteralKeys: env access
+		process.env["USERNAME"];
+
+	if (fromEnv) {
+		return fromEnv;
+	}
+
+	try {
+		const result = Bun.spawnSync(["git", "config", "--get", "user.name"], {
+			stdout: "pipe",
+			stderr: "ignore",
+		});
+		if (result.exitCode === 0) {
+			const value = result.stdout.toString().trim();
+			return value.length > 0 ? value : "";
+		}
+	} catch {
+		// Ignore git lookup errors and fall back to empty string
+	}
+
+	return "";
+}
+
+function resolveYear(): string {
+	return String(new Date().getFullYear());
 }
 
 /**
@@ -420,6 +485,56 @@ function copyTemplateFiles(
 }
 
 // =============================================================================
+// Local Dependency Rewrites
+// =============================================================================
+
+const DEPENDENCY_SECTIONS = [
+	"dependencies",
+	"devDependencies",
+	"peerDependencies",
+	"optionalDependencies",
+] as const;
+
+function rewriteLocalDependencies(targetDir: string): Result<void, InitError> {
+	const packageJsonPath = join(targetDir, "package.json");
+	if (!existsSync(packageJsonPath)) {
+		return Result.ok(undefined);
+	}
+
+	try {
+		const content = readFileSync(packageJsonPath, "utf-8");
+		const parsed = JSON.parse(content) as Record<string, unknown>;
+		let updated = false;
+
+		for (const section of DEPENDENCY_SECTIONS) {
+			const deps = parsed[section];
+			if (!deps || typeof deps !== "object" || Array.isArray(deps)) {
+				continue;
+			}
+
+			const entries = deps as Record<string, unknown>;
+			for (const [name, version] of Object.entries(entries)) {
+				if (typeof version === "string" && name.startsWith("@outfitter/")) {
+					if (version !== "workspace:*") {
+						entries[name] = "workspace:*";
+						updated = true;
+					}
+				}
+			}
+		}
+
+		if (updated) {
+			writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, "\t")}\n`, "utf-8");
+		}
+
+		return Result.ok(undefined);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "Unknown error";
+		return Result.err(new InitError(`Failed to update local dependencies: ${message}`));
+	}
+}
+
+// =============================================================================
 // Public API
 // =============================================================================
 
@@ -451,23 +566,12 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 	// Resolve target directory
 	const resolvedTargetDir = resolve(targetDir);
 
-	// Determine project name
-	const packageInfo = readPackageInfo(resolvedTargetDir);
-	const projectNameResult = await resolveProjectName(options, resolvedTargetDir, packageInfo);
-	if (projectNameResult.isErr()) {
-		return projectNameResult;
-	}
-	const projectName = projectNameResult.value;
-
-	// Determine binary name
-	const binNameResult = await resolveBinName(options, projectName, packageInfo);
-	if (binNameResult.isErr()) {
-		return binNameResult;
-	}
-	const binName = binNameResult.value;
-
 	// Determine template
-	const templateName = options.template ?? "basic";
+	const templateNameResult = await resolveTemplateName(options);
+	if (templateNameResult.isErr()) {
+		return templateNameResult;
+	}
+	const templateName = templateNameResult.value;
 
 	// Validate template exists
 	const templateResult = validateTemplate(templateName);
@@ -476,14 +580,35 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 	}
 	const templatePath = templateResult.value;
 
+	// Determine package name
+	const packageInfo = readPackageInfo(resolvedTargetDir);
+	const packageNameResult = await resolvePackageName(options, resolvedTargetDir, packageInfo);
+	if (packageNameResult.isErr()) {
+		return packageNameResult;
+	}
+	const packageName = packageNameResult.value;
+	const projectName = deriveProjectName(packageName);
+
+	// Determine binary name
+	const binNameResult = await resolveBinName(options, projectName, packageInfo);
+	if (binNameResult.isErr()) {
+		return binNameResult;
+	}
+	const binName = binNameResult.value;
+
+	const author = resolveAuthor();
+	const year = resolveYear();
+
 	// Prepare placeholder values
 	const values: PlaceholderValues = {
 		name: projectName,
 		projectName,
-		packageName: projectName,
+		packageName,
 		binName,
 		version: "0.1.0",
 		description: `A new project created with Outfitter`,
+		author,
+		year,
 	};
 
 	// Check if target directory exists and has files
@@ -528,6 +653,13 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 		return copyResult;
 	}
 
+	if (options.local) {
+		const rewriteResult = rewriteLocalDependencies(resolvedTargetDir);
+		if (rewriteResult.isErr()) {
+			return rewriteResult;
+		}
+	}
+
 	return Result.ok(undefined);
 }
 
@@ -548,121 +680,135 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 export function initCommand(program: Command): void {
 	const init = program.command("init").description("Scaffold a new Outfitter project");
 
+	type InitCommandFlags = {
+		name?: string;
+		bin?: string;
+		template?: string;
+		force?: boolean;
+		local?: boolean;
+		workspace?: boolean;
+		opts?: () => InitCommandFlags;
+	};
+
+	const resolveFlags = (flags: InitCommandFlags, command?: Command): InitCommandFlags => {
+		if (command) {
+			return command.optsWithGlobals<InitCommandFlags>();
+		}
+		return typeof flags.opts === "function" ? flags.opts() : flags;
+	};
+
+	const resolveLocal = (flags: InitCommandFlags): boolean =>
+		Boolean(flags.local || flags.workspace);
+
 	const withCommonOptions = (command: Command): Command =>
 		command
-			.option("-n, --name <name>", "Project name (defaults to directory name)")
+			.option("-n, --name <name>", "Package name (defaults to directory name)")
 			.option("-b, --bin <name>", "Binary name (defaults to project name)")
-			.option("-f, --force", "Overwrite existing files", false);
+			.option("-f, --force", "Overwrite existing files", false)
+			.option("--local", "Use workspace:* for @outfitter dependencies", false)
+			.option("--workspace", "Alias for --local", false);
 
 	withCommonOptions(
-		init.argument("[directory]").option("-t, --template <template>", "Template to use", "basic"),
-	).action(
-		async (
-			directory: string | undefined,
-			flags: { name?: string; bin?: string; template?: string; force?: boolean },
-		) => {
-			const targetDir = directory ?? process.cwd();
+		init.argument("[directory]").option("-t, --template <template>", "Template to use"),
+	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
+		const targetDir = directory ?? process.cwd();
+		const resolvedFlags = resolveFlags(flags, command);
+		const local = resolveLocal(resolvedFlags);
 
-			const result = await runInit({
-				targetDir,
-				name: flags.name,
-				template: flags.template,
-				force: flags.force ?? false,
-				...(flags.bin !== undefined ? { bin: flags.bin } : {}),
-			});
+		const result = await runInit({
+			targetDir,
+			name: resolvedFlags.name,
+			template: resolvedFlags.template,
+			local,
+			force: resolvedFlags.force ?? false,
+			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+		});
 
-			if (result.isErr()) {
-				// biome-ignore lint/suspicious/noConsole: CLI output is expected
-				console.error(`Error: ${result.error.message}`);
-				process.exit(1);
-			}
-
+		if (result.isErr()) {
 			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-		},
-	);
+			console.error(`Error: ${result.error.message}`);
+			process.exit(1);
+		}
+
+		// biome-ignore lint/suspicious/noConsole: CLI output is expected
+		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+	});
 
 	withCommonOptions(
 		init.command("cli [directory]").description("Scaffold a new CLI project"),
-	).action(
-		async (
-			directory: string | undefined,
-			flags: { name?: string; bin?: string; force?: boolean },
-		) => {
-			const targetDir = directory ?? process.cwd();
+	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
+		const targetDir = directory ?? process.cwd();
+		const resolvedFlags = resolveFlags(flags, command);
+		const local = resolveLocal(resolvedFlags);
 
-			const result = await runInit({
-				targetDir,
-				name: flags.name,
-				template: "cli",
-				force: flags.force ?? false,
-				...(flags.bin !== undefined ? { bin: flags.bin } : {}),
-			});
+		const result = await runInit({
+			targetDir,
+			name: resolvedFlags.name,
+			template: "cli",
+			local,
+			force: resolvedFlags.force ?? false,
+			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+		});
 
-			if (result.isErr()) {
-				// biome-ignore lint/suspicious/noConsole: CLI output is expected
-				console.error(`Error: ${result.error.message}`);
-				process.exit(1);
-			}
-
+		if (result.isErr()) {
 			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-		},
-	);
+			console.error(`Error: ${result.error.message}`);
+			process.exit(1);
+		}
+
+		// biome-ignore lint/suspicious/noConsole: CLI output is expected
+		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+	});
 
 	withCommonOptions(
 		init.command("mcp [directory]").description("Scaffold a new MCP server"),
-	).action(
-		async (
-			directory: string | undefined,
-			flags: { name?: string; bin?: string; force?: boolean },
-		) => {
-			const targetDir = directory ?? process.cwd();
+	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
+		const targetDir = directory ?? process.cwd();
+		const resolvedFlags = resolveFlags(flags, command);
+		const local = resolveLocal(resolvedFlags);
 
-			const result = await runInit({
-				targetDir,
-				name: flags.name,
-				template: "mcp",
-				force: flags.force ?? false,
-				...(flags.bin !== undefined ? { bin: flags.bin } : {}),
-			});
+		const result = await runInit({
+			targetDir,
+			name: resolvedFlags.name,
+			template: "mcp",
+			local,
+			force: resolvedFlags.force ?? false,
+			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+		});
 
-			if (result.isErr()) {
-				// biome-ignore lint/suspicious/noConsole: CLI output is expected
-				console.error(`Error: ${result.error.message}`);
-				process.exit(1);
-			}
-
+		if (result.isErr()) {
 			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-		},
-	);
+			console.error(`Error: ${result.error.message}`);
+			process.exit(1);
+		}
+
+		// biome-ignore lint/suspicious/noConsole: CLI output is expected
+		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+	});
 
 	withCommonOptions(
 		init.command("daemon [directory]").description("Scaffold a new daemon project"),
-	).action(
-		async (
-			directory: string | undefined,
-			flags: { name?: string; bin?: string; force?: boolean },
-		) => {
-			const targetDir = directory ?? process.cwd();
+	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
+		const targetDir = directory ?? process.cwd();
+		const resolvedFlags = resolveFlags(flags, command);
+		const local = resolveLocal(resolvedFlags);
 
-			const result = await runInit({
-				targetDir,
-				name: flags.name,
-				template: "daemon",
-				force: flags.force ?? false,
-				...(flags.bin !== undefined ? { bin: flags.bin } : {}),
-			});
+		const result = await runInit({
+			targetDir,
+			name: resolvedFlags.name,
+			template: "daemon",
+			local,
+			force: resolvedFlags.force ?? false,
+			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+		});
 
-			if (result.isErr()) {
-				// biome-ignore lint/suspicious/noConsole: CLI output is expected
-				console.error(`Error: ${result.error.message}`);
-				process.exit(1);
-			}
-
+		if (result.isErr()) {
 			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-		},
-	);
+			console.error(`Error: ${result.error.message}`);
+			process.exit(1);
+		}
+
+		// biome-ignore lint/suspicious/noConsole: CLI output is expected
+		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+	});
 }

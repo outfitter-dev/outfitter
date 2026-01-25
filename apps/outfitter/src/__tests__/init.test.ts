@@ -133,7 +133,7 @@ describe("init command file creation", () => {
 // =============================================================================
 
 describe("init command placeholder replacement", () => {
-	test("replaces {{name}} placeholder in package.json", async () => {
+	test("replaces {{packageName}} placeholder in package.json", async () => {
 		const { runInit } = await import("../commands/init.js");
 
 		await runInit({
@@ -149,7 +149,7 @@ describe("init command placeholder replacement", () => {
 		expect(packageJson.name).toBe("my-awesome-project");
 		// Ensure no unreplaced placeholders
 		const content = readFileSync(packageJsonPath, "utf-8");
-		expect(content).not.toContain("{{name}}");
+		expect(content).not.toContain("{{packageName}}");
 	});
 
 	test("replaces {{version}} placeholder with default version", async () => {
@@ -184,6 +184,23 @@ describe("init command placeholder replacement", () => {
 		const content = readFileSync(packageJsonPath, "utf-8");
 
 		expect(content).not.toContain("{{description}}");
+	});
+
+	test("replaces legacy {{name}} placeholder in source files", async () => {
+		const { runInit } = await import("../commands/init.js");
+
+		await runInit({
+			targetDir: tempDir,
+			name: "my-awesome-project",
+			template: "basic",
+			force: false,
+		});
+
+		const indexPath = join(tempDir, "src", "index.ts");
+		const content = readFileSync(indexPath, "utf-8");
+
+		expect(content).toContain("my-awesome-project");
+		expect(content).not.toContain("{{name}}");
 	});
 });
 
@@ -224,6 +241,54 @@ describe("init command default behavior", () => {
 		// Should succeed without error using basic template
 		const packageJsonPath = join(tempDir, "package.json");
 		expect(existsSync(packageJsonPath)).toBe(true);
+	});
+
+	test("derives project name from scoped package name", async () => {
+		const { runInit } = await import("../commands/init.js");
+
+		await runInit({
+			targetDir: tempDir,
+			name: "@outfitter/scoped-project",
+			template: "basic",
+			force: false,
+		});
+
+		const packageJsonPath = join(tempDir, "package.json");
+		const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+		expect(packageJson.name).toBe("@outfitter/scoped-project");
+
+		const indexPath = join(tempDir, "src", "index.ts");
+		const content = readFileSync(indexPath, "utf-8");
+		expect(content).toContain("scoped-project");
+		expect(content).toContain("@outfitter/scoped-project");
+	});
+});
+
+// =============================================================================
+// Init Command Local Dependency Rewrite Tests
+// =============================================================================
+
+describe("init command local dependency rewriting", () => {
+	test("rewrites @outfitter dependencies to workspace:* when local is enabled", async () => {
+		const { runInit } = await import("../commands/init.js");
+
+		const result = await runInit({
+			targetDir: tempDir,
+			name: "test-project",
+			template: "cli",
+			local: true,
+			force: false,
+		});
+
+		expect(result.isOk()).toBe(true);
+
+		const packageJsonPath = join(tempDir, "package.json");
+		const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+		expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
+		expect(packageJson.dependencies["@outfitter/config"]).toBe("workspace:*");
+		expect(packageJson.dependencies["@outfitter/contracts"]).toBe("workspace:*");
+		expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
+		expect(packageJson.dependencies.commander).toBe("^12.0.0");
 	});
 });
 
