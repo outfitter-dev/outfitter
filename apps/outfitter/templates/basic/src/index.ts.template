@@ -17,10 +17,10 @@
  * ```
  */
 export function main(): void {
-	console.log("Hello from {{projectName}}!");
+  console.log("Hello from {{projectName}}!");
 }
 
 // Run if executed directly
 if (import.meta.main) {
-	main();
+  main();
 }

@@ -9,71 +9,71 @@ import { createLogger } from "@outfitter/logging";
 const logger = createLogger({ name: "{{binName}}" });
 
 type HelloArgs = {
-	name?: unknown;
+  name?: unknown;
 };
 
 export function createMCPServer(): Server {
-	const server = new Server(
-		{
-			name: "{{binName}}",
-			version: "{{version}}",
-		},
-		{
-			capabilities: {
-				tools: {},
-			},
-		}
-	);
+  const server = new Server(
+    {
+      name: "{{binName}}",
+      version: "{{version}}",
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    },
+  );
 
-	// List available tools
-	server.setRequestHandler(ListToolsRequestSchema, async () => ({
-		tools: [
-			{
-				name: "hello",
-				description: "Say hello to someone",
-				inputSchema: {
-					type: "object" as const,
-					properties: {
-						name: {
-							type: "string",
-							description: "Name to greet",
-							default: "World",
-						},
-					},
-				},
-			},
-		],
-	}));
+  // List available tools
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: [
+      {
+        name: "hello",
+        description: "Say hello to someone",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            name: {
+              type: "string",
+              description: "Name to greet",
+              default: "World",
+            },
+          },
+        },
+      },
+    ],
+  }));
 
-	// Handle tool calls
-	server.setRequestHandler(CallToolRequestSchema, async (request) => {
-		const { name, arguments: args } = request.params;
+  // Handle tool calls
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
 
-		const handlers: Record<string, (input: HelloArgs) => { content: { type: "text"; text: string }[] }> = {
-			hello: (input) => {
-				const greeting =
-					typeof input.name === "string" && input.name.trim().length > 0 ? input.name : "World";
+    const handlers: Record<string, (input: HelloArgs) => { content: { type: "text"; text: string }[] }> = {
+      hello: (input) => {
+        const greeting =
+          typeof input.name === "string" && input.name.trim().length > 0 ? input.name : "World";
 
-				logger.info`Greeting ${greeting}`;
-				return {
-					content: [
-						{
-							type: "text" as const,
-							text: `Hello, ${greeting}!`,
-						},
-					],
-				};
-			},
-		};
+        logger.info`Greeting ${greeting}`;
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Hello, ${greeting}!`,
+            },
+          ],
+        };
+      },
+    };
 
-		const handler = handlers[name];
-		if (handler) {
-			return handler((args ?? {}) as HelloArgs);
-		}
+    const handler = handlers[name];
+    if (handler) {
+      return handler((args ?? {}) as HelloArgs);
+    }
 
-		logger.warn`Unknown tool ${name}`;
-		throw new Error(`Unknown tool: ${name}`);
-	});
+    logger.warn`Unknown tool ${name}`;
+    throw new Error(`Unknown tool: ${name}`);
+  });
 
-	return server;
+  return server;
 }

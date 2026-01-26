@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { confirm, isCancel, select, text } from "@clack/prompts";
 import { Result } from "@outfitter/contracts";
 import type { Command } from "commander";
+import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "./shared-deps.js";
 
 // =============================================================================
 // Types
@@ -429,6 +430,7 @@ function copyTemplateFiles(
 	targetDir: string,
 	values: PlaceholderValues,
 	force: boolean,
+	allowOverwrite: boolean = false,
 ): Result<void, InitError> {
 	try {
 		// Ensure target directory exists
@@ -445,7 +447,7 @@ function copyTemplateFiles(
 			if (stat.isDirectory()) {
 				// Recursively copy directories
 				const targetSubDir = join(targetDir, entry);
-				const result = copyTemplateFiles(sourcePath, targetSubDir, values, force);
+				const result = copyTemplateFiles(sourcePath, targetSubDir, values, force, allowOverwrite);
 				if (result.isErr()) {
 					return result;
 				}
@@ -455,7 +457,7 @@ function copyTemplateFiles(
 				const targetPath = join(targetDir, outputFilename);
 
 				// Check if file exists and force is not set
-				if (existsSync(targetPath) && !force) {
+				if (existsSync(targetPath) && !force && !allowOverwrite) {
 					return Result.err(
 						new InitError(`File '${targetPath}' already exists. Use --force to overwrite.`),
 					);
@@ -524,13 +526,49 @@ function rewriteLocalDependencies(targetDir: string): Result<void, InitError> {
 		}
 
 		if (updated) {
-			writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, "\t")}\n`, "utf-8");
+			writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
 		}
 
 		return Result.ok(undefined);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return Result.err(new InitError(`Failed to update local dependencies: ${message}`));
+	}
+}
+
+/**
+ * Injects shared devDependencies and scripts into the project's package.json.
+ *
+ * Template-specific values take precedence over shared defaults.
+ */
+function injectSharedConfig(targetDir: string): Result<void, InitError> {
+	const packageJsonPath = join(targetDir, "package.json");
+	if (!existsSync(packageJsonPath)) {
+		return Result.ok(undefined);
+	}
+
+	try {
+		const content = readFileSync(packageJsonPath, "utf-8");
+		const parsed = JSON.parse(content) as Record<string, unknown>;
+
+		// Merge shared devDependencies (template-specific ones take precedence)
+		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
+		const existingDevDeps = (parsed["devDependencies"] as Record<string, unknown>) ?? {};
+		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
+		parsed["devDependencies"] = { ...SHARED_DEV_DEPS, ...existingDevDeps };
+
+		// Merge shared scripts (template-specific ones take precedence)
+		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
+		const existingScripts = (parsed["scripts"] as Record<string, unknown>) ?? {};
+		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
+		parsed["scripts"] = { ...SHARED_SCRIPTS, ...existingScripts };
+
+		writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
+
+		return Result.ok(undefined);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "Unknown error";
+		return Result.err(new InitError(`Failed to inject shared config: ${message}`));
 	}
 }
 
@@ -647,10 +685,28 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
 		return Result.err(new InitError(`Failed to create target directory: ${message}`));
 	}
 
-	// Copy template files
-	const copyResult = copyTemplateFiles(templatePath, resolvedTargetDir, values, force);
+	// Two-layer template copy: first _base/, then template-specific
+	const templatesDir = getTemplatesDir();
+	const basePath = join(templatesDir, "_base");
+
+	// Layer 1: Copy shared base (if exists)
+	if (existsSync(basePath)) {
+		const baseResult = copyTemplateFiles(basePath, resolvedTargetDir, values, force);
+		if (baseResult.isErr()) {
+			return baseResult;
+		}
+	}
+
+	// Layer 2: Overlay template-specific files
+	const copyResult = copyTemplateFiles(templatePath, resolvedTargetDir, values, force, true);
 	if (copyResult.isErr()) {
 		return copyResult;
+	}
+
+	// Inject shared devDependencies and scripts
+	const injectResult = injectSharedConfig(resolvedTargetDir);
+	if (injectResult.isErr()) {
+		return injectResult;
 	}
 
 	if (options.local) {

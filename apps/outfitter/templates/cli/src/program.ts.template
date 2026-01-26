@@ -8,16 +8,16 @@ import { createLogger } from "@outfitter/logging";
 const logger = createLogger({ name: "{{binName}}" });
 
 export const program = createCLI({
-	name: "{{binName}}",
-	version: "{{version}}",
-	description: "{{description}}",
+  name: "{{binName}}",
+  version: "{{version}}",
+  description: "{{description}}",
 });
 
 program.register(
-	command("hello [name]")
-		.description("Say hello")
-		.action(async ({ args }) => {
-			const name = args[0] ?? "World";
-			logger.info`Hello, ${name}!`;
-		}),
+  command("hello [name]")
+    .description("Say hello")
+    .action(async ({ args }) => {
+      const name = args[0] ?? "World";
+      logger.info`Hello, ${name}!`;
+    }),
 );

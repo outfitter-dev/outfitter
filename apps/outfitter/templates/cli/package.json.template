@@ -1,40 +1,32 @@
 {
-	"name": "{{packageName}}",
-	"version": "{{version}}",
-	"description": "{{description}}",
-	"type": "module",
-	"bin": {
-		"{{binName}}": "./dist/cli.js"
-	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		}
-	},
-	"scripts": {
-		"build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
-		"dev": "bun --watch src/cli.ts",
-		"typecheck": "tsc --noEmit",
-		"test": "bun test",
-		"test:watch": "bun test --watch",
-		"lint": "biome check .",
-		"lint:fix": "biome check . --write",
-		"format": "biome format --write ."
-	},
-	"dependencies": {
-		"@outfitter/cli": "^0.1.0-rc.0",
-		"@outfitter/contracts": "^0.1.0-rc.0",
-		"@outfitter/config": "^0.1.0-rc.0",
-		"@outfitter/logging": "^0.1.0-rc.0",
-		"commander": "^12.0.0"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.0",
-		"@types/bun": "^1.0.0",
-		"typescript": "^5.5.0"
-	},
-	"license": "MIT"
+  "name": "{{packageName}}",
+  "version": "{{version}}",
+  "description": "{{description}}",
+  "type": "module",
+  "bin": {
+    "{{binName}}": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
+    "dev": "bun --watch src/cli.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "dependencies": {
+    "@outfitter/cli": "^0.1.0-rc.0",
+    "@outfitter/contracts": "^0.1.0-rc.0",
+    "@outfitter/config": "^0.1.0-rc.0",
+    "@outfitter/logging": "^0.1.0-rc.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {},
+  "license": "MIT"
 }

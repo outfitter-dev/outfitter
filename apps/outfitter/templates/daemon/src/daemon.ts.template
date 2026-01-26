@@ -6,6 +6,6 @@
 import { runDaemon } from "./daemon-main.js";
 
 runDaemon().catch((error) => {
-	console.error("Daemon failed:", error);
-	process.exit(1);
+  console.error("Daemon failed:", error);
+  process.exit(1);
 });

@@ -1,0 +1,27 @@
+# Lefthook configuration
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.{js,ts,tsx,json,md}"
+      run: bunx biome format --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    lint:
+      glob: "*.{js,ts,tsx}"
+      run: bunx biome lint --no-errors-on-unmatched {staged_files}
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+
+pre-push:
+  parallel: false
+  commands:
+    build:
+      run: bun run build
+
+    test:
+      run: bun run test

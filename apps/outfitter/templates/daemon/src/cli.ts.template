@@ -17,83 +17,83 @@ const socketPath = getSocketPath(TOOL_NAME);
 const lockPath = getLockPath(TOOL_NAME);
 
 const program = createCLI({
-	name: "{{binName}}",
-	version: "{{version}}",
-	description: "{{description}}",
+  name: "{{binName}}",
+  version: "{{version}}",
+  description: "{{description}}",
 });
 
 program.register(
-	command("start")
-		.description("Start the daemon")
-		.option("-f, --foreground", "Run in foreground")
-		.action(async ({ flags }) => {
-			const foreground = Boolean((flags as { foreground?: boolean }).foreground);
+  command("start")
+    .description("Start the daemon")
+    .option("-f, --foreground", "Run in foreground")
+    .action(async ({ flags }) => {
+      const foreground = Boolean((flags as { foreground?: boolean }).foreground);
 
-			if (await isDaemonAlive(lockPath)) {
-				logger.warn`Daemon is already running`;
-				process.exit(1);
-			}
+      if (await isDaemonAlive(lockPath)) {
+        logger.warn`Daemon is already running`;
+        process.exit(1);
+      }
 
-			if (foreground) {
-				// Run in foreground - import and run daemon directly
-				const { runDaemon } = await import("./daemon-main.js");
-				await runDaemon();
-			} else {
-				// Spawn daemon in background
-				const daemon = spawn(process.execPath, [import.meta.dir + "/daemon.js"], {
-					detached: true,
-					stdio: "ignore",
-				});
-				daemon.unref();
-				logger.info`Daemon started with PID ${daemon.pid}`;
-			}
-		}),
+      if (foreground) {
+        // Run in foreground - import and run daemon directly
+        const { runDaemon } = await import("./daemon-main.js");
+        await runDaemon();
+      } else {
+        // Spawn daemon in background
+        const daemon = spawn(process.execPath, [import.meta.dir + "/daemon.js"], {
+          detached: true,
+          stdio: "ignore",
+        });
+        daemon.unref();
+        logger.info`Daemon started with PID ${daemon.pid}`;
+      }
+    }),
 );
 
 program.register(
-	command("stop")
-		.description("Stop the daemon")
-		.action(async () => {
-			if (!(await isDaemonAlive(lockPath))) {
-				logger.warn`Daemon is not running`;
-				process.exit(1);
-			}
-			// Signal daemon to stop via HTTP
-			try {
-				const response = await fetch(`http://unix:${socketPath}:/shutdown`, {
-					method: "POST",
-				});
-				if (response.ok) {
-					logger.info`Daemon stopped`;
-				} else {
-					logger.error`Failed to stop daemon (status ${response.status} ${response.statusText})`;
-					process.exit(1);
-				}
-			} catch {
-				logger.error`Failed to stop daemon`;
-				process.exit(1);
-			}
-		}),
+  command("stop")
+    .description("Stop the daemon")
+    .action(async () => {
+      if (!(await isDaemonAlive(lockPath))) {
+        logger.warn`Daemon is not running`;
+        process.exit(1);
+      }
+      // Signal daemon to stop via HTTP
+      try {
+        const response = await fetch(`http://unix:${socketPath}:/shutdown`, {
+          method: "POST",
+        });
+        if (response.ok) {
+          logger.info`Daemon stopped`;
+        } else {
+          logger.error`Failed to stop daemon (status ${response.status} ${response.statusText})`;
+          process.exit(1);
+        }
+      } catch {
+        logger.error`Failed to stop daemon`;
+        process.exit(1);
+      }
+    }),
 );
 
 program.register(
-	command("status")
-		.description("Check daemon status")
-		.action(async () => {
-			if (await isDaemonAlive(lockPath)) {
-				logger.info`Daemon is running`;
-				// Fetch health info
-				try {
-					const response = await fetch(`http://unix:${socketPath}:/health`);
-					const health = await response.json();
-					console.log(JSON.stringify(health, null, 2));
-				} catch {
-					logger.warn`Could not fetch health info`;
-				}
-			} else {
-				logger.info`Daemon is not running`;
-			}
-		}),
+  command("status")
+    .description("Check daemon status")
+    .action(async () => {
+      if (await isDaemonAlive(lockPath)) {
+        logger.info`Daemon is running`;
+        // Fetch health info
+        try {
+          const response = await fetch(`http://unix:${socketPath}:/health`);
+          const health = await response.json();
+          console.log(JSON.stringify(health, null, 2));
+        } catch {
+          logger.warn`Could not fetch health info`;
+        }
+      } else {
+        logger.info`Daemon is not running`;
+      }
+    }),
 );
 
 program.parse(process.argv);
