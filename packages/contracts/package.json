@@ -121,7 +121,6 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@outfitter/types": "workspace:*",
 		"@types/bun": "latest",
 		"typescript": "^5.8.0"
 	},

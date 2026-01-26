@@ -94,7 +94,6 @@
         "zod": "^4.3.5",
       },
       "devDependencies": {
-        "@outfitter/types": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.8.0",
       },
@@ -228,6 +227,10 @@
     "packages/types": {
       "name": "@outfitter/types",
       "version": "0.1.0-rc.1",
+      "dependencies": {
+        "@outfitter/contracts": "workspace:*",
+        "better-result": "^2.5.0",
+      },
       "devDependencies": {
         "@types/bun": "latest",
         "typescript": "^5.8.0",
