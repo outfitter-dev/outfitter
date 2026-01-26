@@ -1,14 +1,16 @@
 # AGENTS.md
 
-Guidelines for AI agents and developers working in this repository.
+Bun-first TypeScript monorepo. Tests before code. Result types, not exceptions.
+
+Start here before making changes.
 
 ## Project Overview
 
-Outfitter is a Bun-first monorepo providing shared infrastructure for AI-agent-ready tooling. It includes reusable libraries for CLI, MCP servers, daemons, and indexing, plus an umbrella CLI (`outfitter`) for scaffolding.
+Outfitter provides shared infrastructure for AI-agent-ready tooling: CLI, MCP servers, daemons, and indexing. The `outfitter` CLI scaffolds new projects.
 
-**Status**: v0.1.0-rc.1 (release candidate)
+**Core idea**: Handlers are pure functions returning `Result<T, E>`. CLI and MCP are thin adapters over the same logic. Write the handler once, expose it everywhere.
 
-**Linear Team**: Stack (`OS`)
+**Status**: v0.1.0-rc.1 (release candidate) · **Linear Team**: Stack (`OS`)
 
 ## Project Structure
 
@@ -51,11 +53,11 @@ bun run clean                              # Clear Turbo artifacts and node_modu
 
 ### Package Tiers (dependency flow: Foundation → Runtime → Tooling)
 
-**Foundation (cold)** — Stable, rarely change:
+**Foundation (Stable)** — Rarely change:
 - `@outfitter/contracts` — Result/Error patterns, error taxonomy (10 categories → exit/HTTP codes)
 - `@outfitter/types` — Branded types, type utilities
 
-**Runtime (warm)** — Active development:
+**Runtime (Active)** — Evolving based on usage:
 - `@outfitter/cli` — Typed Commander wrapper with output contract
 - `@outfitter/mcp` — MCP server framework with typed tools and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
@@ -67,7 +69,7 @@ bun run clean                              # Clear Turbo artifacts and node_modu
 - `@outfitter/daemon` — Daemon lifecycle, IPC, health checks
 - `@outfitter/testing` — Test harnesses for MCP and CLI
 
-**Tooling (lukewarm)**:
+**Tooling (Early)** — APIs will change:
 - `outfitter` — Umbrella CLI for scaffolding
 
 ### Handler Contract
@@ -102,20 +104,23 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 
 ## Development Principles
 
-### TDD-First (Non-Negotiable)
+### Non-Negotiable
+
+**TDD-First** — Write the test before the code. Always.
 
 1. **Red**: Write failing test that defines behavior
 2. **Green**: Minimal code to pass
 3. **Refactor**: Improve while green
 
-Never write implementation before the test.
+**Result Types** — Handlers return `Result<T, E>`, not exceptions. See [Patterns](./docs/PATTERNS.md).
 
-### Bun-First
+### Strong Preferences
 
-Use Bun-native APIs before npm packages:
+**Bun-First** — Use Bun-native APIs before npm packages:
 - `Bun.hash()`, `Bun.Glob`, `Bun.semver`, `Bun.$`
 - `Bun.color()`, `Bun.stringWidth()`, `Bun.stripANSI()`
 - `bun:sqlite` for SQLite with FTS5
+- `Bun.randomUUIDv7()` for time-sortable request IDs
 
 ### Blessed Dependencies
 
@@ -185,5 +190,6 @@ For package-impacting changes:
 
 ## Key Files
 
-- `SPEC.md` — Complete technical specification
-- `PLAN.md` — Implementation roadmap
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — How packages fit together
+- [docs/PATTERNS.md](./docs/PATTERNS.md) — Handler contract, Result types, error taxonomy
+- [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md) — Tutorials
