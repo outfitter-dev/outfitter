@@ -153,4 +153,4 @@ export function createMCPTestHarness(options: McpTestHarnessOptions): McpHarness
 /**
  * Alias for createMCPTestHarness to support alternate casing.
  */
-export const createMcpTestHarness = createMCPTestHarness;
+export { createMCPTestHarness as createMcpTestHarness };

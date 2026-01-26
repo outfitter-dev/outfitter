@@ -462,9 +462,7 @@ async function findFiles(): Promise<string[]> {
 	const files: string[] = [];
 
 	for await (const file of glob.scan({ cwd: process.cwd() })) {
-		const shouldSkip = SKIP_PATHS.some(
-			(skip) => file.includes(skip) || file.startsWith(skip),
-		);
+		const shouldSkip = SKIP_PATHS.some((skip) => file.includes(skip) || file.startsWith(skip));
 		if (!shouldSkip) {
 			files.push(file);
 		}

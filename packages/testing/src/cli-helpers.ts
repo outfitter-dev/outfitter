@@ -42,7 +42,9 @@ export async function captureCLI(fn: () => Promise<void> | void): Promise<CliTes
 	const originalStdoutWrite = process.stdout.write.bind(process.stdout);
 	const originalStderrWrite = process.stderr.write.bind(process.stderr);
 	const originalExit = process.exit.bind(process);
+	// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 	const originalConsoleLog = console.log;
+	// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 	const originalConsoleError = console.error;
 
 	process.stdout.write = ((
@@ -65,13 +67,11 @@ export async function captureCLI(fn: () => Promise<void> | void): Promise<CliTes
 		return true;
 	}) as typeof process.stderr.write;
 
-	// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 	console.log = (...args: unknown[]): void => {
 		const line = `${args.map(String).join(" ")}\n`;
 		stdoutChunks.push(new TextEncoder().encode(line));
 	};
 
-	// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 	console.error = (...args: unknown[]): void => {
 		const line = `${args.map(String).join(" ")}\n`;
 		stderrChunks.push(new TextEncoder().encode(line));
@@ -94,9 +94,7 @@ export async function captureCLI(fn: () => Promise<void> | void): Promise<CliTes
 		process.stdout.write = originalStdoutWrite;
 		process.stderr.write = originalStderrWrite;
 		process.exit = originalExit;
-		// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 		console.log = originalConsoleLog;
-		// biome-ignore lint/suspicious/noConsole: captureCLI intercepts console output
 		console.error = originalConsoleError;
 	}
 
@@ -127,10 +125,11 @@ export function mockStdin(input: string): { restore: () => void } {
 		[Symbol.asyncIterator]: async function* (): AsyncGenerator<any, void, unknown> {
 			yield encoded;
 		},
+		fd: 0,
 		isTTY: false,
 	};
 
-	process.stdin = mockStream as unknown as NodeJS.ReadStream;
+	process.stdin = mockStream as unknown as NodeJS.ReadStream & { fd: 0 };
 
 	return {
 		restore: () => {

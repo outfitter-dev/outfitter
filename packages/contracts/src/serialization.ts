@@ -122,7 +122,10 @@ function extractContext(error: OutfitterError): Record<string, unknown> | undefi
  * // { _tag: "NotFoundError", category: "not_found", message: "note not found: abc123", context: { resourceType: "note", resourceId: "abc123" } }
  * ```
  */
-export function serializeError(error: OutfitterError, options?: SerializeErrorOptions): SerializedError {
+export function serializeError(
+	error: OutfitterError,
+	options?: SerializeErrorOptions,
+): SerializedError {
 	const isProduction = process.env["NODE_ENV"] === "production";
 	const includeStack = options?.includeStack ?? !isProduction;
 

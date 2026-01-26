@@ -10,7 +10,12 @@
 import { describe, expect, it } from "bun:test";
 import { Result } from "better-result";
 import { retry, withTimeout } from "../resilience.js";
-import { NetworkError, type TimeoutError, ValidationError, type OutfitterError } from "../errors.js";
+import {
+	NetworkError,
+	type TimeoutError,
+	ValidationError,
+	type OutfitterError,
+} from "../errors.js";
 
 // ============================================================================
 // retry<T>() Tests (8 tests)

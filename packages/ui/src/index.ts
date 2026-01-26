@@ -1121,7 +1121,7 @@ export function renderList(items: ListItem[]): string {
 	const lines: string[] = [];
 
 	const renderItem = (item: ListItem, indent: number): void => {
-		const prefix = "  ".repeat(indent) + "- ";
+		const prefix = `${"  ".repeat(indent)}- `;
 
 		if (typeof item === "string") {
 			lines.push(prefix + item);
@@ -1658,7 +1658,7 @@ export function render(shape: Shape, options?: RenderOptions): string {
 				}
 				if (isPlainObject(item)) {
 					// For objects, extract a reasonable string representation
-					const name = (item as Record<string, unknown>)["name"];
+					const name = (item as { name?: unknown }).name;
 					if (typeof name === "string") {
 						return name;
 					}

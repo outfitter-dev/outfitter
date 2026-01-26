@@ -508,10 +508,19 @@ export function decodeCursor(
 		);
 	}
 
-	const obj = data as Record<string, unknown>;
+	type ParsedCursor = {
+		id: string;
+		position: number;
+		createdAt: number;
+		metadata?: Record<string, unknown>;
+		ttl?: number;
+		expiresAt?: number;
+	};
 
-	// Validate required fields (use bracket notation for index signature access)
-	if (typeof obj["id"] !== "string") {
+	const obj = data as Partial<ParsedCursor>;
+
+	// Validate required fields
+	if (typeof obj.id !== "string") {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: missing or invalid 'id' field",
@@ -520,7 +529,7 @@ export function decodeCursor(
 		);
 	}
 
-	if (typeof obj["position"] !== "number") {
+	if (typeof obj.position !== "number") {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: missing or invalid 'position' field",
@@ -530,7 +539,7 @@ export function decodeCursor(
 	}
 
 	// Reject negative positions (matches createCursor validation)
-	if (obj["position"] < 0) {
+	if (obj.position < 0) {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: position must be non-negative",
@@ -539,7 +548,7 @@ export function decodeCursor(
 		);
 	}
 
-	if (typeof obj["createdAt"] !== "number") {
+	if (typeof obj.createdAt !== "number") {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: missing or invalid 'createdAt' field",
@@ -549,10 +558,7 @@ export function decodeCursor(
 	}
 
 	// Validate optional fields if present
-	if (
-		obj["metadata"] !== undefined &&
-		(typeof obj["metadata"] !== "object" || obj["metadata"] === null)
-	) {
+	if (obj.metadata !== undefined && (typeof obj.metadata !== "object" || obj.metadata === null)) {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: 'metadata' must be an object",
@@ -561,7 +567,7 @@ export function decodeCursor(
 		);
 	}
 
-	if (obj["ttl"] !== undefined && typeof obj["ttl"] !== "number") {
+	if (obj.ttl !== undefined && typeof obj.ttl !== "number") {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: 'ttl' must be a number",
@@ -570,7 +576,7 @@ export function decodeCursor(
 		);
 	}
 
-	if (obj["expiresAt"] !== undefined && typeof obj["expiresAt"] !== "number") {
+	if (obj.expiresAt !== undefined && typeof obj.expiresAt !== "number") {
 		return Result.err(
 			new ValidationError({
 				message: "Invalid cursor: 'expiresAt' must be a number",
@@ -581,12 +587,12 @@ export function decodeCursor(
 
 	// Build the cursor with proper typing
 	const cursor: Cursor = Object.freeze({
-		id: obj["id"],
-		position: obj["position"],
-		createdAt: obj["createdAt"],
-		...(obj["metadata"] !== undefined && { metadata: obj["metadata"] as Record<string, unknown> }),
-		...(obj["ttl"] !== undefined && { ttl: obj["ttl"] }),
-		...(obj["expiresAt"] !== undefined && { expiresAt: obj["expiresAt"] }),
+		id: obj.id,
+		position: obj.position,
+		createdAt: obj.createdAt,
+		...(obj.metadata !== undefined && { metadata: obj.metadata as Record<string, unknown> }),
+		...(obj.ttl !== undefined && { ttl: obj.ttl }),
+		...(obj.expiresAt !== undefined && { expiresAt: obj.expiresAt }),
 	});
 
 	return Result.ok(cursor);
@@ -1172,7 +1178,7 @@ export function paginate<T>(items: T[], cursor: Cursor): PaginationResult<T> {
 	const offset = cursor.position;
 
 	// Validate limit: must be a positive integer, fallback to DEFAULT_PAGE_LIMIT
-	const rawLimit = cursor.metadata?.["limit"];
+	const rawLimit = (cursor.metadata as { limit?: unknown } | undefined)?.limit;
 	const limit =
 		typeof rawLimit === "number" && Number.isFinite(rawLimit) && rawLimit > 0
 			? Math.floor(rawLimit)
