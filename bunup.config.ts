@@ -1,4 +1,5 @@
 import { defineWorkspace } from "bunup";
+import type { BunupPlugin } from "bunup";
 
 // DTS splitting requires Bun >= 1.3.7 (fix: oven-sh/bun#26089)
 // TODO: Remove version check once 1.3.7 is widely adopted
@@ -7,6 +8,60 @@ const supportsDtsSplitting =
 	bunVersion[0] > 1 ||
 	(bunVersion[0] === 1 && bunVersion[1] > 3) ||
 	(bunVersion[0] === 1 && bunVersion[1] === 3 && bunVersion[2] >= 7);
+
+const stripDuplicateExports = (): BunupPlugin => ({
+	name: "strip-duplicate-exports",
+	hooks: {
+		onBuildDone: async ({ files }) => {
+			const exportRegex = /export\s*\{\s*([^}]+)\s*\};/g;
+
+			for (const file of files) {
+				if (file.dts) continue;
+				if (!file.fullPath.endsWith(".js")) continue;
+
+				const content = await Bun.file(file.fullPath).text();
+				const matches = [...content.matchAll(exportRegex)];
+				if (matches.length < 2) continue;
+
+				const exports = matches.map((match) => {
+					const start = match.index ?? 0;
+					const end = start + match[0].length;
+					const specifiers = match[1]
+						.split(",")
+						.map((specifier) => specifier.trim())
+						.filter(Boolean)
+						.sort()
+						.join(",");
+					return { start, end, specifiers };
+				});
+
+				const removals: Array<{ start: number; end: number }> = [];
+				for (let i = 0; i < exports.length - 1; i += 1) {
+					const current = exports[i];
+					const next = exports[i + 1];
+					const between = content.slice(current.end, next.start);
+
+					if (between.trim() === "" && current.specifiers === next.specifiers) {
+						removals.push({ start: current.end, end: next.end });
+						i += 1;
+					}
+				}
+
+				if (removals.length === 0) continue;
+
+				let nextContent = content;
+				for (let i = removals.length - 1; i >= 0; i -= 1) {
+					const { start, end } = removals[i];
+					nextContent = `${nextContent.slice(0, start)}${nextContent.slice(end)}`;
+				}
+
+				if (nextContent !== content) {
+					await Bun.write(file.fullPath, nextContent);
+				}
+			}
+		},
+	},
+});
 
 /**
  * Bunup workspace configuration for tree-shakeable library builds.
@@ -54,6 +109,8 @@ export default defineWorkspace(
 		sourceBase: "./src",
 		// Output format: ESM only (Bun ecosystem)
 		format: ["esm"],
+		// Work around Bun duplicate export bug with re-exported entrypoints
+		plugins: [stripDuplicateExports()],
 		// TypeScript declarations (splitting enabled when Bun >= 1.3.7)
 		dts: supportsDtsSplitting ? { splitting: true } : true,
 		// Auto-generate package.json exports field
