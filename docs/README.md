@@ -44,5 +44,5 @@ Each package has detailed API documentation. Stability labels indicate API matur
 
 ## Quick Links
 
-- [GitHub Repository](https://github.com/outfitter-dev/stack)
+- [GitHub Repository](https://github.com/outfitter-dev/outfitter)
 - [npm Organization](https://www.npmjs.com/org/outfitter)

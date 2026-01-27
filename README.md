@@ -107,4 +107,4 @@ MIT
 
 ---
 
-Questions? Ideas? We're building this in the open — come find us at [github.com/outfitter-dev/stack](https://github.com/outfitter-dev/stack). Or just start building and see where it takes you.
+Questions? Ideas? We're building this in the open — come find us at [github.com/outfitter-dev/outfitter](https://github.com/outfitter-dev/outfitter). Or just start building and see where it takes you.

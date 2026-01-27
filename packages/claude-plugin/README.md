@@ -108,6 +108,6 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 ## Links
 
-- [Outfitter Stack Repository](https://github.com/outfitter-dev/stack)
-- [Documentation](https://github.com/outfitter-dev/stack/tree/main/docs)
+- [Outfitter Stack Repository](https://github.com/outfitter-dev/outfitter)
+- [Documentation](https://github.com/outfitter-dev/outfitter/tree/main/docs)
 - [npm Packages](https://www.npmjs.com/org/outfitter)
