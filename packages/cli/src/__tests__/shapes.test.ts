@@ -11,12 +11,14 @@
  * - render() with Resource type (3 tests)
  * - render() options.format override (2 tests)
  * - Standalone renderers still work (1 test)
+ * - Custom renderer registry (6 tests)
  *
- * Total: 17 tests
+ * Total: 23 tests
  */
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import {
   type Collection,
+  clearRenderers,
   type Hierarchy,
   isCollection,
   isHierarchy,
@@ -25,12 +27,14 @@ import {
   type KeyValue,
   type RenderOptions,
   type Resource,
+  registerRenderer,
   render,
   renderJson,
   renderList,
   renderTable,
   renderTree,
   type Shape,
+  unregisterRenderer,
 } from "../render/index.js";
 
 // ============================================================================
@@ -380,5 +384,123 @@ describe("Shape type compilation", () => {
     expect(options.width).toBe(80);
     expect(options.color).toBe(true);
     expect(options.format).toBe("json");
+  });
+});
+
+// ============================================================================
+// Custom Renderer Registry Tests (6 tests)
+// ============================================================================
+
+describe("Custom Renderer Registry", () => {
+  // Clean up after each test to ensure isolation
+  afterEach(() => {
+    clearRenderers();
+  });
+
+  it("registerRenderer() overrides built-in renderer for a shape type", () => {
+    const collection: Collection = {
+      type: "collection",
+      items: [{ name: "Alice" }, { name: "Bob" }],
+    };
+
+    // Register custom renderer
+    registerRenderer("collection", () => "CUSTOM_OUTPUT");
+
+    const result = render(collection);
+    expect(result).toBe("CUSTOM_OUTPUT");
+  });
+
+  it("custom renderer receives shape and options", () => {
+    const collection: Collection = {
+      type: "collection",
+      items: [{ name: "Alice" }],
+    };
+    const options: RenderOptions = { width: 100, color: true };
+
+    let receivedShape: Shape | undefined;
+    let receivedOptions: RenderOptions | undefined;
+
+    registerRenderer("collection", (shape, opts) => {
+      receivedShape = shape;
+      receivedOptions = opts;
+      return "captured";
+    });
+
+    render(collection, options);
+
+    expect(receivedShape).toEqual(collection);
+    expect(receivedOptions).toEqual(options);
+  });
+
+  it("unregisterRenderer() reverts to built-in behavior", () => {
+    const collection: Collection = {
+      type: "collection",
+      items: ["item1", "item2"],
+    };
+
+    // Register custom renderer
+    registerRenderer("collection", () => "CUSTOM");
+    expect(render(collection)).toBe("CUSTOM");
+
+    // Unregister and verify built-in behavior
+    const removed = unregisterRenderer("collection");
+    expect(removed).toBe(true);
+
+    const result = render(collection);
+    // Should now render as list (built-in behavior for primitive items)
+    expect(result).toContain("item1");
+    expect(result).toMatch(/[•\-*]/);
+  });
+
+  it("unregisterRenderer() returns false for non-existent renderer", () => {
+    const removed = unregisterRenderer("nonexistent");
+    expect(removed).toBe(false);
+  });
+
+  it("clearRenderers() removes all custom renderers", () => {
+    // Register multiple custom renderers
+    registerRenderer("collection", () => "CUSTOM_COLLECTION");
+    registerRenderer("hierarchy", () => "CUSTOM_HIERARCHY");
+    registerRenderer("keyvalue", () => "CUSTOM_KEYVALUE");
+
+    // Verify custom renderers are active
+    const collection: Collection = { type: "collection", items: [] };
+    const hierarchy: Hierarchy = {
+      type: "hierarchy",
+      root: { name: "test", children: [] },
+    };
+    const keyValue: KeyValue = { type: "keyvalue", entries: {} };
+
+    expect(render(collection)).toBe("CUSTOM_COLLECTION");
+    expect(render(hierarchy)).toBe("CUSTOM_HIERARCHY");
+    expect(render(keyValue)).toBe("CUSTOM_KEYVALUE");
+
+    // Clear all renderers
+    clearRenderers();
+
+    // Verify built-in behavior is restored
+    expect(render(collection)).not.toBe("CUSTOM_COLLECTION");
+    expect(render(hierarchy)).not.toBe("CUSTOM_HIERARCHY");
+    expect(render(keyValue)).not.toBe("CUSTOM_KEYVALUE");
+  });
+
+  it("multiple custom renderers can coexist", () => {
+    registerRenderer("collection", () => "CUSTOM_COLLECTION");
+    registerRenderer("resource", () => "CUSTOM_RESOURCE");
+
+    const collection: Collection = { type: "collection", items: [] };
+    const resource: Resource = { type: "resource", data: {} };
+    const hierarchy: Hierarchy = {
+      type: "hierarchy",
+      root: { name: "root", children: [] },
+    };
+
+    // Custom renderers should be used
+    expect(render(collection)).toBe("CUSTOM_COLLECTION");
+    expect(render(resource)).toBe("CUSTOM_RESOURCE");
+
+    // Hierarchy should still use built-in (no custom renderer registered)
+    expect(render(hierarchy)).toContain("root");
+    expect(render(hierarchy)).not.toBe("CUSTOM_COLLECTION");
   });
 });
