@@ -47,7 +47,16 @@ bun run release                            # Build + publish
 
 # Maintenance
 bun run clean                              # Clear Turbo artifacts and node_modules
+
+# Upgrade Bun
+./scripts/upgrade-bun.sh 1.4.0            # Upgrade to specific version
+./scripts/upgrade-bun.sh                   # Upgrade to latest
 ```
+
+**Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
+1. Run `./scripts/upgrade-bun.sh <version>`
+2. Script updates `.bun-version`, installs locally, and updates `bun.lock`
+3. Commit both files together
 
 ## Architecture
 
