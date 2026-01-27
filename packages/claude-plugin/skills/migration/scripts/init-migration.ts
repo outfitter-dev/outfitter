@@ -94,8 +94,29 @@ async function runRg(pattern: string, options: string[] = []): Promise<ScanResul
 }
 
 async function countMatches(pattern: string): Promise<number> {
-	const results = await runRg(pattern, ["-c"]);
-	return results.reduce((sum, r) => sum + parseInt(r.content, 10), 0);
+	const proc = Bun.spawn(["rg", pattern, "--type", "ts", "-c"], {
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+
+	const output = await new Response(proc.stdout).text();
+	let total = 0;
+
+	for (const line of output.split("\n").filter(Boolean)) {
+		// rg -c outputs "file:count" for multiple files, or just "count" for single file
+		const colonIndex = line.lastIndexOf(":");
+		if (colonIndex !== -1) {
+			// file:count format
+			const count = parseInt(line.slice(colonIndex + 1), 10);
+			if (!Number.isNaN(count)) total += count;
+		} else {
+			// just count (single file case)
+			const count = parseInt(line, 10);
+			if (!Number.isNaN(count)) total += count;
+		}
+	}
+
+	return total;
 }
 
 async function scanThrows(): Promise<ScanResult[]> {
