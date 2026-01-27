@@ -7,13 +7,17 @@
  * - padText() (2 tests)
  * - stripAnsi() (1 test)
  * - getStringWidth() (1 test)
+ * - pluralize() (4 tests)
+ * - slugify() (5 tests)
  *
- * Total: 8 tests
+ * Total: 16 tests
  */
 import { describe, expect, it } from "bun:test";
 import {
   getStringWidth,
   padText,
+  pluralize,
+  slugify,
   stripAnsi,
   truncateText,
   wrapText,
@@ -118,6 +122,64 @@ describe("Text Formatting", () => {
 
       // "Hello" is 5 characters, ANSI codes should be ignored
       expect(width).toBe(5);
+    });
+  });
+
+  describe("pluralize()", () => {
+    it("returns singular form when count is 1", () => {
+      const result = pluralize(1, "item");
+
+      expect(result).toBe("1 item");
+    });
+
+    it("returns default plural form when count is greater than 1", () => {
+      const result = pluralize(5, "item");
+
+      expect(result).toBe("5 items");
+    });
+
+    it("returns plural form when count is 0", () => {
+      const result = pluralize(0, "item");
+
+      expect(result).toBe("0 items");
+    });
+
+    it("uses custom plural form when provided", () => {
+      const result = pluralize(0, "child", "children");
+
+      expect(result).toBe("0 children");
+    });
+  });
+
+  describe("slugify()", () => {
+    it("converts text to lowercase with hyphens", () => {
+      const result = slugify("Hello World");
+
+      expect(result).toBe("hello-world");
+    });
+
+    it("replaces special characters with hyphens", () => {
+      const result = slugify("Hello World!");
+
+      expect(result).toBe("hello-world");
+    });
+
+    it("replaces ampersand with 'and'", () => {
+      const result = slugify("This & That");
+
+      expect(result).toBe("this-and-that");
+    });
+
+    it("removes leading and trailing hyphens", () => {
+      const result = slugify("  Hello World!  ");
+
+      expect(result).toBe("hello-world");
+    });
+
+    it("collapses multiple spaces into single hyphen", () => {
+      const result = slugify("  Multiple   Spaces  ");
+
+      expect(result).toBe("multiple-spaces");
     });
   });
 });
