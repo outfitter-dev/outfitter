@@ -68,7 +68,7 @@ Packages are organized into tiers based on stability and dependency direction. H
 │  outfitter CLI, @outfitter/testing                      │
 ├─────────────────────────────────────────────────────────┤
 │                    RUNTIME (Active)                     │
-│  cli, config, logging, file-ops, state, ui,            │
+│  cli, config, logging, file-ops, state,                │
 │  mcp, index, daemon, agents                             │
 ├─────────────────────────────────────────────────────────┤
 │                   FOUNDATION (Stable)                   │
@@ -91,12 +91,11 @@ APIs evolving based on usage. These implement the core functionality.
 
 | Package | Purpose |
 |---------|---------|
-| `@outfitter/cli` | Typed CLI framework with output modes, input parsing, pagination |
+| `@outfitter/cli` | Typed CLI framework with output modes, input parsing, pagination, terminal rendering (`/render`, `/terminal` subpaths) |
 | `@outfitter/config` | XDG-compliant config loading with Zod validation |
 | `@outfitter/logging` | Structured logging via logtape with redaction |
 | `@outfitter/file-ops` | Workspace detection, path security, file locking, atomic writes |
 | `@outfitter/state` | Pagination cursors, ephemeral state management |
-| `@outfitter/ui` | Color tokens, terminal renderers, progress bars |
 | `@outfitter/mcp` | MCP server framework with typed tools |
 | `@outfitter/index` | SQLite FTS5 indexing with WAL mode |
 | `@outfitter/daemon` | Daemon lifecycle, IPC, health checks |
@@ -147,7 +146,7 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 - `types` provides utilities to `contracts`
 - `config` and `file-ops` are shared by CLI, MCP, and daemon surfaces
 - `logging` is used throughout but kept optional via interface injection
-- `ui` is CLI-specific (terminal output)
+- `cli` includes terminal rendering via `/render` and `/terminal` subpaths
 - `state` is shared for pagination across surfaces
 
 ## Directory Structure
@@ -171,8 +170,7 @@ outfitter/stack/
 │   ├── stack/               # Version coordination
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
-│   ├── types/               # Type utilities
-│   └── ui/                  # Terminal UI
+│   └── types/               # Type utilities
 ├── docs/                    # Documentation (you are here)
 ├── AGENTS.md                # AI agent instructions
 ├── CLAUDE.md                # Claude Code entry point

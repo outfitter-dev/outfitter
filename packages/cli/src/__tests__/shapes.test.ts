@@ -31,7 +31,7 @@ import {
   renderTable,
   renderTree,
   type Shape,
-} from "../index.js";
+} from "../render/index.js";
 
 // ============================================================================
 // Shape Type Guards Tests (4 tests)

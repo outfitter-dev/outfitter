@@ -58,7 +58,7 @@ The building blocks for applications.
 
 | Package | What it does |
 |---------|--------------|
-| `@outfitter/cli` | CLI framework with human/JSON output modes |
+| `@outfitter/cli` | CLI framework with human/JSON output modes, terminal rendering |
 | `@outfitter/mcp` | MCP server framework with typed tools |
 | `@outfitter/config` | Config loading that respects XDG paths |
 | `@outfitter/logging` | Structured logging with automatic redaction |
@@ -67,7 +67,6 @@ The building blocks for applications.
 | `@outfitter/daemon` | Daemon lifecycle, health checks, IPC |
 | `@outfitter/agents` | Agent scaffolding and templates |
 | `@outfitter/state` | Pagination cursors and ephemeral state |
-| `@outfitter/ui` | Terminal colors and renderers |
 
 ### Tooling (Early)
 

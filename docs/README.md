@@ -25,12 +25,11 @@ Each package has detailed API documentation. Stability labels indicate API matur
 
 ### Runtime (Active)
 
-- [@outfitter/cli](../packages/cli/README.md) — CLI framework with output modes
+- [@outfitter/cli](../packages/cli/README.md) — CLI framework with output modes, terminal rendering
 - [@outfitter/config](../packages/config/README.md) — XDG-compliant configuration
 - [@outfitter/logging](../packages/logging/README.md) — Structured logging with redaction
 - [@outfitter/file-ops](../packages/file-ops/README.md) — Path security, atomic writes
 - [@outfitter/state](../packages/state/README.md) — Pagination cursors, state management
-- [@outfitter/ui](../packages/ui/README.md) — Terminal colors, renderers
 - [@outfitter/mcp](../packages/mcp/README.md) — MCP server framework with typed tools
 - [@outfitter/index](../packages/index/README.md) — SQLite FTS5 full-text search
 - [@outfitter/daemon](../packages/daemon/README.md) — Daemon lifecycle, IPC, health checks

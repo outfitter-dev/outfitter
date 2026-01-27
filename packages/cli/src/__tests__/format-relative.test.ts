@@ -4,7 +4,7 @@
  * TDD RED PHASE: These tests define expected behavior for relative time formatting.
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { formatRelative } from "../index.js";
+import { formatRelative } from "../render/index.js";
 
 // ============================================================================
 // Time Constants for Testing
