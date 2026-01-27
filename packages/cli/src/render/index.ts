@@ -18,6 +18,15 @@ export {
   type TokenOptions,
   type Tokens,
 } from "./colors.js";
+// Date range parsing
+export {
+  type DateRange,
+  endOfDay,
+  parseDateRange,
+  startOfDay,
+} from "./date.js";
+// Duration and byte formatting
+export { formatBytes, formatDuration } from "./format.js";
 // Date/time formatting
 export { formatRelative } from "./format-relative.js";
 // JSON and text rendering
@@ -33,6 +42,7 @@ export { type ProgressOptions, renderProgress } from "./progress.js";
 // Shapes and unified render
 export {
   type Collection,
+  clearRenderers,
   type Hierarchy,
   isCollection,
   isHierarchy,
@@ -42,10 +52,13 @@ export {
   type KeyValue,
   type RenderOptions,
   type Resource,
+  registerRenderer,
   render,
   type Shape,
+  type ShapeRenderer,
   type TreeNode,
   treeNodeToRecord,
+  unregisterRenderer,
 } from "./shapes.js";
 // Table rendering
 export { renderTable, type TableOptions } from "./table.js";
@@ -54,6 +67,8 @@ export {
   ANSI_REGEX,
   getStringWidth,
   padText,
+  pluralize,
+  slugify,
   stripAnsi,
   truncateText,
   wrapText,
