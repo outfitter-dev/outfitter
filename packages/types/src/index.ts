@@ -22,11 +22,14 @@ export {
 } from "./branded";
 // Collection utilities
 export {
+  chunk,
+  dedupe,
   first,
   groupBy,
   isNonEmptyArray,
   last,
   type NonEmptyArray,
+  sortBy,
   toNonEmptyArray,
 } from "./collections";
 // Deep path utilities
@@ -60,6 +63,7 @@ export {
   type ExactlyOne,
   type Mutable,
   type OptionalKeys,
+  type Prettify,
   type RequiredKeys,
   type ValueOf,
 } from "./utilities";
