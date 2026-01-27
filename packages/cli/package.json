@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/cli",
-  "description": "Typed CLI runtime with output contracts, input parsing, and pagination",
+  "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
   "version": "0.1.0-rc.1",
   "type": "module",
   "files": [
@@ -13,6 +13,84 @@
       "import": {
         "types": "./dist/output.d.ts",
         "default": "./dist/output.js"
+      }
+    },
+    "./render": {
+      "import": {
+        "types": "./dist/render/index.d.ts",
+        "default": "./dist/render/index.js"
+      }
+    },
+    "./render/shapes": {
+      "import": {
+        "types": "./dist/render/shapes.d.ts",
+        "default": "./dist/render/shapes.js"
+      }
+    },
+    "./render/markdown": {
+      "import": {
+        "types": "./dist/render/markdown.d.ts",
+        "default": "./dist/render/markdown.js"
+      }
+    },
+    "./render/list": {
+      "import": {
+        "types": "./dist/render/list.d.ts",
+        "default": "./dist/render/list.js"
+      }
+    },
+    "./render/tree": {
+      "import": {
+        "types": "./dist/render/tree.d.ts",
+        "default": "./dist/render/tree.js"
+      }
+    },
+    "./terminal": {
+      "import": {
+        "types": "./dist/terminal/index.d.ts",
+        "default": "./dist/terminal/index.js"
+      }
+    },
+    "./render/format-relative": {
+      "import": {
+        "types": "./dist/render/format-relative.d.ts",
+        "default": "./dist/render/format-relative.js"
+      }
+    },
+    "./render/json": {
+      "import": {
+        "types": "./dist/render/json.d.ts",
+        "default": "./dist/render/json.js"
+      }
+    },
+    "./render/progress": {
+      "import": {
+        "types": "./dist/render/progress.d.ts",
+        "default": "./dist/render/progress.js"
+      }
+    },
+    "./render/table": {
+      "import": {
+        "types": "./dist/render/table.d.ts",
+        "default": "./dist/render/table.js"
+      }
+    },
+    "./render/text": {
+      "import": {
+        "types": "./dist/render/text.d.ts",
+        "default": "./dist/render/text.js"
+      }
+    },
+    "./render/colors": {
+      "import": {
+        "types": "./dist/render/colors.d.ts",
+        "default": "./dist/render/colors.js"
+      }
+    },
+    "./terminal/detection": {
+      "import": {
+        "types": "./dist/terminal/detection.d.ts",
+        "default": "./dist/terminal/detection.js"
       }
     },
     "./types": {
@@ -65,6 +143,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@outfitter/types": "workspace:*",
     "better-result": "^2.5.1",
@@ -95,6 +174,9 @@
     "commander",
     "typescript",
     "bun",
-    "outfitter"
+    "outfitter",
+    "terminal",
+    "colors",
+    "renderers"
   ]
 }

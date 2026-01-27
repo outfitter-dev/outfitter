@@ -726,7 +726,7 @@ export function resetColorDecision(): void {
 
 ### 1. Waymark-specific Styling (styles.ts)
 
-The extensive chalk-based styling for waymark syntax (tags, mentions, properties) is domain-specific. Outfitter provides semantic tokens via `@outfitter/ui`; individual CLIs style their domain objects.
+The extensive chalk-based styling for waymark syntax (tags, mentions, properties) is domain-specific. Outfitter provides semantic tokens via `@outfitter/cli/render`; individual CLIs style their domain objects.
 
 **Reason**: Too coupled to waymark grammar. Outfitter tokens are semantic (success, warning, danger), not domain-specific.
 
@@ -817,7 +817,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has formatters but no shape abstraction. Firewatch has no abstraction.
 
 **Outfitter implementation needed**:
-- `@outfitter/ui` shapes
+- `@outfitter/cli/render` shapes
 - `@outfitter/cli` output() function that auto-selects renderer
 - Integration with `--json`, `--jsonl`, `--tree`, `--table` flags
 
@@ -858,5 +858,5 @@ Based on SPEC.md and existing patterns:
 1. **Create core utilities**: Exit codes, output modes, TTY detection
 2. **Build input parsing**: `collectIds()`, `expandFileArg()`, `parseGlob()`, `parseKeyValue()`
 3. **Implement state persistence**: Cursor storage for `--next`/`--context`
-4. **Integrate with @outfitter/ui**: Shape-to-output rendering
+4. **Integrate with @outfitter/cli/render**: Shape-to-output rendering
 5. **Create typed Commander.js wrapper**: The `createCLI()`, `command()`, `output()` API

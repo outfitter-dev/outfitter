@@ -43,7 +43,6 @@ See [VERSIONS.md](./VERSIONS.md) for the complete compatibility matrix.
 | @outfitter/logging | 0.1.0-rc.1 |
 | @outfitter/file-ops | 0.1.0-rc.1 |
 | @outfitter/state | 0.1.0-rc.1 |
-| @outfitter/ui | 0.1.0-rc.1 |
 | @outfitter/mcp | 0.1.0-rc.1 |
 | @outfitter/index | 0.1.0-rc.1 |
 | @outfitter/daemon | 0.1.0-rc.1 |
@@ -106,12 +105,11 @@ Stable APIs, rarely change:
 
 ### Runtime (warm)
 Expected to evolve:
-- `@outfitter/cli` - CLI framework
+- `@outfitter/cli` - CLI framework (includes terminal rendering)
 - `@outfitter/config` - Configuration
 - `@outfitter/logging` - Structured logging
 - `@outfitter/file-ops` - File operations
 - `@outfitter/state` - State management
-- `@outfitter/ui` - Terminal UI
 - `@outfitter/mcp` - MCP server framework
 - `@outfitter/index` - SQLite FTS5 indexing
 - `@outfitter/daemon` - Daemon lifecycle

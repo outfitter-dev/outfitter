@@ -28,7 +28,6 @@ export const MINIMUM_VERSIONS = {
   "@outfitter/state": "0.1.0-rc.1",
   "@outfitter/testing": "0.1.0-rc.1",
   "@outfitter/types": "0.1.0-rc.1",
-  "@outfitter/ui": "0.1.0-rc.1",
 } as const;
 
 /**

@@ -9,7 +9,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { createTheme } from "@outfitter/ui";
+import { createTheme } from "@outfitter/cli/render";
 import type { Command } from "commander";
 
 // =============================================================================

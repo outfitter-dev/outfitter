@@ -88,7 +88,7 @@ describe("init command file creation", () => {
     expect(packageJson.name).toBe("test-project");
   });
 
-  test("creates tsconfig.json that extends base config", async () => {
+  test("creates tsconfig.json with strict TypeScript settings", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
@@ -98,20 +98,12 @@ describe("init command file creation", () => {
       force: false,
     });
 
-    // Check that both tsconfig files exist
     const tsconfigPath = join(tempDir, "tsconfig.json");
-    const tsconfigBasePath = join(tempDir, "tsconfig.base.json");
     expect(existsSync(tsconfigPath)).toBe(true);
-    expect(existsSync(tsconfigBasePath)).toBe(true);
 
-    // tsconfig.json extends the base config
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
-    expect(tsconfig.extends).toBe("./tsconfig.base.json");
-
-    // Base config contains the actual compiler options
-    const tsconfigBase = JSON.parse(readFileSync(tsconfigBasePath, "utf-8"));
-    expect(tsconfigBase.compilerOptions).toBeDefined();
-    expect(tsconfigBase.compilerOptions.strict).toBe(true);
+    expect(tsconfig.compilerOptions).toBeDefined();
+    expect(tsconfig.compilerOptions.strict).toBe(true);
   });
 
   test("creates src directory structure", async () => {

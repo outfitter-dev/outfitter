@@ -14,7 +14,6 @@ This document tracks version compatibility across @outfitter packages.
 | @outfitter/logging | 0.1.0-rc.0 | RC |
 | @outfitter/file-ops | 0.1.0-rc.0 | RC |
 | @outfitter/state | 0.1.0-rc.0 | RC |
-| @outfitter/ui | 0.1.0-rc.0 | RC |
 | @outfitter/mcp | 0.1.0-rc.0 | RC |
 | @outfitter/index | 0.1.0-rc.0 | RC |
 | @outfitter/daemon | 0.1.0-rc.0 | RC |
@@ -27,12 +26,11 @@ This document tracks version compatibility across @outfitter packages.
 - `@outfitter/types` - Branded types
 
 ### Runtime (warm)
-- `@outfitter/cli` - CLI framework
+- `@outfitter/cli` - CLI framework (includes terminal rendering)
 - `@outfitter/config` - Configuration
 - `@outfitter/logging` - Structured logging
 - `@outfitter/file-ops` - File operations
 - `@outfitter/state` - State management
-- `@outfitter/ui` - Terminal UI
 - `@outfitter/mcp` - MCP server framework
 - `@outfitter/index` - SQLite FTS5 indexing
 - `@outfitter/daemon` - Daemon lifecycle

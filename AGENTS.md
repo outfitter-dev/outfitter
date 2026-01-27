@@ -58,13 +58,12 @@ bun run clean                              # Clear Turbo artifacts and node_modu
 - `@outfitter/types` — Branded types, type utilities
 
 **Runtime (Active)** — Evolving based on usage:
-- `@outfitter/cli` — Typed Commander wrapper with output contract
+- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors
 - `@outfitter/mcp` — MCP server framework with typed tools and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
 - `@outfitter/logging` — Structured logging via logtape
 - `@outfitter/file-ops` — Workspace detection, path security, locking
 - `@outfitter/state` — Pagination state, cursor persistence
-- `@outfitter/ui` — Terminal output, colors, renderers
 - `@outfitter/index` — SQLite FTS5 with WAL
 - `@outfitter/daemon` — Daemon lifecycle, IPC, health checks
 - `@outfitter/testing` — Test harnesses for MCP and CLI
