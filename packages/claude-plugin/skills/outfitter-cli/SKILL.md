@@ -268,6 +268,6 @@ progress.stop();
 
 ## Related Skills
 
-- `os:patterns` — Handler contract
-- `os:scaffold` — CLI command template
-- `os:debug` — Troubleshooting CLI issues
+- `stack:patterns` — Handler contract
+- `stack:scaffold` — CLI command template
+- `stack:debug` — Troubleshooting CLI issues

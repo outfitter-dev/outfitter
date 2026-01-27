@@ -111,7 +111,7 @@ Issues discovered that should be reported to outfitter-dev/stack:
 - [ ] {{this.title}} — {{this.type}}
 {{/each}}
 
-Use `os:migration-feedback` skill to create GitHub issues.
+Use `stack:migration-feedback` skill to create GitHub issues.
 
 ## Completion Checklist
 

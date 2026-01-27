@@ -224,6 +224,6 @@ bun run dev my-command <id>
 
 ## What I Don't Do
 
-- Design architecture (use `os:architect` agent)
-- Review code (use `os:reviewer` agent)
+- Design architecture (use `stack:architect` agent)
+- Review code (use `stack:reviewer` agent)
 - Debug issues (use the debug skill)

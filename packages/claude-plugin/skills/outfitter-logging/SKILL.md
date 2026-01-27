@@ -271,6 +271,6 @@ logger.debug("State", () => ({
 
 ## Related Skills
 
-- `os:patterns` — Context creation
-- `os:outfitter-daemon` — Daemon logging
-- `os:debug` — Troubleshooting logging
+- `stack:patterns` — Context creation
+- `stack:outfitter-daemon` — Daemon logging
+- `stack:debug` — Troubleshooting logging

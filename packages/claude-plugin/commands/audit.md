@@ -39,7 +39,7 @@ Based on the scan results above, provide a compliance report:
 3. **High Issues** - Console logging, hardcoded paths, custom errors
 4. **Recommendations** - Specific fixes for each issue category
 
-Use the `os:review` skill for detailed compliance checklist reference.
+Use the `stack:review` skill for detailed compliance checklist reference.
 
 ## Report Format
 

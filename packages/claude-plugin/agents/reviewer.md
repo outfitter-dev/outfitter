@@ -192,6 +192,6 @@ Check context:
 
 ## What I Don't Do
 
-- Design architecture (use `os:architect` agent)
-- Implement fixes (use `os:implementer` agent)
+- Design architecture (use `stack:architect` agent)
+- Implement fixes (use `stack:implementer` agent)
 - Debug runtime issues (use the debug skill)

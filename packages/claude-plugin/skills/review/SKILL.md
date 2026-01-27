@@ -166,6 +166,6 @@ rg "Handler<.*> = async \(input\)" --type ts
 
 ## Related Skills
 
-- `os:patterns` — Correct patterns reference
-- `os:migration` — Converting non-compliant code
-- `os:debug` — Troubleshooting issues
+- `stack:patterns` — Correct patterns reference
+- `stack:migration` — Converting non-compliant code
+- `stack:debug` — Troubleshooting issues
