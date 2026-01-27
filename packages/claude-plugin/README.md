@@ -9,32 +9,32 @@ Claude Code plugin for @outfitter/* packages. Provides skills, agents, and comma
 /plugin marketplace add outfitter-dev/agents
 
 # Install plugin
-/plugin install os@outfitter
+/plugin install stack@outfitter
 ```
 
 ## Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `os:patterns` | Result types, Handler contract, Error taxonomy reference |
-| `os:scaffold` | Create handlers, CLI commands, MCP tools, daemons |
-| `os:review` | Audit code for stack compliance |
-| `os:migration` | Convert existing code to stack patterns |
-| `os:migration-feedback` | Report issues found during migration |
-| `os:debug` | Troubleshoot stack-specific issues |
-| `os:outfitter-testing` | Test harnesses and patterns |
-| `os:outfitter-cli` | Deep CLI patterns (output modes, pagination) |
-| `os:outfitter-mcp` | MCP server patterns (tools, resources) |
-| `os:outfitter-daemon` | Daemon lifecycle, IPC, health checks |
-| `os:outfitter-logging` | Structured logging, sinks, redaction |
+| `stack:patterns` | Result types, Handler contract, Error taxonomy reference |
+| `stack:scaffold` | Create handlers, CLI commands, MCP tools, daemons |
+| `stack:review` | Audit code for stack compliance |
+| `stack:migration` | Convert existing code to stack patterns |
+| `stack:migration-feedback` | Report issues found during migration |
+| `stack:debug` | Troubleshoot stack-specific issues |
+| `stack:outfitter-testing` | Test harnesses and patterns |
+| `stack:outfitter-cli` | Deep CLI patterns (output modes, pagination) |
+| `stack:outfitter-mcp` | MCP server patterns (tools, resources) |
+| `stack:outfitter-daemon` | Daemon lifecycle, IPC, health checks |
+| `stack:outfitter-logging` | Structured logging, sinks, redaction |
 
 ## Agents
 
 | Agent | Purpose |
 |-------|---------|
-| `os:architect` | Design stack-based systems, choose packages |
-| `os:implementer` | Build features with TDD methodology |
-| `os:reviewer` | Audit code for compliance |
+| `stack:architect` | Design stack-based systems, choose packages |
+| `stack:implementer` | Build features with TDD methodology |
+| `stack:reviewer` | Audit code for compliance |
 
 ## Commands
 
@@ -50,7 +50,7 @@ Claude Code plugin for @outfitter/* packages. Provides skills, agents, and comma
 Tell me about Outfitter Stack patterns
 ```
 
-The `os:patterns` skill activates automatically.
+The `stack:patterns` skill activates automatically.
 
 ### Create a Handler
 
@@ -58,7 +58,7 @@ The `os:patterns` skill activates automatically.
 Create a handler for fetching user profiles
 ```
 
-The `os:scaffold` skill provides templates.
+The `stack:scaffold` skill provides templates.
 
 ### Review Code
 
@@ -78,7 +78,7 @@ Or use the command:
 Audit this project for migration to Outfitter Stack
 ```
 
-The `os:migration` skill runs the scanner and generates:
+The `stack:migration` skill runs the scanner and generates:
 - `.outfitter/migration/audit-report.md` — Scope and recommendations
 - `.outfitter/migration/plan/` — Stage-by-stage task files (foundation, handlers, errors, paths, adapters, documents, unknowns)
 

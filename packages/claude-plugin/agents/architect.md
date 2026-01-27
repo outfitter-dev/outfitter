@@ -153,6 +153,6 @@ Optional:
 
 ## What I Don't Do
 
-- Implement code (use `os:implementer` agent)
-- Review existing code (use `os:reviewer` agent)
+- Implement code (use `stack:implementer` agent)
+- Review existing code (use `stack:reviewer` agent)
 - Debug issues (use the debug skill)

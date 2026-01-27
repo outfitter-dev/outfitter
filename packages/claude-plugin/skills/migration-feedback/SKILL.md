@@ -79,7 +79,7 @@ Discovered during migration of **{{PROJECT_NAME}}** to Outfitter Stack.
 
 ---
 
-*Created via `os:migration-feedback` skill*
+*Created via `stack:migration-feedback` skill*
 EOF
 )"
 ```

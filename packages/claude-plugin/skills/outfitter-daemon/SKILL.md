@@ -308,6 +308,6 @@ export const statusCommand = command("status")
 
 ## Related Skills
 
-- `os:patterns` — Handler contract
-- `os:scaffold` — Daemon template
-- `os:outfitter-logging` — Structured logging
+- `stack:patterns` — Handler contract
+- `stack:scaffold` — Daemon template
+- `stack:outfitter-logging` — Structured logging

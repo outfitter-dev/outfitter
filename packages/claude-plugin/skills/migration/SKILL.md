@@ -132,7 +132,7 @@ function wrapLegacy<T>(fn: () => Promise<T>): Promise<Result<T, InternalError>> 
 
 ## Reporting Issues
 
-If migration reveals problems with @outfitter/* packages, use the `os:migration-feedback` skill to create GitHub issues on outfitter-dev/stack.
+If migration reveals problems with @outfitter/* packages, use the `stack:migration-feedback` skill to create GitHub issues on outfitter-dev/stack.
 
 Categories:
 - **bug** — Package behavior doesn't match expected
@@ -142,7 +142,7 @@ Categories:
 
 ## Related Skills
 
-- `os:patterns` — Target patterns reference
-- `os:review` — Verify migration completeness
-- `os:scaffold` — Templates for new components
-- `os:migration-feedback` — Report issues to stack repo
+- `stack:patterns` — Target patterns reference
+- `stack:review` — Verify migration completeness
+- `stack:scaffold` — Templates for new components
+- `stack:migration-feedback` — Report issues to stack repo

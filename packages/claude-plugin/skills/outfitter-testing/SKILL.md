@@ -262,6 +262,6 @@ bun test --update-snapshots
 
 ## Related Skills
 
-- `os:patterns` — Handler contract reference
-- `os:scaffold` — Handler templates
-- `os:debug` — Troubleshooting test failures
+- `stack:patterns` — Handler contract reference
+- `stack:scaffold` — Handler templates
+- `stack:debug` — Troubleshooting test failures

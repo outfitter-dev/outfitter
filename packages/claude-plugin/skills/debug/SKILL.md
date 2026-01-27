@@ -231,6 +231,6 @@ if (!parseResult.success) {
 
 ## Related Skills
 
-- `os:patterns` — Correct patterns
-- `os:review` — Systematic audit
-- `os:outfitter-testing` — Prevent regressions
+- `stack:patterns` — Correct patterns
+- `stack:review` — Systematic audit
+- `stack:outfitter-testing` — Prevent regressions

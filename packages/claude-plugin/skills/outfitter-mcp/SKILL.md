@@ -279,6 +279,6 @@ test("tool returns results", async () => {
 
 ## Related Skills
 
-- `os:patterns` — Handler contract
-- `os:scaffold` — MCP tool template
-- `os:debug` — Troubleshooting MCP issues
+- `stack:patterns` — Handler contract
+- `stack:scaffold` — MCP tool template
+- `stack:debug` — Troubleshooting MCP issues
