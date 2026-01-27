@@ -16,6 +16,7 @@ import {
   type ExactlyOne,
   type Mutable,
   type OptionalKeys,
+  type Prettify,
   type RequiredKeys,
   type ValueOf,
 } from "../utilities.js";
@@ -352,6 +353,130 @@ describe("utilities", () => {
       // This test verifies that the switch is exhaustive at compile time
       const result = processStatus("pending");
       expect(result).toBe("waiting");
+    });
+  });
+
+  describe("Prettify<T>", () => {
+    it("flattens simple intersection types", () => {
+      interface A {
+        a: string;
+      }
+      interface B {
+        b: number;
+      }
+      type Intersection = A & B;
+      type Flattened = Prettify<Intersection>;
+
+      // The Prettified type should have both properties as direct members
+      const obj: Flattened = { a: "hello", b: 42 };
+      expect(obj.a).toBe("hello");
+      expect(obj.b).toBe(42);
+
+      // Verify the types are assignable both ways
+      const _asIntersection: Intersection = obj;
+      const _asFlattened: Flattened = _asIntersection;
+      expect(true).toBe(true);
+    });
+
+    it("works with nested objects", () => {
+      interface Outer {
+        outer: { nested: string };
+      }
+      interface Inner {
+        inner: { deep: number };
+      }
+      type Combined = Prettify<Outer & Inner>;
+
+      const obj: Combined = {
+        outer: { nested: "value" },
+        inner: { deep: 123 },
+      };
+      expect(obj.outer.nested).toBe("value");
+      expect(obj.inner.deep).toBe(123);
+    });
+
+    it("preserves optional properties", () => {
+      interface RequiredProps {
+        required: string;
+      }
+      interface OptionalProps {
+        optional?: number;
+      }
+      type Mixed = Prettify<RequiredProps & OptionalProps>;
+
+      // optional should remain optional
+      const withoutOptional: Mixed = { required: "yes" };
+      const withOptional: Mixed = { required: "yes", optional: 42 };
+
+      expect(withoutOptional.required).toBe("yes");
+      expect(withOptional.optional).toBe(42);
+    });
+
+    it("preserves readonly properties", () => {
+      interface MutableProps {
+        mutable: string;
+      }
+      interface ReadonlyProps {
+        readonly immutable: number;
+      }
+      type Combined = Prettify<MutableProps & ReadonlyProps>;
+
+      const obj: Combined = { mutable: "change me", immutable: 42 };
+      obj.mutable = "changed";
+      // @ts-expect-error - immutable should remain readonly
+      obj.immutable = 100;
+      expect(obj.mutable).toBe("changed");
+    });
+
+    it("handles complex multi-way intersections", () => {
+      interface A {
+        a: string;
+      }
+      interface B {
+        b: number;
+      }
+      interface C {
+        c: boolean;
+      }
+      interface D {
+        d: null;
+      }
+      type Complex = Prettify<A & B & C & D>;
+
+      const obj: Complex = { a: "str", b: 1, c: true, d: null };
+      expect(obj).toEqual({ a: "str", b: 1, c: true, d: null });
+    });
+
+    it("works with function properties", () => {
+      interface WithMethod {
+        method: () => void;
+      }
+      interface WithValue {
+        value: string;
+      }
+      type Combined = Prettify<WithMethod & WithValue>;
+
+      const noop = (): void => {
+        // intentionally empty
+      };
+      const obj: Combined = {
+        method: noop,
+        value: "test",
+      };
+      expect(typeof obj.method).toBe("function");
+      expect(obj.value).toBe("test");
+    });
+
+    it("is a no-op on simple object types", () => {
+      interface Simple {
+        a: string;
+        b: number;
+      }
+      type Prettified = Prettify<Simple>;
+
+      const obj: Prettified = { a: "hello", b: 42 };
+      const _asSimple: Simple = obj;
+      expect(obj).toEqual({ a: "hello", b: 42 });
     });
   });
 });

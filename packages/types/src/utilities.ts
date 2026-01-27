@@ -90,6 +90,24 @@ export type Mutable<T> = {
 };
 
 /**
+ * Flattens intersection types for better IDE tooltips.
+ *
+ * Instead of showing `{ a: string } & { b: number }`,
+ * shows `{ a: string; b: number }`.
+ *
+ * @example
+ * ```typescript
+ * type A = { a: string };
+ * type B = { b: number };
+ * type Ugly = A & B; // IDE shows: { a: string } & { b: number }
+ * type Pretty = Prettify<A & B>; // IDE shows: { a: string; b: number }
+ * ```
+ */
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+/**
  * Asserts at compile time that a type is never (exhaustiveness check).
  *
  * @param value - The value that should be never
