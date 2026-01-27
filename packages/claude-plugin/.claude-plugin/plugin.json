@@ -1,0 +1,10 @@
+{
+	"name": "os",
+	"version": "0.1.0",
+	"description": "Outfitter Stack - Result types, Handler contract, error taxonomy, and transport-agnostic patterns for @outfitter/* packages",
+	"author": {
+		"name": "Outfitter",
+		"email": "team@outfitter.dev"
+	},
+	"license": "MIT"
+}
