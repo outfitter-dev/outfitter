@@ -1,8 +1,10 @@
-# Claude-Specific Guidance
+# Claude Code Guidance
+
+Claude Code-specific conventions for this repository. For project context, see [AGENTS.md](../AGENTS.md).
 
 ## Task Management
 
-Use the task tools to track work across context windows. Tasks survive context compaction.
+Use task tools to track work across context windows. Tasks survive context compaction.
 
 ### Creating Tasks
 
@@ -32,3 +34,9 @@ Check `TaskList` to find unblocked tasks ready for work.
 - Add discovered follow-up tasks during implementation
 - Never mark a task completed if tests fail or implementation is partial
 - Use `TaskGet` to read full task details before starting work
+
+## Key References
+
+- [AGENTS.md](../AGENTS.md) — Full development guide
+- [docs/PATTERNS.md](../docs/PATTERNS.md) — Handler contract, Result types
+- [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — Package relationships

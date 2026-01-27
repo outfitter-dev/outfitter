@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides AI agents with project-specific context and conventions.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 @.claude/CLAUDE.md
 @AGENTS.md
