@@ -256,3 +256,56 @@ export function padText(text: string, width: number): string {
 
   return text + " ".repeat(paddingNeeded);
 }
+
+/**
+ * Pluralizes a word based on count.
+ *
+ * Returns a string with the count and the appropriate singular or plural
+ * form of the word. By default, adds 's' for plural. Custom plural forms
+ * can be provided for irregular words.
+ *
+ * @param count - The number of items
+ * @param singular - The singular form of the word
+ * @param plural - Optional custom plural form (defaults to singular + 's')
+ * @returns Formatted string with count and pluralized word
+ *
+ * @example
+ * ```typescript
+ * pluralize(1, "item");           // "1 item"
+ * pluralize(5, "item");           // "5 items"
+ * pluralize(0, "child", "children"); // "0 children"
+ * ```
+ */
+export function pluralize(
+  count: number,
+  singular: string,
+  plural?: string
+): string {
+  const word = count === 1 ? singular : (plural ?? `${singular}s`);
+  return `${count} ${word}`;
+}
+
+/**
+ * Converts text to URL-safe slug.
+ *
+ * Transforms text into a lowercase, hyphen-separated string suitable
+ * for URLs. Replaces ampersands with 'and', removes special characters,
+ * and collapses multiple hyphens.
+ *
+ * @param text - Text to convert to slug
+ * @returns URL-safe slug
+ *
+ * @example
+ * ```typescript
+ * slugify("Hello World!");       // "hello-world"
+ * slugify("This & That");        // "this-and-that"
+ * slugify("  Multiple   Spaces  "); // "multiple-spaces"
+ * ```
+ */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
