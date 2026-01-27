@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import * as path from "node:path";
-import * as os from "node:os";
+import { platform as osPlatform, tmpdir, userInfo } from "node:os";
+import { join } from "node:path";
 
 // ============================================================================
 // Platform Detection
@@ -29,8 +29,8 @@ import * as os from "node:os";
  * ```
  */
 export function isUnixPlatform(): boolean {
-	const platform = os.platform();
-	return platform === "darwin" || platform === "linux";
+  const plat = osPlatform();
+  return plat === "darwin" || plat === "linux";
 }
 
 // ============================================================================
@@ -51,29 +51,26 @@ export function isUnixPlatform(): boolean {
  * @internal
  */
 function getRuntimeDir(): string {
-	// XDG_RUNTIME_DIR takes precedence
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgRuntime = process.env["XDG_RUNTIME_DIR"];
-	if (xdgRuntime) {
-		return xdgRuntime;
-	}
+  // XDG_RUNTIME_DIR takes precedence
+  const xdgRuntime = process.env["XDG_RUNTIME_DIR"];
+  if (xdgRuntime) {
+    return xdgRuntime;
+  }
 
-	const platform = os.platform();
+  const plat = osPlatform();
 
-	if (platform === "darwin") {
-		// macOS: use TMPDIR
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		return process.env["TMPDIR"] ?? os.tmpdir();
-	}
+  if (plat === "darwin") {
+    // macOS: use TMPDIR
+    return process.env["TMPDIR"] ?? tmpdir();
+  }
 
-	if (platform === "linux") {
-		// Linux: fallback to /run/user/<uid>
-		return `/run/user/${os.userInfo().uid}`;
-	}
+  if (plat === "linux") {
+    // Linux: fallback to /run/user/<uid>
+    return `/run/user/${userInfo().uid}`;
+  }
 
-	// Windows: use TEMP
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	return process.env["TEMP"] ?? os.tmpdir();
+  // Windows: use TEMP
+  return process.env["TEMP"] ?? tmpdir();
 }
 
 /**
@@ -90,12 +87,12 @@ function getRuntimeDir(): string {
  * ```
  */
 export function getSocketPath(toolName: string): string {
-	if (!isUnixPlatform()) {
-		// Windows named pipe format
-		return `\\\\.\\pipe\\${toolName}-daemon`;
-	}
+  if (!isUnixPlatform()) {
+    // Windows named pipe format
+    return `\\\\.\\pipe\\${toolName}-daemon`;
+  }
 
-	return path.join(getRuntimeDir(), toolName, "daemon.sock");
+  return join(getRuntimeDir(), toolName, "daemon.sock");
 }
 
 /**
@@ -111,12 +108,12 @@ export function getSocketPath(toolName: string): string {
  * ```
  */
 export function getLockPath(toolName: string): string {
-	if (!isUnixPlatform()) {
-		// Windows: store lock file in temp directory
-		return path.join(os.tmpdir(), `${toolName}-daemon.lock`);
-	}
+  if (!isUnixPlatform()) {
+    // Windows: store lock file in temp directory
+    return join(tmpdir(), `${toolName}-daemon.lock`);
+  }
 
-	return path.join(getRuntimeDir(), toolName, "daemon.lock");
+  return join(getRuntimeDir(), toolName, "daemon.lock");
 }
 
 /**
@@ -132,12 +129,12 @@ export function getLockPath(toolName: string): string {
  * ```
  */
 export function getPidPath(toolName: string): string {
-	if (!isUnixPlatform()) {
-		// Windows: store PID file in temp directory
-		return path.join(os.tmpdir(), `${toolName}-daemon.pid`);
-	}
+  if (!isUnixPlatform()) {
+    // Windows: store PID file in temp directory
+    return join(tmpdir(), `${toolName}-daemon.pid`);
+  }
 
-	return path.join(getRuntimeDir(), toolName, "daemon.pid");
+  return join(getRuntimeDir(), toolName, "daemon.pid");
 }
 
 /**
@@ -153,9 +150,9 @@ export function getPidPath(toolName: string): string {
  * ```
  */
 export function getDaemonDir(toolName: string): string {
-	if (!isUnixPlatform()) {
-		return os.tmpdir();
-	}
+  if (!isUnixPlatform()) {
+    return tmpdir();
+  }
 
-	return path.join(getRuntimeDir(), toolName);
+  return join(getRuntimeDir(), toolName);
 }

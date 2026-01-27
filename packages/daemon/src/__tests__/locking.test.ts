@@ -13,16 +13,16 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { mkdir, rm, writeFile as fsWriteFile } from "node:fs/promises";
+import { writeFile as fsWriteFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-	acquireDaemonLock,
-	isDaemonAlive,
-	isProcessAlive,
-	readLockPid,
-	releaseDaemonLock,
-	type LockHandle,
+  acquireDaemonLock,
+  isDaemonAlive,
+  isProcessAlive,
+  type LockHandle,
+  readLockPid,
+  releaseDaemonLock,
 } from "../locking.js";
 
 // ============================================================================
@@ -33,18 +33,18 @@ let testDir: string;
 let testCounter = 0;
 
 async function createTestDir(): Promise<string> {
-	testCounter++;
-	const dir = join(tmpdir(), `daemon-lock-test-${Date.now()}-${testCounter}`);
-	await mkdir(dir, { recursive: true });
-	return dir;
+  testCounter++;
+  const dir = join(tmpdir(), `daemon-lock-test-${Date.now()}-${testCounter}`);
+  await mkdir(dir, { recursive: true });
+  return dir;
 }
 
 async function cleanupTestDir(dir: string): Promise<void> {
-	try {
-		await rm(dir, { recursive: true, force: true });
-	} catch {
-		// Ignore cleanup errors
-	}
+  try {
+    await rm(dir, { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
+  }
 }
 
 /**
@@ -52,25 +52,25 @@ async function cleanupTestDir(dir: string): Promise<void> {
  * Uses a quick scan for an ESRCH result from process.kill.
  */
 function getDeadPid(): number {
-	for (let candidate = 100000; candidate < 101000; candidate++) {
-		try {
-			process.kill(candidate, 0);
-		} catch (error) {
-			if (error instanceof Error && "code" in error && error.code === "ESRCH") {
-				return candidate;
-			}
-		}
-	}
+  for (let candidate = 100_000; candidate < 101_000; candidate++) {
+    try {
+      process.kill(candidate, 0);
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === "ESRCH") {
+        return candidate;
+      }
+    }
+  }
 
-	// Fallback: high PID that's almost certainly not in use
-	return 999999;
+  // Fallback: high PID that's almost certainly not in use
+  return 999_999;
 }
 
 /**
  * Get the current process PID (guaranteed to be alive).
  */
 function getAlivePid(): number {
-	return process.pid;
+  return process.pid;
 }
 
 // ============================================================================
@@ -78,74 +78,74 @@ function getAlivePid(): number {
 // ============================================================================
 
 describe("Process Liveness Detection", () => {
-	describe("isProcessAlive", () => {
-		it("returns true for running process", () => {
-			// The current process is always running
-			const result = isProcessAlive(getAlivePid());
-			expect(result).toBe(true);
-		});
+  describe("isProcessAlive", () => {
+    it("returns true for running process", () => {
+      // The current process is always running
+      const result = isProcessAlive(getAlivePid());
+      expect(result).toBe(true);
+    });
 
-		it("returns false for dead process", () => {
-			// Use a PID that doesn't exist
-			const result = isProcessAlive(getDeadPid());
-			expect(result).toBe(false);
-		});
+    it("returns false for dead process", () => {
+      // Use a PID that doesn't exist
+      const result = isProcessAlive(getDeadPid());
+      expect(result).toBe(false);
+    });
 
-		it("returns false for PID 0 (special kernel process)", () => {
-			// PID 0 is the scheduler/swapper and shouldn't be accessible
-			// from user space in the same way
-			const result = isProcessAlive(0);
-			// This might be true on some systems, false on others
-			// The important thing is it doesn't throw
-			expect(typeof result).toBe("boolean");
-		});
+    it("returns false for PID 0 (special kernel process)", () => {
+      // PID 0 is the scheduler/swapper and shouldn't be accessible
+      // from user space in the same way
+      const result = isProcessAlive(0);
+      // This might be true on some systems, false on others
+      // The important thing is it doesn't throw
+      expect(typeof result).toBe("boolean");
+    });
 
-		it("returns false for negative PID", () => {
-			// Negative PIDs are invalid
-			const result = isProcessAlive(-1);
-			expect(result).toBe(false);
-		});
-	});
+    it("returns false for negative PID", () => {
+      // Negative PIDs are invalid
+      const result = isProcessAlive(-1);
+      expect(result).toBe(false);
+    });
+  });
 
-	describe("isDaemonAlive", () => {
-		beforeEach(async () => {
-			testDir = await createTestDir();
-		});
+  describe("isDaemonAlive", () => {
+    beforeEach(async () => {
+      testDir = await createTestDir();
+    });
 
-		afterEach(async () => {
-			await cleanupTestDir(testDir);
-		});
+    afterEach(async () => {
+      await cleanupTestDir(testDir);
+    });
 
-		it("returns false when lock file does not exist", async () => {
-			const lockPath = join(testDir, "nonexistent.lock");
-			const result = await isDaemonAlive(lockPath);
-			expect(result).toBe(false);
-		});
+    it("returns false when lock file does not exist", async () => {
+      const lockPath = join(testDir, "nonexistent.lock");
+      const result = await isDaemonAlive(lockPath);
+      expect(result).toBe(false);
+    });
 
-		it("returns true when lock file contains alive PID", async () => {
-			const lockPath = join(testDir, "daemon.lock");
-			await fsWriteFile(lockPath, `${getAlivePid()}\n`);
+    it("returns true when lock file contains alive PID", async () => {
+      const lockPath = join(testDir, "daemon.lock");
+      await fsWriteFile(lockPath, `${getAlivePid()}\n`);
 
-			const result = await isDaemonAlive(lockPath);
-			expect(result).toBe(true);
-		});
+      const result = await isDaemonAlive(lockPath);
+      expect(result).toBe(true);
+    });
 
-		it("returns false when lock file contains dead PID", async () => {
-			const lockPath = join(testDir, "daemon.lock");
-			await fsWriteFile(lockPath, `${getDeadPid()}\n`);
+    it("returns false when lock file contains dead PID", async () => {
+      const lockPath = join(testDir, "daemon.lock");
+      await fsWriteFile(lockPath, `${getDeadPid()}\n`);
 
-			const result = await isDaemonAlive(lockPath);
-			expect(result).toBe(false);
-		});
+      const result = await isDaemonAlive(lockPath);
+      expect(result).toBe(false);
+    });
 
-		it("returns false when lock file contains invalid content", async () => {
-			const lockPath = join(testDir, "daemon.lock");
-			await fsWriteFile(lockPath, "not-a-pid\n");
+    it("returns false when lock file contains invalid content", async () => {
+      const lockPath = join(testDir, "daemon.lock");
+      await fsWriteFile(lockPath, "not-a-pid\n");
 
-			const result = await isDaemonAlive(lockPath);
-			expect(result).toBe(false);
-		});
-	});
+      const result = await isDaemonAlive(lockPath);
+      expect(result).toBe(false);
+    });
+  });
 });
 
 // ============================================================================
@@ -153,78 +153,78 @@ describe("Process Liveness Detection", () => {
 // ============================================================================
 
 describe("Lock Acquisition", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("acquireDaemonLock succeeds when no lock exists", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("acquireDaemonLock succeeds when no lock exists", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		const result = await acquireDaemonLock(lockPath);
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value.lockPath).toBe(lockPath);
-			expect(result.value.pid).toBe(process.pid);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.lockPath).toBe(lockPath);
+      expect(result.value.pid).toBe(process.pid);
 
-			// Verify lock file was created
-			const exists = await Bun.file(lockPath).exists();
-			expect(exists).toBe(true);
+      // Verify lock file was created
+      const exists = await Bun.file(lockPath).exists();
+      expect(exists).toBe(true);
 
-			// Verify PID was written
-			const content = await Bun.file(lockPath).text();
-			expect(content.trim()).toBe(String(process.pid));
-		}
-	});
+      // Verify PID was written
+      const content = await Bun.file(lockPath).text();
+      expect(content.trim()).toBe(String(process.pid));
+    }
+  });
 
-	it("acquireDaemonLock fails when daemon already running", async () => {
-		const lockPath = join(testDir, "daemon.lock");
-		// Pre-create lock file with current process PID (simulating another running daemon)
-		await fsWriteFile(lockPath, `${getAlivePid()}\n`);
+  it("acquireDaemonLock fails when daemon already running", async () => {
+    const lockPath = join(testDir, "daemon.lock");
+    // Pre-create lock file with current process PID (simulating another running daemon)
+    await fsWriteFile(lockPath, `${getAlivePid()}\n`);
 
-		const result = await acquireDaemonLock(lockPath);
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("LockError");
-			expect(result.error.message).toContain("already running");
-			expect(result.error.lockPath).toBe(lockPath);
-			expect(result.error.pid).toBe(getAlivePid());
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("LockError");
+      expect(result.error.message).toContain("already running");
+      expect(result.error.lockPath).toBe(lockPath);
+      expect(result.error.pid).toBe(getAlivePid());
+    }
+  });
 
-	it("acquireDaemonLock creates parent directories if needed", async () => {
-		const lockPath = join(testDir, "nested", "deep", "daemon.lock");
+  it("acquireDaemonLock creates parent directories if needed", async () => {
+    const lockPath = join(testDir, "nested", "deep", "daemon.lock");
 
-		const result = await acquireDaemonLock(lockPath);
+    const result = await acquireDaemonLock(lockPath);
 
-		// This test will FAIL if the implementation doesn't create parent dirs
-		// Current implementation does NOT create parent directories
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			const exists = await Bun.file(lockPath).exists();
-			expect(exists).toBe(true);
-		}
-	});
+    // This test will FAIL if the implementation doesn't create parent dirs
+    // Current implementation does NOT create parent directories
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const exists = await Bun.file(lockPath).exists();
+      expect(exists).toBe(true);
+    }
+  });
 
-	it("acquireDaemonLock returns LockHandle with correct properties", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("acquireDaemonLock returns LockHandle with correct properties", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		const result = await acquireDaemonLock(lockPath);
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			const handle: LockHandle = result.value;
-			expect(handle).toHaveProperty("lockPath");
-			expect(handle).toHaveProperty("pid");
-			expect(handle.lockPath).toBe(lockPath);
-			expect(typeof handle.pid).toBe("number");
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const handle: LockHandle = result.value;
+      expect(handle).toHaveProperty("lockPath");
+      expect(handle).toHaveProperty("pid");
+      expect(handle.lockPath).toBe(lockPath);
+      expect(typeof handle.pid).toBe("number");
+    }
+  });
 });
 
 // ============================================================================
@@ -232,66 +232,66 @@ describe("Lock Acquisition", () => {
 // ============================================================================
 
 describe("Lock Release", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("releaseDaemonLock removes lock file when PID matches", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("releaseDaemonLock removes lock file when PID matches", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		// Acquire lock
-		const acquireResult = await acquireDaemonLock(lockPath);
-		expect(acquireResult.isOk()).toBe(true);
+    // Acquire lock
+    const acquireResult = await acquireDaemonLock(lockPath);
+    expect(acquireResult.isOk()).toBe(true);
 
-		if (acquireResult.isOk()) {
-			// Release lock
-			await releaseDaemonLock(acquireResult.value);
+    if (acquireResult.isOk()) {
+      // Release lock
+      await releaseDaemonLock(acquireResult.value);
 
-			// Lock file should be DELETED (not just cleared)
-			// This test will FAIL because current implementation clears instead of unlinks
-			const exists = await Bun.file(lockPath).exists();
-			expect(exists).toBe(false);
-		}
-	});
+      // Lock file should be DELETED (not just cleared)
+      // This test will FAIL because current implementation clears instead of unlinks
+      const exists = await Bun.file(lockPath).exists();
+      expect(exists).toBe(false);
+    }
+  });
 
-	it("lock release only removes if PID matches", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("lock release only removes if PID matches", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		// Create a lock file with a different PID
-		await fsWriteFile(lockPath, `${getDeadPid()}\n`);
+    // Create a lock file with a different PID
+    await fsWriteFile(lockPath, `${getDeadPid()}\n`);
 
-		// Try to release with a handle that has a different PID
-		const handle: LockHandle = {
-			lockPath,
-			pid: process.pid, // Different from what's in the file
-		};
+    // Try to release with a handle that has a different PID
+    const handle: LockHandle = {
+      lockPath,
+      pid: process.pid, // Different from what's in the file
+    };
 
-		await releaseDaemonLock(handle);
+    await releaseDaemonLock(handle);
 
-		// File should still exist because PID didn't match
-		const exists = await Bun.file(lockPath).exists();
-		expect(exists).toBe(true);
+    // File should still exist because PID didn't match
+    const exists = await Bun.file(lockPath).exists();
+    expect(exists).toBe(true);
 
-		// Content should be unchanged
-		const content = await Bun.file(lockPath).text();
-		expect(content.trim()).toBe(String(getDeadPid()));
-	});
+    // Content should be unchanged
+    const content = await Bun.file(lockPath).text();
+    expect(content.trim()).toBe(String(getDeadPid()));
+  });
 
-	it("releaseDaemonLock handles missing lock file gracefully", async () => {
-		const lockPath = join(testDir, "nonexistent.lock");
+  it("releaseDaemonLock handles missing lock file gracefully", async () => {
+    const lockPath = join(testDir, "nonexistent.lock");
 
-		const handle: LockHandle = {
-			lockPath,
-			pid: process.pid,
-		};
+    const handle: LockHandle = {
+      lockPath,
+      pid: process.pid,
+    };
 
-		// Should not throw when lock file doesn't exist
-		await expect(releaseDaemonLock(handle)).resolves.toBeUndefined();
-	});
+    // Should not throw when lock file doesn't exist
+    await expect(releaseDaemonLock(handle)).resolves.toBeUndefined();
+  });
 });
 
 // ============================================================================
@@ -299,62 +299,62 @@ describe("Lock Release", () => {
 // ============================================================================
 
 describe("Stale Lock Handling", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("acquireDaemonLock succeeds when PID is stale", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("acquireDaemonLock succeeds when PID is stale", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		// Create a stale lock file (dead process)
-		await fsWriteFile(lockPath, `${getDeadPid()}\n`);
+    // Create a stale lock file (dead process)
+    await fsWriteFile(lockPath, `${getDeadPid()}\n`);
 
-		// Should be able to acquire over stale lock
-		const result = await acquireDaemonLock(lockPath);
+    // Should be able to acquire over stale lock
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value.pid).toBe(process.pid);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.pid).toBe(process.pid);
 
-			// Verify lock file was updated with new PID
-			const content = await Bun.file(lockPath).text();
-			expect(content.trim()).toBe(String(process.pid));
-		}
-	});
+      // Verify lock file was updated with new PID
+      const content = await Bun.file(lockPath).text();
+      expect(content.trim()).toBe(String(process.pid));
+    }
+  });
 
-	it("acquireDaemonLock handles invalid lock file content", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("acquireDaemonLock handles invalid lock file content", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		// Create a lock file with garbage content
-		await fsWriteFile(lockPath, "garbage-not-a-pid\n");
+    // Create a lock file with garbage content
+    await fsWriteFile(lockPath, "garbage-not-a-pid\n");
 
-		// Should be able to acquire over invalid lock
-		const result = await acquireDaemonLock(lockPath);
+    // Should be able to acquire over invalid lock
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value.pid).toBe(process.pid);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.pid).toBe(process.pid);
+    }
+  });
 
-	it("acquireDaemonLock handles empty lock file", async () => {
-		const lockPath = join(testDir, "daemon.lock");
+  it("acquireDaemonLock handles empty lock file", async () => {
+    const lockPath = join(testDir, "daemon.lock");
 
-		// Create an empty lock file
-		await fsWriteFile(lockPath, "");
+    // Create an empty lock file
+    await fsWriteFile(lockPath, "");
 
-		// Should be able to acquire over empty lock
-		const result = await acquireDaemonLock(lockPath);
+    // Should be able to acquire over empty lock
+    const result = await acquireDaemonLock(lockPath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value.pid).toBe(process.pid);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.pid).toBe(process.pid);
+    }
+  });
 });
 
 // ============================================================================
@@ -362,55 +362,55 @@ describe("Stale Lock Handling", () => {
 // ============================================================================
 
 describe("readLockPid", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("returns PID when lock file contains valid PID", async () => {
-		const lockPath = join(testDir, "daemon.lock");
-		await fsWriteFile(lockPath, "12345\n");
+  it("returns PID when lock file contains valid PID", async () => {
+    const lockPath = join(testDir, "daemon.lock");
+    await fsWriteFile(lockPath, "12345\n");
 
-		const pid = await readLockPid(lockPath);
+    const pid = await readLockPid(lockPath);
 
-		expect(pid).toBe(12345);
-	});
+    expect(pid).toBe(12_345);
+  });
 
-	it("returns undefined when lock file does not exist", async () => {
-		const lockPath = join(testDir, "nonexistent.lock");
+  it("returns undefined when lock file does not exist", async () => {
+    const lockPath = join(testDir, "nonexistent.lock");
 
-		const pid = await readLockPid(lockPath);
+    const pid = await readLockPid(lockPath);
 
-		expect(pid).toBeUndefined();
-	});
+    expect(pid).toBeUndefined();
+  });
 
-	it("returns undefined when lock file contains invalid content", async () => {
-		const lockPath = join(testDir, "daemon.lock");
-		await fsWriteFile(lockPath, "not-a-number\n");
+  it("returns undefined when lock file contains invalid content", async () => {
+    const lockPath = join(testDir, "daemon.lock");
+    await fsWriteFile(lockPath, "not-a-number\n");
 
-		const pid = await readLockPid(lockPath);
+    const pid = await readLockPid(lockPath);
 
-		expect(pid).toBeUndefined();
-	});
+    expect(pid).toBeUndefined();
+  });
 
-	it("returns undefined when lock file is empty", async () => {
-		const lockPath = join(testDir, "daemon.lock");
-		await fsWriteFile(lockPath, "");
+  it("returns undefined when lock file is empty", async () => {
+    const lockPath = join(testDir, "daemon.lock");
+    await fsWriteFile(lockPath, "");
 
-		const pid = await readLockPid(lockPath);
+    const pid = await readLockPid(lockPath);
 
-		expect(pid).toBeUndefined();
-	});
+    expect(pid).toBeUndefined();
+  });
 
-	it("handles PID with whitespace correctly", async () => {
-		const lockPath = join(testDir, "daemon.lock");
-		await fsWriteFile(lockPath, "  12345  \n");
+  it("handles PID with whitespace correctly", async () => {
+    const lockPath = join(testDir, "daemon.lock");
+    await fsWriteFile(lockPath, "  12345  \n");
 
-		const pid = await readLockPid(lockPath);
+    const pid = await readLockPid(lockPath);
 
-		expect(pid).toBe(12345);
-	});
+    expect(pid).toBe(12_345);
+  });
 });

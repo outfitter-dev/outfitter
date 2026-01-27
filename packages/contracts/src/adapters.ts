@@ -7,79 +7,79 @@ import type { Result } from "better-result";
 
 /** Error during indexing operations */
 export interface IndexError {
-	readonly _tag: "IndexError";
-	readonly message: string;
-	readonly cause?: unknown;
+  readonly _tag: "IndexError";
+  readonly message: string;
+  readonly cause?: unknown;
 }
 
 /** Error during cache operations */
 export interface CacheError {
-	readonly _tag: "CacheError";
-	readonly message: string;
-	readonly cause?: unknown;
+  readonly _tag: "CacheError";
+  readonly message: string;
+  readonly cause?: unknown;
 }
 
 /** Error during auth/credential operations */
 export interface AdapterAuthError {
-	readonly _tag: "AdapterAuthError";
-	readonly message: string;
-	readonly cause?: unknown;
+  readonly _tag: "AdapterAuthError";
+  readonly message: string;
+  readonly cause?: unknown;
 }
 
 /** Error during storage operations */
 export interface StorageError {
-	readonly _tag: "StorageError";
-	readonly message: string;
-	readonly cause?: unknown;
+  readonly _tag: "StorageError";
+  readonly message: string;
+  readonly cause?: unknown;
 }
 
 /**
  * Search options for index adapter.
  */
 export interface SearchOptions {
-	/** Maximum results to return */
-	limit?: number;
+  /** Maximum results to return */
+  limit?: number;
 
-	/** Offset for pagination */
-	offset?: number;
+  /** Offset for pagination */
+  offset?: number;
 
-	/** Field-specific filters */
-	filters?: Record<string, unknown>;
+  /** Field-specific filters */
+  filters?: Record<string, unknown>;
 
-	/** Fields to boost in relevance scoring */
-	boostFields?: string[];
+  /** Fields to boost in relevance scoring */
+  boostFields?: string[];
 }
 
 /**
  * Search result from index adapter.
  */
 export interface SearchResult<T> {
-	/** Matched items with relevance scores */
-	hits: Array<{
-		item: T;
-		score: number;
-		highlights?: Record<string, string[]>;
-	}>;
+  /** Matched items with relevance scores */
+  hits: Array<{
+    item: T;
+    score: number;
+    highlights?: Record<string, string[]>;
+  }>;
 
-	/** Total number of matches (for pagination) */
-	total: number;
+  /** Total number of matches (for pagination) */
+  total: number;
 
-	/** Search execution time in milliseconds */
-	took: number;
+  /** Search execution time in milliseconds */
+  took: number;
 }
 
 /**
  * Index statistics.
  */
 export interface IndexStats {
-	/** Total documents indexed */
-	documentCount: number;
+  /** Total documents indexed */
+  documentCount: number;
 
-	/** Index size in bytes (if available) */
-	sizeBytes?: number;
+  /** Index size in bytes (if available) */
+  sizeBytes?: number;
 
-	/** Last update timestamp */
-	lastUpdated: Date | null;
+  /** Last update timestamp */
+  lastUpdated: Date | null;
 }
 
 /**
@@ -102,20 +102,23 @@ export interface IndexStats {
  * ```
  */
 export interface IndexAdapter<T> {
-	/** Add or update documents in the index */
-	index(items: T[]): Promise<Result<void, IndexError>>;
+  /** Add or update documents in the index */
+  index(items: T[]): Promise<Result<void, IndexError>>;
 
-	/** Full-text search with optional filters */
-	search(query: string, options?: SearchOptions): Promise<Result<SearchResult<T>, IndexError>>;
+  /** Full-text search with optional filters */
+  search(
+    query: string,
+    options?: SearchOptions
+  ): Promise<Result<SearchResult<T>, IndexError>>;
 
-	/** Remove documents by ID */
-	remove(ids: string[]): Promise<Result<void, IndexError>>;
+  /** Remove documents by ID */
+  remove(ids: string[]): Promise<Result<void, IndexError>>;
 
-	/** Clear all indexed documents */
-	clear(): Promise<Result<void, IndexError>>;
+  /** Clear all indexed documents */
+  clear(): Promise<Result<void, IndexError>>;
 
-	/** Get index statistics */
-	stats(): Promise<Result<IndexStats, IndexError>>;
+  /** Get index statistics */
+  stats(): Promise<Result<IndexStats, IndexError>>;
 }
 
 /**
@@ -134,23 +137,27 @@ export interface IndexAdapter<T> {
  * ```
  */
 export interface CacheAdapter<T> {
-	/** Get cached value, null if not found or expired */
-	get(key: string): Promise<Result<T | null, CacheError>>;
+  /** Get cached value, null if not found or expired */
+  get(key: string): Promise<Result<T | null, CacheError>>;
 
-	/** Set value with optional TTL in seconds */
-	set(key: string, value: T, ttlSeconds?: number): Promise<Result<void, CacheError>>;
+  /** Set value with optional TTL in seconds */
+  set(
+    key: string,
+    value: T,
+    ttlSeconds?: number
+  ): Promise<Result<void, CacheError>>;
 
-	/** Delete cached value, returns true if existed */
-	delete(key: string): Promise<Result<boolean, CacheError>>;
+  /** Delete cached value, returns true if existed */
+  delete(key: string): Promise<Result<boolean, CacheError>>;
 
-	/** Clear all cached values */
-	clear(): Promise<Result<void, CacheError>>;
+  /** Clear all cached values */
+  clear(): Promise<Result<void, CacheError>>;
 
-	/** Check if key exists (without retrieving value) */
-	has(key: string): Promise<Result<boolean, CacheError>>;
+  /** Check if key exists (without retrieving value) */
+  has(key: string): Promise<Result<boolean, CacheError>>;
 
-	/** Get multiple values at once */
-	getMany(keys: string[]): Promise<Result<Map<string, T>, CacheError>>;
+  /** Get multiple values at once */
+  getMany(keys: string[]): Promise<Result<Map<string, T>, CacheError>>;
 }
 
 /**
@@ -167,17 +174,17 @@ export interface CacheAdapter<T> {
  * ```
  */
 export interface AuthAdapter {
-	/** Retrieve credential by key */
-	get(key: string): Promise<Result<string | null, AdapterAuthError>>;
+  /** Retrieve credential by key */
+  get(key: string): Promise<Result<string | null, AdapterAuthError>>;
 
-	/** Store credential */
-	set(key: string, value: string): Promise<Result<void, AdapterAuthError>>;
+  /** Store credential */
+  set(key: string, value: string): Promise<Result<void, AdapterAuthError>>;
 
-	/** Remove credential */
-	delete(key: string): Promise<Result<boolean, AdapterAuthError>>;
+  /** Remove credential */
+  delete(key: string): Promise<Result<boolean, AdapterAuthError>>;
 
-	/** List available credential keys (not values) */
-	list(): Promise<Result<string[], AdapterAuthError>>;
+  /** List available credential keys (not values) */
+  list(): Promise<Result<string[], AdapterAuthError>>;
 }
 
 /**
@@ -194,21 +201,23 @@ export interface AuthAdapter {
  * ```
  */
 export interface StorageAdapter {
-	/** Read file contents */
-	read(path: string): Promise<Result<Uint8Array, StorageError>>;
+  /** Read file contents */
+  read(path: string): Promise<Result<Uint8Array, StorageError>>;
 
-	/** Write file contents */
-	write(path: string, data: Uint8Array): Promise<Result<void, StorageError>>;
+  /** Write file contents */
+  write(path: string, data: Uint8Array): Promise<Result<void, StorageError>>;
 
-	/** Delete file */
-	delete(path: string): Promise<Result<boolean, StorageError>>;
+  /** Delete file */
+  delete(path: string): Promise<Result<boolean, StorageError>>;
 
-	/** Check if file exists */
-	exists(path: string): Promise<Result<boolean, StorageError>>;
+  /** Check if file exists */
+  exists(path: string): Promise<Result<boolean, StorageError>>;
 
-	/** List files in directory */
-	list(prefix: string): Promise<Result<string[], StorageError>>;
+  /** List files in directory */
+  list(prefix: string): Promise<Result<string[], StorageError>>;
 
-	/** Get file metadata (size, modified time) */
-	stat(path: string): Promise<Result<{ size: number; modifiedAt: Date } | null, StorageError>>;
+  /** Get file metadata (size, modified time) */
+  stat(
+    path: string
+  ): Promise<Result<{ size: number; modifiedAt: Date } | null, StorageError>>;
 }

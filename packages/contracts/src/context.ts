@@ -4,26 +4,26 @@ import type { HandlerContext, Logger, ResolvedConfig } from "./handler.js";
  * Options for creating a handler context.
  */
 export interface CreateContextOptions {
-	/** Logger instance (uses no-op logger if not provided) */
-	logger?: Logger;
+  /** Logger instance (uses no-op logger if not provided) */
+  logger?: Logger;
 
-	/** Resolved configuration */
-	config?: ResolvedConfig;
+  /** Resolved configuration */
+  config?: ResolvedConfig;
 
-	/** Abort signal for cancellation */
-	signal?: AbortSignal;
+  /** Abort signal for cancellation */
+  signal?: AbortSignal;
 
-	/** Explicit request ID (generates UUIDv7 if not provided) */
-	requestId?: string;
+  /** Explicit request ID (generates UUIDv7 if not provided) */
+  requestId?: string;
 
-	/** Workspace root path */
-	workspaceRoot?: string;
+  /** Workspace root path */
+  workspaceRoot?: string;
 
-	/** Current working directory (defaults to process.cwd()) */
-	cwd?: string;
+  /** Current working directory (defaults to process.cwd()) */
+  cwd?: string;
 
-	/** Environment variables to include */
-	env?: Record<string, string | undefined>;
+  /** Environment variables to include */
+  env?: Record<string, string | undefined>;
 }
 
 /**
@@ -31,13 +31,25 @@ export interface CreateContextOptions {
  * Returns itself for child() to maintain the no-op behavior.
  */
 const noopLogger: Logger = {
-	trace: () => {},
-	debug: () => {},
-	info: () => {},
-	warn: () => {},
-	error: () => {},
-	fatal: () => {},
-	child: () => noopLogger,
+  trace: () => {
+    // silent no-op
+  },
+  debug: () => {
+    // silent no-op
+  },
+  info: () => {
+    // silent no-op
+  },
+  warn: () => {
+    // silent no-op
+  },
+  error: () => {
+    // silent no-op
+  },
+  fatal: () => {
+    // silent no-op
+  },
+  child: () => noopLogger,
 };
 
 /**
@@ -60,25 +72,25 @@ const noopLogger: Logger = {
  * ```
  */
 export function createContext(options: CreateContextOptions): HandlerContext {
-	const ctx: HandlerContext = {
-		requestId: options.requestId ?? generateRequestId(),
-		logger: options.logger ?? noopLogger,
-		cwd: options.cwd ?? process.cwd(),
-		env: options.env ?? {},
-	};
+  const ctx: HandlerContext = {
+    requestId: options.requestId ?? generateRequestId(),
+    logger: options.logger ?? noopLogger,
+    cwd: options.cwd ?? process.cwd(),
+    env: options.env ?? {},
+  };
 
-	// Only add optional properties if they have defined values
-	if (options.config !== undefined) {
-		ctx.config = options.config;
-	}
-	if (options.signal !== undefined) {
-		ctx.signal = options.signal;
-	}
-	if (options.workspaceRoot !== undefined) {
-		ctx.workspaceRoot = options.workspaceRoot;
-	}
+  // Only add optional properties if they have defined values
+  if (options.config !== undefined) {
+    ctx.config = options.config;
+  }
+  if (options.signal !== undefined) {
+    ctx.signal = options.signal;
+  }
+  if (options.workspaceRoot !== undefined) {
+    ctx.workspaceRoot = options.workspaceRoot;
+  }
 
-	return ctx;
+  return ctx;
 }
 
 /**
@@ -96,5 +108,5 @@ export function createContext(options: CreateContextOptions): HandlerContext {
  * ```
  */
 export function generateRequestId(): string {
-	return Bun.randomUUIDv7();
+  return Bun.randomUUIDv7();
 }

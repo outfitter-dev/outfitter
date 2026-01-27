@@ -1,140 +1,140 @@
 {
-	"name": "@outfitter/contracts",
-	"description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
-	"version": "0.1.0-rc.1",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		"./validation": {
-			"import": {
-				"types": "./dist/validation.d.ts",
-				"default": "./dist/validation.js"
-			}
-		},
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./actions": {
-			"import": {
-				"types": "./dist/actions.d.ts",
-				"default": "./dist/actions.js"
-			}
-		},
-		"./handler": {
-			"import": {
-				"types": "./dist/handler.d.ts",
-				"default": "./dist/handler.js"
-			}
-		},
-		"./recovery": {
-			"import": {
-				"types": "./dist/recovery.d.ts",
-				"default": "./dist/recovery.js"
-			}
-		},
-		"./assert": {
-			"import": {
-				"types": "./dist/assert/index.d.ts",
-				"default": "./dist/assert/index.js"
-			}
-		},
-		"./result": {
-			"import": {
-				"types": "./dist/result/index.d.ts",
-				"default": "./dist/result/index.js"
-			}
-		},
-		"./result/utilities": {
-			"import": {
-				"types": "./dist/result/utilities.d.ts",
-				"default": "./dist/result/utilities.js"
-			}
-		},
-		"./adapters": {
-			"import": {
-				"types": "./dist/adapters.d.ts",
-				"default": "./dist/adapters.js"
-			}
-		},
-		"./envelope": {
-			"import": {
-				"types": "./dist/envelope.d.ts",
-				"default": "./dist/envelope.js"
-			}
-		},
-		"./resilience": {
-			"import": {
-				"types": "./dist/resilience.d.ts",
-				"default": "./dist/resilience.js"
-			}
-		},
-		"./serialization": {
-			"import": {
-				"types": "./dist/serialization.d.ts",
-				"default": "./dist/serialization.js"
-			}
-		},
-		"./redactor": {
-			"import": {
-				"types": "./dist/redactor.d.ts",
-				"default": "./dist/redactor.js"
-			}
-		},
-		"./errors": {
-			"import": {
-				"types": "./dist/errors.d.ts",
-				"default": "./dist/errors.js"
-			}
-		},
-		"./context": {
-			"import": {
-				"types": "./dist/context.d.ts",
-				"default": "./dist/context.js"
-			}
-		},
-		"./capabilities": {
-			"import": {
-				"types": "./dist/capabilities.d.ts",
-				"default": "./dist/capabilities.js"
-			}
-		},
-		"./package.json": "./package.json"
-	},
-	"sideEffects": false,
-	"scripts": {
-		"build": "bunup --filter @outfitter/contracts",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"test": "bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"better-result": "^2.5.0",
-		"zod": "^4.3.5"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"typescript": "^5.8.0"
-	},
-	"keywords": [
-		"outfitter",
-		"contracts",
-		"errors",
-		"result",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/contracts"
-	}
+  "name": "@outfitter/contracts",
+  "description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
+  "version": "0.1.0-rc.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./validation": {
+      "import": {
+        "types": "./dist/validation.d.ts",
+        "default": "./dist/validation.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./actions": {
+      "import": {
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
+      }
+    },
+    "./handler": {
+      "import": {
+        "types": "./dist/handler.d.ts",
+        "default": "./dist/handler.js"
+      }
+    },
+    "./recovery": {
+      "import": {
+        "types": "./dist/recovery.d.ts",
+        "default": "./dist/recovery.js"
+      }
+    },
+    "./assert": {
+      "import": {
+        "types": "./dist/assert/index.d.ts",
+        "default": "./dist/assert/index.js"
+      }
+    },
+    "./result": {
+      "import": {
+        "types": "./dist/result/index.d.ts",
+        "default": "./dist/result/index.js"
+      }
+    },
+    "./result/utilities": {
+      "import": {
+        "types": "./dist/result/utilities.d.ts",
+        "default": "./dist/result/utilities.js"
+      }
+    },
+    "./adapters": {
+      "import": {
+        "types": "./dist/adapters.d.ts",
+        "default": "./dist/adapters.js"
+      }
+    },
+    "./envelope": {
+      "import": {
+        "types": "./dist/envelope.d.ts",
+        "default": "./dist/envelope.js"
+      }
+    },
+    "./resilience": {
+      "import": {
+        "types": "./dist/resilience.d.ts",
+        "default": "./dist/resilience.js"
+      }
+    },
+    "./serialization": {
+      "import": {
+        "types": "./dist/serialization.d.ts",
+        "default": "./dist/serialization.js"
+      }
+    },
+    "./redactor": {
+      "import": {
+        "types": "./dist/redactor.d.ts",
+        "default": "./dist/redactor.js"
+      }
+    },
+    "./errors": {
+      "import": {
+        "types": "./dist/errors.d.ts",
+        "default": "./dist/errors.js"
+      }
+    },
+    "./context": {
+      "import": {
+        "types": "./dist/context.d.ts",
+        "default": "./dist/context.js"
+      }
+    },
+    "./capabilities": {
+      "import": {
+        "types": "./dist/capabilities.d.ts",
+        "default": "./dist/capabilities.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter @outfitter/contracts",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "better-result": "^2.5.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "outfitter",
+    "contracts",
+    "errors",
+    "result",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/contracts"
+  }
 }

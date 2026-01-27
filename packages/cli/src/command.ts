@@ -5,56 +5,62 @@
  */
 
 import { Command } from "commander";
-import type { CommandBuilder, CommandFlags, CommandAction } from "./types.js";
+import type { CommandAction, CommandBuilder, CommandFlags } from "./types.js";
 
 class CommandBuilderImpl implements CommandBuilder {
-	private readonly command: Command;
+  private readonly command: Command;
 
-	constructor(name: string) {
-		this.command = new Command(name);
-	}
+  constructor(name: string) {
+    this.command = new Command(name);
+  }
 
-	description(text: string): this {
-		this.command.description(text);
-		return this;
-	}
+  description(text: string): this {
+    this.command.description(text);
+    return this;
+  }
 
-	option(flags: string, description: string, defaultValue?: unknown): this {
-		this.command.option(
-			flags,
-			description,
-			defaultValue as string | boolean | string[] | undefined,
-		);
-		return this;
-	}
+  option(flags: string, description: string, defaultValue?: unknown): this {
+    this.command.option(
+      flags,
+      description,
+      defaultValue as string | boolean | string[] | undefined
+    );
+    return this;
+  }
 
-	requiredOption(flags: string, description: string, defaultValue?: unknown): this {
-		this.command.requiredOption(
-			flags,
-			description,
-			defaultValue as string | boolean | string[] | undefined,
-		);
-		return this;
-	}
+  requiredOption(
+    flags: string,
+    description: string,
+    defaultValue?: unknown
+  ): this {
+    this.command.requiredOption(
+      flags,
+      description,
+      defaultValue as string | boolean | string[] | undefined
+    );
+    return this;
+  }
 
-	alias(alias: string): this {
-		this.command.alias(alias);
-		return this;
-	}
+  alias(alias: string): this {
+    this.command.alias(alias);
+    return this;
+  }
 
-	action<TFlags extends CommandFlags = CommandFlags>(handler: CommandAction<TFlags>): this {
-		this.command.action(async (...args: unknown[]) => {
-			const command = args[args.length - 1] as Command;
-			const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
-			const positional = command.args as string[];
-			await handler({ args: positional, flags, command });
-		});
-		return this;
-	}
+  action<TFlags extends CommandFlags = CommandFlags>(
+    handler: CommandAction<TFlags>
+  ): this {
+    this.command.action(async (...args: unknown[]) => {
+      const command = args.at(-1) as Command;
+      const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
+      const positional = command.args as string[];
+      await handler({ args: positional, flags, command });
+    });
+    return this;
+  }
 
-	build(): Command {
-		return this.command;
-	}
+  build(): Command {
+    return this.command;
+  }
 }
 
 /**
@@ -94,5 +100,5 @@ class CommandBuilderImpl implements CommandBuilder {
  * ```
  */
 export function command(name: string): CommandBuilder {
-	return new CommandBuilderImpl(name);
+  return new CommandBuilderImpl(name);
 }

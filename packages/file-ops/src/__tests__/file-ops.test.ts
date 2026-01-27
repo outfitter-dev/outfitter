@@ -18,20 +18,20 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-	acquireLock,
-	atomicWrite,
-	atomicWriteJson,
-	findWorkspaceRoot,
-	getRelativePath,
-	glob,
-	globSync,
-	isInsideWorkspace,
-	isLocked,
-	isPathSafe,
-	releaseLock,
-	resolveSafePath,
-	securePath,
-	withLock,
+  acquireLock,
+  atomicWrite,
+  atomicWriteJson,
+  findWorkspaceRoot,
+  getRelativePath,
+  glob,
+  globSync,
+  isInsideWorkspace,
+  isLocked,
+  isPathSafe,
+  releaseLock,
+  resolveSafePath,
+  securePath,
+  withLock,
 } from "../index.js";
 
 // ============================================================================
@@ -42,18 +42,18 @@ let testDir: string;
 let testCounter = 0;
 
 async function createTestDir(): Promise<string> {
-	testCounter++;
-	const dir = join(tmpdir(), `file-ops-test-${Date.now()}-${testCounter}`);
-	await mkdir(dir, { recursive: true });
-	return dir;
+  testCounter++;
+  const dir = join(tmpdir(), `file-ops-test-${Date.now()}-${testCounter}`);
+  await mkdir(dir, { recursive: true });
+  return dir;
 }
 
 async function cleanupTestDir(dir: string): Promise<void> {
-	try {
-		await rm(dir, { recursive: true, force: true });
-	} catch {
-		// Ignore cleanup errors
-	}
+  try {
+    await rm(dir, { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
+  }
 }
 
 // ============================================================================
@@ -61,138 +61,138 @@ async function cleanupTestDir(dir: string): Promise<void> {
 // ============================================================================
 
 describe("Workspace Detection", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("findWorkspaceRoot finds nearest .git directory", async () => {
-		// Setup: Create nested structure with .git at root
-		const gitDir = join(testDir, ".git");
-		const nestedDir = join(testDir, "packages", "core", "src");
-		await mkdir(gitDir, { recursive: true });
-		await mkdir(nestedDir, { recursive: true });
+  it("findWorkspaceRoot finds nearest .git directory", async () => {
+    // Setup: Create nested structure with .git at root
+    const gitDir = join(testDir, ".git");
+    const nestedDir = join(testDir, "packages", "core", "src");
+    await mkdir(gitDir, { recursive: true });
+    await mkdir(nestedDir, { recursive: true });
 
-		const result = await findWorkspaceRoot(nestedDir);
+    const result = await findWorkspaceRoot(nestedDir);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(testDir);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(testDir);
+    }
+  });
 
-	it("findWorkspaceRoot finds nearest package.json", async () => {
-		// Setup: Create nested structure with package.json at root
-		const nestedDir = join(testDir, "src", "lib");
-		await mkdir(nestedDir, { recursive: true });
-		await writeFile(join(testDir, "package.json"), "{}");
+  it("findWorkspaceRoot finds nearest package.json", async () => {
+    // Setup: Create nested structure with package.json at root
+    const nestedDir = join(testDir, "src", "lib");
+    await mkdir(nestedDir, { recursive: true });
+    await writeFile(join(testDir, "package.json"), "{}");
 
-		const result = await findWorkspaceRoot(nestedDir);
+    const result = await findWorkspaceRoot(nestedDir);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(testDir);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(testDir);
+    }
+  });
 
-	it("findWorkspaceRoot returns NotFoundError when no markers found", async () => {
-		// Setup: Empty directory with no markers
-		const emptyDir = join(testDir, "empty");
-		await mkdir(emptyDir, { recursive: true });
+  it("findWorkspaceRoot returns NotFoundError when no markers found", async () => {
+    // Setup: Empty directory with no markers
+    const emptyDir = join(testDir, "empty");
+    await mkdir(emptyDir, { recursive: true });
 
-		const result = await findWorkspaceRoot(emptyDir, {
-			markers: [".git", "package.json"],
-			stopAt: testDir, // Stop before reaching actual filesystem root
-		});
+    const result = await findWorkspaceRoot(emptyDir, {
+      markers: [".git", "package.json"],
+      stopAt: testDir, // Stop before reaching actual filesystem root
+    });
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("NotFoundError");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("NotFoundError");
+    }
+  });
 
-	it("findWorkspaceRoot respects marker priority (.git > package.json)", async () => {
-		// Setup: Both .git and package.json at same level
-		const gitDir = join(testDir, ".git");
-		await mkdir(gitDir, { recursive: true });
-		await writeFile(join(testDir, "package.json"), "{}");
-		const nestedDir = join(testDir, "src");
-		await mkdir(nestedDir, { recursive: true });
+  it("findWorkspaceRoot respects marker priority (.git > package.json)", async () => {
+    // Setup: Both .git and package.json at same level
+    const gitDir = join(testDir, ".git");
+    await mkdir(gitDir, { recursive: true });
+    await writeFile(join(testDir, "package.json"), "{}");
+    const nestedDir = join(testDir, "src");
+    await mkdir(nestedDir, { recursive: true });
 
-		// When both are present, .git should be the marker used
-		const result = await findWorkspaceRoot(nestedDir, {
-			markers: [".git", "package.json"],
-		});
+    // When both are present, .git should be the marker used
+    const result = await findWorkspaceRoot(nestedDir, {
+      markers: [".git", "package.json"],
+    });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// Should find the directory with .git (same as package.json here)
-			expect(result.value).toBe(testDir);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should find the directory with .git (same as package.json here)
+      expect(result.value).toBe(testDir);
+    }
+  });
 
-	it("findWorkspaceRoot accepts custom markers array", async () => {
-		// Setup: Custom marker file
-		const nestedDir = join(testDir, "deep", "nested");
-		await mkdir(nestedDir, { recursive: true });
-		await writeFile(join(testDir, ".workspace"), "");
+  it("findWorkspaceRoot accepts custom markers array", async () => {
+    // Setup: Custom marker file
+    const nestedDir = join(testDir, "deep", "nested");
+    await mkdir(nestedDir, { recursive: true });
+    await writeFile(join(testDir, ".workspace"), "");
 
-		const result = await findWorkspaceRoot(nestedDir, {
-			markers: [".workspace"],
-		});
+    const result = await findWorkspaceRoot(nestedDir, {
+      markers: [".workspace"],
+    });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(testDir);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(testDir);
+    }
+  });
 
-	it("findWorkspaceRoot stops at filesystem root", async () => {
-		// This test verifies we don't infinite loop
-		// Use a directory that definitely has no markers above testDir
-		const isolatedDir = join(testDir, "isolated");
-		await mkdir(isolatedDir, { recursive: true });
+  it("findWorkspaceRoot stops at filesystem root", async () => {
+    // This test verifies we don't infinite loop
+    // Use a directory that definitely has no markers above testDir
+    const isolatedDir = join(testDir, "isolated");
+    await mkdir(isolatedDir, { recursive: true });
 
-		const result = await findWorkspaceRoot(isolatedDir, {
-			markers: ["__nonexistent_marker__"],
-			stopAt: testDir,
-		});
+    const result = await findWorkspaceRoot(isolatedDir, {
+      markers: ["__nonexistent_marker__"],
+      stopAt: testDir,
+    });
 
-		expect(result.isErr()).toBe(true);
-	});
+    expect(result.isErr()).toBe(true);
+  });
 
-	it("getRelativePath returns path relative to workspace root", async () => {
-		// Setup
-		const gitDir = join(testDir, ".git");
-		const filePath = join(testDir, "packages", "core", "index.ts");
-		await mkdir(gitDir, { recursive: true });
-		await mkdir(join(testDir, "packages", "core"), { recursive: true });
-		await writeFile(filePath, "");
+  it("getRelativePath returns path relative to workspace root", async () => {
+    // Setup
+    const gitDir = join(testDir, ".git");
+    const filePath = join(testDir, "packages", "core", "index.ts");
+    await mkdir(gitDir, { recursive: true });
+    await mkdir(join(testDir, "packages", "core"), { recursive: true });
+    await writeFile(filePath, "");
 
-		const result = await getRelativePath(filePath);
+    const result = await getRelativePath(filePath);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe("packages/core/index.ts");
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe("packages/core/index.ts");
+    }
+  });
 
-	it("isInsideWorkspace checks if path is within workspace", async () => {
-		// Setup
-		const gitDir = join(testDir, ".git");
-		await mkdir(gitDir, { recursive: true });
-		const insidePath = join(testDir, "src", "index.ts");
-		const outsidePath = "/tmp/outside/file.ts";
+  it("isInsideWorkspace checks if path is within workspace", async () => {
+    // Setup
+    const gitDir = join(testDir, ".git");
+    await mkdir(gitDir, { recursive: true });
+    const insidePath = join(testDir, "src", "index.ts");
+    const outsidePath = "/tmp/outside/file.ts";
 
-		const insideResult = await isInsideWorkspace(insidePath, testDir);
-		const outsideResult = await isInsideWorkspace(outsidePath, testDir);
+    const insideResult = await isInsideWorkspace(insidePath, testDir);
+    const outsideResult = await isInsideWorkspace(outsidePath, testDir);
 
-		expect(insideResult).toBe(true);
-		expect(outsideResult).toBe(false);
-	});
+    expect(insideResult).toBe(true);
+    expect(outsideResult).toBe(false);
+  });
 });
 
 // ============================================================================
@@ -200,86 +200,86 @@ describe("Workspace Detection", () => {
 // ============================================================================
 
 describe("Path Security", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("securePath rejects paths with .. traversal", () => {
-		const result = securePath("../../../etc/passwd", testDir);
+  it("securePath rejects paths with .. traversal", () => {
+    const result = securePath("../../../etc/passwd", testDir);
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("ValidationError");
-			expect(result.error.message).toContain("traversal");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("ValidationError");
+      expect(result.error.message).toContain("traversal");
+    }
+  });
 
-	it("securePath rejects absolute paths when basePath provided", () => {
-		const result = securePath("/etc/passwd", testDir);
+  it("securePath rejects absolute paths when basePath provided", () => {
+    const result = securePath("/etc/passwd", testDir);
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("securePath normalizes paths (removes ./ prefix)", () => {
-		const result = securePath("./src/index.ts", testDir);
+  it("securePath normalizes paths (removes ./ prefix)", () => {
+    const result = securePath("./src/index.ts", testDir);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(join(testDir, "src/index.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(join(testDir, "src/index.ts"));
+    }
+  });
 
-	it("securePath returns Result.err(ValidationError) for invalid paths", () => {
-		// Null bytes and other invalid characters
-		const result = securePath("file\x00name.ts", testDir);
+  it("securePath returns Result.err(ValidationError) for invalid paths", () => {
+    // Null bytes and other invalid characters
+    const result = securePath("file\x00name.ts", testDir);
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("securePath allows valid relative paths", () => {
-		const result = securePath("src/lib/utils.ts", testDir);
+  it("securePath allows valid relative paths", () => {
+    const result = securePath("src/lib/utils.ts", testDir);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
+    }
+  });
 
-	it("isPathSafe returns boolean for validation", () => {
-		expect(isPathSafe("src/index.ts", testDir)).toBe(true);
-		expect(isPathSafe("../../../etc/passwd", testDir)).toBe(false);
-		expect(isPathSafe("/absolute/path", testDir)).toBe(false);
-	});
+  it("isPathSafe returns boolean for validation", () => {
+    expect(isPathSafe("src/index.ts", testDir)).toBe(true);
+    expect(isPathSafe("../../../etc/passwd", testDir)).toBe(false);
+    expect(isPathSafe("/absolute/path", testDir)).toBe(false);
+  });
 
-	it("resolveSafePath combines base and relative securely", () => {
-		const result = resolveSafePath(testDir, "packages", "core", "src");
+  it("resolveSafePath combines base and relative securely", () => {
+    const result = resolveSafePath(testDir, "packages", "core", "src");
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(join(testDir, "packages", "core", "src"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(join(testDir, "packages", "core", "src"));
+    }
+  });
 
-	it("securePath handles Windows-style paths", () => {
-		// Should normalize backslashes on all platforms
-		const result = securePath("src\\lib\\utils.ts", testDir);
+  it("securePath handles Windows-style paths", () => {
+    // Should normalize backslashes on all platforms
+    const result = securePath("src\\lib\\utils.ts", testDir);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// Should be normalized to forward slashes
-			expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should be normalized to forward slashes
+      expect(result.value).toBe(join(testDir, "src/lib/utils.ts"));
+    }
+  });
 });
 
 // ============================================================================
@@ -287,112 +287,118 @@ describe("Path Security", () => {
 // ============================================================================
 
 describe("Glob Patterns", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-		// Setup test file structure
-		await mkdir(join(testDir, "src", "lib"), { recursive: true });
-		await mkdir(join(testDir, "src", "utils"), { recursive: true });
-		await mkdir(join(testDir, "node_modules", "pkg"), { recursive: true });
-		await writeFile(join(testDir, "src", "index.ts"), "");
-		await writeFile(join(testDir, "src", "lib", "helpers.ts"), "");
-		await writeFile(join(testDir, "src", "lib", "helpers.test.ts"), "");
-		await writeFile(join(testDir, "src", "utils", "format.ts"), "");
-		await writeFile(join(testDir, "src", "utils", "parse.js"), "");
-		await writeFile(join(testDir, "node_modules", "pkg", "index.js"), "");
-		await writeFile(join(testDir, "README.md"), "");
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+    // Setup test file structure
+    await mkdir(join(testDir, "src", "lib"), { recursive: true });
+    await mkdir(join(testDir, "src", "utils"), { recursive: true });
+    await mkdir(join(testDir, "node_modules", "pkg"), { recursive: true });
+    await writeFile(join(testDir, "src", "index.ts"), "");
+    await writeFile(join(testDir, "src", "lib", "helpers.ts"), "");
+    await writeFile(join(testDir, "src", "lib", "helpers.test.ts"), "");
+    await writeFile(join(testDir, "src", "utils", "format.ts"), "");
+    await writeFile(join(testDir, "src", "utils", "parse.js"), "");
+    await writeFile(join(testDir, "node_modules", "pkg", "index.js"), "");
+    await writeFile(join(testDir, "README.md"), "");
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("glob returns matching files for simple patterns", async () => {
-		const result = await glob("src/*.ts", { cwd: testDir });
+  it("glob returns matching files for simple patterns", async () => {
+    const result = await glob("src/*.ts", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toContain(join(testDir, "src", "index.ts"));
-			expect(result.value).toHaveLength(1);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toContain(join(testDir, "src", "index.ts"));
+      expect(result.value).toHaveLength(1);
+    }
+  });
 
-	it("glob supports ** for recursive matching", async () => {
-		const result = await glob("src/**/*.ts", { cwd: testDir });
+  it("glob supports ** for recursive matching", async () => {
+    const result = await glob("src/**/*.ts", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toContain(join(testDir, "src", "index.ts"));
-			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
-			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.test.ts"));
-			expect(result.value).toContain(join(testDir, "src", "utils", "format.ts"));
-			expect(result.value).toHaveLength(4);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toContain(join(testDir, "src", "index.ts"));
+      expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
+      expect(result.value).toContain(
+        join(testDir, "src", "lib", "helpers.test.ts")
+      );
+      expect(result.value).toContain(
+        join(testDir, "src", "utils", "format.ts")
+      );
+      expect(result.value).toHaveLength(4);
+    }
+  });
 
-	it("glob supports {a,b} alternation", async () => {
-		const result = await glob("src/**/*.{ts,js}", { cwd: testDir });
+  it("glob supports {a,b} alternation", async () => {
+    const result = await glob("src/**/*.{ts,js}", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toContain(join(testDir, "src", "utils", "parse.js"));
-			expect(result.value.length).toBeGreaterThan(4);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toContain(join(testDir, "src", "utils", "parse.js"));
+      expect(result.value.length).toBeGreaterThan(4);
+    }
+  });
 
-	it("glob supports [abc] character classes", async () => {
-		const result = await glob("src/**/*.[tj]s", { cwd: testDir });
+  it("glob supports [abc] character classes", async () => {
+    const result = await glob("src/**/*.[tj]s", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// Should match both .ts and .js files
-			expect(result.value.length).toBeGreaterThan(0);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should match both .ts and .js files
+      expect(result.value.length).toBeGreaterThan(0);
+    }
+  });
 
-	it("glob respects ignore patterns", async () => {
-		const result = await glob("**/*.ts", {
-			cwd: testDir,
-			ignore: ["**/*.test.ts", "**/node_modules/**"],
-		});
+  it("glob respects ignore patterns", async () => {
+    const result = await glob("**/*.ts", {
+      cwd: testDir,
+      ignore: ["**/*.test.ts", "**/node_modules/**"],
+    });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// Should not include test files
-			expect(result.value).not.toContain(join(testDir, "src", "lib", "helpers.test.ts"));
-			expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should not include test files
+      expect(result.value).not.toContain(
+        join(testDir, "src", "lib", "helpers.test.ts")
+      );
+      expect(result.value).toContain(join(testDir, "src", "lib", "helpers.ts"));
+    }
+  });
 
-	it("glob returns empty array for no matches", async () => {
-		const result = await glob("**/*.xyz", { cwd: testDir });
+  it("glob returns empty array for no matches", async () => {
+    const result = await glob("**/*.xyz", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toEqual([]);
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toEqual([]);
+    }
+  });
 
-	it("glob handles .gitignore-style negation patterns", async () => {
-		const result = await glob("src/**/*.ts", {
-			cwd: testDir,
-			ignore: ["**/*.ts", "!**/index.ts"],
-		});
+  it("glob handles .gitignore-style negation patterns", async () => {
+    const result = await glob("src/**/*.ts", {
+      cwd: testDir,
+      ignore: ["**/*.ts", "!**/index.ts"],
+    });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// With negation, should only match index.ts
-			expect(result.value).toContain(join(testDir, "src", "index.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // With negation, should only match index.ts
+      expect(result.value).toContain(join(testDir, "src", "index.ts"));
+    }
+  });
 
-	it("globSync provides synchronous API", () => {
-		const result = globSync("src/*.ts", { cwd: testDir });
+  it("globSync provides synchronous API", () => {
+    const result = globSync("src/*.ts", { cwd: testDir });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toContain(join(testDir, "src", "index.ts"));
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toContain(join(testDir, "src", "index.ts"));
+    }
+  });
 });
 
 // ============================================================================
@@ -400,160 +406,160 @@ describe("Glob Patterns", () => {
 // ============================================================================
 
 describe("File Locking", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("acquireLock creates lock file", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("acquireLock creates lock file", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		const result = await acquireLock(targetFile);
+    const result = await acquireLock(targetFile);
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			// Lock file should exist
-			const lockPath = `${targetFile}.lock`;
-			const lockExists = await Bun.file(lockPath).exists();
-			expect(lockExists).toBe(true);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Lock file should exist
+      const lockPath = `${targetFile}.lock`;
+      const lockExists = await Bun.file(lockPath).exists();
+      expect(lockExists).toBe(true);
 
-			// Cleanup
-			await releaseLock(result.value);
-		}
-	});
+      // Cleanup
+      await releaseLock(result.value);
+    }
+  });
 
-	it("acquireLock returns Result.err(ConflictError) when locked", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("acquireLock returns Result.err(ConflictError) when locked", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		// Acquire first lock
-		const lock1 = await acquireLock(targetFile);
-		expect(lock1.isOk()).toBe(true);
+    // Acquire first lock
+    const lock1 = await acquireLock(targetFile);
+    expect(lock1.isOk()).toBe(true);
 
-		// Try to acquire second lock - should fail
-		const lock2 = await acquireLock(targetFile);
+    // Try to acquire second lock - should fail
+    const lock2 = await acquireLock(targetFile);
 
-		expect(lock2.isErr()).toBe(true);
-		if (lock2.isErr()) {
-			expect(lock2.error._tag).toBe("ConflictError");
-		}
+    expect(lock2.isErr()).toBe(true);
+    if (lock2.isErr()) {
+      expect(lock2.error._tag).toBe("ConflictError");
+    }
 
-		// Cleanup
-		if (lock1.isOk()) {
-			await releaseLock(lock1.value);
-		}
-	});
+    // Cleanup
+    if (lock1.isOk()) {
+      await releaseLock(lock1.value);
+    }
+  });
 
-	it("releaseLock removes lock file", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("releaseLock removes lock file", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		const lockResult = await acquireLock(targetFile);
-		expect(lockResult.isOk()).toBe(true);
+    const lockResult = await acquireLock(targetFile);
+    expect(lockResult.isOk()).toBe(true);
 
-		if (lockResult.isOk()) {
-			const releaseResult = await releaseLock(lockResult.value);
-			expect(releaseResult.isOk()).toBe(true);
+    if (lockResult.isOk()) {
+      const releaseResult = await releaseLock(lockResult.value);
+      expect(releaseResult.isOk()).toBe(true);
 
-			// Lock file should no longer exist
-			const lockPath = `${targetFile}.lock`;
-			const lockExists = await Bun.file(lockPath).exists();
-			expect(lockExists).toBe(false);
-		}
-	});
+      // Lock file should no longer exist
+      const lockPath = `${targetFile}.lock`;
+      const lockExists = await Bun.file(lockPath).exists();
+      expect(lockExists).toBe(false);
+    }
+  });
 
-	it("withLock executes callback while holding lock", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, '{"count": 0}');
+  it("withLock executes callback while holding lock", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, '{"count": 0}');
 
-		let callbackExecuted = false;
-		const result = await withLock(targetFile, async () => {
-			callbackExecuted = true;
-			return 42;
-		});
+    let callbackExecuted = false;
+    const result = await withLock(targetFile, async () => {
+      callbackExecuted = true;
+      return 42;
+    });
 
-		expect(callbackExecuted).toBe(true);
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toBe(42);
-		}
-	});
+    expect(callbackExecuted).toBe(true);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(42);
+    }
+  });
 
-	it("withLock releases lock after callback completes", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("withLock releases lock after callback completes", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		await withLock(targetFile, async () => {
-			// Lock should be held here
-			const lockPath = `${targetFile}.lock`;
-			const lockExists = await Bun.file(lockPath).exists();
-			expect(lockExists).toBe(true);
-		});
+    await withLock(targetFile, async () => {
+      // Lock should be held here
+      const lockPath = `${targetFile}.lock`;
+      const lockExists = await Bun.file(lockPath).exists();
+      expect(lockExists).toBe(true);
+    });
 
-		// After withLock completes, lock should be released
-		const lockPath = `${targetFile}.lock`;
-		const lockExists = await Bun.file(lockPath).exists();
-		expect(lockExists).toBe(false);
-	});
+    // After withLock completes, lock should be released
+    const lockPath = `${targetFile}.lock`;
+    const lockExists = await Bun.file(lockPath).exists();
+    expect(lockExists).toBe(false);
+  });
 
-	it("withLock releases lock on callback error", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("withLock releases lock on callback error", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		const result = await withLock(targetFile, async () => {
-			throw new Error("Callback failed");
-		});
+    const result = await withLock(targetFile, async () => {
+      throw new Error("Callback failed");
+    });
 
-		// Should return error result
-		expect(result.isErr()).toBe(true);
+    // Should return error result
+    expect(result.isErr()).toBe(true);
 
-		// But lock should still be released
-		const lockPath = `${targetFile}.lock`;
-		const lockExists = await Bun.file(lockPath).exists();
-		expect(lockExists).toBe(false);
-	});
+    // But lock should still be released
+    const lockPath = `${targetFile}.lock`;
+    const lockExists = await Bun.file(lockPath).exists();
+    expect(lockExists).toBe(false);
+  });
 
-	it("Lock includes timestamp and PID", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("Lock includes timestamp and PID", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		const lockResult = await acquireLock(targetFile);
-		expect(lockResult.isOk()).toBe(true);
+    const lockResult = await acquireLock(targetFile);
+    expect(lockResult.isOk()).toBe(true);
 
-		if (lockResult.isOk()) {
-			const lock = lockResult.value;
-			expect(lock.pid).toBe(process.pid);
-			expect(typeof lock.timestamp).toBe("number");
-			expect(lock.timestamp).toBeLessThanOrEqual(Date.now());
+    if (lockResult.isOk()) {
+      const lock = lockResult.value;
+      expect(lock.pid).toBe(process.pid);
+      expect(typeof lock.timestamp).toBe("number");
+      expect(lock.timestamp).toBeLessThanOrEqual(Date.now());
 
-			await releaseLock(lock);
-		}
-	});
+      await releaseLock(lock);
+    }
+  });
 
-	it("isLocked checks if file is currently locked", async () => {
-		const targetFile = join(testDir, "data.json");
-		await writeFile(targetFile, "{}");
+  it("isLocked checks if file is currently locked", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
 
-		// Initially not locked
-		expect(await isLocked(targetFile)).toBe(false);
+    // Initially not locked
+    expect(await isLocked(targetFile)).toBe(false);
 
-		// Acquire lock
-		const lockResult = await acquireLock(targetFile);
-		expect(lockResult.isOk()).toBe(true);
+    // Acquire lock
+    const lockResult = await acquireLock(targetFile);
+    expect(lockResult.isOk()).toBe(true);
 
-		// Now should be locked
-		expect(await isLocked(targetFile)).toBe(true);
+    // Now should be locked
+    expect(await isLocked(targetFile)).toBe(true);
 
-		// Release and check again
-		if (lockResult.isOk()) {
-			await releaseLock(lockResult.value);
-		}
-		expect(await isLocked(targetFile)).toBe(false);
-	});
+    // Release and check again
+    if (lockResult.isOk()) {
+      await releaseLock(lockResult.value);
+    }
+    expect(await isLocked(targetFile)).toBe(false);
+  });
 });
 
 // ============================================================================
@@ -561,128 +567,138 @@ describe("File Locking", () => {
 // ============================================================================
 
 describe("Atomic Writes", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("atomicWrite writes to temp file then renames", async () => {
-		const targetFile = join(testDir, "config.json");
-		const content = '{"setting": "value"}';
+  it("atomicWrite writes to temp file then renames", async () => {
+    const targetFile = join(testDir, "config.json");
+    const content = '{"setting": "value"}';
 
-		const result = await atomicWrite(targetFile, content);
+    const result = await atomicWrite(targetFile, content);
 
-		expect(result.isOk()).toBe(true);
+    expect(result.isOk()).toBe(true);
 
-		// File should exist with correct content
-		const written = await Bun.file(targetFile).text();
-		expect(written).toBe(content);
+    // File should exist with correct content
+    const written = await Bun.file(targetFile).text();
+    expect(written).toBe(content);
 
-		// No temp files should remain
-		const files = await Array.fromAsync(new Bun.Glob("*.tmp").scan(testDir));
-		expect(files).toHaveLength(0);
-	});
+    // No temp files should remain
+    const files = await Array.fromAsync(new Bun.Glob("*.tmp").scan(testDir));
+    expect(files).toHaveLength(0);
+  });
 
-	it("atomicWrite preserves file permissions", async () => {
-		const targetFile = join(testDir, "script.sh");
-		await writeFile(targetFile, "#!/bin/bash\necho hello");
-		// Set executable permission (not using chmod to avoid git operations)
+  it("atomicWrite preserves file permissions", async () => {
+    const targetFile = join(testDir, "script.sh");
+    await writeFile(targetFile, "#!/bin/bash\necho hello");
+    // Set executable permission (not using chmod to avoid git operations)
 
-		const result = await atomicWrite(targetFile, "#!/bin/bash\necho world", {
-			preservePermissions: true,
-		});
+    const result = await atomicWrite(targetFile, "#!/bin/bash\necho world", {
+      preservePermissions: true,
+    });
 
-		expect(result.isOk()).toBe(true);
-	});
+    expect(result.isOk()).toBe(true);
+  });
 
-	it("atomicWrite is atomic (all-or-nothing)", async () => {
-		const targetFile = join(testDir, "data.json");
-		const originalContent = '{"version": 1}';
-		await writeFile(targetFile, originalContent);
+  it("atomicWrite is atomic (all-or-nothing)", async () => {
+    const targetFile = join(testDir, "data.json");
+    const originalContent = '{"version": 1}';
+    await writeFile(targetFile, originalContent);
 
-		// Simulate a write that would fail during rename
-		// In practice, this tests the temp-file-then-rename strategy
-		const result = await atomicWrite(targetFile, '{"version": 2}');
+    // Simulate a write that would fail during rename
+    // In practice, this tests the temp-file-then-rename strategy
+    const result = await atomicWrite(targetFile, '{"version": 2}');
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			const content = await Bun.file(targetFile).text();
-			expect(content).toBe('{"version": 2}');
-		}
-	});
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const content = await Bun.file(targetFile).text();
+      expect(content).toBe('{"version": 2}');
+    }
+  });
 
-	it("atomicWrite returns Result type", async () => {
-		const targetFile = join(testDir, "output.txt");
+  it("atomicWrite returns Result type", async () => {
+    const targetFile = join(testDir, "output.txt");
 
-		const result = await atomicWrite(targetFile, "content");
+    const result = await atomicWrite(targetFile, "content");
 
-		// Should be a proper Result type
-		expect("value" in result || "error" in result).toBe(true);
-		expect(result.isOk() || result.isErr()).toBe(true);
-	});
+    // Should be a proper Result type
+    expect("value" in result || "error" in result).toBe(true);
+    expect(result.isOk() || result.isErr()).toBe(true);
+  });
 
-	it("atomicWriteJson handles JSON serialization", async () => {
-		const targetFile = join(testDir, "config.json");
-		const data = { name: "test", values: [1, 2, 3], nested: { key: "value" } };
+  it("atomicWriteJson handles JSON serialization", async () => {
+    const targetFile = join(testDir, "config.json");
+    const data = { name: "test", values: [1, 2, 3], nested: { key: "value" } };
 
-		const result = await atomicWriteJson(targetFile, data);
+    const result = await atomicWriteJson(targetFile, data);
 
-		expect(result.isOk()).toBe(true);
+    expect(result.isOk()).toBe(true);
 
-		const written = await Bun.file(targetFile).json();
-		expect(written).toEqual(data);
-	});
+    const written = await Bun.file(targetFile).json();
+    expect(written).toEqual(data);
+  });
 
-	it("atomicWrite cleans up temp file on failure", async () => {
-		// Create a read-only directory to force failure
-		const readOnlyDir = join(testDir, "readonly");
-		await mkdir(readOnlyDir, { recursive: true });
+  it("atomicWrite cleans up temp file on failure", async () => {
+    // Create a read-only directory to force failure
+    const readOnlyDir = join(testDir, "readonly");
+    await mkdir(readOnlyDir, { recursive: true });
 
-		// Try to write to a path that will fail (invalid directory)
-		const targetFile = join(testDir, "nonexistent", "deeply", "nested", "file.txt");
+    // Try to write to a path that will fail (invalid directory)
+    const targetFile = join(
+      testDir,
+      "nonexistent",
+      "deeply",
+      "nested",
+      "file.txt"
+    );
 
-		const result = await atomicWrite(targetFile, "content", {
-			createParentDirs: false,
-		});
+    const result = await atomicWrite(targetFile, "content", {
+      createParentDirs: false,
+    });
 
-		expect(result.isErr()).toBe(true);
+    expect(result.isErr()).toBe(true);
 
-		// No temp files should be left behind
-		const tempFiles = await Array.fromAsync(new Bun.Glob("*.tmp").scan(testDir));
-		expect(tempFiles).toHaveLength(0);
-	});
+    // No temp files should be left behind
+    const tempFiles = await Array.fromAsync(
+      new Bun.Glob("*.tmp").scan(testDir)
+    );
+    expect(tempFiles).toHaveLength(0);
+  });
 
-	it("atomicWrite creates parent directories if needed", async () => {
-		const targetFile = join(testDir, "deep", "nested", "dir", "file.txt");
+  it("atomicWrite creates parent directories if needed", async () => {
+    const targetFile = join(testDir, "deep", "nested", "dir", "file.txt");
 
-		const result = await atomicWrite(targetFile, "content", {
-			createParentDirs: true,
-		});
+    const result = await atomicWrite(targetFile, "content", {
+      createParentDirs: true,
+    });
 
-		expect(result.isOk()).toBe(true);
+    expect(result.isOk()).toBe(true);
 
-		const content = await Bun.file(targetFile).text();
-		expect(content).toBe("content");
-	});
+    const content = await Bun.file(targetFile).text();
+    expect(content).toBe("content");
+  });
 
-	it("atomicWrite handles concurrent writes safely", async () => {
-		const targetFile = join(testDir, "concurrent.json");
+  it("atomicWrite handles concurrent writes safely", async () => {
+    const targetFile = join(testDir, "concurrent.json");
 
-		// Start multiple concurrent writes
-		const writes = Array.from({ length: 10 }, (_, i) => atomicWrite(targetFile, `{"write": ${i}}`));
+    // Start multiple concurrent writes
+    const writes = Array.from({ length: 10 }, (_, i) =>
+      atomicWrite(targetFile, `{"write": ${i}}`)
+    );
 
-		const results = await Promise.all(writes);
+    const results = await Promise.all(writes);
 
-		// All writes should succeed (no corruption)
-		const successCount = results.filter((r) => r.isOk()).length;
-		expect(successCount).toBe(10);
+    // All writes should succeed (no corruption)
+    const successCount = results.filter((r) => r.isOk()).length;
+    expect(successCount).toBe(10);
 
-		// File should contain valid JSON (one of the writes)
-		const content = await Bun.file(targetFile).text();
-		const parsed = JSON.parse(content);
-		expect(typeof parsed.write).toBe("number");
-	});
+    // File should contain valid JSON (one of the writes)
+    const content = await Bun.file(targetFile).text();
+    const parsed = JSON.parse(content);
+    expect(typeof parsed.write).toBe("number");
+  });
 });

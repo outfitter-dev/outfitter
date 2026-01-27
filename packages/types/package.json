@@ -1,89 +1,89 @@
 {
-	"name": "@outfitter/types",
-	"description": "Branded types, type guards, and type utilities for Outfitter",
-	"version": "0.1.0-rc.1",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		"./deep": {
-			"import": {
-				"types": "./dist/deep.d.ts",
-				"default": "./dist/deep.js"
-			}
-		},
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./utilities": {
-			"import": {
-				"types": "./dist/utilities.d.ts",
-				"default": "./dist/utilities.js"
-			}
-		},
-		"./collections": {
-			"import": {
-				"types": "./dist/collections.d.ts",
-				"default": "./dist/collections.js"
-			}
-		},
-		"./short-id": {
-			"import": {
-				"types": "./dist/short-id.d.ts",
-				"default": "./dist/short-id.js"
-			}
-		},
-		"./hash-id": {
-			"import": {
-				"types": "./dist/hash-id.d.ts",
-				"default": "./dist/hash-id.js"
-			}
-		},
-		"./branded": {
-			"import": {
-				"types": "./dist/branded.d.ts",
-				"default": "./dist/branded.js"
-			}
-		},
-		"./guards": {
-			"import": {
-				"types": "./dist/guards.d.ts",
-				"default": "./dist/guards.js"
-			}
-		},
-		"./package.json": "./package.json"
-	},
-	"sideEffects": false,
-	"scripts": {
-		"build": "bunup --filter @outfitter/types",
-		"test": "bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"@outfitter/contracts": "workspace:*",
-		"better-result": "^2.5.0"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"typescript": "^5.8.0"
-	},
-	"keywords": [
-		"outfitter",
-		"types",
-		"branded",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/types"
-	}
+  "name": "@outfitter/types",
+  "description": "Branded types, type guards, and type utilities for Outfitter",
+  "version": "0.1.0-rc.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./deep": {
+      "import": {
+        "types": "./dist/deep.d.ts",
+        "default": "./dist/deep.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./utilities": {
+      "import": {
+        "types": "./dist/utilities.d.ts",
+        "default": "./dist/utilities.js"
+      }
+    },
+    "./collections": {
+      "import": {
+        "types": "./dist/collections.d.ts",
+        "default": "./dist/collections.js"
+      }
+    },
+    "./short-id": {
+      "import": {
+        "types": "./dist/short-id.d.ts",
+        "default": "./dist/short-id.js"
+      }
+    },
+    "./hash-id": {
+      "import": {
+        "types": "./dist/hash-id.d.ts",
+        "default": "./dist/hash-id.js"
+      }
+    },
+    "./branded": {
+      "import": {
+        "types": "./dist/branded.d.ts",
+        "default": "./dist/branded.js"
+      }
+    },
+    "./guards": {
+      "import": {
+        "types": "./dist/guards.d.ts",
+        "default": "./dist/guards.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter @outfitter/types",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "better-result": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "outfitter",
+    "types",
+    "branded",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/types"
+  }
 }

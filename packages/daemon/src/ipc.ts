@@ -43,30 +43,30 @@ export type IpcMessageHandler = (message: unknown) => Promise<unknown>;
  * ```
  */
 export interface IpcServer {
-	/**
-	 * Start listening for connections on the Unix socket.
-	 *
-	 * Creates the socket file and begins accepting client connections.
-	 * Messages are processed using the handler registered via onMessage.
-	 */
-	listen(): Promise<void>;
+  /**
+   * Start listening for connections on the Unix socket.
+   *
+   * Creates the socket file and begins accepting client connections.
+   * Messages are processed using the handler registered via onMessage.
+   */
+  listen(): Promise<void>;
 
-	/**
-	 * Stop listening and close all connections.
-	 *
-	 * Removes the socket file and cleans up resources.
-	 */
-	close(): Promise<void>;
+  /**
+   * Stop listening and close all connections.
+   *
+   * Removes the socket file and cleans up resources.
+   */
+  close(): Promise<void>;
 
-	/**
-	 * Register a message handler for incoming messages.
-	 *
-	 * Only one handler can be registered. Calling this multiple times
-	 * replaces the previous handler.
-	 *
-	 * @param handler - Function to process incoming messages
-	 */
-	onMessage(handler: IpcMessageHandler): void;
+  /**
+   * Register a message handler for incoming messages.
+   *
+   * Only one handler can be registered. Calling this multiple times
+   * replaces the previous handler.
+   *
+   * @param handler - Function to process incoming messages
+   */
+  onMessage(handler: IpcMessageHandler): void;
 }
 
 /**
@@ -88,33 +88,33 @@ export interface IpcServer {
  * ```
  */
 export interface IpcClient {
-	/**
-	 * Connect to the IPC server.
-	 *
-	 * Establishes a connection to the Unix socket. Throws if the
-	 * server is not available.
-	 */
-	connect(): Promise<void>;
+  /**
+   * Connect to the IPC server.
+   *
+   * Establishes a connection to the Unix socket. Throws if the
+   * server is not available.
+   */
+  connect(): Promise<void>;
 
-	/**
-	 * Send a message and wait for a response.
-	 *
-	 * Serializes the message to JSON, sends it to the server, and
-	 * waits for a response.
-	 *
-	 * @typeParam T - Expected response type
-	 * @param message - Message to send (must be JSON-serializable)
-	 * @returns Promise resolving to the server's response
-	 * @throws Error if not connected or communication fails
-	 */
-	send<T>(message: unknown): Promise<T>;
+  /**
+   * Send a message and wait for a response.
+   *
+   * Serializes the message to JSON, sends it to the server, and
+   * waits for a response.
+   *
+   * @typeParam T - Expected response type
+   * @param message - Message to send (must be JSON-serializable)
+   * @returns Promise resolving to the server's response
+   * @throws Error if not connected or communication fails
+   */
+  send<T>(message: unknown): Promise<T>;
 
-	/**
-	 * Close the connection to the server.
-	 *
-	 * Can be called multiple times safely.
-	 */
-	close(): void;
+  /**
+   * Close the connection to the server.
+   *
+   * Can be called multiple times safely.
+   */
+  close(): void;
 }
 
 // ============================================================================
@@ -122,14 +122,14 @@ export interface IpcClient {
 // ============================================================================
 
 interface IpcMessage {
-	id: string;
-	type: "request" | "response" | "error";
-	payload: unknown;
+  id: string;
+  type: "request" | "response" | "error";
+  payload: unknown;
 }
 
 interface PendingRequest {
-	resolve: (value: unknown) => void;
-	reject: (error: Error) => void;
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
 }
 
 // ============================================================================
@@ -155,114 +155,117 @@ interface PendingRequest {
  * ```
  */
 export function createIpcServer(socketPath: string): IpcServer {
-	let messageHandler: IpcMessageHandler | null = null;
-	let server: ReturnType<typeof Bun.listen> | null = null;
-	let isListening = false;
+  let messageHandler: IpcMessageHandler | null = null;
+  let server: ReturnType<typeof Bun.listen> | null = null;
+  let isListening = false;
 
-	// Per-connection message buffers (Unix sockets don't preserve message boundaries)
-	const socketBuffers = new WeakMap<Socket<unknown>, string>();
+  // Per-connection message buffers (Unix sockets don't preserve message boundaries)
+  const socketBuffers = new WeakMap<Socket<unknown>, string>();
 
-	function processSocketBuffer(socket: Socket<unknown>): void {
-		const buffer = socketBuffers.get(socket) ?? "";
-		const lines = buffer.split("\n");
-		// Keep the last incomplete line in the buffer
-		socketBuffers.set(socket, lines.pop() ?? "");
+  function processSocketBuffer(socket: Socket<unknown>): void {
+    const buffer = socketBuffers.get(socket) ?? "";
+    const lines = buffer.split("\n");
+    // Keep the last incomplete line in the buffer
+    socketBuffers.set(socket, lines.pop() ?? "");
 
-		for (const line of lines) {
-			if (!line.trim()) continue;
+    for (const line of lines) {
+      if (!line.trim()) continue;
 
-			try {
-				const message = JSON.parse(line) as IpcMessage;
+      try {
+        const message = JSON.parse(line) as IpcMessage;
 
-				if (message.type === "request" && messageHandler) {
-					void (async () => {
-						try {
-							const result = await messageHandler(message.payload);
-							const response: IpcMessage = {
-								id: message.id,
-								type: "response",
-								payload: result,
-							};
-							socket.write(`${JSON.stringify(response)}\n`);
-						} catch (error) {
-							const errorResponse: IpcMessage = {
-								id: message.id,
-								type: "error",
-								payload: {
-									message: error instanceof Error ? error.message : "Unknown error",
-								},
-							};
-							socket.write(`${JSON.stringify(errorResponse)}\n`);
-						}
-					})();
-				}
-			} catch {
-				// Ignore malformed messages
-			}
-		}
-	}
+        if (message.type === "request" && messageHandler) {
+          void (async () => {
+            try {
+              const result = await messageHandler(message.payload);
+              const response: IpcMessage = {
+                id: message.id,
+                type: "response",
+                payload: result,
+              };
+              socket.write(`${JSON.stringify(response)}\n`);
+            } catch (error) {
+              const errorResponse: IpcMessage = {
+                id: message.id,
+                type: "error",
+                payload: {
+                  message:
+                    error instanceof Error ? error.message : "Unknown error",
+                },
+              };
+              socket.write(`${JSON.stringify(errorResponse)}\n`);
+            }
+          })();
+        }
+      } catch {
+        // Ignore malformed messages
+      }
+    }
+  }
 
-	return {
-		async listen(): Promise<void> {
-			if (isListening) return;
+  return {
+    async listen(): Promise<void> {
+      if (isListening) return;
 
-			// Remove existing socket file if present
-			try {
-				await unlink(socketPath);
-			} catch {
-				// Ignore if doesn't exist
-			}
+      // Remove existing socket file if present
+      try {
+        await unlink(socketPath);
+      } catch {
+        // Ignore if doesn't exist
+      }
 
-			server = Bun.listen({
-				unix: socketPath,
-				socket: {
-					data(socket, data) {
-						// Convert Buffer to string (Bun's socket data is a Buffer)
-						const text = Buffer.isBuffer(data) ? data.toString("utf-8") : String(data);
+      server = Bun.listen({
+        unix: socketPath,
+        socket: {
+          data(socket, data) {
+            // Convert Buffer to string (Bun's socket data is a Buffer)
+            const text = Buffer.isBuffer(data)
+              ? data.toString("utf-8")
+              : String(data);
 
-						// Accumulate data in per-connection buffer
-						const currentBuffer = socketBuffers.get(socket) ?? "";
-						socketBuffers.set(socket, currentBuffer + text);
+            // Accumulate data in per-connection buffer
+            const currentBuffer = socketBuffers.get(socket) ?? "";
+            socketBuffers.set(socket, currentBuffer + text);
 
-						// Process any complete messages
-						processSocketBuffer(socket);
-					},
-					open(socket) {
-						// Initialize buffer for new connection
-						socketBuffers.set(socket, "");
-					},
-					close(socket) {
-						// Clean up buffer (WeakMap will GC, but explicit delete is cleaner)
-						socketBuffers.delete(socket);
-					},
-					error() {
-						// Connection error
-					},
-				},
-			});
+            // Process any complete messages
+            processSocketBuffer(socket);
+          },
+          open(socket) {
+            // Initialize buffer for new connection
+            socketBuffers.set(socket, "");
+          },
+          close(socket) {
+            // Clean up buffer (WeakMap will GC, but explicit delete is cleaner)
+            socketBuffers.delete(socket);
+          },
+          error() {
+            // Connection error - silent no-op, cleanup handled by close()
+          },
+        },
+      });
 
-			isListening = true;
-		},
+      isListening = true;
+    },
 
-		async close(): Promise<void> {
-			if (!isListening) return;
+    async close(): Promise<void> {
+      if (!isListening) return;
 
-			server?.stop();
-			server = null;
-			isListening = false;
+      server?.stop();
+      server = null;
+      isListening = false;
 
-			// Remove socket file
-			try {
-				await unlink(socketPath);
-			} catch {
-				// Ignore if doesn't exist
-			}
-		},
+      // Remove socket file
+      try {
+        await unlink(socketPath);
+      } catch {
+        // Ignore if doesn't exist
+      }
+    },
 
-		onMessage(handler: IpcMessageHandler): void {
-			messageHandler = handler;
-		},
-	};
+    onMessage(handler: IpcMessageHandler): void {
+      messageHandler = handler;
+    },
+  };
 }
 
 // ============================================================================
@@ -286,139 +289,141 @@ export function createIpcServer(socketPath: string): IpcServer {
  * ```
  */
 export function createIpcClient(socketPath: string): IpcClient {
-	let socket: Socket<undefined> | null = null;
-	let isConnected = false;
-	const pendingRequests = new Map<string, PendingRequest>();
-	let messageBuffer = "";
+  let socket: Socket<undefined> | null = null;
+  let isConnected = false;
+  const pendingRequests = new Map<string, PendingRequest>();
+  let messageBuffer = "";
 
-	function generateId(): string {
-		return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-	}
+  function generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
 
-	function processBuffer(): void {
-		const lines = messageBuffer.split("\n");
-		// Keep the last incomplete line in the buffer
-		messageBuffer = lines.pop() ?? "";
+  function processBuffer(): void {
+    const lines = messageBuffer.split("\n");
+    // Keep the last incomplete line in the buffer
+    messageBuffer = lines.pop() ?? "";
 
-		for (const line of lines) {
-			if (!line.trim()) continue;
+    for (const line of lines) {
+      if (!line.trim()) continue;
 
-			try {
-				const message = JSON.parse(line) as IpcMessage;
-				const pending = pendingRequests.get(message.id);
+      try {
+        const message = JSON.parse(line) as IpcMessage;
+        const pending = pendingRequests.get(message.id);
 
-				if (pending) {
-					pendingRequests.delete(message.id);
+        if (pending) {
+          pendingRequests.delete(message.id);
 
-					if (message.type === "response") {
-						pending.resolve(message.payload);
-					} else if (message.type === "error") {
-						const errorPayload = message.payload as { message: string };
-						pending.reject(new Error(errorPayload.message));
-					}
-				}
-			} catch {
-				// Ignore malformed messages
-			}
-		}
-	}
+          if (message.type === "response") {
+            pending.resolve(message.payload);
+          } else if (message.type === "error") {
+            const errorPayload = message.payload as { message: string };
+            pending.reject(new Error(errorPayload.message));
+          }
+        }
+      } catch {
+        // Ignore malformed messages
+      }
+    }
+  }
 
-	function rejectAllPending(): void {
-		for (const [id, pending] of pendingRequests) {
-			pending.reject(new Error("Connection closed"));
-			pendingRequests.delete(id);
-		}
-	}
+  function rejectAllPending(): void {
+    for (const [id, pending] of pendingRequests) {
+      pending.reject(new Error("Connection closed"));
+      pendingRequests.delete(id);
+    }
+  }
 
-	return {
-		async connect(): Promise<void> {
-			if (isConnected && socket) return;
+  return {
+    connect(): Promise<void> {
+      if (isConnected && socket) return Promise.resolve();
 
-			// Reset state for reconnection
-			messageBuffer = "";
+      // Reset state for reconnection
+      messageBuffer = "";
 
-			return new Promise((resolve, reject) => {
-				try {
-					// Bun.connect returns a Promise, but we get the socket in the open handler
-					void Bun.connect({
-						unix: socketPath,
-						socket: {
-							data(_socket, data) {
-								// Convert Buffer to string (Bun's socket data is a Buffer)
-								const text = Buffer.isBuffer(data) ? data.toString("utf-8") : String(data);
-								messageBuffer += text;
-								processBuffer();
-							},
-							open(_socket) {
-								isConnected = true;
-								socket = _socket;
-								resolve();
-							},
-							close() {
-								isConnected = false;
-								socket = null;
-								rejectAllPending();
-							},
-							error(_socket, error) {
-								isConnected = false;
-								socket = null;
-								reject(error);
-							},
-							connectError(_socket, error) {
-								isConnected = false;
-								socket = null;
-								reject(error);
-							},
-						},
-					});
-				} catch (error) {
-					reject(error);
-				}
-			});
-		},
+      return new Promise((resolve, reject) => {
+        try {
+          // Bun.connect returns a Promise, but we get the socket in the open handler
+          void Bun.connect({
+            unix: socketPath,
+            socket: {
+              data(_socket, data) {
+                // Convert Buffer to string (Bun's socket data is a Buffer)
+                const text = Buffer.isBuffer(data)
+                  ? data.toString("utf-8")
+                  : String(data);
+                messageBuffer += text;
+                processBuffer();
+              },
+              open(_socket) {
+                isConnected = true;
+                socket = _socket;
+                resolve();
+              },
+              close() {
+                isConnected = false;
+                socket = null;
+                rejectAllPending();
+              },
+              error(_socket, error) {
+                isConnected = false;
+                socket = null;
+                reject(error);
+              },
+              connectError(_socket, error) {
+                isConnected = false;
+                socket = null;
+                reject(error);
+              },
+            },
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
 
-		async send<T>(message: unknown): Promise<T> {
-			if (!isConnected || !socket) {
-				throw new Error("Not connected to server");
-			}
+    send<T>(message: unknown): Promise<T> {
+      if (!(isConnected && socket)) {
+        return Promise.reject(new Error("Not connected to server"));
+      }
 
-			const id = generateId();
-			const request: IpcMessage = {
-				id,
-				type: "request",
-				payload: message,
-			};
+      const id = generateId();
+      const request: IpcMessage = {
+        id,
+        type: "request",
+        payload: message,
+      };
 
-			return new Promise<T>((resolve, reject) => {
-				pendingRequests.set(id, {
-					resolve: resolve as (value: unknown) => void,
-					reject,
-				});
+      return new Promise<T>((resolve, reject) => {
+        pendingRequests.set(id, {
+          resolve: resolve as (value: unknown) => void,
+          reject,
+        });
 
-				try {
-					const written = socket?.write(`${JSON.stringify(request)}\n`);
-					if (written === 0) {
-						pendingRequests.delete(id);
-						reject(new Error("Failed to write to socket"));
-					}
-				} catch (error) {
-					pendingRequests.delete(id);
-					reject(error);
-				}
-			});
-		},
+        try {
+          const written = socket?.write(`${JSON.stringify(request)}\n`);
+          if (written === 0) {
+            pendingRequests.delete(id);
+            reject(new Error("Failed to write to socket"));
+          }
+        } catch (error) {
+          pendingRequests.delete(id);
+          reject(error);
+        }
+      });
+    },
 
-		close(): void {
-			if (!isConnected || !socket) return;
+    close(): void {
+      if (!(isConnected && socket)) return;
 
-			try {
-				socket?.terminate();
-			} catch {
-				// Ignore errors during close
-			}
-			socket = null;
-			isConnected = false;
-			rejectAllPending();
-		},
-	};
+      try {
+        socket?.terminate();
+      } catch {
+        // Ignore errors during close
+      }
+      socket = null;
+      isConnected = false;
+      rejectAllPending();
+    },
+  };
 }

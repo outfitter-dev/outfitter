@@ -28,8 +28,11 @@ import { Result } from "better-result";
  * });
  * ```
  */
-export const unwrapOrElse = <T, E>(result: Result<T, E>, defaultFn: (error: E) => T): T => {
-	return result.isOk() ? result.value : defaultFn(result.error);
+export const unwrapOrElse = <T, E>(
+  result: Result<T, E>,
+  defaultFn: (error: E) => T
+): T => {
+  return result.isOk() ? result.value : defaultFn(result.error);
 };
 
 /**
@@ -49,10 +52,13 @@ export const unwrapOrElse = <T, E>(result: Result<T, E>, defaultFn: (error: E) =
  * const result = orElse(primary, fallback);
  * ```
  */
-export const orElse = <T, E, F>(result: Result<T, E>, fallback: Result<T, F>): Result<T, F> => {
-	// If Ok, return as-is (cast needed to change phantom error type)
-	// If Err, return the fallback
-	return result.isOk() ? (result as unknown as Result<T, F>) : fallback;
+export const orElse = <T, E, F>(
+  result: Result<T, E>,
+  fallback: Result<T, F>
+): Result<T, F> => {
+  // If Ok, return as-is (cast needed to change phantom error type)
+  // If Err, return the fallback
+  return result.isOk() ? (result as unknown as Result<T, F>) : fallback;
 };
 
 /**
@@ -76,10 +82,13 @@ export const orElse = <T, E, F>(result: Result<T, E>, fallback: Result<T, F>): R
  * }
  * ```
  */
-export const combine2 = <T1, T2, E>(r1: Result<T1, E>, r2: Result<T2, E>): Result<[T1, T2], E> => {
-	if (r1.isErr()) return r1 as unknown as Result<[T1, T2], E>;
-	if (r2.isErr()) return r2 as unknown as Result<[T1, T2], E>;
-	return Result.ok([r1.value, r2.value]);
+export const combine2 = <T1, T2, E>(
+  r1: Result<T1, E>,
+  r2: Result<T2, E>
+): Result<[T1, T2], E> => {
+  if (r1.isErr()) return r1 as unknown as Result<[T1, T2], E>;
+  if (r2.isErr()) return r2 as unknown as Result<[T1, T2], E>;
+  return Result.ok([r1.value, r2.value]);
 };
 
 /**
@@ -106,12 +115,12 @@ export const combine2 = <T1, T2, E>(r1: Result<T1, E>, r2: Result<T2, E>): Resul
  * ```
  */
 export const combine3 = <T1, T2, T3, E>(
-	r1: Result<T1, E>,
-	r2: Result<T2, E>,
-	r3: Result<T3, E>,
+  r1: Result<T1, E>,
+  r2: Result<T2, E>,
+  r3: Result<T3, E>
 ): Result<[T1, T2, T3], E> => {
-	if (r1.isErr()) return r1 as unknown as Result<[T1, T2, T3], E>;
-	if (r2.isErr()) return r2 as unknown as Result<[T1, T2, T3], E>;
-	if (r3.isErr()) return r3 as unknown as Result<[T1, T2, T3], E>;
-	return Result.ok([r1.value, r2.value, r3.value]);
+  if (r1.isErr()) return r1 as unknown as Result<[T1, T2, T3], E>;
+  if (r2.isErr()) return r2 as unknown as Result<[T1, T2, T3], E>;
+  if (r3.isErr()) return r3 as unknown as Result<[T1, T2, T3], E>;
+  return Result.ok([r1.value, r2.value, r3.value]);
 };

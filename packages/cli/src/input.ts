@@ -8,18 +8,18 @@
  */
 
 import path from "node:path";
-import { Err, Ok, type Result } from "better-result";
 import { CancelledError, ValidationError } from "@outfitter/contracts";
+import { Err, Ok, type Result } from "better-result";
 import type {
-	CollectIdsOptions,
-	ConfirmDestructiveOptions,
-	ExpandFileOptions,
-	FilterExpression,
-	KeyValuePair,
-	NormalizeIdOptions,
-	ParseGlobOptions,
-	Range,
-	SortCriteria,
+  CollectIdsOptions,
+  ConfirmDestructiveOptions,
+  ExpandFileOptions,
+  FilterExpression,
+  KeyValuePair,
+  NormalizeIdOptions,
+  ParseGlobOptions,
+  Range,
+  SortCriteria,
 } from "./types.js";
 
 // =============================================================================
@@ -35,26 +35,26 @@ import type {
  * - Are absolute paths (unless explicitly allowed)
  */
 function isSecurePath(filePath: string, allowAbsolute = false): boolean {
-	// Reject null bytes
-	if (filePath.includes("\0")) {
-		return false;
-	}
+  // Reject null bytes
+  if (filePath.includes("\0")) {
+    return false;
+  }
 
-	// Check for .. traversal in ORIGINAL path (before normalization collapses it)
-	// This catches both "../../../etc/passwd" and "/tmp/../../../etc/passwd"
-	if (filePath.includes("..")) {
-		return false;
-	}
+  // Check for .. traversal in ORIGINAL path (before normalization collapses it)
+  // This catches both "../../../etc/passwd" and "/tmp/../../../etc/passwd"
+  if (filePath.includes("..")) {
+    return false;
+  }
 
-	// Normalize to handle different separators for absolute path check
-	const normalized = path.normalize(filePath);
+  // Normalize to handle different separators for absolute path check
+  const normalized = path.normalize(filePath);
 
-	// Reject absolute paths unless explicitly allowed
-	if (!allowAbsolute && path.isAbsolute(normalized)) {
-		return false;
-	}
+  // Reject absolute paths unless explicitly allowed
+  if (!allowAbsolute && path.isAbsolute(normalized)) {
+    return false;
+  }
 
-	return true;
+  return true;
 }
 
 /**
@@ -65,28 +65,34 @@ function isSecurePath(filePath: string, allowAbsolute = false): boolean {
  * - Contain /../
  */
 function isSecureGlobPattern(pattern: string): boolean {
-	// Reject patterns that start with ..
-	if (pattern.startsWith("..")) {
-		return false;
-	}
+  // Reject patterns that start with ..
+  if (pattern.startsWith("..")) {
+    return false;
+  }
 
-	// Reject patterns containing /../
-	if (pattern.includes("/../")) {
-		return false;
-	}
+  // Reject patterns containing /../
+  if (pattern.includes("/../")) {
+    return false;
+  }
 
-	return true;
+  return true;
 }
 
 /**
  * Validates that a resolved path is within the workspace boundary.
  */
-function isWithinWorkspace(resolvedPath: string, workspaceRoot: string): boolean {
-	const normalizedPath = path.normalize(resolvedPath);
-	const normalizedRoot = path.normalize(workspaceRoot);
+function isWithinWorkspace(
+  resolvedPath: string,
+  workspaceRoot: string
+): boolean {
+  const normalizedPath = path.normalize(resolvedPath);
+  const normalizedRoot = path.normalize(workspaceRoot);
 
-	// Ensure the path starts with the workspace root
-	return normalizedPath === normalizedRoot || normalizedPath.startsWith(normalizedRoot + path.sep);
+  // Ensure the path starts with the workspace root
+  return (
+    normalizedPath === normalizedRoot ||
+    normalizedPath.startsWith(normalizedRoot + path.sep)
+  );
 }
 
 // =============================================================================
@@ -97,56 +103,56 @@ function isWithinWorkspace(resolvedPath: string, workspaceRoot: string): boolean
  * Reads stdin content using async iteration.
  */
 async function readStdin(): Promise<string> {
-	const chunks: string[] = [];
-	for await (const chunk of process.stdin) {
-		if (typeof chunk === "string") {
-			chunks.push(chunk);
-		} else if (Buffer.isBuffer(chunk)) {
-			chunks.push(chunk.toString("utf-8"));
-		} else if (chunk instanceof Uint8Array) {
-			// Convert Uint8Array to Buffer then to string
-			chunks.push(Buffer.from(chunk).toString("utf-8"));
-		}
-	}
-	return chunks.join("");
+  const chunks: string[] = [];
+  for await (const chunk of process.stdin) {
+    if (typeof chunk === "string") {
+      chunks.push(chunk);
+    } else if (Buffer.isBuffer(chunk)) {
+      chunks.push(chunk.toString("utf-8"));
+    } else if (chunk instanceof Uint8Array) {
+      // Convert Uint8Array to Buffer then to string
+      chunks.push(Buffer.from(chunk).toString("utf-8"));
+    }
+  }
+  return chunks.join("");
 }
 
 /**
  * Splits a string by comma and/or space, trimming each part.
  */
 function splitIds(input: string): string[] {
-	// Split on commas first, then on spaces within each part
-	return input
-		.split(",")
-		.flatMap((part) => part.trim().split(/\s+/))
-		.map((id) => id.trim())
-		.filter(Boolean);
+  // Split on commas first, then on spaces within each part
+  return input
+    .split(",")
+    .flatMap((part) => part.trim().split(/\s+/))
+    .map((id) => id.trim())
+    .filter(Boolean);
 }
 
 /**
  * Checks if a path is a directory using Bun.file and $stat.
  */
 async function isDirectory(path: string): Promise<boolean> {
-	try {
-		// Use Bun shell to check if directory
-		const result = await Bun.$`test -d ${path}`.quiet();
-		return result.exitCode === 0;
-	} catch {
-		return false;
-	}
+  try {
+    // Use Bun shell to check if directory
+    const result = await Bun.$`test -d ${path}`.quiet();
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Checks if a path is a file using Bun shell.
  */
 async function isFile(path: string): Promise<boolean> {
-	try {
-		// Use Bun shell to check if file
-		const result = await Bun.$`test -f ${path}`.quiet();
-		return result.exitCode === 0;
-	} catch {
-		return false;
-	}
+  try {
+    // Use Bun shell to check if file
+    const result = await Bun.$`test -f ${path}`.quiet();
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
 }
 
 // =============================================================================
@@ -176,65 +182,67 @@ async function isFile(path: string): Promise<boolean> {
  * ```
  */
 export async function collectIds(
-	input: string | readonly string[],
-	options?: CollectIdsOptions,
+  input: string | readonly string[],
+  options?: CollectIdsOptions
 ): Promise<string[]> {
-	const { allowFile = true, allowStdin = true } = options ?? {};
+  const { allowFile = true, allowStdin = true } = options ?? {};
 
-	const ids: string[] = [];
+  const ids: string[] = [];
 
-	// Normalize input to array
-	const inputs = Array.isArray(input) ? input : [input];
+  // Normalize input to array
+  const inputs = Array.isArray(input) ? input : [input];
 
-	for (const item of inputs) {
-		if (!item) continue;
+  for (const item of inputs) {
+    if (!item) continue;
 
-		// Check for @file reference
-		if (item.startsWith("@")) {
-			const filePath = item.slice(1);
+    // Check for @file reference
+    if (item.startsWith("@")) {
+      const filePath = item.slice(1);
 
-			// @- means stdin
-			if (filePath === "-") {
-				if (!allowStdin) {
-					throw new Error("Reading from stdin is not allowed");
-				}
-				const stdinContent = await readStdin();
-				const stdinIds = stdinContent
-					.split("\n")
-					.map((line) => line.trim())
-					.filter(Boolean);
-				ids.push(...stdinIds);
-			} else {
-				// @file reference
-				if (!allowFile) {
-					throw new Error("File references are not allowed");
-				}
+      // @- means stdin
+      if (filePath === "-") {
+        if (!allowStdin) {
+          throw new Error("Reading from stdin is not allowed");
+        }
+        const stdinContent = await readStdin();
+        const stdinIds = stdinContent
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+        ids.push(...stdinIds);
+      } else {
+        // @file reference
+        if (!allowFile) {
+          throw new Error("File references are not allowed");
+        }
 
-				// Security: validate path doesn't contain traversal patterns
-				if (!isSecurePath(filePath, true)) {
-					throw new Error(`Security error: path traversal not allowed: ${filePath}`);
-				}
+        // Security: validate path doesn't contain traversal patterns
+        if (!isSecurePath(filePath, true)) {
+          throw new Error(
+            `Security error: path traversal not allowed: ${filePath}`
+          );
+        }
 
-				const file = Bun.file(filePath);
-				const exists = await file.exists();
-				if (!exists) {
-					throw new Error(`File not found: ${filePath}`);
-				}
-				const content = await file.text();
-				const fileIds = content
-					.split("\n")
-					.map((line) => line.trim())
-					.filter(Boolean);
-				ids.push(...fileIds);
-			}
-		} else {
-			// Regular input - split by comma and/or space
-			ids.push(...splitIds(item));
-		}
-	}
+        const file = Bun.file(filePath);
+        const exists = await file.exists();
+        if (!exists) {
+          throw new Error(`File not found: ${filePath}`);
+        }
+        const content = await file.text();
+        const fileIds = content
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+        ids.push(...fileIds);
+      }
+    } else {
+      // Regular input - split by comma and/or space
+      ids.push(...splitIds(item));
+    }
+  }
 
-	// Deduplicate while preserving order
-	return [...new Set(ids)];
+  // Deduplicate while preserving order
+  return [...new Set(ids)];
 }
 
 // =============================================================================
@@ -257,53 +265,60 @@ export async function collectIds(
  * const content = await expandFileArg(args.content);
  * ```
  */
-export async function expandFileArg(input: string, options?: ExpandFileOptions): Promise<string> {
-	const { encoding: _encoding = "utf-8", maxSize, trim = false } = options ?? {};
+export async function expandFileArg(
+  input: string,
+  options?: ExpandFileOptions
+): Promise<string> {
+  const {
+    encoding: _encoding = "utf-8",
+    maxSize,
+    trim = false,
+  } = options ?? {};
 
-	// Not a file reference - return as-is
-	if (!input.startsWith("@")) {
-		return input;
-	}
+  // Not a file reference - return as-is
+  if (!input.startsWith("@")) {
+    return input;
+  }
 
-	const filePath = input.slice(1);
+  const filePath = input.slice(1);
 
-	// @- means stdin
-	if (filePath === "-") {
-		let content = await readStdin();
-		if (trim) {
-			content = content.trim();
-		}
-		return content;
-	}
+  // @- means stdin
+  if (filePath === "-") {
+    let content = await readStdin();
+    if (trim) {
+      content = content.trim();
+    }
+    return content;
+  }
 
-	// Security: validate path doesn't contain traversal patterns
-	if (!isSecurePath(filePath, true)) {
-		throw new Error(`Security error: path traversal not allowed: ${filePath}`);
-	}
+  // Security: validate path doesn't contain traversal patterns
+  if (!isSecurePath(filePath, true)) {
+    throw new Error(`Security error: path traversal not allowed: ${filePath}`);
+  }
 
-	// Read file
-	const file = Bun.file(filePath);
-	const exists = await file.exists();
-	if (!exists) {
-		throw new Error(`File not found: ${filePath}`);
-	}
+  // Read file
+  const file = Bun.file(filePath);
+  const exists = await file.exists();
+  if (!exists) {
+    throw new Error(`File not found: ${filePath}`);
+  }
 
-	// Check size limit before reading
-	if (maxSize !== undefined) {
-		const size = file.size;
-		if (size > maxSize) {
-			throw new Error(`File exceeds maximum size of ${maxSize} bytes`);
-		}
-	}
+  // Check size limit before reading
+  if (maxSize !== undefined) {
+    const size = file.size;
+    if (size > maxSize) {
+      throw new Error(`File exceeds maximum size of ${maxSize} bytes`);
+    }
+  }
 
-	// Read file content - Bun.file.text() always uses UTF-8
-	let content = await file.text();
+  // Read file content - Bun.file.text() always uses UTF-8
+  let content = await file.text();
 
-	if (trim) {
-		content = content.trim();
-	}
+  if (trim) {
+    content = content.trim();
+  }
 
-	return content;
+  return content;
 }
 
 // =============================================================================
@@ -328,71 +343,76 @@ export async function expandFileArg(input: string, options?: ExpandFileOptions):
  * });
  * ```
  */
-export async function parseGlob(pattern: string, options?: ParseGlobOptions): Promise<string[]> {
-	const {
-		cwd = process.cwd(),
-		ignore = [],
-		onlyFiles = false,
-		onlyDirectories = false,
-		followSymlinks = false,
-	} = options ?? {};
+export async function parseGlob(
+  pattern: string,
+  options?: ParseGlobOptions
+): Promise<string[]> {
+  const {
+    cwd = process.cwd(),
+    ignore = [],
+    onlyFiles = false,
+    onlyDirectories = false,
+    followSymlinks = false,
+  } = options ?? {};
 
-	// Security: validate pattern doesn't escape workspace
-	if (!isSecureGlobPattern(pattern)) {
-		throw new Error(`Security error: glob pattern may escape workspace: ${pattern}`);
-	}
+  // Security: validate pattern doesn't escape workspace
+  if (!isSecureGlobPattern(pattern)) {
+    throw new Error(
+      `Security error: glob pattern may escape workspace: ${pattern}`
+    );
+  }
 
-	// Resolve workspace root for boundary checking
-	const resolvedCwd = path.resolve(cwd);
+  // Resolve workspace root for boundary checking
+  const resolvedCwd = path.resolve(cwd);
 
-	const glob = new Bun.Glob(pattern);
-	const matches: string[] = [];
+  const glob = new Bun.Glob(pattern);
+  const matches: string[] = [];
 
-	// Scan with options
-	// Only set onlyFiles when explicitly requested (not as default)
-	const scanOptions = {
-		cwd,
-		followSymlinks,
-		onlyFiles: onlyFiles === true,
-	};
+  // Scan with options
+  // Only set onlyFiles when explicitly requested (not as default)
+  const scanOptions = {
+    cwd,
+    followSymlinks,
+    onlyFiles: onlyFiles === true,
+  };
 
-	for await (const match of glob.scan(scanOptions)) {
-		// Resolve absolute path for workspace boundary check
-		const fullPath = path.resolve(cwd, match);
+  for await (const match of glob.scan(scanOptions)) {
+    // Resolve absolute path for workspace boundary check
+    const fullPath = path.resolve(cwd, match);
 
-		// Security: verify match is within workspace
-		if (!isWithinWorkspace(fullPath, resolvedCwd)) {
-			continue;
-		}
+    // Security: verify match is within workspace
+    if (!isWithinWorkspace(fullPath, resolvedCwd)) {
+      continue;
+    }
 
-		// Check against ignore patterns
-		let shouldIgnore = false;
-		for (const ignorePattern of ignore) {
-			const ignoreGlob = new Bun.Glob(ignorePattern);
-			if (ignoreGlob.match(match)) {
-				shouldIgnore = true;
-				break;
-			}
-		}
+    // Check against ignore patterns
+    let shouldIgnore = false;
+    for (const ignorePattern of ignore) {
+      const ignoreGlob = new Bun.Glob(ignorePattern);
+      if (ignoreGlob.match(match)) {
+        shouldIgnore = true;
+        break;
+      }
+    }
 
-		if (shouldIgnore) continue;
+    if (shouldIgnore) continue;
 
-		// If onlyDirectories, check if it's a directory
-		if (onlyDirectories) {
-			const isDir = await isDirectory(fullPath);
-			if (!isDir) continue;
-		}
+    // If onlyDirectories, check if it's a directory
+    if (onlyDirectories) {
+      const isDir = await isDirectory(fullPath);
+      if (!isDir) continue;
+    }
 
-		// If onlyFiles, check if it's a file
-		if (onlyFiles) {
-			const isF = await isFile(fullPath);
-			if (!isF) continue;
-		}
+    // If onlyFiles, check if it's a file
+    if (onlyFiles) {
+      const isF = await isFile(fullPath);
+      if (!isF) continue;
+    }
 
-		matches.push(match);
-	}
+    matches.push(match);
+  }
 
-	return matches;
+  return matches;
 }
 
 // =============================================================================
@@ -414,44 +434,48 @@ export async function parseGlob(pattern: string, options?: ParseGlobOptions): Pr
  * ```
  */
 export function parseKeyValue(
-	input: string | readonly string[],
+  input: string | readonly string[]
 ): Result<KeyValuePair[], InstanceType<typeof ValidationError>> {
-	const pairs: KeyValuePair[] = [];
+  const pairs: KeyValuePair[] = [];
 
-	// Normalize input to array
-	const inputs = Array.isArray(input) ? input : [input];
+  // Normalize input to array
+  const inputs = Array.isArray(input) ? input : [input];
 
-	for (const item of inputs) {
-		if (!item) continue;
+  for (const item of inputs) {
+    if (!item) continue;
 
-		// Split by comma for multiple pairs
-		const parts = item.split(",");
+    // Split by comma for multiple pairs
+    const parts = item.split(",");
 
-		for (const part of parts) {
-			const trimmed = part.trim();
-			if (!trimmed) continue;
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
 
-			// Find first equals sign
-			const eqIndex = trimmed.indexOf("=");
+      // Find first equals sign
+      const eqIndex = trimmed.indexOf("=");
 
-			if (eqIndex === -1) {
-				return new Err(
-					new ValidationError({ message: `Missing '=' in key-value pair: ${trimmed}` }),
-				);
-			}
+      if (eqIndex === -1) {
+        return new Err(
+          new ValidationError({
+            message: `Missing '=' in key-value pair: ${trimmed}`,
+          })
+        );
+      }
 
-			const key = trimmed.slice(0, eqIndex).trim();
-			const value = trimmed.slice(eqIndex + 1);
+      const key = trimmed.slice(0, eqIndex).trim();
+      const value = trimmed.slice(eqIndex + 1);
 
-			if (!key) {
-				return new Err(new ValidationError({ message: "Empty key in key-value pair" }));
-			}
+      if (!key) {
+        return new Err(
+          new ValidationError({ message: "Empty key in key-value pair" })
+        );
+      }
 
-			pairs.push({ key, value });
-		}
-	}
+      pairs.push({ key, value });
+    }
+  }
 
-	return new Ok(pairs);
+  return new Ok(pairs);
 }
 
 // =============================================================================
@@ -475,106 +499,129 @@ export function parseKeyValue(
  * ```
  */
 export function parseRange(
-	input: string,
-	type: "number" | "date",
+  input: string,
+  type: "number" | "date"
 ): Result<Range, InstanceType<typeof ValidationError>> {
-	const trimmed = input.trim();
+  const trimmed = input.trim();
 
-	if (type === "date") {
-		// Date range uses ".." separator
-		const parts = trimmed.split("..");
+  if (type === "date") {
+    // Date range uses ".." separator
+    const parts = trimmed.split("..");
 
-		if (parts.length === 1) {
-			// Single date - start and end are the same
-			const dateStr = parts[0];
-			if (dateStr === undefined) {
-				return new Err(new ValidationError({ message: "Empty date input" }));
-			}
-			const date = new Date(dateStr.trim());
-			if (Number.isNaN(date.getTime())) {
-				return new Err(new ValidationError({ message: `Invalid date format: ${dateStr}` }));
-			}
-			return new Ok({ type: "date", start: date, end: date });
-		}
+    if (parts.length === 1) {
+      // Single date - start and end are the same
+      const dateStr = parts[0];
+      if (dateStr === undefined) {
+        return new Err(new ValidationError({ message: "Empty date input" }));
+      }
+      const date = new Date(dateStr.trim());
+      if (Number.isNaN(date.getTime())) {
+        return new Err(
+          new ValidationError({ message: `Invalid date format: ${dateStr}` })
+        );
+      }
+      return new Ok({ type: "date", start: date, end: date });
+    }
 
-		if (parts.length === 2) {
-			const startStr = parts[0];
-			const endStr = parts[1];
-			if (startStr === undefined || endStr === undefined) {
-				return new Err(new ValidationError({ message: "Invalid date range format" }));
-			}
-			const start = new Date(startStr.trim());
-			const end = new Date(endStr.trim());
+    if (parts.length === 2) {
+      const startStr = parts[0];
+      const endStr = parts[1];
+      if (startStr === undefined || endStr === undefined) {
+        return new Err(
+          new ValidationError({ message: "Invalid date range format" })
+        );
+      }
+      const start = new Date(startStr.trim());
+      const end = new Date(endStr.trim());
 
-			if (Number.isNaN(start.getTime())) {
-				return new Err(new ValidationError({ message: `Invalid date format: ${startStr}` }));
-			}
-			if (Number.isNaN(end.getTime())) {
-				return new Err(new ValidationError({ message: `Invalid date format: ${endStr}` }));
-			}
+      if (Number.isNaN(start.getTime())) {
+        return new Err(
+          new ValidationError({ message: `Invalid date format: ${startStr}` })
+        );
+      }
+      if (Number.isNaN(end.getTime())) {
+        return new Err(
+          new ValidationError({ message: `Invalid date format: ${endStr}` })
+        );
+      }
 
-			if (start.getTime() > end.getTime()) {
-				return new Err(
-					new ValidationError({ message: "Start date must be before or equal to end date" }),
-				);
-			}
+      if (start.getTime() > end.getTime()) {
+        return new Err(
+          new ValidationError({
+            message: "Start date must be before or equal to end date",
+          })
+        );
+      }
 
-			return new Ok({ type: "date", start, end });
-		}
+      return new Ok({ type: "date", start, end });
+    }
 
-		return new Err(new ValidationError({ message: `Invalid date range format: ${input}` }));
-	}
+    return new Err(
+      new ValidationError({ message: `Invalid date range format: ${input}` })
+    );
+  }
 
-	// Numeric range uses "-" separator (but we need to handle negative numbers)
-	// Pattern: handle negative numbers like -10--5 (meaning -10 to -5)
+  // Numeric range uses "-" separator (but we need to handle negative numbers)
+  // Pattern: handle negative numbers like -10--5 (meaning -10 to -5)
 
-	// Try to parse as single number first
-	const singleNum = Number(trimmed);
-	if (!Number.isNaN(singleNum) && !trimmed.includes("-", trimmed.startsWith("-") ? 1 : 0)) {
-		return new Ok({ type: "number", min: singleNum, max: singleNum });
-	}
+  // Try to parse as single number first
+  const singleNum = Number(trimmed);
+  if (
+    !(
+      Number.isNaN(singleNum) ||
+      trimmed.includes("-", trimmed.startsWith("-") ? 1 : 0)
+    )
+  ) {
+    return new Ok({ type: "number", min: singleNum, max: singleNum });
+  }
 
-	// Parse range with potential negative numbers
-	// Strategy: find the separator "-" that isn't part of a negative number
-	// A "-" is a separator if:
-	// - It's not the first character
-	// - The character before it is a digit or space
+  // Parse range with potential negative numbers
+  // Strategy: find the separator "-" that isn't part of a negative number
+  // A "-" is a separator if:
+  // - It's not the first character
+  // - The character before it is a digit or space
 
-	let separatorIndex = -1;
-	for (let i = 1; i < trimmed.length; i++) {
-		const char = trimmed[i];
-		const prevChar = trimmed[i - 1];
-		if (char === "-" && prevChar !== undefined) {
-			// If previous char is a digit or space, this is likely the separator
-			if (/[\d\s]/.test(prevChar)) {
-				separatorIndex = i;
-				break;
-			}
-		}
-	}
+  let separatorIndex = -1;
+  for (let i = 1; i < trimmed.length; i++) {
+    const char = trimmed[i];
+    const prevChar = trimmed[i - 1];
+    // If previous char is a digit or space, this is likely the separator
+    if (char === "-" && prevChar !== undefined && /[\d\s]/.test(prevChar)) {
+      separatorIndex = i;
+      break;
+    }
+  }
 
-	if (separatorIndex === -1) {
-		return new Err(new ValidationError({ message: `Invalid numeric range format: ${input}` }));
-	}
+  if (separatorIndex === -1) {
+    return new Err(
+      new ValidationError({ message: `Invalid numeric range format: ${input}` })
+    );
+  }
 
-	const minStr = trimmed.slice(0, separatorIndex).trim();
-	const maxStr = trimmed.slice(separatorIndex + 1).trim();
+  const minStr = trimmed.slice(0, separatorIndex).trim();
+  const maxStr = trimmed.slice(separatorIndex + 1).trim();
 
-	const min = Number(minStr);
-	const max = Number(maxStr);
+  const min = Number(minStr);
+  const max = Number(maxStr);
 
-	if (Number.isNaN(min)) {
-		return new Err(new ValidationError({ message: `Invalid number: ${minStr}` }));
-	}
-	if (Number.isNaN(max)) {
-		return new Err(new ValidationError({ message: `Invalid number: ${maxStr}` }));
-	}
+  if (Number.isNaN(min)) {
+    return new Err(
+      new ValidationError({ message: `Invalid number: ${minStr}` })
+    );
+  }
+  if (Number.isNaN(max)) {
+    return new Err(
+      new ValidationError({ message: `Invalid number: ${maxStr}` })
+    );
+  }
 
-	if (min > max) {
-		return new Err(new ValidationError({ message: "Min must be less than or equal to max" }));
-	}
+  if (min > max) {
+    return new Err(
+      new ValidationError({ message: "Min must be less than or equal to max" })
+    );
+  }
 
-	return new Ok({ type: "number", min, max });
+  return new Ok({ type: "number", min, max });
 }
 
 // =============================================================================
@@ -597,73 +644,75 @@ export function parseRange(
  * ```
  */
 export function parseFilter(
-	input: string,
+  input: string
 ): Result<FilterExpression[], InstanceType<typeof ValidationError>> {
-	const trimmed = input.trim();
+  const trimmed = input.trim();
 
-	if (!trimmed) {
-		return new Ok([]);
-	}
+  if (!trimmed) {
+    return new Ok([]);
+  }
 
-	const filters: FilterExpression[] = [];
+  const filters: FilterExpression[] = [];
 
-	// Split by comma for multiple filters
-	const parts = trimmed.split(",");
+  // Split by comma for multiple filters
+  const parts = trimmed.split(",");
 
-	for (const part of parts) {
-		let partTrimmed = part.trim();
-		if (!partTrimmed) continue;
+  for (const part of parts) {
+    let partTrimmed = part.trim();
+    if (!partTrimmed) continue;
 
-		// Check for negation prefix
-		let isNegated = false;
-		if (partTrimmed.startsWith("!")) {
-			isNegated = true;
-			partTrimmed = partTrimmed.slice(1).trim();
-		}
+    // Check for negation prefix
+    let isNegated = false;
+    if (partTrimmed.startsWith("!")) {
+      isNegated = true;
+      partTrimmed = partTrimmed.slice(1).trim();
+    }
 
-		// Find first colon (field:value separator)
-		const colonIndex = partTrimmed.indexOf(":");
+    // Find first colon (field:value separator)
+    const colonIndex = partTrimmed.indexOf(":");
 
-		if (colonIndex === -1) {
-			return new Err(
-				new ValidationError({ message: `Missing ':' in filter expression: ${part.trim()}` }),
-			);
-		}
+    if (colonIndex === -1) {
+      return new Err(
+        new ValidationError({
+          message: `Missing ':' in filter expression: ${part.trim()}`,
+        })
+      );
+    }
 
-		const field = partTrimmed.slice(0, colonIndex).trim();
-		let value = partTrimmed.slice(colonIndex + 1).trim();
+    const field = partTrimmed.slice(0, colonIndex).trim();
+    let value = partTrimmed.slice(colonIndex + 1).trim();
 
-		// Check for operators in value
-		let operator: FilterExpression["operator"] | undefined;
+    // Check for operators in value
+    let operator: FilterExpression["operator"] | undefined;
 
-		if (isNegated) {
-			operator = "ne";
-		} else if (value.startsWith(">=")) {
-			operator = "gte";
-			value = value.slice(2).trim();
-		} else if (value.startsWith("<=")) {
-			operator = "lte";
-			value = value.slice(2).trim();
-		} else if (value.startsWith(">")) {
-			operator = "gt";
-			value = value.slice(1).trim();
-		} else if (value.startsWith("<")) {
-			operator = "lt";
-			value = value.slice(1).trim();
-		} else if (value.startsWith("~")) {
-			operator = "contains";
-			value = value.slice(1).trim();
-		}
+    if (isNegated) {
+      operator = "ne";
+    } else if (value.startsWith(">=")) {
+      operator = "gte";
+      value = value.slice(2).trim();
+    } else if (value.startsWith("<=")) {
+      operator = "lte";
+      value = value.slice(2).trim();
+    } else if (value.startsWith(">")) {
+      operator = "gt";
+      value = value.slice(1).trim();
+    } else if (value.startsWith("<")) {
+      operator = "lt";
+      value = value.slice(1).trim();
+    } else if (value.startsWith("~")) {
+      operator = "contains";
+      value = value.slice(1).trim();
+    }
 
-		const filter: FilterExpression = { field, value };
-		if (operator) {
-			(filter as { operator: typeof operator }).operator = operator;
-		}
+    const filter: FilterExpression = { field, value };
+    if (operator) {
+      (filter as { operator: typeof operator }).operator = operator;
+    }
 
-		filters.push(filter);
-	}
+    filters.push(filter);
+  }
 
-	return new Ok(filters);
+  return new Ok(filters);
 }
 
 // =============================================================================
@@ -686,49 +735,49 @@ export function parseFilter(
  * ```
  */
 export function parseSortSpec(
-	input: string,
+  input: string
 ): Result<SortCriteria[], InstanceType<typeof ValidationError>> {
-	const trimmed = input.trim();
+  const trimmed = input.trim();
 
-	if (!trimmed) {
-		return new Ok([]);
-	}
+  if (!trimmed) {
+    return new Ok([]);
+  }
 
-	const criteria: SortCriteria[] = [];
+  const criteria: SortCriteria[] = [];
 
-	// Split by comma for multiple sort fields
-	const parts = trimmed.split(",");
+  // Split by comma for multiple sort fields
+  const parts = trimmed.split(",");
 
-	for (const part of parts) {
-		const partTrimmed = part.trim();
-		if (!partTrimmed) continue;
+  for (const part of parts) {
+    const partTrimmed = part.trim();
+    if (!partTrimmed) continue;
 
-		// Check for direction (field:direction)
-		const colonIndex = partTrimmed.indexOf(":");
+    // Check for direction (field:direction)
+    const colonIndex = partTrimmed.indexOf(":");
 
-		if (colonIndex === -1) {
-			// No direction specified - default to asc
-			criteria.push({ field: partTrimmed, direction: "asc" });
-		} else {
-			const field = partTrimmed.slice(0, colonIndex).trim();
-			const direction = partTrimmed
-				.slice(colonIndex + 1)
-				.trim()
-				.toLowerCase();
+    if (colonIndex === -1) {
+      // No direction specified - default to asc
+      criteria.push({ field: partTrimmed, direction: "asc" });
+    } else {
+      const field = partTrimmed.slice(0, colonIndex).trim();
+      const direction = partTrimmed
+        .slice(colonIndex + 1)
+        .trim()
+        .toLowerCase();
 
-			if (direction !== "asc" && direction !== "desc") {
-				return new Err(
-					new ValidationError({
-						message: `Invalid sort direction: ${direction}. Must be 'asc' or 'desc'.`,
-					}),
-				);
-			}
+      if (direction !== "asc" && direction !== "desc") {
+        return new Err(
+          new ValidationError({
+            message: `Invalid sort direction: ${direction}. Must be 'asc' or 'desc'.`,
+          })
+        );
+      }
 
-			criteria.push({ field, direction });
-		}
-	}
+      criteria.push({ field, direction });
+    }
+  }
 
-	return new Ok(criteria);
+  return new Ok(criteria);
 }
 
 // =============================================================================
@@ -749,51 +798,57 @@ export function parseSortSpec(
  * ```
  */
 export function normalizeId(
-	input: string,
-	options?: NormalizeIdOptions,
+  input: string,
+  options?: NormalizeIdOptions
 ): Result<string, InstanceType<typeof ValidationError>> {
-	const { trim = false, lowercase = false, minLength, maxLength, pattern } = options ?? {};
+  const {
+    trim = false,
+    lowercase = false,
+    minLength,
+    maxLength,
+    pattern,
+  } = options ?? {};
 
-	let normalized = input;
+  let normalized = input;
 
-	if (trim) {
-		normalized = normalized.trim();
-	}
+  if (trim) {
+    normalized = normalized.trim();
+  }
 
-	if (lowercase) {
-		normalized = normalized.toLowerCase();
-	}
+  if (lowercase) {
+    normalized = normalized.toLowerCase();
+  }
 
-	// Validate length constraints
-	if (minLength !== undefined && normalized.length < minLength) {
-		return new Err(
-			new ValidationError({
-				message: `ID must be at least ${minLength} characters long`,
-				field: "id",
-			}),
-		);
-	}
+  // Validate length constraints
+  if (minLength !== undefined && normalized.length < minLength) {
+    return new Err(
+      new ValidationError({
+        message: `ID must be at least ${minLength} characters long`,
+        field: "id",
+      })
+    );
+  }
 
-	if (maxLength !== undefined && normalized.length > maxLength) {
-		return new Err(
-			new ValidationError({
-				message: `ID must be at most ${maxLength} characters long`,
-				field: "id",
-			}),
-		);
-	}
+  if (maxLength !== undefined && normalized.length > maxLength) {
+    return new Err(
+      new ValidationError({
+        message: `ID must be at most ${maxLength} characters long`,
+        field: "id",
+      })
+    );
+  }
 
-	// Validate pattern
-	if (pattern && !pattern.test(normalized)) {
-		return new Err(
-			new ValidationError({
-				message: `ID does not match required pattern: ${pattern.source}`,
-				field: "id",
-			}),
-		);
-	}
+  // Validate pattern
+  if (pattern && !pattern.test(normalized)) {
+    return new Err(
+      new ValidationError({
+        message: `ID does not match required pattern: ${pattern.source}`,
+        field: "id",
+      })
+    );
+  }
 
-	return new Ok(normalized);
+  return new Ok(normalized);
 }
 
 // =============================================================================
@@ -823,45 +878,45 @@ export function normalizeId(
  * ```
  */
 export async function confirmDestructive(
-	options: ConfirmDestructiveOptions,
+  options: ConfirmDestructiveOptions
 ): Promise<Result<boolean, InstanceType<typeof CancelledError>>> {
-	const { message, bypassFlag = false, itemCount } = options;
+  const { message, bypassFlag = false, itemCount } = options;
 
-	// If bypass flag is set, skip confirmation
-	if (bypassFlag) {
-		return new Ok(true);
-	}
+  // If bypass flag is set, skip confirmation
+  if (bypassFlag) {
+    return new Ok(true);
+  }
 
-	// Check if we're in a TTY environment
-	const isTTY = process.stdout.isTTY;
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const isDumbTerminal = process.env["TERM"] === "dumb";
+  // Check if we're in a TTY environment
+  const isTTY = process.stdout.isTTY;
+  const isDumbTerminal = process.env["TERM"] === "dumb";
 
-	if (!isTTY || isDumbTerminal) {
-		// Can't prompt in non-TTY or dumb terminal - return Err
-		return new Err(
-			new CancelledError({
-				message: "Cannot prompt for confirmation in non-interactive mode. Use --yes to bypass.",
-			}),
-		);
-	}
+  if (!isTTY || isDumbTerminal) {
+    // Can't prompt in non-TTY or dumb terminal - return Err
+    return new Err(
+      new CancelledError({
+        message:
+          "Cannot prompt for confirmation in non-interactive mode. Use --yes to bypass.",
+      })
+    );
+  }
 
-	// Build the prompt message
-	let promptMessage = message;
-	if (itemCount !== undefined) {
-		promptMessage = `${message} (${itemCount} items)`;
-	}
+  // Build the prompt message
+  let promptMessage = message;
+  if (itemCount !== undefined) {
+    promptMessage = `${message} (${itemCount} items)`;
+  }
 
-	const { confirm, isCancel } = await import("@clack/prompts");
-	const response = await confirm({ message: promptMessage });
+  const { confirm, isCancel } = await import("@clack/prompts");
+  const response = await confirm({ message: promptMessage });
 
-	if (isCancel(response) || response === false) {
-		return new Err(
-			new CancelledError({
-				message: "Operation cancelled by user.",
-			}),
-		);
-	}
+  if (isCancel(response) || response === false) {
+    return new Err(
+      new CancelledError({
+        message: "Operation cancelled by user.",
+      })
+    );
+  }
 
-	return new Ok(true);
+  return new Ok(true);
 }

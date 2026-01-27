@@ -10,7 +10,12 @@
 
 import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { Result, NotFoundError, ValidationError, type StorageError } from "@outfitter/contracts";
+import {
+  NotFoundError,
+  Result,
+  type StorageError,
+  ValidationError,
+} from "@outfitter/contracts";
 
 // ============================================================================
 // Types
@@ -40,18 +45,18 @@ import { Result, NotFoundError, ValidationError, type StorageError } from "@outf
  * ```
  */
 export interface Cursor {
-	/** Unique identifier for this cursor (UUID format) */
-	readonly id: string;
-	/** Current position/offset in the result set (zero-based) */
-	readonly position: number;
-	/** Optional user-defined metadata associated with this cursor */
-	readonly metadata?: Record<string, unknown>;
-	/** Time-to-live in milliseconds (optional, omitted if cursor never expires) */
-	readonly ttl?: number;
-	/** Unix timestamp (ms) when this cursor expires (computed from createdAt + ttl) */
-	readonly expiresAt?: number;
-	/** Unix timestamp (ms) when this cursor was created */
-	readonly createdAt: number;
+  /** Unique identifier for this cursor (UUID format) */
+  readonly id: string;
+  /** Current position/offset in the result set (zero-based) */
+  readonly position: number;
+  /** Optional user-defined metadata associated with this cursor */
+  readonly metadata?: Record<string, unknown>;
+  /** Time-to-live in milliseconds (optional, omitted if cursor never expires) */
+  readonly ttl?: number;
+  /** Unix timestamp (ms) when this cursor expires (computed from createdAt + ttl) */
+  readonly expiresAt?: number;
+  /** Unix timestamp (ms) when this cursor was created */
+  readonly createdAt: number;
 }
 
 /**
@@ -72,14 +77,14 @@ export interface Cursor {
  * ```
  */
 export interface CreateCursorOptions {
-	/** Custom cursor ID (UUID generated if not provided) */
-	id?: string;
-	/** Starting position in the result set (must be non-negative) */
-	position: number;
-	/** User-defined metadata to associate with the cursor */
-	metadata?: Record<string, unknown>;
-	/** Time-to-live in milliseconds (cursor never expires if omitted) */
-	ttl?: number;
+  /** Custom cursor ID (UUID generated if not provided) */
+  id?: string;
+  /** Starting position in the result set (must be non-negative) */
+  position: number;
+  /** User-defined metadata to associate with the cursor */
+  metadata?: Record<string, unknown>;
+  /** Time-to-live in milliseconds (cursor never expires if omitted) */
+  ttl?: number;
 }
 
 /**
@@ -110,42 +115,42 @@ export interface CreateCursorOptions {
  * ```
  */
 export interface CursorStore {
-	/**
-	 * Save or update a cursor in the store.
-	 * @param cursor - The cursor to store (replaces existing if same ID)
-	 */
-	set(cursor: Cursor): void;
-	/**
-	 * Retrieve a cursor by ID.
-	 * @param id - The cursor ID to look up
-	 * @returns Result with cursor or NotFoundError (also returned for expired cursors)
-	 */
-	get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>>;
-	/**
-	 * Check if a cursor exists and is not expired.
-	 * @param id - The cursor ID to check
-	 * @returns True if cursor exists and is valid, false otherwise
-	 */
-	has(id: string): boolean;
-	/**
-	 * Delete a cursor by ID.
-	 * @param id - The cursor ID to delete (no-op if not found)
-	 */
-	delete(id: string): void;
-	/**
-	 * Remove all cursors from the store.
-	 */
-	clear(): void;
-	/**
-	 * List all cursor IDs in the store (including expired).
-	 * @returns Array of cursor IDs
-	 */
-	list(): string[];
-	/**
-	 * Remove all expired cursors from the store.
-	 * @returns Number of cursors that were pruned
-	 */
-	prune(): number;
+  /**
+   * Save or update a cursor in the store.
+   * @param cursor - The cursor to store (replaces existing if same ID)
+   */
+  set(cursor: Cursor): void;
+  /**
+   * Retrieve a cursor by ID.
+   * @param id - The cursor ID to look up
+   * @returns Result with cursor or NotFoundError (also returned for expired cursors)
+   */
+  get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>>;
+  /**
+   * Check if a cursor exists and is not expired.
+   * @param id - The cursor ID to check
+   * @returns True if cursor exists and is valid, false otherwise
+   */
+  has(id: string): boolean;
+  /**
+   * Delete a cursor by ID.
+   * @param id - The cursor ID to delete (no-op if not found)
+   */
+  delete(id: string): void;
+  /**
+   * Remove all cursors from the store.
+   */
+  clear(): void;
+  /**
+   * List all cursor IDs in the store (including expired).
+   * @returns Array of cursor IDs
+   */
+  list(): string[];
+  /**
+   * Remove all expired cursors from the store.
+   * @returns Number of cursors that were pruned
+   */
+  prune(): number;
 }
 
 /**
@@ -172,11 +177,11 @@ export interface CursorStore {
  * ```
  */
 export interface ScopedStore extends CursorStore {
-	/**
-	 * Get the full scope path for this store.
-	 * @returns Scope string (e.g., "parent:child" for nested scopes)
-	 */
-	getScope(): string;
+  /**
+   * Get the full scope path for this store.
+   * @returns Scope string (e.g., "parent:child" for nested scopes)
+   */
+  getScope(): string;
 }
 
 /**
@@ -192,8 +197,8 @@ export interface ScopedStore extends CursorStore {
  * ```
  */
 export interface PersistentStoreOptions {
-	/** Absolute file path for cursor persistence (JSON format) */
-	path: string;
+  /** Absolute file path for cursor persistence (JSON format) */
+  path: string;
 }
 
 /**
@@ -220,17 +225,17 @@ export interface PersistentStoreOptions {
  * ```
  */
 export interface PersistentStore extends CursorStore {
-	/**
-	 * Flush all in-memory cursors to disk.
-	 * Uses atomic write (temp file + rename) to prevent corruption.
-	 * @returns Promise that resolves when write is complete
-	 */
-	flush(): Promise<void>;
-	/**
-	 * Dispose of the store and cleanup resources.
-	 * Call this when the store is no longer needed.
-	 */
-	dispose(): void;
+  /**
+   * Flush all in-memory cursors to disk.
+   * Uses atomic write (temp file + rename) to prevent corruption.
+   * @returns Promise that resolves when write is complete
+   */
+  flush(): Promise<void>;
+  /**
+   * Dispose of the store and cleanup resources.
+   * Call this when the store is no longer needed.
+   */
+  dispose(): void;
 }
 
 // ============================================================================
@@ -264,33 +269,33 @@ export interface PersistentStore extends CursorStore {
  * ```
  */
 export function createCursor(
-	options: CreateCursorOptions,
+  options: CreateCursorOptions
 ): Result<Cursor, InstanceType<typeof ValidationError>> {
-	// Validate position is non-negative
-	if (options.position < 0) {
-		return Result.err(
-			new ValidationError({
-				message: "Position must be non-negative",
-				field: "position",
-			}),
-		);
-	}
+  // Validate position is non-negative
+  if (options.position < 0) {
+    return Result.err(
+      new ValidationError({
+        message: "Position must be non-negative",
+        field: "position",
+      })
+    );
+  }
 
-	const createdAt = Date.now();
-	const id = options.id ?? crypto.randomUUID();
+  const createdAt = Date.now();
+  const id = options.id ?? crypto.randomUUID();
 
-	// Build cursor with conditional optional properties
-	// Using exactOptionalPropertyTypes means we can't set undefined for optional props
-	const cursor: Cursor = Object.freeze({
-		id,
-		position: options.position,
-		createdAt,
-		...(options.metadata !== undefined && { metadata: options.metadata }),
-		...(options.ttl !== undefined && { ttl: options.ttl }),
-		...(options.ttl !== undefined && { expiresAt: createdAt + options.ttl }),
-	});
+  // Build cursor with conditional optional properties
+  // Using exactOptionalPropertyTypes means we can't set undefined for optional props
+  const cursor: Cursor = Object.freeze({
+    id,
+    position: options.position,
+    createdAt,
+    ...(options.metadata !== undefined && { metadata: options.metadata }),
+    ...(options.ttl !== undefined && { ttl: options.ttl }),
+    ...(options.ttl !== undefined && { expiresAt: createdAt + options.ttl }),
+  });
 
-	return Result.ok(cursor);
+  return Result.ok(cursor);
 }
 
 /**
@@ -319,17 +324,17 @@ export function createCursor(
  * ```
  */
 export function advanceCursor(cursor: Cursor, newPosition: number): Cursor {
-	// Build new cursor preserving optional properties
-	const newCursor: Cursor = Object.freeze({
-		id: cursor.id,
-		position: newPosition,
-		createdAt: cursor.createdAt,
-		...(cursor.metadata !== undefined && { metadata: cursor.metadata }),
-		...(cursor.ttl !== undefined && { ttl: cursor.ttl }),
-		...(cursor.expiresAt !== undefined && { expiresAt: cursor.expiresAt }),
-	});
+  // Build new cursor preserving optional properties
+  const newCursor: Cursor = Object.freeze({
+    id: cursor.id,
+    position: newPosition,
+    createdAt: cursor.createdAt,
+    ...(cursor.metadata !== undefined && { metadata: cursor.metadata }),
+    ...(cursor.ttl !== undefined && { ttl: cursor.ttl }),
+    ...(cursor.expiresAt !== undefined && { expiresAt: cursor.expiresAt }),
+  });
 
-	return newCursor;
+  return newCursor;
 }
 
 /**
@@ -362,11 +367,11 @@ export function advanceCursor(cursor: Cursor, newPosition: number): Cursor {
  * ```
  */
 export function isExpired(cursor: Cursor): boolean {
-	// Cursors without TTL never expire
-	if (cursor.expiresAt === undefined) {
-		return false;
-	}
-	return Date.now() > cursor.expiresAt;
+  // Cursors without TTL never expire
+  if (cursor.expiresAt === undefined) {
+    return false;
+  }
+  return Date.now() > cursor.expiresAt;
 }
 
 /**
@@ -374,7 +379,7 @@ export function isExpired(cursor: Cursor): boolean {
  * Replaces + with -, / with _, and removes = padding.
  */
 function toBase64Url(base64: string): string {
-	return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 const base64Encoder = new TextEncoder();
@@ -384,24 +389,24 @@ const base64Decoder = new TextDecoder();
  * Converts UTF-8 text to standard base64.
  */
 function toBase64(value: string): string {
-	const bytes = base64Encoder.encode(value);
-	let binary = "";
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-	return btoa(binary);
+  const bytes = base64Encoder.encode(value);
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
 }
 
 /**
  * Converts standard base64 to UTF-8 text.
  */
 function fromBase64(base64: string): string {
-	const binary = atob(base64);
-	const bytes = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i += 1) {
-		bytes[i] = binary.charCodeAt(i);
-	}
-	return base64Decoder.decode(bytes);
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return base64Decoder.decode(bytes);
 }
 
 /**
@@ -409,11 +414,11 @@ function fromBase64(base64: string): string {
  * Replaces - with +, _ with /, and adds padding if needed.
  */
 function fromBase64Url(base64Url: string): string {
-	let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-	// Add padding if needed
-	const padLength = (4 - (base64.length % 4)) % 4;
-	base64 += "=".repeat(padLength);
-	return base64;
+  let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  // Add padding if needed
+  const padLength = (4 - (base64.length % 4)) % 4;
+  base64 += "=".repeat(padLength);
+  return base64;
 }
 
 /**
@@ -438,10 +443,10 @@ function fromBase64Url(base64Url: string): string {
  * ```
  */
 export function encodeCursor(cursor: Cursor): string {
-	const json = JSON.stringify(cursor);
-	// Encode to standard base64, then convert to URL-safe
-	const base64 = toBase64(json);
-	return toBase64Url(base64);
+  const json = JSON.stringify(cursor);
+  // Encode to standard base64, then convert to URL-safe
+  const base64 = toBase64(json);
+  return toBase64Url(base64);
 }
 
 /**
@@ -469,133 +474,138 @@ export function encodeCursor(cursor: Cursor): string {
  * ```
  */
 export function decodeCursor(
-	encoded: string,
+  encoded: string
 ): Result<Cursor, InstanceType<typeof ValidationError>> {
-	// Step 1: Decode base64
-	let json: string;
-	try {
-		const base64 = fromBase64Url(encoded);
-		json = fromBase64(base64);
-	} catch {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: failed to decode base64",
-				field: "cursor",
-			}),
-		);
-	}
+  // Step 1: Decode base64
+  let json: string;
+  try {
+    const base64 = fromBase64Url(encoded);
+    json = fromBase64(base64);
+  } catch {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: failed to decode base64",
+        field: "cursor",
+      })
+    );
+  }
 
-	// Step 2: Parse JSON
-	let data: unknown;
-	try {
-		data = JSON.parse(json);
-	} catch {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: failed to parse JSON",
-				field: "cursor",
-			}),
-		);
-	}
+  // Step 2: Parse JSON
+  let data: unknown;
+  try {
+    data = JSON.parse(json);
+  } catch {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: failed to parse JSON",
+        field: "cursor",
+      })
+    );
+  }
 
-	// Step 3: Validate structure
-	if (typeof data !== "object" || data === null) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: expected object",
-				field: "cursor",
-			}),
-		);
-	}
+  // Step 3: Validate structure
+  if (typeof data !== "object" || data === null) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: expected object",
+        field: "cursor",
+      })
+    );
+  }
 
-	type ParsedCursor = {
-		id: string;
-		position: number;
-		createdAt: number;
-		metadata?: Record<string, unknown>;
-		ttl?: number;
-		expiresAt?: number;
-	};
+  interface ParsedCursor {
+    id: string;
+    position: number;
+    createdAt: number;
+    metadata?: Record<string, unknown>;
+    ttl?: number;
+    expiresAt?: number;
+  }
 
-	const obj = data as Partial<ParsedCursor>;
+  const obj = data as Partial<ParsedCursor>;
 
-	// Validate required fields
-	if (typeof obj.id !== "string") {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: missing or invalid 'id' field",
-				field: "cursor.id",
-			}),
-		);
-	}
+  // Validate required fields
+  if (typeof obj.id !== "string") {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: missing or invalid 'id' field",
+        field: "cursor.id",
+      })
+    );
+  }
 
-	if (typeof obj.position !== "number") {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: missing or invalid 'position' field",
-				field: "cursor.position",
-			}),
-		);
-	}
+  if (typeof obj.position !== "number") {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: missing or invalid 'position' field",
+        field: "cursor.position",
+      })
+    );
+  }
 
-	// Reject negative positions (matches createCursor validation)
-	if (obj.position < 0) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: position must be non-negative",
-				field: "cursor.position",
-			}),
-		);
-	}
+  // Reject negative positions (matches createCursor validation)
+  if (obj.position < 0) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: position must be non-negative",
+        field: "cursor.position",
+      })
+    );
+  }
 
-	if (typeof obj.createdAt !== "number") {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: missing or invalid 'createdAt' field",
-				field: "cursor.createdAt",
-			}),
-		);
-	}
+  if (typeof obj.createdAt !== "number") {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: missing or invalid 'createdAt' field",
+        field: "cursor.createdAt",
+      })
+    );
+  }
 
-	// Validate optional fields if present
-	if (obj.metadata !== undefined && (typeof obj.metadata !== "object" || obj.metadata === null)) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: 'metadata' must be an object",
-				field: "cursor.metadata",
-			}),
-		);
-	}
+  // Validate optional fields if present
+  if (
+    obj.metadata !== undefined &&
+    (typeof obj.metadata !== "object" || obj.metadata === null)
+  ) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: 'metadata' must be an object",
+        field: "cursor.metadata",
+      })
+    );
+  }
 
-	if (obj.ttl !== undefined && typeof obj.ttl !== "number") {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: 'ttl' must be a number",
-				field: "cursor.ttl",
-			}),
-		);
-	}
+  if (obj.ttl !== undefined && typeof obj.ttl !== "number") {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: 'ttl' must be a number",
+        field: "cursor.ttl",
+      })
+    );
+  }
 
-	if (obj.expiresAt !== undefined && typeof obj.expiresAt !== "number") {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid cursor: 'expiresAt' must be a number",
-				field: "cursor.expiresAt",
-			}),
-		);
-	}
+  if (obj.expiresAt !== undefined && typeof obj.expiresAt !== "number") {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid cursor: 'expiresAt' must be a number",
+        field: "cursor.expiresAt",
+      })
+    );
+  }
 
-	// Build the cursor with proper typing
-	const cursor: Cursor = Object.freeze({
-		id: obj.id,
-		position: obj.position,
-		createdAt: obj.createdAt,
-		...(obj.metadata !== undefined && { metadata: obj.metadata as Record<string, unknown> }),
-		...(obj.ttl !== undefined && { ttl: obj.ttl }),
-		...(obj.expiresAt !== undefined && { expiresAt: obj.expiresAt }),
-	});
+  // Build the cursor with proper typing
+  const cursor: Cursor = Object.freeze({
+    id: obj.id,
+    position: obj.position,
+    createdAt: obj.createdAt,
+    ...(obj.metadata !== undefined && {
+      metadata: obj.metadata as Record<string, unknown>,
+    }),
+    ...(obj.ttl !== undefined && { ttl: obj.ttl }),
+    ...(obj.expiresAt !== undefined && { expiresAt: obj.expiresAt }),
+  });
 
-	return Result.ok(cursor);
+  return Result.ok(cursor);
 }
 
 // ============================================================================
@@ -640,76 +650,76 @@ export function decodeCursor(
  * ```
  */
 export function createCursorStore(): CursorStore & ScopedStore {
-	const cursors = new Map<string, Cursor>();
+  const cursors = new Map<string, Cursor>();
 
-	return {
-		set(cursor: Cursor): void {
-			cursors.set(cursor.id, cursor);
-		},
+  return {
+    set(cursor: Cursor): void {
+      cursors.set(cursor.id, cursor);
+    },
 
-		get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
-			const cursor = cursors.get(id);
+    get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
+      const cursor = cursors.get(id);
 
-			if (cursor === undefined) {
-				return Result.err(
-					new NotFoundError({
-						message: `Cursor not found: ${id}`,
-						resourceType: "cursor",
-						resourceId: id,
-					}),
-				);
-			}
+      if (cursor === undefined) {
+        return Result.err(
+          new NotFoundError({
+            message: `Cursor not found: ${id}`,
+            resourceType: "cursor",
+            resourceId: id,
+          })
+        );
+      }
 
-			// Check if cursor has expired
-			if (isExpired(cursor)) {
-				return Result.err(
-					new NotFoundError({
-						message: `Cursor expired: ${id}`,
-						resourceType: "cursor",
-						resourceId: id,
-					}),
-				);
-			}
+      // Check if cursor has expired
+      if (isExpired(cursor)) {
+        return Result.err(
+          new NotFoundError({
+            message: `Cursor expired: ${id}`,
+            resourceType: "cursor",
+            resourceId: id,
+          })
+        );
+      }
 
-			return Result.ok(cursor);
-		},
+      return Result.ok(cursor);
+    },
 
-		has(id: string): boolean {
-			const cursor = cursors.get(id);
-			if (cursor === undefined) {
-				return false;
-			}
-			// Don't report expired cursors as existing
-			return !isExpired(cursor);
-		},
+    has(id: string): boolean {
+      const cursor = cursors.get(id);
+      if (cursor === undefined) {
+        return false;
+      }
+      // Don't report expired cursors as existing
+      return !isExpired(cursor);
+    },
 
-		delete(id: string): void {
-			cursors.delete(id);
-		},
+    delete(id: string): void {
+      cursors.delete(id);
+    },
 
-		clear(): void {
-			cursors.clear();
-		},
+    clear(): void {
+      cursors.clear();
+    },
 
-		list(): string[] {
-			return Array.from(cursors.keys());
-		},
+    list(): string[] {
+      return Array.from(cursors.keys());
+    },
 
-		prune(): number {
-			let count = 0;
-			for (const [id, cursor] of cursors) {
-				if (isExpired(cursor)) {
-					cursors.delete(id);
-					count++;
-				}
-			}
-			return count;
-		},
+    prune(): number {
+      let count = 0;
+      for (const [id, cursor] of cursors) {
+        if (isExpired(cursor)) {
+          cursors.delete(id);
+          count++;
+        }
+      }
+      return count;
+    },
 
-		getScope(): string {
-			return "";
-		},
-	};
+    getScope(): string {
+      return "";
+    },
+  };
 }
 
 // ============================================================================
@@ -717,7 +727,7 @@ export function createCursorStore(): CursorStore & ScopedStore {
 // ============================================================================
 
 interface StorageFormat {
-	cursors: Record<string, Cursor>;
+  cursors: Record<string, Cursor>;
 }
 
 /**
@@ -768,127 +778,127 @@ interface StorageFormat {
  * ```
  */
 export async function createPersistentStore(
-	options: PersistentStoreOptions,
+  options: PersistentStoreOptions
 ): Promise<PersistentStore> {
-	const { path: storagePath } = options;
-	const cursors = new Map<string, Cursor>();
+  const { path: storagePath } = options;
+  const cursors = new Map<string, Cursor>();
 
-	// Load existing data from file if it exists
-	if (existsSync(storagePath)) {
-		try {
-			const content = await Bun.file(storagePath).text();
-			const data = JSON.parse(content) as StorageFormat;
-			if (data.cursors && typeof data.cursors === "object") {
-				for (const [id, cursor] of Object.entries(data.cursors)) {
-					cursors.set(id, cursor);
-				}
-			}
-		} catch {
-			// File corrupted or invalid - start with empty store
-		}
-	}
+  // Load existing data from file if it exists
+  if (existsSync(storagePath)) {
+    try {
+      const content = await Bun.file(storagePath).text();
+      const data = JSON.parse(content) as StorageFormat;
+      if (data.cursors && typeof data.cursors === "object") {
+        for (const [id, cursor] of Object.entries(data.cursors)) {
+          cursors.set(id, cursor);
+        }
+      }
+    } catch {
+      // File corrupted or invalid - start with empty store
+    }
+  }
 
-	const flush = async (): Promise<void> => {
-		// Ensure directory exists
-		const dir = dirname(storagePath);
-		if (!existsSync(dir)) {
-			mkdirSync(dir, { recursive: true });
-		}
+  const flush = async (): Promise<void> => {
+    // Ensure directory exists
+    const dir = dirname(storagePath);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
 
-		// Convert Map to object for serialization
-		const data: StorageFormat = {
-			cursors: Object.fromEntries(cursors),
-		};
+    // Convert Map to object for serialization
+    const data: StorageFormat = {
+      cursors: Object.fromEntries(cursors),
+    };
 
-		// Atomic write: write to temp file, then rename
-		const tempPath = `${storagePath}.tmp.${Date.now()}`;
-		const content = JSON.stringify(data, null, 2);
+    // Atomic write: write to temp file, then rename
+    const tempPath = `${storagePath}.tmp.${Date.now()}`;
+    const content = JSON.stringify(data, null, 2);
 
-		try {
-			writeFileSync(tempPath, content, { encoding: "utf-8" });
-			// Rename is atomic on most filesystems
-			renameSync(tempPath, storagePath);
-		} catch (error) {
-			// Try to clean up temp file on failure
-			try {
-				const { unlinkSync } = await import("node:fs");
-				unlinkSync(tempPath);
-			} catch {
-				// Ignore cleanup errors
-			}
-			throw error;
-		}
-	};
+    try {
+      writeFileSync(tempPath, content, { encoding: "utf-8" });
+      // Rename is atomic on most filesystems
+      renameSync(tempPath, storagePath);
+    } catch (error) {
+      // Try to clean up temp file on failure
+      try {
+        const { unlinkSync } = await import("node:fs");
+        unlinkSync(tempPath);
+      } catch {
+        // Ignore cleanup errors
+      }
+      throw error;
+    }
+  };
 
-	const dispose = (): void => {
-		// Cleanup resources - in real implementation might unregister exit handlers
-	};
+  const dispose = (): void => {
+    // Cleanup resources - in real implementation might unregister exit handlers
+  };
 
-	return {
-		set(cursor: Cursor): void {
-			cursors.set(cursor.id, cursor);
-		},
+  return {
+    set(cursor: Cursor): void {
+      cursors.set(cursor.id, cursor);
+    },
 
-		get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
-			const cursor = cursors.get(id);
+    get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
+      const cursor = cursors.get(id);
 
-			if (cursor === undefined) {
-				return Result.err(
-					new NotFoundError({
-						message: `Cursor not found: ${id}`,
-						resourceType: "cursor",
-						resourceId: id,
-					}),
-				);
-			}
+      if (cursor === undefined) {
+        return Result.err(
+          new NotFoundError({
+            message: `Cursor not found: ${id}`,
+            resourceType: "cursor",
+            resourceId: id,
+          })
+        );
+      }
 
-			if (isExpired(cursor)) {
-				return Result.err(
-					new NotFoundError({
-						message: `Cursor expired: ${id}`,
-						resourceType: "cursor",
-						resourceId: id,
-					}),
-				);
-			}
+      if (isExpired(cursor)) {
+        return Result.err(
+          new NotFoundError({
+            message: `Cursor expired: ${id}`,
+            resourceType: "cursor",
+            resourceId: id,
+          })
+        );
+      }
 
-			return Result.ok(cursor);
-		},
+      return Result.ok(cursor);
+    },
 
-		has(id: string): boolean {
-			const cursor = cursors.get(id);
-			if (cursor === undefined) {
-				return false;
-			}
-			return !isExpired(cursor);
-		},
+    has(id: string): boolean {
+      const cursor = cursors.get(id);
+      if (cursor === undefined) {
+        return false;
+      }
+      return !isExpired(cursor);
+    },
 
-		delete(id: string): void {
-			cursors.delete(id);
-		},
+    delete(id: string): void {
+      cursors.delete(id);
+    },
 
-		clear(): void {
-			cursors.clear();
-		},
+    clear(): void {
+      cursors.clear();
+    },
 
-		list(): string[] {
-			return Array.from(cursors.keys());
-		},
+    list(): string[] {
+      return Array.from(cursors.keys());
+    },
 
-		prune(): number {
-			let count = 0;
-			for (const [id, cursor] of cursors) {
-				if (isExpired(cursor)) {
-					cursors.delete(id);
-					count++;
-				}
-			}
-			return count;
-		},
+    prune(): number {
+      let count = 0;
+      for (const [id, cursor] of cursors) {
+        if (isExpired(cursor)) {
+          cursors.delete(id);
+          count++;
+        }
+      }
+      return count;
+    },
 
-		flush,
-		dispose,
-	};
+    flush,
+    dispose,
+  };
 }
 
 // ============================================================================
@@ -945,70 +955,73 @@ export async function createPersistentStore(
  * issuesStore.set(cursor);
  * ```
  */
-export function createScopedStore(store: CursorStore | ScopedStore, scope: string): ScopedStore {
-	// Get parent scope if available
-	const parentScope = "getScope" in store ? store.getScope() : "";
-	const fullScope = parentScope ? `${parentScope}:${scope}` : scope;
-	const prefix = `${fullScope}:`;
+export function createScopedStore(
+  store: CursorStore | ScopedStore,
+  scope: string
+): ScopedStore {
+  // Get parent scope if available
+  const parentScope = "getScope" in store ? store.getScope() : "";
+  const fullScope = parentScope ? `${parentScope}:${scope}` : scope;
+  const prefix = `${fullScope}:`;
 
-	return {
-		set(cursor: Cursor): void {
-			// Create a new cursor with the prefixed ID
-			const scopedCursor = Object.freeze({
-				...cursor,
-				id: `${prefix}${cursor.id}`,
-			});
-			store.set(scopedCursor);
-		},
+  return {
+    set(cursor: Cursor): void {
+      // Create a new cursor with the prefixed ID
+      const scopedCursor = Object.freeze({
+        ...cursor,
+        id: `${prefix}${cursor.id}`,
+      });
+      store.set(scopedCursor);
+    },
 
-		get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
-			const result = store.get(`${prefix}${id}`);
-			if (result.isErr()) {
-				return result;
-			}
-			// Strip prefix from cursor ID to present clean ID to caller
-			// This prevents double-prefixing when cursor is updated and set again
-			const cursor = result.value;
-			return Result.ok(
-				Object.freeze({
-					...cursor,
-					id: cursor.id.slice(prefix.length),
-				}),
-			);
-		},
+    get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
+      const result = store.get(`${prefix}${id}`);
+      if (result.isErr()) {
+        return result;
+      }
+      // Strip prefix from cursor ID to present clean ID to caller
+      // This prevents double-prefixing when cursor is updated and set again
+      const cursor = result.value;
+      return Result.ok(
+        Object.freeze({
+          ...cursor,
+          id: cursor.id.slice(prefix.length),
+        })
+      );
+    },
 
-		has(id: string): boolean {
-			return store.has(`${prefix}${id}`);
-		},
+    has(id: string): boolean {
+      return store.has(`${prefix}${id}`);
+    },
 
-		delete(id: string): void {
-			store.delete(`${prefix}${id}`);
-		},
+    delete(id: string): void {
+      store.delete(`${prefix}${id}`);
+    },
 
-		clear(): void {
-			// Only clear cursors in this scope
-			const ids = store.list().filter((id) => id.startsWith(prefix));
-			for (const id of ids) {
-				store.delete(id);
-			}
-		},
+    clear(): void {
+      // Only clear cursors in this scope
+      const ids = store.list().filter((id) => id.startsWith(prefix));
+      for (const id of ids) {
+        store.delete(id);
+      }
+    },
 
-		list(): string[] {
-			// Return only IDs in this scope, without the prefix
-			return store
-				.list()
-				.filter((id) => id.startsWith(prefix))
-				.map((id) => id.slice(prefix.length));
-		},
+    list(): string[] {
+      // Return only IDs in this scope, without the prefix
+      return store
+        .list()
+        .filter((id) => id.startsWith(prefix))
+        .map((id) => id.slice(prefix.length));
+    },
 
-		prune(): number {
-			return store.prune();
-		},
+    prune(): number {
+      return store.prune();
+    },
 
-		getScope(): string {
-			return fullScope;
-		},
-	};
+    getScope(): string {
+      return fullScope;
+    },
+  };
 }
 
 // ============================================================================
@@ -1042,23 +1055,23 @@ export const DEFAULT_PAGE_LIMIT = 25;
  * ```
  */
 export interface PaginationStore {
-	/**
-	 * Get a cursor by ID.
-	 * @param id - The cursor ID to look up
-	 * @returns The cursor if found, null otherwise
-	 */
-	get(id: string): Cursor | null;
-	/**
-	 * Store a cursor by ID.
-	 * @param id - The ID to store under
-	 * @param cursor - The cursor to store
-	 */
-	set(id: string, cursor: Cursor): void;
-	/**
-	 * Delete a cursor by ID.
-	 * @param id - The cursor ID to delete
-	 */
-	delete(id: string): void;
+  /**
+   * Get a cursor by ID.
+   * @param id - The cursor ID to look up
+   * @returns The cursor if found, null otherwise
+   */
+  get(id: string): Cursor | null;
+  /**
+   * Store a cursor by ID.
+   * @param id - The ID to store under
+   * @param cursor - The cursor to store
+   */
+  set(id: string, cursor: Cursor): void;
+  /**
+   * Delete a cursor by ID.
+   * @param id - The cursor ID to delete
+   */
+  delete(id: string): void;
 }
 
 // Module-level default store instance (lazy initialization)
@@ -1084,10 +1097,10 @@ let defaultPaginationStore: PaginationStore | null = null;
  * ```
  */
 export function getDefaultPaginationStore(): PaginationStore {
-	if (defaultPaginationStore === null) {
-		defaultPaginationStore = createPaginationStore();
-	}
-	return defaultPaginationStore;
+  if (defaultPaginationStore === null) {
+    defaultPaginationStore = createPaginationStore();
+  }
+  return defaultPaginationStore;
 }
 
 /**
@@ -1111,21 +1124,21 @@ export function getDefaultPaginationStore(): PaginationStore {
  * ```
  */
 export function createPaginationStore(): PaginationStore {
-	const cursors = new Map<string, Cursor>();
+  const cursors = new Map<string, Cursor>();
 
-	return {
-		get(id: string): Cursor | null {
-			return cursors.get(id) ?? null;
-		},
+  return {
+    get(id: string): Cursor | null {
+      return cursors.get(id) ?? null;
+    },
 
-		set(id: string, cursor: Cursor): void {
-			cursors.set(id, cursor);
-		},
+    set(id: string, cursor: Cursor): void {
+      cursors.set(id, cursor);
+    },
 
-		delete(id: string): void {
-			cursors.delete(id);
-		},
-	};
+    delete(id: string): void {
+      cursors.delete(id);
+    },
+  };
 }
 
 /**
@@ -1134,10 +1147,10 @@ export function createPaginationStore(): PaginationStore {
  * @typeParam T - The type of items being paginated
  */
 export interface PaginationResult<T> {
-	/** The items in the current page */
-	page: T[];
-	/** The cursor for the next page, or null if this is the last page */
-	nextCursor: Cursor | null;
+  /** The items in the current page */
+  page: T[];
+  /** The cursor for the next page, or null if this is the last page */
+  nextCursor: Cursor | null;
 }
 
 /**
@@ -1175,30 +1188,30 @@ export interface PaginationResult<T> {
  * ```
  */
 export function paginate<T>(items: T[], cursor: Cursor): PaginationResult<T> {
-	const offset = cursor.position;
+  const offset = cursor.position;
 
-	// Validate limit: must be a positive integer, fallback to DEFAULT_PAGE_LIMIT
-	const rawLimit = (cursor.metadata as { limit?: unknown } | undefined)?.limit;
-	const limit =
-		typeof rawLimit === "number" && Number.isFinite(rawLimit) && rawLimit > 0
-			? Math.floor(rawLimit)
-			: DEFAULT_PAGE_LIMIT;
+  // Validate limit: must be a positive integer, fallback to DEFAULT_PAGE_LIMIT
+  const rawLimit = (cursor.metadata as { limit?: unknown } | undefined)?.limit;
+  const limit =
+    typeof rawLimit === "number" && Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.floor(rawLimit)
+      : DEFAULT_PAGE_LIMIT;
 
-	// Extract the page slice
-	const page = items.slice(offset, offset + limit);
+  // Extract the page slice
+  const page = items.slice(offset, offset + limit);
 
-	// Calculate next position
-	const nextPosition = offset + page.length;
+  // Calculate next position
+  const nextPosition = offset + page.length;
 
-	// If we've reached or passed the end, no next cursor
-	if (nextPosition >= items.length) {
-		return { page, nextCursor: null };
-	}
+  // If we've reached or passed the end, no next cursor
+  if (nextPosition >= items.length) {
+    return { page, nextCursor: null };
+  }
 
-	// Create next cursor with updated position
-	const nextCursor = advanceCursor(cursor, nextPosition);
+  // Create next cursor with updated position
+  const nextCursor = advanceCursor(cursor, nextPosition);
 
-	return { page, nextCursor };
+  return { page, nextCursor };
 }
 
 /**
@@ -1229,12 +1242,12 @@ export function paginate<T>(items: T[], cursor: Cursor): PaginationResult<T> {
  * ```
  */
 export function loadCursor(
-	id: string,
-	store?: PaginationStore,
+  id: string,
+  store?: PaginationStore
 ): Result<Cursor | null, StorageError> {
-	const effectiveStore = store ?? getDefaultPaginationStore();
-	const cursor = effectiveStore.get(id);
-	return Result.ok(cursor);
+  const effectiveStore = store ?? getDefaultPaginationStore();
+  const cursor = effectiveStore.get(id);
+  return Result.ok(cursor);
 }
 
 /**
@@ -1264,8 +1277,11 @@ export function loadCursor(
  * }
  * ```
  */
-export function saveCursor(cursor: Cursor, store?: PaginationStore): Result<void, StorageError> {
-	const effectiveStore = store ?? getDefaultPaginationStore();
-	effectiveStore.set(cursor.id, cursor);
-	return Result.ok(undefined);
+export function saveCursor(
+  cursor: Cursor,
+  store?: PaginationStore
+): Result<void, StorageError> {
+  const effectiveStore = store ?? getDefaultPaginationStore();
+  effectiveStore.set(cursor.id, cursor);
+  return Result.ok(undefined);
 }

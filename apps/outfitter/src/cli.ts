@@ -22,27 +22,25 @@ import { outfitterActions } from "./actions.js";
  * @returns Configured Commander program
  */
 function createProgram() {
-	const cli = createCLI({
-		name: "outfitter",
-		version: "0.1.0-rc.0",
-		description: "Outfitter CLI for scaffolding and project management",
-		onError: (error) => {
-			if (error instanceof Error) {
-				// biome-ignore lint/suspicious/noConsole: CLI error output is expected
-				console.error(`Error: ${error.message}`);
-			} else {
-				// biome-ignore lint/suspicious/noConsole: CLI error output is expected
-				console.error("An unexpected error occurred");
-			}
-		},
-		onExit: (code) => process.exit(code),
-	});
+  const cli = createCLI({
+    name: "outfitter",
+    version: "0.1.0-rc.0",
+    description: "Outfitter CLI for scaffolding and project management",
+    onError: (error) => {
+      if (error instanceof Error) {
+        console.error(`Error: ${error.message}`);
+      } else {
+        console.error("An unexpected error occurred");
+      }
+    },
+    onExit: (code) => process.exit(code),
+  });
 
-	for (const command of buildCliCommands(outfitterActions)) {
-		cli.register(command);
-	}
+  for (const command of buildCliCommands(outfitterActions)) {
+    cli.register(command);
+  }
 
-	return cli;
+  return cli;
 }
 
 // =============================================================================
@@ -53,8 +51,8 @@ function createProgram() {
  * Main entry point for the CLI.
  */
 async function main(): Promise<void> {
-	const cli = createProgram();
-	await cli.parse();
+  const cli = createProgram();
+  await cli.parse();
 }
 
 // Run the CLI

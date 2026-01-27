@@ -1,63 +1,86 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
-	"vcs": {
-		"enabled": true,
-		"clientKind": "git",
-		"useIgnoreFile": true
-	},
-	"files": {
-		"ignoreUnknown": true,
-		"includes": ["**", "!**/node_modules", "!**/dist", "!**/.turbo", "!**/*.gen.ts"]
-	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"indentWidth": 2,
-		"lineWidth": 100
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"complexity": {
-				"noBannedTypes": "error",
-				"noUselessTypeConstraint": "error"
-			},
-			"correctness": {
-				"noUnusedImports": "error",
-				"noUnusedVariables": "error",
-				"useExhaustiveDependencies": "warn"
-			},
-			"style": {
-				"noNonNullAssertion": "warn",
-				"useConst": "error",
-				"useImportType": "error",
-				"noParameterAssign": "error"
-			},
-			"suspicious": {
-				"noExplicitAny": "error",
-				"noConsole": "warn"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"semicolons": "always",
-			"trailingCommas": "all"
-		}
-	},
-	"overrides": [
-		{
-			"includes": ["**/serialization.ts"],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"useLiteralKeys": "off"
-					}
-				}
-			}
-		}
-	]
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core"],
+  "javascript": {
+    "globals": ["Bun"]
+  },
+  "linter": {
+    "rules": {
+      "complexity": {
+        "useLiteralKeys": "off",
+        "noVoid": "off",
+        "noExcessiveCognitiveComplexity": "off"
+      },
+      "performance": {
+        "useTopLevelRegex": "off"
+      },
+      "style": {
+        "useBlockStatements": "off"
+      },
+      "suspicious": {
+        "noConsole": "error"
+      }
+    }
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["!**/node_modules", "!**/dist", "!**/.turbo", "!**/*.gen.ts"]
+  },
+  "overrides": [
+    {
+      "includes": ["**/serialization.ts"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useLiteralKeys": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/*/src/index.ts", "apps/*/src/index.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/__tests__/**/*"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "useAwait": "off",
+            "noConsole": "off"
+          },
+          "performance": {
+            "noDelete": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/**/*.ts",
+        "scripts/**/*.ts",
+        "**/scripts/**/*.ts",
+        "packages/agents/src/**/*.ts",
+        "packages/testing/src/cli-helpers.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }

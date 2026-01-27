@@ -35,16 +35,16 @@
  * ```
  */
 export type DeepKeys<T> = T extends object
-	? T extends readonly unknown[]
-		? never // Arrays are leaf nodes - don't recurse
-		: {
-				[K in keyof T & string]: NonNullable<T[K]> extends object
-					? NonNullable<T[K]> extends readonly unknown[]
-						? K // Arrays are leaf nodes
-						: K | `${K}.${DeepKeys<NonNullable<T[K]>>}`
-					: K;
-			}[keyof T & string]
-	: never;
+  ? T extends readonly unknown[]
+    ? never // Arrays are leaf nodes - don't recurse
+    : {
+        [K in keyof T & string]: NonNullable<T[K]> extends object
+          ? NonNullable<T[K]> extends readonly unknown[]
+            ? K // Arrays are leaf nodes
+            : K | `${K}.${DeepKeys<NonNullable<T[K]>>}`
+          : K;
+      }[keyof T & string]
+  : never;
 
 /**
  * Gets the type at a specific dot-notation path.
@@ -70,12 +70,12 @@ export type DeepKeys<T> = T extends object
  * ```
  */
 export type DeepGet<T, P extends string> = P extends `${infer K}.${infer Rest}`
-	? K extends keyof T
-		? DeepGet<T[K], Rest>
-		: never
-	: P extends keyof T
-		? T[P]
-		: never;
+  ? K extends keyof T
+    ? DeepGet<T[K], Rest>
+    : never
+  : P extends keyof T
+    ? T[P]
+    : never;
 
 /**
  * Creates a new type with the value at path P replaced with V.
@@ -107,10 +107,14 @@ export type DeepGet<T, P extends string> = P extends `${infer K}.${infer Rest}`
  * // { user: { id: number } }
  * ```
  */
-export type DeepSet<T, P extends string, V> = P extends `${infer K}.${infer Rest}`
-	? K extends keyof T
-		? { [Key in keyof T]: Key extends K ? DeepSet<T[Key], Rest, V> : T[Key] }
-		: never
-	: P extends keyof T
-		? { [Key in keyof T]: Key extends P ? V : T[Key] }
-		: never;
+export type DeepSet<
+  T,
+  P extends string,
+  V,
+> = P extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? { [Key in keyof T]: Key extends K ? DeepSet<T[Key], Rest, V> : T[Key] }
+    : never
+  : P extends keyof T
+    ? { [Key in keyof T]: Key extends P ? V : T[Key] }
+    : never;

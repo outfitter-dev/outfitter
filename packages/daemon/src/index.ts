@@ -13,16 +13,16 @@
 // ============================================================================
 
 export {
-	// Error types
-	type DaemonErrorCode,
-	DaemonError,
-	// State types
-	type DaemonState,
-	// Configuration types
-	type DaemonOptions,
-	type ShutdownHandler,
-	// Daemon interface
-	type Daemon,
+  // Daemon interface
+  type Daemon,
+  DaemonError,
+  // Error types
+  type DaemonErrorCode,
+  // Configuration types
+  type DaemonOptions,
+  // State types
+  type DaemonState,
+  type ShutdownHandler,
 } from "./types.js";
 
 // ============================================================================
@@ -30,14 +30,14 @@ export {
 // ============================================================================
 
 export {
-	// Error classes
-	StaleSocketError,
-	ConnectionRefusedError,
-	ConnectionTimeoutError,
-	ProtocolError,
-	LockError,
-	// Union types
-	type DaemonConnectionError,
+  ConnectionRefusedError,
+  ConnectionTimeoutError,
+  // Union types
+  type DaemonConnectionError,
+  LockError,
+  ProtocolError,
+  // Error classes
+  StaleSocketError,
 } from "./errors.js";
 
 // ============================================================================
@@ -45,13 +45,13 @@ export {
 // ============================================================================
 
 export {
-	// Platform detection
-	isUnixPlatform,
-	// Path resolution
-	getSocketPath,
-	getLockPath,
-	getPidPath,
-	getDaemonDir,
+  getDaemonDir,
+  getLockPath,
+  getPidPath,
+  // Path resolution
+  getSocketPath,
+  // Platform detection
+  isUnixPlatform,
 } from "./platform.js";
 
 // ============================================================================
@@ -59,15 +59,15 @@ export {
 // ============================================================================
 
 export {
-	// Types
-	type LockHandle,
-	// Lock operations
-	acquireDaemonLock,
-	releaseDaemonLock,
-	// Liveness checks
-	isProcessAlive,
-	isDaemonAlive,
-	readLockPid,
+  // Lock operations
+  acquireDaemonLock,
+  isDaemonAlive,
+  // Liveness checks
+  isProcessAlive,
+  // Types
+  type LockHandle,
+  readLockPid,
+  releaseDaemonLock,
 } from "./locking.js";
 
 // ============================================================================
@@ -81,13 +81,13 @@ export { createDaemon } from "./lifecycle.js";
 // ============================================================================
 
 export {
-	// Types
-	type IpcMessageHandler,
-	type IpcServer,
-	type IpcClient,
-	// Factory functions
-	createIpcServer,
-	createIpcClient,
+  createIpcClient,
+  // Factory functions
+  createIpcServer,
+  type IpcClient,
+  // Types
+  type IpcMessageHandler,
+  type IpcServer,
 } from "./ipc.js";
 
 // ============================================================================
@@ -95,11 +95,11 @@ export {
 // ============================================================================
 
 export {
-	// Types
-	type HealthCheck,
-	type HealthCheckResult,
-	type HealthStatus,
-	type HealthChecker,
-	// Factory function
-	createHealthChecker,
+  // Factory function
+  createHealthChecker,
+  // Types
+  type HealthCheck,
+  type HealthChecker,
+  type HealthCheckResult,
+  type HealthStatus,
 } from "./health.js";

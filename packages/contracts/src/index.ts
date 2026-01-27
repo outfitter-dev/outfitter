@@ -7,166 +7,151 @@
  * @packageDocumentation
  */
 
+export type { TaggedErrorClass } from "better-result";
 // Re-export Result from better-result for convenience
 export { Result, TaggedError } from "better-result";
-export type { TaggedErrorClass } from "better-result";
-
-// Result utilities (extensions to better-result)
-export { combine2, combine3, orElse, unwrapOrElse } from "./result/index.js";
-
+export type {
+  ActionApiSpec,
+  ActionCliInputContext,
+  ActionCliOption,
+  ActionCliSpec,
+  ActionMcpSpec,
+  ActionRegistry,
+  ActionSpec,
+  ActionSurface,
+  ActionTrpcSpec,
+  AnyActionSpec,
+  HttpMethod,
+} from "./actions.js";
+// Action registry
+export {
+  ACTION_SURFACES,
+  createActionRegistry,
+  DEFAULT_REGISTRY_SURFACES,
+  defineAction,
+} from "./actions.js";
+// Adapter interfaces
+export type {
+  AdapterAuthError,
+  AuthAdapter,
+  CacheAdapter,
+  CacheError,
+  // Adapter interfaces
+  IndexAdapter,
+  // Error types
+  IndexError,
+  IndexStats,
+  // Search types
+  SearchOptions,
+  SearchResult,
+  StorageAdapter,
+  StorageError,
+} from "./adapters.js";
 // Assertion utilities
 export {
-	type NonEmptyArray,
-	isNonEmptyArray,
-	assertDefined,
-	assertNonEmpty,
-	assertMatches,
+  assertDefined,
+  assertMatches,
+  assertNonEmpty,
+  isNonEmptyArray,
+  type NonEmptyArray,
 } from "./assert/index.js";
-
-// Errors
+export type { ActionCapability, CapabilitySurface } from "./capabilities.js";
+// Capability manifest
 export {
-	// Types
-	type ErrorCategory,
-	type SerializedError,
-	type AnyKitError,
-	type OutfitterError,
-	type KitErrorProps,
-	// Maps
-	exitCodeMap,
-	statusCodeMap,
-	// Helper functions
-	getExitCode,
-	getStatusCode,
-	// Concrete errors
-	ValidationError,
-	AssertionError,
-	NotFoundError,
-	ConflictError,
-	PermissionError,
-	TimeoutError,
-	RateLimitError,
-	NetworkError,
-	InternalError,
-	AuthError,
-	CancelledError,
-} from "./errors.js";
-
-// Recovery heuristics
+  ACTION_CAPABILITIES,
+  CAPABILITY_SURFACES,
+  capability,
+  capabilityAll,
+  DEFAULT_ACTION_SURFACES,
+  getActionsForSurface,
+} from "./capabilities.js";
+// Context utilities
 export {
-	type BackoffOptions,
-	isRecoverable,
-	isRetryable,
-	getBackoffDelay,
-	shouldRetry,
-} from "./recovery.js";
-
-// Handler contract
-export type {
-	Logger,
-	ResolvedConfig,
-	HandlerContext,
-	Handler,
-	SyncHandler,
-} from "./handler.js";
-
-// Validation utilities
-export { createValidator, validateInput } from "./validation.js";
-
-// Serialization utilities
-export {
-	type SerializeErrorOptions,
-	serializeError,
-	deserializeError,
-	safeStringify,
-	safeParse,
-} from "./serialization.js";
+  type CreateContextOptions,
+  createContext,
+  generateRequestId,
+} from "./context.js";
 
 // Envelope utilities
 export {
-	type EnvelopeMeta,
-	type PaginationMeta,
-	type SuccessEnvelope,
-	type ErrorEnvelope,
-	type Envelope,
-	type HttpResponse,
-	toEnvelope,
-	toHttpResponse,
+  type Envelope,
+  type EnvelopeMeta,
+  type ErrorEnvelope,
+  type HttpResponse,
+  type PaginationMeta,
+  type SuccessEnvelope,
+  toEnvelope,
+  toHttpResponse,
 } from "./envelope.js";
-
-// Context utilities
+// Errors
 export {
-	type CreateContextOptions,
-	createContext,
-	generateRequestId,
-} from "./context.js";
-
-// Resilience utilities
+  type AnyKitError,
+  AssertionError,
+  AuthError,
+  CancelledError,
+  ConflictError,
+  // Types
+  type ErrorCategory,
+  // Maps
+  exitCodeMap,
+  // Helper functions
+  getExitCode,
+  getStatusCode,
+  InternalError,
+  type KitErrorProps,
+  NetworkError,
+  NotFoundError,
+  type OutfitterError,
+  PermissionError,
+  RateLimitError,
+  type SerializedError,
+  statusCodeMap,
+  TimeoutError,
+  // Concrete errors
+  ValidationError,
+} from "./errors.js";
+// Handler contract
+export type {
+  Handler,
+  HandlerContext,
+  Logger,
+  ResolvedConfig,
+  SyncHandler,
+} from "./handler.js";
+// Recovery heuristics
 export {
-	type RetryOptions,
-	type TimeoutOptions,
-	retry,
-	withTimeout,
-} from "./resilience.js";
-
+  type BackoffOptions,
+  getBackoffDelay,
+  isRecoverable,
+  isRetryable,
+  shouldRetry,
+} from "./recovery.js";
 // Redactor
 export {
-	type RedactorConfig,
-	type RedactionEvent,
-	type RedactionCallback,
-	type Redactor,
-	DEFAULT_PATTERNS,
-	DEFAULT_SENSITIVE_KEYS,
-	createRedactor,
+  createRedactor,
+  DEFAULT_PATTERNS,
+  DEFAULT_SENSITIVE_KEYS,
+  type RedactionCallback,
+  type RedactionEvent,
+  type Redactor,
+  type RedactorConfig,
 } from "./redactor.js";
-
-// Adapter interfaces
-export type {
-	// Error types
-	IndexError,
-	CacheError,
-	AdapterAuthError,
-	StorageError,
-	// Search types
-	SearchOptions,
-	SearchResult,
-	IndexStats,
-	// Adapter interfaces
-	IndexAdapter,
-	CacheAdapter,
-	AuthAdapter,
-	StorageAdapter,
-} from "./adapters.js";
-
-// Capability manifest
+// Resilience utilities
 export {
-	CAPABILITY_SURFACES,
-	DEFAULT_ACTION_SURFACES,
-	ACTION_CAPABILITIES,
-	capability,
-	capabilityAll,
-	getActionsForSurface,
-} from "./capabilities.js";
-
-export type { CapabilitySurface, ActionCapability } from "./capabilities.js";
-
-// Action registry
+  type RetryOptions,
+  retry,
+  type TimeoutOptions,
+  withTimeout,
+} from "./resilience.js";
+// Result utilities (extensions to better-result)
+export { combine2, combine3, orElse, unwrapOrElse } from "./result/index.js";
+// Serialization utilities
 export {
-	ACTION_SURFACES,
-	DEFAULT_REGISTRY_SURFACES,
-	createActionRegistry,
-	defineAction,
-} from "./actions.js";
-
-export type {
-	ActionSurface,
-	ActionSpec,
-	ActionRegistry,
-	AnyActionSpec,
-	ActionCliOption,
-	ActionCliSpec,
-	ActionCliInputContext,
-	ActionMcpSpec,
-	ActionApiSpec,
-	ActionTrpcSpec,
-	HttpMethod,
-} from "./actions.js";
+  deserializeError,
+  type SerializeErrorOptions,
+  safeParse,
+  safeStringify,
+  serializeError,
+} from "./serialization.js";
+// Validation utilities
+export { createValidator, validateInput } from "./validation.js";

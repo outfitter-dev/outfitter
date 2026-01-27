@@ -4,8 +4,8 @@
  * @module branded
  */
 
-import { Result } from "better-result";
 import { ValidationError } from "@outfitter/contracts";
+import { Result } from "better-result";
 
 /**
  * Creates a branded type by adding a unique brand to a base type.
@@ -31,7 +31,7 @@ export type Branded<T, Brand extends string> = T & { readonly __brand: Brand };
  * @throws Error - Not implemented yet
  */
 export function brand<T, Brand extends string>(value: T): Branded<T, Brand> {
-	return value as Branded<T, Brand>;
+  return value as Branded<T, Brand>;
 }
 
 /**
@@ -42,7 +42,7 @@ export function brand<T, Brand extends string>(value: T): Branded<T, Brand> {
  * @throws Error - Not implemented yet
  */
 export function unbrand<T, Brand extends string>(value: Branded<T, Brand>): T {
-	return value as T;
+  return value as T;
 }
 
 /**
@@ -98,36 +98,36 @@ export type UUID = Branded<string, "UUID">;
  * ```
  */
 export function positiveInt(
-	value: number,
+  value: number
 ): Result<PositiveInt, InstanceType<typeof ValidationError>> {
-	if (!Number.isFinite(value)) {
-		return Result.err(
-			new ValidationError({
-				message: "Value must be a finite number",
-				field: "value",
-			}),
-		);
-	}
+  if (!Number.isFinite(value)) {
+    return Result.err(
+      new ValidationError({
+        message: "Value must be a finite number",
+        field: "value",
+      })
+    );
+  }
 
-	if (!Number.isInteger(value)) {
-		return Result.err(
-			new ValidationError({
-				message: "Value must be an integer",
-				field: "value",
-			}),
-		);
-	}
+  if (!Number.isInteger(value)) {
+    return Result.err(
+      new ValidationError({
+        message: "Value must be an integer",
+        field: "value",
+      })
+    );
+  }
 
-	if (value <= 0) {
-		return Result.err(
-			new ValidationError({
-				message: "Value must be greater than 0",
-				field: "value",
-			}),
-		);
-	}
+  if (value <= 0) {
+    return Result.err(
+      new ValidationError({
+        message: "Value must be greater than 0",
+        field: "value",
+      })
+    );
+  }
 
-	return Result.ok(brand<number, "PositiveInt">(value));
+  return Result.ok(brand<number, "PositiveInt">(value));
 }
 
 /**
@@ -145,18 +145,18 @@ export function positiveInt(
  * ```
  */
 export function nonEmptyString(
-	value: string,
+  value: string
 ): Result<NonEmptyString, InstanceType<typeof ValidationError>> {
-	if (value.trim().length === 0) {
-		return Result.err(
-			new ValidationError({
-				message: "String must not be empty or whitespace-only",
-				field: "value",
-			}),
-		);
-	}
+  if (value.trim().length === 0) {
+    return Result.err(
+      new ValidationError({
+        message: "String must not be empty or whitespace-only",
+        field: "value",
+      })
+    );
+  }
 
-	return Result.ok(brand<string, "NonEmptyString">(value));
+  return Result.ok(brand<string, "NonEmptyString">(value));
 }
 
 /**
@@ -179,17 +179,19 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * }
  * ```
  */
-export function email(value: string): Result<Email, InstanceType<typeof ValidationError>> {
-	if (!EMAIL_REGEX.test(value)) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid email format",
-				field: "value",
-			}),
-		);
-	}
+export function email(
+  value: string
+): Result<Email, InstanceType<typeof ValidationError>> {
+  if (!EMAIL_REGEX.test(value)) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid email format",
+        field: "value",
+      })
+    );
+  }
 
-	return Result.ok(brand<string, "Email">(value));
+  return Result.ok(brand<string, "Email">(value));
 }
 
 /**
@@ -197,7 +199,8 @@ export function email(value: string): Result<Email, InstanceType<typeof Validati
  * - Version nibble (position 15) must be '4'
  * - Variant bits (position 20) must be one of [89ab]
  */
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
  * Creates a UUID from a string, validating UUID v4 format.
@@ -213,15 +216,17 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9
  * }
  * ```
  */
-export function uuid(value: string): Result<UUID, InstanceType<typeof ValidationError>> {
-	if (!UUID_REGEX.test(value)) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid UUID v4 format",
-				field: "value",
-			}),
-		);
-	}
+export function uuid(
+  value: string
+): Result<UUID, InstanceType<typeof ValidationError>> {
+  if (!UUID_REGEX.test(value)) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid UUID v4 format",
+        field: "value",
+      })
+    );
+  }
 
-	return Result.ok(brand<string, "UUID">(value));
+  return Result.ok(brand<string, "UUID">(value));
 }

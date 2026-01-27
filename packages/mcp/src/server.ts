@@ -7,18 +7,22 @@
  * @packageDocumentation
  */
 
-import { Result } from "@outfitter/contracts";
-import type { Logger, OutfitterError, HandlerContext } from "@outfitter/contracts";
-import { generateRequestId } from "@outfitter/contracts";
+import type {
+  HandlerContext,
+  Logger,
+  OutfitterError,
+} from "@outfitter/contracts";
+import { generateRequestId, Result } from "@outfitter/contracts";
+import type { z } from "zod";
 import { zodToJsonSchema } from "./schema.js";
 import {
-	type McpServerOptions,
-	type ToolDefinition,
-	type ResourceDefinition,
-	type McpServer,
-	type SerializedTool,
-	type InvokeToolOptions,
-	McpError,
+  type InvokeToolOptions,
+  McpError,
+  type McpServer,
+  type McpServerOptions,
+  type ResourceDefinition,
+  type SerializedTool,
+  type ToolDefinition,
 } from "./types.js";
 
 // ============================================================================
@@ -30,16 +34,18 @@ import {
  * Used when no logger is provided to the server.
  */
 function createNoOpLogger(): Logger {
-	const noop = () => {};
-	return {
-		trace: noop,
-		debug: noop,
-		info: noop,
-		warn: noop,
-		error: noop,
-		fatal: noop,
-		child: () => createNoOpLogger(),
-	};
+  const noop = () => {
+    // intentional no-op
+  };
+  return {
+    trace: noop,
+    debug: noop,
+    info: noop,
+    warn: noop,
+    error: noop,
+    fatal: noop,
+    child: () => createNoOpLogger(),
+  };
 }
 
 // ============================================================================
@@ -50,14 +56,15 @@ function createNoOpLogger(): Logger {
  * Internal tool storage with handler reference.
  */
 interface StoredTool {
-	name: string;
-	description: string;
-	inputSchema: unknown;
-	deferLoading: boolean;
-	// biome-ignore lint/suspicious/noExplicitAny: Handler types vary
-	handler: (input: any, ctx: HandlerContext) => Promise<Result<unknown, OutfitterError>>;
-	// biome-ignore lint/suspicious/noExplicitAny: Zod schema type
-	zodSchema: any;
+  name: string;
+  description: string;
+  inputSchema: unknown;
+  deferLoading: boolean;
+  handler: (
+    input: unknown,
+    ctx: HandlerContext
+  ) => Promise<Result<unknown, OutfitterError>>;
+  zodSchema: z.ZodTypeAny;
 }
 
 // ============================================================================
@@ -98,216 +105,228 @@ interface StoredTool {
  * ```
  */
 export function createMcpServer(options: McpServerOptions): McpServer {
-	const { name, version, logger: providedLogger } = options;
-	const logger = providedLogger ?? createNoOpLogger();
+  const { name, version, logger: providedLogger } = options;
+  const logger = providedLogger ?? createNoOpLogger();
 
-	// Tool and resource storage
-	const tools = new Map<string, StoredTool>();
-	const resources: ResourceDefinition[] = [];
+  // Tool and resource storage
+  const tools = new Map<string, StoredTool>();
+  const resources: ResourceDefinition[] = [];
 
-	// Create handler context for tool invocations
-	function createHandlerContext(
-		toolName: string,
-		requestId: string,
-		signal?: AbortSignal,
-	): HandlerContext {
-		const ctx: HandlerContext = {
-			requestId,
-			logger: logger.child({ tool: toolName, requestId }),
-			cwd: process.cwd(),
-			env: process.env as Record<string, string | undefined>,
-		};
+  // Create handler context for tool invocations
+  function createHandlerContext(
+    toolName: string,
+    requestId: string,
+    signal?: AbortSignal
+  ): HandlerContext {
+    const ctx: HandlerContext = {
+      requestId,
+      logger: logger.child({ tool: toolName, requestId }),
+      cwd: process.cwd(),
+      env: process.env as Record<string, string | undefined>,
+    };
 
-		// Only add signal if it's defined (exactOptionalPropertyTypes)
-		if (signal !== undefined) {
-			ctx.signal = signal;
-		}
+    // Only add signal if it's defined (exactOptionalPropertyTypes)
+    if (signal !== undefined) {
+      ctx.signal = signal;
+    }
 
-		return ctx;
-	}
+    return ctx;
+  }
 
-	// Translate OutfitterError to McpError
-	function translateError(error: OutfitterError): InstanceType<typeof McpError> {
-		// Map error categories to JSON-RPC error codes
-		const codeMap: Record<string, number> = {
-			validation: -32602, // Invalid params
-			not_found: -32601, // Method not found (closest fit)
-			permission: -32600, // Invalid request
-			internal: -32603, // Internal error
-			timeout: -32603,
-			network: -32603,
-			rate_limit: -32603,
-			auth: -32600,
-			conflict: -32603,
-			cancelled: -32603,
-		};
+  // Translate OutfitterError to McpError
+  function translateError(
+    error: OutfitterError
+  ): InstanceType<typeof McpError> {
+    // Map error categories to JSON-RPC error codes
+    const codeMap: Record<string, number> = {
+      validation: -32_602, // Invalid params
+      not_found: -32_601, // Method not found (closest fit)
+      permission: -32_600, // Invalid request
+      internal: -32_603, // Internal error
+      timeout: -32_603,
+      network: -32_603,
+      rate_limit: -32_603,
+      auth: -32_600,
+      conflict: -32_603,
+      cancelled: -32_603,
+    };
 
-		const code = codeMap[error.category] ?? -32603;
+    const code = codeMap[error.category] ?? -32_603;
 
-		return new McpError({
-			message: error.message,
-			code,
-			context: {
-				originalTag: error._tag,
-				category: error.category,
-			},
-		});
-	}
+    return new McpError({
+      message: error.message,
+      code,
+      context: {
+        originalTag: error._tag,
+        category: error.category,
+      },
+    });
+  }
 
-	const server: McpServer = {
-		name,
-		version,
+  const server: McpServer = {
+    name,
+    version,
 
-		registerTool<TInput, TOutput, TError extends OutfitterError>(
-			tool: ToolDefinition<TInput, TOutput, TError>,
-		): void {
-			logger.debug("Registering tool", { name: tool.name });
+    registerTool<TInput, TOutput, TError extends OutfitterError>(
+      tool: ToolDefinition<TInput, TOutput, TError>
+    ): void {
+      logger.debug("Registering tool", { name: tool.name });
 
-			const description = tool.description?.trim() ?? "";
-			if (description.length < 8) {
-				logger.warn("Tool description may be too short for search discovery", {
-					name: tool.name,
-					description,
-				});
-			}
+      const description = tool.description?.trim() ?? "";
+      if (description.length < 8) {
+        logger.warn("Tool description may be too short for search discovery", {
+          name: tool.name,
+          description,
+        });
+      }
 
-			const jsonSchema = zodToJsonSchema(tool.inputSchema);
-			const handler: StoredTool["handler"] = (input, ctx) => tool.handler(input as TInput, ctx);
-			const deferLoading = tool.deferLoading ?? true;
+      const jsonSchema = zodToJsonSchema(tool.inputSchema);
+      const handler: StoredTool["handler"] = (input, ctx) =>
+        tool.handler(input as TInput, ctx);
+      const deferLoading = tool.deferLoading ?? true;
 
-			tools.set(tool.name, {
-				name: tool.name,
-				description,
-				inputSchema: jsonSchema,
-				deferLoading,
-				handler,
-				zodSchema: tool.inputSchema,
-			});
+      tools.set(tool.name, {
+        name: tool.name,
+        description,
+        inputSchema: jsonSchema,
+        deferLoading,
+        handler,
+        zodSchema: tool.inputSchema,
+      });
 
-			logger.info("Tool registered", { name: tool.name });
-		},
+      logger.info("Tool registered", { name: tool.name });
+    },
 
-		registerResource(resource: ResourceDefinition): void {
-			logger.debug("Registering resource", { uri: resource.uri, name: resource.name });
-			resources.push(resource);
-			logger.info("Resource registered", { uri: resource.uri });
-		},
+    registerResource(resource: ResourceDefinition): void {
+      logger.debug("Registering resource", {
+        uri: resource.uri,
+        name: resource.name,
+      });
+      resources.push(resource);
+      logger.info("Resource registered", { uri: resource.uri });
+    },
 
-		getTools(): SerializedTool[] {
-			return Array.from(tools.values()).map((tool) => ({
-				name: tool.name,
-				description: tool.description,
-				inputSchema: tool.inputSchema as Record<string, unknown>,
-				defer_loading: tool.deferLoading,
-			}));
-		},
+    getTools(): SerializedTool[] {
+      return Array.from(tools.values()).map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema as Record<string, unknown>,
+        defer_loading: tool.deferLoading,
+      }));
+    },
 
-		getResources(): ResourceDefinition[] {
-			return [...resources];
-		},
+    getResources(): ResourceDefinition[] {
+      return [...resources];
+    },
 
-		async invokeTool<T = unknown>(
-			toolName: string,
-			input: unknown,
-			invokeOptions?: InvokeToolOptions,
-		): Promise<Result<T, InstanceType<typeof McpError>>> {
-			const requestId = invokeOptions?.requestId ?? generateRequestId();
+    async invokeTool<T = unknown>(
+      toolName: string,
+      input: unknown,
+      invokeOptions?: InvokeToolOptions
+    ): Promise<Result<T, InstanceType<typeof McpError>>> {
+      const requestId = invokeOptions?.requestId ?? generateRequestId();
 
-			logger.debug("Invoking tool", { tool: toolName, requestId });
+      logger.debug("Invoking tool", { tool: toolName, requestId });
 
-			// Find tool
-			const tool = tools.get(toolName);
-			if (!tool) {
-				logger.warn("Tool not found", { tool: toolName, requestId });
-				return Result.err(
-					new McpError({
-						message: `Tool not found: ${toolName}`,
-						code: -32601,
-						context: { tool: toolName },
-					}),
-				);
-			}
+      // Find tool
+      const tool = tools.get(toolName);
+      if (!tool) {
+        logger.warn("Tool not found", { tool: toolName, requestId });
+        return Result.err(
+          new McpError({
+            message: `Tool not found: ${toolName}`,
+            code: -32_601,
+            context: { tool: toolName },
+          })
+        );
+      }
 
-			// Validate input
-			const parseResult = tool.zodSchema.safeParse(input);
-			if (!parseResult.success) {
-				const errorMessages = parseResult.error.issues
-					.map(
-						(issue: { path: (string | number)[]; message: string }) =>
-							`${issue.path.join(".")}: ${issue.message}`,
-					)
-					.join("; ");
+      // Validate input
+      const parseResult = tool.zodSchema.safeParse(input);
+      if (!parseResult.success) {
+        const errorMessages = parseResult.error.issues
+          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+          .join("; ");
 
-				logger.warn("Input validation failed", {
-					tool: toolName,
-					requestId,
-					errors: errorMessages,
-				});
+        logger.warn("Input validation failed", {
+          tool: toolName,
+          requestId,
+          errors: errorMessages,
+        });
 
-				return Result.err(
-					new McpError({
-						message: `Invalid input: ${errorMessages}`,
-						code: -32602,
-						context: {
-							tool: toolName,
-							validationErrors: parseResult.error.issues,
-						},
-					}),
-				);
-			}
+        return Result.err(
+          new McpError({
+            message: `Invalid input: ${errorMessages}`,
+            code: -32_602,
+            context: {
+              tool: toolName,
+              validationErrors: parseResult.error.issues,
+            },
+          })
+        );
+      }
 
-			// Create handler context
-			const ctx = createHandlerContext(toolName, requestId, invokeOptions?.signal);
+      // Create handler context
+      const ctx = createHandlerContext(
+        toolName,
+        requestId,
+        invokeOptions?.signal
+      );
 
-			// Invoke handler
-			try {
-				const result = await tool.handler(parseResult.data, ctx);
+      // Invoke handler
+      try {
+        const result = await tool.handler(parseResult.data, ctx);
 
-				if (result.isErr()) {
-					logger.debug("Tool returned error", {
-						tool: toolName,
-						requestId,
-						error: result.error._tag,
-					});
-					return Result.err(translateError(result.error));
-				}
+        if (result.isErr()) {
+          logger.debug("Tool returned error", {
+            tool: toolName,
+            requestId,
+            error: result.error._tag,
+          });
+          return Result.err(translateError(result.error));
+        }
 
-				logger.debug("Tool completed successfully", { tool: toolName, requestId });
-				return Result.ok(result.value as T);
-			} catch (error) {
-				logger.error("Tool threw exception", {
-					tool: toolName,
-					requestId,
-					error: error instanceof Error ? error.message : String(error),
-				});
+        logger.debug("Tool completed successfully", {
+          tool: toolName,
+          requestId,
+        });
+        return Result.ok(result.value as T);
+      } catch (error) {
+        logger.error("Tool threw exception", {
+          tool: toolName,
+          requestId,
+          error: error instanceof Error ? error.message : String(error),
+        });
 
-				return Result.err(
-					new McpError({
-						message: error instanceof Error ? error.message : "Unknown error",
-						code: -32603,
-						context: {
-							tool: toolName,
-							thrown: true,
-						},
-					}),
-				);
-			}
-		},
+        return Result.err(
+          new McpError({
+            message: error instanceof Error ? error.message : "Unknown error",
+            code: -32_603,
+            context: {
+              tool: toolName,
+              thrown: true,
+            },
+          })
+        );
+      }
+    },
 
-		async start(): Promise<void> {
-			logger.info("MCP server starting", { name, version, tools: tools.size });
-			// In a full implementation, this would start the transport layer
-			// For now, we just log the start
-		},
+    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    async start(): Promise<void> {
+      logger.info("MCP server starting", { name, version, tools: tools.size });
+      // In a full implementation, this would start the transport layer
+      // For now, we just log the start
+    },
 
-		async stop(): Promise<void> {
-			logger.info("MCP server stopping", { name, version });
-			// In a full implementation, this would stop the transport layer
-			// For now, we just log the stop
-		},
-	};
+    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    async stop(): Promise<void> {
+      logger.info("MCP server stopping", { name, version });
+      // In a full implementation, this would stop the transport layer
+      // For now, we just log the stop
+    },
+  };
 
-	return server;
+  return server;
 }
 
 // ============================================================================
@@ -336,10 +355,14 @@ export function createMcpServer(options: McpServerOptions): McpServer {
  * });
  * ```
  */
-export function defineTool<TInput, TOutput, TError extends OutfitterError = OutfitterError>(
-	definition: ToolDefinition<TInput, TOutput, TError>,
+export function defineTool<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+>(
+  definition: ToolDefinition<TInput, TOutput, TError>
 ): ToolDefinition<TInput, TOutput, TError> {
-	return definition;
+  return definition;
 }
 
 /**
@@ -361,6 +384,8 @@ export function defineTool<TInput, TOutput, TError extends OutfitterError = Outf
  * });
  * ```
  */
-export function defineResource(definition: ResourceDefinition): ResourceDefinition {
-	return definition;
+export function defineResource(
+  definition: ResourceDefinition
+): ResourceDefinition {
+  return definition;
 }

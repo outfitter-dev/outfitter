@@ -45,10 +45,10 @@ import { z } from "zod";
  * ```
  */
 export const portSchema: z.ZodType<number, string> = z
-	.string()
-	.regex(/^\d+$/)
-	.transform(Number)
-	.pipe(z.number().int().positive().max(65535));
+  .string()
+  .regex(/^\d+$/)
+  .transform(Number)
+  .pipe(z.number().int().positive().max(65_535));
 
 /**
  * Boolean schema with proper string coercion.
@@ -67,8 +67,8 @@ export const portSchema: z.ZodType<number, string> = z
  * ```
  */
 export const booleanSchema: z.ZodType<boolean, string> = z
-	.enum(["true", "false", "1", "0", ""])
-	.transform((val) => val === "true" || val === "1");
+  .enum(["true", "false", "1", "0", ""])
+  .transform((val) => val === "true" || val === "1");
 
 /**
  * Optional boolean schema - returns undefined if not set.
@@ -85,13 +85,16 @@ export const booleanSchema: z.ZodType<boolean, string> = z
  * schema.parse({ NO_COLOR: undefined }); // { NO_COLOR: undefined }
  * ```
  */
-export const optionalBooleanSchema: z.ZodType<boolean | undefined, string | undefined> = z
-	.string()
-	.optional()
-	.transform((val) => {
-		if (val === undefined || val === "") return undefined;
-		return val === "true" || val === "1";
-	});
+export const optionalBooleanSchema: z.ZodType<
+  boolean | undefined,
+  string | undefined
+> = z
+  .string()
+  .optional()
+  .transform((val) => {
+    if (val === undefined || val === "") return undefined;
+    return val === "true" || val === "1";
+  });
 
 // ============================================================================
 // Parse Function
@@ -122,53 +125,56 @@ export const optionalBooleanSchema: z.ZodType<boolean | undefined, string | unde
  * ```
  */
 export function parseEnv<T extends z.ZodRawShape>(
-	schema: z.ZodObject<T>,
-	envObj: Record<string, string | undefined> = process.env,
+  schema: z.ZodObject<T>,
+  envObj: Record<string, string | undefined> = process.env
 ): z.infer<z.ZodObject<T>> {
-	return schema.parse(envObj);
+  return schema.parse(envObj);
 }
 
 // ============================================================================
 // App-Level Environment
 // ============================================================================
 
+// biome-ignore lint/style/useConsistentTypeDefinitions: type required for Zod schema constraint
 type AppEnvShape = {
-	NODE_ENV: z.ZodDefault<
-		z.ZodEnum<{
-			development: "development";
-			test: "test";
-			production: "production";
-		}>
-	>;
-	NO_COLOR: typeof optionalBooleanSchema;
-	FORCE_COLOR: typeof optionalBooleanSchema;
-	CI: typeof optionalBooleanSchema;
-	TERM: z.ZodOptional<z.ZodString>;
-	XDG_CONFIG_HOME: z.ZodOptional<z.ZodString>;
-	XDG_DATA_HOME: z.ZodOptional<z.ZodString>;
-	XDG_STATE_HOME: z.ZodOptional<z.ZodString>;
-	XDG_CACHE_HOME: z.ZodOptional<z.ZodString>;
-	HOME: z.ZodOptional<z.ZodString>;
+  NODE_ENV: z.ZodDefault<
+    z.ZodEnum<{
+      development: "development";
+      test: "test";
+      production: "production";
+    }>
+  >;
+  NO_COLOR: typeof optionalBooleanSchema;
+  FORCE_COLOR: typeof optionalBooleanSchema;
+  CI: typeof optionalBooleanSchema;
+  TERM: z.ZodOptional<z.ZodString>;
+  XDG_CONFIG_HOME: z.ZodOptional<z.ZodString>;
+  XDG_DATA_HOME: z.ZodOptional<z.ZodString>;
+  XDG_STATE_HOME: z.ZodOptional<z.ZodString>;
+  XDG_CACHE_HOME: z.ZodOptional<z.ZodString>;
+  HOME: z.ZodOptional<z.ZodString>;
 };
 
 /**
  * Schema for common application environment variables.
  */
 const appEnvSchema: z.ZodObject<AppEnvShape> = z.object({
-	NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
 
-	// Terminal detection
-	NO_COLOR: optionalBooleanSchema,
-	FORCE_COLOR: optionalBooleanSchema,
-	CI: optionalBooleanSchema,
-	TERM: z.string().optional(),
+  // Terminal detection
+  NO_COLOR: optionalBooleanSchema,
+  FORCE_COLOR: optionalBooleanSchema,
+  CI: optionalBooleanSchema,
+  TERM: z.string().optional(),
 
-	// XDG paths
-	XDG_CONFIG_HOME: z.string().optional(),
-	XDG_DATA_HOME: z.string().optional(),
-	XDG_STATE_HOME: z.string().optional(),
-	XDG_CACHE_HOME: z.string().optional(),
-	HOME: z.string().optional(),
+  // XDG paths
+  XDG_CONFIG_HOME: z.string().optional(),
+  XDG_DATA_HOME: z.string().optional(),
+  XDG_STATE_HOME: z.string().optional(),
+  XDG_CACHE_HOME: z.string().optional(),
+  HOME: z.string().optional(),
 });
 
 /**
@@ -224,8 +230,10 @@ export const env: Env = parseEnv(appEnvSchema);
  * }
  * ```
  */
-export function getEnvBoolean(key: "NO_COLOR" | "FORCE_COLOR" | "CI"): boolean | undefined {
-	const value = process.env[key];
-	if (value === undefined || value === "") return undefined;
-	return value === "true" || value === "1";
+export function getEnvBoolean(
+  key: "NO_COLOR" | "FORCE_COLOR" | "CI"
+): boolean | undefined {
+  const value = process.env[key];
+  if (value === undefined || value === "") return undefined;
+  return value === "true" || value === "1";
 }

@@ -29,20 +29,20 @@ import { getEnvBoolean } from "@outfitter/config";
  * ```
  */
 export interface Theme {
-	/** Applies green color for success messages */
-	success: (text: string) => string;
-	/** Applies yellow color for warning messages */
-	warning: (text: string) => string;
-	/** Applies red color for error messages */
-	error: (text: string) => string;
-	/** Applies blue color for informational messages */
-	info: (text: string) => string;
-	/** Returns text unchanged (primary/default text) */
-	primary: (text: string) => string;
-	/** Applies gray color for secondary text */
-	secondary: (text: string) => string;
-	/** Applies dim styling for de-emphasized text */
-	muted: (text: string) => string;
+  /** Applies green color for success messages */
+  success: (text: string) => string;
+  /** Applies yellow color for warning messages */
+  warning: (text: string) => string;
+  /** Applies red color for error messages */
+  error: (text: string) => string;
+  /** Applies blue color for informational messages */
+  info: (text: string) => string;
+  /** Returns text unchanged (primary/default text) */
+  primary: (text: string) => string;
+  /** Applies gray color for secondary text */
+  secondary: (text: string) => string;
+  /** Applies dim styling for de-emphasized text */
+  muted: (text: string) => string;
 }
 
 /**
@@ -56,7 +56,15 @@ export interface Theme {
  * console.log(applyColor("Success", color));
  * ```
  */
-export type ColorName = "green" | "yellow" | "red" | "blue" | "cyan" | "magenta" | "white" | "gray";
+export type ColorName =
+  | "green"
+  | "yellow"
+  | "red"
+  | "blue"
+  | "cyan"
+  | "magenta"
+  | "white"
+  | "gray";
 
 /**
  * Configuration options for {@link renderTable}.
@@ -70,16 +78,16 @@ export type ColorName = "green" | "yellow" | "red" | "blue" | "cyan" | "magenta"
  * ```
  */
 export interface TableOptions {
-	/**
-	 * Fixed column widths by key.
-	 * If not specified, column width is calculated from content.
-	 */
-	columnWidths?: Record<string, number>;
-	/**
-	 * Custom header labels by key.
-	 * If not specified, the object key is used as the header.
-	 */
-	headers?: Record<string, string>;
+  /**
+   * Fixed column widths by key.
+   * If not specified, column width is calculated from content.
+   */
+  columnWidths?: Record<string, number>;
+  /**
+   * Custom header labels by key.
+   * If not specified, the object key is used as the header.
+   */
+  headers?: Record<string, string>;
 }
 
 /**
@@ -94,10 +102,10 @@ export interface TableOptions {
  * ```
  */
 export interface NestedListItem {
-	/** The text content of this list item */
-	text: string;
-	/** Optional nested child items (strings or nested items) */
-	children?: Array<string | NestedListItem>;
+  /** The text content of this list item */
+  text: string;
+  /** Optional nested child items (strings or nested items) */
+  children?: Array<string | NestedListItem>;
 }
 
 /**
@@ -128,14 +136,14 @@ export type ListItem = string | NestedListItem;
  * ```
  */
 export interface ProgressOptions {
-	/** Current progress value */
-	current: number;
-	/** Total value (100% when current equals total) */
-	total: number;
-	/** Width of the progress bar in characters (default: 20) */
-	width?: number;
-	/** Whether to show percentage after the bar (default: false) */
-	showPercent?: boolean;
+  /** Current progress value */
+  current: number;
+  /** Total value (100% when current equals total) */
+  total: number;
+  /** Width of the progress bar in characters (default: 20) */
+  width?: number;
+  /** Whether to show percentage after the bar (default: false) */
+  showPercent?: boolean;
 }
 
 /**
@@ -154,10 +162,10 @@ export interface ProgressOptions {
  * ```
  */
 export interface TerminalOptions {
-	/** Override TTY detection (uses process.stdout.isTTY if not specified) */
-	isTTY?: boolean;
-	/** Override CI detection (uses CI env variable if not specified) */
-	isCI?: boolean;
+  /** Override TTY detection (uses process.stdout.isTTY if not specified) */
+  isTTY?: boolean;
+  /** Override CI detection (uses CI env variable if not specified) */
+  isCI?: boolean;
 }
 
 /**
@@ -180,22 +188,22 @@ export interface TerminalOptions {
  * ```
  */
 export interface Tokens {
-	/** Green color for success messages */
-	success: string;
-	/** Yellow color for warning messages */
-	warning: string;
-	/** Red color for error messages */
-	error: string;
-	/** Blue color for informational messages */
-	info: string;
-	/** Dim/gray color for de-emphasized text */
-	muted: string;
-	/** Bright/highlight color for emphasis */
-	accent: string;
-	/** Default text color (typically empty string) */
-	primary: string;
-	/** Subdued color for secondary text */
-	secondary: string;
+  /** Green color for success messages */
+  success: string;
+  /** Yellow color for warning messages */
+  warning: string;
+  /** Red color for error messages */
+  error: string;
+  /** Blue color for informational messages */
+  info: string;
+  /** Dim/gray color for de-emphasized text */
+  muted: string;
+  /** Bright/highlight color for emphasis */
+  accent: string;
+  /** Default text color (typically empty string) */
+  primary: string;
+  /** Subdued color for secondary text */
+  secondary: string;
 }
 
 /**
@@ -211,21 +219,21 @@ export interface Tokens {
  * ```
  */
 export interface TokenOptions {
-	/**
-	 * Override NO_COLOR environment variable.
-	 * When true, colors are enabled regardless of NO_COLOR.
-	 */
-	forceColor?: boolean;
-	/**
-	 * Color support level:
-	 * - 0: No color support (all tokens are empty strings)
-	 * - 1: Basic ANSI colors (16 colors)
-	 * - 2: 256 color support
-	 * - 3: True color (16 million colors)
-	 *
-	 * When not specified, level is auto-detected from environment.
-	 */
-	colorLevel?: 0 | 1 | 2 | 3;
+  /**
+   * Override NO_COLOR environment variable.
+   * When true, colors are enabled regardless of NO_COLOR.
+   */
+  forceColor?: boolean;
+  /**
+   * Color support level:
+   * - 0: No color support (all tokens are empty strings)
+   * - 1: Basic ANSI colors (16 colors)
+   * - 2: 256 color support
+   * - 3: True color (16 million colors)
+   *
+   * When not specified, level is auto-detected from environment.
+   */
+  colorLevel?: 0 | 1 | 2 | 3;
 }
 
 // ============================================================================
@@ -247,10 +255,10 @@ export interface TokenOptions {
  * ```
  */
 export interface TreeNode {
-	/** The name/label of this node */
-	name: string;
-	/** Child nodes (empty array for leaf nodes) */
-	children: TreeNode[];
+  /** The name/label of this node */
+  name: string;
+  /** Child nodes (empty array for leaf nodes) */
+  children: TreeNode[];
 }
 
 /**
@@ -273,12 +281,12 @@ export interface TreeNode {
  * ```
  */
 export interface Collection {
-	/** Discriminant for Collection type */
-	type: "collection";
-	/** Array of items to render */
-	items: unknown[];
-	/** Optional custom headers for table rendering */
-	headers?: Record<string, string>;
+  /** Discriminant for Collection type */
+  type: "collection";
+  /** Array of items to render */
+  items: unknown[];
+  /** Optional custom headers for table rendering */
+  headers?: Record<string, string>;
 }
 
 /**
@@ -299,10 +307,10 @@ export interface Collection {
  * ```
  */
 export interface Hierarchy {
-	/** Discriminant for Hierarchy type */
-	type: "hierarchy";
-	/** Root node of the tree */
-	root: TreeNode;
+  /** Discriminant for Hierarchy type */
+  type: "hierarchy";
+  /** Root node of the tree */
+  root: TreeNode;
 }
 
 /**
@@ -321,10 +329,10 @@ export interface Hierarchy {
  * ```
  */
 export interface KeyValue {
-	/** Discriminant for KeyValue type */
-	type: "keyvalue";
-	/** Key-value entries to display */
-	entries: Record<string, unknown>;
+  /** Discriminant for KeyValue type */
+  type: "keyvalue";
+  /** Key-value entries to display */
+  entries: Record<string, unknown>;
 }
 
 /**
@@ -346,12 +354,12 @@ export interface KeyValue {
  * ```
  */
 export interface Resource {
-	/** Discriminant for Resource type */
-	type: "resource";
-	/** The content to render */
-	data: unknown;
-	/** Output format (defaults to "json") */
-	format?: "json" | "markdown" | "text";
+  /** Discriminant for Resource type */
+  type: "resource";
+  /** The content to render */
+  data: unknown;
+  /** Output format (defaults to "json") */
+  format?: "json" | "markdown" | "text";
 }
 
 /**
@@ -386,12 +394,12 @@ export type Shape = Collection | Hierarchy | KeyValue | Resource;
  * ```
  */
 export interface RenderOptions {
-	/** Maximum width for output (used by some renderers) */
-	width?: number;
-	/** Whether to use ANSI colors in output */
-	color?: boolean;
-	/** Force a specific output format, overriding auto-selection */
-	format?: "table" | "list" | "tree" | "json" | "text";
+  /** Maximum width for output (used by some renderers) */
+  width?: number;
+  /** Whether to use ANSI colors in output */
+  color?: boolean;
+  /** Force a specific output format, overriding auto-selection */
+  format?: "table" | "list" | "tree" | "json" | "text";
 }
 
 // ============================================================================
@@ -399,19 +407,19 @@ export interface RenderOptions {
 // ============================================================================
 
 const ANSI = {
-	reset: "\x1b[0m",
-	bold: "\x1b[1m",
-	dim: "\x1b[2m",
-	italic: "\x1b[3m",
-	// Foreground colors
-	green: "\x1b[32m",
-	yellow: "\x1b[33m",
-	red: "\x1b[31m",
-	blue: "\x1b[34m",
-	cyan: "\x1b[36m",
-	magenta: "\x1b[35m",
-	white: "\x1b[37m",
-	gray: "\x1b[90m",
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  italic: "\x1b[3m",
+  // Foreground colors
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  red: "\x1b[31m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
+  magenta: "\x1b[35m",
+  white: "\x1b[37m",
+  gray: "\x1b[90m",
 } as const;
 
 // ============================================================================
@@ -419,49 +427,51 @@ const ANSI = {
 // ============================================================================
 
 function getEnvValue(key: "NO_COLOR" | "FORCE_COLOR"): string | undefined {
-	return process.env[key];
+  return process.env[key];
 }
 
 function hasNoColorEnv(): boolean {
-	return getEnvValue("NO_COLOR") !== undefined;
+  return getEnvValue("NO_COLOR") !== undefined;
 }
 
 function resolveForceColorEnv(): boolean | undefined {
-	const value = getEnvValue("FORCE_COLOR");
-	if (value === undefined) {
-		return undefined;
-	}
-	if (value === "") {
-		return true;
-	}
-	const numeric = Number(value);
-	if (!Number.isNaN(numeric)) {
-		return numeric > 0;
-	}
-	return true;
+  const value = getEnvValue("FORCE_COLOR");
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === "") {
+    return true;
+  }
+  const numeric = Number(value);
+  if (!Number.isNaN(numeric)) {
+    return numeric > 0;
+  }
+  return true;
 }
 
-function resolveColorEnv(options?: { forceColorFirst?: boolean }): boolean | undefined {
-	const forced = resolveForceColorEnv();
-	const noColor = hasNoColorEnv();
+function resolveColorEnv(options?: {
+  forceColorFirst?: boolean;
+}): boolean | undefined {
+  const forced = resolveForceColorEnv();
+  const noColor = hasNoColorEnv();
 
-	if (options?.forceColorFirst) {
-		if (forced !== undefined) {
-			return forced;
-		}
-		if (noColor) {
-			return false;
-		}
-	} else {
-		if (noColor) {
-			return false;
-		}
-		if (forced !== undefined) {
-			return forced;
-		}
-	}
+  if (options?.forceColorFirst) {
+    if (forced !== undefined) {
+      return forced;
+    }
+    if (noColor) {
+      return false;
+    }
+  } else {
+    if (noColor) {
+      return false;
+    }
+    if (forced !== undefined) {
+      return forced;
+    }
+  }
 
-	return undefined;
+  return undefined;
 }
 
 /**
@@ -489,18 +499,18 @@ function resolveColorEnv(options?: { forceColorFirst?: boolean }): boolean | und
  * ```
  */
 export function supportsColor(options?: TerminalOptions): boolean {
-	const env = resolveColorEnv();
-	if (env !== undefined) {
-		return env;
-	}
+  const env = resolveColorEnv();
+  if (env !== undefined) {
+    return env;
+  }
 
-	// Check isTTY option if provided
-	if (options?.isTTY !== undefined) {
-		return options.isTTY;
-	}
+  // Check isTTY option if provided
+  if (options?.isTTY !== undefined) {
+    return options.isTTY;
+  }
 
-	// Default to checking stdout
-	return process.stdout.isTTY ?? false;
+  // Default to checking stdout
+  return process.stdout.isTTY ?? false;
 }
 
 /**
@@ -522,13 +532,13 @@ export function supportsColor(options?: TerminalOptions): boolean {
  * ```
  */
 export function getTerminalWidth(options?: TerminalOptions): number {
-	const isTTY = options?.isTTY ?? process.stdout.isTTY ?? false;
+  const isTTY = options?.isTTY ?? process.stdout.isTTY ?? false;
 
-	if (!isTTY) {
-		return 80;
-	}
+  if (!isTTY) {
+    return 80;
+  }
 
-	return process.stdout.columns ?? 80;
+  return process.stdout.columns ?? 80;
 }
 
 /**
@@ -556,17 +566,17 @@ export function getTerminalWidth(options?: TerminalOptions): number {
  * ```
  */
 export function isInteractive(options?: TerminalOptions): boolean {
-	// Check CI environment first
-	// Using getEnvBoolean for dynamic reads (needed for tests)
-	const isCI = options?.isCI ?? getEnvBoolean("CI") === true;
+  // Check CI environment first
+  // Using getEnvBoolean for dynamic reads (needed for tests)
+  const isCI = options?.isCI ?? getEnvBoolean("CI") === true;
 
-	if (isCI) {
-		return false;
-	}
+  if (isCI) {
+    return false;
+  }
 
-	// Check TTY
-	const isTTY = options?.isTTY ?? process.stdout.isTTY ?? false;
-	return isTTY;
+  // Check TTY
+  const isTTY = options?.isTTY ?? process.stdout.isTTY ?? false;
+  return isTTY;
 }
 
 // ============================================================================
@@ -602,26 +612,26 @@ export function isInteractive(options?: TerminalOptions): boolean {
  * ```
  */
 export function createTheme(): Theme {
-	const colorEnabled = supportsColor();
+  const colorEnabled = supportsColor();
 
-	const colorFn = (ansiCode: string) => (text: string) => {
-		if (!colorEnabled) {
-			return text;
-		}
-		return `${ansiCode}${text}${ANSI.reset}`;
-	};
+  const colorFn = (ansiCode: string) => (text: string) => {
+    if (!colorEnabled) {
+      return text;
+    }
+    return `${ansiCode}${text}${ANSI.reset}`;
+  };
 
-	return {
-		// Semantic colors
-		success: colorFn(ANSI.green),
-		warning: colorFn(ANSI.yellow),
-		error: colorFn(ANSI.red),
-		info: colorFn(ANSI.blue),
-		// Text colors
-		primary: colorFn(""), // No color, just the text
-		secondary: colorFn(ANSI.gray),
-		muted: colorFn(ANSI.dim),
-	};
+  return {
+    // Semantic colors
+    success: colorFn(ANSI.green),
+    warning: colorFn(ANSI.yellow),
+    error: colorFn(ANSI.red),
+    info: colorFn(ANSI.blue),
+    // Text colors
+    primary: colorFn(""), // No color, just the text
+    secondary: colorFn(ANSI.gray),
+    muted: colorFn(ANSI.dim),
+  };
 }
 
 /**
@@ -651,55 +661,55 @@ export function createTheme(): Theme {
  * ```
  */
 function resolveTokenColorEnabled(options?: TokenOptions): boolean {
-	// colorLevel: 0 always disables colors
-	if (options?.colorLevel === 0) {
-		return false;
-	}
-	// forceColor option takes precedence over environment
-	if (options?.forceColor === true) {
-		return true;
-	}
-	// Explicit color level overrides environment
-	if (options?.colorLevel !== undefined) {
-		return options.colorLevel > 0;
-	}
-	const env = resolveColorEnv({ forceColorFirst: true });
-	if (env !== undefined) {
-		return env;
-	}
-	return process.stdout.isTTY ?? false;
+  // colorLevel: 0 always disables colors
+  if (options?.colorLevel === 0) {
+    return false;
+  }
+  // forceColor option takes precedence over environment
+  if (options?.forceColor === true) {
+    return true;
+  }
+  // Explicit color level overrides environment
+  if (options?.colorLevel !== undefined) {
+    return options.colorLevel > 0;
+  }
+  const env = resolveColorEnv({ forceColorFirst: true });
+  if (env !== undefined) {
+    return env;
+  }
+  return process.stdout.isTTY ?? false;
 }
 
 export function createTokens(options?: TokenOptions): Tokens {
-	const colorEnabled = resolveTokenColorEnabled(options);
+  const colorEnabled = resolveTokenColorEnabled(options);
 
-	// Return empty strings when colors are disabled
-	if (!colorEnabled) {
-		return {
-			success: "",
-			warning: "",
-			error: "",
-			info: "",
-			muted: "",
-			accent: "",
-			primary: "",
-			secondary: "",
-		};
-	}
+  // Return empty strings when colors are disabled
+  if (!colorEnabled) {
+    return {
+      success: "",
+      warning: "",
+      error: "",
+      info: "",
+      muted: "",
+      accent: "",
+      primary: "",
+      secondary: "",
+    };
+  }
 
-	// Return ANSI codes when colors are enabled
-	return {
-		// Semantic colors
-		success: ANSI.green,
-		warning: ANSI.yellow,
-		error: ANSI.red,
-		info: ANSI.blue,
-		// Text colors
-		muted: ANSI.dim,
-		accent: ANSI.cyan,
-		primary: "", // Primary uses default terminal color
-		secondary: ANSI.gray,
-	};
+  // Return ANSI codes when colors are enabled
+  return {
+    // Semantic colors
+    success: ANSI.green,
+    warning: ANSI.yellow,
+    error: ANSI.red,
+    info: ANSI.blue,
+    // Text colors
+    muted: ANSI.dim,
+    accent: ANSI.cyan,
+    primary: "", // Primary uses default terminal color
+    secondary: ANSI.gray,
+  };
 }
 
 /**
@@ -721,12 +731,12 @@ export function createTokens(options?: TokenOptions): Tokens {
  * ```
  */
 export function applyColor(text: string, color: ColorName): string {
-	if (!supportsColor()) {
-		return text;
-	}
+  if (!supportsColor()) {
+    return text;
+  }
 
-	const ansiCode = ANSI[color];
-	return `${ansiCode}${text}${ANSI.reset}`;
+  const ansiCode = ANSI[color];
+  return `${ansiCode}${text}${ANSI.reset}`;
 }
 
 // ============================================================================
@@ -753,7 +763,7 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g;
  * ```
  */
 export function stripAnsi(text: string): string {
-	return text.replace(ANSI_REGEX, "");
+  return text.replace(ANSI_REGEX, "");
 }
 
 /**
@@ -775,7 +785,7 @@ export function stripAnsi(text: string): string {
  * ```
  */
 export function getStringWidth(text: string): number {
-	return Bun.stringWidth(text);
+  return Bun.stringWidth(text);
 }
 
 /**
@@ -804,64 +814,64 @@ export function getStringWidth(text: string): number {
  * ```
  */
 export function wrapText(text: string, width: number): string {
-	const words = text.split(/(\s+)/);
-	const lines: string[] = [];
-	let currentLine = "";
-	let currentWidth = 0;
+  const words = text.split(/(\s+)/);
+  const lines: string[] = [];
+  let currentLine = "";
+  let currentWidth = 0;
 
-	// Track active ANSI codes for carrying across lines
-	let activeAnsi = "";
+  // Track active ANSI codes for carrying across lines
+  let activeAnsi = "";
 
-	for (const word of words) {
-		// Check if this is whitespace
-		if (/^\s+$/.test(word)) {
-			// Don't add leading whitespace to new line
-			if (currentLine !== "") {
-				currentLine += word;
-				currentWidth += getStringWidth(word);
-			}
-			continue;
-		}
+  for (const word of words) {
+    // Check if this is whitespace
+    if (/^\s+$/.test(word)) {
+      // Don't add leading whitespace to new line
+      if (currentLine !== "") {
+        currentLine += word;
+        currentWidth += getStringWidth(word);
+      }
+      continue;
+    }
 
-		const wordWidth = getStringWidth(word);
+    const wordWidth = getStringWidth(word);
 
-		// Extract any ANSI codes from this word
-		// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
-		const ansiMatches = word.match(/\x1b\[[0-9;]*m/g);
-		if (ansiMatches) {
-			for (const code of ansiMatches) {
-				if (code === ANSI.reset) {
-					activeAnsi = "";
-				} else {
-					activeAnsi = code;
-				}
-			}
-		}
+    // Extract any ANSI codes from this word
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
+    const ansiMatches = word.match(/\x1b\[[0-9;]*m/g);
+    if (ansiMatches) {
+      for (const code of ansiMatches) {
+        if (code === ANSI.reset) {
+          activeAnsi = "";
+        } else {
+          activeAnsi = code;
+        }
+      }
+    }
 
-		if (currentWidth + wordWidth > width && currentLine !== "") {
-			// Close any active ANSI at end of line
-			if (activeAnsi !== "") {
-				// Find the ANSI code in the word before adding reset
-				const hasReset = word.includes(ANSI.reset);
-				if (!hasReset && activeAnsi !== "") {
-					// Word has active ansi that continues
-				}
-			}
-			lines.push(currentLine.trimEnd());
-			// Start new line with active ANSI
-			currentLine = activeAnsi !== "" ? activeAnsi + word : word;
-			currentWidth = wordWidth;
-		} else {
-			currentLine += word;
-			currentWidth += wordWidth;
-		}
-	}
+    if (currentWidth + wordWidth > width && currentLine !== "") {
+      // Close any active ANSI at end of line
+      if (activeAnsi !== "") {
+        // Find the ANSI code in the word before adding reset
+        const hasReset = word.includes(ANSI.reset);
+        if (!hasReset && activeAnsi !== "") {
+          // Word has active ansi that continues
+        }
+      }
+      lines.push(currentLine.trimEnd());
+      // Start new line with active ANSI
+      currentLine = activeAnsi !== "" ? activeAnsi + word : word;
+      currentWidth = wordWidth;
+    } else {
+      currentLine += word;
+      currentWidth += wordWidth;
+    }
+  }
 
-	if (currentLine !== "") {
-		lines.push(currentLine.trimEnd());
-	}
+  if (currentLine !== "") {
+    lines.push(currentLine.trimEnd());
+  }
 
-	return lines.join("\n");
+  return lines.join("\n");
 }
 
 /**
@@ -886,60 +896,60 @@ export function wrapText(text: string, width: number): string {
  * ```
  */
 export function truncateText(text: string, maxWidth: number): string {
-	const visibleWidth = getStringWidth(text);
+  const visibleWidth = getStringWidth(text);
 
-	if (visibleWidth <= maxWidth) {
-		return text;
-	}
+  if (visibleWidth <= maxWidth) {
+    return text;
+  }
 
-	const ellipsis = "...";
-	const ellipsisWidth = 3;
-	const targetWidth = maxWidth - ellipsisWidth;
+  const ellipsis = "...";
+  const ellipsisWidth = 3;
+  const targetWidth = maxWidth - ellipsisWidth;
 
-	if (targetWidth <= 0) {
-		return ellipsis.slice(0, maxWidth);
-	}
+  if (targetWidth <= 0) {
+    return ellipsis.slice(0, maxWidth);
+  }
 
-	// We need to truncate while preserving ANSI codes
-	const stripped = stripAnsi(text);
-	let result = "";
-	let currentWidth = 0;
-	let textIndex = 0;
-	let fullIndex = 0;
+  // We need to truncate while preserving ANSI codes
+  const stripped = stripAnsi(text);
+  let result = "";
+  let currentWidth = 0;
+  let textIndex = 0;
+  let fullIndex = 0;
 
-	while (currentWidth < targetWidth && textIndex < stripped.length) {
-		// Check if we're at an ANSI escape sequence in the original text
-		while (fullIndex < text.length && text[fullIndex] === "\x1b") {
-			// Find end of ANSI sequence
-			// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
-			const match = text.slice(fullIndex).match(/^\x1b\[[0-9;]*m/);
-			if (match) {
-				result += match[0];
-				fullIndex += match[0].length;
-			} else {
-				break;
-			}
-		}
+  while (currentWidth < targetWidth && textIndex < stripped.length) {
+    // Check if we're at an ANSI escape sequence in the original text
+    while (fullIndex < text.length && text[fullIndex] === "\x1b") {
+      // Find end of ANSI sequence
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
+      const match = text.slice(fullIndex).match(/^\x1b\[[0-9;]*m/);
+      if (match) {
+        result += match[0];
+        fullIndex += match[0].length;
+      } else {
+        break;
+      }
+    }
 
-		if (fullIndex < text.length) {
-			const char = text[fullIndex];
-			if (char !== undefined) {
-				const charWidth = Bun.stringWidth(char);
-				if (currentWidth + charWidth <= targetWidth) {
-					result += char;
-					currentWidth += charWidth;
-					textIndex++;
-					fullIndex++;
-				} else {
-					break;
-				}
-			}
-		}
-	}
+    if (fullIndex < text.length) {
+      const char = text[fullIndex];
+      if (char !== undefined) {
+        const charWidth = Bun.stringWidth(char);
+        if (currentWidth + charWidth <= targetWidth) {
+          result += char;
+          currentWidth += charWidth;
+          textIndex++;
+          fullIndex++;
+        } else {
+          break;
+        }
+      }
+    }
+  }
 
-	// Add reset if we had ANSI codes
-	const hasAnsi = result.includes("\x1b[");
-	return result + (hasAnsi ? ANSI.reset : "") + ellipsis;
+  // Add reset if we had ANSI codes
+  const hasAnsi = result.includes("\x1b[");
+  return result + (hasAnsi ? ANSI.reset : "") + ellipsis;
 }
 
 /**
@@ -961,14 +971,14 @@ export function truncateText(text: string, maxWidth: number): string {
  * ```
  */
 export function padText(text: string, width: number): string {
-	const visibleWidth = getStringWidth(text);
-	const paddingNeeded = width - visibleWidth;
+  const visibleWidth = getStringWidth(text);
+  const paddingNeeded = width - visibleWidth;
 
-	if (paddingNeeded <= 0) {
-		return text;
-	}
+  if (paddingNeeded <= 0) {
+    return text;
+  }
 
-	return text + " ".repeat(paddingNeeded);
+  return text + " ".repeat(paddingNeeded);
 }
 
 // ============================================================================
@@ -1008,85 +1018,90 @@ export function padText(text: string, width: number): string {
  * // +----+-------+----------+
  * ```
  */
-export function renderTable(data: Array<Record<string, unknown>>, options?: TableOptions): string {
-	if (data.length === 0) {
-		return "";
-	}
+export function renderTable(
+  data: Record<string, unknown>[],
+  options?: TableOptions
+): string {
+  if (data.length === 0) {
+    return "";
+  }
 
-	// Get all keys from data
-	const allKeys = new Set<string>();
-	for (const row of data) {
-		for (const key of Object.keys(row)) {
-			allKeys.add(key);
-		}
-	}
-	const keys = Array.from(allKeys);
+  // Get all keys from data
+  const allKeys = new Set<string>();
+  for (const row of data) {
+    for (const key of Object.keys(row)) {
+      allKeys.add(key);
+    }
+  }
+  const keys = Array.from(allKeys);
 
-	// Map headers
-	const headers = options?.headers ?? {};
-	const getHeader = (key: string): string => headers[key] ?? key;
+  // Map headers
+  const headers = options?.headers ?? {};
+  const getHeader = (key: string): string => headers[key] ?? key;
 
-	// Calculate column widths
-	const columnWidths: Record<string, number> = {};
-	for (const key of keys) {
-		const headerWidth = getStringWidth(getHeader(key));
-		let maxDataWidth = 0;
+  // Calculate column widths
+  const columnWidths: Record<string, number> = {};
+  for (const key of keys) {
+    const headerWidth = getStringWidth(getHeader(key));
+    let maxDataWidth = 0;
 
-		for (const row of data) {
-			const value = row[key];
-			const strValue = value === undefined || value === null ? "" : String(value);
-			const width = getStringWidth(strValue);
-			if (width > maxDataWidth) {
-				maxDataWidth = width;
-			}
-		}
+    for (const row of data) {
+      const value = row[key];
+      const strValue =
+        value === undefined || value === null ? "" : String(value);
+      const width = getStringWidth(strValue);
+      if (width > maxDataWidth) {
+        maxDataWidth = width;
+      }
+    }
 
-		// Use option width if provided, otherwise calculate
-		const optionWidth = options?.columnWidths?.[key];
-		columnWidths[key] = optionWidth ?? Math.max(headerWidth, maxDataWidth);
-	}
+    // Use option width if provided, otherwise calculate
+    const optionWidth = options?.columnWidths?.[key];
+    columnWidths[key] = optionWidth ?? Math.max(headerWidth, maxDataWidth);
+  }
 
-	// Build table
-	const lines: string[] = [];
+  // Build table
+  const lines: string[] = [];
 
-	// Header separator
-	const headerSep = `+${keys.map((k) => "-".repeat((columnWidths[k] ?? 0) + 2)).join("+")}+`;
+  // Header separator
+  const headerSep = `+${keys.map((k) => "-".repeat((columnWidths[k] ?? 0) + 2)).join("+")}+`;
 
-	// Header row
-	const headerRow = `|${keys
-		.map((k) => {
-			const header = getHeader(k);
-			const width = columnWidths[k] ?? 0;
-			return ` ${padText(header, width)} `;
-		})
-		.join("|")}|`;
+  // Header row
+  const headerRow = `|${keys
+    .map((k) => {
+      const header = getHeader(k);
+      const width = columnWidths[k] ?? 0;
+      return ` ${padText(header, width)} `;
+    })
+    .join("|")}|`;
 
-	lines.push(headerSep);
-	lines.push(headerRow);
-	lines.push(headerSep);
+  lines.push(headerSep);
+  lines.push(headerRow);
+  lines.push(headerSep);
 
-	// Data rows
-	for (const row of data) {
-		const rowStr = `|${keys
-			.map((k) => {
-				const value = row[k];
-				let strValue = value === undefined || value === null ? "" : String(value);
-				const width = columnWidths[k] ?? 0;
+  // Data rows
+  for (const row of data) {
+    const rowStr = `|${keys
+      .map((k) => {
+        const value = row[k];
+        let strValue =
+          value === undefined || value === null ? "" : String(value);
+        const width = columnWidths[k] ?? 0;
 
-				// Truncate if needed
-				if (getStringWidth(strValue) > width) {
-					strValue = truncateText(strValue, width);
-				}
+        // Truncate if needed
+        if (getStringWidth(strValue) > width) {
+          strValue = truncateText(strValue, width);
+        }
 
-				return ` ${padText(strValue, width)} `;
-			})
-			.join("|")}|`;
-		lines.push(rowStr);
-	}
+        return ` ${padText(strValue, width)} `;
+      })
+      .join("|")}|`;
+    lines.push(rowStr);
+  }
 
-	lines.push(headerSep);
+  lines.push(headerSep);
 
-	return lines.join("\n");
+  return lines.join("\n");
 }
 
 /**
@@ -1118,28 +1133,28 @@ export function renderTable(data: Array<Record<string, unknown>>, options?: Tabl
  * ```
  */
 export function renderList(items: ListItem[]): string {
-	const lines: string[] = [];
+  const lines: string[] = [];
 
-	const renderItem = (item: ListItem, indent: number): void => {
-		const prefix = `${"  ".repeat(indent)}- `;
+  const renderItem = (item: ListItem, indent: number): void => {
+    const prefix = `${"  ".repeat(indent)}- `;
 
-		if (typeof item === "string") {
-			lines.push(prefix + item);
-		} else {
-			lines.push(prefix + item.text);
-			if (item.children) {
-				for (const child of item.children) {
-					renderItem(child, indent + 1);
-				}
-			}
-		}
-	};
+    if (typeof item === "string") {
+      lines.push(prefix + item);
+    } else {
+      lines.push(prefix + item.text);
+      if (item.children) {
+        for (const child of item.children) {
+          renderItem(child, indent + 1);
+        }
+      }
+    }
+  };
 
-	for (const item of items) {
-		renderItem(item, 0);
-	}
+  for (const item of items) {
+    renderItem(item, 0);
+  }
 
-	return lines.join("\n");
+  return lines.join("\n");
 }
 
 /**
@@ -1175,30 +1190,35 @@ export function renderList(items: ListItem[]): string {
  * ```
  */
 export function renderTree(tree: Record<string, unknown>): string {
-	const lines: string[] = [];
+  const lines: string[] = [];
 
-	const renderNode = (key: string, value: unknown, prefix: string, isLast: boolean): void => {
-		const connector = isLast ? "└── " : "├── ";
-		lines.push(prefix + connector + key);
+  const renderNode = (
+    key: string,
+    value: unknown,
+    prefix: string,
+    isLast: boolean
+  ): void => {
+    const connector = isLast ? "└── " : "├── ";
+    lines.push(prefix + connector + key);
 
-		if (value !== null && typeof value === "object") {
-			const entries = Object.entries(value as Record<string, unknown>);
-			const childPrefix = prefix + (isLast ? "    " : "│   ");
+    if (value !== null && typeof value === "object") {
+      const entries = Object.entries(value as Record<string, unknown>);
+      const childPrefix = prefix + (isLast ? "    " : "│   ");
 
-			entries.forEach(([childKey, childValue], index) => {
-				const childIsLast = index === entries.length - 1;
-				renderNode(childKey, childValue, childPrefix, childIsLast);
-			});
-		}
-	};
+      entries.forEach(([childKey, childValue], index) => {
+        const childIsLast = index === entries.length - 1;
+        renderNode(childKey, childValue, childPrefix, childIsLast);
+      });
+    }
+  };
 
-	const entries = Object.entries(tree);
-	entries.forEach(([key, value], index) => {
-		const isLast = index === entries.length - 1;
-		renderNode(key, value, "", isLast);
-	});
+  const entries = Object.entries(tree);
+  entries.forEach(([key, value], index) => {
+    const isLast = index === entries.length - 1;
+    renderNode(key, value, "", isLast);
+  });
 
-	return lines.join("\n");
+  return lines.join("\n");
 }
 
 /**
@@ -1228,25 +1248,25 @@ export function renderTree(tree: Record<string, unknown>): string {
  * ```
  */
 export function renderProgress(options: ProgressOptions): string {
-	const { current, total, width = 20, showPercent = false } = options;
+  const { current, total, width = 20, showPercent = false } = options;
 
-	// Guard against total <= 0 to avoid NaN/Infinity and RangeError from repeat()
-	if (total <= 0) {
-		const bar = "░".repeat(width);
-		return showPercent ? `[${bar}] 0%` : `[${bar}]`;
-	}
+  // Guard against total <= 0 to avoid NaN/Infinity and RangeError from repeat()
+  if (total <= 0) {
+    const bar = "░".repeat(width);
+    return showPercent ? `[${bar}] 0%` : `[${bar}]`;
+  }
 
-	const percent = Math.min(100, Math.max(0, (current / total) * 100));
-	const filled = Math.round((percent / 100) * width);
-	const empty = width - filled;
+  const percent = Math.min(100, Math.max(0, (current / total) * 100));
+  const filled = Math.round((percent / 100) * width);
+  const empty = width - filled;
 
-	const bar = "█".repeat(filled) + "░".repeat(empty);
+  const bar = "█".repeat(filled) + "░".repeat(empty);
 
-	if (showPercent) {
-		return `[${bar}] ${Math.round(percent)}%`;
-	}
+  if (showPercent) {
+    return `[${bar}] ${Math.round(percent)}%`;
+  }
 
-	return `[${bar}]`;
+  return `[${bar}]`;
 }
 
 // ============================================================================
@@ -1282,64 +1302,73 @@ export function renderProgress(options: ProgressOptions): string {
  * ```
  */
 export function renderMarkdown(markdown: string): string {
-	const colorEnabled = supportsColor();
+  const colorEnabled = supportsColor();
 
-	let result = markdown;
+  let result = markdown;
 
-	// Process code blocks first (before inline code)
-	result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (_match, _lang, code: string) => {
-		const trimmed = code.trimEnd();
-		if (colorEnabled) {
-			return `${ANSI.dim}${trimmed}${ANSI.reset}`;
-		}
-		return trimmed;
-	});
+  // Process code blocks first (before inline code)
+  result = result.replace(
+    /```(\w*)\n([\s\S]*?)```/g,
+    (_match, _lang, code: string) => {
+      const trimmed = code.trimEnd();
+      if (colorEnabled) {
+        return `${ANSI.dim}${trimmed}${ANSI.reset}`;
+      }
+      return trimmed;
+    }
+  );
 
-	// Headings (# Heading)
-	result = result.replace(/^(#{1,6})\s+(.+)$/gm, (_match, _hashes, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.bold}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
+  // Headings (# Heading)
+  result = result.replace(
+    /^(#{1,6})\s+(.+)$/gm,
+    (_match, _hashes, text: string) => {
+      if (colorEnabled) {
+        return `${ANSI.bold}${text}${ANSI.reset}`;
+      }
+      return text;
+    }
+  );
 
-	// Bold (**text** or __text__)
-	result = result.replace(/\*\*(.+?)\*\*/g, (_match, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.bold}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
-	result = result.replace(/__(.+?)__/g, (_match, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.bold}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
+  // Bold (**text** or __text__)
+  result = result.replace(/\*\*(.+?)\*\*/g, (_match, text: string) => {
+    if (colorEnabled) {
+      return `${ANSI.bold}${text}${ANSI.reset}`;
+    }
+    return text;
+  });
+  result = result.replace(/__(.+?)__/g, (_match, text: string) => {
+    if (colorEnabled) {
+      return `${ANSI.bold}${text}${ANSI.reset}`;
+    }
+    return text;
+  });
 
-	// Italic (*text* or _text_) - be careful not to match bold
-	result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_match, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.italic}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
-	result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, (_match, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.italic}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
+  // Italic (*text* or _text_) - be careful not to match bold
+  result = result.replace(
+    /(?<!\*)\*([^*]+)\*(?!\*)/g,
+    (_match, text: string) => {
+      if (colorEnabled) {
+        return `${ANSI.italic}${text}${ANSI.reset}`;
+      }
+      return text;
+    }
+  );
+  result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, (_match, text: string) => {
+    if (colorEnabled) {
+      return `${ANSI.italic}${text}${ANSI.reset}`;
+    }
+    return text;
+  });
 
-	// Inline code (`code`)
-	result = result.replace(/`([^`]+)`/g, (_match, text: string) => {
-		if (colorEnabled) {
-			return `${ANSI.cyan}${text}${ANSI.reset}`;
-		}
-		return text;
-	});
+  // Inline code (`code`)
+  result = result.replace(/`([^`]+)`/g, (_match, text: string) => {
+    if (colorEnabled) {
+      return `${ANSI.cyan}${text}${ANSI.reset}`;
+    }
+    return text;
+  });
 
-	return result;
+  return result;
 }
 
 /**
@@ -1361,8 +1390,8 @@ export function renderMarkdown(markdown: string): string {
  * ```
  */
 export function renderJson(data: unknown): string {
-	const json = JSON.stringify(data, null, 2);
-	return json;
+  const json = JSON.stringify(data, null, 2);
+  return json;
 }
 
 /**
@@ -1380,7 +1409,7 @@ export function renderJson(data: unknown): string {
  * ```
  */
 export function renderText(text: string): string {
-	return text;
+  return text;
 }
 
 // ============================================================================
@@ -1405,95 +1434,95 @@ export function renderText(text: string): string {
  * ```
  */
 export function formatRelative(date: Date | number | string): string {
-	// Convert input to timestamp
-	let timestamp: number;
+  // Convert input to timestamp
+  let timestamp: number;
 
-	if (date instanceof Date) {
-		timestamp = date.getTime();
-	} else if (typeof date === "number") {
-		timestamp = date;
-	} else {
-		// Try parsing as ISO string
-		const parsed = Date.parse(date);
-		if (Number.isNaN(parsed)) {
-			return "invalid date";
-		}
-		timestamp = parsed;
-	}
+  if (date instanceof Date) {
+    timestamp = date.getTime();
+  } else if (typeof date === "number") {
+    timestamp = date;
+  } else {
+    // Try parsing as ISO string
+    const parsed = Date.parse(date);
+    if (Number.isNaN(parsed)) {
+      return "invalid date";
+    }
+    timestamp = parsed;
+  }
 
-	// Validate timestamp is a finite number (handles invalid Date, NaN, Infinity)
-	if (!Number.isFinite(timestamp)) {
-		return "invalid date";
-	}
+  // Validate timestamp is a finite number (handles invalid Date, NaN, Infinity)
+  if (!Number.isFinite(timestamp)) {
+    return "invalid date";
+  }
 
-	const now = Date.now();
-	const diffMs = now - timestamp;
-	const absDiffMs = Math.abs(diffMs);
-	const isFuture = diffMs < 0;
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const absDiffMs = Math.abs(diffMs);
+  const isFuture = diffMs < 0;
 
-	// Time constants
-	const SECOND = 1000;
-	const MINUTE = 60 * SECOND;
-	const HOUR = 60 * MINUTE;
-	const DAY = 24 * HOUR;
-	const MONTH = 30 * DAY;
-	const YEAR = 365 * DAY;
+  // Time constants
+  const SECOND = 1000;
+  const MINUTE = 60 * SECOND;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+  const MONTH = 30 * DAY;
+  const YEAR = 365 * DAY;
 
-	// Just now (within 10 seconds)
-	if (absDiffMs < 10 * SECOND) {
-		return "just now";
-	}
+  // Just now (within 10 seconds)
+  if (absDiffMs < 10 * SECOND) {
+    return "just now";
+  }
 
-	// Seconds (10-59 seconds)
-	if (absDiffMs < MINUTE) {
-		const seconds = Math.floor(absDiffMs / SECOND);
-		return isFuture ? `in ${seconds} seconds` : `${seconds} seconds ago`;
-	}
+  // Seconds (10-59 seconds)
+  if (absDiffMs < MINUTE) {
+    const seconds = Math.floor(absDiffMs / SECOND);
+    return isFuture ? `in ${seconds} seconds` : `${seconds} seconds ago`;
+  }
 
-	// Minutes (1-59 minutes)
-	if (absDiffMs < HOUR) {
-		const minutes = Math.floor(absDiffMs / MINUTE);
-		if (minutes === 1) {
-			return isFuture ? "in 1 minute" : "1 minute ago";
-		}
-		return isFuture ? `in ${minutes} minutes` : `${minutes} minutes ago`;
-	}
+  // Minutes (1-59 minutes)
+  if (absDiffMs < HOUR) {
+    const minutes = Math.floor(absDiffMs / MINUTE);
+    if (minutes === 1) {
+      return isFuture ? "in 1 minute" : "1 minute ago";
+    }
+    return isFuture ? `in ${minutes} minutes` : `${minutes} minutes ago`;
+  }
 
-	// Hours (1-23 hours)
-	if (absDiffMs < DAY) {
-		const hours = Math.floor(absDiffMs / HOUR);
-		if (hours === 1) {
-			return isFuture ? "in 1 hour" : "1 hour ago";
-		}
-		return isFuture ? `in ${hours} hours` : `${hours} hours ago`;
-	}
+  // Hours (1-23 hours)
+  if (absDiffMs < DAY) {
+    const hours = Math.floor(absDiffMs / HOUR);
+    if (hours === 1) {
+      return isFuture ? "in 1 hour" : "1 hour ago";
+    }
+    return isFuture ? `in ${hours} hours` : `${hours} hours ago`;
+  }
 
-	// Yesterday/Tomorrow (24-47 hours)
-	if (absDiffMs < 2 * DAY) {
-		return isFuture ? "tomorrow" : "yesterday";
-	}
+  // Yesterday/Tomorrow (24-47 hours)
+  if (absDiffMs < 2 * DAY) {
+    return isFuture ? "tomorrow" : "yesterday";
+  }
 
-	// Days (2-29 days)
-	if (absDiffMs < MONTH) {
-		const days = Math.floor(absDiffMs / DAY);
-		return isFuture ? `in ${days} days` : `${days} days ago`;
-	}
+  // Days (2-29 days)
+  if (absDiffMs < MONTH) {
+    const days = Math.floor(absDiffMs / DAY);
+    return isFuture ? `in ${days} days` : `${days} days ago`;
+  }
 
-	// Months (1-11 months)
-	if (absDiffMs < YEAR) {
-		const months = Math.floor(absDiffMs / MONTH);
-		if (months === 1) {
-			return isFuture ? "in 1 month" : "1 month ago";
-		}
-		return isFuture ? `in ${months} months` : `${months} months ago`;
-	}
+  // Months (1-11 months)
+  if (absDiffMs < YEAR) {
+    const months = Math.floor(absDiffMs / MONTH);
+    if (months === 1) {
+      return isFuture ? "in 1 month" : "1 month ago";
+    }
+    return isFuture ? `in ${months} months` : `${months} months ago`;
+  }
 
-	// Years
-	const years = Math.floor(absDiffMs / YEAR);
-	if (years === 1) {
-		return isFuture ? "in 1 year" : "1 year ago";
-	}
-	return isFuture ? `in ${years} years` : `${years} years ago`;
+  // Years
+  const years = Math.floor(absDiffMs / YEAR);
+  if (years === 1) {
+    return isFuture ? "in 1 year" : "1 year ago";
+  }
+  return isFuture ? `in ${years} years` : `${years} years ago`;
 }
 
 // ============================================================================
@@ -1514,7 +1543,7 @@ export function formatRelative(date: Date | number | string): string {
  * ```
  */
 export function isCollection(shape: Shape): shape is Collection {
-	return shape.type === "collection";
+  return shape.type === "collection";
 }
 
 /**
@@ -1531,7 +1560,7 @@ export function isCollection(shape: Shape): shape is Collection {
  * ```
  */
 export function isHierarchy(shape: Shape): shape is Hierarchy {
-	return shape.type === "hierarchy";
+  return shape.type === "hierarchy";
 }
 
 /**
@@ -1548,7 +1577,7 @@ export function isHierarchy(shape: Shape): shape is Hierarchy {
  * ```
  */
 export function isKeyValue(shape: Shape): shape is KeyValue {
-	return shape.type === "keyvalue";
+  return shape.type === "keyvalue";
 }
 
 /**
@@ -1565,7 +1594,7 @@ export function isKeyValue(shape: Shape): shape is KeyValue {
  * ```
  */
 export function isResource(shape: Shape): shape is Resource {
-	return shape.type === "resource";
+  return shape.type === "resource";
 }
 
 // ============================================================================
@@ -1576,24 +1605,24 @@ export function isResource(shape: Shape): shape is Resource {
  * Converts a TreeNode to the Record format expected by renderTree.
  */
 function treeNodeToRecord(node: TreeNode): Record<string, unknown> {
-	if (node.children.length === 0) {
-		return { [node.name]: null };
-	}
+  if (node.children.length === 0) {
+    return { [node.name]: null };
+  }
 
-	const childRecord: Record<string, unknown> = {};
-	for (const child of node.children) {
-		const childObj = treeNodeToRecord(child);
-		Object.assign(childRecord, childObj);
-	}
+  const childRecord: Record<string, unknown> = {};
+  for (const child of node.children) {
+    const childObj = treeNodeToRecord(child);
+    Object.assign(childRecord, childObj);
+  }
 
-	return { [node.name]: childRecord };
+  return { [node.name]: childRecord };
 }
 
 /**
  * Checks if an item is a plain object (not null, not array, not primitive).
  */
 function isPlainObject(item: unknown): item is Record<string, unknown> {
-	return item !== null && typeof item === "object" && !Array.isArray(item);
+  return item !== null && typeof item === "object" && !Array.isArray(item);
 }
 
 /**
@@ -1631,108 +1660,109 @@ function isPlainObject(item: unknown): item is Record<string, unknown> {
  * ```
  */
 export function render(shape: Shape, options?: RenderOptions): string {
-	const format = options?.format;
+  const format = options?.format;
 
-	// Handle format override
-	if (format === "json") {
-		if (isCollection(shape)) {
-			return renderJson(shape.items);
-		}
-		if (isHierarchy(shape)) {
-			return renderJson(treeNodeToRecord(shape.root));
-		}
-		if (isKeyValue(shape)) {
-			return renderJson(shape.entries);
-		}
-		if (isResource(shape)) {
-			return renderJson(shape.data);
-		}
-	}
+  // Handle format override
+  if (format === "json") {
+    if (isCollection(shape)) {
+      return renderJson(shape.items);
+    }
+    if (isHierarchy(shape)) {
+      return renderJson(treeNodeToRecord(shape.root));
+    }
+    if (isKeyValue(shape)) {
+      return renderJson(shape.entries);
+    }
+    if (isResource(shape)) {
+      return renderJson(shape.data);
+    }
+  }
 
-	if (format === "list") {
-		if (isCollection(shape)) {
-			// Convert items to strings for list rendering
-			const listItems = shape.items.map((item) => {
-				if (typeof item === "string") {
-					return item;
-				}
-				if (isPlainObject(item)) {
-					// For objects, extract a reasonable string representation
-					const name = (item as { name?: unknown }).name;
-					if (typeof name === "string") {
-						return name;
-					}
-					return JSON.stringify(item);
-				}
-				return String(item);
-			});
-			return renderList(listItems);
-		}
-	}
+  if (format === "list" && isCollection(shape)) {
+    // Convert items to strings for list rendering
+    const listItems = shape.items.map((item) => {
+      if (typeof item === "string") {
+        return item;
+      }
+      if (isPlainObject(item)) {
+        // For objects, extract a reasonable string representation
+        const name = (item as { name?: unknown }).name;
+        if (typeof name === "string") {
+          return name;
+        }
+        return JSON.stringify(item);
+      }
+      return String(item);
+    });
+    return renderList(listItems);
+  }
 
-	if (format === "table") {
-		if (isCollection(shape)) {
-			const items = shape.items.filter(isPlainObject) as Array<Record<string, unknown>>;
-			return renderTable(items, shape.headers ? { headers: shape.headers } : undefined);
-		}
-	}
+  if (format === "table" && isCollection(shape)) {
+    const items = shape.items.filter(isPlainObject) as Record<
+      string,
+      unknown
+    >[];
+    return renderTable(
+      items,
+      shape.headers ? { headers: shape.headers } : undefined
+    );
+  }
 
-	if (format === "tree") {
-		if (isHierarchy(shape)) {
-			return renderTree(treeNodeToRecord(shape.root));
-		}
-	}
+  if (format === "tree" && isHierarchy(shape)) {
+    return renderTree(treeNodeToRecord(shape.root));
+  }
 
-	if (format === "text") {
-		if (isResource(shape)) {
-			return renderText(String(shape.data));
-		}
-	}
+  if (format === "text" && isResource(shape)) {
+    return renderText(String(shape.data));
+  }
 
-	// Auto-selection based on shape type
-	if (isCollection(shape)) {
-		// Check if items are objects (use table) or primitives (use list)
-		const hasObjectItems = shape.items.every(isPlainObject);
+  // Auto-selection based on shape type
+  if (isCollection(shape)) {
+    // Check if items are objects (use table) or primitives (use list)
+    const hasObjectItems = shape.items.every(isPlainObject);
 
-		if (hasObjectItems) {
-			const items = shape.items as Array<Record<string, unknown>>;
-			return renderTable(items, shape.headers ? { headers: shape.headers } : undefined);
-		}
+    if (hasObjectItems) {
+      const items = shape.items as Record<string, unknown>[];
+      return renderTable(
+        items,
+        shape.headers ? { headers: shape.headers } : undefined
+      );
+    }
 
-		// Render as list
-		const listItems = shape.items.map((item) => {
-			if (typeof item === "string") {
-				return item;
-			}
-			return String(item);
-		});
-		return renderList(listItems);
-	}
+    // Render as list
+    const listItems = shape.items.map((item) => {
+      if (typeof item === "string") {
+        return item;
+      }
+      return String(item);
+    });
+    return renderList(listItems);
+  }
 
-	if (isHierarchy(shape)) {
-		return renderTree(treeNodeToRecord(shape.root));
-	}
+  if (isHierarchy(shape)) {
+    return renderTree(treeNodeToRecord(shape.root));
+  }
 
-	if (isKeyValue(shape)) {
-		// Render key-value pairs in a formatted way
-		return renderJson(shape.entries);
-	}
+  if (isKeyValue(shape)) {
+    // Render key-value pairs in a formatted way
+    return renderJson(shape.entries);
+  }
 
-	if (isResource(shape)) {
-		const resourceFormat = shape.format ?? "json";
+  if (isResource(shape)) {
+    const resourceFormat = shape.format ?? "json";
 
-		if (resourceFormat === "markdown") {
-			return renderMarkdown(String(shape.data));
-		}
+    if (resourceFormat === "markdown") {
+      return renderMarkdown(String(shape.data));
+    }
 
-		if (resourceFormat === "text") {
-			return renderText(String(shape.data));
-		}
+    if (resourceFormat === "text") {
+      return renderText(String(shape.data));
+    }
 
-		// Default to JSON
-		return renderJson(shape.data);
-	}
+    // Default to JSON
+    return renderJson(shape.data);
+  }
 
-	// Fallback (should never reach here with proper typing)
-	return renderJson(shape);
+  // Fallback (should never reach here with proper typing)
+  return renderJson(shape);
 }

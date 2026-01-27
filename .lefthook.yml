@@ -1,17 +1,13 @@
-# Lefthook configuration for Outfitter Kit
+# Lefthook configuration for Outfitter Stack
 # https://github.com/evilmartians/lefthook
 
 pre-commit:
   parallel: true
   commands:
-    format-check:
-      glob: "*.{js,ts,tsx,json,md}"
-      run: bunx biome format --no-errors-on-unmatched {staged_files}
+    ultracite:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: bun x ultracite fix {staged_files}
       stage_fixed: true
-
-    lint:
-      glob: "*.{js,ts,tsx}"
-      run: bunx biome lint --no-errors-on-unmatched {staged_files}
 
     typecheck:
       glob: "*.{ts,tsx}"
@@ -25,7 +21,3 @@ pre-push:
 
     test:
       run: ./scripts/pre-push-test.sh
-
-    # ast-grep patterns (to be configured when patterns are defined)
-    # ast-grep:
-    #   run: bunx @ast-grep/cli scan --rule .ast-grep/rules/

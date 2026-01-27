@@ -7,6 +7,9 @@
  */
 
 export { createIndex } from "./fts5.js";
+export {
+  createMigrationRegistry,
+  type IndexMigrationRegistry,
+} from "./migrations.js";
 export * from "./types.js";
-export { createMigrationRegistry, type IndexMigrationRegistry } from "./migrations.js";
 export { INDEX_VERSION } from "./version.js";

@@ -14,19 +14,19 @@ const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
  * @returns Base62 encoded string
  */
 function toBase62(num: bigint): string {
-	if (num === 0n) return "0";
+  if (num === 0n) return "0";
 
-	const base = BigInt(BASE62.length);
-	let result = "";
-	let value = num;
+  const base = BigInt(BASE62.length);
+  let result = "";
+  let value = num;
 
-	while (value > 0n) {
-		const remainder = Number(value % base);
-		result = BASE62[remainder] + result;
-		value = value / base;
-	}
+  while (value > 0n) {
+    const remainder = Number(value % base);
+    result = BASE62[remainder] + result;
+    value /= base;
+  }
 
-	return result;
+  return result;
 }
 
 /**
@@ -45,13 +45,13 @@ function toBase62(num: bigint): string {
  * ```
  */
 export function hashId(input: string, length = 5): string {
-	// Use Bun.hash() which returns a 64-bit number
-	const hash = Bun.hash(input);
+  // Use Bun.hash() which returns a 64-bit number
+  const hash = Bun.hash(input);
 
-	// Convert to base62 for URL-safe alphanumeric output
-	const base62 = toBase62(BigInt(hash));
+  // Convert to base62 for URL-safe alphanumeric output
+  const base62 = toBase62(BigInt(hash));
 
-	// Pad with leading zeros if needed, then truncate to requested length
-	const padded = base62.padStart(length, "0");
-	return padded.slice(0, length);
+  // Pad with leading zeros if needed, then truncate to requested length
+  const padded = base62.padStart(length, "0");
+  return padded.slice(0, length);
 }

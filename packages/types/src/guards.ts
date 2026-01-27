@@ -17,7 +17,7 @@
  * ```
  */
 export function isDefined<T>(value: T | null | undefined): value is T {
-	return value !== null && value !== undefined;
+  return value !== null && value !== undefined;
 }
 
 /**
@@ -27,7 +27,7 @@ export function isDefined<T>(value: T | null | undefined): value is T {
  * @returns True if the value is a string with length > 0
  */
 export function isNonEmptyString(value: unknown): value is string {
-	return typeof value === "string" && value.length > 0;
+  return typeof value === "string" && value.length > 0;
 }
 
 /**
@@ -36,13 +36,15 @@ export function isNonEmptyString(value: unknown): value is string {
  * @param value - The value to check
  * @returns True if the value is a plain object (not null, array, or other object types)
  */
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
-	return (
-		typeof value === "object" &&
-		value !== null &&
-		!Array.isArray(value) &&
-		Object.getPrototypeOf(value) === Object.prototype
-	);
+export function isPlainObject(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
 }
 
 /**
@@ -52,8 +54,11 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
  * @param key - The property key to look for
  * @returns True if the value is an object with the specified property
  */
-export function hasProperty<K extends string>(value: unknown, key: K): value is Record<K, unknown> {
-	return isPlainObject(value) && key in value;
+export function hasProperty<K extends string>(
+  value: unknown,
+  key: K
+): value is Record<K, unknown> {
+  return isPlainObject(value) && key in value;
 }
 
 /**
@@ -72,9 +77,9 @@ export function hasProperty<K extends string>(value: unknown, key: K): value is 
  * ```
  */
 export function createGuard<T>(
-	predicate: (value: unknown) => boolean,
+  predicate: (value: unknown) => boolean
 ): (value: unknown) => value is T {
-	return (value: unknown): value is T => predicate(value);
+  return (value: unknown): value is T => predicate(value);
 }
 
 /**
@@ -87,11 +92,11 @@ export function createGuard<T>(
  * @throws Error - Not implemented yet
  */
 export function assertType<T>(
-	value: unknown,
-	guard: (value: unknown) => value is T,
-	message?: string,
+  value: unknown,
+  guard: (value: unknown) => value is T,
+  message?: string
 ): asserts value is T {
-	if (!guard(value)) {
-		throw new Error(message ?? "Type assertion failed");
-	}
+  if (!guard(value)) {
+    throw new Error(message ?? "Type assertion failed");
+  }
 }

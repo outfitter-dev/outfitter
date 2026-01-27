@@ -32,49 +32,48 @@
  * ```
  */
 
-// Types
-export {
-	type McpServerOptions,
-	type ToolDefinition,
-	type ResourceDefinition,
-	type SerializedTool,
-	type McpServer,
-	type InvokeToolOptions,
-	type McpHandlerContext,
-	McpError,
-} from "./types.js";
-
-// Server
-export { createMcpServer, defineTool, defineResource } from "./server.js";
-
-// Schema utilities
-export { type JsonSchema, zodToJsonSchema } from "./schema.js";
-
-// Core tools
-export {
-	createCoreTools,
-	defineDocsTool,
-	defineConfigTool,
-	defineQueryTool,
-	type DocsSection,
-	type DocsToolEntry,
-	type DocsToolInput,
-	type DocsToolResponse,
-	type DocsToolOptions,
-	type ConfigAction,
-	type ConfigToolInput,
-	type ConfigToolResponse,
-	type ConfigToolOptions,
-	type ConfigStore,
-	type QueryToolInput,
-	type QueryToolResponse,
-	type QueryToolOptions,
-	type CoreToolsOptions,
-} from "./core-tools.js";
-
-// Transport helpers
-export { connectStdio, createSdkServer, type McpToolResponse } from "./transport.js";
-
+export type { BuildMcpToolsOptions } from "./actions.js";
 // Action adapter
 export { buildMcpTools } from "./actions.js";
-export type { BuildMcpToolsOptions } from "./actions.js";
+// Core tools
+export {
+  type ConfigAction,
+  type ConfigStore,
+  type ConfigToolInput,
+  type ConfigToolOptions,
+  type ConfigToolResponse,
+  type CoreToolsOptions,
+  createCoreTools,
+  type DocsSection,
+  type DocsToolEntry,
+  type DocsToolInput,
+  type DocsToolOptions,
+  type DocsToolResponse,
+  defineConfigTool,
+  defineDocsTool,
+  defineQueryTool,
+  type QueryToolInput,
+  type QueryToolOptions,
+  type QueryToolResponse,
+} from "./core-tools.js";
+// Schema utilities
+export { type JsonSchema, zodToJsonSchema } from "./schema.js";
+// Server
+export { createMcpServer, defineResource, defineTool } from "./server.js";
+// Transport helpers
+export {
+  connectStdio,
+  createSdkServer,
+  type McpToolResponse,
+} from "./transport.js";
+// Types
+export {
+  type InvokeToolOptions,
+  McpError,
+  type McpHandlerContext,
+  type McpServer,
+  type McpServerOptions,
+  type ResourceDefinition,
+  type SerializedTool,
+  type ToolDefinition,
+} from "./types.js";

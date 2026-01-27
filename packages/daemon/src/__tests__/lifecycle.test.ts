@@ -13,7 +13,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
-import { mkdir, rm, writeFile as fsWriteFile } from "node:fs/promises";
+import { writeFile as fsWriteFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDaemon } from "../lifecycle.js";
@@ -27,26 +27,26 @@ let testDir: string;
 let testCounter = 0;
 
 async function createTestDir(): Promise<string> {
-	testCounter++;
-	const dir = join(tmpdir(), `daemon-test-${Date.now()}-${testCounter}`);
-	await mkdir(dir, { recursive: true });
-	return dir;
+  testCounter++;
+  const dir = join(tmpdir(), `daemon-test-${Date.now()}-${testCounter}`);
+  await mkdir(dir, { recursive: true });
+  return dir;
 }
 
 async function cleanupTestDir(dir: string): Promise<void> {
-	try {
-		await rm(dir, { recursive: true, force: true });
-	} catch {
-		// Ignore cleanup errors
-	}
+  try {
+    await rm(dir, { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
+  }
 }
 
 function createTestOptions(pidFile: string): DaemonOptions {
-	return {
-		name: "test-daemon",
-		pidFile,
-		shutdownTimeout: 1000,
-	};
+  return {
+    name: "test-daemon",
+    pidFile,
+    shutdownTimeout: 1000,
+  };
 }
 
 // ============================================================================
@@ -54,80 +54,80 @@ function createTestOptions(pidFile: string): DaemonOptions {
 // ============================================================================
 
 describe("PID File Management", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("creates PID file on start", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("creates PID file on start", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		const result = await daemon.start();
+    const result = await daemon.start();
 
-		expect(result.isOk()).toBe(true);
-		const exists = await Bun.file(pidFile).exists();
-		expect(exists).toBe(true);
+    expect(result.isOk()).toBe(true);
+    const exists = await Bun.file(pidFile).exists();
+    expect(exists).toBe(true);
 
-		// Cleanup
-		await daemon.stop();
-	});
+    // Cleanup
+    await daemon.stop();
+  });
 
-	it("writes current process PID to file", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("writes current process PID to file", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		await daemon.start();
+    await daemon.start();
 
-		const content = await Bun.file(pidFile).text();
-		expect(content.trim()).toBe(String(process.pid));
+    const content = await Bun.file(pidFile).text();
+    expect(content.trim()).toBe(String(process.pid));
 
-		// Cleanup
-		await daemon.stop();
-	});
+    // Cleanup
+    await daemon.stop();
+  });
 
-	it("removes PID file on stop", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("removes PID file on stop", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		const exists = await Bun.file(pidFile).exists();
-		expect(exists).toBe(false);
-	});
+    const exists = await Bun.file(pidFile).exists();
+    expect(exists).toBe(false);
+  });
 
-	it("returns error if PID file already exists", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		// Pre-create PID file to simulate another running instance
-		await fsWriteFile(pidFile, "12345");
+  it("returns error if PID file already exists", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    // Pre-create PID file to simulate another running instance
+    await fsWriteFile(pidFile, "12345");
 
-		const daemon = createDaemon(createTestOptions(pidFile));
-		const result = await daemon.start();
+    const daemon = createDaemon(createTestOptions(pidFile));
+    const result = await daemon.start();
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error._tag).toBe("DaemonError");
-			expect(result.error.code).toBe("ALREADY_RUNNING");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("DaemonError");
+      expect(result.error.code).toBe("ALREADY_RUNNING");
+    }
+  });
 
-	it("creates parent directories for PID file if needed", async () => {
-		const pidFile = join(testDir, "nested", "deep", "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("creates parent directories for PID file if needed", async () => {
+    const pidFile = join(testDir, "nested", "deep", "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		const result = await daemon.start();
+    const result = await daemon.start();
 
-		expect(result.isOk()).toBe(true);
-		const exists = await Bun.file(pidFile).exists();
-		expect(exists).toBe(true);
+    expect(result.isOk()).toBe(true);
+    const exists = await Bun.file(pidFile).exists();
+    expect(exists).toBe(true);
 
-		// Cleanup
-		await daemon.stop();
-	});
+    // Cleanup
+    await daemon.stop();
+  });
 });
 
 // ============================================================================
@@ -135,67 +135,67 @@ describe("PID File Management", () => {
 // ============================================================================
 
 describe("State Transitions", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("starts in stopped state", () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("starts in stopped state", () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		expect(daemon.state).toBe("stopped");
-	});
+    expect(daemon.state).toBe("stopped");
+  });
 
-	it("transitions to running state after start", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("transitions to running state after start", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		await daemon.start();
+    await daemon.start();
 
-		expect(daemon.state).toBe("running");
-		expect(daemon.isRunning()).toBe(true);
+    expect(daemon.state).toBe("running");
+    expect(daemon.isRunning()).toBe(true);
 
-		// Cleanup
-		await daemon.stop();
-	});
+    // Cleanup
+    await daemon.stop();
+  });
 
-	it("transitions to stopped state after stop", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("transitions to stopped state after stop", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		expect(daemon.state).toBe("stopped");
-		expect(daemon.isRunning()).toBe(false);
-	});
+    expect(daemon.state).toBe("stopped");
+    expect(daemon.isRunning()).toBe(false);
+  });
 
-	it("isRunning returns false when stopped", () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("isRunning returns false when stopped", () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		expect(daemon.isRunning()).toBe(false);
-	});
+    expect(daemon.isRunning()).toBe(false);
+  });
 
-	it("prevents double start", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("prevents double start", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		await daemon.start();
-		const result = await daemon.start();
+    await daemon.start();
+    const result = await daemon.start();
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error.code).toBe("ALREADY_RUNNING");
-		}
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.code).toBe("ALREADY_RUNNING");
+    }
 
-		// Cleanup
-		await daemon.stop();
-	});
+    // Cleanup
+    await daemon.stop();
+  });
 });
 
 // ============================================================================
@@ -203,96 +203,98 @@ describe("State Transitions", () => {
 // ============================================================================
 
 describe("Signal Handling", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("registers signal handlers on start", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("registers signal handlers on start", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		// Track if signal handlers are registered
-		const originalOn = process.on.bind(process);
-		const registeredSignals: string[] = [];
-		const onSpy = spyOn(process, "on").mockImplementation((event, listener) => {
-			if (event === "SIGTERM" || event === "SIGINT") {
-				registeredSignals.push(event as string);
-			}
-			return originalOn(event, listener);
-		});
+    // Track if signal handlers are registered
+    const originalOn = process.on.bind(process);
+    const registeredSignals: string[] = [];
+    const onSpy = spyOn(process, "on").mockImplementation((event, listener) => {
+      if (event === "SIGTERM" || event === "SIGINT") {
+        registeredSignals.push(event as string);
+      }
+      return originalOn(event, listener);
+    });
 
-		await daemon.start();
+    await daemon.start();
 
-		expect(registeredSignals).toContain("SIGTERM");
-		expect(registeredSignals).toContain("SIGINT");
+    expect(registeredSignals).toContain("SIGTERM");
+    expect(registeredSignals).toContain("SIGINT");
 
-		// Cleanup
-		await daemon.stop();
-		onSpy.mockRestore();
-	});
+    // Cleanup
+    await daemon.stop();
+    onSpy.mockRestore();
+  });
 
-	it("removes signal handlers on stop", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("removes signal handlers on stop", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		const originalOff = process.off.bind(process);
-		const removedSignals: string[] = [];
-		const offSpy = spyOn(process, "off").mockImplementation((event, listener) => {
-			if (event === "SIGTERM" || event === "SIGINT") {
-				removedSignals.push(event as string);
-			}
-			return originalOff(event, listener);
-		});
+    const originalOff = process.off.bind(process);
+    const removedSignals: string[] = [];
+    const offSpy = spyOn(process, "off").mockImplementation(
+      (event, listener) => {
+        if (event === "SIGTERM" || event === "SIGINT") {
+          removedSignals.push(event as string);
+        }
+        return originalOff(event, listener);
+      }
+    );
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		expect(removedSignals).toContain("SIGTERM");
-		expect(removedSignals).toContain("SIGINT");
+    expect(removedSignals).toContain("SIGTERM");
+    expect(removedSignals).toContain("SIGINT");
 
-		offSpy.mockRestore();
-	});
+    offSpy.mockRestore();
+  });
 
-	it("handles SIGTERM signal gracefully", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		let shutdownCalled = false;
+  it("handles SIGTERM signal gracefully", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    let shutdownCalled = false;
 
-		daemon.onShutdown(async () => {
-			shutdownCalled = true;
-		});
+    daemon.onShutdown(async () => {
+      shutdownCalled = true;
+    });
 
-		await daemon.start();
+    await daemon.start();
 
-		// Simulate SIGTERM by calling the internal shutdown
-		// We cannot actually send SIGTERM in tests as it would kill the test process
-		await daemon.stop();
+    // Simulate SIGTERM by calling the internal shutdown
+    // We cannot actually send SIGTERM in tests as it would kill the test process
+    await daemon.stop();
 
-		expect(shutdownCalled).toBe(true);
-		expect(daemon.state).toBe("stopped");
-	});
+    expect(shutdownCalled).toBe(true);
+    expect(daemon.state).toBe("stopped");
+  });
 
-	it("handles SIGINT signal gracefully", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		let shutdownCalled = false;
+  it("handles SIGINT signal gracefully", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    let shutdownCalled = false;
 
-		daemon.onShutdown(async () => {
-			shutdownCalled = true;
-		});
+    daemon.onShutdown(async () => {
+      shutdownCalled = true;
+    });
 
-		await daemon.start();
+    await daemon.start();
 
-		// Simulate SIGINT by calling stop
-		await daemon.stop();
+    // Simulate SIGINT by calling stop
+    await daemon.stop();
 
-		expect(shutdownCalled).toBe(true);
-		expect(daemon.state).toBe("stopped");
-	});
+    expect(shutdownCalled).toBe(true);
+    expect(daemon.state).toBe("stopped");
+  });
 });
 
 // ============================================================================
@@ -300,88 +302,88 @@ describe("Signal Handling", () => {
 // ============================================================================
 
 describe("Shutdown Handlers", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("calls shutdown handlers on stop", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		let handlerCalled = false;
+  it("calls shutdown handlers on stop", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    let handlerCalled = false;
 
-		daemon.onShutdown(async () => {
-			handlerCalled = true;
-		});
+    daemon.onShutdown(async () => {
+      handlerCalled = true;
+    });
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		expect(handlerCalled).toBe(true);
-	});
+    expect(handlerCalled).toBe(true);
+  });
 
-	it("calls multiple shutdown handlers in order", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		const callOrder: number[] = [];
+  it("calls multiple shutdown handlers in order", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    const callOrder: number[] = [];
 
-		daemon.onShutdown(async () => {
-			callOrder.push(1);
-		});
-		daemon.onShutdown(async () => {
-			callOrder.push(2);
-		});
-		daemon.onShutdown(async () => {
-			callOrder.push(3);
-		});
+    daemon.onShutdown(async () => {
+      callOrder.push(1);
+    });
+    daemon.onShutdown(async () => {
+      callOrder.push(2);
+    });
+    daemon.onShutdown(async () => {
+      callOrder.push(3);
+    });
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		expect(callOrder).toEqual([1, 2, 3]);
-	});
+    expect(callOrder).toEqual([1, 2, 3]);
+  });
 
-	it("waits for all shutdown handlers to complete", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		let slowHandlerComplete = false;
+  it("waits for all shutdown handlers to complete", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    let slowHandlerComplete = false;
 
-		daemon.onShutdown(async () => {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-			slowHandlerComplete = true;
-		});
+    daemon.onShutdown(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      slowHandlerComplete = true;
+    });
 
-		await daemon.start();
-		await daemon.stop();
+    await daemon.start();
+    await daemon.stop();
 
-		expect(slowHandlerComplete).toBe(true);
-	});
+    expect(slowHandlerComplete).toBe(true);
+  });
 
-	it("returns SHUTDOWN_TIMEOUT error if handlers exceed timeout", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon({
-			...createTestOptions(pidFile),
-			shutdownTimeout: 50, // Very short timeout
-		});
+  it("returns SHUTDOWN_TIMEOUT error if handlers exceed timeout", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon({
+      ...createTestOptions(pidFile),
+      shutdownTimeout: 50, // Very short timeout
+    });
 
-		daemon.onShutdown(async () => {
-			// This handler takes longer than the timeout
-			await new Promise((resolve) => setTimeout(resolve, 200));
-		});
+    daemon.onShutdown(async () => {
+      // This handler takes longer than the timeout
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    });
 
-		await daemon.start();
-		const result = await daemon.stop();
+    await daemon.start();
+    const result = await daemon.stop();
 
-		// State should still be stopped even after timeout
-		expect(daemon.state).toBe("stopped");
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error.code).toBe("SHUTDOWN_TIMEOUT");
-		}
-	});
+    // State should still be stopped even after timeout
+    expect(daemon.state).toBe("stopped");
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.code).toBe("SHUTDOWN_TIMEOUT");
+    }
+  });
 });
 
 // ============================================================================
@@ -389,82 +391,82 @@ describe("Shutdown Handlers", () => {
 // ============================================================================
 
 describe("Error Cases", () => {
-	beforeEach(async () => {
-		testDir = await createTestDir();
-	});
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
 
-	afterEach(async () => {
-		await cleanupTestDir(testDir);
-	});
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
 
-	it("returns NOT_RUNNING error when stopping a stopped daemon", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("returns NOT_RUNNING error when stopping a stopped daemon", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		const result = await daemon.stop();
+    const result = await daemon.stop();
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error.code).toBe("NOT_RUNNING");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.code).toBe("NOT_RUNNING");
+    }
+  });
 
-	it("returns PID_ERROR when PID file cannot be written", async () => {
-		// Use an invalid path that cannot be created
-		const pidFile = "/nonexistent/path/that/cannot/exist/daemon.pid";
-		const daemon = createDaemon({
-			...createTestOptions(pidFile),
-			// Override to prevent mkdir from succeeding
-		});
+  it("returns PID_ERROR when PID file cannot be written", async () => {
+    // Use an invalid path that cannot be created
+    const pidFile = "/nonexistent/path/that/cannot/exist/daemon.pid";
+    const daemon = createDaemon({
+      ...createTestOptions(pidFile),
+      // Override to prevent mkdir from succeeding
+    });
 
-		const result = await daemon.start();
+    const result = await daemon.start();
 
-		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error.code).toBe("PID_ERROR");
-		}
-	});
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.code).toBe("PID_ERROR");
+    }
+  });
 
-	it("cleans up PID file on start failure after partial success", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
+  it("cleans up PID file on start failure after partial success", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
 
-		// Start successfully first
-		await daemon.start();
-		// Get the PID file created
-		const exists1 = await Bun.file(pidFile).exists();
-		expect(exists1).toBe(true);
+    // Start successfully first
+    await daemon.start();
+    // Get the PID file created
+    const exists1 = await Bun.file(pidFile).exists();
+    expect(exists1).toBe(true);
 
-		// Now stop properly
-		await daemon.stop();
+    // Now stop properly
+    await daemon.stop();
 
-		// Verify cleanup
-		const exists2 = await Bun.file(pidFile).exists();
-		expect(exists2).toBe(false);
-	});
+    // Verify cleanup
+    const exists2 = await Bun.file(pidFile).exists();
+    expect(exists2).toBe(false);
+  });
 
-	it("handles shutdown handler errors gracefully", async () => {
-		const pidFile = join(testDir, "daemon.pid");
-		const daemon = createDaemon(createTestOptions(pidFile));
-		let secondHandlerCalled = false;
+  it("handles shutdown handler errors gracefully", async () => {
+    const pidFile = join(testDir, "daemon.pid");
+    const daemon = createDaemon(createTestOptions(pidFile));
+    let secondHandlerCalled = false;
 
-		// First handler throws
-		daemon.onShutdown(async () => {
-			throw new Error("Handler failed");
-		});
+    // First handler throws
+    daemon.onShutdown(async () => {
+      throw new Error("Handler failed");
+    });
 
-		// Second handler should still be called
-		daemon.onShutdown(async () => {
-			secondHandlerCalled = true;
-		});
+    // Second handler should still be called
+    daemon.onShutdown(async () => {
+      secondHandlerCalled = true;
+    });
 
-		await daemon.start();
-		const result = await daemon.stop();
+    await daemon.start();
+    const result = await daemon.stop();
 
-		// Should still complete shutdown
-		expect(daemon.state).toBe("stopped");
-		expect(secondHandlerCalled).toBe(true);
-		// Result might be ok or err depending on implementation
-		expect(result.isOk() || result.isErr()).toBe(true);
-	});
+    // Should still complete shutdown
+    expect(daemon.state).toBe("stopped");
+    expect(secondHandlerCalled).toBe(true);
+    // Result might be ok or err depending on implementation
+    expect(result.isOk() || result.isErr()).toBe(true);
+  });
 });

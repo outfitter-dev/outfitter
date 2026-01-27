@@ -20,17 +20,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Result } from "@outfitter/contracts";
 import {
-	advanceCursor,
-	createCursor,
-	createCursorStore,
-	createPersistentStore,
-	createScopedStore,
-	decodeCursor,
-	encodeCursor,
-	isExpired,
-	type Cursor,
-	type CursorStore,
-	type ScopedStore,
+  advanceCursor,
+  type Cursor,
+  type CursorStore,
+  createCursor,
+  createCursorStore,
+  createPersistentStore,
+  createScopedStore,
+  decodeCursor,
+  encodeCursor,
+  isExpired,
+  type ScopedStore,
 } from "../index.js";
 
 // ============================================================================
@@ -38,33 +38,36 @@ import {
 // ============================================================================
 
 function createTmpDir(): string {
-	const dir = join(
-		tmpdir(),
-		`outfitter-state-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-	);
-	mkdirSync(dir, { recursive: true });
-	return dir;
+  const dir = join(
+    tmpdir(),
+    `outfitter-state-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+  mkdirSync(dir, { recursive: true });
+  return dir;
 }
 
 function cleanupTmpDir(dir: string): void {
-	if (existsSync(dir)) {
-		rmSync(dir, { recursive: true, force: true });
-	}
+  if (existsSync(dir)) {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 const base64Encoder = new TextEncoder();
 
 function toBase64(value: string): string {
-	const bytes = base64Encoder.encode(value);
-	let binary = "";
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-	return btoa(binary);
+  const bytes = base64Encoder.encode(value);
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
 }
 
 function toBase64Url(value: string): string {
-	return toBase64(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return toBase64(value)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 // ============================================================================
@@ -72,74 +75,77 @@ function toBase64Url(value: string): string {
 // ============================================================================
 
 describe("Cursor Creation", () => {
-	it("createCursor creates a new cursor with ID and position", () => {
-		const cursorResult = createCursor({ id: "cursor-1", position: 0 });
+  it("createCursor creates a new cursor with ID and position", () => {
+    const cursorResult = createCursor({ id: "cursor-1", position: 0 });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(cursorResult.value.id).toBe("cursor-1");
-			expect(cursorResult.value.position).toBe(0);
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(cursorResult.value.id).toBe("cursor-1");
+      expect(cursorResult.value.position).toBe(0);
+    }
+  });
 
-	it("createCursor generates unique cursor ID if not provided", () => {
-		const cursor1Result = createCursor({ position: 0 });
-		const cursor2Result = createCursor({ position: 0 });
+  it("createCursor generates unique cursor ID if not provided", () => {
+    const cursor1Result = createCursor({ position: 0 });
+    const cursor2Result = createCursor({ position: 0 });
 
-		expect(Result.isOk(cursor1Result)).toBe(true);
-		expect(Result.isOk(cursor2Result)).toBe(true);
-		if (Result.isOk(cursor1Result) && Result.isOk(cursor2Result)) {
-			expect(cursor1Result.value.id).toBeDefined();
-			expect(cursor2Result.value.id).toBeDefined();
-			expect(cursor1Result.value.id).not.toBe(cursor2Result.value.id);
-		}
-	});
+    expect(Result.isOk(cursor1Result)).toBe(true);
+    expect(Result.isOk(cursor2Result)).toBe(true);
+    if (Result.isOk(cursor1Result) && Result.isOk(cursor2Result)) {
+      expect(cursor1Result.value.id).toBeDefined();
+      expect(cursor2Result.value.id).toBeDefined();
+      expect(cursor1Result.value.id).not.toBe(cursor2Result.value.id);
+    }
+  });
 
-	it("createCursor accepts optional metadata", () => {
-		const cursorResult = createCursor({
-			id: "cursor-1",
-			position: 10,
-			metadata: { query: "test", pageSize: 50 },
-		});
+  it("createCursor accepts optional metadata", () => {
+    const cursorResult = createCursor({
+      id: "cursor-1",
+      position: 10,
+      metadata: { query: "test", pageSize: 50 },
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(cursorResult.value.metadata).toEqual({ query: "test", pageSize: 50 });
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(cursorResult.value.metadata).toEqual({
+        query: "test",
+        pageSize: 50,
+      });
+    }
+  });
 
-	it("createCursor validates position is non-negative", () => {
-		const result = createCursor({ id: "cursor-1", position: -1 });
+  it("createCursor validates position is non-negative", () => {
+    const result = createCursor({ id: "cursor-1", position: -1 });
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("cursor is immutable (frozen object)", () => {
-		const cursor = createCursor({ id: "cursor-1", position: 0 });
+  it("cursor is immutable (frozen object)", () => {
+    const cursor = createCursor({ id: "cursor-1", position: 0 });
 
-		// Result should be ok for valid input
-		expect(Result.isOk(cursor)).toBe(true);
-		if (Result.isOk(cursor)) {
-			expect(Object.isFrozen(cursor.value)).toBe(true);
-		}
-	});
+    // Result should be ok for valid input
+    expect(Result.isOk(cursor)).toBe(true);
+    if (Result.isOk(cursor)) {
+      expect(Object.isFrozen(cursor.value)).toBe(true);
+    }
+  });
 
-	it("advanceCursor returns new cursor with updated position", () => {
-		const cursorResult = createCursor({ id: "cursor-1", position: 0 });
-		expect(Result.isOk(cursorResult)).toBe(true);
+  it("advanceCursor returns new cursor with updated position", () => {
+    const cursorResult = createCursor({ id: "cursor-1", position: 0 });
+    expect(Result.isOk(cursorResult)).toBe(true);
 
-		if (Result.isOk(cursorResult)) {
-			const advanced = advanceCursor(cursorResult.value, 50);
+    if (Result.isOk(cursorResult)) {
+      const advanced = advanceCursor(cursorResult.value, 50);
 
-			expect(advanced.id).toBe("cursor-1");
-			expect(advanced.position).toBe(50);
-			// Original should be unchanged
-			expect(cursorResult.value.position).toBe(0);
-		}
-	});
+      expect(advanced.id).toBe("cursor-1");
+      expect(advanced.position).toBe(50);
+      // Original should be unchanged
+      expect(cursorResult.value.position).toBe(0);
+    }
+  });
 });
 
 // ============================================================================
@@ -147,118 +153,118 @@ describe("Cursor Creation", () => {
 // ============================================================================
 
 describe("Cursor Store", () => {
-	let store: CursorStore;
+  let store: CursorStore;
 
-	beforeEach(() => {
-		store = createCursorStore();
-	});
+  beforeEach(() => {
+    store = createCursorStore();
+  });
 
-	it("createCursorStore initializes empty store", () => {
-		const newStore = createCursorStore();
+  it("createCursorStore initializes empty store", () => {
+    const newStore = createCursorStore();
 
-		expect(newStore.list()).toEqual([]);
-	});
+    expect(newStore.list()).toEqual([]);
+  });
 
-	it("store.set saves cursor by ID", () => {
-		const cursorResult = createCursor({ id: "cursor-1", position: 10 });
-		expect(Result.isOk(cursorResult)).toBe(true);
+  it("store.set saves cursor by ID", () => {
+    const cursorResult = createCursor({ id: "cursor-1", position: 10 });
+    expect(Result.isOk(cursorResult)).toBe(true);
 
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			const retrieved = store.get("cursor-1");
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      const retrieved = store.get("cursor-1");
 
-			expect(Result.isOk(retrieved)).toBe(true);
-			if (Result.isOk(retrieved)) {
-				expect(retrieved.value.position).toBe(10);
-			}
-		}
-	});
+      expect(Result.isOk(retrieved)).toBe(true);
+      if (Result.isOk(retrieved)) {
+        expect(retrieved.value.position).toBe(10);
+      }
+    }
+  });
 
-	it("store.get retrieves cursor by ID", () => {
-		const cursorResult = createCursor({ id: "test-cursor", position: 25 });
-		expect(Result.isOk(cursorResult)).toBe(true);
+  it("store.get retrieves cursor by ID", () => {
+    const cursorResult = createCursor({ id: "test-cursor", position: 25 });
+    expect(Result.isOk(cursorResult)).toBe(true);
 
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			const result = store.get("test-cursor");
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      const result = store.get("test-cursor");
 
-			expect(Result.isOk(result)).toBe(true);
-			if (Result.isOk(result)) {
-				expect(result.value.id).toBe("test-cursor");
-				expect(result.value.position).toBe(25);
-			}
-		}
-	});
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value.id).toBe("test-cursor");
+        expect(result.value.position).toBe(25);
+      }
+    }
+  });
 
-	it("store.get returns Result.err(NotFoundError) for unknown ID", () => {
-		const result = store.get("nonexistent");
+  it("store.get returns Result.err(NotFoundError) for unknown ID", () => {
+    const result = store.get("nonexistent");
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("NotFoundError");
-			expect(result.error.resourceType).toBe("cursor");
-			expect(result.error.resourceId).toBe("nonexistent");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("NotFoundError");
+      expect(result.error.resourceType).toBe("cursor");
+      expect(result.error.resourceId).toBe("nonexistent");
+    }
+  });
 
-	it("store.delete removes cursor", () => {
-		const cursorResult = createCursor({ id: "to-delete", position: 0 });
-		expect(Result.isOk(cursorResult)).toBe(true);
+  it("store.delete removes cursor", () => {
+    const cursorResult = createCursor({ id: "to-delete", position: 0 });
+    expect(Result.isOk(cursorResult)).toBe(true);
 
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			expect(store.has("to-delete")).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      expect(store.has("to-delete")).toBe(true);
 
-			store.delete("to-delete");
-			expect(store.has("to-delete")).toBe(false);
-		}
-	});
+      store.delete("to-delete");
+      expect(store.has("to-delete")).toBe(false);
+    }
+  });
 
-	it("store.clear removes all cursors", () => {
-		const cursor1 = createCursor({ id: "c1", position: 0 });
-		const cursor2 = createCursor({ id: "c2", position: 10 });
+  it("store.clear removes all cursors", () => {
+    const cursor1 = createCursor({ id: "c1", position: 0 });
+    const cursor2 = createCursor({ id: "c2", position: 10 });
 
-		if (Result.isOk(cursor1) && Result.isOk(cursor2)) {
-			store.set(cursor1.value);
-			store.set(cursor2.value);
+    if (Result.isOk(cursor1) && Result.isOk(cursor2)) {
+      store.set(cursor1.value);
+      store.set(cursor2.value);
 
-			expect(store.list().length).toBe(2);
+      expect(store.list().length).toBe(2);
 
-			store.clear();
+      store.clear();
 
-			expect(store.list()).toEqual([]);
-		}
-	});
+      expect(store.list()).toEqual([]);
+    }
+  });
 
-	it("store.list returns all cursor IDs", () => {
-		const cursor1 = createCursor({ id: "alpha", position: 0 });
-		const cursor2 = createCursor({ id: "beta", position: 10 });
-		const cursor3 = createCursor({ id: "gamma", position: 20 });
+  it("store.list returns all cursor IDs", () => {
+    const cursor1 = createCursor({ id: "alpha", position: 0 });
+    const cursor2 = createCursor({ id: "beta", position: 10 });
+    const cursor3 = createCursor({ id: "gamma", position: 20 });
 
-		if (Result.isOk(cursor1) && Result.isOk(cursor2) && Result.isOk(cursor3)) {
-			store.set(cursor1.value);
-			store.set(cursor2.value);
-			store.set(cursor3.value);
+    if (Result.isOk(cursor1) && Result.isOk(cursor2) && Result.isOk(cursor3)) {
+      store.set(cursor1.value);
+      store.set(cursor2.value);
+      store.set(cursor3.value);
 
-			const ids = store.list();
+      const ids = store.list();
 
-			expect(ids).toContain("alpha");
-			expect(ids).toContain("beta");
-			expect(ids).toContain("gamma");
-			expect(ids.length).toBe(3);
-		}
-	});
+      expect(ids).toContain("alpha");
+      expect(ids).toContain("beta");
+      expect(ids).toContain("gamma");
+      expect(ids.length).toBe(3);
+    }
+  });
 
-	it("store.has checks if cursor exists", () => {
-		const cursorResult = createCursor({ id: "existing", position: 0 });
+  it("store.has checks if cursor exists", () => {
+    const cursorResult = createCursor({ id: "existing", position: 0 });
 
-		expect(store.has("existing")).toBe(false);
+    expect(store.has("existing")).toBe(false);
 
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			expect(store.has("existing")).toBe(true);
-		}
-	});
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      expect(store.has("existing")).toBe(true);
+    }
+  });
 });
 
 // ============================================================================
@@ -266,136 +272,136 @@ describe("Cursor Store", () => {
 // ============================================================================
 
 describe("Persistence", () => {
-	let tmpDir: string;
+  let tmpDir: string;
 
-	beforeEach(() => {
-		tmpDir = createTmpDir();
-	});
+  beforeEach(() => {
+    tmpDir = createTmpDir();
+  });
 
-	afterEach(() => {
-		cleanupTmpDir(tmpDir);
-	});
+  afterEach(() => {
+    cleanupTmpDir(tmpDir);
+  });
 
-	it("createPersistentStore saves to file", async () => {
-		const storagePath = join(tmpDir, "cursors.json");
-		const store = await createPersistentStore({ path: storagePath });
+  it("createPersistentStore saves to file", async () => {
+    const storagePath = join(tmpDir, "cursors.json");
+    const store = await createPersistentStore({ path: storagePath });
 
-		const cursorResult = createCursor({ id: "persisted", position: 100 });
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			await store.flush();
-		}
+    const cursorResult = createCursor({ id: "persisted", position: 100 });
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      await store.flush();
+    }
 
-		expect(existsSync(storagePath)).toBe(true);
-	});
+    expect(existsSync(storagePath)).toBe(true);
+  });
 
-	it("createPersistentStore loads from file on init", async () => {
-		const storagePath = join(tmpDir, "cursors.json");
+  it("createPersistentStore loads from file on init", async () => {
+    const storagePath = join(tmpDir, "cursors.json");
 
-		// First store saves data
-		const store1 = await createPersistentStore({ path: storagePath });
-		const cursorResult = createCursor({ id: "persistent", position: 42 });
-		if (Result.isOk(cursorResult)) {
-			store1.set(cursorResult.value);
-			await store1.flush();
-		}
+    // First store saves data
+    const store1 = await createPersistentStore({ path: storagePath });
+    const cursorResult = createCursor({ id: "persistent", position: 42 });
+    if (Result.isOk(cursorResult)) {
+      store1.set(cursorResult.value);
+      await store1.flush();
+    }
 
-		// Second store should load existing data
-		const store2 = await createPersistentStore({ path: storagePath });
-		const result = store2.get("persistent");
+    // Second store should load existing data
+    const store2 = await createPersistentStore({ path: storagePath });
+    const result = store2.get("persistent");
 
-		expect(Result.isOk(result)).toBe(true);
-		if (Result.isOk(result)) {
-			expect(result.value.position).toBe(42);
-		}
-	});
+    expect(Result.isOk(result)).toBe(true);
+    if (Result.isOk(result)) {
+      expect(result.value.position).toBe(42);
+    }
+  });
 
-	it("store file uses JSON format", async () => {
-		const storagePath = join(tmpDir, "cursors.json");
-		const store = await createPersistentStore({ path: storagePath });
+  it("store file uses JSON format", async () => {
+    const storagePath = join(tmpDir, "cursors.json");
+    const store = await createPersistentStore({ path: storagePath });
 
-		const cursorResult = createCursor({ id: "json-test", position: 50 });
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			await store.flush();
-		}
+    const cursorResult = createCursor({ id: "json-test", position: 50 });
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      await store.flush();
+    }
 
-		const fileContent = await Bun.file(storagePath).text();
-		const parsed = JSON.parse(fileContent);
+    const fileContent = await Bun.file(storagePath).text();
+    const parsed = JSON.parse(fileContent);
 
-		expect(parsed).toHaveProperty("cursors");
-		expect(parsed.cursors["json-test"]).toBeDefined();
-		expect(parsed.cursors["json-test"].position).toBe(50);
-	});
+    expect(parsed).toHaveProperty("cursors");
+    expect(parsed.cursors["json-test"]).toBeDefined();
+    expect(parsed.cursors["json-test"].position).toBe(50);
+  });
 
-	it("persistence is atomic (uses atomic write)", async () => {
-		const storagePath = join(tmpDir, "atomic.json");
-		const store = await createPersistentStore({ path: storagePath });
+  it("persistence is atomic (uses atomic write)", async () => {
+    const storagePath = join(tmpDir, "atomic.json");
+    const store = await createPersistentStore({ path: storagePath });
 
-		const cursorResult = createCursor({ id: "atomic-test", position: 1 });
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			await store.flush();
-		}
+    const cursorResult = createCursor({ id: "atomic-test", position: 1 });
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      await store.flush();
+    }
 
-		// File should exist with valid content even after flush
-		// (atomic write ensures no partial writes)
-		const fileContent = await Bun.file(storagePath).text();
-		expect(() => JSON.parse(fileContent)).not.toThrow();
-	});
+    // File should exist with valid content even after flush
+    // (atomic write ensures no partial writes)
+    const fileContent = await Bun.file(storagePath).text();
+    expect(() => JSON.parse(fileContent)).not.toThrow();
+  });
 
-	it("store handles corrupted file gracefully", async () => {
-		const storagePath = join(tmpDir, "corrupted.json");
+  it("store handles corrupted file gracefully", async () => {
+    const storagePath = join(tmpDir, "corrupted.json");
 
-		// Write corrupted JSON
-		writeFileSync(storagePath, "{ invalid json content");
+    // Write corrupted JSON
+    writeFileSync(storagePath, "{ invalid json content");
 
-		// Should initialize empty store rather than crash
-		const store = await createPersistentStore({ path: storagePath });
+    // Should initialize empty store rather than crash
+    const store = await createPersistentStore({ path: storagePath });
 
-		expect(store.list()).toEqual([]);
-	});
+    expect(store.list()).toEqual([]);
+  });
 
-	it("store creates directory if not exists", async () => {
-		const nestedDir = join(tmpDir, "nested", "deeply", "cursors");
-		const storagePath = join(nestedDir, "store.json");
+  it("store creates directory if not exists", async () => {
+    const nestedDir = join(tmpDir, "nested", "deeply", "cursors");
+    const storagePath = join(nestedDir, "store.json");
 
-		// Directory doesn't exist yet
-		expect(existsSync(nestedDir)).toBe(false);
+    // Directory doesn't exist yet
+    expect(existsSync(nestedDir)).toBe(false);
 
-		const store = await createPersistentStore({ path: storagePath });
-		const cursorResult = createCursor({ id: "nested-test", position: 0 });
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			await store.flush();
-		}
+    const store = await createPersistentStore({ path: storagePath });
+    const cursorResult = createCursor({ id: "nested-test", position: 0 });
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      await store.flush();
+    }
 
-		expect(existsSync(nestedDir)).toBe(true);
-		expect(existsSync(storagePath)).toBe(true);
-	});
+    expect(existsSync(nestedDir)).toBe(true);
+    expect(existsSync(storagePath)).toBe(true);
+  });
 
-	it("store respects custom storage path", async () => {
-		const customPath = join(tmpDir, "custom-location", "my-cursors.json");
-		const store = await createPersistentStore({ path: customPath });
+  it("store respects custom storage path", async () => {
+    const customPath = join(tmpDir, "custom-location", "my-cursors.json");
+    const store = await createPersistentStore({ path: customPath });
 
-		const cursorResult = createCursor({ id: "custom", position: 99 });
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
-			await store.flush();
-		}
+    const cursorResult = createCursor({ id: "custom", position: 99 });
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
+      await store.flush();
+    }
 
-		expect(existsSync(customPath)).toBe(true);
-	});
+    expect(existsSync(customPath)).toBe(true);
+  });
 
-	it("store flushes on process exit", async () => {
-		// This test verifies the store registers an exit handler
-		// The actual exit behavior is hard to test, so we verify the mechanism exists
-		const storagePath = join(tmpDir, "exit-flush.json");
-		const store = await createPersistentStore({ path: storagePath });
+  it("store flushes on process exit", async () => {
+    // This test verifies the store registers an exit handler
+    // The actual exit behavior is hard to test, so we verify the mechanism exists
+    const storagePath = join(tmpDir, "exit-flush.json");
+    const store = await createPersistentStore({ path: storagePath });
 
-		// Store should have a way to register cleanup
-		expect(typeof store.dispose).toBe("function");
-	});
+    // Store should have a way to register cleanup
+    expect(typeof store.dispose).toBe("function");
+  });
 });
 
 // ============================================================================
@@ -403,74 +409,74 @@ describe("Persistence", () => {
 // ============================================================================
 
 describe("Context Scoping", () => {
-	let store: CursorStore;
+  let store: CursorStore;
 
-	beforeEach(() => {
-		store = createCursorStore();
-	});
+  beforeEach(() => {
+    store = createCursorStore();
+  });
 
-	it("createScopedStore creates namespaced store", () => {
-		const scoped = createScopedStore(store, "my-context");
+  it("createScopedStore creates namespaced store", () => {
+    const scoped = createScopedStore(store, "my-context");
 
-		expect(scoped.getScope()).toBe("my-context");
-	});
+    expect(scoped.getScope()).toBe("my-context");
+  });
 
-	it("scoped stores are isolated (same ID, different scope)", () => {
-		const scope1 = createScopedStore(store, "scope-1");
-		const scope2 = createScopedStore(store, "scope-2");
+  it("scoped stores are isolated (same ID, different scope)", () => {
+    const scope1 = createScopedStore(store, "scope-1");
+    const scope2 = createScopedStore(store, "scope-2");
 
-		const cursor1 = createCursor({ id: "cursor", position: 10 });
-		const cursor2 = createCursor({ id: "cursor", position: 20 });
+    const cursor1 = createCursor({ id: "cursor", position: 10 });
+    const cursor2 = createCursor({ id: "cursor", position: 20 });
 
-		if (Result.isOk(cursor1) && Result.isOk(cursor2)) {
-			scope1.set(cursor1.value);
-			scope2.set(cursor2.value);
+    if (Result.isOk(cursor1) && Result.isOk(cursor2)) {
+      scope1.set(cursor1.value);
+      scope2.set(cursor2.value);
 
-			const result1 = scope1.get("cursor");
-			const result2 = scope2.get("cursor");
+      const result1 = scope1.get("cursor");
+      const result2 = scope2.get("cursor");
 
-			expect(Result.isOk(result1)).toBe(true);
-			expect(Result.isOk(result2)).toBe(true);
+      expect(Result.isOk(result1)).toBe(true);
+      expect(Result.isOk(result2)).toBe(true);
 
-			if (Result.isOk(result1) && Result.isOk(result2)) {
-				expect(result1.value.position).toBe(10);
-				expect(result2.value.position).toBe(20);
-			}
-		}
-	});
+      if (Result.isOk(result1) && Result.isOk(result2)) {
+        expect(result1.value.position).toBe(10);
+        expect(result2.value.position).toBe(20);
+      }
+    }
+  });
 
-	it("scopes can be nested (scope within scope)", () => {
-		const outerScope = createScopedStore(store, "outer");
-		const innerScope = createScopedStore(outerScope, "inner");
+  it("scopes can be nested (scope within scope)", () => {
+    const outerScope = createScopedStore(store, "outer");
+    const innerScope = createScopedStore(outerScope, "inner");
 
-		expect(innerScope.getScope()).toBe("outer:inner");
-	});
+    expect(innerScope.getScope()).toBe("outer:inner");
+  });
 
-	it("getScope returns current scope name", () => {
-		const scoped = createScopedStore(store, "test-scope");
+  it("getScope returns current scope name", () => {
+    const scoped = createScopedStore(store, "test-scope");
 
-		expect(scoped.getScope()).toBe("test-scope");
-	});
+    expect(scoped.getScope()).toBe("test-scope");
+  });
 
-	it("root store has empty scope", () => {
-		const rootStore = createCursorStore();
+  it("root store has empty scope", () => {
+    const rootStore = createCursorStore();
 
-		// Root store should implement getScope returning empty string
-		expect((rootStore as ScopedStore).getScope()).toBe("");
-	});
+    // Root store should implement getScope returning empty string
+    expect((rootStore as ScopedStore).getScope()).toBe("");
+  });
 
-	it("scoped cursor IDs are prefixed with scope", () => {
-		const scoped = createScopedStore(store, "my-scope");
+  it("scoped cursor IDs are prefixed with scope", () => {
+    const scoped = createScopedStore(store, "my-scope");
 
-		const cursorResult = createCursor({ id: "local-id", position: 0 });
-		if (Result.isOk(cursorResult)) {
-			scoped.set(cursorResult.value);
+    const cursorResult = createCursor({ id: "local-id", position: 0 });
+    if (Result.isOk(cursorResult)) {
+      scoped.set(cursorResult.value);
 
-			// The underlying store should have the prefixed ID
-			const ids = store.list();
-			expect(ids).toContain("my-scope:local-id");
-		}
-	});
+      // The underlying store should have the prefixed ID
+      const ids = store.list();
+      expect(ids).toContain("my-scope:local-id");
+    }
+  });
 });
 
 // ============================================================================
@@ -478,143 +484,151 @@ describe("Context Scoping", () => {
 // ============================================================================
 
 describe("TTL and Expiration", () => {
-	let store: CursorStore;
+  let store: CursorStore;
 
-	beforeEach(() => {
-		store = createCursorStore();
-	});
+  beforeEach(() => {
+    store = createCursorStore();
+  });
 
-	it("createCursor accepts ttl option (milliseconds)", () => {
-		const cursorResult = createCursor({
-			id: "ttl-cursor",
-			position: 0,
-			ttl: 60000, // 60 seconds
-		});
+  it("createCursor accepts ttl option (milliseconds)", () => {
+    const cursorResult = createCursor({
+      id: "ttl-cursor",
+      position: 0,
+      ttl: 60_000, // 60 seconds
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(cursorResult.value.ttl).toBe(60000);
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(cursorResult.value.ttl).toBe(60_000);
+    }
+  });
 
-	it("cursor includes expiresAt timestamp when ttl provided", () => {
-		const now = Date.now();
-		const cursorResult = createCursor({
-			id: "expiring",
-			position: 0,
-			ttl: 30000, // 30 seconds
-		});
+  it("cursor includes expiresAt timestamp when ttl provided", () => {
+    const now = Date.now();
+    const cursorResult = createCursor({
+      id: "expiring",
+      position: 0,
+      ttl: 30_000, // 30 seconds
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(cursorResult.value.expiresAt).toBeDefined();
-			// Should be roughly now + ttl (allow 1 second tolerance)
-			expect(cursorResult.value.expiresAt).toBeGreaterThanOrEqual(now + 30000 - 1000);
-			expect(cursorResult.value.expiresAt).toBeLessThanOrEqual(now + 30000 + 1000);
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(cursorResult.value.expiresAt).toBeDefined();
+      // Should be roughly now + ttl (allow 1 second tolerance)
+      expect(cursorResult.value.expiresAt).toBeGreaterThanOrEqual(
+        now + 30_000 - 1000
+      );
+      expect(cursorResult.value.expiresAt).toBeLessThanOrEqual(
+        now + 30_000 + 1000
+      );
+    }
+  });
 
-	it("isExpired returns true for expired cursors", () => {
-		const pastTime = Date.now() - 10000; // 10 seconds ago
-		const cursorResult = createCursor({
-			id: "past-cursor",
-			position: 0,
-			ttl: 5000,
-		});
+  it("isExpired returns true for expired cursors", () => {
+    const pastTime = Date.now() - 10_000; // 10 seconds ago
+    const cursorResult = createCursor({
+      id: "past-cursor",
+      position: 0,
+      ttl: 5000,
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			// Manually set expiresAt to past for testing
-			const expiredCursor = {
-				...cursorResult.value,
-				expiresAt: pastTime,
-			} as Cursor;
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      // Manually set expiresAt to past for testing
+      const expiredCursor = {
+        ...cursorResult.value,
+        expiresAt: pastTime,
+      } as Cursor;
 
-			expect(isExpired(expiredCursor)).toBe(true);
-		}
-	});
+      expect(isExpired(expiredCursor)).toBe(true);
+    }
+  });
 
-	it("isExpired returns false for valid cursors", () => {
-		const cursorResult = createCursor({
-			id: "valid-cursor",
-			position: 0,
-			ttl: 60000, // 60 seconds in the future
-		});
+  it("isExpired returns false for valid cursors", () => {
+    const cursorResult = createCursor({
+      id: "valid-cursor",
+      position: 0,
+      ttl: 60_000, // 60 seconds in the future
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(isExpired(cursorResult.value)).toBe(false);
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(isExpired(cursorResult.value)).toBe(false);
+    }
+  });
 
-	it("cursors without TTL never expire", () => {
-		const cursorResult = createCursor({
-			id: "eternal-cursor",
-			position: 0,
-			// No TTL provided
-		});
+  it("cursors without TTL never expire", () => {
+    const cursorResult = createCursor({
+      id: "eternal-cursor",
+      position: 0,
+      // No TTL provided
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			expect(cursorResult.value.expiresAt).toBeUndefined();
-			expect(isExpired(cursorResult.value)).toBe(false);
-		}
-	});
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      expect(cursorResult.value.expiresAt).toBeUndefined();
+      expect(isExpired(cursorResult.value)).toBe(false);
+    }
+  });
 
-	it("store.get returns NotFoundError for expired cursor", () => {
-		// Create a cursor that expires immediately
-		const cursorResult = createCursor({
-			id: "expires-fast",
-			position: 0,
-			ttl: 1, // 1ms TTL
-		});
+  it("store.get returns NotFoundError for expired cursor", () => {
+    // Create a cursor that expires immediately
+    const cursorResult = createCursor({
+      id: "expires-fast",
+      position: 0,
+      ttl: 1, // 1ms TTL
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			store.set(cursorResult.value);
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      store.set(cursorResult.value);
 
-			// Wait for expiration
-			const start = Date.now();
-			while (Date.now() - start < 10) {
-				// Busy wait for 10ms
-			}
+      // Wait for expiration
+      const start = Date.now();
+      while (Date.now() - start < 10) {
+        // Busy wait for 10ms
+      }
 
-			const result = store.get("expires-fast");
-			expect(Result.isError(result)).toBe(true);
-			if (Result.isError(result)) {
-				expect(result.error._tag).toBe("NotFoundError");
-			}
-		}
-	});
+      const result = store.get("expires-fast");
+      expect(Result.isError(result)).toBe(true);
+      if (Result.isError(result)) {
+        expect(result.error._tag).toBe("NotFoundError");
+      }
+    }
+  });
 
-	it("store.prune removes all expired cursors", () => {
-		// Create cursors with different TTLs
-		const cursor1 = createCursor({ id: "short-lived", position: 0, ttl: 1 });
-		const cursor2 = createCursor({ id: "long-lived", position: 0, ttl: 60000 });
-		const cursor3 = createCursor({ id: "eternal", position: 0 });
+  it("store.prune removes all expired cursors", () => {
+    // Create cursors with different TTLs
+    const cursor1 = createCursor({ id: "short-lived", position: 0, ttl: 1 });
+    const cursor2 = createCursor({
+      id: "long-lived",
+      position: 0,
+      ttl: 60_000,
+    });
+    const cursor3 = createCursor({ id: "eternal", position: 0 });
 
-		if (Result.isOk(cursor1) && Result.isOk(cursor2) && Result.isOk(cursor3)) {
-			store.set(cursor1.value);
-			store.set(cursor2.value);
-			store.set(cursor3.value);
+    if (Result.isOk(cursor1) && Result.isOk(cursor2) && Result.isOk(cursor3)) {
+      store.set(cursor1.value);
+      store.set(cursor2.value);
+      store.set(cursor3.value);
 
-			// Wait for short-lived to expire
-			const start = Date.now();
-			while (Date.now() - start < 10) {
-				// Busy wait
-			}
+      // Wait for short-lived to expire
+      const start = Date.now();
+      while (Date.now() - start < 10) {
+        // Busy wait
+      }
 
-			const pruned = store.prune();
+      const pruned = store.prune();
 
-			// Should have removed 1 expired cursor
-			expect(pruned).toBe(1);
-			// Should still have 2 cursors
-			expect(store.list().length).toBe(2);
-			expect(store.has("long-lived")).toBe(true);
-			expect(store.has("eternal")).toBe(true);
-			expect(store.has("short-lived")).toBe(false);
-		}
-	});
+      // Should have removed 1 expired cursor
+      expect(pruned).toBe(1);
+      // Should still have 2 cursors
+      expect(store.list().length).toBe(2);
+      expect(store.has("long-lived")).toBe(true);
+      expect(store.has("eternal")).toBe(true);
+      expect(store.has("short-lived")).toBe(false);
+    }
+  });
 });
 
 // ============================================================================
@@ -622,100 +636,100 @@ describe("TTL and Expiration", () => {
 // ============================================================================
 
 describe("Cursor Encoding", () => {
-	it("encodeCursor returns URL-safe base64 string (no +, /, =)", () => {
-		const cursorResult = createCursor({
-			id: "test-id",
-			position: 100,
-			metadata: { query: "status:open" },
-			ttl: 3600000,
-		});
+  it("encodeCursor returns URL-safe base64 string (no +, /, =)", () => {
+    const cursorResult = createCursor({
+      id: "test-id",
+      position: 100,
+      metadata: { query: "status:open" },
+      ttl: 3_600_000,
+    });
 
-		expect(Result.isOk(cursorResult)).toBe(true);
-		if (Result.isOk(cursorResult)) {
-			const encoded = encodeCursor(cursorResult.value);
+    expect(Result.isOk(cursorResult)).toBe(true);
+    if (Result.isOk(cursorResult)) {
+      const encoded = encodeCursor(cursorResult.value);
 
-			// Should be a string
-			expect(typeof encoded).toBe("string");
-			// Should not contain URL-unsafe characters
-			expect(encoded).not.toMatch(/[+/=]/);
-			// Should only contain URL-safe base64 characters
-			expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
-		}
-	});
+      // Should be a string
+      expect(typeof encoded).toBe("string");
+      // Should not contain URL-unsafe characters
+      expect(encoded).not.toMatch(/[+/=]/);
+      // Should only contain URL-safe base64 characters
+      expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
+    }
+  });
 
-	it("decodeCursor restores all cursor properties (round-trip)", () => {
-		const originalCursor = createCursor({
-			id: "round-trip-id",
-			position: 42,
-			metadata: { filter: "active", pageSize: 25 },
-			ttl: 7200000,
-		});
+  it("decodeCursor restores all cursor properties (round-trip)", () => {
+    const originalCursor = createCursor({
+      id: "round-trip-id",
+      position: 42,
+      metadata: { filter: "active", pageSize: 25 },
+      ttl: 7_200_000,
+    });
 
-		expect(Result.isOk(originalCursor)).toBe(true);
-		if (Result.isOk(originalCursor)) {
-			const encoded = encodeCursor(originalCursor.value);
-			const decoded = decodeCursor(encoded);
+    expect(Result.isOk(originalCursor)).toBe(true);
+    if (Result.isOk(originalCursor)) {
+      const encoded = encodeCursor(originalCursor.value);
+      const decoded = decodeCursor(encoded);
 
-			expect(Result.isOk(decoded)).toBe(true);
-			if (Result.isOk(decoded)) {
-				expect(decoded.value.id).toBe(originalCursor.value.id);
-				expect(decoded.value.position).toBe(originalCursor.value.position);
-				expect(decoded.value.metadata).toEqual(originalCursor.value.metadata);
-				expect(decoded.value.ttl).toBe(originalCursor.value.ttl);
-				expect(decoded.value.expiresAt).toBe(originalCursor.value.expiresAt);
-				expect(decoded.value.createdAt).toBe(originalCursor.value.createdAt);
-			}
-		}
-	});
+      expect(Result.isOk(decoded)).toBe(true);
+      if (Result.isOk(decoded)) {
+        expect(decoded.value.id).toBe(originalCursor.value.id);
+        expect(decoded.value.position).toBe(originalCursor.value.position);
+        expect(decoded.value.metadata).toEqual(originalCursor.value.metadata);
+        expect(decoded.value.ttl).toBe(originalCursor.value.ttl);
+        expect(decoded.value.expiresAt).toBe(originalCursor.value.expiresAt);
+        expect(decoded.value.createdAt).toBe(originalCursor.value.createdAt);
+      }
+    }
+  });
 
-	it("decodeCursor returns ValidationError for invalid base64", () => {
-		// Invalid base64 string (contains invalid characters like !)
-		const result = decodeCursor("!!!not-valid-base64!!!");
+  it("decodeCursor returns ValidationError for invalid base64", () => {
+    // Invalid base64 string (contains invalid characters like !)
+    const result = decodeCursor("!!!not-valid-base64!!!");
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("decodeCursor returns ValidationError for invalid JSON", () => {
-		// Valid base64 but not valid JSON
-		// "not json" in URL-safe base64
-		const invalidJson = toBase64Url("not json");
-		const result = decodeCursor(invalidJson);
+  it("decodeCursor returns ValidationError for invalid JSON", () => {
+    // Valid base64 but not valid JSON
+    // "not json" in URL-safe base64
+    const invalidJson = toBase64Url("not json");
+    const result = decodeCursor(invalidJson);
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("decodeCursor returns ValidationError for missing required fields", () => {
-		// Valid JSON but missing required cursor fields
-		const incompleteData = { position: 10 }; // missing id, createdAt
-		const encoded = toBase64Url(JSON.stringify(incompleteData));
-		const result = decodeCursor(encoded);
+  it("decodeCursor returns ValidationError for missing required fields", () => {
+    // Valid JSON but missing required cursor fields
+    const incompleteData = { position: 10 }; // missing id, createdAt
+    const encoded = toBase64Url(JSON.stringify(incompleteData));
+    const result = decodeCursor(encoded);
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 
-	it("decodeCursor returns ValidationError for negative position", () => {
-		const invalidData = {
-			id: "cursor-negative",
-			position: -1,
-			createdAt: Date.now(),
-		};
-		const encoded = toBase64Url(JSON.stringify(invalidData));
-		const result = decodeCursor(encoded);
+  it("decodeCursor returns ValidationError for negative position", () => {
+    const invalidData = {
+      id: "cursor-negative",
+      position: -1,
+      createdAt: Date.now(),
+    };
+    const encoded = toBase64Url(JSON.stringify(invalidData));
+    const result = decodeCursor(encoded);
 
-		expect(Result.isError(result)).toBe(true);
-		if (Result.isError(result)) {
-			expect(result.error._tag).toBe("ValidationError");
-		}
-	});
+    expect(Result.isError(result)).toBe(true);
+    if (Result.isError(result)) {
+      expect(result.error._tag).toBe("ValidationError");
+    }
+  });
 });
 
 // ============================================================================
@@ -723,213 +737,221 @@ describe("Cursor Encoding", () => {
 // ============================================================================
 
 describe("Pagination Helpers", () => {
-	describe("paginate()", () => {
-		it("extracts correct page slice based on cursor position and limit", async () => {
-			const { paginate, createCursor } = await import("../index.js");
-			const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  describe("paginate()", () => {
+    it("extracts correct page slice based on cursor position and limit", async () => {
+      const { paginate, createCursor } = await import("../index.js");
+      const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-			// Cursor at position 0 with limit 3
-			const cursorResult = createCursor({
-				id: "page-cursor",
-				position: 0,
-				metadata: { limit: 3 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      // Cursor at position 0 with limit 3
+      const cursorResult = createCursor({
+        id: "page-cursor",
+        position: 0,
+        metadata: { limit: 3 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page, nextCursor } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page, nextCursor } = paginate(items, cursorResult.value);
 
-				expect(page).toEqual([1, 2, 3]);
-				expect(nextCursor).not.toBeNull();
-				expect(nextCursor?.position).toBe(3);
-			}
-		});
+        expect(page).toEqual([1, 2, 3]);
+        expect(nextCursor).not.toBeNull();
+        expect(nextCursor?.position).toBe(3);
+      }
+    });
 
-		it("returns null nextCursor when exhausted (offset + limit >= items.length)", async () => {
-			const { paginate, createCursor } = await import("../index.js");
-			const items = [1, 2, 3, 4, 5];
+    it("returns null nextCursor when exhausted (offset + limit >= items.length)", async () => {
+      const { paginate, createCursor } = await import("../index.js");
+      const items = [1, 2, 3, 4, 5];
 
-			// Cursor at position 3 with limit 3 -> only 2 items left
-			const cursorResult = createCursor({
-				id: "last-page",
-				position: 3,
-				metadata: { limit: 3 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      // Cursor at position 3 with limit 3 -> only 2 items left
+      const cursorResult = createCursor({
+        id: "last-page",
+        position: 3,
+        metadata: { limit: 3 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page, nextCursor } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page, nextCursor } = paginate(items, cursorResult.value);
 
-				expect(page).toEqual([4, 5]);
-				expect(nextCursor).toBeNull();
-			}
-		});
+        expect(page).toEqual([4, 5]);
+        expect(nextCursor).toBeNull();
+      }
+    });
 
-		it("handles empty array", async () => {
-			const { paginate, createCursor } = await import("../index.js");
-			const items: number[] = [];
+    it("handles empty array", async () => {
+      const { paginate, createCursor } = await import("../index.js");
+      const items: number[] = [];
 
-			const cursorResult = createCursor({
-				id: "empty-cursor",
-				position: 0,
-				metadata: { limit: 10 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "empty-cursor",
+        position: 0,
+        metadata: { limit: 10 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page, nextCursor } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page, nextCursor } = paginate(items, cursorResult.value);
 
-				expect(page).toEqual([]);
-				expect(nextCursor).toBeNull();
-			}
-		});
+        expect(page).toEqual([]);
+        expect(nextCursor).toBeNull();
+      }
+    });
 
-		it("handles exact fit (items.length === offset + limit)", async () => {
-			const { paginate, createCursor } = await import("../index.js");
-			const items = [1, 2, 3, 4, 5];
+    it("handles exact fit (items.length === offset + limit)", async () => {
+      const { paginate, createCursor } = await import("../index.js");
+      const items = [1, 2, 3, 4, 5];
 
-			// Position 0, limit 5 = exact fit
-			const cursorResult = createCursor({
-				id: "exact-fit",
-				position: 0,
-				metadata: { limit: 5 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      // Position 0, limit 5 = exact fit
+      const cursorResult = createCursor({
+        id: "exact-fit",
+        position: 0,
+        metadata: { limit: 5 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page, nextCursor } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page, nextCursor } = paginate(items, cursorResult.value);
 
-				expect(page).toEqual([1, 2, 3, 4, 5]);
-				expect(nextCursor).toBeNull();
-			}
-		});
+        expect(page).toEqual([1, 2, 3, 4, 5]);
+        expect(nextCursor).toBeNull();
+      }
+    });
 
-		it("uses default limit when not specified in metadata", async () => {
-			const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import("../index.js");
-			const items = Array.from({ length: 100 }, (_, i) => i + 1);
+    it("uses default limit when not specified in metadata", async () => {
+      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import(
+        "../index.js"
+      );
+      const items = Array.from({ length: 100 }, (_, i) => i + 1);
 
-			const cursorResult = createCursor({
-				id: "no-limit",
-				position: 0,
-				// No limit in metadata
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "no-limit",
+        position: 0,
+        // No limit in metadata
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page } = paginate(items, cursorResult.value);
 
-				// Should use default limit
-				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
-			}
-		});
+        // Should use default limit
+        expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
+      }
+    });
 
-		it("falls back to default limit when limit is non-positive", async () => {
-			const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import("../index.js");
-			const items = Array.from({ length: 50 }, (_, i) => i + 1);
+    it("falls back to default limit when limit is non-positive", async () => {
+      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import(
+        "../index.js"
+      );
+      const items = Array.from({ length: 50 }, (_, i) => i + 1);
 
-			const cursorResult = createCursor({
-				id: "zero-limit",
-				position: 0,
-				metadata: { limit: 0 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "zero-limit",
+        position: 0,
+        metadata: { limit: 0 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const { page, nextCursor } = paginate(items, cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        const { page, nextCursor } = paginate(items, cursorResult.value);
 
-				expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
-				expect(nextCursor?.position).toBe(DEFAULT_PAGE_LIMIT);
-			}
-		});
-	});
+        expect(page.length).toBe(DEFAULT_PAGE_LIMIT);
+        expect(nextCursor?.position).toBe(DEFAULT_PAGE_LIMIT);
+      }
+    });
+  });
 
-	describe("loadCursor() and saveCursor()", () => {
-		it("loadCursor returns Ok(null) when cursor not found", async () => {
-			const { loadCursor, createPaginationStore } = await import("../index.js");
-			const store = createPaginationStore();
+  describe("loadCursor() and saveCursor()", () => {
+    it("loadCursor returns Ok(null) when cursor not found", async () => {
+      const { loadCursor, createPaginationStore } = await import("../index.js");
+      const store = createPaginationStore();
 
-			const result = loadCursor("nonexistent", store);
+      const result = loadCursor("nonexistent", store);
 
-			expect(Result.isOk(result)).toBe(true);
-			if (Result.isOk(result)) {
-				expect(result.value).toBeNull();
-			}
-		});
+      expect(Result.isOk(result)).toBe(true);
+      if (Result.isOk(result)) {
+        expect(result.value).toBeNull();
+      }
+    });
 
-		it("loadCursor returns stored cursor when found", async () => {
-			const { loadCursor, saveCursor, createCursor, createPaginationStore } = await import(
-				"../index.js"
-			);
-			const store = createPaginationStore();
+    it("loadCursor returns stored cursor when found", async () => {
+      const { loadCursor, saveCursor, createCursor, createPaginationStore } =
+        await import("../index.js");
+      const store = createPaginationStore();
 
-			const cursorResult = createCursor({
-				id: "stored-cursor",
-				position: 42,
-				metadata: { limit: 25 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "stored-cursor",
+        position: 42,
+        metadata: { limit: 25 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				saveCursor(cursorResult.value, store);
-				const result = loadCursor("stored-cursor", store);
+      if (Result.isOk(cursorResult)) {
+        saveCursor(cursorResult.value, store);
+        const result = loadCursor("stored-cursor", store);
 
-				expect(Result.isOk(result)).toBe(true);
-				if (Result.isOk(result)) {
-					expect(result.value).not.toBeNull();
-					expect(result.value?.id).toBe("stored-cursor");
-					expect(result.value?.position).toBe(42);
-				}
-			}
-		});
+        expect(Result.isOk(result)).toBe(true);
+        if (Result.isOk(result)) {
+          expect(result.value).not.toBeNull();
+          expect(result.value?.id).toBe("stored-cursor");
+          expect(result.value?.position).toBe(42);
+        }
+      }
+    });
 
-		it("saveCursor persists cursor to store", async () => {
-			const { saveCursor, createCursor, createPaginationStore } = await import("../index.js");
-			const store = createPaginationStore();
+    it("saveCursor persists cursor to store", async () => {
+      const { saveCursor, createCursor, createPaginationStore } = await import(
+        "../index.js"
+      );
+      const store = createPaginationStore();
 
-			const cursorResult = createCursor({
-				id: "save-test",
-				position: 100,
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "save-test",
+        position: 100,
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				const saveResult = saveCursor(cursorResult.value, store);
+      if (Result.isOk(cursorResult)) {
+        const saveResult = saveCursor(cursorResult.value, store);
 
-				expect(Result.isOk(saveResult)).toBe(true);
-				// Verify it's in the store
-				expect(store.get("save-test")).not.toBeNull();
-			}
-		});
+        expect(Result.isOk(saveResult)).toBe(true);
+        // Verify it's in the store
+        expect(store.get("save-test")).not.toBeNull();
+      }
+    });
 
-		it("default memory store works across load/save", async () => {
-			const { loadCursor, saveCursor, createCursor, getDefaultPaginationStore } = await import(
-				"../index.js"
-			);
+    it("default memory store works across load/save", async () => {
+      const {
+        loadCursor,
+        saveCursor,
+        createCursor,
+        getDefaultPaginationStore,
+      } = await import("../index.js");
 
-			// Verify the default store is accessible
-			const _store = getDefaultPaginationStore();
-			expect(_store).toBeDefined();
+      // Verify the default store is accessible
+      const _store = getDefaultPaginationStore();
+      expect(_store).toBeDefined();
 
-			const cursorResult = createCursor({
-				id: "default-store-test",
-				position: 50,
-				metadata: { limit: 10 },
-			});
-			expect(Result.isOk(cursorResult)).toBe(true);
+      const cursorResult = createCursor({
+        id: "default-store-test",
+        position: 50,
+        metadata: { limit: 10 },
+      });
+      expect(Result.isOk(cursorResult)).toBe(true);
 
-			if (Result.isOk(cursorResult)) {
-				// Save without explicit store (uses default)
-				saveCursor(cursorResult.value);
+      if (Result.isOk(cursorResult)) {
+        // Save without explicit store (uses default)
+        saveCursor(cursorResult.value);
 
-				// Load without explicit store (uses default)
-				const result = loadCursor("default-store-test");
+        // Load without explicit store (uses default)
+        const result = loadCursor("default-store-test");
 
-				expect(Result.isOk(result)).toBe(true);
-				if (Result.isOk(result)) {
-					expect(result.value?.id).toBe("default-store-test");
-					expect(result.value?.position).toBe(50);
-				}
-			}
-		});
-	});
+        expect(Result.isOk(result)).toBe(true);
+        if (Result.isOk(result)) {
+          expect(result.value?.id).toBe("default-store-test");
+          expect(result.value?.position).toBe(50);
+        }
+      }
+    });
+  });
 });

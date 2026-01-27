@@ -28,9 +28,9 @@ const UNSAFE_PATH_PATTERN = /(?:^|[\\/])\.\.(?:[\\/]|$)|^[\\/]|^[a-zA-Z]:/;
  * @throws Error if path contains traversal or absolute path indicators
  */
 function validatePathComponent(component: string, name: string): void {
-	if (UNSAFE_PATH_PATTERN.test(component)) {
-		throw new Error(`Security: path traversal detected in ${name}`);
-	}
+  if (UNSAFE_PATH_PATTERN.test(component)) {
+    throw new Error(`Security: path traversal detected in ${name}`);
+  }
 }
 
 /**
@@ -40,16 +40,15 @@ function validatePathComponent(component: string, name: string): void {
  * - Linux/other: ~/.local/state
  */
 function getDefaultStateHome(): string {
-	const home = os.homedir();
-	switch (process.platform) {
-		case "darwin":
-			return path.join(home, "Library", "Application Support");
-		case "win32":
-			// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-			return process.env["LOCALAPPDATA"] ?? path.join(home, "AppData", "Local");
-		default:
-			return path.join(home, ".local", "state");
-	}
+  const home = os.homedir();
+  switch (process.platform) {
+    case "darwin":
+      return path.join(home, "Library", "Application Support");
+    case "win32":
+      return process.env["LOCALAPPDATA"] ?? path.join(home, "AppData", "Local");
+    default:
+      return path.join(home, ".local", "state");
+  }
 }
 
 /**
@@ -60,21 +59,19 @@ function getDefaultStateHome(): string {
  * @throws Error if path components contain traversal attempts
  */
 function getStatePath(options: CursorOptions): string {
-	// Validate all path components for security
-	validatePathComponent(options.command, "command");
-	validatePathComponent(options.toolName, "toolName");
-	if (options.context) {
-		validatePathComponent(options.context, "context");
-	}
+  // Validate all path components for security
+  validatePathComponent(options.command, "command");
+  validatePathComponent(options.toolName, "toolName");
+  if (options.context) {
+    validatePathComponent(options.context, "context");
+  }
 
-	const xdgState =
-		// biome-ignore lint/complexity/useLiteralKeys: TypeScript noPropertyAccessFromIndexSignature requires bracket notation
-		process.env["XDG_STATE_HOME"] ?? getDefaultStateHome();
-	const parts = [xdgState, options.toolName, "cursors", options.command];
-	if (options.context) {
-		parts.push(options.context);
-	}
-	return path.join(...parts, "cursor.json");
+  const xdgState = process.env["XDG_STATE_HOME"] ?? getDefaultStateHome();
+  const parts = [xdgState, options.toolName, "cursors", options.command];
+  if (options.context) {
+    parts.push(options.context);
+  }
+  return path.join(...parts, "cursor.json");
 }
 
 /**
@@ -96,45 +93,46 @@ function getStatePath(options: CursorOptions): string {
  * }
  * ```
  */
-export function loadCursor(options: CursorOptions): PaginationState | undefined {
-	const statePath = getStatePath(options);
+export function loadCursor(
+  options: CursorOptions
+): PaginationState | undefined {
+  const statePath = getStatePath(options);
 
-	if (!fs.existsSync(statePath)) {
-		return undefined;
-	}
+  if (!fs.existsSync(statePath)) {
+    return undefined;
+  }
 
-	try {
-		const content = fs.readFileSync(statePath, "utf-8");
-		const parsed = JSON.parse(content) as unknown;
+  try {
+    const content = fs.readFileSync(statePath, "utf-8");
+    const parsed = JSON.parse(content) as unknown;
 
-		// Validate required structure - cursor must be a string
-		if (
-			typeof parsed !== "object" ||
-			parsed === null ||
-			// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-			typeof (parsed as Record<string, unknown>)["cursor"] !== "string"
-		) {
-			return undefined;
-		}
+    // Validate required structure - cursor must be a string
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as Record<string, unknown>)["cursor"] !== "string"
+    ) {
+      return undefined;
+    }
 
-		const state = parsed as PaginationState;
+    const state = parsed as PaginationState;
 
-		if (options.maxAgeMs !== undefined) {
-			if (typeof state.timestamp !== "number") {
-				return undefined;
-			}
+    if (options.maxAgeMs !== undefined) {
+      if (typeof state.timestamp !== "number") {
+        return undefined;
+      }
 
-			const ageMs = Date.now() - state.timestamp;
-			if (ageMs > options.maxAgeMs) {
-				return undefined;
-			}
-		}
+      const ageMs = Date.now() - state.timestamp;
+      if (ageMs > options.maxAgeMs) {
+        return undefined;
+      }
+    }
 
-		return state;
-	} catch {
-		// Return undefined for corrupted/invalid JSON
-		return undefined;
-	}
+    return state;
+  } catch {
+    // Return undefined for corrupted/invalid JSON
+    return undefined;
+  }
 }
 
 /**
@@ -159,24 +157,24 @@ export function loadCursor(options: CursorOptions): PaginationState | undefined 
  * ```
  */
 export function saveCursor(cursor: string, options: CursorOptions): void {
-	const statePath = getStatePath(options);
-	const stateDir = path.dirname(statePath);
+  const statePath = getStatePath(options);
+  const stateDir = path.dirname(statePath);
 
-	// Create parent directories if needed
-	fs.mkdirSync(stateDir, { recursive: true });
+  // Create parent directories if needed
+  fs.mkdirSync(stateDir, { recursive: true });
 
-	// Build the pagination state
-	const state: PaginationState = {
-		cursor,
-		command: options.command,
-		timestamp: Date.now(),
-		hasMore: options.hasMore ?? true,
-		...(options.context && { context: options.context }),
-		...(options.total !== undefined && { total: options.total }),
-	};
+  // Build the pagination state
+  const state: PaginationState = {
+    cursor,
+    command: options.command,
+    timestamp: Date.now(),
+    hasMore: options.hasMore ?? true,
+    ...(options.context && { context: options.context }),
+    ...(options.total !== undefined && { total: options.total }),
+  };
 
-	// Write state to file
-	fs.writeFileSync(statePath, JSON.stringify(state), "utf-8");
+  // Write state to file
+  fs.writeFileSync(statePath, JSON.stringify(state), "utf-8");
 }
 
 /**
@@ -198,13 +196,13 @@ export function saveCursor(cursor: string, options: CursorOptions): void {
  * ```
  */
 export function clearCursor(options: CursorOptions): void {
-	const statePath = getStatePath(options);
+  const statePath = getStatePath(options);
 
-	try {
-		if (fs.existsSync(statePath)) {
-			fs.unlinkSync(statePath);
-		}
-	} catch {
-		// Don't throw for missing files or directories
-	}
+  try {
+    if (fs.existsSync(statePath)) {
+      fs.unlinkSync(statePath);
+    }
+  } catch {
+    // Don't throw for missing files or directories
+  }
 }

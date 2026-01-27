@@ -30,20 +30,25 @@
 // Environment Variable Access
 // ============================================================================
 
-export {
-	env,
-	parseEnv,
-	portSchema,
-	booleanSchema,
-	optionalBooleanSchema,
-	getEnvBoolean,
-} from "./env.js";
 export type { Env } from "./env.js";
+export {
+  booleanSchema,
+  env,
+  getEnvBoolean,
+  optionalBooleanSchema,
+  parseEnv,
+  portSchema,
+} from "./env.js";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { TaggedErrorClass } from "@outfitter/contracts";
-import { NotFoundError, Result, TaggedError, ValidationError } from "@outfitter/contracts";
+import {
+  NotFoundError,
+  Result,
+  TaggedError,
+  ValidationError,
+} from "@outfitter/contracts";
 import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
 import { parse as parseYaml } from "yaml";
@@ -53,19 +58,20 @@ import type { ZodSchema } from "zod";
 // Error Types
 // ============================================================================
 
+// biome-ignore lint/style/useConsistentTypeDefinitions: type required for TaggedError constraint
 type ParseErrorFields = {
-	/** Human-readable error message describing the parse failure */
-	message: string;
-	/** Name of the file that failed to parse */
-	filename: string;
-	/** Line number where the error occurred (if available) */
-	line?: number;
-	/** Column number where the error occurred (if available) */
-	column?: number;
+  /** Human-readable error message describing the parse failure */
+  message: string;
+  /** Name of the file that failed to parse */
+  filename: string;
+  /** Line number where the error occurred (if available) */
+  line?: number;
+  /** Column number where the error occurred (if available) */
+  column?: number;
 };
 
 const ParseErrorBase: TaggedErrorClass<"ParseError", ParseErrorFields> =
-	TaggedError("ParseError")<ParseErrorFields>();
+  TaggedError("ParseError")<ParseErrorFields>();
 
 /**
  * Error thrown when a configuration file cannot be parsed.
@@ -82,7 +88,7 @@ const ParseErrorBase: TaggedErrorClass<"ParseError", ParseErrorFields> =
  * ```
  */
 export class ParseError extends ParseErrorBase {
-	readonly category = "validation" as const;
+  readonly category = "validation" as const;
 }
 
 // ============================================================================
@@ -109,13 +115,11 @@ export class ParseError extends ParseErrorBase {
  * ```
  */
 export function getConfigDir(appName: string): string {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const home = process.env["HOME"] ?? "";
+  const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+  const home = process.env["HOME"] ?? "";
 
-	const baseDir = xdgConfigHome ?? join(home, ".config");
-	return join(baseDir, appName);
+  const baseDir = xdgConfigHome ?? join(home, ".config");
+  return join(baseDir, appName);
 }
 
 /**
@@ -138,13 +142,11 @@ export function getConfigDir(appName: string): string {
  * ```
  */
 export function getDataDir(appName: string): string {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgDataHome = process.env["XDG_DATA_HOME"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const home = process.env["HOME"] ?? "";
+  const xdgDataHome = process.env["XDG_DATA_HOME"];
+  const home = process.env["HOME"] ?? "";
 
-	const baseDir = xdgDataHome ?? join(home, ".local", "share");
-	return join(baseDir, appName);
+  const baseDir = xdgDataHome ?? join(home, ".local", "share");
+  return join(baseDir, appName);
 }
 
 /**
@@ -167,13 +169,11 @@ export function getDataDir(appName: string): string {
  * ```
  */
 export function getCacheDir(appName: string): string {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgCacheHome = process.env["XDG_CACHE_HOME"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const home = process.env["HOME"] ?? "";
+  const xdgCacheHome = process.env["XDG_CACHE_HOME"];
+  const home = process.env["HOME"] ?? "";
 
-	const baseDir = xdgCacheHome ?? join(home, ".cache");
-	return join(baseDir, appName);
+  const baseDir = xdgCacheHome ?? join(home, ".cache");
+  return join(baseDir, appName);
 }
 
 /**
@@ -196,13 +196,11 @@ export function getCacheDir(appName: string): string {
  * ```
  */
 export function getStateDir(appName: string): string {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgStateHome = process.env["XDG_STATE_HOME"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const home = process.env["HOME"] ?? "";
+  const xdgStateHome = process.env["XDG_STATE_HOME"];
+  const home = process.env["HOME"] ?? "";
 
-	const baseDir = xdgStateHome ?? join(home, ".local", "state");
-	return join(baseDir, appName);
+  const baseDir = xdgStateHome ?? join(home, ".local", "state");
+  return join(baseDir, appName);
 }
 
 // ============================================================================
@@ -214,14 +212,14 @@ export function getStateDir(appName: string): string {
  * @internal
  */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-	if (value === null || typeof value !== "object") {
-		return false;
-	}
-	// Arrays are not plain objects
-	if (Array.isArray(value)) {
-		return false;
-	}
-	return true;
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  // Arrays are not plain objects
+  if (Array.isArray(value)) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -263,44 +261,44 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
  * ```
  */
 export function deepMerge<T extends object>(target: T, source: Partial<T>): T {
-	// Create a new object to avoid mutating the original
-	const result = { ...target } as Record<string, unknown>;
+  // Create a new object to avoid mutating the original
+  const result = { ...target } as Record<string, unknown>;
 
-	for (const key of Object.keys(source)) {
-		const sourceValue = (source as Record<string, unknown>)[key];
-		const targetValue = result[key];
+  for (const key of Object.keys(source)) {
+    const sourceValue = (source as Record<string, unknown>)[key];
+    const targetValue = result[key];
 
-		// undefined doesn't override
-		if (sourceValue === undefined) {
-			continue;
-		}
+    // undefined doesn't override
+    if (sourceValue === undefined) {
+      continue;
+    }
 
-		// null explicitly replaces
-		if (sourceValue === null) {
-			result[key] = null;
-			continue;
-		}
+    // null explicitly replaces
+    if (sourceValue === null) {
+      result[key] = null;
+      continue;
+    }
 
-		// Arrays replace (not merge)
-		if (Array.isArray(sourceValue)) {
-			result[key] = sourceValue;
-			continue;
-		}
+    // Arrays replace (not merge)
+    if (Array.isArray(sourceValue)) {
+      result[key] = sourceValue;
+      continue;
+    }
 
-		// Recursively merge plain objects
-		if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
-			result[key] = deepMerge(
-				targetValue as Record<string, unknown>,
-				sourceValue as Partial<Record<string, unknown>>,
-			);
-			continue;
-		}
+    // Recursively merge plain objects
+    if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
+      result[key] = deepMerge(
+        targetValue as Record<string, unknown>,
+        sourceValue as Partial<Record<string, unknown>>
+      );
+      continue;
+    }
 
-		// Otherwise, source replaces target
-		result[key] = sourceValue;
-	}
+    // Otherwise, source replaces target
+    result[key] = sourceValue;
+  }
 
-	return result as T;
+  return result as T;
 }
 
 // ============================================================================
@@ -312,11 +310,11 @@ export function deepMerge<T extends object>(target: T, source: Partial<T>): T {
  * @internal
  */
 function getExtension(filename: string): string {
-	const lastDot = filename.lastIndexOf(".");
-	if (lastDot === -1) {
-		return "";
-	}
-	return filename.slice(lastDot + 1).toLowerCase();
+  const lastDot = filename.lastIndexOf(".");
+  if (lastDot === -1) {
+    return "";
+  }
+  return filename.slice(lastDot + 1).toLowerCase();
 }
 
 /**
@@ -364,57 +362,58 @@ function getExtension(filename: string): string {
  * ```
  */
 export function parseConfigFile(
-	content: string,
-	filename: string,
+  content: string,
+  filename: string
 ): Result<Record<string, unknown>, InstanceType<typeof ParseError>> {
-	const ext = getExtension(filename);
+  const ext = getExtension(filename);
 
-	try {
-		switch (ext) {
-			case "toml": {
-				const parsed = parseToml(content);
-				return Result.ok(parsed as Record<string, unknown>);
-			}
+  try {
+    switch (ext) {
+      case "toml": {
+        const parsed = parseToml(content);
+        return Result.ok(parsed as Record<string, unknown>);
+      }
 
-			case "yaml":
-			case "yml": {
-				// Enable merge key support for YAML anchors/aliases
-				const parsed = parseYaml(content, { merge: true });
-				if (parsed === null || typeof parsed !== "object") {
-					return Result.ok({});
-				}
-				return Result.ok(parsed as Record<string, unknown>);
-			}
+      case "yaml":
+      case "yml": {
+        // Enable merge key support for YAML anchors/aliases
+        const parsed = parseYaml(content, { merge: true });
+        if (parsed === null || typeof parsed !== "object") {
+          return Result.ok({});
+        }
+        return Result.ok(parsed as Record<string, unknown>);
+      }
 
-			case "json": {
-				// Use strict JSON parsing for .json files
-				const parsed = JSON.parse(content);
-				return Result.ok(parsed as Record<string, unknown>);
-			}
+      case "json": {
+        // Use strict JSON parsing for .json files
+        const parsed = JSON.parse(content);
+        return Result.ok(parsed as Record<string, unknown>);
+      }
 
-			case "json5": {
-				const parsed = JSON5.parse(content);
-				return Result.ok(parsed as Record<string, unknown>);
-			}
+      case "json5": {
+        const parsed = JSON5.parse(content);
+        return Result.ok(parsed as Record<string, unknown>);
+      }
 
-			default: {
-				return Result.err(
-					new ParseError({
-						message: `Unsupported config file extension: .${ext}`,
-						filename,
-					}),
-				);
-			}
-		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown parse error";
-		return Result.err(
-			new ParseError({
-				message: `Failed to parse ${filename}: ${message}`,
-				filename,
-			}),
-		);
-	}
+      default: {
+        return Result.err(
+          new ParseError({
+            message: `Unsupported config file extension: .${ext}`,
+            filename,
+          })
+        );
+      }
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown parse error";
+    return Result.err(
+      new ParseError({
+        message: `Failed to parse ${filename}: ${message}`,
+        filename,
+      })
+    );
+  }
 }
 
 // ============================================================================
@@ -440,14 +439,14 @@ export function parseConfigFile(
  * ```
  */
 export interface ConfigSources<T> {
-	/** Default values (lowest precedence) */
-	defaults?: Partial<T>;
-	/** Values loaded from config file */
-	file?: Partial<T>;
-	/** Values from environment variables */
-	env?: Partial<T>;
-	/** CLI flag values (highest precedence) */
-	flags?: Partial<T>;
+  /** Default values (lowest precedence) */
+  defaults?: Partial<T>;
+  /** Values loaded from config file */
+  file?: Partial<T>;
+  /** Values from environment variables */
+  env?: Partial<T>;
+  /** CLI flag values (highest precedence) */
+  flags?: Partial<T>;
 }
 
 /**
@@ -486,47 +485,50 @@ export interface ConfigSources<T> {
  * ```
  */
 export function resolveConfig<T>(
-	schema: ZodSchema<T>,
-	sources: ConfigSources<T>,
-): Result<T, InstanceType<typeof ValidationError> | InstanceType<typeof ParseError>> {
-	// Start with empty object and merge in precedence order
-	let merged: Record<string, unknown> = {};
+  schema: ZodSchema<T>,
+  sources: ConfigSources<T>
+): Result<
+  T,
+  InstanceType<typeof ValidationError> | InstanceType<typeof ParseError>
+> {
+  // Start with empty object and merge in precedence order
+  let merged: Record<string, unknown> = {};
 
-	if (sources.defaults) {
-		merged = deepMerge(merged, sources.defaults as Record<string, unknown>);
-	}
+  if (sources.defaults) {
+    merged = deepMerge(merged, sources.defaults as Record<string, unknown>);
+  }
 
-	if (sources.file) {
-		merged = deepMerge(merged, sources.file as Record<string, unknown>);
-	}
+  if (sources.file) {
+    merged = deepMerge(merged, sources.file as Record<string, unknown>);
+  }
 
-	if (sources.env) {
-		merged = deepMerge(merged, sources.env as Record<string, unknown>);
-	}
+  if (sources.env) {
+    merged = deepMerge(merged, sources.env as Record<string, unknown>);
+  }
 
-	if (sources.flags) {
-		merged = deepMerge(merged, sources.flags as Record<string, unknown>);
-	}
+  if (sources.flags) {
+    merged = deepMerge(merged, sources.flags as Record<string, unknown>);
+  }
 
-	// Validate against schema
-	const parseResult = schema.safeParse(merged);
+  // Validate against schema
+  const parseResult = schema.safeParse(merged);
 
-	if (!parseResult.success) {
-		const issues = parseResult.error.issues;
-		const firstIssue = issues[0];
-		const path = firstIssue?.path?.join(".") ?? "";
-		const message = firstIssue?.message ?? "Validation failed";
-		const fullMessage = path ? `${path}: ${message}` : message;
+  if (!parseResult.success) {
+    const issues = parseResult.error.issues;
+    const firstIssue = issues[0];
+    const path = firstIssue?.path?.join(".") ?? "";
+    const message = firstIssue?.message ?? "Validation failed";
+    const fullMessage = path ? `${path}: ${message}` : message;
 
-		return Result.err(
-			new ValidationError({
-				message: fullMessage,
-				...(path ? { field: path } : {}),
-			}),
-		);
-	}
+    return Result.err(
+      new ValidationError({
+        message: fullMessage,
+        ...(path ? { field: path } : {}),
+      })
+    );
+  }
 
-	return Result.ok(parseResult.data);
+  return Result.ok(parseResult.data);
 }
 
 // ============================================================================
@@ -547,12 +549,12 @@ const CONFIG_EXTENSIONS = ["toml", "yaml", "yml", "json", "json5"];
  * ```
  */
 export interface LoadConfigOptions {
-	/**
-	 * Custom search paths to check for config files.
-	 * When provided, overrides the default XDG-based search paths.
-	 * Paths are searched in order; first match wins.
-	 */
-	searchPaths?: string[];
+  /**
+   * Custom search paths to check for config files.
+   * When provided, overrides the default XDG-based search paths.
+   * Paths are searched in order; first match wins.
+   */
+  searchPaths?: string[];
 }
 
 /**
@@ -561,13 +563,13 @@ export interface LoadConfigOptions {
  * @internal
  */
 function findConfigFile(dir: string): string | undefined {
-	for (const ext of CONFIG_EXTENSIONS) {
-		const filePath = join(dir, `config.${ext}`);
-		if (existsSync(filePath)) {
-			return filePath;
-		}
-	}
-	return undefined;
+  for (const ext of CONFIG_EXTENSIONS) {
+    const filePath = join(dir, `config.${ext}`);
+    if (existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -576,22 +578,20 @@ function findConfigFile(dir: string): string | undefined {
  * @internal
  */
 function getDefaultSearchPaths(appName: string): string[] {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const home = process.env["HOME"] ?? "";
-	const defaultConfigPath = join(home, ".config", appName);
+  const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+  const home = process.env["HOME"] ?? "";
+  const defaultConfigPath = join(home, ".config", appName);
 
-	// If XDG_CONFIG_HOME is set, search both the XDG path and ~/.config fallback
-	if (xdgConfigHome) {
-		const xdgPath = join(xdgConfigHome, appName);
-		// Only include both if they're different paths
-		if (xdgPath !== defaultConfigPath) {
-			return [xdgPath, defaultConfigPath];
-		}
-	}
+  // If XDG_CONFIG_HOME is set, search both the XDG path and ~/.config fallback
+  if (xdgConfigHome) {
+    const xdgPath = join(xdgConfigHome, appName);
+    // Only include both if they're different paths
+    if (xdgPath !== defaultConfigPath) {
+      return [xdgPath, defaultConfigPath];
+    }
+  }
 
-	return [defaultConfigPath];
+  return [defaultConfigPath];
 }
 
 /**
@@ -642,84 +642,82 @@ function getDefaultSearchPaths(appName: string): string[] {
  * });
  * ```
  */
-export async function loadConfig<T>(
-	appName: string,
-	schema: ZodSchema<T>,
-	options?: LoadConfigOptions,
-): Promise<
-	Result<
-		T,
-		| InstanceType<typeof NotFoundError>
-		| InstanceType<typeof ValidationError>
-		| InstanceType<typeof ParseError>
-	>
+export function loadConfig<T>(
+  appName: string,
+  schema: ZodSchema<T>,
+  options?: LoadConfigOptions
+): Result<
+  T,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ValidationError>
+  | InstanceType<typeof ParseError>
 > {
-	// Determine search paths
-	const searchPaths = options?.searchPaths
-		? options.searchPaths.map((p) => join(p, appName))
-		: getDefaultSearchPaths(appName);
+  // Determine search paths
+  const searchPaths = options?.searchPaths
+    ? options.searchPaths.map((p) => join(p, appName))
+    : getDefaultSearchPaths(appName);
 
-	// Find first existing config file
-	let configFilePath: string | undefined;
+  // Find first existing config file
+  let configFilePath: string | undefined;
 
-	for (const searchPath of searchPaths) {
-		const found = findConfigFile(searchPath);
-		if (found) {
-			configFilePath = found;
-			break;
-		}
-	}
+  for (const searchPath of searchPaths) {
+    const found = findConfigFile(searchPath);
+    if (found) {
+      configFilePath = found;
+      break;
+    }
+  }
 
-	if (!configFilePath) {
-		return Result.err(
-			new NotFoundError({
-				message: `Configuration file not found for ${appName}`,
-				resourceType: "config",
-				resourceId: appName,
-			}),
-		);
-	}
+  if (!configFilePath) {
+    return Result.err(
+      new NotFoundError({
+        message: `Configuration file not found for ${appName}`,
+        resourceType: "config",
+        resourceId: appName,
+      })
+    );
+  }
 
-	// Read and parse the config file
-	let content: string;
-	try {
-		content = readFileSync(configFilePath, "utf-8");
-	} catch {
-		return Result.err(
-			new NotFoundError({
-				message: `Failed to read config file: ${configFilePath}`,
-				resourceType: "config",
-				resourceId: configFilePath,
-			}),
-		);
-	}
+  // Read and parse the config file
+  let content: string;
+  try {
+    content = readFileSync(configFilePath, "utf-8");
+  } catch {
+    return Result.err(
+      new NotFoundError({
+        message: `Failed to read config file: ${configFilePath}`,
+        resourceType: "config",
+        resourceId: configFilePath,
+      })
+    );
+  }
 
-	// Parse the config file
-	const filename = configFilePath.split("/").pop() ?? "config";
-	const parseResult = parseConfigFile(content, filename);
+  // Parse the config file
+  const filename = configFilePath.split("/").pop() ?? "config";
+  const parseResult = parseConfigFile(content, filename);
 
-	if (parseResult.isErr()) {
-		return Result.err(parseResult.error);
-	}
+  if (parseResult.isErr()) {
+    return Result.err(parseResult.error);
+  }
 
-	// Validate against schema
-	const parsed = parseResult.unwrap();
-	const validateResult = schema.safeParse(parsed);
+  // Validate against schema
+  const parsed = parseResult.unwrap();
+  const validateResult = schema.safeParse(parsed);
 
-	if (!validateResult.success) {
-		const issues = validateResult.error.issues;
-		const firstIssue = issues[0];
-		const path = firstIssue?.path?.join(".") ?? "";
-		const message = firstIssue?.message ?? "Validation failed";
-		const fullMessage = path ? `${path}: ${message}` : message;
+  if (!validateResult.success) {
+    const issues = validateResult.error.issues;
+    const firstIssue = issues[0];
+    const path = firstIssue?.path?.join(".") ?? "";
+    const message = firstIssue?.message ?? "Validation failed";
+    const fullMessage = path ? `${path}: ${message}` : message;
 
-		return Result.err(
-			new ValidationError({
-				message: fullMessage,
-				...(path ? { field: path } : {}),
-			}),
-		);
-	}
+    return Result.err(
+      new ValidationError({
+        message: fullMessage,
+        ...(path ? { field: path } : {}),
+      })
+    );
+  }
 
-	return Result.ok(validateResult.data);
+  return Result.ok(validateResult.data);
 }

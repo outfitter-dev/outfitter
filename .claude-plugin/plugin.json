@@ -1,24 +1,24 @@
 {
-	"name": "stack",
-	"version": "0.1.0",
-	"description": "Outfitter Stack - Result types, Handler contract, error taxonomy, and transport-agnostic patterns for @outfitter/* packages",
-	"author": {
-		"name": "Outfitter",
-		"email": "team@outfitter.dev"
-	},
-	"license": "MIT",
-	"keywords": [
-		"outfitter-stack",
-		"result-types",
-		"handler-contract",
-		"error-taxonomy",
-		"migration",
-		"cli",
-		"mcp",
-		"daemon",
-		"logging"
-	],
-	"commands": "./packages/claude-plugin/commands/",
-	"agents": "./packages/claude-plugin/agents/",
-	"skills": "./packages/claude-plugin/skills/"
+  "name": "stack",
+  "version": "0.1.0",
+  "description": "Outfitter Stack - Result types, Handler contract, error taxonomy, and transport-agnostic patterns for @outfitter/* packages",
+  "author": {
+    "name": "Outfitter",
+    "email": "team@outfitter.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "outfitter-stack",
+    "result-types",
+    "handler-contract",
+    "error-taxonomy",
+    "migration",
+    "cli",
+    "mcp",
+    "daemon",
+    "logging"
+  ],
+  "commands": "./packages/claude-plugin/commands/",
+  "agents": "./packages/claude-plugin/agents/",
+  "skills": "./packages/claude-plugin/skills/"
 }

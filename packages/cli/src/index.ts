@@ -4,64 +4,59 @@
  * @packageDocumentation
  */
 
-// Re-export types
-export type {
-	// Core types
-	CLI,
-	CLIConfig,
-	CommandBuilder,
-	CommandConfig,
-	CommandAction,
-	CommandFlags,
-	// Output types
-	OutputMode,
-	OutputOptions,
-	// Input types
-	CollectIdsOptions,
-	ExpandFileOptions,
-	ParseGlobOptions,
-	NormalizeIdOptions,
-	ConfirmDestructiveOptions,
-	// Result types
-	Range,
-	NumericRange,
-	DateRange,
-	FilterExpression,
-	SortCriteria,
-	KeyValuePair,
-	// Error types
-	ValidationError,
-	CancelledError,
-	// Pagination types
-	PaginationState,
-	CursorOptions,
-} from "./types.js";
-
-// Core CLI factory
-export { createCLI } from "./cli.js";
-
-// Command builder
-export { command } from "./command.js";
-
+export type { BuildCliCommandsOptions } from "./actions.js";
 // Action adapter
 export { buildCliCommands } from "./actions.js";
-export type { BuildCliCommandsOptions } from "./actions.js";
-
-// Output utilities
-export { output, exitWithError } from "./output.js";
-
+// Core CLI factory
+export { createCLI } from "./cli.js";
+// Command builder
+export { command } from "./command.js";
 // Input utilities
 export {
-	collectIds,
-	expandFileArg,
-	parseGlob,
-	parseKeyValue,
-	parseRange,
-	parseFilter,
-	parseSortSpec,
-	normalizeId,
-	confirmDestructive,
+  collectIds,
+  confirmDestructive,
+  expandFileArg,
+  normalizeId,
+  parseFilter,
+  parseGlob,
+  parseKeyValue,
+  parseRange,
+  parseSortSpec,
 } from "./input.js";
 
+// Output utilities
+export { exitWithError, output } from "./output.js";
 // Pagination utilities
-export { loadCursor, saveCursor, clearCursor } from "./pagination.js";
+export { clearCursor, loadCursor, saveCursor } from "./pagination.js";
+// Re-export types
+export type {
+  CancelledError,
+  // Core types
+  CLI,
+  CLIConfig,
+  // Input types
+  CollectIdsOptions,
+  CommandAction,
+  CommandBuilder,
+  CommandConfig,
+  CommandFlags,
+  ConfirmDestructiveOptions,
+  CursorOptions,
+  DateRange,
+  ExpandFileOptions,
+  FilterExpression,
+  KeyValuePair,
+  NormalizeIdOptions,
+  NumericRange,
+  // Output types
+  OutputMode,
+  OutputOptions,
+  // Pagination types
+  PaginationState,
+  ParseGlobOptions,
+  // Result types
+  Range,
+  SortCriteria,
+  // Error types
+  ValidationError,
+} from "./types.js";

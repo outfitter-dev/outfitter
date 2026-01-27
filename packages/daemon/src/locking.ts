@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import type { Result } from "@outfitter/contracts";
 import { unlink } from "node:fs/promises";
+import type { Result } from "@outfitter/contracts";
 import { LockError } from "./errors.js";
 
 // ============================================================================
@@ -21,11 +21,11 @@ import { LockError } from "./errors.js";
  * Must be passed to `releaseDaemonLock` to properly release the lock.
  */
 export interface LockHandle {
-	/** Path to the lock file */
-	readonly lockPath: string;
+  /** Path to the lock file */
+  readonly lockPath: string;
 
-	/** PID that owns the lock */
-	readonly pid: number;
+  /** PID that owns the lock */
+  readonly pid: number;
 }
 
 // ============================================================================
@@ -51,22 +51,22 @@ export interface LockHandle {
  * ```
  */
 export function isProcessAlive(pid: number): boolean {
-	// Negative PIDs are invalid - they have special meaning in kill()
-	if (pid <= 0) {
-		return false;
-	}
+  // Negative PIDs are invalid - they have special meaning in kill()
+  if (pid <= 0) {
+    return false;
+  }
 
-	try {
-		// Signal 0 doesn't kill, just checks if process exists
-		process.kill(pid, 0);
-		return true;
-	} catch (error) {
-		// ESRCH = no such process, EPERM = exists but no permission
-		if (error instanceof Error && "code" in error && error.code === "EPERM") {
-			return true;
-		}
-		return false;
-	}
+  try {
+    // Signal 0 doesn't kill, just checks if process exists
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    // ESRCH = no such process, EPERM = exists but no permission
+    if (error instanceof Error && "code" in error && error.code === "EPERM") {
+      return true;
+    }
+    return false;
+  }
 }
 
 /**
@@ -84,26 +84,26 @@ export function isProcessAlive(pid: number): boolean {
  * ```
  */
 export async function isDaemonAlive(lockPath: string): Promise<boolean> {
-	const file = Bun.file(lockPath);
+  const file = Bun.file(lockPath);
 
-	if (!(await file.exists())) {
-		return false;
-	}
+  if (!(await file.exists())) {
+    return false;
+  }
 
-	try {
-		const content = await file.text();
-		const pid = parseInt(content.trim(), 10);
+  try {
+    const content = await file.text();
+    const pid = Number.parseInt(content.trim(), 10);
 
-		if (Number.isNaN(pid)) {
-			// Invalid lock file content
-			return false;
-		}
+    if (Number.isNaN(pid)) {
+      // Invalid lock file content
+      return false;
+    }
 
-		return isProcessAlive(pid);
-	} catch {
-		// Error reading file
-		return false;
-	}
+    return isProcessAlive(pid);
+  } catch {
+    // Error reading file
+    return false;
+  }
 }
 
 // ============================================================================
@@ -134,54 +134,56 @@ export async function isDaemonAlive(lockPath: string): Promise<boolean> {
  * }
  * ```
  */
-export async function acquireDaemonLock(lockPath: string): Promise<Result<LockHandle, LockError>> {
-	const file = Bun.file(lockPath);
+export async function acquireDaemonLock(
+  lockPath: string
+): Promise<Result<LockHandle, LockError>> {
+  const file = Bun.file(lockPath);
 
-	// Check if lock file exists with a valid PID
-	if (await file.exists()) {
-		try {
-			const content = await file.text();
-			const existingPid = parseInt(content.trim(), 10);
+  // Check if lock file exists with a valid PID
+  if (await file.exists()) {
+    try {
+      const content = await file.text();
+      const existingPid = Number.parseInt(content.trim(), 10);
 
-			if (!Number.isNaN(existingPid) && isProcessAlive(existingPid)) {
-				return {
-					isOk: () => false,
-					isErr: () => true,
-					error: new LockError({
-						message: `Daemon already running with PID ${existingPid}`,
-						lockPath,
-						pid: existingPid,
-					}),
-				} as Result<LockHandle, LockError>;
-			}
-			// Stale lock file - process no longer exists, continue to acquire
-		} catch {
-			// Error reading file, try to acquire anyway
-		}
-	}
+      if (!Number.isNaN(existingPid) && isProcessAlive(existingPid)) {
+        return {
+          isOk: () => false,
+          isErr: () => true,
+          error: new LockError({
+            message: `Daemon already running with PID ${existingPid}`,
+            lockPath,
+            pid: existingPid,
+          }),
+        } as Result<LockHandle, LockError>;
+      }
+      // Stale lock file - process no longer exists, continue to acquire
+    } catch {
+      // Error reading file, try to acquire anyway
+    }
+  }
 
-	// Write our PID atomically
-	const pid = process.pid;
+  // Write our PID atomically
+  const pid = process.pid;
 
-	try {
-		await Bun.write(lockPath, `${pid}\n`);
+  try {
+    await Bun.write(lockPath, `${pid}\n`);
 
-		return {
-			isOk: () => true,
-			isErr: () => false,
-			value: { lockPath, pid },
-		} as Result<LockHandle, LockError>;
-	} catch (error) {
-		return {
-			isOk: () => false,
-			isErr: () => true,
-			error: new LockError({
-				message: `Failed to write lock file: ${error instanceof Error ? error.message : String(error)}`,
-				lockPath,
-				pid,
-			}),
-		} as Result<LockHandle, LockError>;
-	}
+    return {
+      isOk: () => true,
+      isErr: () => false,
+      value: { lockPath, pid },
+    } as Result<LockHandle, LockError>;
+  } catch (error) {
+    return {
+      isOk: () => false,
+      isErr: () => true,
+      error: new LockError({
+        message: `Failed to write lock file: ${error instanceof Error ? error.message : String(error)}`,
+        lockPath,
+        pid,
+      }),
+    } as Result<LockHandle, LockError>;
+  }
 }
 
 /**
@@ -205,25 +207,25 @@ export async function acquireDaemonLock(lockPath: string): Promise<Result<LockHa
  * ```
  */
 export async function releaseDaemonLock(handle: LockHandle): Promise<void> {
-	const { lockPath, pid } = handle;
-	const file = Bun.file(lockPath);
+  const { lockPath, pid } = handle;
+  const file = Bun.file(lockPath);
 
-	if (!(await file.exists())) {
-		// Lock file already removed, nothing to do
-		return;
-	}
+  if (!(await file.exists())) {
+    // Lock file already removed, nothing to do
+    return;
+  }
 
-	try {
-		const content = await file.text();
-		const filePid = parseInt(content.trim(), 10);
+  try {
+    const content = await file.text();
+    const filePid = Number.parseInt(content.trim(), 10);
 
-		// Only remove if PID matches (our lock)
-		if (filePid === pid) {
-			await unlink(lockPath);
-		}
-	} catch {
-		// Best effort - if we can't release, just return
-	}
+    // Only remove if PID matches (our lock)
+    if (filePid === pid) {
+      await unlink(lockPath);
+    }
+  } catch {
+    // Best effort - if we can't release, just return
+  }
 }
 
 /**
@@ -234,18 +236,20 @@ export async function releaseDaemonLock(handle: LockHandle): Promise<void> {
  *
  * @internal
  */
-export async function readLockPid(lockPath: string): Promise<number | undefined> {
-	const file = Bun.file(lockPath);
+export async function readLockPid(
+  lockPath: string
+): Promise<number | undefined> {
+  const file = Bun.file(lockPath);
 
-	if (!(await file.exists())) {
-		return undefined;
-	}
+  if (!(await file.exists())) {
+    return undefined;
+  }
 
-	try {
-		const content = await file.text();
-		const pid = parseInt(content.trim(), 10);
-		return Number.isNaN(pid) ? undefined : pid;
-	} catch {
-		return undefined;
-	}
+  try {
+    const content = await file.text();
+    const pid = Number.parseInt(content.trim(), 10);
+    return Number.isNaN(pid) ? undefined : pid;
+  } catch {
+    return undefined;
+  }
 }

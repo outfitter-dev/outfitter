@@ -1,5 +1,5 @@
-import { TaggedError } from "better-result";
 import type { TaggedErrorClass } from "better-result";
+import { TaggedError } from "better-result";
 
 /**
  * Error categories for classification, exit codes, and HTTP status mapping.
@@ -11,32 +11,32 @@ import type { TaggedErrorClass } from "better-result";
  * - Client retry decisions (transient vs permanent)
  */
 export type ErrorCategory =
-	| "validation"
-	| "not_found"
-	| "conflict"
-	| "permission"
-	| "timeout"
-	| "rate_limit"
-	| "network"
-	| "internal"
-	| "auth"
-	| "cancelled";
+  | "validation"
+  | "not_found"
+  | "conflict"
+  | "permission"
+  | "timeout"
+  | "rate_limit"
+  | "network"
+  | "internal"
+  | "auth"
+  | "cancelled";
 
 /**
  * Maps error category to CLI exit code.
  * Non-zero exit indicates error; specific values for script automation.
  */
 export const exitCodeMap: Record<ErrorCategory, number> = {
-	validation: 1,
-	not_found: 2,
-	conflict: 3,
-	permission: 4,
-	timeout: 5,
-	rate_limit: 6,
-	network: 7,
-	internal: 8,
-	auth: 9,
-	cancelled: 130, // POSIX convention: 128 + SIGINT(2)
+  validation: 1,
+  not_found: 2,
+  conflict: 3,
+  permission: 4,
+  timeout: 5,
+  rate_limit: 6,
+  network: 7,
+  internal: 8,
+  auth: 9,
+  cancelled: 130, // POSIX convention: 128 + SIGINT(2)
 };
 
 /**
@@ -44,26 +44,26 @@ export const exitCodeMap: Record<ErrorCategory, number> = {
  * Used by MCP servers and API responses.
  */
 export const statusCodeMap: Record<ErrorCategory, number> = {
-	validation: 400,
-	not_found: 404,
-	conflict: 409,
-	permission: 403,
-	timeout: 504,
-	rate_limit: 429,
-	network: 502,
-	internal: 500,
-	auth: 401,
-	cancelled: 499,
+  validation: 400,
+  not_found: 404,
+  conflict: 409,
+  permission: 403,
+  timeout: 504,
+  rate_limit: 429,
+  network: 502,
+  internal: 500,
+  auth: 401,
+  cancelled: 499,
 };
 
 /**
  * Serialized error format for JSON transport.
  */
 export interface SerializedError {
-	_tag: string;
-	category: ErrorCategory;
-	message: string;
-	context?: Record<string, unknown>;
+  _tag: string;
+  category: ErrorCategory;
+  message: string;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -71,23 +71,23 @@ export interface SerializedError {
  * All concrete error classes must include these fields.
  */
 export interface KitErrorProps {
-	message: string;
-	category: ErrorCategory;
-	context?: Record<string, unknown>;
+  message: string;
+  category: ErrorCategory;
+  context?: Record<string, unknown>;
 }
 
 /**
  * Get CLI exit code for an error category.
  */
 export function getExitCode(category: ErrorCategory): number {
-	return exitCodeMap[category];
+  return exitCodeMap[category];
 }
 
 /**
  * Get HTTP status code for an error category.
  */
 export function getStatusCode(category: ErrorCategory): number {
-	return statusCodeMap[category];
+  return statusCodeMap[category];
 }
 
 // ============================================================================
@@ -96,124 +96,124 @@ export function getStatusCode(category: ErrorCategory): number {
 
 // Base classes avoid TS9021 warnings from extending expressions.
 const ValidationErrorBase: TaggedErrorClass<
-	"ValidationError",
-	{
-		message: string;
-		field?: string;
-	}
+  "ValidationError",
+  {
+    message: string;
+    field?: string;
+  }
 > = TaggedError("ValidationError")<{
-	message: string;
-	field?: string;
+  message: string;
+  field?: string;
 }>();
 
 const AssertionErrorBase: TaggedErrorClass<
-	"AssertionError",
-	{
-		message: string;
-	}
+  "AssertionError",
+  {
+    message: string;
+  }
 > = TaggedError("AssertionError")<{
-	message: string;
+  message: string;
 }>();
 
 const NotFoundErrorBase: TaggedErrorClass<
-	"NotFoundError",
-	{
-		message: string;
-		resourceType: string;
-		resourceId: string;
-	}
+  "NotFoundError",
+  {
+    message: string;
+    resourceType: string;
+    resourceId: string;
+  }
 > = TaggedError("NotFoundError")<{
-	message: string;
-	resourceType: string;
-	resourceId: string;
+  message: string;
+  resourceType: string;
+  resourceId: string;
 }>();
 
 const ConflictErrorBase: TaggedErrorClass<
-	"ConflictError",
-	{
-		message: string;
-		context?: Record<string, unknown>;
-	}
+  "ConflictError",
+  {
+    message: string;
+    context?: Record<string, unknown>;
+  }
 > = TaggedError("ConflictError")<{
-	message: string;
-	context?: Record<string, unknown>;
+  message: string;
+  context?: Record<string, unknown>;
 }>();
 
 const PermissionErrorBase: TaggedErrorClass<
-	"PermissionError",
-	{
-		message: string;
-		context?: Record<string, unknown>;
-	}
+  "PermissionError",
+  {
+    message: string;
+    context?: Record<string, unknown>;
+  }
 > = TaggedError("PermissionError")<{
-	message: string;
-	context?: Record<string, unknown>;
+  message: string;
+  context?: Record<string, unknown>;
 }>();
 
 const TimeoutErrorBase: TaggedErrorClass<
-	"TimeoutError",
-	{
-		message: string;
-		operation: string;
-		timeoutMs: number;
-	}
+  "TimeoutError",
+  {
+    message: string;
+    operation: string;
+    timeoutMs: number;
+  }
 > = TaggedError("TimeoutError")<{
-	message: string;
-	operation: string;
-	timeoutMs: number;
+  message: string;
+  operation: string;
+  timeoutMs: number;
 }>();
 
 const RateLimitErrorBase: TaggedErrorClass<
-	"RateLimitError",
-	{
-		message: string;
-		retryAfterSeconds?: number;
-	}
+  "RateLimitError",
+  {
+    message: string;
+    retryAfterSeconds?: number;
+  }
 > = TaggedError("RateLimitError")<{
-	message: string;
-	retryAfterSeconds?: number;
+  message: string;
+  retryAfterSeconds?: number;
 }>();
 
 const NetworkErrorBase: TaggedErrorClass<
-	"NetworkError",
-	{
-		message: string;
-		context?: Record<string, unknown>;
-	}
+  "NetworkError",
+  {
+    message: string;
+    context?: Record<string, unknown>;
+  }
 > = TaggedError("NetworkError")<{
-	message: string;
-	context?: Record<string, unknown>;
+  message: string;
+  context?: Record<string, unknown>;
 }>();
 
 const InternalErrorBase: TaggedErrorClass<
-	"InternalError",
-	{
-		message: string;
-		context?: Record<string, unknown>;
-	}
+  "InternalError",
+  {
+    message: string;
+    context?: Record<string, unknown>;
+  }
 > = TaggedError("InternalError")<{
-	message: string;
-	context?: Record<string, unknown>;
+  message: string;
+  context?: Record<string, unknown>;
 }>();
 
 const AuthErrorBase: TaggedErrorClass<
-	"AuthError",
-	{
-		message: string;
-		reason?: "missing" | "invalid" | "expired";
-	}
+  "AuthError",
+  {
+    message: string;
+    reason?: "missing" | "invalid" | "expired";
+  }
 > = TaggedError("AuthError")<{
-	message: string;
-	reason?: "missing" | "invalid" | "expired";
+  message: string;
+  reason?: "missing" | "invalid" | "expired";
 }>();
 
 const CancelledErrorBase: TaggedErrorClass<
-	"CancelledError",
-	{
-		message: string;
-	}
+  "CancelledError",
+  {
+    message: string;
+  }
 > = TaggedError("CancelledError")<{
-	message: string;
+  message: string;
 }>();
 
 /**
@@ -225,15 +225,15 @@ const CancelledErrorBase: TaggedErrorClass<
  * ```
  */
 export class ValidationError extends ValidationErrorBase {
-	readonly category = "validation" as const;
+  readonly category = "validation" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -262,15 +262,15 @@ export class ValidationError extends ValidationErrorBase {
  * @see ValidationError - For user input validation failures (HTTP 400)
  */
 export class AssertionError extends AssertionErrorBase {
-	readonly category = "internal" as const;
+  readonly category = "internal" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -282,15 +282,15 @@ export class AssertionError extends AssertionErrorBase {
  * ```
  */
 export class NotFoundError extends NotFoundErrorBase {
-	readonly category = "not_found" as const;
+  readonly category = "not_found" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -302,15 +302,15 @@ export class NotFoundError extends NotFoundErrorBase {
  * ```
  */
 export class ConflictError extends ConflictErrorBase {
-	readonly category = "conflict" as const;
+  readonly category = "conflict" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -322,15 +322,15 @@ export class ConflictError extends ConflictErrorBase {
  * ```
  */
 export class PermissionError extends PermissionErrorBase {
-	readonly category = "permission" as const;
+  readonly category = "permission" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -342,15 +342,15 @@ export class PermissionError extends PermissionErrorBase {
  * ```
  */
 export class TimeoutError extends TimeoutErrorBase {
-	readonly category = "timeout" as const;
+  readonly category = "timeout" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -362,15 +362,15 @@ export class TimeoutError extends TimeoutErrorBase {
  * ```
  */
 export class RateLimitError extends RateLimitErrorBase {
-	readonly category = "rate_limit" as const;
+  readonly category = "rate_limit" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -382,15 +382,15 @@ export class RateLimitError extends RateLimitErrorBase {
  * ```
  */
 export class NetworkError extends NetworkErrorBase {
-	readonly category = "network" as const;
+  readonly category = "network" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -402,15 +402,15 @@ export class NetworkError extends NetworkErrorBase {
  * ```
  */
 export class InternalError extends InternalErrorBase {
-	readonly category = "internal" as const;
+  readonly category = "internal" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -422,15 +422,15 @@ export class InternalError extends InternalErrorBase {
  * ```
  */
 export class AuthError extends AuthErrorBase {
-	readonly category = "auth" as const;
+  readonly category = "auth" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
@@ -442,32 +442,32 @@ export class AuthError extends AuthErrorBase {
  * ```
  */
 export class CancelledError extends CancelledErrorBase {
-	readonly category = "cancelled" as const;
+  readonly category = "cancelled" as const;
 
-	exitCode(): number {
-		return getExitCode(this.category);
-	}
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
 
-	statusCode(): number {
-		return getStatusCode(this.category);
-	}
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
 }
 
 /**
  * Union type of all concrete error class instances.
  */
 export type AnyKitError =
-	| InstanceType<typeof ValidationError>
-	| InstanceType<typeof AssertionError>
-	| InstanceType<typeof NotFoundError>
-	| InstanceType<typeof ConflictError>
-	| InstanceType<typeof PermissionError>
-	| InstanceType<typeof TimeoutError>
-	| InstanceType<typeof RateLimitError>
-	| InstanceType<typeof NetworkError>
-	| InstanceType<typeof InternalError>
-	| InstanceType<typeof AuthError>
-	| InstanceType<typeof CancelledError>;
+  | InstanceType<typeof ValidationError>
+  | InstanceType<typeof AssertionError>
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ConflictError>
+  | InstanceType<typeof PermissionError>
+  | InstanceType<typeof TimeoutError>
+  | InstanceType<typeof RateLimitError>
+  | InstanceType<typeof NetworkError>
+  | InstanceType<typeof InternalError>
+  | InstanceType<typeof AuthError>
+  | InstanceType<typeof CancelledError>;
 
 /**
  * Type alias for backwards compatibility with handler signatures.

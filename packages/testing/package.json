@@ -1,57 +1,57 @@
 {
-	"name": "@outfitter/testing",
-	"description": "Test harnesses, fixtures, and utilities for Outfitter packages",
-	"version": "0.1.0-rc.1",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./fixtures": {
-			"import": {
-				"types": "./dist/fixtures.d.ts",
-				"default": "./dist/fixtures.js"
-			}
-		},
-		"./package.json": "./package.json"
-	},
-	"sideEffects": false,
-	"scripts": {
-		"build": "bunup --filter @outfitter/testing",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"test": "bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"@outfitter/contracts": "workspace:*",
-		"@outfitter/mcp": "workspace:*",
-		"zod": "^4.3.5"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"typescript": "^5.8.0"
-	},
-	"keywords": [
-		"outfitter",
-		"testing",
-		"fixtures",
-		"harness",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/testing"
-	}
+  "name": "@outfitter/testing",
+  "description": "Test harnesses, fixtures, and utilities for Outfitter packages",
+  "version": "0.1.0-rc.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./fixtures": {
+      "import": {
+        "types": "./dist/fixtures.d.ts",
+        "default": "./dist/fixtures.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter @outfitter/testing",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/mcp": "workspace:*",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "outfitter",
+    "testing",
+    "fixtures",
+    "harness",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/testing"
+  }
 }

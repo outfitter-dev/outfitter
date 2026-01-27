@@ -1,38 +1,43 @@
 {
-	"$schema": "https://turbo.build/schema.json",
-	"tasks": {
-		"build": {
-			"dependsOn": ["^build"],
-			"inputs": ["src/**", "tsconfig.json", "package.json", "../../bunup.config.ts"],
-			"outputs": ["dist/**"]
-		},
-		"test": {
-			"dependsOn": ["build"],
-			"inputs": ["src/**", "test/**", "*.test.ts"],
-			"outputs": [],
-			"cache": false
-		},
-		"test:watch": {
-			"cache": false,
-			"persistent": true
-		},
-		"lint": {
-			"dependsOn": ["^build"],
-			"inputs": ["src/**", "biome.json"],
-			"outputs": []
-		},
-		"lint:fix": {
-			"dependsOn": ["^build"],
-			"inputs": ["src/**", "biome.json"],
-			"outputs": []
-		},
-		"typecheck": {
-			"dependsOn": ["^build"],
-			"inputs": ["src/**", "tsconfig.json"],
-			"outputs": []
-		},
-		"clean": {
-			"cache": false
-		}
-	}
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "package.json",
+        "../../bunup.config.ts"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**", "test/**", "*.test.ts"],
+      "outputs": [],
+      "cache": false
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "biome.json"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "biome.json"],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    }
+  }
 }

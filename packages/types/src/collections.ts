@@ -24,7 +24,7 @@ export type NonEmptyArray<T> = [T, ...T[]];
  * ```
  */
 export function isNonEmptyArray<T>(array: T[]): array is NonEmptyArray<T> {
-	return array.length > 0;
+  return array.length > 0;
 }
 
 /**
@@ -36,10 +36,10 @@ export function isNonEmptyArray<T>(array: T[]): array is NonEmptyArray<T> {
  * @throws Error - Not implemented yet
  */
 export function toNonEmptyArray<T>(array: T[]): NonEmptyArray<T> {
-	if (array.length === 0) {
-		throw new Error("Array is empty");
-	}
-	return array as NonEmptyArray<T>;
+  if (array.length === 0) {
+    throw new Error("Array is empty");
+  }
+  return array as NonEmptyArray<T>;
 }
 
 /**
@@ -49,7 +49,7 @@ export function toNonEmptyArray<T>(array: T[]): NonEmptyArray<T> {
  * @returns The first element (guaranteed to exist)
  */
 export function first<T>(array: NonEmptyArray<T>): T {
-	return array[0];
+  return array[0];
 }
 
 /**
@@ -59,7 +59,7 @@ export function first<T>(array: NonEmptyArray<T>): T {
  * @returns The last element (guaranteed to exist)
  */
 export function last<T>(array: NonEmptyArray<T>): T {
-	return array[array.length - 1] as T;
+  return array.at(-1) as T;
 }
 
 /**
@@ -78,20 +78,20 @@ export function last<T>(array: NonEmptyArray<T>): T {
  * ```
  */
 export function groupBy<T, K extends string | number | symbol>(
-	items: T[],
-	keyFn: (item: T) => K,
+  items: T[],
+  keyFn: (item: T) => K
 ): Map<K, NonEmptyArray<T>> {
-	const result = new Map<K, NonEmptyArray<T>>();
+  const result = new Map<K, NonEmptyArray<T>>();
 
-	for (const item of items) {
-		const key = keyFn(item);
-		const existing = result.get(key);
-		if (existing) {
-			existing.push(item);
-		} else {
-			result.set(key, [item]);
-		}
-	}
+  for (const item of items) {
+    const key = keyFn(item);
+    const existing = result.get(key);
+    if (existing) {
+      existing.push(item);
+    } else {
+      result.set(key, [item]);
+    }
+  }
 
-	return result;
+  return result;
 }

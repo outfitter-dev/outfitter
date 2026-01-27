@@ -7,24 +7,27 @@
  * @packageDocumentation
  */
 
-// Init command
-export { initCommand, runInit, type InitOptions, InitError } from "./commands/init";
-
 // Action registry
 export { outfitterActions } from "./actions.js";
-
 // Doctor command
 export {
-	doctorCommand,
-	runDoctor,
-	printDoctorResults,
-	type DoctorOptions,
-	type DoctorResult,
-	type DoctorSummary,
-	type CheckResult,
-	type BunVersionCheck,
-	type PackageJsonCheck,
-	type DependenciesCheck,
-	type ConfigFilesCheck,
-	type DirectoriesCheck,
+  type BunVersionCheck,
+  type CheckResult,
+  type ConfigFilesCheck,
+  type DependenciesCheck,
+  type DirectoriesCheck,
+  type DoctorOptions,
+  type DoctorResult,
+  type DoctorSummary,
+  doctorCommand,
+  type PackageJsonCheck,
+  printDoctorResults,
+  runDoctor,
 } from "./commands/doctor";
+// Init command
+export {
+  InitError,
+  type InitOptions,
+  initCommand,
+  runInit,
+} from "./commands/init";

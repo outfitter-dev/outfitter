@@ -10,13 +10,13 @@ import { describe, expect, test } from "bun:test";
 import { InitError, initCommand } from "../index.js";
 
 describe("outfitter public API", () => {
-	test("exports initCommand", () => {
-		expect(typeof initCommand).toBe("function");
-	});
+  test("exports initCommand", () => {
+    expect(typeof initCommand).toBe("function");
+  });
 
-	test("exports InitError", () => {
-		const err = new InitError("test");
-		expect(err).toBeInstanceOf(Error);
-		expect(err.name).toBe("InitError");
-	});
+  test("exports InitError", () => {
+    const err = new InitError("test");
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe("InitError");
+  });
 });

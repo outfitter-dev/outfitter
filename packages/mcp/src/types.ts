@@ -6,14 +6,24 @@
  * @packageDocumentation
  */
 
-import type { Result, TaggedErrorClass } from "@outfitter/contracts";
-import { TaggedError } from "@outfitter/contracts";
-import type { Handler, HandlerContext, OutfitterError, Logger } from "@outfitter/contracts";
+import {
+  type Handler,
+  type HandlerContext,
+  type Logger,
+  type OutfitterError,
+  type Result,
+  type TaggedErrorClass,
+  TaggedError as TaggedErrorImpl,
+} from "@outfitter/contracts";
 import type { z } from "zod";
 
 // Re-export types for convenience
-export type { Result };
-export { TaggedError };
+export type { Result } from "@outfitter/contracts";
+// biome-ignore lint/performance/noBarrelFile: intentional re-export for API surface
+export { TaggedError } from "@outfitter/contracts";
+
+// Internal alias for use in this file
+const TaggedError = TaggedErrorImpl;
 
 // ============================================================================
 // Server Options
@@ -34,23 +44,23 @@ export { TaggedError };
  * ```
  */
 export interface McpServerOptions {
-	/**
-	 * Server name, used in MCP protocol handshake.
-	 * Should be a short, descriptive identifier.
-	 */
-	name: string;
+  /**
+   * Server name, used in MCP protocol handshake.
+   * Should be a short, descriptive identifier.
+   */
+  name: string;
 
-	/**
-	 * Server version (semver format recommended).
-	 * Sent to clients during initialization.
-	 */
-	version: string;
+  /**
+   * Server version (semver format recommended).
+   * Sent to clients during initialization.
+   */
+  version: string;
 
-	/**
-	 * Optional logger instance for server logging.
-	 * If not provided, a no-op logger is used.
-	 */
-	logger?: Logger;
+  /**
+   * Optional logger instance for server logging.
+   * If not provided, a no-op logger is used.
+   */
+  logger?: Logger;
 }
 
 // ============================================================================
@@ -93,36 +103,40 @@ export interface McpServerOptions {
  * };
  * ```
  */
-export interface ToolDefinition<TInput, TOutput, TError extends OutfitterError = OutfitterError> {
-	/**
-	 * Unique tool name (kebab-case recommended).
-	 * Used by clients to invoke the tool.
-	 */
-	name: string;
+export interface ToolDefinition<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+> {
+  /**
+   * Unique tool name (kebab-case recommended).
+   * Used by clients to invoke the tool.
+   */
+  name: string;
 
-	/**
-	 * Human-readable description of what the tool does.
-	 * Shown to clients and used by LLMs to understand tool capabilities.
-	 */
-	description: string;
+  /**
+   * Human-readable description of what the tool does.
+   * Shown to clients and used by LLMs to understand tool capabilities.
+   */
+  description: string;
 
-	/**
-	 * Whether the tool should be deferred for tool search.
-	 * Defaults to true for domain tools; core tools set this to false.
-	 */
-	deferLoading?: boolean;
+  /**
+   * Whether the tool should be deferred for tool search.
+   * Defaults to true for domain tools; core tools set this to false.
+   */
+  deferLoading?: boolean;
 
-	/**
-	 * Zod schema for validating and parsing input.
-	 * The schema defines the expected input structure.
-	 */
-	inputSchema: z.ZodType<TInput>;
+  /**
+   * Zod schema for validating and parsing input.
+   * The schema defines the expected input structure.
+   */
+  inputSchema: z.ZodType<TInput>;
 
-	/**
-	 * Handler function that processes the tool invocation.
-	 * Receives validated input and HandlerContext, returns Result.
-	 */
-	handler: Handler<TInput, TOutput, TError>;
+  /**
+   * Handler function that processes the tool invocation.
+   * Receives validated input and HandlerContext, returns Result.
+   */
+  handler: Handler<TInput, TOutput, TError>;
 }
 
 /**
@@ -130,17 +144,17 @@ export interface ToolDefinition<TInput, TOutput, TError extends OutfitterError =
  * This is the format sent to clients during tool listing.
  */
 export interface SerializedTool {
-	/** Tool name */
-	name: string;
+  /** Tool name */
+  name: string;
 
-	/** Tool description */
-	description: string;
+  /** Tool description */
+  description: string;
 
-	/** JSON Schema representation of the input schema */
-	inputSchema: Record<string, unknown>;
+  /** JSON Schema representation of the input schema */
+  inputSchema: Record<string, unknown>;
 
-	/** MCP tool-search hint: whether tool is deferred */
-	defer_loading?: boolean;
+  /** MCP tool-search hint: whether tool is deferred */
+  defer_loading?: boolean;
 }
 
 // ============================================================================
@@ -164,29 +178,29 @@ export interface SerializedTool {
  * ```
  */
 export interface ResourceDefinition {
-	/**
-	 * Unique resource URI.
-	 * Must be a valid URI (file://, https://, custom://, etc.).
-	 */
-	uri: string;
+  /**
+   * Unique resource URI.
+   * Must be a valid URI (file://, https://, custom://, etc.).
+   */
+  uri: string;
 
-	/**
-	 * Human-readable resource name.
-	 * Displayed to users in resource listings.
-	 */
-	name: string;
+  /**
+   * Human-readable resource name.
+   * Displayed to users in resource listings.
+   */
+  name: string;
 
-	/**
-	 * Optional description of the resource.
-	 * Provides additional context about the resource contents.
-	 */
-	description?: string;
+  /**
+   * Optional description of the resource.
+   * Provides additional context about the resource contents.
+   */
+  description?: string;
 
-	/**
-	 * Optional MIME type of the resource content.
-	 * Helps clients understand how to process the resource.
-	 */
-	mimeType?: string;
+  /**
+   * Optional MIME type of the resource content.
+   * Helps clients understand how to process the resource.
+   */
+  mimeType?: string;
 }
 
 // ============================================================================
@@ -194,16 +208,16 @@ export interface ResourceDefinition {
 // ============================================================================
 
 const McpErrorBase: TaggedErrorClass<
-	"McpError",
-	{
-		message: string;
-		code: number;
-		context?: Record<string, unknown>;
-	}
+  "McpError",
+  {
+    message: string;
+    code: number;
+    context?: Record<string, unknown>;
+  }
 > = TaggedError("McpError")<{
-	message: string;
-	code: number;
-	context?: Record<string, unknown>;
+  message: string;
+  code: number;
+  context?: Record<string, unknown>;
 }>();
 
 /**
@@ -230,8 +244,8 @@ const McpErrorBase: TaggedErrorClass<
  * ```
  */
 export class McpError extends McpErrorBase {
-	/** Error category for Outfitter error taxonomy compatibility */
-	readonly category = "internal" as const;
+  /** Error category for Outfitter error taxonomy compatibility */
+  readonly category = "internal" as const;
 }
 
 // ============================================================================
@@ -242,11 +256,11 @@ export class McpError extends McpErrorBase {
  * Options for invoking a tool.
  */
 export interface InvokeToolOptions {
-	/** Abort signal for cancellation */
-	signal?: AbortSignal;
+  /** Abort signal for cancellation */
+  signal?: AbortSignal;
 
-	/** Custom request ID (auto-generated if not provided) */
-	requestId?: string;
+  /** Custom request ID (auto-generated if not provided) */
+  requestId?: string;
 }
 
 /**
@@ -269,62 +283,62 @@ export interface InvokeToolOptions {
  * ```
  */
 export interface McpServer {
-	/** Server name */
-	readonly name: string;
+  /** Server name */
+  readonly name: string;
 
-	/** Server version */
-	readonly version: string;
+  /** Server version */
+  readonly version: string;
 
-	/**
-	 * Register a tool with the server.
-	 * @param tool - Tool definition to register
-	 */
-	registerTool<TInput, TOutput, TError extends OutfitterError>(
-		tool: ToolDefinition<TInput, TOutput, TError>,
-	): void;
+  /**
+   * Register a tool with the server.
+   * @param tool - Tool definition to register
+   */
+  registerTool<TInput, TOutput, TError extends OutfitterError>(
+    tool: ToolDefinition<TInput, TOutput, TError>
+  ): void;
 
-	/**
-	 * Register a resource with the server.
-	 * @param resource - Resource definition to register
-	 */
-	registerResource(resource: ResourceDefinition): void;
+  /**
+   * Register a resource with the server.
+   * @param resource - Resource definition to register
+   */
+  registerResource(resource: ResourceDefinition): void;
 
-	/**
-	 * Get all registered tools.
-	 * @returns Array of serialized tool information
-	 */
-	getTools(): SerializedTool[];
+  /**
+   * Get all registered tools.
+   * @returns Array of serialized tool information
+   */
+  getTools(): SerializedTool[];
 
-	/**
-	 * Get all registered resources.
-	 * @returns Array of resource definitions
-	 */
-	getResources(): ResourceDefinition[];
+  /**
+   * Get all registered resources.
+   * @returns Array of resource definitions
+   */
+  getResources(): ResourceDefinition[];
 
-	/**
-	 * Invoke a tool by name.
-	 * @param name - Tool name
-	 * @param input - Tool input (will be validated)
-	 * @param options - Optional invocation options
-	 * @returns Result with tool output or McpError
-	 */
-	invokeTool<T = unknown>(
-		name: string,
-		input: unknown,
-		options?: InvokeToolOptions,
-	): Promise<Result<T, InstanceType<typeof McpError>>>;
+  /**
+   * Invoke a tool by name.
+   * @param name - Tool name
+   * @param input - Tool input (will be validated)
+   * @param options - Optional invocation options
+   * @returns Result with tool output or McpError
+   */
+  invokeTool<T = unknown>(
+    name: string,
+    input: unknown,
+    options?: InvokeToolOptions
+  ): Promise<Result<T, InstanceType<typeof McpError>>>;
 
-	/**
-	 * Start the MCP server.
-	 * Begins listening for client connections.
-	 */
-	start(): Promise<void>;
+  /**
+   * Start the MCP server.
+   * Begins listening for client connections.
+   */
+  start(): Promise<void>;
 
-	/**
-	 * Stop the MCP server.
-	 * Closes all connections and cleans up resources.
-	 */
-	stop(): Promise<void>;
+  /**
+   * Stop the MCP server.
+   * Closes all connections and cleans up resources.
+   */
+  stop(): Promise<void>;
 }
 
 // ============================================================================
@@ -336,6 +350,6 @@ export interface McpServer {
  * Includes MCP-specific information in addition to standard HandlerContext.
  */
 export interface McpHandlerContext extends HandlerContext {
-	/** The name of the tool being invoked */
-	toolName?: string;
+  /** The name of the tool being invoked */
+  toolName?: string;
 }

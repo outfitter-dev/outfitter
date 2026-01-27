@@ -16,14 +16,14 @@ import type { LoggerInstance } from "@outfitter/logging";
 // ============================================================================
 
 const DaemonErrorBase: TaggedErrorClass<
-	"DaemonError",
-	{
-		code: DaemonErrorCode;
-		message: string;
-	}
+  "DaemonError",
+  {
+    code: DaemonErrorCode;
+    message: string;
+  }
 > = TaggedError("DaemonError")<{
-	code: DaemonErrorCode;
-	message: string;
+  code: DaemonErrorCode;
+  message: string;
 }>();
 
 /**
@@ -36,11 +36,11 @@ const DaemonErrorBase: TaggedErrorClass<
  * - `START_FAILED`: Daemon failed to start
  */
 export type DaemonErrorCode =
-	| "ALREADY_RUNNING"
-	| "NOT_RUNNING"
-	| "SHUTDOWN_TIMEOUT"
-	| "PID_ERROR"
-	| "START_FAILED";
+  | "ALREADY_RUNNING"
+  | "NOT_RUNNING"
+  | "SHUTDOWN_TIMEOUT"
+  | "PID_ERROR"
+  | "START_FAILED";
 
 /**
  * Error type for daemon operations.
@@ -97,31 +97,31 @@ export type DaemonState = "stopped" | "starting" | "running" | "stopping";
  * ```
  */
 export interface DaemonOptions {
-	/**
-	 * Unique name identifying this daemon.
-	 * Used in log messages and error context.
-	 */
-	name: string;
+  /**
+   * Unique name identifying this daemon.
+   * Used in log messages and error context.
+   */
+  name: string;
 
-	/**
-	 * Absolute path to the PID file.
-	 * The daemon writes its process ID here on start and removes it on stop.
-	 * Used to prevent multiple instances and for external process management.
-	 */
-	pidFile: string;
+  /**
+   * Absolute path to the PID file.
+   * The daemon writes its process ID here on start and removes it on stop.
+   * Used to prevent multiple instances and for external process management.
+   */
+  pidFile: string;
 
-	/**
-	 * Optional logger instance for daemon messages.
-	 * If not provided, logging is disabled.
-	 */
-	logger?: LoggerInstance;
+  /**
+   * Optional logger instance for daemon messages.
+   * If not provided, logging is disabled.
+   */
+  logger?: LoggerInstance;
 
-	/**
-	 * Maximum time in milliseconds to wait for graceful shutdown.
-	 * After this timeout, the daemon will force stop.
-	 * @defaultValue 5000
-	 */
-	shutdownTimeout?: number;
+  /**
+   * Maximum time in milliseconds to wait for graceful shutdown.
+   * After this timeout, the daemon will force stop.
+   * @defaultValue 5000
+   */
+  shutdownTimeout?: number;
 }
 
 // ============================================================================
@@ -167,45 +167,45 @@ export type ShutdownHandler = () => Promise<void>;
  * ```
  */
 export interface Daemon {
-	/**
-	 * Current lifecycle state of the daemon.
-	 */
-	readonly state: DaemonState;
+  /**
+   * Current lifecycle state of the daemon.
+   */
+  readonly state: DaemonState;
 
-	/**
-	 * Start the daemon.
-	 *
-	 * Creates PID file and registers signal handlers.
-	 * Transitions from `stopped` to `starting` then `running`.
-	 *
-	 * @returns Result with void on success, or DaemonError on failure
-	 */
-	start(): Promise<Result<void, DaemonError>>;
+  /**
+   * Start the daemon.
+   *
+   * Creates PID file and registers signal handlers.
+   * Transitions from `stopped` to `starting` then `running`.
+   *
+   * @returns Result with void on success, or DaemonError on failure
+   */
+  start(): Promise<Result<void, DaemonError>>;
 
-	/**
-	 * Stop the daemon gracefully.
-	 *
-	 * Runs shutdown handlers, removes PID file, and cleans up signal handlers.
-	 * Transitions from `running` to `stopping` then `stopped`.
-	 *
-	 * @returns Result with void on success, or DaemonError on failure
-	 */
-	stop(): Promise<Result<void, DaemonError>>;
+  /**
+   * Stop the daemon gracefully.
+   *
+   * Runs shutdown handlers, removes PID file, and cleans up signal handlers.
+   * Transitions from `running` to `stopping` then `stopped`.
+   *
+   * @returns Result with void on success, or DaemonError on failure
+   */
+  stop(): Promise<Result<void, DaemonError>>;
 
-	/**
-	 * Check if the daemon is currently running.
-	 *
-	 * @returns true if state is "running", false otherwise
-	 */
-	isRunning(): boolean;
+  /**
+   * Check if the daemon is currently running.
+   *
+   * @returns true if state is "running", false otherwise
+   */
+  isRunning(): boolean;
 
-	/**
-	 * Register a shutdown handler to be called during graceful shutdown.
-	 *
-	 * Multiple handlers can be registered and will be called in registration order.
-	 * Handlers must complete within the shutdown timeout.
-	 *
-	 * @param handler - Async function to execute during shutdown
-	 */
-	onShutdown(handler: ShutdownHandler): void;
+  /**
+   * Register a shutdown handler to be called during graceful shutdown.
+   *
+   * Multiple handlers can be registered and will be called in registration order.
+   * Handlers must complete within the shutdown timeout.
+   *
+   * @param handler - Async function to execute during shutdown
+   */
+  onShutdown(handler: ShutdownHandler): void;
 }

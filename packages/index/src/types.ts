@@ -6,8 +6,7 @@
  * @packageDocumentation
  */
 
-import type { Result } from "@outfitter/contracts";
-import type { StorageError } from "@outfitter/contracts";
+import type { Result, StorageError } from "@outfitter/contracts";
 import type { IndexMigrationRegistry } from "./migrations.js";
 
 // ============================================================================
@@ -38,38 +37,38 @@ export type TokenizerType = "unicode61" | "porter" | "trigram";
  * ```
  */
 export interface IndexOptions {
-	/**
-	 * Absolute path to the SQLite database file.
-	 * The file will be created if it does not exist.
-	 */
-	path: string;
+  /**
+   * Absolute path to the SQLite database file.
+   * The file will be created if it does not exist.
+   */
+  path: string;
 
-	/**
-	 * Name of the FTS5 virtual table.
-	 * @defaultValue "documents"
-	 */
-	tableName?: string;
+  /**
+   * Name of the FTS5 virtual table.
+   * @defaultValue "documents"
+   */
+  tableName?: string;
 
-	/**
-	 * FTS5 tokenizer for text analysis.
-	 * @defaultValue "unicode61"
-	 */
-	tokenizer?: TokenizerType;
+  /**
+   * FTS5 tokenizer for text analysis.
+   * @defaultValue "unicode61"
+   */
+  tokenizer?: TokenizerType;
 
-	/**
-	 * Optional tool identifier recorded in index metadata.
-	 */
-	tool?: string;
+  /**
+   * Optional tool identifier recorded in index metadata.
+   */
+  tool?: string;
 
-	/**
-	 * Optional tool version recorded in index metadata.
-	 */
-	toolVersion?: string;
+  /**
+   * Optional tool version recorded in index metadata.
+   */
+  toolVersion?: string;
 
-	/**
-	 * Optional migration registry for upgrading older index versions.
-	 */
-	migrations?: IndexMigrationRegistry;
+  /**
+   * Optional migration registry for upgrading older index versions.
+   */
+  migrations?: IndexMigrationRegistry;
 }
 
 // =============================================================================
@@ -80,14 +79,14 @@ export interface IndexOptions {
  * Metadata stored alongside the index to track version and provenance.
  */
 export interface IndexMetadata {
-	/** File format version */
-	version: number;
-	/** When this index was created */
-	created: string;
-	/** Tool that created the index */
-	tool: string;
-	/** Tool version that created the index */
-	toolVersion: string;
+  /** File format version */
+  version: number;
+  /** When this index was created */
+  created: string;
+  /** Tool that created the index */
+  tool: string;
+  /** Tool version that created the index */
+  toolVersion: string;
 }
 
 // ============================================================================
@@ -111,17 +110,17 @@ export interface IndexMetadata {
  * ```
  */
 export interface IndexDocument {
-	/** Unique identifier for this document */
-	id: string;
+  /** Unique identifier for this document */
+  id: string;
 
-	/** Searchable text content */
-	content: string;
+  /** Searchable text content */
+  content: string;
 
-	/**
-	 * Optional metadata associated with the document.
-	 * Stored as JSON and returned with search results.
-	 */
-	metadata?: Record<string, unknown>;
+  /**
+   * Optional metadata associated with the document.
+   * Stored as JSON and returned with search results.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -152,20 +151,20 @@ export interface IndexDocument {
  * ```
  */
 export interface SearchQuery {
-	/** FTS5 query string */
-	query: string;
+  /** FTS5 query string */
+  query: string;
 
-	/**
-	 * Maximum number of results to return.
-	 * @defaultValue 25
-	 */
-	limit?: number;
+  /**
+   * Maximum number of results to return.
+   * @defaultValue 25
+   */
+  limit?: number;
 
-	/**
-	 * Number of results to skip (for pagination).
-	 * @defaultValue 0
-	 */
-	offset?: number;
+  /**
+   * Number of results to skip (for pagination).
+   * @defaultValue 0
+   */
+  offset?: number;
 }
 
 /**
@@ -194,27 +193,27 @@ export interface SearchQuery {
  * ```
  */
 export interface SearchResult<T = unknown> {
-	/** Document ID */
-	id: string;
+  /** Document ID */
+  id: string;
 
-	/**
-	 * BM25 relevance ranking score.
-	 * Higher scores indicate better matches.
-	 * Note: FTS5 BM25 returns negative values (closer to 0 = better match).
-	 */
-	score: number;
+  /**
+   * BM25 relevance ranking score.
+   * Higher scores indicate better matches.
+   * Note: FTS5 BM25 returns negative values (closer to 0 = better match).
+   */
+  score: number;
 
-	/** Full document content */
-	content: string;
+  /** Full document content */
+  content: string;
 
-	/** Document metadata (if present) */
-	metadata?: T;
+  /** Document metadata (if present) */
+  metadata?: T;
 
-	/**
-	 * Matching snippets from the content.
-	 * Uses FTS5 snippet() function for context-aware highlights.
-	 */
-	highlights?: string[];
+  /**
+   * Matching snippets from the content.
+   * Uses FTS5 snippet() function for context-aware highlights.
+   */
+  highlights?: string[];
 }
 
 // ============================================================================
@@ -250,53 +249,53 @@ export interface SearchResult<T = unknown> {
  * ```
  */
 export interface Index<T = unknown> {
-	/**
-	 * Add a single document to the index.
-	 * If a document with the same ID exists, it will be replaced.
-	 *
-	 * @param doc - Document to add
-	 * @returns Result indicating success or StorageError
-	 */
-	add(doc: IndexDocument): Promise<Result<void, StorageError>>;
+  /**
+   * Add a single document to the index.
+   * If a document with the same ID exists, it will be replaced.
+   *
+   * @param doc - Document to add
+   * @returns Result indicating success or StorageError
+   */
+  add(doc: IndexDocument): Promise<Result<void, StorageError>>;
 
-	/**
-	 * Add multiple documents to the index in a single transaction.
-	 * More efficient than calling add() multiple times.
-	 * If a document with the same ID exists, it will be replaced.
-	 *
-	 * @param docs - Array of documents to add
-	 * @returns Result indicating success or StorageError
-	 */
-	addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>>;
+  /**
+   * Add multiple documents to the index in a single transaction.
+   * More efficient than calling add() multiple times.
+   * If a document with the same ID exists, it will be replaced.
+   *
+   * @param docs - Array of documents to add
+   * @returns Result indicating success or StorageError
+   */
+  addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>>;
 
-	/**
-	 * Search the index using FTS5 query syntax.
-	 * Returns results ranked by BM25 relevance score.
-	 *
-	 * @param query - Search query parameters
-	 * @returns Result containing array of search results or StorageError
-	 */
-	search(query: SearchQuery): Promise<Result<SearchResult<T>[], StorageError>>;
+  /**
+   * Search the index using FTS5 query syntax.
+   * Returns results ranked by BM25 relevance score.
+   *
+   * @param query - Search query parameters
+   * @returns Result containing array of search results or StorageError
+   */
+  search(query: SearchQuery): Promise<Result<SearchResult<T>[], StorageError>>;
 
-	/**
-	 * Remove a document from the index by ID.
-	 * No error is returned if the document does not exist.
-	 *
-	 * @param id - Document ID to remove
-	 * @returns Result indicating success or StorageError
-	 */
-	remove(id: string): Promise<Result<void, StorageError>>;
+  /**
+   * Remove a document from the index by ID.
+   * No error is returned if the document does not exist.
+   *
+   * @param id - Document ID to remove
+   * @returns Result indicating success or StorageError
+   */
+  remove(id: string): Promise<Result<void, StorageError>>;
 
-	/**
-	 * Remove all documents from the index.
-	 *
-	 * @returns Result indicating success or StorageError
-	 */
-	clear(): Promise<Result<void, StorageError>>;
+  /**
+   * Remove all documents from the index.
+   *
+   * @returns Result indicating success or StorageError
+   */
+  clear(): Promise<Result<void, StorageError>>;
 
-	/**
-	 * Close the index and release resources.
-	 * The index should not be used after calling close().
-	 */
-	close(): void;
+  /**
+   * Close the index and release resources.
+   * The index should not be used after calling close().
+   */
+  close(): void;
 }

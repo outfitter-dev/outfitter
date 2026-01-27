@@ -21,10 +21,10 @@ import { extname, join } from "node:path";
  * Used for fixture overrides.
  */
 type DeepPartial<T> = T extends object
-	? {
-			[P in keyof T]?: DeepPartial<T[P]>;
-		}
-	: T;
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
 
 // ============================================================================
 // Deep Merge Utility
@@ -34,7 +34,7 @@ type DeepPartial<T> = T extends object
  * Checks if a value is a plain object (not an array, null, or other type).
  */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -43,27 +43,27 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
  * Undefined values in source are skipped.
  */
 function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
-	const result = { ...target };
+  const result = { ...target };
 
-	for (const key of Object.keys(source)) {
-		const sourceValue = (source as Record<string, unknown>)[key];
-		const targetValue = (target as Record<string, unknown>)[key];
+  for (const key of Object.keys(source)) {
+    const sourceValue = (source as Record<string, unknown>)[key];
+    const targetValue = (target as Record<string, unknown>)[key];
 
-		if (sourceValue === undefined) {
-			continue;
-		}
+    if (sourceValue === undefined) {
+      continue;
+    }
 
-		if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
-			(result as Record<string, unknown>)[key] = deepMerge(
-				targetValue as object,
-				sourceValue as DeepPartial<object>,
-			);
-		} else {
-			(result as Record<string, unknown>)[key] = sourceValue;
-		}
-	}
+    if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
+      (result as Record<string, unknown>)[key] = deepMerge(
+        targetValue as object,
+        sourceValue as DeepPartial<object>
+      );
+    } else {
+      (result as Record<string, unknown>)[key] = sourceValue;
+    }
+  }
 
-	return result;
+  return result;
 }
 
 /**
@@ -71,19 +71,19 @@ function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
  * Handles nested objects and arrays.
  */
 function deepClone<T>(obj: T): T {
-	if (obj === null || typeof obj !== "object") {
-		return obj;
-	}
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
 
-	if (Array.isArray(obj)) {
-		return obj.map((item) => deepClone(item)) as unknown as T;
-	}
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepClone(item)) as unknown as T;
+  }
 
-	const cloned = {} as T;
-	for (const key of Object.keys(obj) as Array<keyof T>) {
-		cloned[key] = deepClone(obj[key]);
-	}
-	return cloned;
+  const cloned = {} as T;
+  for (const key of Object.keys(obj) as Array<keyof T>) {
+    cloned[key] = deepClone(obj[key]);
+  }
+  return cloned;
 }
 
 // ============================================================================
@@ -117,14 +117,16 @@ function deepClone<T>(obj: T): T {
  * const user2 = createUser({ name: "Jane Doe", settings: { theme: "light" } });
  * ```
  */
-export function createFixture<T extends object>(defaults: T): (overrides?: DeepPartial<T>) => T {
-	return (overrides?: DeepPartial<T>): T => {
-		const cloned = deepClone(defaults);
-		if (overrides === undefined) {
-			return cloned;
-		}
-		return deepMerge(cloned, overrides);
-	};
+export function createFixture<T extends object>(
+  defaults: T
+): (overrides?: DeepPartial<T>) => T {
+  return (overrides?: DeepPartial<T>): T => {
+    const cloned = deepClone(defaults);
+    if (overrides === undefined) {
+      return cloned;
+    }
+    return deepMerge(cloned, overrides);
+  };
 }
 
 // ============================================================================
@@ -135,9 +137,9 @@ export function createFixture<T extends object>(defaults: T): (overrides?: DeepP
  * Generates a unique temporary directory path.
  */
 function generateTempDirPath(): string {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).slice(2, 10);
-	return join(tmpdir(), `outfitter-test-${timestamp}-${random}`);
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).slice(2, 10);
+  return join(tmpdir(), `outfitter-test-${timestamp}-${random}`);
 }
 
 /**
@@ -160,20 +162,22 @@ function generateTempDirPath(): string {
  * // Directory is automatically cleaned up
  * ```
  */
-export async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
-	const dir = generateTempDirPath();
+export async function withTempDir<T>(
+  fn: (dir: string) => Promise<T>
+): Promise<T> {
+  const dir = generateTempDirPath();
 
-	// Create the directory
-	await mkdir(dir, { recursive: true });
+  // Create the directory
+  await mkdir(dir, { recursive: true });
 
-	try {
-		return await fn(dir);
-	} finally {
-		// Always clean up, even on error
-		await rm(dir, { recursive: true, force: true }).catch(() => {
-			// Ignore cleanup errors
-		});
-	}
+  try {
+    return await fn(dir);
+  } finally {
+    // Always clean up, even on error
+    await rm(dir, { recursive: true, force: true }).catch(() => {
+      // Ignore cleanup errors
+    });
+  }
 }
 
 // ============================================================================
@@ -202,31 +206,34 @@ export async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T
  * // Original environment is restored
  * ```
  */
-export async function withEnv<T>(vars: Record<string, string>, fn: () => Promise<T>): Promise<T> {
-	// Store original values (undefined means the var wasn't set)
-	const originalValues = new Map<string, string | undefined>();
+export async function withEnv<T>(
+  vars: Record<string, string>,
+  fn: () => Promise<T>
+): Promise<T> {
+  // Store original values (undefined means the var wasn't set)
+  const originalValues = new Map<string, string | undefined>();
 
-	for (const key of Object.keys(vars)) {
-		originalValues.set(key, process.env[key]);
-	}
+  for (const key of Object.keys(vars)) {
+    originalValues.set(key, process.env[key]);
+  }
 
-	// Set new values
-	for (const [key, value] of Object.entries(vars)) {
-		process.env[key] = value;
-	}
+  // Set new values
+  for (const [key, value] of Object.entries(vars)) {
+    process.env[key] = value;
+  }
 
-	try {
-		return await fn();
-	} finally {
-		// Restore original values
-		for (const [key, originalValue] of originalValues) {
-			if (originalValue === undefined) {
-				delete process.env[key];
-			} else {
-				process.env[key] = originalValue;
-			}
-		}
-	}
+  try {
+    return await fn();
+  } finally {
+    // Restore original values
+    for (const [key, originalValue] of originalValues) {
+      if (originalValue === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = originalValue;
+      }
+    }
+  }
 }
 
 // ============================================================================
@@ -234,11 +241,11 @@ export async function withEnv<T>(vars: Record<string, string>, fn: () => Promise
 // ============================================================================
 
 interface LoadFixtureOptions {
-	/**
-	 * Base fixtures directory.
-	 * Defaults to `${process.cwd()}/__fixtures__`.
-	 */
-	readonly fixturesDir?: string;
+  /**
+   * Base fixtures directory.
+   * Defaults to `${process.cwd()}/__fixtures__`.
+   */
+  readonly fixturesDir?: string;
 }
 
 /**
@@ -252,14 +259,17 @@ interface LoadFixtureOptions {
  * const config = loadFixture("mcp/config.toml");
  * ```
  */
-export function loadFixture<T = string>(name: string, options?: LoadFixtureOptions): T {
-	const baseDir = options?.fixturesDir ?? join(process.cwd(), "__fixtures__");
-	const filePath = join(baseDir, name);
-	const content = readFileSync(filePath, "utf-8");
+export function loadFixture<T = string>(
+  name: string,
+  options?: LoadFixtureOptions
+): T {
+  const baseDir = options?.fixturesDir ?? join(process.cwd(), "__fixtures__");
+  const filePath = join(baseDir, name);
+  const content = readFileSync(filePath, "utf-8");
 
-	if (extname(filePath) === ".json") {
-		return JSON.parse(content) as T;
-	}
+  if (extname(filePath) === ".json") {
+    return JSON.parse(content) as T;
+  }
 
-	return content as T;
+  return content as T;
 }

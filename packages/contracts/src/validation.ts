@@ -9,12 +9,12 @@ import { ValidationError } from "./errors.js";
  * @returns Formatted error message string
  */
 function formatZodIssues(issues: z.ZodIssue[]): string {
-	return issues
-		.map((issue) => {
-			const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
-			return `${path}: ${issue.message}`;
-		})
-		.join("; ");
+  return issues
+    .map((issue) => {
+      const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+      return `${path}: ${issue.message}`;
+    })
+    .join("; ");
 }
 
 /**
@@ -24,11 +24,11 @@ function formatZodIssues(issues: z.ZodIssue[]): string {
  * @returns Field path string or undefined
  */
 function extractField(issues: z.ZodIssue[]): string | undefined {
-	const firstIssue = issues[0];
-	if (firstIssue && firstIssue.path.length > 0) {
-		return firstIssue.path.join(".");
-	}
-	return undefined;
+  const firstIssue = issues[0];
+  if (firstIssue && firstIssue.path.length > 0) {
+    return firstIssue.path.join(".");
+  }
+  return undefined;
 }
 
 /**
@@ -50,11 +50,11 @@ function extractField(issues: z.ZodIssue[]): string | undefined {
  * ```
  */
 export function createValidator<T>(
-	schema: z.ZodType<T>,
+  schema: z.ZodType<T>
 ): (input: unknown) => Result<T, ValidationError> {
-	return (input: unknown): Result<T, ValidationError> => {
-		return validateInput(schema, input);
-	};
+  return (input: unknown): Result<T, ValidationError> => {
+    return validateInput(schema, input);
+  };
 }
 
 /**
@@ -75,21 +75,24 @@ export function createValidator<T>(
  * }
  * ```
  */
-export function validateInput<T>(schema: z.ZodType<T>, input: unknown): Result<T, ValidationError> {
-	const parseResult = schema.safeParse(input);
+export function validateInput<T>(
+  schema: z.ZodType<T>,
+  input: unknown
+): Result<T, ValidationError> {
+  const parseResult = schema.safeParse(input);
 
-	if (parseResult.success) {
-		return Result.ok(parseResult.data);
-	}
+  if (parseResult.success) {
+    return Result.ok(parseResult.data);
+  }
 
-	const message = formatZodIssues(parseResult.error.issues);
-	const field = extractField(parseResult.error.issues);
+  const message = formatZodIssues(parseResult.error.issues);
+  const field = extractField(parseResult.error.issues);
 
-	// Build error with optional field only if defined
-	const errorProps: { message: string; field?: string } = { message };
-	if (field !== undefined) {
-		errorProps.field = field;
-	}
+  // Build error with optional field only if defined
+  const errorProps: { message: string; field?: string } = { message };
+  if (field !== undefined) {
+    errorProps.field = field;
+  }
 
-	return Result.err(new ValidationError(errorProps));
+  return Result.err(new ValidationError(errorProps));
 }

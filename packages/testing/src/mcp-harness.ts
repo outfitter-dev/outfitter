@@ -10,11 +10,11 @@
 
 import type { OutfitterError, Result } from "@outfitter/contracts";
 import {
-	createMcpServer,
-	type McpError,
-	type McpServer,
-	type SerializedTool,
-	type ToolDefinition,
+  createMcpServer,
+  type McpError,
+  type McpServer,
+  type SerializedTool,
+  type ToolDefinition,
 } from "@outfitter/mcp";
 import { loadFixture } from "./fixtures.js";
 
@@ -27,58 +27,58 @@ import { loadFixture } from "./fixtures.js";
  * Matches the MCP protocol shape used in the spec.
  */
 export interface McpToolResponse {
-	content: Array<{ type: "text" | "image"; text?: string; data?: string }>;
-	isError?: boolean;
+  content: Array<{ type: "text" | "image"; text?: string; data?: string }>;
+  isError?: boolean;
 }
 
 /**
  * Test harness for MCP servers.
  */
 export interface McpHarness {
-	/**
-	 * Call a tool by name with input parameters.
-	 * Returns the MCP-formatted response.
-	 */
-	callTool(
-		name: string,
-		input: Record<string, unknown>,
-	): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>>;
+  /**
+   * Call a tool by name with input parameters.
+   * Returns the MCP-formatted response.
+   */
+  callTool(
+    name: string,
+    input: Record<string, unknown>
+  ): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>>;
 
-	/**
-	 * List all registered tools with schemas.
-	 */
-	listTools(): SerializedTool[];
+  /**
+   * List all registered tools with schemas.
+   */
+  listTools(): SerializedTool[];
 
-	/**
-	 * Search tools by name or description (case-insensitive).
-	 */
-	searchTools(query: string): SerializedTool[];
+  /**
+   * Search tools by name or description (case-insensitive).
+   */
+  searchTools(query: string): SerializedTool[];
 
-	/**
-	 * Load fixture data by name (relative to __fixtures__).
-	 */
-	loadFixture<T = string>(name: string): T;
+  /**
+   * Load fixture data by name (relative to __fixtures__).
+   */
+  loadFixture<T = string>(name: string): T;
 
-	/**
-	 * Reset harness state between tests.
-	 */
-	reset(): void;
+  /**
+   * Reset harness state between tests.
+   */
+  reset(): void;
 }
 
 export interface McpHarnessOptions {
-	/** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
-	readonly fixturesDir?: string;
+  /** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
+  readonly fixturesDir?: string;
 }
 
 export interface McpTestHarnessOptions {
-	/** Tools to register on the test MCP server. */
-	readonly tools: ToolDefinition<unknown, unknown, OutfitterError>[];
-	/** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
-	readonly fixturesDir?: string;
-	/** Optional server name for diagnostics. */
-	readonly name?: string;
-	/** Optional server version for diagnostics. */
-	readonly version?: string;
+  /** Tools to register on the test MCP server. */
+  readonly tools: ToolDefinition<unknown, unknown, OutfitterError>[];
+  /** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
+  readonly fixturesDir?: string;
+  /** Optional server name for diagnostics. */
+  readonly name?: string;
+  /** Optional server version for diagnostics. */
+  readonly version?: string;
 }
 
 // ============================================================================
@@ -88,45 +88,50 @@ export interface McpTestHarnessOptions {
 /**
  * Creates an MCP test harness from an MCP server.
  */
-export function createMcpHarness(server: McpServer, options: McpHarnessOptions = {}): McpHarness {
-	return {
-		async callTool(
-			name: string,
-			input: Record<string, unknown>,
-		): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>> {
-			return server.invokeTool<McpToolResponse>(name, input);
-		},
+export function createMcpHarness(
+  server: McpServer,
+  options: McpHarnessOptions = {}
+): McpHarness {
+  return {
+    callTool(
+      name: string,
+      input: Record<string, unknown>
+    ): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>> {
+      return server.invokeTool<McpToolResponse>(name, input);
+    },
 
-		listTools(): SerializedTool[] {
-			return server.getTools();
-		},
+    listTools(): SerializedTool[] {
+      return server.getTools();
+    },
 
-		searchTools(query: string): SerializedTool[] {
-			const normalized = query.trim().toLowerCase();
-			const tools = server.getTools();
+    searchTools(query: string): SerializedTool[] {
+      const normalized = query.trim().toLowerCase();
+      const tools = server.getTools();
 
-			if (normalized.length === 0) {
-				return tools;
-			}
+      if (normalized.length === 0) {
+        return tools;
+      }
 
-			return tools.filter((tool) => {
-				const nameMatch = tool.name.toLowerCase().includes(normalized);
-				const descriptionMatch = tool.description.toLowerCase().includes(normalized);
-				return nameMatch || descriptionMatch;
-			});
-		},
+      return tools.filter((tool) => {
+        const nameMatch = tool.name.toLowerCase().includes(normalized);
+        const descriptionMatch = tool.description
+          .toLowerCase()
+          .includes(normalized);
+        return nameMatch || descriptionMatch;
+      });
+    },
 
-		loadFixture<T = string>(name: string): T {
-			return loadFixture<T>(
-				name,
-				options.fixturesDir ? { fixturesDir: options.fixturesDir } : undefined,
-			);
-		},
+    loadFixture<T = string>(name: string): T {
+      return loadFixture<T>(
+        name,
+        options.fixturesDir ? { fixturesDir: options.fixturesDir } : undefined
+      );
+    },
 
-		reset(): void {
-			// No internal state to reset in the default harness.
-		},
-	};
+    reset(): void {
+      // No internal state to reset in the default harness.
+    },
+  };
 }
 
 /**
@@ -135,19 +140,23 @@ export function createMcpHarness(server: McpServer, options: McpHarnessOptions =
  * This is a spec-compatible wrapper that builds a test server,
  * registers tools, and returns the standard MCP harness.
  */
-export function createMCPTestHarness(options: McpTestHarnessOptions): McpHarness {
-	const server = createMcpServer({
-		name: options.name ?? "mcp-test",
-		version: options.version ?? "0.0.0",
-	});
+export function createMCPTestHarness(
+  options: McpTestHarnessOptions
+): McpHarness {
+  const server = createMcpServer({
+    name: options.name ?? "mcp-test",
+    version: options.version ?? "0.0.0",
+  });
 
-	for (const tool of options.tools) {
-		server.registerTool(tool);
-	}
+  for (const tool of options.tools) {
+    server.registerTool(tool);
+  }
 
-	return createMcpHarness(server, {
-		...(options.fixturesDir !== undefined ? { fixturesDir: options.fixturesDir } : {}),
-	});
+  return createMcpHarness(server, {
+    ...(options.fixturesDir !== undefined
+      ? { fixturesDir: options.fixturesDir }
+      : {}),
+  });
 }
 
 /**

@@ -13,14 +13,14 @@ import type { ErrorCategory } from "./errors.js";
  * Backoff strategy configuration options
  */
 export interface BackoffOptions {
-	/** Base delay in milliseconds (default: 100) */
-	baseDelayMs?: number;
-	/** Maximum delay cap in milliseconds (default: 30000) */
-	maxDelayMs?: number;
-	/** Backoff strategy (default: "exponential") */
-	strategy?: "linear" | "exponential" | "constant";
-	/** Whether to add jitter to prevent thundering herd (default: true) */
-	useJitter?: boolean;
+  /** Base delay in milliseconds (default: 100) */
+  baseDelayMs?: number;
+  /** Maximum delay cap in milliseconds (default: 30000) */
+  maxDelayMs?: number;
+  /** Backoff strategy (default: "exponential") */
+  strategy?: "linear" | "exponential" | "constant";
+  /** Whether to add jitter to prevent thundering herd (default: true) */
+  useJitter?: boolean;
 }
 
 /**
@@ -30,10 +30,10 @@ export interface BackoffOptions {
  * or with user intervention (like waiting for rate limit reset).
  */
 const RECOVERABLE_CATEGORIES: readonly ErrorCategory[] = [
-	"network",
-	"timeout",
-	"rate_limit",
-	"conflict",
+  "network",
+  "timeout",
+  "rate_limit",
+  "conflict",
 ];
 
 /**
@@ -66,8 +66,10 @@ const RETRYABLE_CATEGORIES: readonly ErrorCategory[] = ["network", "timeout"];
  * console.log(isRecoverable(validationError)); // false
  * ```
  */
-export const isRecoverable = (error: { readonly category: ErrorCategory }): boolean => {
-	return RECOVERABLE_CATEGORIES.includes(error.category);
+export const isRecoverable = (error: {
+  readonly category: ErrorCategory;
+}): boolean => {
+  return RECOVERABLE_CATEGORIES.includes(error.category);
 };
 
 /**
@@ -102,8 +104,10 @@ export const isRecoverable = (error: { readonly category: ErrorCategory }): bool
  * console.log(isRetryable(rateLimitError)); // false (use retryAfterSeconds)
  * ```
  */
-export const isRetryable = (error: { readonly category: ErrorCategory }): boolean => {
-	return RETRYABLE_CATEGORIES.includes(error.category);
+export const isRetryable = (error: {
+  readonly category: ErrorCategory;
+}): boolean => {
+  return RETRYABLE_CATEGORIES.includes(error.category);
 };
 
 /**
@@ -141,42 +145,45 @@ export const isRetryable = (error: { readonly category: ErrorCategory }): boolea
  * const exactDelay = getBackoffDelay(2, { useJitter: false }); // exactly 400ms
  * ```
  */
-export const getBackoffDelay = (attempt: number, options: BackoffOptions = {}): number => {
-	const {
-		baseDelayMs = 100,
-		maxDelayMs = 30000,
-		strategy = "exponential",
-		useJitter = true,
-	} = options;
+export const getBackoffDelay = (
+  attempt: number,
+  options: BackoffOptions = {}
+): number => {
+  const {
+    baseDelayMs = 100,
+    maxDelayMs = 30_000,
+    strategy = "exponential",
+    useJitter = true,
+  } = options;
 
-	let delay: number;
-	switch (strategy) {
-		case "constant": {
-			delay = baseDelayMs;
-			break;
-		}
-		case "linear": {
-			delay = baseDelayMs * (attempt + 1);
-			break;
-		}
-		default: {
-			// "exponential" and any unhandled cases
-			delay = baseDelayMs * 2 ** attempt;
-		}
-	}
+  let delay: number;
+  switch (strategy) {
+    case "constant": {
+      delay = baseDelayMs;
+      break;
+    }
+    case "linear": {
+      delay = baseDelayMs * (attempt + 1);
+      break;
+    }
+    default: {
+      // "exponential" and any unhandled cases
+      delay = baseDelayMs * 2 ** attempt;
+    }
+  }
 
-	// Cap at maxDelayMs before jitter calculation
-	delay = Math.min(delay, maxDelayMs);
+  // Cap at maxDelayMs before jitter calculation
+  delay = Math.min(delay, maxDelayMs);
 
-	// Add jitter (+/-10%) to prevent thundering herd
-	if (useJitter) {
-		const jitterFactor = 0.1;
-		const jitter = delay * jitterFactor * (Math.random() * 2 - 1);
-		delay = Math.round(delay + jitter);
-	}
+  // Add jitter (+/-10%) to prevent thundering herd
+  if (useJitter) {
+    const jitterFactor = 0.1;
+    const jitter = delay * jitterFactor * (Math.random() * 2 - 1);
+    delay = Math.round(delay + jitter);
+  }
 
-	// Re-cap after jitter to ensure we never exceed maxDelayMs
-	return Math.min(delay, maxDelayMs);
+  // Re-cap after jitter to ensure we never exceed maxDelayMs
+  return Math.min(delay, maxDelayMs);
 };
 
 /**
@@ -208,12 +215,12 @@ export const getBackoffDelay = (attempt: number, options: BackoffOptions = {}): 
  * ```
  */
 export const shouldRetry = (
-	error: { readonly category: ErrorCategory },
-	attempt: number,
-	maxAttempts = 3,
+  error: { readonly category: ErrorCategory },
+  attempt: number,
+  maxAttempts = 3
 ): boolean => {
-	if (attempt >= maxAttempts) {
-		return false;
-	}
-	return isRetryable(error);
+  if (attempt >= maxAttempts) {
+    return false;
+  }
+  return isRetryable(error);
 };

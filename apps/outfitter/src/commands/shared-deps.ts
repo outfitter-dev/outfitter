@@ -14,11 +14,11 @@
  * Keep these in sync with the root package.json versions.
  */
 export const SHARED_DEV_DEPS = {
-	"@biomejs/biome": "^2.3.11",
-	"@types/bun": "latest",
-	lefthook: "^2.0.15",
-	typescript: "^5.9.3",
-	ultracite: "^7.0.12",
+  "@biomejs/biome": "^2.3.11",
+  "@types/bun": "latest",
+  lefthook: "^2.0.15",
+  typescript: "^5.9.3",
+  ultracite: "^7.0.12",
 } as const;
 
 /**
@@ -26,8 +26,8 @@ export const SHARED_DEV_DEPS = {
  * Template-specific scripts take precedence over these defaults.
  */
 export const SHARED_SCRIPTS = {
-	lint: "biome check .",
-	"lint:fix": "biome check . --write",
-	format: "biome format --write .",
-	typecheck: "tsc --noEmit",
+  lint: "biome check .",
+  "lint:fix": "biome check . --write",
+  format: "biome format --write .",
+  typecheck: "tsc --noEmit",
 } as const;

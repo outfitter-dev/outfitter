@@ -4,8 +4,11 @@
  * @packageDocumentation
  */
 
-import { exitCodeMap, safeStringify as contractsSafeStringify } from "@outfitter/contracts";
 import type { ErrorCategory } from "@outfitter/contracts";
+import {
+  safeStringify as contractsSafeStringify,
+  exitCodeMap,
+} from "@outfitter/contracts";
 import type { OutputMode, OutputOptions } from "./types.js";
 
 // =============================================================================
@@ -21,20 +24,23 @@ const DEFAULT_EXIT_CODE = 1;
  * Writes to a stream with proper backpressure handling.
  * Returns a promise that resolves when the write is complete.
  */
-async function writeWithBackpressure(stream: NodeJS.WritableStream, data: string): Promise<void> {
-	return new Promise((resolve, reject) => {
-		const canContinue = stream.write(data, (error) => {
-			if (error) reject(error);
-		});
+function writeWithBackpressure(
+  stream: NodeJS.WritableStream,
+  data: string
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const canContinue = stream.write(data, (error) => {
+      if (error) reject(error);
+    });
 
-		if (canContinue) {
-			resolve();
-		} else {
-			// Backpressure: wait for drain before resolving
-			stream.once("drain", () => resolve());
-			stream.once("error", reject);
-		}
-	});
+    if (canContinue) {
+      resolve();
+    } else {
+      // Backpressure: wait for drain before resolving
+      stream.once("drain", () => resolve());
+      stream.once("error", reject);
+    }
+  });
 }
 
 // =============================================================================
@@ -47,29 +53,27 @@ async function writeWithBackpressure(stream: NodeJS.WritableStream, data: string
  * Priority: explicit option > env var > TTY detection
  */
 function detectMode(options?: OutputOptions): OutputMode {
-	// Explicit mode takes highest priority
-	if (options?.mode) {
-		return options.mode;
-	}
+  // Explicit mode takes highest priority
+  if (options?.mode) {
+    return options.mode;
+  }
 
-	// Check environment variables (JSONL takes priority over JSON)
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const envJsonl = process.env["OUTFITTER_JSONL"];
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	const envJson = process.env["OUTFITTER_JSON"];
-	if (envJsonl === "1") return "jsonl";
-	if (envJson === "1") return "json";
-	if (envJsonl === "0" || envJson === "0") return "human";
+  // Check environment variables (JSONL takes priority over JSON)
+  const envJsonl = process.env["OUTFITTER_JSONL"];
+  const envJson = process.env["OUTFITTER_JSON"];
+  if (envJsonl === "1") return "jsonl";
+  if (envJson === "1") return "json";
+  if (envJsonl === "0" || envJson === "0") return "human";
 
-	// Default: JSON for non-TTY, human for TTY
-	return process.stdout.isTTY ? "human" : "json";
+  // Default: JSON for non-TTY, human for TTY
+  return process.stdout.isTTY ? "human" : "json";
 }
 
 /**
  * Type guard for valid error categories.
  */
 function isValidCategory(category: string): category is ErrorCategory {
-	return category in exitCodeMap;
+  return category in exitCodeMap;
 }
 
 /**
@@ -77,42 +81,42 @@ function isValidCategory(category: string): category is ErrorCategory {
  * Wraps contracts' safeStringify with undefined → null conversion for CLI JSON output.
  */
 function safeStringify(value: unknown, pretty?: boolean): string {
-	// Use contracts' safeStringify which handles BigInt and circular references
-	// We wrap the value to convert undefined to null for CLI JSON compatibility
-	const wrappedValue = value === undefined ? null : value;
-	return contractsSafeStringify(wrappedValue, pretty ? 2 : undefined);
+  // Use contracts' safeStringify which handles BigInt and circular references
+  // We wrap the value to convert undefined to null for CLI JSON compatibility
+  const wrappedValue = value === undefined ? null : value;
+  return contractsSafeStringify(wrappedValue, pretty ? 2 : undefined);
 }
 
 /**
  * Formats data for human-readable output.
  */
 function formatHuman(data: unknown): string {
-	if (data === null || data === undefined) {
-		return "";
-	}
+  if (data === null || data === undefined) {
+    return "";
+  }
 
-	if (typeof data === "string") {
-		return data;
-	}
+  if (typeof data === "string") {
+    return data;
+  }
 
-	if (typeof data === "number" || typeof data === "boolean") {
-		return String(data);
-	}
+  if (typeof data === "number" || typeof data === "boolean") {
+    return String(data);
+  }
 
-	if (Array.isArray(data)) {
-		return data.map((item) => formatHuman(item)).join("\n");
-	}
+  if (Array.isArray(data)) {
+    return data.map((item) => formatHuman(item)).join("\n");
+  }
 
-	if (typeof data === "object") {
-		// Simple key: value formatting for objects
-		const lines: string[] = [];
-		for (const [key, value] of Object.entries(data)) {
-			lines.push(`${key}: ${formatHuman(value)}`);
-		}
-		return lines.join("\n");
-	}
+  if (typeof data === "object") {
+    // Simple key: value formatting for objects
+    const lines: string[] = [];
+    for (const [key, value] of Object.entries(data)) {
+      lines.push(`${key}: ${formatHuman(value)}`);
+    }
+    return lines.join("\n");
+  }
 
-	return String(data);
+  return String(data);
 }
 
 /**
@@ -120,22 +124,22 @@ function formatHuman(data: unknown): string {
  * Works with both actual OutfitterError instances and duck-typed errors.
  */
 interface KitErrorLike {
-	_tag: string | undefined;
-	category: string | undefined;
-	context: Record<string, unknown> | undefined;
+  _tag: string | undefined;
+  category: string | undefined;
+  context: Record<string, unknown> | undefined;
 }
 
 function getErrorProperties(error: Error): KitErrorLike {
-	const errorObj = error as Error & {
-		_tag?: string;
-		category?: string;
-		context?: Record<string, unknown>;
-	};
-	return {
-		_tag: errorObj._tag,
-		category: errorObj.category,
-		context: errorObj.context,
-	};
+  const errorObj = error as Error & {
+    _tag?: string;
+    category?: string;
+    context?: Record<string, unknown>;
+  };
+  return {
+    _tag: errorObj._tag,
+    category: errorObj.category,
+    context: errorObj.context,
+  };
 }
 
 /**
@@ -143,23 +147,23 @@ function getErrorProperties(error: Error): KitErrorLike {
  * Uses exitCodeMap from @outfitter/contracts for known categories.
  */
 function getExitCode(error: Error): number {
-	const { category } = getErrorProperties(error);
+  const { category } = getErrorProperties(error);
 
-	if (category !== undefined && isValidCategory(category)) {
-		return exitCodeMap[category];
-	}
+  if (category !== undefined && isValidCategory(category)) {
+    return exitCodeMap[category];
+  }
 
-	return DEFAULT_EXIT_CODE;
+  return DEFAULT_EXIT_CODE;
 }
 
 /**
  * Serializable error structure for JSON output.
  */
 interface SerializedCliError {
-	message: string;
-	_tag?: string;
-	category?: string;
-	context?: Record<string, unknown>;
+  message: string;
+  _tag?: string;
+  category?: string;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -167,38 +171,38 @@ interface SerializedCliError {
  * Handles both OutfitterError instances and plain Error objects.
  */
 function serializeErrorToJson(error: Error): string {
-	const { _tag, category, context } = getErrorProperties(error);
+  const { _tag, category, context } = getErrorProperties(error);
 
-	const result: SerializedCliError = {
-		message: error.message,
-	};
+  const result: SerializedCliError = {
+    message: error.message,
+  };
 
-	if (_tag !== undefined) {
-		result._tag = _tag;
-	}
+  if (_tag !== undefined) {
+    result._tag = _tag;
+  }
 
-	if (category !== undefined) {
-		result.category = category;
-	}
+  if (category !== undefined) {
+    result.category = category;
+  }
 
-	if (context !== undefined) {
-		result.context = context;
-	}
+  if (context !== undefined) {
+    result.context = context;
+  }
 
-	return JSON.stringify(result);
+  return JSON.stringify(result);
 }
 
 /**
  * Formats an error for human-readable output.
  */
 function formatErrorHuman(error: Error): string {
-	const { _tag } = getErrorProperties(error);
+  const { _tag } = getErrorProperties(error);
 
-	if (_tag) {
-		return `${_tag}: ${error.message}`;
-	}
+  if (_tag) {
+    return `${_tag}: ${error.message}`;
+  }
 
-	return error.message;
+  return error.message;
 }
 
 // =============================================================================
@@ -234,45 +238,48 @@ function formatErrorHuman(error: Error): string {
  * await output(largeDataset, { mode: "jsonl" });
  * ```
  */
-export async function output(data: unknown, options?: OutputOptions): Promise<void> {
-	const mode = detectMode(options);
-	const stream = options?.stream ?? process.stdout;
+export async function output(
+  data: unknown,
+  options?: OutputOptions
+): Promise<void> {
+  const mode = detectMode(options);
+  const stream = options?.stream ?? process.stdout;
 
-	let outputText: string;
+  let outputText: string;
 
-	switch (mode) {
-		case "json": {
-			// Handle undefined/null explicitly
-			const jsonData = data === undefined ? null : data;
-			outputText = safeStringify(jsonData, options?.pretty);
-			break;
-		}
+  switch (mode) {
+    case "json": {
+      // Handle undefined/null explicitly
+      const jsonData = data === undefined ? null : data;
+      outputText = safeStringify(jsonData, options?.pretty);
+      break;
+    }
 
-		case "jsonl": {
-			// Arrays get one JSON object per line
-			if (Array.isArray(data)) {
-				if (data.length === 0) {
-					outputText = "";
-				} else {
-					outputText = data.map((item) => safeStringify(item)).join("\n");
-				}
-			} else {
-				// Single objects get single JSON line
-				outputText = safeStringify(data);
-			}
-			break;
-		}
+    case "jsonl": {
+      // Arrays get one JSON object per line
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          outputText = "";
+        } else {
+          outputText = data.map((item) => safeStringify(item)).join("\n");
+        }
+      } else {
+        // Single objects get single JSON line
+        outputText = safeStringify(data);
+      }
+      break;
+    }
 
-		default: {
-			outputText = formatHuman(data);
-			break;
-		}
-	}
+    default: {
+      outputText = formatHuman(data);
+      break;
+    }
+  }
 
-	// Only write if there's content (with backpressure handling)
-	if (outputText) {
-		await writeWithBackpressure(stream, `${outputText}\n`);
-	}
+  // Only write if there's content (with backpressure handling)
+  if (outputText) {
+    await writeWithBackpressure(stream, `${outputText}\n`);
+  }
 }
 
 /**
@@ -296,17 +303,17 @@ export async function output(data: unknown, options?: OutputOptions): Promise<vo
  * ```
  */
 export function exitWithError(error: Error, options?: OutputOptions): never {
-	const exitCode = getExitCode(error);
-	const mode = detectMode(options);
-	const isJsonMode = mode === "json" || mode === "jsonl";
+  const exitCode = getExitCode(error);
+  const mode = detectMode(options);
+  const isJsonMode = mode === "json" || mode === "jsonl";
 
-	if (isJsonMode) {
-		// JSON mode: serialize to stderr
-		process.stderr.write(`${serializeErrorToJson(error)}\n`);
-	} else {
-		// Human mode: formatted output to stderr
-		process.stderr.write(`${formatErrorHuman(error)}\n`);
-	}
+  if (isJsonMode) {
+    // JSON mode: serialize to stderr
+    process.stderr.write(`${serializeErrorToJson(error)}\n`);
+  } else {
+    // Human mode: formatted output to stderr
+    process.stderr.write(`${formatErrorHuman(error)}\n`);
+  }
 
-	process.exit(exitCode);
+  process.exit(exitCode);
 }

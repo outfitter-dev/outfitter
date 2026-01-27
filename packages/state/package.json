@@ -1,50 +1,50 @@
 {
-	"name": "@outfitter/state",
-	"description": "Pagination cursor persistence and state management for Outfitter",
-	"version": "0.1.0-rc.1",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./package.json": "./package.json"
-	},
-	"sideEffects": false,
-	"scripts": {
-		"build": "bunup --filter @outfitter/state",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"test": "bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"@outfitter/contracts": "workspace:*",
-		"@outfitter/types": "workspace:*"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"typescript": "^5.8.0"
-	},
-	"keywords": [
-		"outfitter",
-		"state",
-		"pagination",
-		"cursor",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/state"
-	}
+  "name": "@outfitter/state",
+  "description": "Pagination cursor persistence and state management for Outfitter",
+  "version": "0.1.0-rc.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter @outfitter/state",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "outfitter",
+    "state",
+    "pagination",
+    "cursor",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/state"
+  }
 }

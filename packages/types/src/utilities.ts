@@ -26,20 +26,21 @@ export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
  * // { id: string; name: string; email?: string; }
  * ```
  */
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 /**
  * Deeply makes all properties readonly.
  */
 export type DeepReadonly<T> = {
-	readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
+  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
 };
 
 /**
  * Deeply makes all properties partial (optional).
  */
 export type DeepPartial<T> = {
-	[P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 /**
@@ -52,9 +53,9 @@ export type DeepPartial<T> = {
  * ```
  */
 export type AtLeastOne<T, Keys extends keyof T = keyof T> = Omit<T, Keys> &
-	{
-		[K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
-	}[Keys];
+  {
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
+  }[Keys];
 
 /**
  * Creates a type that requires exactly one of the specified keys.
@@ -66,9 +67,10 @@ export type AtLeastOne<T, Keys extends keyof T = keyof T> = Omit<T, Keys> &
  * ```
  */
 export type ExactlyOne<T, Keys extends keyof T = keyof T> = Omit<T, Keys> &
-	{
-		[K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, never>>;
-	}[Keys];
+  {
+    [K in Keys]-?: Required<Pick<T, K>> &
+      Partial<Record<Exclude<Keys, K>, never>>;
+  }[Keys];
 
 /**
  * Extracts the element type from an array type.
@@ -84,7 +86,7 @@ export type ValueOf<T> = T[keyof T];
  * Makes a type's properties mutable (removes readonly).
  */
 export type Mutable<T> = {
-	-readonly [P in keyof T]: T[P];
+  -readonly [P in keyof T]: T[P];
 };
 
 /**
@@ -106,5 +108,5 @@ export type Mutable<T> = {
  * ```
  */
 export function assertNever(value: never): never {
-	throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
+  throw new Error(`Unexpected value: ${JSON.stringify(value)}`);
 }

@@ -7,7 +7,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { output, exitWithError } from "../output.js";
+import { exitWithError, output } from "../output.js";
 
 // =============================================================================
 // Test Utilities
@@ -17,94 +17,104 @@ import { output, exitWithError } from "../output.js";
  * Captures stdout/stderr output during function execution.
  */
 interface CapturedOutput {
-	readonly stdout: string;
-	readonly stderr: string;
+  readonly stdout: string;
+  readonly stderr: string;
 }
 
 /**
  * Mock error with OutfitterError-compatible structure.
  */
 interface MockKitError extends Error {
-	readonly _tag: string;
-	readonly category: string;
-	readonly context?: Record<string, unknown>;
+  readonly _tag: string;
+  readonly category: string;
+  readonly context?: Record<string, unknown>;
 }
 
 function createMockError(
-	tag: string,
-	category: string,
-	message: string,
-	context?: Record<string, unknown>,
+  tag: string,
+  category: string,
+  message: string,
+  context?: Record<string, unknown>
 ): MockKitError {
-	const error = new Error(message) as MockKitError;
-	Object.defineProperty(error, "_tag", { value: tag, enumerable: true });
-	Object.defineProperty(error, "category", { value: category, enumerable: true });
-	if (context) {
-		Object.defineProperty(error, "context", { value: context, enumerable: true });
-	}
-	return error;
+  const error = new Error(message) as MockKitError;
+  Object.defineProperty(error, "_tag", { value: tag, enumerable: true });
+  Object.defineProperty(error, "category", {
+    value: category,
+    enumerable: true,
+  });
+  if (context) {
+    Object.defineProperty(error, "context", {
+      value: context,
+      enumerable: true,
+    });
+  }
+  return error;
 }
 
 /**
  * Captures stdout and stderr during a synchronous or async function execution.
  */
-async function captureOutput(fn: () => void | Promise<void>): Promise<CapturedOutput> {
-	let stdoutContent = "";
-	let stderrContent = "";
+async function captureOutput(
+  fn: () => void | Promise<void>
+): Promise<CapturedOutput> {
+  let stdoutContent = "";
+  let stderrContent = "";
 
-	const originalStdoutWrite = process.stdout.write.bind(process.stdout);
-	const originalStderrWrite = process.stderr.write.bind(process.stderr);
+  const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+  const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
-	process.stdout.write = (chunk: string | Uint8Array): boolean => {
-		stdoutContent += typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
-		return true;
-	};
+  process.stdout.write = (chunk: string | Uint8Array): boolean => {
+    stdoutContent +=
+      typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+    return true;
+  };
 
-	process.stderr.write = (chunk: string | Uint8Array): boolean => {
-		stderrContent += typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
-		return true;
-	};
+  process.stderr.write = (chunk: string | Uint8Array): boolean => {
+    stderrContent +=
+      typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+    return true;
+  };
 
-	try {
-		await fn();
-	} finally {
-		process.stdout.write = originalStdoutWrite;
-		process.stderr.write = originalStderrWrite;
-	}
+  try {
+    await fn();
+  } finally {
+    process.stdout.write = originalStdoutWrite;
+    process.stderr.write = originalStderrWrite;
+  }
 
-	return { stdout: stdoutContent, stderr: stderrContent };
+  return { stdout: stdoutContent, stderr: stderrContent };
 }
 
 /**
  * Mocks process.exit to capture exit codes without actually exiting.
  */
 interface ExitCapture {
-	readonly exitCode: number | undefined;
-	readonly called: boolean;
+  readonly exitCode: number | undefined;
+  readonly called: boolean;
 }
 
 function mockProcessExit(): {
-	restore: () => void;
-	getCapture: () => ExitCapture;
+  restore: () => void;
+  getCapture: () => ExitCapture;
 } {
-	let exitCode: number | undefined;
-	let called = false;
+  let exitCode: number | undefined;
+  let called = false;
 
-	const originalExit = process.exit;
+  const originalExit = process.exit;
 
-	// @ts-expect-error - mocking process.exit
-	process.exit = (code?: number): never => {
-		exitCode = code;
-		called = true;
-		throw new Error(`process.exit(${code}) called`);
-	};
+  // @ts-expect-error - mocking process.exit
+  process.exit = (code?: number): never => {
+    exitCode = code;
+    called = true;
+    throw new Error(`process.exit(${code}) called`);
+  };
 
-	return {
-		restore: () => {
-			process.exit = originalExit;
-		},
-		getCapture: () => ({ exitCode, called }),
-	};
+  return {
+    restore: () => {
+      process.exit = originalExit;
+    },
+    getCapture: () => ({ exitCode, called }),
+  };
 }
 
 // =============================================================================
@@ -115,21 +125,21 @@ let originalEnv: NodeJS.ProcessEnv;
 let originalIsTTY: boolean | undefined;
 
 beforeEach(() => {
-	// Save original environment
-	originalEnv = { ...process.env };
-	originalIsTTY = process.stdout.isTTY;
+  // Save original environment
+  originalEnv = { ...process.env };
+  originalIsTTY = process.stdout.isTTY;
 });
 
 afterEach(() => {
-	// Restore original environment
-	process.env = originalEnv;
-	delete process.env.OUTFITTER_JSON;
-	delete process.env.OUTFITTER_JSONL;
-	Object.defineProperty(process.stdout, "isTTY", {
-		value: originalIsTTY,
-		writable: true,
-		configurable: true,
-	});
+  // Restore original environment
+  process.env = originalEnv;
+  delete process.env.OUTFITTER_JSON;
+  delete process.env.OUTFITTER_JSONL;
+  Object.defineProperty(process.stdout, "isTTY", {
+    value: originalIsTTY,
+    writable: true,
+    configurable: true,
+  });
 });
 
 // =============================================================================
@@ -137,105 +147,105 @@ afterEach(() => {
 // =============================================================================
 
 describe("output() mode detection", () => {
-	test("uses human mode by default when stdout is a TTY", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true,
-			writable: true,
-			configurable: true,
-		});
+  test("uses human mode by default when stdout is a TTY", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output({ name: "test" });
-		});
+    const captured = await captureOutput(() => {
+      output({ name: "test" });
+    });
 
-		// Human mode should NOT output raw JSON
-		expect(captured.stdout).not.toContain('{"name":"test"}');
-	});
+    // Human mode should NOT output raw JSON
+    expect(captured.stdout).not.toContain('{"name":"test"}');
+  });
 
-	test("uses json mode when stdout is not a TTY", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("uses json mode when stdout is not a TTY", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output({ name: "test" });
-		});
+    const captured = await captureOutput(() => {
+      output({ name: "test" });
+    });
 
-		// Non-TTY should output JSON
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual({ name: "test" });
-	});
+    // Non-TTY should output JSON
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
 
-	test("respects explicit mode option", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true, // TTY would default to human
-			writable: true,
-			configurable: true,
-		});
+  test("respects explicit mode option", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true, // TTY would default to human
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output({ name: "test" }, { mode: "json" });
-		});
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, { mode: "json" });
+    });
 
-		// Explicit json mode should override TTY detection
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual({ name: "test" });
-	});
+    // Explicit json mode should override TTY detection
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
 
-	test("respects OUTFITTER_JSON env var", async () => {
-		process.env.OUTFITTER_JSON = "1";
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true, // TTY would default to human
-			writable: true,
-			configurable: true,
-		});
+  test("respects OUTFITTER_JSON env var", async () => {
+    process.env.OUTFITTER_JSON = "1";
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true, // TTY would default to human
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output({ name: "test" });
-		});
+    const captured = await captureOutput(() => {
+      output({ name: "test" });
+    });
 
-		// Env var should override TTY detection
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual({ name: "test" });
-	});
+    // Env var should override TTY detection
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
 
-	test("respects OUTFITTER_JSONL env var with priority over JSON", async () => {
-		process.env.OUTFITTER_JSONL = "1";
-		process.env.OUTFITTER_JSON = "1";
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true,
-			writable: true,
-			configurable: true,
-		});
+  test("respects OUTFITTER_JSONL env var with priority over JSON", async () => {
+    process.env.OUTFITTER_JSONL = "1";
+    process.env.OUTFITTER_JSON = "1";
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output([{ name: "test" }]);
-		});
+    const captured = await captureOutput(() => {
+      output([{ name: "test" }]);
+    });
 
-		const lines = captured.stdout.trim().split("\n");
-		expect(lines).toHaveLength(1);
-		expect(JSON.parse(lines[0])).toEqual({ name: "test" });
-	});
+    const lines = captured.stdout.trim().split("\n");
+    expect(lines).toHaveLength(1);
+    expect(JSON.parse(lines[0])).toEqual({ name: "test" });
+  });
 
-	test("mode option takes precedence over env var", async () => {
-		process.env.OUTFITTER_JSON = "1";
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("mode option takes precedence over env var", async () => {
+    process.env.OUTFITTER_JSON = "1";
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const captured = await captureOutput(() => {
-			output({ name: "test" }, { mode: "jsonl" });
-		});
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, { mode: "jsonl" });
+    });
 
-		// Explicit mode should override env var
-		// JSONL outputs one line per item (for single object, just one JSON line)
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual({ name: "test" });
-	});
+    // Explicit mode should override env var
+    // JSONL outputs one line per item (for single object, just one JSON line)
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
 });
 
 // =============================================================================
@@ -243,70 +253,70 @@ describe("output() mode detection", () => {
 // =============================================================================
 
 describe("output() JSON mode", () => {
-	test("outputs valid JSON for single object", async () => {
-		const captured = await captureOutput(() => {
-			output({ id: 1, name: "test" }, { mode: "json" });
-		});
+  test("outputs valid JSON for single object", async () => {
+    const captured = await captureOutput(() => {
+      output({ id: 1, name: "test" }, { mode: "json" });
+    });
 
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual({ id: 1, name: "test" });
-	});
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ id: 1, name: "test" });
+  });
 
-	test("outputs valid JSON array for collections", async () => {
-		const items = [
-			{ id: 1, name: "first" },
-			{ id: 2, name: "second" },
-		];
+  test("outputs valid JSON array for collections", async () => {
+    const items = [
+      { id: 1, name: "first" },
+      { id: 2, name: "second" },
+    ];
 
-		const captured = await captureOutput(() => {
-			output(items, { mode: "json" });
-		});
+    const captured = await captureOutput(() => {
+      output(items, { mode: "json" });
+    });
 
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toEqual(items);
-	});
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual(items);
+  });
 
-	test("handles undefined gracefully", async () => {
-		const captured = await captureOutput(() => {
-			output(undefined, { mode: "json" });
-		});
+  test("handles undefined gracefully", async () => {
+    const captured = await captureOutput(() => {
+      output(undefined, { mode: "json" });
+    });
 
-		// undefined should serialize to null in JSON
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toBeNull();
-	});
+    // undefined should serialize to null in JSON
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toBeNull();
+  });
 
-	test("handles null gracefully", async () => {
-		const captured = await captureOutput(() => {
-			output(null, { mode: "json" });
-		});
+  test("handles null gracefully", async () => {
+    const captured = await captureOutput(() => {
+      output(null, { mode: "json" });
+    });
 
-		const parsed = JSON.parse(captured.stdout.trim());
-		expect(parsed).toBeNull();
-	});
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toBeNull();
+  });
 
-	test("handles circular references gracefully (safe stringify)", async () => {
-		const circular: Record<string, unknown> = { name: "circular" };
-		circular.self = circular;
+  test("handles circular references gracefully (safe stringify)", async () => {
+    const circular: Record<string, unknown> = { name: "circular" };
+    circular.self = circular;
 
-		// Should not throw and should handle circular reference
-		const captured = await captureOutput(() => {
-			output(circular, { mode: "json" });
-		});
+    // Should not throw and should handle circular reference
+    const captured = await captureOutput(() => {
+      output(circular, { mode: "json" });
+    });
 
-		// The output should be valid JSON (circular ref replaced with placeholder)
-		expect(() => JSON.parse(captured.stdout.trim())).not.toThrow();
-	});
+    // The output should be valid JSON (circular ref replaced with placeholder)
+    expect(() => JSON.parse(captured.stdout.trim())).not.toThrow();
+  });
 
-	test("pretty prints when pretty option is true", async () => {
-		const captured = await captureOutput(() => {
-			output({ id: 1 }, { mode: "json", pretty: true });
-		});
+  test("pretty prints when pretty option is true", async () => {
+    const captured = await captureOutput(() => {
+      output({ id: 1 }, { mode: "json", pretty: true });
+    });
 
-		// Pretty printed JSON should have indentation
-		expect(captured.stdout).toContain("\n");
-		expect(captured.stdout).toMatch(/\s{2,}/); // At least 2-space indent
-	});
+    // Pretty printed JSON should have indentation
+    expect(captured.stdout).toContain("\n");
+    expect(captured.stdout).toMatch(/\s{2,}/); // At least 2-space indent
+  });
 });
 
 // =============================================================================
@@ -314,63 +324,63 @@ describe("output() JSON mode", () => {
 // =============================================================================
 
 describe("output() JSONL mode", () => {
-	test("outputs one JSON object per line for arrays", async () => {
-		const items = [
-			{ id: 1, name: "first" },
-			{ id: 2, name: "second" },
-			{ id: 3, name: "third" },
-		];
+  test("outputs one JSON object per line for arrays", async () => {
+    const items = [
+      { id: 1, name: "first" },
+      { id: 2, name: "second" },
+      { id: 3, name: "third" },
+    ];
 
-		const captured = await captureOutput(() => {
-			output(items, { mode: "jsonl" });
-		});
+    const captured = await captureOutput(() => {
+      output(items, { mode: "jsonl" });
+    });
 
-		const lines = captured.stdout.trim().split("\n");
-		expect(lines).toHaveLength(3);
+    const lines = captured.stdout.trim().split("\n");
+    expect(lines).toHaveLength(3);
 
-		// Each line should be valid JSON
-		expect(JSON.parse(lines[0])).toEqual({ id: 1, name: "first" });
-		expect(JSON.parse(lines[1])).toEqual({ id: 2, name: "second" });
-		expect(JSON.parse(lines[2])).toEqual({ id: 3, name: "third" });
-	});
+    // Each line should be valid JSON
+    expect(JSON.parse(lines[0])).toEqual({ id: 1, name: "first" });
+    expect(JSON.parse(lines[1])).toEqual({ id: 2, name: "second" });
+    expect(JSON.parse(lines[2])).toEqual({ id: 3, name: "third" });
+  });
 
-	test("single objects output as single JSON line", async () => {
-		const captured = await captureOutput(() => {
-			output({ id: 1, name: "single" }, { mode: "jsonl" });
-		});
+  test("single objects output as single JSON line", async () => {
+    const captured = await captureOutput(() => {
+      output({ id: 1, name: "single" }, { mode: "jsonl" });
+    });
 
-		const lines = captured.stdout.trim().split("\n");
-		expect(lines).toHaveLength(1);
-		expect(JSON.parse(lines[0])).toEqual({ id: 1, name: "single" });
-	});
+    const lines = captured.stdout.trim().split("\n");
+    expect(lines).toHaveLength(1);
+    expect(JSON.parse(lines[0])).toEqual({ id: 1, name: "single" });
+  });
 
-	test("each line is valid JSON", async () => {
-		const items = [
-			{ complex: { nested: { deeply: true } } },
-			{ array: [1, 2, 3] },
-			{ unicode: "\u00e9\u00e0\u00fc" },
-		];
+  test("each line is valid JSON", async () => {
+    const items = [
+      { complex: { nested: { deeply: true } } },
+      { array: [1, 2, 3] },
+      { unicode: "\u00e9\u00e0\u00fc" },
+    ];
 
-		const captured = await captureOutput(() => {
-			output(items, { mode: "jsonl" });
-		});
+    const captured = await captureOutput(() => {
+      output(items, { mode: "jsonl" });
+    });
 
-		const lines = captured.stdout.trim().split("\n");
+    const lines = captured.stdout.trim().split("\n");
 
-		// Each line must parse without error
-		for (const line of lines) {
-			expect(() => JSON.parse(line)).not.toThrow();
-		}
-	});
+    // Each line must parse without error
+    for (const line of lines) {
+      expect(() => JSON.parse(line)).not.toThrow();
+    }
+  });
 
-	test("handles empty array", async () => {
-		const captured = await captureOutput(() => {
-			output([], { mode: "jsonl" });
-		});
+  test("handles empty array", async () => {
+    const captured = await captureOutput(() => {
+      output([], { mode: "jsonl" });
+    });
 
-		// Empty array should produce no output (or empty string)
-		expect(captured.stdout.trim()).toBe("");
-	});
+    // Empty array should produce no output (or empty string)
+    expect(captured.stdout.trim()).toBe("");
+  });
 });
 
 // =============================================================================
@@ -378,45 +388,46 @@ describe("output() JSONL mode", () => {
 // =============================================================================
 
 describe("output() human mode", () => {
-	test("outputs string representation for primitives", async () => {
-		const captured = await captureOutput(() => {
-			output("hello world", { mode: "human" });
-		});
+  test("outputs string representation for primitives", async () => {
+    const captured = await captureOutput(() => {
+      output("hello world", { mode: "human" });
+    });
 
-		expect(captured.stdout).toContain("hello world");
-	});
+    expect(captured.stdout).toContain("hello world");
+  });
 
-	test("outputs number as string", async () => {
-		const captured = await captureOutput(() => {
-			output(42, { mode: "human" });
-		});
+  test("outputs number as string", async () => {
+    const captured = await captureOutput(() => {
+      output(42, { mode: "human" });
+    });
 
-		expect(captured.stdout).toContain("42");
-	});
+    expect(captured.stdout).toContain("42");
+  });
 
-	test("outputs formatted representation for objects", async () => {
-		const captured = await captureOutput(() => {
-			output({ name: "test", value: 123 }, { mode: "human" });
-		});
+  test("outputs formatted representation for objects", async () => {
+    const captured = await captureOutput(() => {
+      output({ name: "test", value: 123 }, { mode: "human" });
+    });
 
-		// Human mode should include the object properties
-		expect(captured.stdout).toContain("name");
-		expect(captured.stdout).toContain("test");
-	});
+    // Human mode should include the object properties
+    expect(captured.stdout).toContain("name");
+    expect(captured.stdout).toContain("test");
+  });
 
-	test("outputs to specified stream", async () => {
-		let stderrContent = "";
-		const mockStderr = {
-			write: (chunk: string | Uint8Array): boolean => {
-				stderrContent += typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
-				return true;
-			},
-		} as NodeJS.WritableStream;
+  test("outputs to specified stream", async () => {
+    let stderrContent = "";
+    const mockStderr = {
+      write: (chunk: string | Uint8Array): boolean => {
+        stderrContent +=
+          typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+        return true;
+      },
+    } as NodeJS.WritableStream;
 
-		output("error message", { mode: "human", stream: mockStderr });
+    output("error message", { mode: "human", stream: mockStderr });
 
-		expect(stderrContent).toContain("error message");
-	});
+    expect(stderrContent).toContain("error message");
+  });
 });
 
 // =============================================================================
@@ -424,114 +435,139 @@ describe("output() human mode", () => {
 // =============================================================================
 
 describe("exitWithError() error serialization (JSON mode)", () => {
-	test("includes _tag field", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("includes _tag field", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("ValidationError", "validation", "Invalid input");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Invalid input"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			const parsed = JSON.parse(captured.stderr.trim() || captured.stdout.trim());
-			expect(parsed._tag).toBe("ValidationError");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      const parsed = JSON.parse(
+        captured.stderr.trim() || captured.stdout.trim()
+      );
+      expect(parsed._tag).toBe("ValidationError");
+    } finally {
+      exitMock.restore();
+    }
+  });
 
-	test("includes category field", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("includes category field", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("NotFoundError", "not_found", "Resource not found");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "NotFoundError",
+      "not_found",
+      "Resource not found"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			const parsed = JSON.parse(captured.stderr.trim() || captured.stdout.trim());
-			expect(parsed.category).toBe("not_found");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      const parsed = JSON.parse(
+        captured.stderr.trim() || captured.stdout.trim()
+      );
+      expect(parsed.category).toBe("not_found");
+    } finally {
+      exitMock.restore();
+    }
+  });
 
-	test("includes message field", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("includes message field", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("ValidationError", "validation", "Email is required");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Email is required"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			const parsed = JSON.parse(captured.stderr.trim() || captured.stdout.trim());
-			expect(parsed.message).toBe("Email is required");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      const parsed = JSON.parse(
+        captured.stderr.trim() || captured.stdout.trim()
+      );
+      expect(parsed.message).toBe("Email is required");
+    } finally {
+      exitMock.restore();
+    }
+  });
 
-	test("serializes context (non-sensitive fields)", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: false,
-			writable: true,
-			configurable: true,
-		});
+  test("serializes context (non-sensitive fields)", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("ValidationError", "validation", "Invalid field", {
-			field: "email",
-			expected: "string",
-		});
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Invalid field",
+      {
+        field: "email",
+        expected: "string",
+      }
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			const parsed = JSON.parse(captured.stderr.trim() || captured.stdout.trim());
-			expect(parsed.context).toBeDefined();
-			expect(parsed.context.field).toBe("email");
-			expect(parsed.context.expected).toBe("string");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      const parsed = JSON.parse(
+        captured.stderr.trim() || captured.stdout.trim()
+      );
+      expect(parsed.context).toBeDefined();
+      expect(parsed.context.field).toBe("email");
+      expect(parsed.context.expected).toBe("string");
+    } finally {
+      exitMock.restore();
+    }
+  });
 });
 
 // =============================================================================
@@ -539,199 +575,239 @@ describe("exitWithError() error serialization (JSON mode)", () => {
 // =============================================================================
 
 describe("exitWithError() exit codes mapping", () => {
-	test("exit 1 for validation errors (category: 'validation')", () => {
-		const error = createMockError("ValidationError", "validation", "Invalid input");
-		const exitMock = mockProcessExit();
+  test("exit 1 for validation errors (category: 'validation')", () => {
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Invalid input"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(1);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(1);
+    }
+  });
 
-	test("exit 2 for not_found errors", () => {
-		const error = createMockError("NotFoundError", "not_found", "Resource not found");
-		const exitMock = mockProcessExit();
+  test("exit 2 for not_found errors", () => {
+    const error = createMockError(
+      "NotFoundError",
+      "not_found",
+      "Resource not found"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(2);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(2);
+    }
+  });
 
-	test("exit 3 for conflict errors", () => {
-		const error = createMockError("ConflictError", "conflict", "Version conflict");
-		const exitMock = mockProcessExit();
+  test("exit 3 for conflict errors", () => {
+    const error = createMockError(
+      "ConflictError",
+      "conflict",
+      "Version conflict"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(3);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(3);
+    }
+  });
 
-	test("exit 4 for permission errors", () => {
-		const error = createMockError("PermissionError", "permission", "Access denied");
-		const exitMock = mockProcessExit();
+  test("exit 4 for permission errors", () => {
+    const error = createMockError(
+      "PermissionError",
+      "permission",
+      "Access denied"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(4);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(4);
+    }
+  });
 
-	test("exit 5 for timeout errors", () => {
-		const error = createMockError("TimeoutError", "timeout", "Operation timed out");
-		const exitMock = mockProcessExit();
+  test("exit 5 for timeout errors", () => {
+    const error = createMockError(
+      "TimeoutError",
+      "timeout",
+      "Operation timed out"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(5);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(5);
+    }
+  });
 
-	test("exit 6 for rate_limit errors", () => {
-		const error = createMockError("RateLimitError", "rate_limit", "Rate limit exceeded");
-		const exitMock = mockProcessExit();
+  test("exit 6 for rate_limit errors", () => {
+    const error = createMockError(
+      "RateLimitError",
+      "rate_limit",
+      "Rate limit exceeded"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(6);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(6);
+    }
+  });
 
-	test("exit 7 for network errors", () => {
-		const error = createMockError("NetworkError", "network", "Connection failed");
-		const exitMock = mockProcessExit();
+  test("exit 7 for network errors", () => {
+    const error = createMockError(
+      "NetworkError",
+      "network",
+      "Connection failed"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(7);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(7);
+    }
+  });
 
-	test("exit 8 for internal errors", () => {
-		const error = createMockError("InternalError", "internal", "Unexpected error");
-		const exitMock = mockProcessExit();
+  test("exit 8 for internal errors", () => {
+    const error = createMockError(
+      "InternalError",
+      "internal",
+      "Unexpected error"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(8);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(8);
+    }
+  });
 
-	test("exit 9 for auth errors", () => {
-		const error = createMockError("AuthError", "auth", "Authentication failed");
-		const exitMock = mockProcessExit();
+  test("exit 9 for auth errors", () => {
+    const error = createMockError("AuthError", "auth", "Authentication failed");
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(9);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(9);
+    }
+  });
 
-	test("exit 130 for cancelled errors", () => {
-		const error = createMockError("CancelledError", "cancelled", "Operation cancelled");
-		const exitMock = mockProcessExit();
+  test("exit 130 for cancelled errors", () => {
+    const error = createMockError(
+      "CancelledError",
+      "cancelled",
+      "Operation cancelled"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			expect(capture.exitCode).toBe(130);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(130);
+    }
+  });
 
-	test("exit 1 for unknown error category (fallback)", () => {
-		const error = createMockError("UnknownError", "unknown_category", "Something unknown");
-		const exitMock = mockProcessExit();
+  test("exit 1 for unknown error category (fallback)", () => {
+    const error = createMockError(
+      "UnknownError",
+      "unknown_category",
+      "Something unknown"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			// Unknown categories should fallback to exit code 1
-			expect(capture.exitCode).toBe(1);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      // Unknown categories should fallback to exit code 1
+      expect(capture.exitCode).toBe(1);
+    }
+  });
 
-	test("exit 1 for plain Error without category", () => {
-		const error = new Error("Plain error without category");
-		const exitMock = mockProcessExit();
+  test("exit 1 for plain Error without category", () => {
+    const error = new Error("Plain error without category");
+    const exitMock = mockProcessExit();
 
-		try {
-			exitWithError(error);
-		} catch {
-			// Expected: process.exit mock throws
-		} finally {
-			const capture = exitMock.getCapture();
-			exitMock.restore();
-			expect(capture.called).toBe(true);
-			// Plain errors without category should default to exit code 1
-			expect(capture.exitCode).toBe(1);
-		}
-	});
+    try {
+      exitWithError(error);
+    } catch {
+      // Expected: process.exit mock throws
+    } finally {
+      const capture = exitMock.getCapture();
+      exitMock.restore();
+      expect(capture.called).toBe(true);
+      // Plain errors without category should default to exit code 1
+      expect(capture.exitCode).toBe(1);
+    }
+  });
 });
 
 // =============================================================================
@@ -739,83 +815,96 @@ describe("exitWithError() exit codes mapping", () => {
 // =============================================================================
 
 describe("exitWithError() human mode output", () => {
-	test("writes to stderr, not stdout", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true,
-			writable: true,
-			configurable: true,
-		});
+  test("writes to stderr, not stdout", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("ValidationError", "validation", "Invalid input");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Invalid input"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			// In human mode, error should go to stderr
-			expect(captured.stderr).toContain("Invalid input");
-			expect(captured.stdout).toBe("");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      // In human mode, error should go to stderr
+      expect(captured.stderr).toContain("Invalid input");
+      expect(captured.stdout).toBe("");
+    } finally {
+      exitMock.restore();
+    }
+  });
 
-	test("includes error message", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true,
-			writable: true,
-			configurable: true,
-		});
+  test("includes error message", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("ValidationError", "validation", "Email address is not valid");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Email address is not valid"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			expect(captured.stderr).toContain("Email address is not valid");
-		} finally {
-			exitMock.restore();
-		}
-	});
+      expect(captured.stderr).toContain("Email address is not valid");
+    } finally {
+      exitMock.restore();
+    }
+  });
 
-	test("includes error tag in human-readable format", async () => {
-		Object.defineProperty(process.stdout, "isTTY", {
-			value: true,
-			writable: true,
-			configurable: true,
-		});
+  test("includes error tag in human-readable format", async () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
 
-		const error = createMockError("NotFoundError", "not_found", "Resource not found");
-		const exitMock = mockProcessExit();
+    const error = createMockError(
+      "NotFoundError",
+      "not_found",
+      "Resource not found"
+    );
+    const exitMock = mockProcessExit();
 
-		try {
-			const captured = await captureOutput(() => {
-				try {
-					exitWithError(error);
-				} catch {
-					// Expected: process.exit mock throws
-				}
-			});
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error);
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
 
-			// Human mode should include some indication of error type
-			expect(
-				captured.stderr.includes("NotFoundError") || captured.stderr.includes("not found"),
-			).toBe(true);
-		} finally {
-			exitMock.restore();
-		}
-	});
+      // Human mode should include some indication of error type
+      expect(
+        captured.stderr.includes("NotFoundError") ||
+          captured.stderr.includes("not found")
+      ).toBe(true);
+    } finally {
+      exitMock.restore();
+    }
+  });
 });

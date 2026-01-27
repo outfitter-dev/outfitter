@@ -18,8 +18,10 @@ export type NonEmptyArray<T> = [T, ...T[]];
 /**
  * Type guard for NonEmptyArray.
  */
-export const isNonEmptyArray = <T>(arr: readonly T[]): arr is NonEmptyArray<T> => {
-	return arr.length > 0;
+export const isNonEmptyArray = <T>(
+  arr: readonly T[]
+): arr is NonEmptyArray<T> => {
+  return arr.length > 0;
 };
 
 /**
@@ -27,13 +29,15 @@ export const isNonEmptyArray = <T>(arr: readonly T[]): arr is NonEmptyArray<T> =
  * Returns Result instead of throwing.
  */
 export const assertDefined = <T>(
-	value: T | null | undefined,
-	message?: string,
+  value: T | null | undefined,
+  message?: string
 ): Result<T, InstanceType<typeof AssertionError>> => {
-	if (value === null || value === undefined) {
-		return Result.err(new AssertionError({ message: message ?? "Value is null or undefined" }));
-	}
-	return Result.ok(value);
+  if (value === null || value === undefined) {
+    return Result.err(
+      new AssertionError({ message: message ?? "Value is null or undefined" })
+    );
+  }
+  return Result.ok(value);
 };
 
 /**
@@ -41,13 +45,15 @@ export const assertDefined = <T>(
  * Returns NonEmptyArray on success.
  */
 export const assertNonEmpty = <T>(
-	arr: readonly T[],
-	message?: string,
+  arr: readonly T[],
+  message?: string
 ): Result<NonEmptyArray<T>, InstanceType<typeof AssertionError>> => {
-	if (arr.length === 0) {
-		return Result.err(new AssertionError({ message: message ?? "Array is empty" }));
-	}
-	return Result.ok(arr as NonEmptyArray<T>);
+  if (arr.length === 0) {
+    return Result.err(
+      new AssertionError({ message: message ?? "Array is empty" })
+    );
+  }
+  return Result.ok(arr as NonEmptyArray<T>);
 };
 
 /**
@@ -55,22 +61,26 @@ export const assertNonEmpty = <T>(
  * Supports type guard predicates for narrowing.
  */
 export function assertMatches<T, U extends T>(
-	value: T,
-	predicate: (v: T) => v is U,
-	message?: string,
+  value: T,
+  predicate: (v: T) => v is U,
+  message?: string
 ): Result<U, InstanceType<typeof AssertionError>>;
 export function assertMatches<T>(
-	value: T,
-	predicate: (v: T) => boolean,
-	message?: string,
+  value: T,
+  predicate: (v: T) => boolean,
+  message?: string
 ): Result<T, InstanceType<typeof AssertionError>>;
 export function assertMatches<T>(
-	value: T,
-	predicate: (v: T) => boolean,
-	message?: string,
+  value: T,
+  predicate: (v: T) => boolean,
+  message?: string
 ): Result<T, InstanceType<typeof AssertionError>> {
-	if (!predicate(value)) {
-		return Result.err(new AssertionError({ message: message ?? "Value does not match predicate" }));
-	}
-	return Result.ok(value);
+  if (!predicate(value)) {
+    return Result.err(
+      new AssertionError({
+        message: message ?? "Value does not match predicate",
+      })
+    );
+  }
+  return Result.ok(value);
 }

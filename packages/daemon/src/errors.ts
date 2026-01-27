@@ -15,66 +15,66 @@ import { TaggedError } from "@outfitter/contracts";
 // ============================================================================
 
 const StaleSocketErrorBase: TaggedErrorClass<
-	"StaleSocketError",
-	{
-		message: string;
-		socketPath: string;
-		pid?: number;
-	}
+  "StaleSocketError",
+  {
+    message: string;
+    socketPath: string;
+    pid?: number;
+  }
 > = TaggedError("StaleSocketError")<{
-	message: string;
-	socketPath: string;
-	pid?: number;
+  message: string;
+  socketPath: string;
+  pid?: number;
 }>();
 
 const ConnectionRefusedErrorBase: TaggedErrorClass<
-	"ConnectionRefusedError",
-	{
-		message: string;
-		socketPath: string;
-	}
+  "ConnectionRefusedError",
+  {
+    message: string;
+    socketPath: string;
+  }
 > = TaggedError("ConnectionRefusedError")<{
-	message: string;
-	socketPath: string;
+  message: string;
+  socketPath: string;
 }>();
 
 const ConnectionTimeoutErrorBase: TaggedErrorClass<
-	"ConnectionTimeoutError",
-	{
-		message: string;
-		socketPath: string;
-		timeoutMs: number;
-	}
+  "ConnectionTimeoutError",
+  {
+    message: string;
+    socketPath: string;
+    timeoutMs: number;
+  }
 > = TaggedError("ConnectionTimeoutError")<{
-	message: string;
-	socketPath: string;
-	timeoutMs: number;
+  message: string;
+  socketPath: string;
+  timeoutMs: number;
 }>();
 
 const ProtocolErrorBase: TaggedErrorClass<
-	"ProtocolError",
-	{
-		message: string;
-		socketPath: string;
-		details?: string;
-	}
+  "ProtocolError",
+  {
+    message: string;
+    socketPath: string;
+    details?: string;
+  }
 > = TaggedError("ProtocolError")<{
-	message: string;
-	socketPath: string;
-	details?: string;
+  message: string;
+  socketPath: string;
+  details?: string;
 }>();
 
 const LockErrorBase: TaggedErrorClass<
-	"LockError",
-	{
-		message: string;
-		lockPath: string;
-		pid?: number;
-	}
+  "LockError",
+  {
+    message: string;
+    lockPath: string;
+    pid?: number;
+  }
 > = TaggedError("LockError")<{
-	message: string;
-	lockPath: string;
-	pid?: number;
+  message: string;
+  lockPath: string;
+  pid?: number;
 }>();
 
 /**
@@ -191,7 +191,7 @@ export class LockError extends LockErrorBase {}
  * ```
  */
 export type DaemonConnectionError =
-	| StaleSocketError
-	| ConnectionRefusedError
-	| ConnectionTimeoutError
-	| ProtocolError;
+  | StaleSocketError
+  | ConnectionRefusedError
+  | ConnectionTimeoutError
+  | ProtocolError;

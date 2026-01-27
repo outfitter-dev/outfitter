@@ -6,60 +6,60 @@
 
 // Branded type utilities
 export {
-	brand,
-	unbrand,
-	positiveInt,
-	nonEmptyString,
-	email,
-	uuid,
-	type Branded,
-	type Unbrand,
-	type BrandOf,
-	type PositiveInt,
-	type NonEmptyString,
-	type Email,
-	type UUID,
+  type Branded,
+  type BrandOf,
+  brand,
+  type Email,
+  email,
+  type NonEmptyString,
+  nonEmptyString,
+  type PositiveInt,
+  positiveInt,
+  type Unbrand,
+  type UUID,
+  unbrand,
+  uuid,
 } from "./branded";
-
-// Short ID generation
-export { shortId, isShortId, type ShortId, type ShortIdOptions } from "./short-id";
-
-// Deterministic hash ID generation
-export { hashId } from "./hash-id";
+// Collection utilities
+export {
+  first,
+  groupBy,
+  isNonEmptyArray,
+  last,
+  type NonEmptyArray,
+  toNonEmptyArray,
+} from "./collections";
+// Deep path utilities
+export type { DeepGet, DeepKeys, DeepSet } from "./deep";
 
 // Type guards
 export {
-	isDefined,
-	isNonEmptyString,
-	isPlainObject,
-	hasProperty,
-	createGuard,
-	assertType,
+  assertType,
+  createGuard,
+  hasProperty,
+  isDefined,
+  isNonEmptyString,
+  isPlainObject,
 } from "./guards";
-
-// Collection utilities
+// Deterministic hash ID generation
+export { hashId } from "./hash-id";
+// Short ID generation
 export {
-	isNonEmptyArray,
-	toNonEmptyArray,
-	first,
-	last,
-	groupBy,
-	type NonEmptyArray,
-} from "./collections";
-
+  isShortId,
+  type ShortId,
+  type ShortIdOptions,
+  shortId,
+} from "./short-id";
 // Type utilities
 export {
-	assertNever,
-	type RequiredKeys,
-	type OptionalKeys,
-	type DeepReadonly,
-	type DeepPartial,
-	type AtLeastOne,
-	type ExactlyOne,
-	type ElementOf,
-	type ValueOf,
-	type Mutable,
+  type AtLeastOne,
+  assertNever,
+  type DeepPartial,
+  type DeepReadonly,
+  type ElementOf,
+  type ExactlyOne,
+  type Mutable,
+  type OptionalKeys,
+  type RequiredKeys,
+  type ValueOf,
 } from "./utilities";
-
-// Deep path utilities
-export type { DeepKeys, DeepGet, DeepSet } from "./deep";

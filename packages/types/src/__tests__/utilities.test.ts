@@ -8,308 +8,350 @@
 
 import { describe, expect, it } from "bun:test";
 import {
-	assertNever,
-	type AtLeastOne,
-	type DeepPartial,
-	type DeepReadonly,
-	type ElementOf,
-	type ExactlyOne,
-	type Mutable,
-	type OptionalKeys,
-	type RequiredKeys,
-	type ValueOf,
+  type AtLeastOne,
+  assertNever,
+  type DeepPartial,
+  type DeepReadonly,
+  type ElementOf,
+  type ExactlyOne,
+  type Mutable,
+  type OptionalKeys,
+  type RequiredKeys,
+  type ValueOf,
 } from "../utilities.js";
 
 describe("utilities", () => {
-	describe("RequiredKeys<T, K>", () => {
-		interface Config {
-			host?: string;
-			port?: number;
-			timeout?: number;
-		}
+  describe("RequiredKeys<T, K>", () => {
+    interface Config {
+      host?: string;
+      port?: number;
+      timeout?: number;
+    }
 
-		it("makes specified keys required", () => {
-			type WithHost = RequiredKeys<Config, "host">;
-			// host should be required, port and timeout remain optional
-			const config: WithHost = { host: "localhost" };
-			expect(config.host).toBe("localhost");
-		});
+    it("makes specified keys required", () => {
+      type WithHost = RequiredKeys<Config, "host">;
+      // host should be required, port and timeout remain optional
+      const config: WithHost = { host: "localhost" };
+      expect(config.host).toBe("localhost");
+    });
 
-		it("preserves other optional keys", () => {
-			type WithHost = RequiredKeys<Config, "host">;
-			const config: WithHost = { host: "localhost", port: 3000 };
-			// port is still optional
-			expect(config.port).toBe(3000);
-		});
+    it("preserves other optional keys", () => {
+      type WithHost = RequiredKeys<Config, "host">;
+      const config: WithHost = { host: "localhost", port: 3000 };
+      // port is still optional
+      expect(config.port).toBe(3000);
+    });
 
-		it("works with multiple keys", () => {
-			type WithHostPort = RequiredKeys<Config, "host" | "port">;
-			const config: WithHostPort = { host: "localhost", port: 3000 };
-			expect(config.host).toBe("localhost");
-			expect(config.port).toBe(3000);
-		});
-	});
+    it("works with multiple keys", () => {
+      type WithHostPort = RequiredKeys<Config, "host" | "port">;
+      const config: WithHostPort = { host: "localhost", port: 3000 };
+      expect(config.host).toBe("localhost");
+      expect(config.port).toBe(3000);
+    });
+  });
 
-	describe("OptionalKeys<T, K>", () => {
-		interface User {
-			id: string;
-			name: string;
-			email: string;
-		}
+  describe("OptionalKeys<T, K>", () => {
+    interface User {
+      id: string;
+      name: string;
+      email: string;
+    }
 
-		it("makes specified keys optional", () => {
-			type PartialUser = OptionalKeys<User, "email">;
-			// email should be optional now
-			const user: PartialUser = { id: "1", name: "Alice" };
-			expect(user.name).toBe("Alice");
-		});
+    it("makes specified keys optional", () => {
+      type PartialUser = OptionalKeys<User, "email">;
+      // email should be optional now
+      const user: PartialUser = { id: "1", name: "Alice" };
+      expect(user.name).toBe("Alice");
+    });
 
-		it("preserves required keys", () => {
-			type PartialUser = OptionalKeys<User, "email">;
-			// @ts-expect-error - id and name should still be required
-			const _invalid: PartialUser = { id: "1" };
-			expect(true).toBe(true);
-		});
+    it("preserves required keys", () => {
+      type PartialUser = OptionalKeys<User, "email">;
+      // @ts-expect-error - id and name should still be required
+      const _invalid: PartialUser = { id: "1" };
+      expect(true).toBe(true);
+    });
 
-		it("works with multiple keys", () => {
-			type PartialUser = OptionalKeys<User, "name" | "email">;
-			const user: PartialUser = { id: "1" };
-			expect(user.id).toBe("1");
-		});
-	});
+    it("works with multiple keys", () => {
+      type PartialUser = OptionalKeys<User, "name" | "email">;
+      const user: PartialUser = { id: "1" };
+      expect(user.id).toBe("1");
+    });
+  });
 
-	describe("DeepReadonly<T>", () => {
-		it("makes all properties readonly", () => {
-			type Config = { host: string; port: number };
-			type ReadonlyConfig = DeepReadonly<Config>;
+  describe("DeepReadonly<T>", () => {
+    it("makes all properties readonly", () => {
+      interface Config {
+        host: string;
+        port: number;
+      }
+      type ReadonlyConfig = DeepReadonly<Config>;
 
-			const config: ReadonlyConfig = { host: "localhost", port: 3000 };
-			// @ts-expect-error - should not be assignable
-			config.host = "changed";
-			expect(true).toBe(true);
-		});
+      const config: ReadonlyConfig = { host: "localhost", port: 3000 };
+      // @ts-expect-error - should not be assignable
+      config.host = "changed";
+      expect(true).toBe(true);
+    });
 
-		it("recurses into nested objects", () => {
-			type Nested = { outer: { inner: { value: number } } };
-			type ReadonlyNested = DeepReadonly<Nested>;
+    it("recurses into nested objects", () => {
+      interface Nested {
+        outer: { inner: { value: number } };
+      }
+      type ReadonlyNested = DeepReadonly<Nested>;
 
-			const obj: ReadonlyNested = { outer: { inner: { value: 42 } } };
-			// @ts-expect-error - nested property should be readonly
-			obj.outer.inner.value = 100;
-			expect(true).toBe(true);
-		});
+      const obj: ReadonlyNested = { outer: { inner: { value: 42 } } };
+      // @ts-expect-error - nested property should be readonly
+      obj.outer.inner.value = 100;
+      expect(true).toBe(true);
+    });
 
-		it("handles arrays", () => {
-			type WithArray = { items: number[] };
-			type ReadonlyWithArray = DeepReadonly<WithArray>;
+    it("handles arrays", () => {
+      interface WithArray {
+        items: number[];
+      }
+      type ReadonlyWithArray = DeepReadonly<WithArray>;
 
-			const obj: ReadonlyWithArray = { items: [1, 2, 3] };
-			// Array itself should be readonly
-			// @ts-expect-error - should not be assignable
-			obj.items = [4, 5, 6];
-			expect(true).toBe(true);
-		});
-	});
+      const obj: ReadonlyWithArray = { items: [1, 2, 3] };
+      // Array itself should be readonly
+      // @ts-expect-error - should not be assignable
+      obj.items = [4, 5, 6];
+      expect(true).toBe(true);
+    });
+  });
 
-	describe("DeepPartial<T>", () => {
-		it("makes all properties optional", () => {
-			type Config = { host: string; port: number };
-			type PartialConfig = DeepPartial<Config>;
+  describe("DeepPartial<T>", () => {
+    it("makes all properties optional", () => {
+      interface Config {
+        host: string;
+        port: number;
+      }
+      type PartialConfig = DeepPartial<Config>;
 
-			// All properties optional
-			const config: PartialConfig = {};
-			expect(config.host).toBeUndefined();
-		});
+      // All properties optional
+      const config: PartialConfig = {};
+      expect(config.host).toBeUndefined();
+    });
 
-		it("recurses into nested objects", () => {
-			type Nested = { outer: { inner: { value: number } } };
-			type PartialNested = DeepPartial<Nested>;
+    it("recurses into nested objects", () => {
+      interface Nested {
+        outer: { inner: { value: number } };
+      }
+      type PartialNested = DeepPartial<Nested>;
 
-			// All nested properties optional
-			const obj: PartialNested = { outer: {} };
-			expect(obj.outer?.inner?.value).toBeUndefined();
-		});
+      // All nested properties optional
+      const obj: PartialNested = { outer: {} };
+      expect(obj.outer?.inner?.value).toBeUndefined();
+    });
 
-		it("preserves original types when provided", () => {
-			type Config = { host: string; port: number };
-			type PartialConfig = DeepPartial<Config>;
+    it("preserves original types when provided", () => {
+      interface Config {
+        host: string;
+        port: number;
+      }
+      type PartialConfig = DeepPartial<Config>;
 
-			const config: PartialConfig = { host: "localhost" };
-			expect(config.host).toBe("localhost");
-		});
-	});
+      const config: PartialConfig = { host: "localhost" };
+      expect(config.host).toBe("localhost");
+    });
+  });
 
-	describe("AtLeastOne<T, Keys>", () => {
-		it("requires at least one of specified keys", () => {
-			type Props = { a?: string; b?: number; c?: boolean };
-			type AtLeastAorB = AtLeastOne<Props, "a" | "b">;
+  describe("AtLeastOne<T, Keys>", () => {
+    it("requires at least one of specified keys", () => {
+      interface Props {
+        a?: string;
+        b?: number;
+        c?: boolean;
+      }
+      type AtLeastAorB = AtLeastOne<Props, "a" | "b">;
 
-			// Valid: has 'a'
-			const withA: AtLeastAorB = { a: "hello" };
-			// Valid: has 'b'
-			const withB: AtLeastAorB = { b: 42 };
-			// Valid: has both
-			const withBoth: AtLeastAorB = { a: "hello", b: 42 };
+      // Valid: has 'a'
+      const withA: AtLeastAorB = { a: "hello" };
+      // Valid: has 'b'
+      const withB: AtLeastAorB = { b: 42 };
+      // Valid: has both
+      const withBoth: AtLeastAorB = { a: "hello", b: 42 };
 
-			expect(withA.a).toBe("hello");
-			expect(withB.b).toBe(42);
-			expect(withBoth.a).toBe("hello");
-		});
+      expect(withA.a).toBe("hello");
+      expect(withB.b).toBe(42);
+      expect(withBoth.a).toBe("hello");
+    });
 
-		it("rejects when none of the specified keys present", () => {
-			type Props = { a?: string; b?: number; c?: boolean };
-			type AtLeastAorB = AtLeastOne<Props, "a" | "b">;
+    it("rejects when none of the specified keys present", () => {
+      interface Props {
+        a?: string;
+        b?: number;
+        c?: boolean;
+      }
+      type AtLeastAorB = AtLeastOne<Props, "a" | "b">;
 
-			// @ts-expect-error - must have at least a or b
-			const _invalid: AtLeastAorB = { c: true };
-			expect(true).toBe(true);
-		});
-	});
+      // @ts-expect-error - must have at least a or b
+      const _invalid: AtLeastAorB = { c: true };
+      expect(true).toBe(true);
+    });
+  });
 
-	describe("ExactlyOne<T, Keys>", () => {
-		it("requires exactly one of specified keys", () => {
-			type Auth = { token?: string; apiKey?: string };
-			type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
+  describe("ExactlyOne<T, Keys>", () => {
+    it("requires exactly one of specified keys", () => {
+      interface Auth {
+        token?: string;
+        apiKey?: string;
+      }
+      type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 
-			// Valid: has only token
-			const withToken: OneAuth = { token: "abc" };
-			// Valid: has only apiKey
-			const withApiKey: OneAuth = { apiKey: "xyz" };
+      // Valid: has only token
+      const withToken: OneAuth = { token: "abc" };
+      // Valid: has only apiKey
+      const withApiKey: OneAuth = { apiKey: "xyz" };
 
-			expect(withToken.token).toBe("abc");
-			expect(withApiKey.apiKey).toBe("xyz");
-		});
+      expect(withToken.token).toBe("abc");
+      expect(withApiKey.apiKey).toBe("xyz");
+    });
 
-		it("rejects when both specified keys present", () => {
-			type Auth = { token?: string; apiKey?: string };
-			type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
+    it("rejects when both specified keys present", () => {
+      interface Auth {
+        token?: string;
+        apiKey?: string;
+      }
+      type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 
-			// @ts-expect-error - cannot have both token and apiKey
-			const _invalid: OneAuth = { token: "abc", apiKey: "xyz" };
-			expect(true).toBe(true);
-		});
+      // @ts-expect-error - cannot have both token and apiKey
+      const _invalid: OneAuth = { token: "abc", apiKey: "xyz" };
+      expect(true).toBe(true);
+    });
 
-		it("rejects when none of the specified keys present", () => {
-			type Auth = { token?: string; apiKey?: string; extra?: boolean };
-			type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
+    it("rejects when none of the specified keys present", () => {
+      interface Auth {
+        token?: string;
+        apiKey?: string;
+        extra?: boolean;
+      }
+      type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 
-			// @ts-expect-error - must have exactly one of token or apiKey
-			const _invalid: OneAuth = { extra: true };
-			expect(true).toBe(true);
-		});
-	});
+      // @ts-expect-error - must have exactly one of token or apiKey
+      const _invalid: OneAuth = { extra: true };
+      expect(true).toBe(true);
+    });
+  });
 
-	describe("ElementOf<T>", () => {
-		it("extracts element type from array", () => {
-			type Numbers = number[];
-			type Num = ElementOf<Numbers>;
+  describe("ElementOf<T>", () => {
+    it("extracts element type from array", () => {
+      type Numbers = number[];
+      type Num = ElementOf<Numbers>;
 
-			const n: Num = 42;
-			expect(n).toBe(42);
-		});
+      const n: Num = 42;
+      expect(n).toBe(42);
+    });
 
-		it("extracts element type from readonly array", () => {
-			type ReadonlyStrings = readonly string[];
-			type Str = ElementOf<ReadonlyStrings>;
+    it("extracts element type from readonly array", () => {
+      type ReadonlyStrings = readonly string[];
+      type Str = ElementOf<ReadonlyStrings>;
 
-			const s: Str = "hello";
-			expect(s).toBe("hello");
-		});
+      const s: Str = "hello";
+      expect(s).toBe("hello");
+    });
 
-		it("extracts element type from tuple", () => {
-			type Tuple = [string, number, boolean];
-			type Elem = ElementOf<Tuple>;
+    it("extracts element type from tuple", () => {
+      type Tuple = [string, number, boolean];
+      type Elem = ElementOf<Tuple>;
 
-			// Element should be string | number | boolean
-			const a: Elem = "hello";
-			const b: Elem = 42;
-			const c: Elem = true;
-			expect([a, b, c]).toEqual(["hello", 42, true]);
-		});
-	});
+      // Element should be string | number | boolean
+      const a: Elem = "hello";
+      const b: Elem = 42;
+      const c: Elem = true;
+      expect([a, b, c]).toEqual(["hello", 42, true]);
+    });
+  });
 
-	describe("ValueOf<T>", () => {
-		it("creates union of object values", () => {
-			type Obj = { a: string; b: number; c: boolean };
-			type Val = ValueOf<Obj>;
+  describe("ValueOf<T>", () => {
+    it("creates union of object values", () => {
+      interface Obj {
+        a: string;
+        b: number;
+        c: boolean;
+      }
+      type Val = ValueOf<Obj>;
 
-			const s: Val = "hello";
-			const n: Val = 42;
-			const b: Val = true;
-			expect([s, n, b]).toEqual(["hello", 42, true]);
-		});
+      const s: Val = "hello";
+      const n: Val = 42;
+      const b: Val = true;
+      expect([s, n, b]).toEqual(["hello", 42, true]);
+    });
 
-		it("works with const objects", () => {
-			const STATUS = {
-				PENDING: "pending",
-				DONE: "done",
-				ERROR: "error",
-			} as const;
+    it("works with const objects", () => {
+      const STATUS = {
+        PENDING: "pending",
+        DONE: "done",
+        ERROR: "error",
+      } as const;
 
-			type StatusValue = ValueOf<typeof STATUS>;
-			const status: StatusValue = "pending";
-			expect(status).toBe("pending");
-		});
-	});
+      type StatusValue = ValueOf<typeof STATUS>;
+      const status: StatusValue = "pending";
+      expect(status).toBe("pending");
+    });
+  });
 
-	describe("Mutable<T>", () => {
-		it("removes readonly from properties", () => {
-			type Frozen = { readonly x: number; readonly y: string };
-			type Thawed = Mutable<Frozen>;
+  describe("Mutable<T>", () => {
+    it("removes readonly from properties", () => {
+      interface Frozen {
+        readonly x: number;
+        readonly y: string;
+      }
+      type Thawed = Mutable<Frozen>;
 
-			const obj: Thawed = { x: 1, y: "a" };
-			obj.x = 2; // Should be allowed
-			obj.y = "b";
-			expect(obj).toEqual({ x: 2, y: "b" });
-		});
+      const obj: Thawed = { x: 1, y: "a" };
+      obj.x = 2; // Should be allowed
+      obj.y = "b";
+      expect(obj).toEqual({ x: 2, y: "b" });
+    });
 
-		it("makes readonly arrays mutable", () => {
-			type ReadonlyObj = { readonly items: readonly number[] };
-			type MutableObj = Mutable<ReadonlyObj>;
+    it("makes readonly arrays mutable", () => {
+      interface ReadonlyObj {
+        readonly items: readonly number[];
+      }
+      type MutableObj = Mutable<ReadonlyObj>;
 
-			const obj: MutableObj = { items: [1, 2, 3] };
-			obj.items = [4, 5]; // items property is now mutable
-			expect(obj.items).toEqual([4, 5]);
-		});
-	});
+      const obj: MutableObj = { items: [1, 2, 3] };
+      obj.items = [4, 5]; // items property is now mutable
+      expect(obj.items).toEqual([4, 5]);
+    });
+  });
 
-	describe("assertNever()", () => {
-		type Status = "pending" | "done";
+  describe("assertNever()", () => {
+    type Status = "pending" | "done";
 
-		function processStatus(status: Status): string {
-			switch (status) {
-				case "pending":
-					return "waiting";
-				case "done":
-					return "complete";
-				default:
-					return assertNever(status);
-			}
-		}
+    function processStatus(status: Status): string {
+      switch (status) {
+        case "pending":
+          return "waiting";
+        case "done":
+          return "complete";
+        default:
+          return assertNever(status);
+      }
+    }
 
-		it("throws when reached at runtime", () => {
-			// Force an invalid value past TypeScript
-			const invalid = "unknown" as Status;
-			expect(() => {
-				switch (invalid) {
-					case "pending":
-						return "waiting";
-					case "done":
-						return "complete";
-					default:
-						return assertNever(invalid as never);
-				}
-			}).toThrow();
-		});
+    it("throws when reached at runtime", () => {
+      // Force an invalid value past TypeScript
+      const invalid = "unknown" as Status;
+      expect(() => {
+        switch (invalid) {
+          case "pending":
+            return "waiting";
+          case "done":
+            return "complete";
+          default:
+            return assertNever(invalid as never);
+        }
+      }).toThrow();
+    });
 
-		it("includes value in error message", () => {
-			expect(() => assertNever("bad" as never)).toThrow(/bad/);
-		});
+    it("includes value in error message", () => {
+      expect(() => assertNever("bad" as never)).toThrow(/bad/);
+    });
 
-		it("enables exhaustiveness checking", () => {
-			// This test verifies that the switch is exhaustive at compile time
-			const result = processStatus("pending");
-			expect(result).toBe("waiting");
-		});
-	});
+    it("enables exhaustiveness checking", () => {
+      // This test verifies that the switch is exhaustive at compile time
+      const result = processStatus("pending");
+      expect(result).toBe("waiting");
+    });
+  });
 });

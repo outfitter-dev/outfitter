@@ -1,56 +1,60 @@
 import type { Result } from "better-result";
-import { type OutfitterError, type SerializedError, statusCodeMap } from "./errors.js";
-import { serializeError } from "./serialization.js";
 import { generateRequestId } from "./context.js";
+import {
+  type OutfitterError,
+  type SerializedError,
+  statusCodeMap,
+} from "./errors.js";
+import { serializeError } from "./serialization.js";
 
 /**
  * Metadata attached to every response envelope.
  */
 export interface EnvelopeMeta {
-	/** Unique request identifier for tracing */
-	requestId: string;
+  /** Unique request identifier for tracing */
+  requestId: string;
 
-	/** ISO timestamp of response generation */
-	timestamp: string;
+  /** ISO timestamp of response generation */
+  timestamp: string;
 
-	/** Operation duration in milliseconds */
-	durationMs?: number;
+  /** Operation duration in milliseconds */
+  durationMs?: number;
 }
 
 /**
  * Pagination metadata for list responses.
  */
 export interface PaginationMeta {
-	/** Total number of items (if known) */
-	total?: number;
+  /** Total number of items (if known) */
+  total?: number;
 
-	/** Number of items returned */
-	count: number;
+  /** Number of items returned */
+  count: number;
 
-	/** Cursor for next page (null if no more pages) */
-	nextCursor: string | null;
+  /** Cursor for next page (null if no more pages) */
+  nextCursor: string | null;
 
-	/** Whether more pages exist */
-	hasMore: boolean;
+  /** Whether more pages exist */
+  hasMore: boolean;
 }
 
 /**
  * Success envelope structure.
  */
 export interface SuccessEnvelope<T> {
-	ok: true;
-	data: T;
-	meta: EnvelopeMeta;
-	pagination?: PaginationMeta;
+  ok: true;
+  data: T;
+  meta: EnvelopeMeta;
+  pagination?: PaginationMeta;
 }
 
 /**
  * Error envelope structure.
  */
 export interface ErrorEnvelope {
-	ok: false;
-	error: SerializedError;
-	meta: EnvelopeMeta;
+  ok: false;
+  error: SerializedError;
+  meta: EnvelopeMeta;
 }
 
 /**
@@ -62,24 +66,24 @@ export type Envelope<T> = SuccessEnvelope<T> | ErrorEnvelope;
  * HTTP-style response with status code.
  */
 export interface HttpResponse<T> {
-	status: number;
-	body: Envelope<T>;
+  status: number;
+  body: Envelope<T>;
 }
 
 /**
  * Build envelope metadata with defaults.
  */
 function buildMeta(overrides?: Partial<EnvelopeMeta>): EnvelopeMeta {
-	const meta: EnvelopeMeta = {
-		requestId: overrides?.requestId ?? generateRequestId(),
-		timestamp: new Date().toISOString(),
-	};
+  const meta: EnvelopeMeta = {
+    requestId: overrides?.requestId ?? generateRequestId(),
+    timestamp: new Date().toISOString(),
+  };
 
-	if (overrides?.durationMs !== undefined) {
-		meta.durationMs = overrides.durationMs;
-	}
+  if (overrides?.durationMs !== undefined) {
+    meta.durationMs = overrides.durationMs;
+  }
 
-	return meta;
+  return meta;
 }
 
 /**
@@ -98,24 +102,24 @@ function buildMeta(overrides?: Partial<EnvelopeMeta>): EnvelopeMeta {
  * ```
  */
 export function toEnvelope<T, E extends OutfitterError>(
-	result: Result<T, E>,
-	meta?: Partial<EnvelopeMeta>,
+  result: Result<T, E>,
+  meta?: Partial<EnvelopeMeta>
 ): Envelope<T> {
-	const envelopeMeta = buildMeta(meta);
+  const envelopeMeta = buildMeta(meta);
 
-	if (result.isOk()) {
-		return {
-			ok: true,
-			data: result.value,
-			meta: envelopeMeta,
-		};
-	}
+  if (result.isOk()) {
+    return {
+      ok: true,
+      data: result.value,
+      meta: envelopeMeta,
+    };
+  }
 
-	return {
-		ok: false,
-		error: serializeError(result.error),
-		meta: envelopeMeta,
-	};
+  return {
+    ok: false,
+    error: serializeError(result.error),
+    meta: envelopeMeta,
+  };
 }
 
 /**
@@ -136,21 +140,23 @@ export function toEnvelope<T, E extends OutfitterError>(
  * // or { status: 404, body: { ok: false, error: {...}, meta: {...} } }
  * ```
  */
-export function toHttpResponse<T, E extends OutfitterError>(result: Result<T, E>): HttpResponse<T> {
-	const envelope = toEnvelope(result);
+export function toHttpResponse<T, E extends OutfitterError>(
+  result: Result<T, E>
+): HttpResponse<T> {
+  const envelope = toEnvelope(result);
 
-	if (envelope.ok) {
-		return {
-			status: 200,
-			body: envelope,
-		};
-	}
+  if (envelope.ok) {
+    return {
+      status: 200,
+      body: envelope,
+    };
+  }
 
-	// Get status code from error category
-	const status = statusCodeMap[envelope.error.category];
+  // Get status code from error category
+  const status = statusCodeMap[envelope.error.category];
 
-	return {
-		status,
-		body: envelope,
-	};
+  return {
+    status,
+    body: envelope,
+  };
 }

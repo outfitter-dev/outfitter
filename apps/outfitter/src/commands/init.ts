@@ -7,7 +7,14 @@
  * @packageDocumentation
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { confirm, isCancel, select, text } from "@clack/prompts";
@@ -23,44 +30,44 @@ import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "./shared-deps.js";
  * Options for the init command.
  */
 export interface InitOptions {
-	/** Target directory to initialize the project in */
-	readonly targetDir: string;
-	/** Package name (defaults to directory name if not provided) */
-	readonly name: string | undefined;
-	/** Binary name (defaults to project name if not provided) */
-	readonly bin?: string;
-	/** Template to use (defaults to 'basic') */
-	readonly template: string | undefined;
-	/** Whether to use local/workspace dependencies */
-	readonly local?: boolean;
-	/** Whether to overwrite existing files */
-	readonly force: boolean;
+  /** Target directory to initialize the project in */
+  readonly targetDir: string;
+  /** Package name (defaults to directory name if not provided) */
+  readonly name: string | undefined;
+  /** Binary name (defaults to project name if not provided) */
+  readonly bin?: string;
+  /** Template to use (defaults to 'basic') */
+  readonly template: string | undefined;
+  /** Whether to use local/workspace dependencies */
+  readonly local?: boolean;
+  /** Whether to overwrite existing files */
+  readonly force: boolean;
 }
 
 /**
  * Placeholder values for template substitution.
  */
 interface PlaceholderValues {
-	readonly name: string;
-	readonly projectName: string;
-	readonly packageName: string;
-	readonly binName: string;
-	readonly version: string;
-	readonly description: string;
-	readonly author: string;
-	readonly year: string;
+  readonly name: string;
+  readonly projectName: string;
+  readonly packageName: string;
+  readonly binName: string;
+  readonly version: string;
+  readonly description: string;
+  readonly author: string;
+  readonly year: string;
 }
 
 /**
  * Error returned when initialization fails.
  */
 export class InitError extends Error {
-	readonly _tag = "InitError" as const;
+  readonly _tag = "InitError" as const;
 
-	constructor(message: string) {
-		super(message);
-		this.name = "InitError";
-	}
+  constructor(message: string) {
+    super(message);
+    this.name = "InitError";
+  }
 }
 
 // =============================================================================
@@ -72,49 +79,49 @@ export class InitError extends Error {
  * These files should be copied as raw buffers without placeholder substitution.
  */
 const BINARY_EXTENSIONS = new Set([
-	// Images
-	".png",
-	".jpg",
-	".jpeg",
-	".gif",
-	".ico",
-	".webp",
-	".bmp",
-	".tiff",
-	".svg", // SVG is text but often contains complex content that shouldn't be modified
-	// Fonts
-	".woff",
-	".woff2",
-	".ttf",
-	".otf",
-	".eot",
-	// Audio/Video
-	".mp3",
-	".mp4",
-	".wav",
-	".ogg",
-	".webm",
-	// Archives
-	".zip",
-	".tar",
-	".gz",
-	".bz2",
-	".7z",
-	// Documents
-	".pdf",
-	// Executables/Libraries
-	".exe",
-	".dll",
-	".so",
-	".dylib",
-	".node",
-	".wasm",
-	// Other binary formats
-	".bin",
-	".dat",
-	".db",
-	".sqlite",
-	".sqlite3",
+  // Images
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".ico",
+  ".webp",
+  ".bmp",
+  ".tiff",
+  ".svg", // SVG is text but often contains complex content that shouldn't be modified
+  // Fonts
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
+  // Audio/Video
+  ".mp3",
+  ".mp4",
+  ".wav",
+  ".ogg",
+  ".webm",
+  // Archives
+  ".zip",
+  ".tar",
+  ".gz",
+  ".bz2",
+  ".7z",
+  // Documents
+  ".pdf",
+  // Executables/Libraries
+  ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
+  ".node",
+  ".wasm",
+  // Other binary formats
+  ".bin",
+  ".dat",
+  ".db",
+  ".sqlite",
+  ".sqlite3",
 ]);
 
 /**
@@ -124,8 +131,8 @@ const BINARY_EXTENSIONS = new Set([
  * @returns True if the file is binary, false otherwise
  */
 function isBinaryFile(filename: string): boolean {
-	const ext = extname(filename).toLowerCase();
-	return BINARY_EXTENSIONS.has(ext);
+  const ext = extname(filename).toLowerCase();
+  return BINARY_EXTENSIONS.has(ext);
 }
 
 // =============================================================================
@@ -136,40 +143,40 @@ function isBinaryFile(filename: string): boolean {
  * Gets the path to the templates directory.
  */
 function getTemplatesDir(): string {
-	// Templates are stored at the monorepo root
-	// Walk up from the current file location to find templates/
-	// Use fileURLToPath to properly decode percent-encoded paths (e.g., spaces)
-	let currentDir = dirname(fileURLToPath(import.meta.url));
+  // Templates are stored at the monorepo root
+  // Walk up from the current file location to find templates/
+  // Use fileURLToPath to properly decode percent-encoded paths (e.g., spaces)
+  let currentDir = dirname(fileURLToPath(import.meta.url));
 
-	// Walk up until we find the templates directory
-	for (let i = 0; i < 10; i++) {
-		const templatesPath = join(currentDir, "templates");
-		if (existsSync(templatesPath)) {
-			return templatesPath;
-		}
-		currentDir = dirname(currentDir);
-	}
+  // Walk up until we find the templates directory
+  for (let i = 0; i < 10; i++) {
+    const templatesPath = join(currentDir, "templates");
+    if (existsSync(templatesPath)) {
+      return templatesPath;
+    }
+    currentDir = dirname(currentDir);
+  }
 
-	// Fallback: assume we're running from the monorepo root
-	return join(process.cwd(), "templates");
+  // Fallback: assume we're running from the monorepo root
+  return join(process.cwd(), "templates");
 }
 
 /**
  * Validates that a template exists.
  */
 function validateTemplate(templateName: string): Result<string, InitError> {
-	const templatesDir = getTemplatesDir();
-	const templatePath = join(templatesDir, templateName);
+  const templatesDir = getTemplatesDir();
+  const templatePath = join(templatesDir, templateName);
 
-	if (!existsSync(templatePath)) {
-		return Result.err(
-			new InitError(
-				`Template '${templateName}' not found. Available templates are in: ${templatesDir}`,
-			),
-		);
-	}
+  if (!existsSync(templatePath)) {
+    return Result.err(
+      new InitError(
+        `Template '${templateName}' not found. Available templates are in: ${templatesDir}`
+      )
+    );
+  }
 
-	return Result.ok(templatePath);
+  return Result.ok(templatePath);
 }
 
 /**
@@ -177,23 +184,26 @@ function validateTemplate(templateName: string): Result<string, InitError> {
  *
  * Placeholders are in the format {{name}}, {{version}}, etc.
  */
-function replacePlaceholders(content: string, values: PlaceholderValues): string {
-	return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-		if (Object.hasOwn(values, key)) {
-			return values[key as keyof PlaceholderValues];
-		}
-		return match;
-	});
+function replacePlaceholders(
+  content: string,
+  values: PlaceholderValues
+): string {
+  return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    if (Object.hasOwn(values, key)) {
+      return values[key as keyof PlaceholderValues];
+    }
+    return match;
+  });
 }
 
 /**
  * Gets the output filename by removing .template extension.
  */
 function getOutputFilename(templateFilename: string): string {
-	if (templateFilename.endsWith(".template")) {
-		return templateFilename.slice(0, -".template".length);
-	}
-	return templateFilename;
+  if (templateFilename.endsWith(".template")) {
+    return templateFilename.slice(0, -".template".length);
+  }
+  return templateFilename;
 }
 
 // =============================================================================
@@ -201,289 +211,294 @@ function getOutputFilename(templateFilename: string): string {
 // =============================================================================
 
 function isInteractive(): boolean {
-	// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-	return process.stdout.isTTY === true && process.env["TERM"] !== "dumb";
+  return process.stdout.isTTY === true && process.env["TERM"] !== "dumb";
 }
 
 interface PackageInfo {
-	readonly name?: string;
-	readonly bin?: string;
+  readonly name?: string;
+  readonly bin?: string;
 }
 
 function readPackageInfo(targetDir: string): PackageInfo {
-	const packageJsonPath = join(targetDir, "package.json");
-	if (!existsSync(packageJsonPath)) {
-		return {};
-	}
+  const packageJsonPath = join(targetDir, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return {};
+  }
 
-	try {
-		const content = readFileSync(packageJsonPath, "utf-8");
-		const parsed = JSON.parse(content) as Record<string, unknown>;
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		const name = parsed["name"];
-		const resolvedName = typeof name === "string" && name.length > 0 ? name : undefined;
+  try {
+    const content = readFileSync(packageJsonPath, "utf-8");
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+    const name = parsed["name"];
+    const resolvedName =
+      typeof name === "string" && name.length > 0 ? name : undefined;
 
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		const bin = parsed["bin"];
-		let resolvedBin: string | undefined;
-		if (typeof bin === "string") {
-			resolvedBin = bin.length > 0 ? bin : undefined;
-		} else if (typeof bin === "object" && bin !== null) {
-			const entries = Object.entries(bin as Record<string, unknown>).filter(
-				([, value]) => typeof value === "string",
-			);
-			const keys = entries.map(([key]) => key);
-			if (keys.length > 0) {
-				const derived = resolvedName ? deriveBinName(resolvedName) : undefined;
-				if (derived && keys.includes(derived)) {
-					resolvedBin = derived;
-				} else if (resolvedName && keys.includes(resolvedName)) {
-					resolvedBin = resolvedName;
-				} else {
-					resolvedBin = keys[0];
-				}
-			}
-		}
+    const bin = parsed["bin"];
+    let resolvedBin: string | undefined;
+    if (typeof bin === "string") {
+      resolvedBin = bin.length > 0 ? bin : undefined;
+    } else if (typeof bin === "object" && bin !== null) {
+      const entries = Object.entries(bin as Record<string, unknown>).filter(
+        ([, value]) => typeof value === "string"
+      );
+      const keys = entries.map(([key]) => key);
+      if (keys.length > 0) {
+        const derived = resolvedName ? deriveBinName(resolvedName) : undefined;
+        if (derived && keys.includes(derived)) {
+          resolvedBin = derived;
+        } else if (resolvedName && keys.includes(resolvedName)) {
+          resolvedBin = resolvedName;
+        } else {
+          resolvedBin = keys[0];
+        }
+      }
+    }
 
-		return {
-			...(resolvedName ? { name: resolvedName } : {}),
-			...(resolvedBin ? { bin: resolvedBin } : {}),
-		};
-	} catch {
-		return {};
-	}
+    return {
+      ...(resolvedName ? { name: resolvedName } : {}),
+      ...(resolvedBin ? { bin: resolvedBin } : {}),
+    };
+  } catch {
+    return {};
+  }
 }
 
 function deriveProjectName(packageName: string): string {
-	if (packageName.startsWith("@")) {
-		const parts = packageName.split("/");
-		if (parts.length > 1 && parts[1]) {
-			return parts[1];
-		}
-	}
-	return packageName;
+  if (packageName.startsWith("@")) {
+    const parts = packageName.split("/");
+    if (parts.length > 1 && parts[1]) {
+      return parts[1];
+    }
+  }
+  return packageName;
 }
 
 function deriveBinName(projectName: string): string {
-	if (projectName.startsWith("@")) {
-		const parts = projectName.split("/");
-		if (parts.length > 1 && parts[1]) {
-			return parts[1];
-		}
-	}
-	return projectName;
+  if (projectName.startsWith("@")) {
+    const parts = projectName.split("/");
+    if (parts.length > 1 && parts[1]) {
+      return parts[1];
+    }
+  }
+  return projectName;
 }
 
 async function resolvePackageName(
-	options: InitOptions,
-	resolvedTargetDir: string,
-	packageInfo: PackageInfo,
+  options: InitOptions,
+  resolvedTargetDir: string,
+  packageInfo: PackageInfo
 ): Promise<Result<string, InitError>> {
-	if (options.name) {
-		return Result.ok(options.name);
-	}
+  if (options.name) {
+    return Result.ok(options.name);
+  }
 
-	const detectedName = packageInfo.name;
-	const fallbackName = basename(resolvedTargetDir);
+  const detectedName = packageInfo.name;
+  const fallbackName = basename(resolvedTargetDir);
 
-	if (!isInteractive()) {
-		return Result.ok(detectedName ?? fallbackName);
-	}
+  if (!isInteractive()) {
+    return Result.ok(detectedName ?? fallbackName);
+  }
 
-	const suggested = detectedName ?? fallbackName;
-	const custom = await text({
-		message: "Package name",
-		placeholder: suggested,
-	});
+  const suggested = detectedName ?? fallbackName;
+  const custom = await text({
+    message: "Package name",
+    placeholder: suggested,
+  });
 
-	if (isCancel(custom)) {
-		return Result.err(new InitError("Initialization cancelled."));
-	}
+  if (isCancel(custom)) {
+    return Result.err(new InitError("Initialization cancelled."));
+  }
 
-	const trimmed = String(custom).trim();
-	return Result.ok(trimmed.length > 0 ? trimmed : suggested);
+  const trimmed = String(custom).trim();
+  return Result.ok(trimmed.length > 0 ? trimmed : suggested);
 }
 
 async function resolveBinName(
-	options: InitOptions,
-	projectName: string,
-	packageInfo: PackageInfo,
+  options: InitOptions,
+  projectName: string,
+  packageInfo: PackageInfo
 ): Promise<Result<string, InitError>> {
-	if (options.bin) {
-		return Result.ok(options.bin);
-	}
+  if (options.bin) {
+    return Result.ok(options.bin);
+  }
 
-	const derived = deriveBinName(projectName);
-	const detected = packageInfo.bin;
-	if (!isInteractive()) {
-		return Result.ok(detected ?? derived);
-	}
+  const derived = deriveBinName(projectName);
+  const detected = packageInfo.bin;
+  if (!isInteractive()) {
+    return Result.ok(detected ?? derived);
+  }
 
-	if (detected) {
-		const useDetected = await confirm({
-			message: `Detected package binary name "${detected}". Use this as the binary name?`,
-		});
+  if (detected) {
+    const useDetected = await confirm({
+      message: `Detected package binary name "${detected}". Use this as the binary name?`,
+    });
 
-		if (isCancel(useDetected)) {
-			return Result.err(new InitError("Initialization cancelled."));
-		}
+    if (isCancel(useDetected)) {
+      return Result.err(new InitError("Initialization cancelled."));
+    }
 
-		if (useDetected) {
-			return Result.ok(detected);
-		}
-	}
+    if (useDetected) {
+      return Result.ok(detected);
+    }
+  }
 
-	const useDerived = await confirm({
-		message: `Use "${derived}" as the binary name?`,
-	});
+  const useDerived = await confirm({
+    message: `Use "${derived}" as the binary name?`,
+  });
 
-	if (isCancel(useDerived)) {
-		return Result.err(new InitError("Initialization cancelled."));
-	}
+  if (isCancel(useDerived)) {
+    return Result.err(new InitError("Initialization cancelled."));
+  }
 
-	if (useDerived) {
-		return Result.ok(derived);
-	}
+  if (useDerived) {
+    return Result.ok(derived);
+  }
 
-	const custom = await text({
-		message: "Binary name",
-		placeholder: derived,
-	});
+  const custom = await text({
+    message: "Binary name",
+    placeholder: derived,
+  });
 
-	if (isCancel(custom)) {
-		return Result.err(new InitError("Initialization cancelled."));
-	}
+  if (isCancel(custom)) {
+    return Result.err(new InitError("Initialization cancelled."));
+  }
 
-	const trimmed = String(custom).trim();
-	return Result.ok(trimmed.length > 0 ? trimmed : derived);
+  const trimmed = String(custom).trim();
+  return Result.ok(trimmed.length > 0 ? trimmed : derived);
 }
 
-async function resolveTemplateName(options: InitOptions): Promise<Result<string, InitError>> {
-	if (options.template) {
-		return Result.ok(options.template);
-	}
+async function resolveTemplateName(
+  options: InitOptions
+): Promise<Result<string, InitError>> {
+  if (options.template) {
+    return Result.ok(options.template);
+  }
 
-	if (!isInteractive()) {
-		return Result.ok("basic");
-	}
+  if (!isInteractive()) {
+    return Result.ok("basic");
+  }
 
-	const selection = await select({
-		message: "Select a template",
-		options: [
-			{ value: "basic", label: "basic", hint: "Minimal starter" },
-			{ value: "cli", label: "cli", hint: "CLI application" },
-			{ value: "mcp", label: "mcp", hint: "MCP server" },
-			{ value: "daemon", label: "daemon", hint: "Daemon + CLI" },
-		],
-	});
+  const selection = await select({
+    message: "Select a template",
+    options: [
+      { value: "basic", label: "basic", hint: "Minimal starter" },
+      { value: "cli", label: "cli", hint: "CLI application" },
+      { value: "mcp", label: "mcp", hint: "MCP server" },
+      { value: "daemon", label: "daemon", hint: "Daemon + CLI" },
+    ],
+  });
 
-	if (isCancel(selection)) {
-		return Result.err(new InitError("Initialization cancelled."));
-	}
+  if (isCancel(selection)) {
+    return Result.err(new InitError("Initialization cancelled."));
+  }
 
-	const value = String(selection).trim();
-	return Result.ok(value.length > 0 ? value : "basic");
+  const value = String(selection).trim();
+  return Result.ok(value.length > 0 ? value : "basic");
 }
 
 function resolveAuthor(): string {
-	const fromEnv =
-		// biome-ignore lint/complexity/useLiteralKeys: env access
-		process.env["GIT_AUTHOR_NAME"] ??
-		// biome-ignore lint/complexity/useLiteralKeys: env access
-		process.env["GIT_COMMITTER_NAME"] ??
-		// biome-ignore lint/complexity/useLiteralKeys: env access
-		process.env["AUTHOR"] ??
-		// biome-ignore lint/complexity/useLiteralKeys: env access
-		process.env["USER"] ??
-		// biome-ignore lint/complexity/useLiteralKeys: env access
-		process.env["USERNAME"];
+  const fromEnv =
+    process.env["GIT_AUTHOR_NAME"] ??
+    process.env["GIT_COMMITTER_NAME"] ??
+    process.env["AUTHOR"] ??
+    process.env["USER"] ??
+    process.env["USERNAME"];
 
-	if (fromEnv) {
-		return fromEnv;
-	}
+  if (fromEnv) {
+    return fromEnv;
+  }
 
-	try {
-		const result = Bun.spawnSync(["git", "config", "--get", "user.name"], {
-			stdout: "pipe",
-			stderr: "ignore",
-		});
-		if (result.exitCode === 0) {
-			const value = result.stdout.toString().trim();
-			return value.length > 0 ? value : "";
-		}
-	} catch {
-		// Ignore git lookup errors and fall back to empty string
-	}
+  try {
+    const result = Bun.spawnSync(["git", "config", "--get", "user.name"], {
+      stdout: "pipe",
+      stderr: "ignore",
+    });
+    if (result.exitCode === 0) {
+      const value = result.stdout.toString().trim();
+      return value.length > 0 ? value : "";
+    }
+  } catch {
+    // Ignore git lookup errors and fall back to empty string
+  }
 
-	return "";
+  return "";
 }
 
 function resolveYear(): string {
-	return String(new Date().getFullYear());
+  return String(new Date().getFullYear());
 }
 
 /**
  * Recursively copies template files to the target directory.
  */
 function copyTemplateFiles(
-	templateDir: string,
-	targetDir: string,
-	values: PlaceholderValues,
-	force: boolean,
-	allowOverwrite: boolean = false,
+  templateDir: string,
+  targetDir: string,
+  values: PlaceholderValues,
+  force: boolean,
+  allowOverwrite = false
 ): Result<void, InitError> {
-	try {
-		// Ensure target directory exists
-		if (!existsSync(targetDir)) {
-			mkdirSync(targetDir, { recursive: true });
-		}
+  try {
+    // Ensure target directory exists
+    if (!existsSync(targetDir)) {
+      mkdirSync(targetDir, { recursive: true });
+    }
 
-		const entries = readdirSync(templateDir);
+    const entries = readdirSync(templateDir);
 
-		for (const entry of entries) {
-			const sourcePath = join(templateDir, entry);
-			const stat = statSync(sourcePath);
+    for (const entry of entries) {
+      const sourcePath = join(templateDir, entry);
+      const stat = statSync(sourcePath);
 
-			if (stat.isDirectory()) {
-				// Recursively copy directories
-				const targetSubDir = join(targetDir, entry);
-				const result = copyTemplateFiles(sourcePath, targetSubDir, values, force, allowOverwrite);
-				if (result.isErr()) {
-					return result;
-				}
-			} else if (stat.isFile()) {
-				// Process and copy files
-				const outputFilename = getOutputFilename(entry);
-				const targetPath = join(targetDir, outputFilename);
+      if (stat.isDirectory()) {
+        // Recursively copy directories
+        const targetSubDir = join(targetDir, entry);
+        const result = copyTemplateFiles(
+          sourcePath,
+          targetSubDir,
+          values,
+          force,
+          allowOverwrite
+        );
+        if (result.isErr()) {
+          return result;
+        }
+      } else if (stat.isFile()) {
+        // Process and copy files
+        const outputFilename = getOutputFilename(entry);
+        const targetPath = join(targetDir, outputFilename);
 
-				// Check if file exists and force is not set
-				if (existsSync(targetPath) && !force && !allowOverwrite) {
-					return Result.err(
-						new InitError(`File '${targetPath}' already exists. Use --force to overwrite.`),
-					);
-				}
+        // Check if file exists and force is not set
+        if (existsSync(targetPath) && !force && !allowOverwrite) {
+          return Result.err(
+            new InitError(
+              `File '${targetPath}' already exists. Use --force to overwrite.`
+            )
+          );
+        }
 
-				// Handle binary files separately to avoid corruption
-				if (isBinaryFile(outputFilename)) {
-					// Copy binary files as raw buffers without modification
-					const buffer = readFileSync(sourcePath);
-					writeFileSync(targetPath, buffer);
-				} else {
-					// Read and process template content for text files
-					const content = readFileSync(sourcePath, "utf-8");
-					const processedContent = replacePlaceholders(content, values);
+        // Handle binary files separately to avoid corruption
+        if (isBinaryFile(outputFilename)) {
+          // Copy binary files as raw buffers without modification
+          const buffer = readFileSync(sourcePath);
+          writeFileSync(targetPath, buffer);
+        } else {
+          // Read and process template content for text files
+          const content = readFileSync(sourcePath, "utf-8");
+          const processedContent = replacePlaceholders(content, values);
 
-					// Write the processed content
-					writeFileSync(targetPath, processedContent, "utf-8");
-				}
-			}
-		}
+          // Write the processed content
+          writeFileSync(targetPath, processedContent, "utf-8");
+        }
+      }
+    }
 
-		return Result.ok(undefined);
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
-		return Result.err(new InitError(`Failed to copy template files: ${message}`));
-	}
+    return Result.ok(undefined);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Result.err(
+      new InitError(`Failed to copy template files: ${message}`)
+    );
+  }
 }
 
 // =============================================================================
@@ -491,49 +506,57 @@ function copyTemplateFiles(
 // =============================================================================
 
 const DEPENDENCY_SECTIONS = [
-	"dependencies",
-	"devDependencies",
-	"peerDependencies",
-	"optionalDependencies",
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
 ] as const;
 
 function rewriteLocalDependencies(targetDir: string): Result<void, InitError> {
-	const packageJsonPath = join(targetDir, "package.json");
-	if (!existsSync(packageJsonPath)) {
-		return Result.ok(undefined);
-	}
+  const packageJsonPath = join(targetDir, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return Result.ok(undefined);
+  }
 
-	try {
-		const content = readFileSync(packageJsonPath, "utf-8");
-		const parsed = JSON.parse(content) as Record<string, unknown>;
-		let updated = false;
+  try {
+    const content = readFileSync(packageJsonPath, "utf-8");
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+    let updated = false;
 
-		for (const section of DEPENDENCY_SECTIONS) {
-			const deps = parsed[section];
-			if (!deps || typeof deps !== "object" || Array.isArray(deps)) {
-				continue;
-			}
+    for (const section of DEPENDENCY_SECTIONS) {
+      const deps = parsed[section];
+      if (!deps || typeof deps !== "object" || Array.isArray(deps)) {
+        continue;
+      }
 
-			const entries = deps as Record<string, unknown>;
-			for (const [name, version] of Object.entries(entries)) {
-				if (typeof version === "string" && name.startsWith("@outfitter/")) {
-					if (version !== "workspace:*") {
-						entries[name] = "workspace:*";
-						updated = true;
-					}
-				}
-			}
-		}
+      const entries = deps as Record<string, unknown>;
+      for (const [name, version] of Object.entries(entries)) {
+        if (
+          typeof version === "string" &&
+          name.startsWith("@outfitter/") &&
+          version !== "workspace:*"
+        ) {
+          entries[name] = "workspace:*";
+          updated = true;
+        }
+      }
+    }
 
-		if (updated) {
-			writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
-		}
+    if (updated) {
+      writeFileSync(
+        packageJsonPath,
+        `${JSON.stringify(parsed, null, 2)}\n`,
+        "utf-8"
+      );
+    }
 
-		return Result.ok(undefined);
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
-		return Result.err(new InitError(`Failed to update local dependencies: ${message}`));
-	}
+    return Result.ok(undefined);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Result.err(
+      new InitError(`Failed to update local dependencies: ${message}`)
+    );
+  }
 }
 
 /**
@@ -542,34 +565,38 @@ function rewriteLocalDependencies(targetDir: string): Result<void, InitError> {
  * Template-specific values take precedence over shared defaults.
  */
 function injectSharedConfig(targetDir: string): Result<void, InitError> {
-	const packageJsonPath = join(targetDir, "package.json");
-	if (!existsSync(packageJsonPath)) {
-		return Result.ok(undefined);
-	}
+  const packageJsonPath = join(targetDir, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return Result.ok(undefined);
+  }
 
-	try {
-		const content = readFileSync(packageJsonPath, "utf-8");
-		const parsed = JSON.parse(content) as Record<string, unknown>;
+  try {
+    const content = readFileSync(packageJsonPath, "utf-8");
+    const parsed = JSON.parse(content) as Record<string, unknown>;
 
-		// Merge shared devDependencies (template-specific ones take precedence)
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		const existingDevDeps = (parsed["devDependencies"] as Record<string, unknown>) ?? {};
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		parsed["devDependencies"] = { ...SHARED_DEV_DEPS, ...existingDevDeps };
+    // Merge shared devDependencies (template-specific ones take precedence)
+    const existingDevDeps =
+      (parsed["devDependencies"] as Record<string, unknown>) ?? {};
+    parsed["devDependencies"] = { ...SHARED_DEV_DEPS, ...existingDevDeps };
 
-		// Merge shared scripts (template-specific ones take precedence)
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		const existingScripts = (parsed["scripts"] as Record<string, unknown>) ?? {};
-		// biome-ignore lint/complexity/useLiteralKeys: noPropertyAccessFromIndexSignature requires bracket notation
-		parsed["scripts"] = { ...SHARED_SCRIPTS, ...existingScripts };
+    // Merge shared scripts (template-specific ones take precedence)
+    const existingScripts =
+      (parsed["scripts"] as Record<string, unknown>) ?? {};
+    parsed["scripts"] = { ...SHARED_SCRIPTS, ...existingScripts };
 
-		writeFileSync(packageJsonPath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
+    writeFileSync(
+      packageJsonPath,
+      `${JSON.stringify(parsed, null, 2)}\n`,
+      "utf-8"
+    );
 
-		return Result.ok(undefined);
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
-		return Result.err(new InitError(`Failed to inject shared config: ${message}`));
-	}
+    return Result.ok(undefined);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Result.err(
+      new InitError(`Failed to inject shared config: ${message}`)
+    );
+  }
 }
 
 // =============================================================================
@@ -598,125 +625,146 @@ function injectSharedConfig(targetDir: string): Result<void, InitError> {
  * }
  * ```
  */
-export async function runInit(options: InitOptions): Promise<Result<void, InitError>> {
-	const { targetDir, force } = options;
+export async function runInit(
+  options: InitOptions
+): Promise<Result<void, InitError>> {
+  const { targetDir, force } = options;
 
-	// Resolve target directory
-	const resolvedTargetDir = resolve(targetDir);
+  // Resolve target directory
+  const resolvedTargetDir = resolve(targetDir);
 
-	// Determine template
-	const templateNameResult = await resolveTemplateName(options);
-	if (templateNameResult.isErr()) {
-		return templateNameResult;
-	}
-	const templateName = templateNameResult.value;
+  // Determine template
+  const templateNameResult = await resolveTemplateName(options);
+  if (templateNameResult.isErr()) {
+    return templateNameResult;
+  }
+  const templateName = templateNameResult.value;
 
-	// Validate template exists
-	const templateResult = validateTemplate(templateName);
-	if (templateResult.isErr()) {
-		return templateResult;
-	}
-	const templatePath = templateResult.value;
+  // Validate template exists
+  const templateResult = validateTemplate(templateName);
+  if (templateResult.isErr()) {
+    return templateResult;
+  }
+  const templatePath = templateResult.value;
 
-	// Determine package name
-	const packageInfo = readPackageInfo(resolvedTargetDir);
-	const packageNameResult = await resolvePackageName(options, resolvedTargetDir, packageInfo);
-	if (packageNameResult.isErr()) {
-		return packageNameResult;
-	}
-	const packageName = packageNameResult.value;
-	const projectName = deriveProjectName(packageName);
+  // Determine package name
+  const packageInfo = readPackageInfo(resolvedTargetDir);
+  const packageNameResult = await resolvePackageName(
+    options,
+    resolvedTargetDir,
+    packageInfo
+  );
+  if (packageNameResult.isErr()) {
+    return packageNameResult;
+  }
+  const packageName = packageNameResult.value;
+  const projectName = deriveProjectName(packageName);
 
-	// Determine binary name
-	const binNameResult = await resolveBinName(options, projectName, packageInfo);
-	if (binNameResult.isErr()) {
-		return binNameResult;
-	}
-	const binName = binNameResult.value;
+  // Determine binary name
+  const binNameResult = await resolveBinName(options, projectName, packageInfo);
+  if (binNameResult.isErr()) {
+    return binNameResult;
+  }
+  const binName = binNameResult.value;
 
-	const author = resolveAuthor();
-	const year = resolveYear();
+  const author = resolveAuthor();
+  const year = resolveYear();
 
-	// Prepare placeholder values
-	const values: PlaceholderValues = {
-		name: projectName,
-		projectName,
-		packageName,
-		binName,
-		version: "0.1.0-rc.0",
-		description: `A new project created with Outfitter`,
-		author,
-		year,
-	};
+  // Prepare placeholder values
+  const values: PlaceholderValues = {
+    name: projectName,
+    projectName,
+    packageName,
+    binName,
+    version: "0.1.0-rc.0",
+    description: "A new project created with Outfitter",
+    author,
+    year,
+  };
 
-	// Check if target directory exists and has files
-	if (existsSync(resolvedTargetDir) && !force) {
-		try {
-			const entries = readdirSync(resolvedTargetDir);
-			// Filter out hidden files and common ignorable files
-			const significantEntries = entries.filter((e) => !e.startsWith(".") || e === ".gitignore");
-			if (significantEntries.length > 0) {
-				// Check if any files would be overwritten
-				for (const entry of significantEntries) {
-					const templateEntry = `${entry}.template`;
-					const templateFilePath = join(templatePath, templateEntry);
-					const plainFilePath = join(templatePath, entry);
-					if (existsSync(templateFilePath) || existsSync(plainFilePath)) {
-						return Result.err(
-							new InitError(
-								`Directory '${resolvedTargetDir}' already exists with files that would be overwritten. Use --force to overwrite.`,
-							),
-						);
-					}
-				}
-			}
-		} catch {
-			// If we can't read the directory, proceed (will fail later if actually problematic)
-		}
-	}
+  // Check if target directory exists and has files
+  if (existsSync(resolvedTargetDir) && !force) {
+    try {
+      const entries = readdirSync(resolvedTargetDir);
+      // Filter out hidden files and common ignorable files
+      const significantEntries = entries.filter(
+        (e) => !e.startsWith(".") || e === ".gitignore"
+      );
+      if (significantEntries.length > 0) {
+        // Check if any files would be overwritten
+        for (const entry of significantEntries) {
+          const templateEntry = `${entry}.template`;
+          const templateFilePath = join(templatePath, templateEntry);
+          const plainFilePath = join(templatePath, entry);
+          if (existsSync(templateFilePath) || existsSync(plainFilePath)) {
+            return Result.err(
+              new InitError(
+                `Directory '${resolvedTargetDir}' already exists with files that would be overwritten. Use --force to overwrite.`
+              )
+            );
+          }
+        }
+      }
+    } catch {
+      // If we can't read the directory, proceed (will fail later if actually problematic)
+    }
+  }
 
-	// Ensure target directory exists
-	try {
-		if (!existsSync(resolvedTargetDir)) {
-			mkdirSync(resolvedTargetDir, { recursive: true });
-		}
-	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
-		return Result.err(new InitError(`Failed to create target directory: ${message}`));
-	}
+  // Ensure target directory exists
+  try {
+    if (!existsSync(resolvedTargetDir)) {
+      mkdirSync(resolvedTargetDir, { recursive: true });
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Result.err(
+      new InitError(`Failed to create target directory: ${message}`)
+    );
+  }
 
-	// Two-layer template copy: first _base/, then template-specific
-	const templatesDir = getTemplatesDir();
-	const basePath = join(templatesDir, "_base");
+  // Two-layer template copy: first _base/, then template-specific
+  const templatesDir = getTemplatesDir();
+  const basePath = join(templatesDir, "_base");
 
-	// Layer 1: Copy shared base (if exists)
-	if (existsSync(basePath)) {
-		const baseResult = copyTemplateFiles(basePath, resolvedTargetDir, values, force);
-		if (baseResult.isErr()) {
-			return baseResult;
-		}
-	}
+  // Layer 1: Copy shared base (if exists)
+  if (existsSync(basePath)) {
+    const baseResult = copyTemplateFiles(
+      basePath,
+      resolvedTargetDir,
+      values,
+      force
+    );
+    if (baseResult.isErr()) {
+      return baseResult;
+    }
+  }
 
-	// Layer 2: Overlay template-specific files
-	const copyResult = copyTemplateFiles(templatePath, resolvedTargetDir, values, force, true);
-	if (copyResult.isErr()) {
-		return copyResult;
-	}
+  // Layer 2: Overlay template-specific files
+  const copyResult = copyTemplateFiles(
+    templatePath,
+    resolvedTargetDir,
+    values,
+    force,
+    true
+  );
+  if (copyResult.isErr()) {
+    return copyResult;
+  }
 
-	// Inject shared devDependencies and scripts
-	const injectResult = injectSharedConfig(resolvedTargetDir);
-	if (injectResult.isErr()) {
-		return injectResult;
-	}
+  // Inject shared devDependencies and scripts
+  const injectResult = injectSharedConfig(resolvedTargetDir);
+  if (injectResult.isErr()) {
+    return injectResult;
+  }
 
-	if (options.local) {
-		const rewriteResult = rewriteLocalDependencies(resolvedTargetDir);
-		if (rewriteResult.isErr()) {
-			return rewriteResult;
-		}
-	}
+  if (options.local) {
+    const rewriteResult = rewriteLocalDependencies(resolvedTargetDir);
+    if (rewriteResult.isErr()) {
+      return rewriteResult;
+    }
+  }
 
-	return Result.ok(undefined);
+  return Result.ok(undefined);
 }
 
 /**
@@ -734,137 +782,162 @@ export async function runInit(options: InitOptions): Promise<Result<void, InitEr
  * ```
  */
 export function initCommand(program: Command): void {
-	const init = program.command("init").description("Scaffold a new Outfitter project");
+  const init = program
+    .command("init")
+    .description("Scaffold a new Outfitter project");
 
-	type InitCommandFlags = {
-		name?: string;
-		bin?: string;
-		template?: string;
-		force?: boolean;
-		local?: boolean;
-		workspace?: boolean;
-		opts?: () => InitCommandFlags;
-	};
+  interface InitCommandFlags {
+    name?: string;
+    bin?: string;
+    template?: string;
+    force?: boolean;
+    local?: boolean;
+    workspace?: boolean;
+    opts?: () => InitCommandFlags;
+  }
 
-	const resolveFlags = (flags: InitCommandFlags, command?: Command): InitCommandFlags => {
-		if (command) {
-			return command.optsWithGlobals<InitCommandFlags>();
-		}
-		return typeof flags.opts === "function" ? flags.opts() : flags;
-	};
+  const resolveFlags = (
+    flags: InitCommandFlags,
+    command?: Command
+  ): InitCommandFlags => {
+    if (command) {
+      return command.optsWithGlobals<InitCommandFlags>();
+    }
+    return typeof flags.opts === "function" ? flags.opts() : flags;
+  };
 
-	const resolveLocal = (flags: InitCommandFlags): boolean =>
-		Boolean(flags.local || flags.workspace);
+  const resolveLocal = (flags: InitCommandFlags): boolean =>
+    Boolean(flags.local || flags.workspace);
 
-	const withCommonOptions = (command: Command): Command =>
-		command
-			.option("-n, --name <name>", "Package name (defaults to directory name)")
-			.option("-b, --bin <name>", "Binary name (defaults to project name)")
-			.option("-f, --force", "Overwrite existing files", false)
-			.option("--local", "Use workspace:* for @outfitter dependencies", false)
-			.option("--workspace", "Alias for --local", false);
+  const withCommonOptions = (command: Command): Command =>
+    command
+      .option("-n, --name <name>", "Package name (defaults to directory name)")
+      .option("-b, --bin <name>", "Binary name (defaults to project name)")
+      .option("-f, --force", "Overwrite existing files", false)
+      .option("--local", "Use workspace:* for @outfitter dependencies", false)
+      .option("--workspace", "Alias for --local", false);
 
-	withCommonOptions(
-		init.argument("[directory]").option("-t, --template <template>", "Template to use"),
-	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
-		const targetDir = directory ?? process.cwd();
-		const resolvedFlags = resolveFlags(flags, command);
-		const local = resolveLocal(resolvedFlags);
+  withCommonOptions(
+    init
+      .argument("[directory]")
+      .option("-t, --template <template>", "Template to use")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const local = resolveLocal(resolvedFlags);
 
-		const result = await runInit({
-			targetDir,
-			name: resolvedFlags.name,
-			template: resolvedFlags.template,
-			local,
-			force: resolvedFlags.force ?? false,
-			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-		});
+      const result = await runInit({
+        targetDir,
+        name: resolvedFlags.name,
+        template: resolvedFlags.template,
+        local,
+        force: resolvedFlags.force ?? false,
+        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+      });
 
-		if (result.isErr()) {
-			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.error(`Error: ${result.error.message}`);
-			process.exit(1);
-		}
+      if (result.isErr()) {
+        console.error(`Error: ${result.error.message}`);
+        process.exit(1);
+      }
 
-		// biome-ignore lint/suspicious/noConsole: CLI output is expected
-		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-	});
+      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+    }
+  );
 
-	withCommonOptions(
-		init.command("cli [directory]").description("Scaffold a new CLI project"),
-	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
-		const targetDir = directory ?? process.cwd();
-		const resolvedFlags = resolveFlags(flags, command);
-		const local = resolveLocal(resolvedFlags);
+  withCommonOptions(
+    init.command("cli [directory]").description("Scaffold a new CLI project")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const local = resolveLocal(resolvedFlags);
 
-		const result = await runInit({
-			targetDir,
-			name: resolvedFlags.name,
-			template: "cli",
-			local,
-			force: resolvedFlags.force ?? false,
-			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-		});
+      const result = await runInit({
+        targetDir,
+        name: resolvedFlags.name,
+        template: "cli",
+        local,
+        force: resolvedFlags.force ?? false,
+        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+      });
 
-		if (result.isErr()) {
-			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.error(`Error: ${result.error.message}`);
-			process.exit(1);
-		}
+      if (result.isErr()) {
+        console.error(`Error: ${result.error.message}`);
+        process.exit(1);
+      }
 
-		// biome-ignore lint/suspicious/noConsole: CLI output is expected
-		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-	});
+      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+    }
+  );
 
-	withCommonOptions(
-		init.command("mcp [directory]").description("Scaffold a new MCP server"),
-	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
-		const targetDir = directory ?? process.cwd();
-		const resolvedFlags = resolveFlags(flags, command);
-		const local = resolveLocal(resolvedFlags);
+  withCommonOptions(
+    init.command("mcp [directory]").description("Scaffold a new MCP server")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const local = resolveLocal(resolvedFlags);
 
-		const result = await runInit({
-			targetDir,
-			name: resolvedFlags.name,
-			template: "mcp",
-			local,
-			force: resolvedFlags.force ?? false,
-			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-		});
+      const result = await runInit({
+        targetDir,
+        name: resolvedFlags.name,
+        template: "mcp",
+        local,
+        force: resolvedFlags.force ?? false,
+        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+      });
 
-		if (result.isErr()) {
-			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.error(`Error: ${result.error.message}`);
-			process.exit(1);
-		}
+      if (result.isErr()) {
+        console.error(`Error: ${result.error.message}`);
+        process.exit(1);
+      }
 
-		// biome-ignore lint/suspicious/noConsole: CLI output is expected
-		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-	});
+      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+    }
+  );
 
-	withCommonOptions(
-		init.command("daemon [directory]").description("Scaffold a new daemon project"),
-	).action(async (directory: string | undefined, flags: InitCommandFlags, command: Command) => {
-		const targetDir = directory ?? process.cwd();
-		const resolvedFlags = resolveFlags(flags, command);
-		const local = resolveLocal(resolvedFlags);
+  withCommonOptions(
+    init
+      .command("daemon [directory]")
+      .description("Scaffold a new daemon project")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const local = resolveLocal(resolvedFlags);
 
-		const result = await runInit({
-			targetDir,
-			name: resolvedFlags.name,
-			template: "daemon",
-			local,
-			force: resolvedFlags.force ?? false,
-			...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-		});
+      const result = await runInit({
+        targetDir,
+        name: resolvedFlags.name,
+        template: "daemon",
+        local,
+        force: resolvedFlags.force ?? false,
+        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+      });
 
-		if (result.isErr()) {
-			// biome-ignore lint/suspicious/noConsole: CLI output is expected
-			console.error(`Error: ${result.error.message}`);
-			process.exit(1);
-		}
+      if (result.isErr()) {
+        console.error(`Error: ${result.error.message}`);
+        process.exit(1);
+      }
 
-		// biome-ignore lint/suspicious/noConsole: CLI output is expected
-		console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-	});
+      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+    }
+  );
 }

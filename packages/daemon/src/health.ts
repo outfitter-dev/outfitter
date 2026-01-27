@@ -36,19 +36,19 @@ import type { Result } from "@outfitter/contracts";
  * ```
  */
 export interface HealthCheck {
-	/**
-	 * Unique name identifying this health check.
-	 * Used as the key in the HealthStatus.checks record.
-	 */
-	name: string;
+  /**
+   * Unique name identifying this health check.
+   * Used as the key in the HealthStatus.checks record.
+   */
+  name: string;
 
-	/**
-	 * Function that performs the health check.
-	 *
-	 * Should return Result.ok(undefined) if healthy, or Result.err(error)
-	 * with details about the failure.
-	 */
-	check(): Promise<Result<void, Error>>;
+  /**
+   * Function that performs the health check.
+   *
+   * Should return Result.ok(undefined) if healthy, or Result.err(error)
+   * with details about the failure.
+   */
+  check(): Promise<Result<void, Error>>;
 }
 
 /**
@@ -58,10 +58,10 @@ export interface HealthCheck {
  * providing more details (typically the error message on failure).
  */
 export interface HealthCheckResult {
-	/** Whether this check passed (true) or failed (false) */
-	healthy: boolean;
-	/** Optional message, typically the error message on failure */
-	message?: string;
+  /** Whether this check passed (true) or failed (false) */
+  healthy: boolean;
+  /** Optional message, typically the error message on failure */
+  message?: string;
 }
 
 /**
@@ -83,14 +83,14 @@ export interface HealthCheckResult {
  * ```
  */
 export interface HealthStatus {
-	/** Overall health status - true only if ALL checks pass */
-	healthy: boolean;
+  /** Overall health status - true only if ALL checks pass */
+  healthy: boolean;
 
-	/** Individual check results keyed by check name */
-	checks: Record<string, HealthCheckResult>;
+  /** Individual check results keyed by check name */
+  checks: Record<string, HealthCheckResult>;
 
-	/** Uptime in seconds since the health checker was created */
-	uptime: number;
+  /** Uptime in seconds since the health checker was created */
+  uptime: number;
 }
 
 /**
@@ -115,24 +115,24 @@ export interface HealthStatus {
  * ```
  */
 export interface HealthChecker {
-	/**
-	 * Run all registered health checks and return aggregated status.
-	 *
-	 * Checks are run in parallel for efficiency. The overall healthy
-	 * status is true only if all individual checks pass.
-	 *
-	 * @returns Aggregated health status
-	 */
-	check(): Promise<HealthStatus>;
+  /**
+   * Run all registered health checks and return aggregated status.
+   *
+   * Checks are run in parallel for efficiency. The overall healthy
+   * status is true only if all individual checks pass.
+   *
+   * @returns Aggregated health status
+   */
+  check(): Promise<HealthStatus>;
 
-	/**
-	 * Register a new health check at runtime.
-	 *
-	 * The check will be included in all subsequent calls to check().
-	 *
-	 * @param check - Health check to register
-	 */
-	register(check: HealthCheck): void;
+  /**
+   * Register a new health check at runtime.
+   *
+   * The check will be included in all subsequent calls to check().
+   *
+   * @param check - Health check to register
+   */
+  register(check: HealthCheck): void;
 }
 
 // ============================================================================
@@ -177,63 +177,63 @@ export interface HealthChecker {
  * ```
  */
 export function createHealthChecker(checks: HealthCheck[]): HealthChecker {
-	const registeredChecks: HealthCheck[] = [...checks];
-	const startTime = Date.now();
+  const registeredChecks: HealthCheck[] = [...checks];
+  const startTime = Date.now();
 
-	async function runCheck(check: HealthCheck): Promise<HealthCheckResult> {
-		try {
-			const result = await check.check();
+  async function runCheck(check: HealthCheck): Promise<HealthCheckResult> {
+    try {
+      const result = await check.check();
 
-			if (result.isOk()) {
-				return { healthy: true };
-			}
+      if (result.isOk()) {
+        return { healthy: true };
+      }
 
-			return {
-				healthy: false,
-				message: result.error.message,
-			};
-		} catch (error) {
-			// Handle thrown exceptions as failures
-			return {
-				healthy: false,
-				message: error instanceof Error ? error.message : "Unknown error",
-			};
-		}
-	}
+      return {
+        healthy: false,
+        message: result.error.message,
+      };
+    } catch (error) {
+      // Handle thrown exceptions as failures
+      return {
+        healthy: false,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 
-	return {
-		async check(): Promise<HealthStatus> {
-			// Run all checks in parallel
-			const results = await Promise.all(
-				registeredChecks.map(async (check) => ({
-					name: check.name,
-					result: await runCheck(check),
-				})),
-			);
+  return {
+    async check(): Promise<HealthStatus> {
+      // Run all checks in parallel
+      const results = await Promise.all(
+        registeredChecks.map(async (check) => ({
+          name: check.name,
+          result: await runCheck(check),
+        }))
+      );
 
-			// Aggregate results
-			const checksRecord: Record<string, HealthCheckResult> = {};
-			let allHealthy = true;
+      // Aggregate results
+      const checksRecord: Record<string, HealthCheckResult> = {};
+      let allHealthy = true;
 
-			for (const { name, result } of results) {
-				checksRecord[name] = result;
-				if (!result.healthy) {
-					allHealthy = false;
-				}
-			}
+      for (const { name, result } of results) {
+        checksRecord[name] = result;
+        if (!result.healthy) {
+          allHealthy = false;
+        }
+      }
 
-			// Calculate uptime in seconds
-			const uptime = Math.floor((Date.now() - startTime) / 1000);
+      // Calculate uptime in seconds
+      const uptime = Math.floor((Date.now() - startTime) / 1000);
 
-			return {
-				healthy: allHealthy,
-				checks: checksRecord,
-				uptime,
-			};
-		},
+      return {
+        healthy: allHealthy,
+        checks: checksRecord,
+        uptime,
+      };
+    },
 
-		register(check: HealthCheck): void {
-			registeredChecks.push(check);
-		},
-	};
+    register(check: HealthCheck): void {
+      registeredChecks.push(check);
+    },
+  };
 }

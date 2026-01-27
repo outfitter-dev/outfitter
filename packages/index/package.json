@@ -1,75 +1,75 @@
 {
-	"name": "@outfitter/index",
-	"description": "SQLite FTS5 full-text search indexing for Outfitter",
-	"version": "0.1.0-rc.1",
-	"type": "module",
-	"files": [
-		"dist"
-	],
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		"./migrations": {
-			"import": {
-				"types": "./dist/migrations.d.ts",
-				"default": "./dist/migrations.js"
-			}
-		},
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./types": {
-			"import": {
-				"types": "./dist/types.d.ts",
-				"default": "./dist/types.js"
-			}
-		},
-		"./fts5": {
-			"import": {
-				"types": "./dist/fts5.d.ts",
-				"default": "./dist/fts5.js"
-			}
-		},
-		"./version": {
-			"import": {
-				"types": "./dist/version.d.ts",
-				"default": "./dist/version.js"
-			}
-		},
-		"./package.json": "./package.json"
-	},
-	"sideEffects": false,
-	"scripts": {
-		"build": "bunup --filter @outfitter/index",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"test": "bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"@outfitter/contracts": "workspace:*",
-		"@outfitter/file-ops": "workspace:*"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"typescript": "^5.8.0"
-	},
-	"keywords": [
-		"outfitter",
-		"index",
-		"fts5",
-		"sqlite",
-		"search",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/index"
-	}
+  "name": "@outfitter/index",
+  "description": "SQLite FTS5 full-text search indexing for Outfitter",
+  "version": "0.1.0-rc.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./migrations": {
+      "import": {
+        "types": "./dist/migrations.d.ts",
+        "default": "./dist/migrations.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    },
+    "./fts5": {
+      "import": {
+        "types": "./dist/fts5.d.ts",
+        "default": "./dist/fts5.js"
+      }
+    },
+    "./version": {
+      "import": {
+        "types": "./dist/version.d.ts",
+        "default": "./dist/version.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter @outfitter/index",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/file-ops": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "outfitter",
+    "index",
+    "fts5",
+    "sqlite",
+    "search",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/index"
+  }
 }
