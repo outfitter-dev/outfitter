@@ -11,6 +11,7 @@
  * 3. Glob Patterns (8 tests)
  * 4. File Locking (8 tests)
  * 5. Atomic Writes (8 tests)
+ * 6. Shared (Reader) Locking (8 tests)
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
@@ -19,6 +20,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   acquireLock,
+  acquireSharedLock,
   atomicWrite,
   atomicWriteJson,
   findWorkspaceRoot,
@@ -29,9 +31,11 @@ import {
   isLocked,
   isPathSafe,
   releaseLock,
+  releaseSharedLock,
   resolveSafePath,
   securePath,
   withLock,
+  withSharedLock,
 } from "../index.js";
 
 // ============================================================================
@@ -700,5 +704,202 @@ describe("Atomic Writes", () => {
     const content = await Bun.file(targetFile).text();
     const parsed = JSON.parse(content);
     expect(typeof parsed.write).toBe("number");
+  });
+});
+
+// ============================================================================
+// 6. Shared (Reader) Locking Tests
+// ============================================================================
+
+describe("Shared (Reader) Locking", () => {
+  beforeEach(async () => {
+    testDir = await createTestDir();
+  });
+
+  afterEach(async () => {
+    await cleanupTestDir(testDir);
+  });
+
+  it("single reader can acquire shared lock", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+
+    const result = await acquireSharedLock(targetFile);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const lock = result.value;
+      expect(lock.lockType).toBe("shared");
+      expect(lock.pid).toBe(process.pid);
+      expect(typeof lock.timestamp).toBe("number");
+
+      // Cleanup
+      await releaseSharedLock(lock);
+    }
+  });
+
+  it("multiple readers can hold shared locks simultaneously", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+
+    // Acquire first shared lock
+    const lock1Result = await acquireSharedLock(targetFile);
+    expect(lock1Result.isOk()).toBe(true);
+
+    // Acquire second shared lock (should succeed)
+    const lock2Result = await acquireSharedLock(targetFile);
+    expect(lock2Result.isOk()).toBe(true);
+
+    // Verify lock file contains multiple readers
+    const lockPath = `${targetFile}.lock`;
+    const lockContent = await Bun.file(lockPath).json();
+    expect(lockContent.type).toBe("shared");
+    expect(lockContent.readers.length).toBe(2);
+
+    // Cleanup
+    if (lock1Result.isOk()) {
+      await releaseSharedLock(lock1Result.value);
+    }
+    if (lock2Result.isOk()) {
+      await releaseSharedLock(lock2Result.value);
+    }
+  });
+
+  it("exclusive lock blocks new shared locks", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+
+    // Acquire exclusive lock first
+    const exclusiveLock = await acquireLock(targetFile);
+    expect(exclusiveLock.isOk()).toBe(true);
+
+    // Try to acquire shared lock - should fail
+    const sharedLock = await acquireSharedLock(targetFile);
+    expect(sharedLock.isErr()).toBe(true);
+    if (sharedLock.isErr()) {
+      expect(sharedLock.error._tag).toBe("ConflictError");
+    }
+
+    // Cleanup
+    if (exclusiveLock.isOk()) {
+      await releaseLock(exclusiveLock.value);
+    }
+  });
+
+  it("shared locks block exclusive lock acquisition", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+
+    // Acquire shared lock first
+    const sharedLock = await acquireSharedLock(targetFile);
+    expect(sharedLock.isOk()).toBe(true);
+
+    // Try to acquire exclusive lock - should fail
+    const exclusiveLock = await acquireLock(targetFile);
+    expect(exclusiveLock.isErr()).toBe(true);
+    if (exclusiveLock.isErr()) {
+      expect(exclusiveLock.error._tag).toBe("ConflictError");
+    }
+
+    // Cleanup
+    if (sharedLock.isOk()) {
+      await releaseSharedLock(sharedLock.value);
+    }
+  });
+
+  it("reader count decrements on release", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+    const lockPath = `${targetFile}.lock`;
+
+    // Acquire two shared locks
+    const lock1Result = await acquireSharedLock(targetFile);
+    const lock2Result = await acquireSharedLock(targetFile);
+
+    expect(lock1Result.isOk()).toBe(true);
+    expect(lock2Result.isOk()).toBe(true);
+
+    // Verify two readers
+    let lockContent = await Bun.file(lockPath).json();
+    expect(lockContent.readers.length).toBe(2);
+
+    // Release one lock
+    if (lock1Result.isOk()) {
+      await releaseSharedLock(lock1Result.value);
+    }
+
+    // Verify one reader remains
+    lockContent = await Bun.file(lockPath).json();
+    expect(lockContent.readers.length).toBe(1);
+
+    // Cleanup
+    if (lock2Result.isOk()) {
+      await releaseSharedLock(lock2Result.value);
+    }
+  });
+
+  it("lock file cleaned up when last reader releases", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+    const lockPath = `${targetFile}.lock`;
+
+    // Acquire shared lock
+    const lockResult = await acquireSharedLock(targetFile);
+    expect(lockResult.isOk()).toBe(true);
+
+    // Lock file should exist
+    expect(await Bun.file(lockPath).exists()).toBe(true);
+
+    // Release lock
+    if (lockResult.isOk()) {
+      const releaseResult = await releaseSharedLock(lockResult.value);
+      expect(releaseResult.isOk()).toBe(true);
+    }
+
+    // Lock file should be deleted
+    expect(await Bun.file(lockPath).exists()).toBe(false);
+  });
+
+  it("withSharedLock executes callback and releases", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, '{"count": 0}');
+
+    let callbackExecuted = false;
+    const result = await withSharedLock(targetFile, async () => {
+      callbackExecuted = true;
+      // Verify lock is held during callback
+      const lockPath = `${targetFile}.lock`;
+      const lockExists = await Bun.file(lockPath).exists();
+      expect(lockExists).toBe(true);
+      return 42;
+    });
+
+    expect(callbackExecuted).toBe(true);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(42);
+    }
+
+    // Lock should be released after callback
+    const lockPath = `${targetFile}.lock`;
+    const lockExists = await Bun.file(lockPath).exists();
+    expect(lockExists).toBe(false);
+  });
+
+  it("withSharedLock releases lock on callback error", async () => {
+    const targetFile = join(testDir, "data.json");
+    await writeFile(targetFile, "{}");
+
+    const result = await withSharedLock(targetFile, async () => {
+      throw new Error("Callback failed");
+    });
+
+    // Should return error result
+    expect(result.isErr()).toBe(true);
+
+    // But lock should still be released
+    const lockPath = `${targetFile}.lock`;
+    const lockExists = await Bun.file(lockPath).exists();
+    expect(lockExists).toBe(false);
   });
 });
