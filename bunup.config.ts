@@ -101,6 +101,10 @@ export default defineWorkspace(
       name: "@outfitter/stack",
       root: "packages/stack",
     },
+    {
+      name: "outfitter",
+      root: "apps/outfitter",
+    },
   ],
   {
     // Entry points: all source files except tests

@@ -48,5 +48,8 @@
     "type": "git",
     "url": "https://github.com/outfitter-dev/outfitter.git",
     "directory": "packages/daemon"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

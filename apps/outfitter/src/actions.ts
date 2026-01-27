@@ -8,6 +8,7 @@ import { resolve } from "node:path";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
+  type ActionRegistry,
   createActionRegistry,
   defineAction,
   InternalError,
@@ -163,7 +164,7 @@ const doctorAction = defineAction({
   },
 });
 
-export const outfitterActions = createActionRegistry()
+export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(
     createInitAction({
       id: "init",

@@ -1,25 +1,49 @@
 {
   "name": "outfitter",
-  "version": "0.1.0-rc.1",
   "description": "Outfitter umbrella CLI for scaffolding and project management",
+  "version": "0.1.0-rc.1",
   "type": "module",
-  "bin": {
-    "outfitter": "./dist/cli.js"
-  },
   "files": [
     "dist",
     "templates"
   ],
-  "module": "./dist/cli.js",
-  "types": "./dist/cli.d.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/cli.d.ts",
-        "default": "./dist/cli.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./actions": {
+      "import": {
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
+      }
+    },
+    "./commands/doctor": {
+      "import": {
+        "types": "./dist/commands/doctor.d.ts",
+        "default": "./dist/commands/doctor.js"
+      }
+    },
+    "./commands/init": {
+      "import": {
+        "types": "./dist/commands/init.d.ts",
+        "default": "./dist/commands/init.js"
+      }
+    },
+    "./commands/shared-deps": {
+      "import": {
+        "types": "./dist/commands/shared-deps.d.ts",
+        "default": "./dist/commands/shared-deps.js"
       }
     },
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "outfitter": "./dist/cli.js"
   },
   "sideEffects": false,
   "scripts": {
