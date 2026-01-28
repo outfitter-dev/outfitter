@@ -15,22 +15,10 @@
         "default": "./dist/output.js"
       }
     },
-    "./render": {
+    "./render/text": {
       "import": {
-        "types": "./dist/render/index.d.ts",
-        "default": "./dist/render/index.js"
-      }
-    },
-    "./render/format": {
-      "import": {
-        "types": "./dist/render/format.d.ts",
-        "default": "./dist/render/format.js"
-      }
-    },
-    "./render/shapes": {
-      "import": {
-        "types": "./dist/render/shapes.d.ts",
-        "default": "./dist/render/shapes.js"
+        "types": "./dist/render/text.d.ts",
+        "default": "./dist/render/text.js"
       }
     },
     "./render/markdown": {
@@ -39,10 +27,34 @@
         "default": "./dist/render/markdown.js"
       }
     },
+    "./render/format": {
+      "import": {
+        "types": "./dist/render/format.d.ts",
+        "default": "./dist/render/format.js"
+      }
+    },
+    "./render/borders": {
+      "import": {
+        "types": "./dist/render/borders.d.ts",
+        "default": "./dist/render/borders.js"
+      }
+    },
+    "./render": {
+      "import": {
+        "types": "./dist/render/index.d.ts",
+        "default": "./dist/render/index.js"
+      }
+    },
     "./render/list": {
       "import": {
         "types": "./dist/render/list.d.ts",
         "default": "./dist/render/list.js"
+      }
+    },
+    "./render/shapes": {
+      "import": {
+        "types": "./dist/render/shapes.d.ts",
+        "default": "./dist/render/shapes.js"
       }
     },
     "./render/tree": {
@@ -55,6 +67,18 @@
       "import": {
         "types": "./dist/terminal/index.d.ts",
         "default": "./dist/terminal/index.js"
+      }
+    },
+    "./terminal/detection": {
+      "import": {
+        "types": "./dist/terminal/detection.d.ts",
+        "default": "./dist/terminal/detection.js"
+      }
+    },
+    "./render/colors": {
+      "import": {
+        "types": "./dist/render/colors.d.ts",
+        "default": "./dist/render/colors.js"
       }
     },
     "./render/format-relative": {
@@ -87,36 +111,6 @@
         "default": "./dist/render/table.js"
       }
     },
-    "./render/text": {
-      "import": {
-        "types": "./dist/render/text.d.ts",
-        "default": "./dist/render/text.js"
-      }
-    },
-    "./render/colors": {
-      "import": {
-        "types": "./dist/render/colors.d.ts",
-        "default": "./dist/render/colors.js"
-      }
-    },
-    "./terminal/detection": {
-      "import": {
-        "types": "./dist/terminal/detection.d.ts",
-        "default": "./dist/terminal/detection.js"
-      }
-    },
-    "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
     "./pagination": {
       "import": {
         "types": "./dist/pagination.d.ts",
@@ -129,10 +123,22 @@
         "default": "./dist/input.js"
       }
     },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    },
     "./actions": {
       "import": {
         "types": "./dist/actions.d.ts",
         "default": "./dist/actions.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./command": {

@@ -8,6 +8,15 @@
 
 // biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
 export {
+  // Box-drawing borders
+  BORDERS,
+  type BorderCharacters,
+  type BorderStyle,
+  drawHorizontalLine,
+  getBorderCharacters,
+  type LinePosition,
+} from "./borders.js";
+export {
   ANSI,
   applyColor,
   type ColorName,
