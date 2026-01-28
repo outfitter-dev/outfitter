@@ -16,6 +16,8 @@ export {
   getBorderCharacters,
   type LinePosition,
 } from "./borders.js";
+// Box rendering
+export { type BoxAlign, type BoxOptions, renderBox } from "./box.js";
 export {
   ANSI,
   applyColor,
