@@ -310,3 +310,85 @@ describe("table demo section", () => {
     expect(result.output).toContain("BASIC TABLE");
   });
 });
+
+// =============================================================================
+// Errors Section Tests
+// =============================================================================
+
+describe("errors demo section", () => {
+  test("errors section is registered", async () => {
+    // Import demo to trigger section registration
+    await import("../commands/demo.js");
+
+    const section = getSection("errors");
+    expect(section).toBeDefined();
+    expect(section?.id).toBe("errors");
+  });
+
+  test("errors section produces output with error taxonomy", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("errors");
+
+    expect(output).toBeDefined();
+    expect(output).toContain("ERROR TAXONOMY");
+    expect(output).toContain("Exit Code");
+    expect(output).toContain("HTTP Status");
+  });
+
+  test("errors section includes error output examples", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("errors");
+
+    expect(output).toContain("ERROR OUTPUT");
+    expect(output).toContain("exitWithError");
+    expect(output).toContain("ValidationError");
+  });
+
+  test("errors section shows all error categories", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("errors");
+
+    expect(output).toContain("validation");
+    expect(output).toContain("not_found");
+    expect(output).toContain("conflict");
+    expect(output).toContain("permission");
+    expect(output).toContain("timeout");
+    expect(output).toContain("rate_limit");
+    expect(output).toContain("network");
+    expect(output).toContain("internal");
+    expect(output).toContain("auth");
+    expect(output).toContain("cancelled");
+  });
+
+  test("errors section includes mode detection info", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("errors");
+
+    expect(output).toContain("MODE DETECTION");
+    expect(output).toContain("OUTFITTER_JSON");
+    expect(output).toContain("OUTFITTER_JSONL");
+  });
+
+  test("errors section includes error methods", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("errors");
+
+    expect(output).toContain("ERROR METHODS");
+    expect(output).toContain(".exitCode()");
+    expect(output).toContain(".statusCode()");
+  });
+
+  test("runDemo with errors section works", async () => {
+    const { runDemo } = await import("../commands/demo.js");
+
+    const result = runDemo({ section: "errors" });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain("ERROR TAXONOMY");
+  });
+});
