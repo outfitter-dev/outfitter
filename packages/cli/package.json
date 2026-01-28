@@ -15,6 +15,24 @@
         "default": "./dist/output.js"
       }
     },
+    "./render/box": {
+      "import": {
+        "types": "./dist/render/box.d.ts",
+        "default": "./dist/render/box.js"
+      }
+    },
+    "./render/tree": {
+      "import": {
+        "types": "./dist/render/tree.d.ts",
+        "default": "./dist/render/tree.js"
+      }
+    },
+    "./render/table": {
+      "import": {
+        "types": "./dist/render/table.d.ts",
+        "default": "./dist/render/table.js"
+      }
+    },
     "./render/text": {
       "import": {
         "types": "./dist/render/text.d.ts",
@@ -57,12 +75,6 @@
         "default": "./dist/render/shapes.js"
       }
     },
-    "./render/tree": {
-      "import": {
-        "types": "./dist/render/tree.d.ts",
-        "default": "./dist/render/tree.js"
-      }
-    },
     "./terminal": {
       "import": {
         "types": "./dist/terminal/index.d.ts",
@@ -99,16 +111,16 @@
         "default": "./dist/render/json.js"
       }
     },
+    "./render/spinner": {
+      "import": {
+        "types": "./dist/render/spinner.d.ts",
+        "default": "./dist/render/spinner.js"
+      }
+    },
     "./render/progress": {
       "import": {
         "types": "./dist/render/progress.d.ts",
         "default": "./dist/render/progress.js"
-      }
-    },
-    "./render/table": {
-      "import": {
-        "types": "./dist/render/table.d.ts",
-        "default": "./dist/render/table.js"
       }
     },
     "./pagination": {
