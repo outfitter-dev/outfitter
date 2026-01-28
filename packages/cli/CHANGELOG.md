@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-rc.2
+
+### Patch Changes
+
+- Add text utilities (pluralize, slugify), format utilities (formatDuration, formatBytes), parseDateRange, and registerRenderer for custom shape renderers
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.1.0-rc.2
+  - @outfitter/types@0.1.0-rc.2
+  - @outfitter/config@0.1.0-rc.2
+
 ## 0.1.0
 
 ### Minor Changes

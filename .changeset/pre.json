@@ -1,0 +1,26 @@
+{
+  "mode": "pre",
+  "tag": "rc",
+  "initialVersions": {
+    "outfitter": "0.1.0-rc.1",
+    "@outfitter/agents": "0.1.0-rc.1",
+    "@outfitter/cli": "0.1.0-rc.1",
+    "@outfitter/config": "0.1.0-rc.1",
+    "@outfitter/contracts": "0.1.0-rc.1",
+    "@outfitter/daemon": "0.1.0-rc.1",
+    "@outfitter/file-ops": "0.1.0-rc.1",
+    "@outfitter/index": "0.1.0-rc.1",
+    "@outfitter/logging": "0.1.0-rc.1",
+    "@outfitter/mcp": "0.1.0-rc.1",
+    "@outfitter/stack": "0.1.0-rc.1",
+    "@outfitter/state": "0.1.0-rc.1",
+    "@outfitter/testing": "0.1.0-rc.1",
+    "@outfitter/types": "0.1.0-rc.1"
+  },
+  "changesets": [
+    "cli-utilities",
+    "contracts-error-codes",
+    "file-ops-shared-lock",
+    "types-utilities"
+  ]
+}

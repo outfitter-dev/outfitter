@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.0-rc.2
+
+### Patch Changes
+
+- Add withSharedLock for reader-writer locking with meta-lock protection against race conditions
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.1.0-rc.2
+  - @outfitter/types@0.1.0-rc.2
+
 All notable changes to `@outfitter/file-ops` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

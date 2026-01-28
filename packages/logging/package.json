@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/logging",
   "description": "Structured logging via logtape with redaction support for Outfitter",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "type": "module",
   "files": [
     "dist"
