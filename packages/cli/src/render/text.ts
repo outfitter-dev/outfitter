@@ -72,6 +72,8 @@ export function getStringWidth(text: string): number {
  * - Respecting word boundaries (no mid-word breaks)
  * - Trimming trailing whitespace from lines
  *
+ * Uses Bun's native `Bun.wrapAnsi()` for high performance.
+ *
  * @param text - Text to wrap (may contain ANSI codes)
  * @param width - Maximum visible width per line
  * @returns Wrapped text with newlines
@@ -90,64 +92,7 @@ export function getStringWidth(text: string): number {
  * ```
  */
 export function wrapText(text: string, width: number): string {
-  const words = text.split(/(\s+)/);
-  const lines: string[] = [];
-  let currentLine = "";
-  let currentWidth = 0;
-
-  // Track active ANSI codes for carrying across lines
-  let activeAnsi = "";
-
-  for (const word of words) {
-    // Check if this is whitespace
-    if (/^\s+$/.test(word)) {
-      // Don't add leading whitespace to new line
-      if (currentLine !== "") {
-        currentLine += word;
-        currentWidth += getStringWidth(word);
-      }
-      continue;
-    }
-
-    const wordWidth = getStringWidth(word);
-
-    // Extract any ANSI codes from this word
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
-    const ansiMatches = word.match(/\x1b\[[0-9;]*m/g);
-    if (ansiMatches) {
-      for (const code of ansiMatches) {
-        if (code === ANSI.reset) {
-          activeAnsi = "";
-        } else {
-          activeAnsi = code;
-        }
-      }
-    }
-
-    if (currentWidth + wordWidth > width && currentLine !== "") {
-      // Close any active ANSI at end of line
-      if (activeAnsi !== "") {
-        // Find the ANSI code in the word before adding reset
-        const hasReset = word.includes(ANSI.reset);
-        if (!hasReset && activeAnsi !== "") {
-          // Word has active ansi that continues
-        }
-      }
-      lines.push(currentLine.trimEnd());
-      // Start new line with active ANSI
-      currentLine = activeAnsi !== "" ? activeAnsi + word : word;
-      currentWidth = wordWidth;
-    } else {
-      currentLine += word;
-      currentWidth += wordWidth;
-    }
-  }
-
-  if (currentLine !== "") {
-    lines.push(currentLine.trimEnd());
-  }
-
-  return lines.join("\n");
+  return Bun.wrapAnsi(text, width);
 }
 
 /**
