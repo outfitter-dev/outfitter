@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Upgrade Bun version across the project
 #
+# Updates:
+#   - .bun-version
+#   - engines.bun in package.json files
+#   - Pinned @types/bun versions (leaves "latest" alone)
+#   - bun.lock
+#
 # Usage:
 #   ./scripts/upgrade-bun.sh 1.4.0        # Upgrade to specific version
 #   ./scripts/upgrade-bun.sh              # Upgrade to latest
@@ -27,11 +33,34 @@ echo ""
 echo "Upgrading Bun: $CURRENT -> $VERSION"
 echo ""
 
-# Update version file
+# Update .bun-version file
 echo "$VERSION" > .bun-version
+echo "Updated .bun-version"
+
+# Update engines.bun in package.json files
+# Matches: "bun": ">=x.y.z" and updates to new version
+echo "Updating engines.bun..."
+find . -name "package.json" -not -path "*/node_modules/*" -exec grep -l '"bun":.*">=' {} \; | while read -r file; do
+  # macOS sed uses -i '', GNU sed uses -i
+  if sed -i '' -E "s/\"bun\":[[:space:]]*\">=[0-9]+\.[0-9]+\.[0-9]+\"/\"bun\": \">=$VERSION\"/" "$file" 2>/dev/null || \
+     sed -i -E "s/\"bun\":[[:space:]]*\">=[0-9]+\.[0-9]+\.[0-9]+\"/\"bun\": \">=$VERSION\"/" "$file" 2>/dev/null; then
+    echo "  $file"
+  fi
+done
+
+# Update pinned @types/bun versions (skip "latest")
+# Matches: "@types/bun": "^x.y.z" and updates to new version
+echo "Updating @types/bun..."
+find . -name "package.json" -not -path "*/node_modules/*" -exec grep -l '"@types/bun".*"\^' {} \; | while read -r file; do
+  if sed -i '' -E "s/\"@types\/bun\":[[:space:]]*\"\^[0-9]+\.[0-9]+\.[0-9]+\"/\"@types\/bun\": \"^$VERSION\"/" "$file" 2>/dev/null || \
+     sed -i -E "s/\"@types\/bun\":[[:space:]]*\"\^[0-9]+\.[0-9]+\.[0-9]+\"/\"@types\/bun\": \"^$VERSION\"/" "$file" 2>/dev/null; then
+    echo "  $file"
+  fi
+done
 
 # Install new version locally (if bun is available)
 if command -v bun &> /dev/null; then
+  echo ""
   echo "Installing Bun $VERSION locally..."
   curl -fsSL https://bun.sh/install | bash -s "bun-v$VERSION"
 
@@ -46,10 +75,12 @@ if command -v bun &> /dev/null; then
   echo ""
   echo "Done! Changes ready to commit:"
   echo "  - .bun-version"
+  echo "  - package.json files (engines.bun, @types/bun)"
   echo "  - bun.lock"
   echo ""
   echo "Commit with:"
-  echo "  git add .bun-version bun.lock && git commit -m 'chore: upgrade Bun to $VERSION'"
+  echo "  git add -A && git commit -m 'chore: upgrade Bun to $VERSION'"
 else
+  echo ""
   echo "Bun not found. Install manually, then run 'bun install' to update lockfile."
 fi
