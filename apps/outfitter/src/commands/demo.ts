@@ -1,0 +1,247 @@
+/**
+ * `outfitter demo` - Showcases @outfitter/cli rendering capabilities.
+ *
+ * A "Storybook for CLI" that demonstrates available rendering primitives
+ * with copy-pasteable code examples.
+ *
+ * @packageDocumentation
+ */
+
+import { createTheme, renderTable, SPINNERS } from "@outfitter/cli/render";
+import { ANSI } from "@outfitter/cli/streaming";
+import {
+  getSectionIds,
+  getSections,
+  runAllSections,
+  runSection,
+} from "./demo/index.js";
+
+// Import sections to register them
+import "./demo/colors.js";
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/**
+ * Options for the demo command.
+ */
+export interface DemoOptions {
+  /** Section to run (undefined = run all) */
+  readonly section?: string | undefined;
+  /** List available sections instead of running */
+  readonly list?: boolean | undefined;
+  /** Run animated demo (spinners only) */
+  readonly animate?: boolean | undefined;
+}
+
+/**
+ * Result of running the demo command.
+ */
+export interface DemoResult {
+  /** Output text to display */
+  readonly output: string;
+  /** Exit code (0 = success, 1 = error) */
+  readonly exitCode: number;
+}
+
+// =============================================================================
+// Public API
+// =============================================================================
+
+/**
+ * Runs the demo command programmatically.
+ *
+ * @param options - Demo options
+ * @returns Demo result with output and exit code
+ *
+ * @example
+ * ```typescript
+ * // Run all sections
+ * const result = runDemo({});
+ * console.log(result.output);
+ *
+ * // Run specific section
+ * const result = runDemo({ section: "colors" });
+ *
+ * // List available sections
+ * const result = runDemo({ list: true });
+ * ```
+ */
+export function runDemo(options: DemoOptions): DemoResult {
+  // Handle --list flag
+  if (options.list) {
+    return listSections();
+  }
+
+  // Handle --animate flag (spinners only)
+  if (options.animate) {
+    await runAnimatedSpinnerDemo();
+    return { output: "", exitCode: 0 };
+  }
+
+  // Handle specific section
+  if (options.section) {
+    // Special case: "all" runs all sections
+    if (options.section === "all") {
+      const output = runAllSections();
+      return { output, exitCode: 0 };
+    }
+
+    const output = runSection(options.section);
+    if (output === undefined) {
+      return {
+        output: formatError(options.section),
+        exitCode: 1,
+      };
+    }
+    return { output, exitCode: 0 };
+  }
+
+  // Default: run all sections
+  const output = runAllSections();
+  return { output, exitCode: 0 };
+}
+
+// =============================================================================
+// Internal Helpers
+// =============================================================================
+
+/**
+ * Lists available sections.
+ */
+function listSections(): DemoResult {
+  const sections = getSections();
+  const theme = createTheme();
+
+  if (sections.length === 0) {
+    return {
+      output: theme.muted("No demo sections available."),
+      exitCode: 0,
+    };
+  }
+
+  const lines: string[] = [
+    "Available demo sections:",
+    "",
+    renderTable(
+      sections.map((s) => ({ section: s.id, description: s.description })),
+      { headers: { section: "Section", description: "Description" } }
+    ),
+    "",
+    theme.muted('Run "outfitter demo [section]" to run a specific section.'),
+    theme.muted('Run "outfitter demo all" to run all sections.'),
+  ];
+
+  return { output: lines.join("\n"), exitCode: 0 };
+}
+
+/**
+ * Formats an error message for unknown section.
+ */
+function formatError(sectionId: string): DemoResult["output"] {
+  const theme = createTheme();
+  const available = getSectionIds();
+
+  const lines: string[] = [
+    theme.error(`Unknown section: ${sectionId}`),
+    "",
+    `Available sections: ${available.length > 0 ? available.join(", ") : "(none)"}`,
+    "",
+    theme.muted('Run "outfitter demo --list" to see all sections.'),
+  ];
+
+  return lines.join("\n");
+}
+
+/**
+ * Runs an animated spinner demo showing all spinner styles simultaneously.
+ * Runs indefinitely until Ctrl+C.
+ */
+async function runAnimatedSpinnerDemo(): Promise<void> {
+  const theme = createTheme();
+  const styles = Object.keys(SPINNERS) as Array<keyof typeof SPINNERS>;
+  const intervalMs = 80;
+
+  const stream = process.stdout;
+  const isTTY = stream.isTTY ?? false;
+
+  console.log("");
+  console.log(theme.bold("ANIMATED SPINNER DEMO"));
+  console.log(theme.muted("All styles running simultaneously"));
+  console.log(theme.muted("Press Ctrl+C to stop"));
+  console.log("");
+
+  if (!isTTY) {
+    // Non-TTY fallback: just show static frames
+    for (const style of styles) {
+      const spinner = SPINNERS[style];
+      console.log(`${style.padEnd(10)} ${spinner.frames.join(" ")}`);
+    }
+    return;
+  }
+
+  // Hide cursor and reserve lines
+  stream.write(ANSI.hideCursor);
+  const numLines = styles.length;
+
+  // Print initial state
+  for (const style of styles) {
+    const spinner = SPINNERS[style];
+    const frame = spinner.frames[0] ?? "";
+    stream.write(
+      `  ${frame}  ${style.padEnd(10)} ${theme.muted(`(${spinner.interval}ms)`)}\n`
+    );
+  }
+
+  const frameIndices = styles.map(() => 0);
+
+  // Animation loop
+  const animate = (): void => {
+    // Move cursor up to first spinner line
+    stream.write(ANSI.cursorUp(numLines));
+
+    for (let i = 0; i < styles.length; i++) {
+      const style = styles[i];
+      if (!style) continue;
+      const spinner = SPINNERS[style];
+      const frameIndex = frameIndices[i] ?? 0;
+      const frame = spinner.frames[frameIndex % spinner.frames.length] ?? "";
+
+      stream.write(ANSI.clearLine);
+      stream.write(
+        `  ${frame}  ${style.padEnd(10)} ${theme.muted(`(${spinner.interval}ms)`)}\n`
+      );
+
+      frameIndices[i] = frameIndex + 1;
+    }
+  };
+
+  const timer = setInterval(animate, intervalMs);
+
+  // Clean up on Ctrl+C
+  const cleanup = (): void => {
+    clearInterval(timer);
+    stream.write(ANSI.showCursor);
+    console.log("");
+    console.log(
+      theme.muted("Use createSpinner() from @outfitter/cli/streaming")
+    );
+    console.log("");
+    process.exit(0);
+  };
+
+  process.on("SIGINT", cleanup);
+
+  // Keep running indefinitely
+  await new Promise(() => {});
+}
+
+/**
+ * Prints demo results to the console.
+ */
+export function printDemoResults(result: DemoResult): void {
+  if (result.output) {
+    console.log(result.output);
+  }
+}
