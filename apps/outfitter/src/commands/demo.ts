@@ -7,8 +7,10 @@
  * @packageDocumentation
  */
 
+import { isCancel, select } from "@clack/prompts";
 import { createTheme, renderTable, SPINNERS } from "@outfitter/cli/render";
 import { ANSI } from "@outfitter/cli/streaming";
+import { isInteractive } from "@outfitter/cli/terminal";
 import {
   getSectionIds,
   getSections,
@@ -16,9 +18,8 @@ import {
   runSection,
 } from "./demo/index.js";
 
-// Import sections to register them
-import "./demo/colors.js";
-import "./demo/table.js";
+// Import app-specific sections to register them
+// Note: Primitive demos (colors, table, etc.) are now provided by @outfitter/cli/demo
 import "./demo/errors.js";
 
 // =============================================================================
@@ -54,23 +55,26 @@ export interface DemoResult {
 /**
  * Runs the demo command programmatically.
  *
+ * When no section is specified and running in an interactive terminal,
+ * prompts the user to select a section.
+ *
  * @param options - Demo options
  * @returns Demo result with output and exit code
  *
  * @example
  * ```typescript
  * // Run all sections
- * const result = runDemo({});
+ * const result = await runDemo({});
  * console.log(result.output);
  *
  * // Run specific section
- * const result = runDemo({ section: "colors" });
+ * const result = await runDemo({ section: "colors" });
  *
  * // List available sections
- * const result = runDemo({ list: true });
+ * const result = await runDemo({ list: true });
  * ```
  */
-export function runDemo(options: DemoOptions): DemoResult {
+export async function runDemo(options: DemoOptions): Promise<DemoResult> {
   // Handle --list flag
   if (options.list) {
     return listSections();
@@ -84,25 +88,70 @@ export function runDemo(options: DemoOptions): DemoResult {
 
   // Handle specific section
   if (options.section) {
-    // Special case: "all" runs all sections
-    if (options.section === "all") {
-      const output = runAllSections();
-      return { output, exitCode: 0 };
-    }
+    return runSectionByName(options.section);
+  }
 
-    const output = runSection(options.section);
-    if (output === undefined) {
-      return {
-        output: formatError(options.section),
-        exitCode: 1,
-      };
+  // No section specified - show interactive picker if in TTY, otherwise run all
+  if (isInteractive()) {
+    const selectedSection = await selectSection();
+    if (selectedSection === null) {
+      return { output: "", exitCode: 130 }; // Cancelled
     }
+    return runSectionByName(selectedSection);
+  }
+
+  // Non-interactive: run all sections
+  const output = runAllSections();
+  return { output, exitCode: 0 };
+}
+
+/**
+ * Runs a section by name.
+ */
+function runSectionByName(sectionName: string): DemoResult {
+  // Special case: "all" runs all sections
+  if (sectionName === "all") {
+    const output = runAllSections();
     return { output, exitCode: 0 };
   }
 
-  // Default: run all sections
-  const output = runAllSections();
+  const output = runSection(sectionName);
+  if (output === undefined) {
+    return {
+      output: formatError(sectionName),
+      exitCode: 1,
+    };
+  }
   return { output, exitCode: 0 };
+}
+
+/**
+ * Prompts the user to select a demo section.
+ *
+ * @returns Selected section name, or null if cancelled
+ */
+async function selectSection(): Promise<string | null> {
+  const sections = getSections();
+
+  const options = [
+    { value: "all", label: "All sections", hint: "Run all demos" },
+    ...sections.map((s) => ({
+      value: s.id,
+      label: s.id,
+      hint: s.description,
+    })),
+  ];
+
+  const selection = await select({
+    message: "Select a demo section",
+    options,
+  });
+
+  if (isCancel(selection)) {
+    return null;
+  }
+
+  return String(selection);
 }
 
 // =============================================================================

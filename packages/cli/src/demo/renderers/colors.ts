@@ -1,7 +1,5 @@
 /**
- * Colors demo section.
- *
- * Showcases the color system from @outfitter/cli with copy-pasteable examples.
+ * Colors demo renderer.
  *
  * @packageDocumentation
  */
@@ -9,22 +7,24 @@
 import {
   ANSI,
   applyColor,
-  createTheme,
+  type ColorName,
   createTokens,
   resolveTokenColorEnabled,
-} from "@outfitter/cli/render";
+  type Theme,
+} from "../../render/colors.js";
 import {
   hasNoColorEnv,
   resolveForceColorEnv,
-} from "@outfitter/cli/terminal/detection";
-import type { DemoSection } from "./index.js";
-import { registerSection } from "./index.js";
+} from "../../terminal/detection.js";
+import { getThemeMethodsByCategory } from "../registry.js";
+import { getExample } from "../templates.js";
+import type { DemoConfig } from "../types.js";
 
 /**
  * Renders the colors demo section.
  */
-function runColorsDemo(): string {
-  const theme = createTheme();
+export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
+  const showCode = config.showCode ?? true;
   const tokens = createTokens();
   const colorEnabled = resolveTokenColorEnabled();
 
@@ -36,56 +36,39 @@ function runColorsDemo(): string {
   lines.push("THEME COLORS (createTheme)");
   lines.push("==========================");
   lines.push("");
-  lines.push('import { createTheme } from "@outfitter/cli/render";');
-  lines.push("const theme = createTheme();");
+
+  if (showCode) {
+    lines.push('import { createTheme } from "@outfitter/cli/render";');
+    lines.push("const theme = createTheme();");
+    lines.push("");
+  }
+
+  const { semantic } = getThemeMethodsByCategory();
+
+  for (const method of semantic) {
+    const text = getExample(method as keyof typeof getExample, config.examples);
+    const fn = theme[method];
+    const output = fn(text as string);
+    const code = `theme.${method}("${text}")`;
+    lines.push(`${code.padEnd(42)} → ${output}`);
+  }
+
+  // ==========================================================================
+  // Utility Methods Section
+  // ==========================================================================
+  lines.push("");
+  lines.push("UTILITY METHODS");
+  lines.push("===============");
   lines.push("");
 
-  // Show each theme method with its output
-  const themeExamples: Array<{
-    code: string;
-    fn: (text: string) => string;
-    text: string;
-  }> = [
-    {
-      code: 'theme.success("Operation completed")',
-      fn: theme.success,
-      text: "Operation completed",
-    },
-    {
-      code: 'theme.warning("Proceed with caution")',
-      fn: theme.warning,
-      text: "Proceed with caution",
-    },
-    {
-      code: 'theme.error("Something went wrong")',
-      fn: theme.error,
-      text: "Something went wrong",
-    },
-    {
-      code: 'theme.info("For your information")',
-      fn: theme.info,
-      text: "For your information",
-    },
-    {
-      code: 'theme.muted("(optional)")',
-      fn: theme.muted,
-      text: "(optional)",
-    },
-    {
-      code: 'theme.primary("Main content")',
-      fn: theme.primary,
-      text: "Main content",
-    },
-    {
-      code: 'theme.secondary("Supporting text")',
-      fn: theme.secondary,
-      text: "Supporting text",
-    },
-  ];
+  const { utility } = getThemeMethodsByCategory();
 
-  for (const example of themeExamples) {
-    const output = example.fn(example.text);
-    lines.push(`${example.code.padEnd(42)} → ${output}`);
+  for (const method of utility) {
+    const text = getExample(method as keyof typeof getExample, config.examples);
+    const fn = theme[method];
+    const output = fn(text as string);
+    const code = `theme.${method}("${text}")`;
+    lines.push(`${code.padEnd(42)} → ${output}`);
   }
 
   // ==========================================================================
@@ -95,24 +78,24 @@ function runColorsDemo(): string {
   lines.push("DIRECT COLORS (applyColor)");
   lines.push("==========================");
   lines.push("");
-  lines.push('import { applyColor } from "@outfitter/cli/render";');
-  lines.push("");
 
-  const colors: Array<{
-    name: string;
-    color: Parameters<typeof applyColor>[1];
-  }> = [
-    { name: "green", color: "green" },
-    { name: "yellow", color: "yellow" },
-    { name: "red", color: "red" },
-    { name: "blue", color: "blue" },
-    { name: "cyan", color: "cyan" },
-    { name: "magenta", color: "magenta" },
-    { name: "gray", color: "gray" },
+  if (showCode) {
+    lines.push('import { applyColor } from "@outfitter/cli/render";');
+    lines.push("");
+  }
+
+  const colors: ColorName[] = [
+    "green",
+    "yellow",
+    "red",
+    "blue",
+    "cyan",
+    "magenta",
+    "gray",
   ];
 
-  for (const { name, color } of colors) {
-    const code = `applyColor("text", "${name}")`;
+  for (const color of colors) {
+    const code = `applyColor("text", "${color}")`;
     const output = applyColor("text", color);
     lines.push(`${code.padEnd(32)} → ${output}`);
   }
@@ -124,13 +107,15 @@ function runColorsDemo(): string {
   lines.push("RAW TOKENS (createTokens)");
   lines.push("=========================");
   lines.push("");
-  lines.push('import { createTokens, ANSI } from "@outfitter/cli/render";');
-  lines.push("const t = createTokens();");
-  lines.push("");
 
-  // Show raw token usage
-  // Note: Using string concat to avoid noTemplateCurlyInString lint rule
-  const d = "$"; // dollar sign for template literal examples
+  if (showCode) {
+    lines.push('import { createTokens, ANSI } from "@outfitter/cli/render";');
+    lines.push("const t = createTokens();");
+    lines.push("");
+  }
+
+  // Use string concat to avoid noTemplateCurlyInString lint rule
+  const d = "$";
   const tokenExamples: Array<{ code: string; token: string; text: string }> = [
     {
       code: `\`${d}{t.success}Done${d}{ANSI.reset}\``,
@@ -155,7 +140,6 @@ function runColorsDemo(): string {
   ];
 
   for (const example of tokenExamples) {
-    // Only include reset if colors are enabled (token is non-empty)
     const reset = example.token ? ANSI.reset : "";
     const output = `${example.token}${example.text}${reset}`;
     lines.push(`${example.code.padEnd(36)} → ${output}`);
@@ -171,7 +155,6 @@ function runColorsDemo(): string {
   const noColor = hasNoColorEnv();
   const forceColor = resolveForceColorEnv();
 
-  // Format FORCE_COLOR display (avoid nested ternary)
   let forceColorDisplay: string;
   if (forceColor === true) {
     forceColorDisplay = theme.success("enabled");
@@ -191,12 +174,3 @@ function runColorsDemo(): string {
 
   return lines.join("\n");
 }
-
-// Register the colors section
-registerSection({
-  id: "colors",
-  description: "Color palette and theme demonstration",
-  run: runColorsDemo,
-} satisfies DemoSection);
-
-export { runColorsDemo };

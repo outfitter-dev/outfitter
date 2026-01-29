@@ -10,16 +10,22 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
+    "./commands/demo": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/commands/demo.d.ts",
+        "default": "./dist/commands/demo.js"
       }
     },
     "./actions": {
       "import": {
         "types": "./dist/actions.d.ts",
         "default": "./dist/actions.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./commands/doctor": {
@@ -40,14 +46,22 @@
         "default": "./dist/commands/shared-deps.js"
       }
     },
+    "./commands/demo/errors": {
+      "import": {
+        "types": "./dist/commands/demo/errors.d.ts",
+        "default": "./dist/commands/demo/errors.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {
-    "outfitter": "./dist/cli.js"
+    "outfitter": "./dist/cli.js",
+    "out": "./dist/cli.js"
   },
   "sideEffects": false,
   "scripts": {
     "build": "bunup --filter outfitter",
+    "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",

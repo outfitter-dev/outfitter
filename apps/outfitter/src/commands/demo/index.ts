@@ -1,10 +1,19 @@
 /**
  * Demo section registry.
  *
- * Exports available demo sections and a function to run them.
+ * Integrates @outfitter/cli/demo primitives with app-specific sections.
  *
  * @packageDocumentation
  */
+
+import {
+  type DemoConfig,
+  getPrimitive,
+  getPrimitiveIds,
+  type PrimitiveId,
+  renderAllDemos,
+  renderDemo,
+} from "@outfitter/cli/demo";
 
 /**
  * A demo section that can be executed.
@@ -19,37 +28,75 @@ export interface DemoSection {
 }
 
 /**
- * Registry of all available demo sections.
- * Add new sections here as they are implemented.
+ * Registry of app-specific demo sections.
+ * These are sections not covered by @outfitter/cli/demo.
  */
-const sections: DemoSection[] = [];
+const appSections: DemoSection[] = [];
 
 /**
- * Registers a demo section.
+ * Demo configuration for this CLI.
+ */
+const DEMO_CONFIG: DemoConfig = {
+  examples: {
+    success: "Package published",
+    error: "Init failed",
+    warning: "Deprecated API",
+    spinnerMessage: "Installing dependencies...",
+    boxTitle: "Outfitter",
+    boxContent: "CLI scaffolding tool",
+  },
+};
+
+/**
+ * Registers an app-specific demo section.
  */
 export function registerSection(section: DemoSection): void {
-  sections.push(section);
+  appSections.push(section);
 }
 
 /**
- * Gets all available section IDs.
+ * Gets all available section IDs (primitives + app sections).
  */
 export function getSectionIds(): string[] {
-  return sections.map((s) => s.id);
+  const primitiveIds = getPrimitiveIds();
+  const appIds = appSections.map((s) => s.id);
+  return [...primitiveIds, ...appIds];
 }
 
 /**
  * Gets all available sections with their descriptions.
  */
 export function getSections(): readonly DemoSection[] {
-  return sections;
+  // Convert primitives to DemoSection format
+  const primitiveSections: DemoSection[] = getPrimitiveIds().map((id) => {
+    const meta = getPrimitive(id);
+    return {
+      id: meta.id,
+      description: meta.description,
+      run: () => renderDemo(id, DEMO_CONFIG),
+    };
+  });
+
+  return [...primitiveSections, ...appSections];
 }
 
 /**
  * Gets a section by ID.
  */
 export function getSection(id: string): DemoSection | undefined {
-  return sections.find((s) => s.id === id);
+  // Check if it's a primitive
+  const primitiveIds = getPrimitiveIds();
+  if (primitiveIds.includes(id as PrimitiveId)) {
+    const meta = getPrimitive(id as PrimitiveId);
+    return {
+      id: meta.id,
+      description: meta.description,
+      run: () => renderDemo(id as PrimitiveId, DEMO_CONFIG),
+    };
+  }
+
+  // Check app sections
+  return appSections.find((s) => s.id === id);
 }
 
 /**
@@ -70,9 +117,15 @@ export function runSection(id: string): string | undefined {
  */
 export function runAllSections(): string {
   const outputs: string[] = [];
-  for (const section of sections) {
+
+  // Run all primitive demos
+  outputs.push(renderAllDemos(DEMO_CONFIG));
+
+  // Run app-specific sections
+  for (const section of appSections) {
+    outputs.push("");
     outputs.push(section.run());
-    outputs.push(""); // Add blank line between sections
   }
+
   return outputs.join("\n").trimEnd();
 }

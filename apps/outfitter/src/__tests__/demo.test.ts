@@ -120,7 +120,7 @@ describe("demo command", () => {
   test("runDemo returns output and exit code", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({});
+    const result = await runDemo({ section: "all" });
 
     expect(result).toHaveProperty("output");
     expect(result).toHaveProperty("exitCode");
@@ -131,7 +131,7 @@ describe("demo command", () => {
   test("runDemo with --list returns section list", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({ list: true });
+    const result = await runDemo({ list: true });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("Available demo sections");
@@ -140,7 +140,7 @@ describe("demo command", () => {
   test("runDemo with unknown section returns error", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({ section: "nonexistent-demo-section" });
+    const result = await runDemo({ section: "nonexistent-demo-section" });
 
     expect(result.exitCode).toBe(1);
     expect(result.output).toContain("Unknown section");
@@ -151,7 +151,7 @@ describe("demo command", () => {
     const uniqueId = `test-demo-all-${Date.now()}`;
     registerSection(createMockSection(uniqueId, "Test", "demo-all-output"));
 
-    const result = runDemo({ section: "all" });
+    const result = await runDemo({ section: "all" });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("demo-all-output");
@@ -166,7 +166,7 @@ describe("demo result structure", () => {
   test("DemoResult has correct structure", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({});
+    const result = await runDemo({ section: "all" });
 
     expect(result).toHaveProperty("output");
     expect(result).toHaveProperty("exitCode");
@@ -233,7 +233,7 @@ describe("colors demo section", () => {
   test("runDemo with colors section works", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({ section: "colors" });
+    const result = await runDemo({ section: "colors" });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("THEME COLORS");
@@ -274,13 +274,16 @@ describe("table demo section", () => {
     expect(output).toContain("Assignee");
   });
 
-  test("table section includes column width constraint", async () => {
+  test("table section includes border styles", async () => {
     await import("../commands/demo.js");
 
     const output = runSection("table");
 
-    expect(output).toContain("COLUMN WIDTH CONSTRAINT");
-    expect(output).toContain("columnWidths");
+    expect(output).toContain("BORDER STYLES");
+    expect(output).toContain("single");
+    expect(output).toContain("double");
+    expect(output).toContain("rounded");
+    expect(output).toContain("heavy");
   });
 
   test("table section includes wide characters example", async () => {
@@ -292,19 +295,19 @@ describe("table demo section", () => {
     expect(output).toContain("山田太郎");
   });
 
-  test("table section includes limitations", async () => {
+  test("table section includes compact mode", async () => {
     await import("../commands/demo.js");
 
     const output = runSection("table");
 
-    expect(output).toContain("KNOWN LIMITATIONS");
-    expect(output).toContain("ASCII borders only");
+    expect(output).toContain("COMPACT MODE");
+    expect(output).toContain("compact: true");
   });
 
   test("runDemo with table section works", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({ section: "table" });
+    const result = await runDemo({ section: "table" });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("BASIC TABLE");
@@ -386,7 +389,7 @@ describe("errors demo section", () => {
   test("runDemo with errors section works", async () => {
     const { runDemo } = await import("../commands/demo.js");
 
-    const result = runDemo({ section: "errors" });
+    const result = await runDemo({ section: "errors" });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("ERROR TAXONOMY");

@@ -175,8 +175,8 @@ const demoAction = defineAction({
       animate: Boolean(context.flags["animate"]),
     }),
   },
-  handler: (input) => {
-    const result = runDemo(input);
+  handler: async (input) => {
+    const result = await runDemo(input);
     printDemoResults(result);
 
     if (result.exitCode !== 0) {
