@@ -5,7 +5,11 @@
  */
 
 import type { Theme } from "../../render/colors.js";
-import { renderTree } from "../../render/tree.js";
+import {
+  renderTree,
+  TREE_GUIDES,
+  type TreeGuideStyle,
+} from "../../render/tree.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -25,7 +29,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderTree } from "@outfitter/cli/render";');
+    lines.push('import { renderTree } from "@outfitter/cli/tree";');
     lines.push("");
   }
 
@@ -46,39 +50,108 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   lines.push("");
 
   // ==========================================================================
-  // Deeper Nesting Section
+  // Guide Styles Section
   // ==========================================================================
-  lines.push("DEEPER NESTING");
-  lines.push("==============");
+  lines.push("GUIDE STYLES");
+  lines.push("============");
+  lines.push("");
+
+  const guideDemo = {
+    root: {
+      child1: {
+        leaf: null,
+      },
+      child2: null,
+    },
+  };
+
+  const guideStyles: TreeGuideStyle[] = [
+    "single",
+    "rounded",
+    "heavy",
+    "double",
+  ];
+
+  for (const style of guideStyles) {
+    const guide = TREE_GUIDES[style];
+    lines.push(
+      `${style.toUpperCase()} (fork: "${guide.fork.trim()}", end: "${guide.end.trim()}")`
+    );
+    lines.push("");
+    lines.push(renderTree(guideDemo, { guide: style }));
+    lines.push("");
+  }
+
+  // ==========================================================================
+  // Max Depth Section
+  // ==========================================================================
+  lines.push("MAX DEPTH");
+  lines.push("=========");
   lines.push("");
 
   const deepTree = {
-    project: {
-      src: {
-        components: {
-          ui: {
-            Button: null,
-            Input: null,
-            Select: null,
-          },
-          layout: {
-            Header: null,
-            Footer: null,
-          },
+    level1: {
+      level2: {
+        level3: {
+          level4: null,
         },
-        lib: {
-          utils: null,
-          helpers: null,
-        },
-      },
-      tests: {
-        unit: null,
-        integration: null,
       },
     },
   };
 
+  if (showCode) {
+    lines.push("renderTree(tree, { maxDepth: 2 })");
+    lines.push("");
+  }
+
+  lines.push("Full tree:");
   lines.push(renderTree(deepTree));
+  lines.push("");
+  lines.push("With maxDepth: 2:");
+  lines.push(renderTree(deepTree, { maxDepth: 2 }));
+  lines.push("");
+
+  // ==========================================================================
+  // Custom Labels Section
+  // ==========================================================================
+  lines.push("CUSTOM LABELS");
+  lines.push("=============");
+  lines.push("");
+
+  const fileTree = {
+    src: {
+      "index.ts": null,
+      components: {
+        "Button.tsx": null,
+      },
+    },
+    "package.json": null,
+  };
+
+  if (showCode) {
+    lines.push("renderTree(tree, {");
+    lines.push("  renderLabel: (key, value) => {");
+    lines.push("    if (value && typeof value === 'object') {");
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: code example display
+    lines.push("      return `📁 ${key}/`;");
+    lines.push("    }");
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: code example display
+    lines.push("    return `📄 ${key}`;");
+    lines.push("  }");
+    lines.push("})");
+    lines.push("");
+  }
+
+  lines.push(
+    renderTree(fileTree, {
+      renderLabel: (key, value) => {
+        if (value && typeof value === "object") {
+          return `📁 ${key}/`;
+        }
+        return `📄 ${key}`;
+      },
+    })
+  );
   lines.push("");
 
   // ==========================================================================
@@ -89,8 +162,9 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   lines.push("");
   lines.push("• Objects become branches with children");
   lines.push("• null values become leaf nodes (terminal)");
-  lines.push("• Uses Unicode box-drawing characters (├── └── │)");
-  lines.push("• Keys are displayed as node labels");
+  lines.push("• Use guide option to change visual style");
+  lines.push("• Use maxDepth to limit rendering depth");
+  lines.push("• Use renderLabel for custom node formatting");
 
   return lines.join("\n");
 }

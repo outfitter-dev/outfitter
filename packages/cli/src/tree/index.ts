@@ -22,4 +22,9 @@
  */
 
 // biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
-export { renderTree } from "../render/tree.js";
+export {
+  renderTree,
+  TREE_GUIDES,
+  type TreeGuideStyle,
+  type TreeOptions,
+} from "../render/tree.js";

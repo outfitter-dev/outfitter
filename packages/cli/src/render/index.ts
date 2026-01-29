@@ -99,4 +99,9 @@ export {
   wrapText,
 } from "./text.js";
 // Tree rendering
-export { renderTree } from "./tree.js";
+export {
+  renderTree,
+  TREE_GUIDES,
+  type TreeGuideStyle,
+  type TreeOptions,
+} from "./tree.js";
