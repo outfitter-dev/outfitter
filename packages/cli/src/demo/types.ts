@@ -25,7 +25,8 @@ export type PrimitiveId =
   | "progress"
   | "tree"
   | "text"
-  | "markdown";
+  | "markdown"
+  | "indicators";
 
 // ============================================================================
 // Metadata Types
@@ -175,6 +176,7 @@ export function isPrimitiveId(value: string): value is PrimitiveId {
     "tree",
     "text",
     "markdown",
+    "indicators",
   ];
   return validIds.includes(value as PrimitiveId);
 }

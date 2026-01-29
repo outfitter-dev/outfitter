@@ -343,6 +343,13 @@ export const PRIMITIVE_META: Record<PrimitiveId, PrimitiveMeta> = {
     description: "Markdown to terminal ANSI rendering",
     importExample: 'import { renderMarkdown } from "@outfitter/cli/render";',
   },
+  indicators: {
+    id: "indicators",
+    name: "Indicators",
+    description: "Status symbols, selection markers, and progress indicators",
+    importExample:
+      'import { getIndicator, INDICATORS } from "@outfitter/cli/render";',
+  },
 };
 
 /**

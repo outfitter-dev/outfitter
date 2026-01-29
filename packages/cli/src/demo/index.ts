@@ -33,6 +33,7 @@ import {
 import { renderBordersDemo } from "./renderers/borders.js";
 import { renderBoxDemo } from "./renderers/box.js";
 import { renderColorsDemo } from "./renderers/colors.js";
+import { renderIndicatorsDemo } from "./renderers/indicators.js";
 import { renderListDemo } from "./renderers/list.js";
 import { renderMarkdownDemo } from "./renderers/markdown.js";
 import { renderProgressDemo } from "./renderers/progress.js";
@@ -66,6 +67,7 @@ const DEMO_RENDERERS: Record<PrimitiveId, DemoRenderer> = {
   tree: renderTreeDemo,
   text: renderTextDemo,
   markdown: renderMarkdownDemo,
+  indicators: renderIndicatorsDemo,
 };
 
 // ============================================================================

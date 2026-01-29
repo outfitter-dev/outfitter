@@ -40,6 +40,16 @@ export {
 export { formatBytes, formatDuration } from "./format.js";
 // Date/time formatting
 export { formatRelative } from "./format-relative.js";
+// Indicators
+export {
+  getIndicator,
+  getProgressIndicator,
+  INDICATORS,
+  type IndicatorCategory,
+  type IndicatorSet,
+  isUnicodeSupported,
+  type ProgressStyle,
+} from "./indicators.js";
 // JSON and text rendering
 export { renderJson, renderText } from "./json.js";
 

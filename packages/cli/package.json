@@ -15,6 +15,24 @@
         "default": "./dist/output.js"
       }
     },
+    "./demo/renderers/box": {
+      "import": {
+        "types": "./dist/demo/renderers/box.d.ts",
+        "default": "./dist/demo/renderers/box.js"
+      }
+    },
+    "./demo/renderers/tree": {
+      "import": {
+        "types": "./dist/demo/renderers/tree.d.ts",
+        "default": "./dist/demo/renderers/tree.js"
+      }
+    },
+    "./demo/renderers/spinner": {
+      "import": {
+        "types": "./dist/demo/renderers/spinner.d.ts",
+        "default": "./dist/demo/renderers/spinner.js"
+      }
+    },
     "./demo/renderers/progress": {
       "import": {
         "types": "./dist/demo/renderers/progress.d.ts",
@@ -39,6 +57,12 @@
         "default": "./dist/demo/renderers/markdown.js"
       }
     },
+    "./demo/renderers/indicators": {
+      "import": {
+        "types": "./dist/demo/renderers/indicators.d.ts",
+        "default": "./dist/demo/renderers/indicators.js"
+      }
+    },
     "./demo/renderers/borders": {
       "import": {
         "types": "./dist/demo/renderers/borders.d.ts",
@@ -51,16 +75,10 @@
         "default": "./dist/demo/renderers/list.js"
       }
     },
-    "./demo/renderers/box": {
+    "./preset/standard": {
       "import": {
-        "types": "./dist/demo/renderers/box.d.ts",
-        "default": "./dist/demo/renderers/box.js"
-      }
-    },
-    "./demo/renderers/tree": {
-      "import": {
-        "types": "./dist/demo/renderers/tree.d.ts",
-        "default": "./dist/demo/renderers/tree.js"
+        "types": "./dist/preset/standard.d.ts",
+        "default": "./dist/preset/standard.js"
       }
     },
     "./box": {
@@ -105,10 +123,10 @@
         "default": "./dist/demo/renderers/colors.js"
       }
     },
-    "./demo/renderers/spinner": {
+    "./render/borders": {
       "import": {
-        "types": "./dist/demo/renderers/spinner.d.ts",
-        "default": "./dist/demo/renderers/spinner.js"
+        "types": "./dist/render/borders.d.ts",
+        "default": "./dist/render/borders.js"
       }
     },
     "./render": {
@@ -153,12 +171,6 @@
         "default": "./dist/preset/full.js"
       }
     },
-    "./preset/standard": {
-      "import": {
-        "types": "./dist/preset/standard.d.ts",
-        "default": "./dist/preset/standard.js"
-      }
-    },
     "./render/json": {
       "import": {
         "types": "./dist/render/json.d.ts",
@@ -201,10 +213,10 @@
         "default": "./dist/render/format.js"
       }
     },
-    "./render/borders": {
+    "./render/indicators": {
       "import": {
-        "types": "./dist/render/borders.d.ts",
-        "default": "./dist/render/borders.js"
+        "types": "./dist/render/indicators.d.ts",
+        "default": "./dist/render/indicators.js"
       }
     },
     "./theme/presets/minimal": {
