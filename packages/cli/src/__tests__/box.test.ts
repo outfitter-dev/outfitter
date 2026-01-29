@@ -149,6 +149,91 @@ describe("renderBox()", () => {
   });
 
   // ============================================================================
+  // Internal Dividers / Sections Tests (6 tests)
+  // ============================================================================
+
+  describe("sections (internal dividers)", () => {
+    it("renders box with two sections and divider", () => {
+      const result = renderBox("", {
+        sections: ["Header", "Content"],
+      });
+      const lines = result.split("\n");
+
+      // Should have 5 lines: top, header, divider, content, bottom
+      expect(lines.length).toBe(5);
+      expect(result).toContain("Header");
+      expect(result).toContain("Content");
+      // Should have T-intersection characters for divider
+      expect(result).toContain("├");
+      expect(result).toContain("┤");
+    });
+
+    it("renders box with three sections and two dividers", () => {
+      const result = renderBox("", {
+        sections: ["Header", "Body", "Footer"],
+      });
+      const lines = result.split("\n");
+
+      // Should have 6 lines: top, header, divider, body, divider, footer, bottom
+      expect(lines.length).toBe(7);
+      expect(result).toContain("Header");
+      expect(result).toContain("Body");
+      expect(result).toContain("Footer");
+      // Should have two dividers
+      const dividerCount = lines.filter(
+        (l) => l.includes("├") && l.includes("┤")
+      ).length;
+      expect(dividerCount).toBe(2);
+    });
+
+    it("renders multiple lines per section when section is string[]", () => {
+      const result = renderBox("", {
+        sections: ["Header", ["Line 1", "Line 2", "Line 3"]],
+      });
+      const lines = result.split("\n");
+
+      // top + header + divider + 3 content lines + bottom = 7 lines
+      expect(lines.length).toBe(7);
+      expect(result).toContain("Line 1");
+      expect(result).toContain("Line 2");
+      expect(result).toContain("Line 3");
+    });
+
+    it("respects border style for divider characters", () => {
+      const result = renderBox("", {
+        sections: ["Header", "Content"],
+        border: "double",
+      });
+
+      // Double border uses ╠ and ╣ for T-intersections
+      expect(result).toContain("╠");
+      expect(result).toContain("╣");
+    });
+
+    it("respects padding within sections", () => {
+      const result = renderBox("", {
+        sections: ["X", "Y"],
+        padding: 2,
+      });
+      const lines = result.split("\n");
+
+      // Find a content line and verify padding
+      const contentLine = lines.find((l) => l.includes("X"));
+      // With padding=2, should have at least 2 spaces after │
+      expect(contentLine).toMatch(/│\s{2,}X\s{2,}│/);
+    });
+
+    it("sections takes precedence over content parameter", () => {
+      const result = renderBox("Ignored content", {
+        sections: ["Used section"],
+      });
+
+      expect(result).toContain("Used section");
+      expect(result).not.toContain("Ignored content");
+    });
+  });
+
+  // ============================================================================
   // Width and Alignment Tests (2 tests)
   // ============================================================================
 

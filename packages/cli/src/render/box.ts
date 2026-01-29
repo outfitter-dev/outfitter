@@ -65,6 +65,33 @@ export interface BoxOptions {
    * @default "left"
    */
   align?: BoxAlign;
+
+  /**
+   * Content sections separated by internal dividers.
+   * Each section can be a string or string[].
+   * When provided, takes precedence over the content parameter.
+   *
+   * @example
+   * ```typescript
+   * renderBox("", {
+   *   sections: [
+   *     "Header",
+   *     ["Line 1", "Line 2"],
+   *     "Footer"
+   *   ],
+   *   border: "single"
+   * });
+   * // ┌─────────────────┐
+   * // │ Header          │
+   * // ├─────────────────┤
+   * // │ Line 1          │
+   * // │ Line 2          │
+   * // ├─────────────────┤
+   * // │ Footer          │
+   * // └─────────────────┘
+   * ```
+   */
+  sections?: Array<string | string[]>;
 }
 
 // ============================================================================
@@ -146,12 +173,28 @@ export function renderBox(
   const title = options?.title;
   const align = options?.align ?? "left";
   const fixedWidth = options?.width;
+  const sections = options?.sections;
 
   const chars = getBorderCharacters(border);
 
-  // Convert content to lines
+  // Convert content to lines (or use sections if provided)
   let lines: string[];
-  if (typeof content === "string") {
+  // Track section boundaries for divider insertion
+  let sectionBoundaries: number[] = [];
+
+  if (sections && sections.length > 0) {
+    // Sections mode: convert each section to lines and track boundaries
+    lines = [];
+    for (const [idx, section] of sections.entries()) {
+      const sectionLines =
+        typeof section === "string" ? section.split("\n") : section;
+      lines.push(...sectionLines);
+      // Track where this section ends (cumulative line count)
+      if (idx < sections.length - 1) {
+        sectionBoundaries.push(lines.length);
+      }
+    }
+  } else if (typeof content === "string") {
     lines = content.split("\n");
   } else {
     lines = content;
@@ -160,18 +203,32 @@ export function renderBox(
   // Handle wrapping if width is specified
   if (fixedWidth) {
     // Calculate available content width (total - borders - padding)
-    const contentWidth = fixedWidth - 2 - padding * 2;
-    if (contentWidth > 0) {
+    const contentWidthForWrap = fixedWidth - 2 - padding * 2;
+    if (contentWidthForWrap > 0) {
       const wrappedLines: string[] = [];
+      const newBoundaries: number[] = [];
+      let boundaryIdx = 0;
+      let originalLineCount = 0;
+
       for (const line of lines) {
-        if (getStringWidth(line) > contentWidth) {
-          const wrapped = wrapText(line, contentWidth);
+        if (getStringWidth(line) > contentWidthForWrap) {
+          const wrapped = wrapText(line, contentWidthForWrap);
           wrappedLines.push(...wrapped.split("\n"));
         } else {
           wrappedLines.push(line);
         }
+
+        originalLineCount++;
+
+        // Adjust section boundaries for wrapped lines
+        const boundary = sectionBoundaries[boundaryIdx];
+        if (boundary !== undefined && originalLineCount === boundary) {
+          newBoundaries.push(wrappedLines.length);
+          boundaryIdx++;
+        }
       }
       lines = wrappedLines;
+      sectionBoundaries = newBoundaries;
     }
   }
 
@@ -230,12 +287,24 @@ export function renderBox(
   }
   output.push(topBorder);
 
-  // Content lines with padding
-  for (const line of lines) {
+  // Track which boundary we're looking at
+  let boundaryIdx = 0;
+
+  // Content lines with padding (and dividers between sections)
+  for (const [idx, line] of lines.entries()) {
     const alignedLine = alignLine(line, contentWidth, align);
     output.push(
       chars.vertical + paddingStr + alignedLine + paddingStr + chars.vertical
     );
+
+    // Insert divider after this line if it's a section boundary
+    const boundary = sectionBoundaries[boundaryIdx];
+    if (boundary !== undefined && idx + 1 === boundary) {
+      const divider =
+        chars.leftT + chars.horizontal.repeat(innerWidth) + chars.rightT;
+      output.push(divider);
+      boundaryIdx++;
+    }
   }
 
   // Bottom border
