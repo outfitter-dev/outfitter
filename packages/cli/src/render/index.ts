@@ -40,6 +40,14 @@ export {
 export { formatBytes, formatDuration } from "./format.js";
 // Date/time formatting
 export { formatRelative } from "./format-relative.js";
+// Heading rendering
+export {
+  type CaseMode,
+  type HeadingOptions,
+  renderHeading,
+  type SeparatorStyle,
+  type WidthMode,
+} from "./heading.js";
 // Indicators
 export {
   getIndicator,
@@ -66,6 +74,12 @@ export { renderMarkdown } from "./markdown.js";
 
 // Progress rendering
 export { type ProgressOptions, renderProgress } from "./progress.js";
+// Separator rendering
+export {
+  type DividerStyle,
+  renderSeparator,
+  type SeparatorOptions,
+} from "./separator.js";
 // Shapes and unified render
 export {
   type Collection,
