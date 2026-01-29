@@ -15,100 +15,10 @@
         "default": "./dist/output.js"
       }
     },
-    "./demo/renderers/markdown": {
-      "import": {
-        "types": "./dist/demo/renderers/markdown.d.ts",
-        "default": "./dist/demo/renderers/markdown.js"
-      }
-    },
-    "./demo/renderers/indicators": {
-      "import": {
-        "types": "./dist/demo/renderers/indicators.d.ts",
-        "default": "./dist/demo/renderers/indicators.js"
-      }
-    },
-    "./demo/renderers/borders": {
-      "import": {
-        "types": "./dist/demo/renderers/borders.d.ts",
-        "default": "./dist/demo/renderers/borders.js"
-      }
-    },
-    "./demo/renderers/list": {
-      "import": {
-        "types": "./dist/demo/renderers/list.d.ts",
-        "default": "./dist/demo/renderers/list.js"
-      }
-    },
-    "./demo/renderers/box": {
-      "import": {
-        "types": "./dist/demo/renderers/box.d.ts",
-        "default": "./dist/demo/renderers/box.js"
-      }
-    },
-    "./demo/renderers/tree": {
-      "import": {
-        "types": "./dist/demo/renderers/tree.d.ts",
-        "default": "./dist/demo/renderers/tree.js"
-      }
-    },
-    "./demo/types": {
-      "import": {
-        "types": "./dist/demo/types.d.ts",
-        "default": "./dist/demo/types.js"
-      }
-    },
-    "./demo/registry": {
-      "import": {
-        "types": "./dist/demo/registry.d.ts",
-        "default": "./dist/demo/registry.js"
-      }
-    },
     "./demo": {
       "import": {
         "types": "./dist/demo/index.d.ts",
         "default": "./dist/demo/index.js"
-      }
-    },
-    "./demo/renderers/colors": {
-      "import": {
-        "types": "./dist/demo/renderers/colors.d.ts",
-        "default": "./dist/demo/renderers/colors.js"
-      }
-    },
-    "./demo/renderers/spinner": {
-      "import": {
-        "types": "./dist/demo/renderers/spinner.d.ts",
-        "default": "./dist/demo/renderers/spinner.js"
-      }
-    },
-    "./demo/renderers/progress": {
-      "import": {
-        "types": "./dist/demo/renderers/progress.d.ts",
-        "default": "./dist/demo/renderers/progress.js"
-      }
-    },
-    "./demo/renderers/table": {
-      "import": {
-        "types": "./dist/demo/renderers/table.d.ts",
-        "default": "./dist/demo/renderers/table.js"
-      }
-    },
-    "./demo/renderers/text": {
-      "import": {
-        "types": "./dist/demo/renderers/text.d.ts",
-        "default": "./dist/demo/renderers/text.js"
-      }
-    },
-    "./render/box": {
-      "import": {
-        "types": "./dist/render/box.d.ts",
-        "default": "./dist/render/box.js"
-      }
-    },
-    "./render/tree": {
-      "import": {
-        "types": "./dist/render/tree.d.ts",
-        "default": "./dist/render/tree.js"
       }
     },
     "./borders": {
@@ -141,124 +51,22 @@
         "default": "./dist/tree/index.js"
       }
     },
-    "./demo/templates": {
-      "import": {
-        "types": "./dist/demo/templates.d.ts",
-        "default": "./dist/demo/templates.js"
-      }
-    },
-    "./render/text": {
-      "import": {
-        "types": "./dist/render/text.d.ts",
-        "default": "./dist/render/text.js"
-      }
-    },
-    "./render/markdown": {
-      "import": {
-        "types": "./dist/render/markdown.d.ts",
-        "default": "./dist/render/markdown.js"
-      }
-    },
-    "./render/format": {
-      "import": {
-        "types": "./dist/render/format.d.ts",
-        "default": "./dist/render/format.js"
-      }
-    },
-    "./render/indicators": {
-      "import": {
-        "types": "./dist/render/indicators.d.ts",
-        "default": "./dist/render/indicators.js"
-      }
-    },
-    "./render/borders": {
-      "import": {
-        "types": "./dist/render/borders.d.ts",
-        "default": "./dist/render/borders.js"
-      }
-    },
     "./render": {
       "import": {
         "types": "./dist/render/index.d.ts",
         "default": "./dist/render/index.js"
       }
     },
-    "./render/list": {
+    "./prompt/validators": {
       "import": {
-        "types": "./dist/render/list.d.ts",
-        "default": "./dist/render/list.js"
+        "types": "./dist/prompt/validators.d.ts",
+        "default": "./dist/prompt/validators.js"
       }
     },
-    "./render/shapes": {
+    "./prompt": {
       "import": {
-        "types": "./dist/render/shapes.d.ts",
-        "default": "./dist/render/shapes.js"
-      }
-    },
-    "./terminal/detection": {
-      "import": {
-        "types": "./dist/terminal/detection.d.ts",
-        "default": "./dist/terminal/detection.js"
-      }
-    },
-    "./render/colors": {
-      "import": {
-        "types": "./dist/render/colors.d.ts",
-        "default": "./dist/render/colors.js"
-      }
-    },
-    "./render/format-relative": {
-      "import": {
-        "types": "./dist/render/format-relative.d.ts",
-        "default": "./dist/render/format-relative.js"
-      }
-    },
-    "./render/date": {
-      "import": {
-        "types": "./dist/render/date.d.ts",
-        "default": "./dist/render/date.js"
-      }
-    },
-    "./render/json": {
-      "import": {
-        "types": "./dist/render/json.d.ts",
-        "default": "./dist/render/json.js"
-      }
-    },
-    "./render/spinner": {
-      "import": {
-        "types": "./dist/render/spinner.d.ts",
-        "default": "./dist/render/spinner.js"
-      }
-    },
-    "./render/progress": {
-      "import": {
-        "types": "./dist/render/progress.d.ts",
-        "default": "./dist/render/progress.js"
-      }
-    },
-    "./render/table": {
-      "import": {
-        "types": "./dist/render/table.d.ts",
-        "default": "./dist/render/table.js"
-      }
-    },
-    "./theme/presets/minimal": {
-      "import": {
-        "types": "./dist/theme/presets/minimal.d.ts",
-        "default": "./dist/theme/presets/minimal.js"
-      }
-    },
-    "./theme/presets/default": {
-      "import": {
-        "types": "./dist/theme/presets/default.d.ts",
-        "default": "./dist/theme/presets/default.js"
-      }
-    },
-    "./theme/presets": {
-      "import": {
-        "types": "./dist/theme/presets/index.d.ts",
-        "default": "./dist/theme/presets/index.js"
+        "types": "./dist/prompt/index.d.ts",
+        "default": "./dist/prompt/index.js"
       }
     },
     "./streaming/spinner": {
@@ -285,10 +93,100 @@
         "default": "./dist/streaming/index.js"
       }
     },
-    "./terminal": {
+    "./theme/presets/rounded": {
       "import": {
-        "types": "./dist/terminal/index.d.ts",
-        "default": "./dist/terminal/index.js"
+        "types": "./dist/theme/presets/rounded.d.ts",
+        "default": "./dist/theme/presets/rounded.js"
+      }
+    },
+    "./theme/presets/bold": {
+      "import": {
+        "types": "./dist/theme/presets/bold.d.ts",
+        "default": "./dist/theme/presets/bold.js"
+      }
+    },
+    "./theme/presets/minimal": {
+      "import": {
+        "types": "./dist/theme/presets/minimal.d.ts",
+        "default": "./dist/theme/presets/minimal.js"
+      }
+    },
+    "./theme/presets/default": {
+      "import": {
+        "types": "./dist/theme/presets/default.d.ts",
+        "default": "./dist/theme/presets/default.js"
+      }
+    },
+    "./theme/presets": {
+      "import": {
+        "types": "./dist/theme/presets/index.d.ts",
+        "default": "./dist/theme/presets/index.js"
+      }
+    },
+    "./prompt/confirm": {
+      "import": {
+        "types": "./dist/prompt/confirm.d.ts",
+        "default": "./dist/prompt/confirm.js"
+      }
+    },
+    "./prompt/select": {
+      "import": {
+        "types": "./dist/prompt/select.d.ts",
+        "default": "./dist/prompt/select.js"
+      }
+    },
+    "./prompt/group": {
+      "import": {
+        "types": "./dist/prompt/group.d.ts",
+        "default": "./dist/prompt/group.js"
+      }
+    },
+    "./list": {
+      "import": {
+        "types": "./dist/list/index.d.ts",
+        "default": "./dist/list/index.js"
+      }
+    },
+    "./colors": {
+      "import": {
+        "types": "./dist/colors/index.d.ts",
+        "default": "./dist/colors/index.js"
+      }
+    },
+    "./table": {
+      "import": {
+        "types": "./dist/table/index.d.ts",
+        "default": "./dist/table/index.js"
+      }
+    },
+    "./theme/context": {
+      "import": {
+        "types": "./dist/theme/context.d.ts",
+        "default": "./dist/theme/context.js"
+      }
+    },
+    "./theme/types": {
+      "import": {
+        "types": "./dist/theme/types.d.ts",
+        "default": "./dist/theme/types.js"
+      }
+    },
+    "./theme": {
+      "import": {
+        "types": "./dist/theme/index.d.ts",
+        "default": "./dist/theme/index.js"
+      }
+    },
+    "./theme/create": {
+      "import": {
+        "types": "./dist/theme/create.d.ts",
+        "default": "./dist/theme/create.js"
+      }
+    },
+    "./theme/resolve": {
+      "import": {
+        "types": "./dist/theme/resolve.d.ts",
+        "default": "./dist/theme/resolve.js"
       }
     },
     "./pagination": {
