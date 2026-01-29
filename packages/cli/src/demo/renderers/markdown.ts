@@ -6,6 +6,7 @@
 
 import type { Theme } from "../../render/colors.js";
 import { renderMarkdown } from "../../render/markdown.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -20,8 +21,7 @@ export function renderMarkdownDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Basic Markdown Section
   // ==========================================================================
-  lines.push("MARKDOWN RENDERING");
-  lines.push("==================");
+  lines.push(demoSection("Markdown Rendering"));
   lines.push("");
 
   if (showCode) {
@@ -48,8 +48,7 @@ export function renderMarkdownDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Supported Elements Section
   // ==========================================================================
-  lines.push("SUPPORTED ELEMENTS");
-  lines.push("==================");
+  lines.push(demoSection("Supported Elements"));
   lines.push("");
 
   const elements = [
@@ -79,8 +78,7 @@ export function renderMarkdownDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Color Support Section
   // ==========================================================================
-  lines.push("COLOR SUPPORT");
-  lines.push("=============");
+  lines.push(demoSection("Color Support"));
   lines.push("");
   lines.push("• Colors applied when terminal supports ANSI");
   lines.push("• Respects NO_COLOR environment variable");

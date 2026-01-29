@@ -6,6 +6,7 @@
 
 import type { Theme } from "../../render/colors.js";
 import { renderProgress } from "../../render/progress.js";
+import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 
 /**
@@ -19,8 +20,7 @@ export function renderProgressDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Basic Progress Section
   // ==========================================================================
-  lines.push("BASIC PROGRESS BAR");
-  lines.push("==================");
+  lines.push(demoSection("Basic Progress Bar"));
   lines.push("");
 
   if (showCode) {
@@ -39,8 +39,7 @@ export function renderProgressDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // With Percentage Display Section
   // ==========================================================================
-  lines.push("WITH PERCENTAGE DISPLAY");
-  lines.push("=======================");
+  lines.push(demoSection("With Percentage Display"));
   lines.push("");
 
   if (showCode) {
@@ -56,8 +55,7 @@ export function renderProgressDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Custom Width Section
   // ==========================================================================
-  lines.push("CUSTOM WIDTH");
-  lines.push("============");
+  lines.push(demoSection("Custom Width"));
   lines.push("");
 
   const widths = [10, 20, 30, 40];
@@ -76,8 +74,7 @@ export function renderProgressDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Edge Cases Section
   // ==========================================================================
-  lines.push("EDGE CASES");
-  lines.push("==========");
+  lines.push(demoSection("Edge Cases"));
   lines.push("");
 
   lines.push("Empty (0%):");

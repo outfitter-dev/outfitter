@@ -7,6 +7,7 @@
 import { BORDERS, drawHorizontalLine } from "../../render/borders.js";
 import type { Theme } from "../../render/colors.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
+import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 
 /**
@@ -21,8 +22,7 @@ export function renderBordersDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Border Styles Section
   // ==========================================================================
-  lines.push("BORDER STYLES");
-  lines.push("=============");
+  lines.push(demoSection("Border Styles"));
   lines.push("");
 
   if (showCode) {
@@ -59,8 +59,7 @@ export function renderBordersDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Characters Reference Section
   // ==========================================================================
-  lines.push("CHARACTERS REFERENCE");
-  lines.push("====================");
+  lines.push(demoSection("Characters Reference"));
   lines.push("");
 
   for (const style of styles) {

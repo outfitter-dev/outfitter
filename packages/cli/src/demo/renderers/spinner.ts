@@ -11,6 +11,7 @@ import {
   SPINNERS,
 } from "../../render/spinner.js";
 import { getSpinnerStyles, SPINNER_STYLE_META } from "../registry.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -26,8 +27,7 @@ export function renderSpinnerDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Spinner Styles Section
   // ==========================================================================
-  lines.push("SPINNER STYLES");
-  lines.push("==============");
+  lines.push(demoSection("Spinner Styles"));
   lines.push("");
 
   if (showCode) {
@@ -63,8 +63,7 @@ export function renderSpinnerDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Usage Section
   // ==========================================================================
-  lines.push("USAGE");
-  lines.push("=====");
+  lines.push(demoSection("Usage"));
   lines.push("");
 
   if (showCode) {
