@@ -7,6 +7,10 @@
 import { Command } from "commander";
 import type { CommandAction, CommandBuilder, CommandFlags } from "./types.js";
 
+// Re-export createCLI from cli.ts for convenience
+// biome-ignore lint/performance/noBarrelFile: Intentional re-export for public API
+export { createCLI } from "./cli.js";
+
 class CommandBuilderImpl implements CommandBuilder {
   private readonly command: Command;
 

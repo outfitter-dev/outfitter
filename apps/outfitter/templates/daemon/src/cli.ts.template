@@ -5,7 +5,7 @@
  * Commands: start, stop, restart, status
  */
 
-import { createCLI, command } from "@outfitter/cli";
+import { command, createCLI } from "@outfitter/cli/command";
 import { createLogger } from "@outfitter/logging";
 import { spawn } from "node:child_process";
 import { getSocketPath, getLockPath, isDaemonAlive } from "@outfitter/daemon";

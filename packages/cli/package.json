@@ -15,82 +15,16 @@
         "default": "./dist/output.js"
       }
     },
-    "./demo/renderers/progress": {
+    "./box": {
       "import": {
-        "types": "./dist/demo/renderers/progress.d.ts",
-        "default": "./dist/demo/renderers/progress.js"
+        "types": "./dist/box/index.d.ts",
+        "default": "./dist/box/index.js"
       }
     },
-    "./demo/renderers/table": {
+    "./tree": {
       "import": {
-        "types": "./dist/demo/renderers/table.d.ts",
-        "default": "./dist/demo/renderers/table.js"
-      }
-    },
-    "./demo/renderers/text": {
-      "import": {
-        "types": "./dist/demo/renderers/text.d.ts",
-        "default": "./dist/demo/renderers/text.js"
-      }
-    },
-    "./demo/renderers/markdown": {
-      "import": {
-        "types": "./dist/demo/renderers/markdown.d.ts",
-        "default": "./dist/demo/renderers/markdown.js"
-      }
-    },
-    "./demo/renderers/borders": {
-      "import": {
-        "types": "./dist/demo/renderers/borders.d.ts",
-        "default": "./dist/demo/renderers/borders.js"
-      }
-    },
-    "./demo/renderers/list": {
-      "import": {
-        "types": "./dist/demo/renderers/list.d.ts",
-        "default": "./dist/demo/renderers/list.js"
-      }
-    },
-    "./demo/renderers/box": {
-      "import": {
-        "types": "./dist/demo/renderers/box.d.ts",
-        "default": "./dist/demo/renderers/box.js"
-      }
-    },
-    "./demo/renderers/tree": {
-      "import": {
-        "types": "./dist/demo/renderers/tree.d.ts",
-        "default": "./dist/demo/renderers/tree.js"
-      }
-    },
-    "./render/box": {
-      "import": {
-        "types": "./dist/render/box.d.ts",
-        "default": "./dist/render/box.js"
-      }
-    },
-    "./render/tree": {
-      "import": {
-        "types": "./dist/render/tree.d.ts",
-        "default": "./dist/render/tree.js"
-      }
-    },
-    "./demo/templates": {
-      "import": {
-        "types": "./dist/demo/templates.d.ts",
-        "default": "./dist/demo/templates.js"
-      }
-    },
-    "./demo/types": {
-      "import": {
-        "types": "./dist/demo/types.d.ts",
-        "default": "./dist/demo/types.js"
-      }
-    },
-    "./demo/registry": {
-      "import": {
-        "types": "./dist/demo/registry.d.ts",
-        "default": "./dist/demo/registry.js"
+        "types": "./dist/tree/index.d.ts",
+        "default": "./dist/tree/index.js"
       }
     },
     "./demo": {
@@ -99,64 +33,46 @@
         "default": "./dist/demo/index.js"
       }
     },
-    "./demo/renderers/colors": {
-      "import": {
-        "types": "./dist/demo/renderers/colors.d.ts",
-        "default": "./dist/demo/renderers/colors.js"
-      }
-    },
-    "./demo/renderers/spinner": {
-      "import": {
-        "types": "./dist/demo/renderers/spinner.d.ts",
-        "default": "./dist/demo/renderers/spinner.js"
-      }
-    },
-    "./render/table": {
-      "import": {
-        "types": "./dist/render/table.d.ts",
-        "default": "./dist/render/table.js"
-      }
-    },
-    "./render/text": {
-      "import": {
-        "types": "./dist/render/text.d.ts",
-        "default": "./dist/render/text.js"
-      }
-    },
-    "./render/markdown": {
-      "import": {
-        "types": "./dist/render/markdown.d.ts",
-        "default": "./dist/render/markdown.js"
-      }
-    },
-    "./render/format": {
-      "import": {
-        "types": "./dist/render/format.d.ts",
-        "default": "./dist/render/format.js"
-      }
-    },
-    "./render/borders": {
-      "import": {
-        "types": "./dist/render/borders.d.ts",
-        "default": "./dist/render/borders.js"
-      }
-    },
     "./render": {
       "import": {
         "types": "./dist/render/index.d.ts",
         "default": "./dist/render/index.js"
       }
     },
-    "./render/list": {
+    "./borders": {
       "import": {
-        "types": "./dist/render/list.d.ts",
-        "default": "./dist/render/list.js"
+        "types": "./dist/borders/index.d.ts",
+        "default": "./dist/borders/index.js"
       }
     },
-    "./render/shapes": {
+    "./preset/full": {
       "import": {
-        "types": "./dist/render/shapes.d.ts",
-        "default": "./dist/render/shapes.js"
+        "types": "./dist/preset/full.d.ts",
+        "default": "./dist/preset/full.js"
+      }
+    },
+    "./preset/standard": {
+      "import": {
+        "types": "./dist/preset/standard.d.ts",
+        "default": "./dist/preset/standard.js"
+      }
+    },
+    "./theme/presets/minimal": {
+      "import": {
+        "types": "./dist/theme/presets/minimal.d.ts",
+        "default": "./dist/theme/presets/minimal.js"
+      }
+    },
+    "./theme/presets/default": {
+      "import": {
+        "types": "./dist/theme/presets/default.d.ts",
+        "default": "./dist/theme/presets/default.js"
+      }
+    },
+    "./theme/presets": {
+      "import": {
+        "types": "./dist/theme/presets/index.d.ts",
+        "default": "./dist/theme/presets/index.js"
       }
     },
     "./terminal": {
@@ -169,42 +85,6 @@
       "import": {
         "types": "./dist/terminal/detection.d.ts",
         "default": "./dist/terminal/detection.js"
-      }
-    },
-    "./render/colors": {
-      "import": {
-        "types": "./dist/render/colors.d.ts",
-        "default": "./dist/render/colors.js"
-      }
-    },
-    "./render/format-relative": {
-      "import": {
-        "types": "./dist/render/format-relative.d.ts",
-        "default": "./dist/render/format-relative.js"
-      }
-    },
-    "./render/date": {
-      "import": {
-        "types": "./dist/render/date.d.ts",
-        "default": "./dist/render/date.js"
-      }
-    },
-    "./render/json": {
-      "import": {
-        "types": "./dist/render/json.d.ts",
-        "default": "./dist/render/json.js"
-      }
-    },
-    "./render/spinner": {
-      "import": {
-        "types": "./dist/render/spinner.d.ts",
-        "default": "./dist/render/spinner.js"
-      }
-    },
-    "./render/progress": {
-      "import": {
-        "types": "./dist/render/progress.d.ts",
-        "default": "./dist/render/progress.js"
       }
     },
     "./pagination": {

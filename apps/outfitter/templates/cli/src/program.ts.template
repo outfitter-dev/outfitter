@@ -2,7 +2,7 @@
  * {{projectName}} - CLI program definition
  */
 
-import { createCLI, command } from "@outfitter/cli";
+import { command, createCLI } from "@outfitter/cli/command";
 import { createLogger } from "@outfitter/logging";
 
 const logger = createLogger({ name: "{{binName}}" });

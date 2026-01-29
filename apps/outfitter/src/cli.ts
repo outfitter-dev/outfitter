@@ -9,7 +9,8 @@
  * @packageDocumentation
  */
 
-import { buildCliCommands, createCLI } from "@outfitter/cli";
+import { buildCliCommands } from "@outfitter/cli/actions";
+import { createCLI } from "@outfitter/cli/command";
 import { outfitterActions } from "./actions.js";
 
 // =============================================================================

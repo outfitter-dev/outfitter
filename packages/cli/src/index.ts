@@ -1,62 +1,36 @@
 /**
- * @outfitter/cli - Typed CLI runtime with output contracts, input parsing, and pagination
+ * @outfitter/cli - CLI primitives for AI-agent-ready tooling
+ *
+ * Root export contains minimal essentials: colors and output.
+ *
+ * For rendering primitives:
+ * - @outfitter/cli/table
+ * - @outfitter/cli/list
+ * - @outfitter/cli/box
+ * - @outfitter/cli/tree
+ * - @outfitter/cli/borders
+ *
+ * For CLI building:
+ * - @outfitter/cli/command
+ * - @outfitter/cli/actions
+ * - @outfitter/cli/input
+ * - @outfitter/cli/pagination
+ *
+ * Or use presets:
+ * - @outfitter/cli/preset/standard
+ * - @outfitter/cli/preset/full
  *
  * @packageDocumentation
  */
 
-export type { BuildCliCommandsOptions } from "./actions.js";
-// Action adapter
-export { buildCliCommands } from "./actions.js";
-// Core CLI factory
-export { createCLI } from "./cli.js";
-// Command builder
-export { command } from "./command.js";
-// Input utilities
+// Colors (theme and ANSI)
 export {
-  collectIds,
-  confirmDestructive,
-  expandFileArg,
-  normalizeId,
-  parseFilter,
-  parseGlob,
-  parseKeyValue,
-  parseRange,
-  parseSortSpec,
-} from "./input.js";
+  ANSI,
+  createTheme,
+  type Theme,
+  type Tokens,
+} from "./colors/index.js";
 
-// Output utilities
-export { exitWithError, output } from "./output.js";
-// Pagination utilities
-export { clearCursor, loadCursor, saveCursor } from "./pagination.js";
-// Re-export types
-export type {
-  CancelledError,
-  // Core types
-  CLI,
-  CLIConfig,
-  // Input types
-  CollectIdsOptions,
-  CommandAction,
-  CommandBuilder,
-  CommandConfig,
-  CommandFlags,
-  ConfirmDestructiveOptions,
-  CursorOptions,
-  DateRange,
-  ExpandFileOptions,
-  FilterExpression,
-  KeyValuePair,
-  NormalizeIdOptions,
-  NumericRange,
-  // Output types
-  OutputMode,
-  OutputOptions,
-  // Pagination types
-  PaginationState,
-  ParseGlobOptions,
-  // Result types
-  Range,
-  SortCriteria,
-  // Error types
-  ValidationError,
-} from "./types.js";
+// Output (stdout/stderr abstraction)
+export { output } from "./output.js";
+export type { OutputMode } from "./types.js";
