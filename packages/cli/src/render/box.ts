@@ -37,6 +37,26 @@ export type BoxAlign = "left" | "center" | "right";
  * });
  * ```
  */
+/**
+ * Spacing configuration for individual sides.
+ */
+export interface BoxSpacing {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+}
+
+/**
+ * Border visibility configuration for individual sides.
+ */
+export interface BoxBorders {
+  top?: boolean;
+  right?: boolean;
+  bottom?: boolean;
+  left?: boolean;
+}
+
 export interface BoxOptions {
   /**
    * Border style to use.
@@ -45,10 +65,23 @@ export interface BoxOptions {
   border?: BorderStyle;
 
   /**
+   * Control which borders to render.
+   * @default { top: true, right: true, bottom: true, left: true }
+   */
+  borders?: BoxBorders;
+
+  /**
    * Internal padding (spaces between border and content).
+   * Can be a single number for all sides or an object for individual sides.
    * @default 1
    */
-  padding?: number;
+  padding?: number | BoxSpacing;
+
+  /**
+   * External margin (spacing outside the box).
+   * Can be a single number for all sides or an object for individual sides.
+   */
+  margin?: number | BoxSpacing;
 
   /**
    * Fixed width for the box. If not specified, auto-fits to content.
@@ -123,6 +156,92 @@ function alignLine(line: string, width: number, align: BoxAlign): string {
   }
 }
 
+/**
+ * Normalized spacing with all four sides defined.
+ */
+interface NormalizedSpacing {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+/**
+ * Normalized borders with all four sides defined.
+ */
+interface NormalizedBorders {
+  top: boolean;
+  right: boolean;
+  bottom: boolean;
+  left: boolean;
+}
+
+/**
+ * Normalizes padding input to have all four sides.
+ * For backward compatibility, when padding is a number it only applies to horizontal (left/right).
+ * When padding is an object, all sides can be specified.
+ */
+function normalizePadding(
+  padding: number | BoxSpacing | undefined,
+  defaultValue: number
+): NormalizedSpacing {
+  if (padding === undefined) {
+    return { top: 0, right: defaultValue, bottom: 0, left: defaultValue };
+  }
+  if (typeof padding === "number") {
+    // Backward compatibility: number only applies to horizontal padding
+    return { top: 0, right: padding, bottom: 0, left: padding };
+  }
+  return {
+    top: padding.top ?? 0,
+    right: padding.right ?? defaultValue,
+    bottom: padding.bottom ?? 0,
+    left: padding.left ?? defaultValue,
+  };
+}
+
+/**
+ * Normalizes margin input to have all four sides.
+ * When margin is a number, it applies to all sides.
+ */
+function normalizeMargin(
+  margin: number | BoxSpacing | undefined,
+  defaultValue: number
+): NormalizedSpacing {
+  if (margin === undefined) {
+    return {
+      top: defaultValue,
+      right: defaultValue,
+      bottom: defaultValue,
+      left: defaultValue,
+    };
+  }
+  if (typeof margin === "number") {
+    return { top: margin, right: margin, bottom: margin, left: margin };
+  }
+  return {
+    top: margin.top ?? defaultValue,
+    right: margin.right ?? defaultValue,
+    bottom: margin.bottom ?? defaultValue,
+    left: margin.left ?? defaultValue,
+  };
+}
+
+/**
+ * Normalizes borders input to have all four sides.
+ */
+function normalizeBorders(borders: BoxBorders | undefined): NormalizedBorders {
+  if (borders === undefined) {
+    return { top: true, right: true, bottom: true, left: true };
+  }
+  return {
+    top: borders.top ?? true,
+    right: borders.right ?? true,
+    bottom: borders.bottom ?? true,
+    left: borders.left ?? true,
+  };
+}
+
 // ============================================================================
 // Main Function
 // ============================================================================
@@ -169,11 +288,15 @@ export function renderBox(
   options?: BoxOptions
 ): string {
   const border = options?.border ?? "single";
-  const padding = options?.padding ?? 1;
   const title = options?.title;
   const align = options?.align ?? "left";
   const fixedWidth = options?.width;
   const sections = options?.sections;
+
+  // Normalize spacing and borders
+  const pad = normalizePadding(options?.padding, 1);
+  const margin = normalizeMargin(options?.margin, 0);
+  const borders = normalizeBorders(options?.borders);
 
   const chars = getBorderCharacters(border);
 
@@ -200,10 +323,15 @@ export function renderBox(
     lines = content;
   }
 
+  // Calculate horizontal padding/border overhead
+  const leftOverhead = (borders.left ? 1 : 0) + pad.left;
+  const rightOverhead = (borders.right ? 1 : 0) + pad.right;
+  const horizontalOverhead = leftOverhead + rightOverhead;
+
   // Handle wrapping if width is specified
   if (fixedWidth) {
     // Calculate available content width (total - borders - padding)
-    const contentWidthForWrap = fixedWidth - 2 - padding * 2;
+    const contentWidthForWrap = fixedWidth - horizontalOverhead;
     if (contentWidthForWrap > 0) {
       const wrappedLines: string[] = [];
       const newBoundaries: number[] = [];
@@ -245,72 +373,148 @@ export function renderBox(
   let boxWidth: number;
   if (fixedWidth) {
     boxWidth = fixedWidth;
-    contentWidth = fixedWidth - 2 - padding * 2;
+    contentWidth = fixedWidth - horizontalOverhead;
   } else {
-    // Box width = borders (2) + padding (2 * padding) + content
-    boxWidth = 2 + padding * 2 + contentWidth;
+    // Box width = borders + padding + content
+    boxWidth = horizontalOverhead + contentWidth;
 
     // Ensure minimum width for title if present (only for auto-width)
-    if (title) {
-      // Title needs: "─ " + title + " ─" = 4 chars + title length, plus 2 for borders
-      const minBoxWidthForTitle = getStringWidth(title) + 6;
+    if (title && borders.top) {
+      // Title needs: "─ " + title + " ─" = 4 chars + title length, plus corner chars
+      const minBoxWidthForTitle =
+        getStringWidth(title) +
+        4 +
+        (borders.left ? 1 : 0) +
+        (borders.right ? 1 : 0);
       if (boxWidth < minBoxWidthForTitle) {
         boxWidth = minBoxWidthForTitle;
-        contentWidth = boxWidth - 2 - padding * 2;
+        contentWidth = boxWidth - horizontalOverhead;
       }
     }
   }
 
   const output: string[] = [];
-  const paddingStr = " ".repeat(padding);
+  const leftPaddingStr = " ".repeat(pad.left);
+  const rightPaddingStr = " ".repeat(pad.right);
+  const marginLeftStr = " ".repeat(margin.left);
+  const marginRightStr = " ".repeat(margin.right);
+
+  // Helper to build a content line
+  const buildContentLine = (lineContent: string): string => {
+    const aligned = alignLine(lineContent, contentWidth, align);
+    const leftBorder = borders.left ? chars.vertical : "";
+    const rightBorder = borders.right ? chars.vertical : "";
+    return (
+      marginLeftStr +
+      leftBorder +
+      leftPaddingStr +
+      aligned +
+      rightPaddingStr +
+      rightBorder +
+      marginRightStr
+    );
+  };
+
+  // Calculate inner width (for horizontal borders)
+  const innerWidth =
+    boxWidth - (borders.left ? 1 : 0) - (borders.right ? 1 : 0);
+
+  // Add top margin
+  for (let i = 0; i < margin.top; i++) {
+    output.push("");
+  }
 
   // Top border with optional title
-  let topBorder: string;
-  const innerWidth = boxWidth - 2;
-  if (title) {
-    // Truncate title if needed
-    const maxTitleWidth = innerWidth - 4; // leave room for "─ Title ─"
-    let displayTitle = title;
-    if (getStringWidth(title) > maxTitleWidth) {
-      displayTitle = truncateText(title, maxTitleWidth);
+  if (borders.top) {
+    let topBorder: string;
+    if (title) {
+      // Truncate title if needed
+      // Title needs: "─ " + title + " ─" at minimum (4 extra chars)
+      const maxTitleWidth = Math.max(0, innerWidth - 4);
+      let displayTitle = title;
+
+      // If width is too small for even a single character title, skip title
+      if (maxTitleWidth === 0) {
+        topBorder =
+          marginLeftStr +
+          (borders.left ? chars.topLeft : "") +
+          chars.horizontal.repeat(Math.max(0, innerWidth)) +
+          (borders.right ? chars.topRight : "") +
+          marginRightStr;
+      } else {
+        if (getStringWidth(title) > maxTitleWidth) {
+          displayTitle = truncateText(title, maxTitleWidth);
+        }
+        const titlePart = `${chars.horizontal} ${displayTitle} `;
+        const remainingWidth = Math.max(
+          0,
+          innerWidth - getStringWidth(titlePart)
+        );
+        topBorder =
+          marginLeftStr +
+          (borders.left ? chars.topLeft : "") +
+          titlePart +
+          chars.horizontal.repeat(remainingWidth) +
+          (borders.right ? chars.topRight : "") +
+          marginRightStr;
+      }
+    } else {
+      topBorder =
+        marginLeftStr +
+        (borders.left ? chars.topLeft : "") +
+        chars.horizontal.repeat(innerWidth) +
+        (borders.right ? chars.topRight : "") +
+        marginRightStr;
     }
-    const titlePart = `${chars.horizontal} ${displayTitle} `;
-    const remainingWidth = innerWidth - getStringWidth(titlePart);
-    topBorder =
-      chars.topLeft +
-      titlePart +
-      chars.horizontal.repeat(remainingWidth) +
-      chars.topRight;
-  } else {
-    topBorder =
-      chars.topLeft + chars.horizontal.repeat(innerWidth) + chars.topRight;
+    output.push(topBorder);
   }
-  output.push(topBorder);
+
+  // Top padding lines
+  for (let i = 0; i < pad.top; i++) {
+    output.push(buildContentLine(""));
+  }
 
   // Track which boundary we're looking at
   let boundaryIdx = 0;
 
   // Content lines with padding (and dividers between sections)
   for (const [idx, line] of lines.entries()) {
-    const alignedLine = alignLine(line, contentWidth, align);
-    output.push(
-      chars.vertical + paddingStr + alignedLine + paddingStr + chars.vertical
-    );
+    output.push(buildContentLine(line));
 
     // Insert divider after this line if it's a section boundary
     const boundary = sectionBoundaries[boundaryIdx];
     if (boundary !== undefined && idx + 1 === boundary) {
       const divider =
-        chars.leftT + chars.horizontal.repeat(innerWidth) + chars.rightT;
+        marginLeftStr +
+        (borders.left ? chars.leftT : "") +
+        chars.horizontal.repeat(innerWidth) +
+        (borders.right ? chars.rightT : "") +
+        marginRightStr;
       output.push(divider);
       boundaryIdx++;
     }
   }
 
+  // Bottom padding lines
+  for (let i = 0; i < pad.bottom; i++) {
+    output.push(buildContentLine(""));
+  }
+
   // Bottom border
-  const bottomBorder =
-    chars.bottomLeft + chars.horizontal.repeat(innerWidth) + chars.bottomRight;
-  output.push(bottomBorder);
+  if (borders.bottom) {
+    const bottomBorder =
+      marginLeftStr +
+      (borders.left ? chars.bottomLeft : "") +
+      chars.horizontal.repeat(innerWidth) +
+      (borders.right ? chars.bottomRight : "") +
+      marginRightStr;
+    output.push(bottomBorder);
+  }
+
+  // Add bottom margin
+  for (let i = 0; i < margin.bottom; i++) {
+    output.push("");
+  }
 
   return output.join("\n");
 }

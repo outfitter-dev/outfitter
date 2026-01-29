@@ -178,6 +178,98 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
       width: 30,
     })
   );
+  lines.push("");
+
+  // ==========================================================================
+  // Partial Borders
+  // ==========================================================================
+  lines.push("PARTIAL BORDERS");
+  lines.push("===============");
+  lines.push("");
+
+  if (showDescriptions) {
+    lines.push(
+      theme.muted("Control which borders to render with the borders option.")
+    );
+    lines.push("");
+  }
+
+  if (showCode) {
+    lines.push('renderBox("Top and bottom only", {');
+    lines.push(
+      "  borders: { top: true, bottom: true, left: false, right: false }"
+    );
+    lines.push("})");
+    lines.push("");
+  }
+
+  lines.push(
+    renderBox("Top and bottom only", {
+      borders: { top: true, bottom: true, left: false, right: false },
+    })
+  );
+  lines.push("");
+
+  if (showCode) {
+    lines.push('renderBox("Left and right only", {');
+    lines.push(
+      "  borders: { top: false, bottom: false, left: true, right: true }"
+    );
+    lines.push("})");
+    lines.push("");
+  }
+
+  lines.push(
+    renderBox("Left and right only", {
+      borders: { top: false, bottom: false, left: true, right: true },
+    })
+  );
+  lines.push("");
+
+  // ==========================================================================
+  // Margin
+  // ==========================================================================
+  lines.push("MARGIN");
+  lines.push("======");
+  lines.push("");
+
+  if (showDescriptions) {
+    lines.push(theme.muted("Add spacing outside the box with margin."));
+    lines.push("");
+  }
+
+  if (showCode) {
+    lines.push('renderBox("With margin", { margin: { left: 4 } })');
+    lines.push("");
+  }
+
+  lines.push(renderBox("With margin", { margin: { left: 4 } }));
+  lines.push("");
+
+  // ==========================================================================
+  // Individual Padding
+  // ==========================================================================
+  lines.push("INDIVIDUAL PADDING");
+  lines.push("==================");
+  lines.push("");
+
+  if (showDescriptions) {
+    lines.push(theme.muted("Control padding per side with an object."));
+    lines.push("");
+  }
+
+  if (showCode) {
+    lines.push('renderBox("Custom padding", {');
+    lines.push("  padding: { top: 1, bottom: 1, left: 3, right: 1 }");
+    lines.push("})");
+    lines.push("");
+  }
+
+  lines.push(
+    renderBox("Custom padding", {
+      padding: { top: 1, bottom: 1, left: 3, right: 1 },
+    })
+  );
 
   return lines.join("\n");
 }

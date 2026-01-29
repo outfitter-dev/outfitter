@@ -234,6 +234,129 @@ describe("renderBox()", () => {
   });
 
   // ============================================================================
+  // Partial Borders Tests (3 tests)
+  // ============================================================================
+
+  describe("partial borders", () => {
+    it("renders box with only top and bottom borders", () => {
+      const result = renderBox("Content", {
+        borders: { top: true, bottom: true, left: false, right: false },
+      });
+      const lines = result.split("\n");
+
+      // Should have top and bottom borders
+      expect(lines[0]).toContain("─");
+      expect(lines.at(-1)).toContain("─");
+      // Content line should NOT have vertical borders
+      const contentLine = lines.find((l) => l.includes("Content"));
+      expect(contentLine).not.toContain("│");
+    });
+
+    it("renders box with only left and right borders", () => {
+      const result = renderBox("Content", {
+        borders: { top: false, bottom: false, left: true, right: true },
+      });
+      const lines = result.split("\n");
+
+      // Should have no top or bottom borders
+      expect(lines[0]).not.toContain("┌");
+      expect(lines[0]).not.toContain("─");
+      // Content lines should have vertical borders
+      const contentLine = lines.find((l) => l.includes("Content"));
+      expect(contentLine).toMatch(/│.*Content.*│/);
+    });
+
+    it("renders box with single border (top only)", () => {
+      const result = renderBox("Content", {
+        borders: { top: true, bottom: false, left: false, right: false },
+      });
+      const lines = result.split("\n");
+
+      // First line should have horizontal border
+      expect(lines[0]).toContain("─");
+      // Content line should not have vertical borders
+      const contentLine = lines.find((l) => l.includes("Content"));
+      expect(contentLine).not.toContain("│");
+      // Last line should not be a border
+      expect(lines.at(-1)).not.toContain("─");
+    });
+  });
+
+  // ============================================================================
+  // Margin Tests (3 tests)
+  // ============================================================================
+
+  describe("margin", () => {
+    it("adds margin as empty lines/spaces outside box", () => {
+      const result = renderBox("X", { margin: 1 });
+      const lines = result.split("\n");
+
+      // With margin: 1, should have empty lines before/after
+      expect(lines[0]).toBe("");
+      expect(lines.at(-1)).toBe("");
+      // Content should have space indentation
+      const boxLine = lines.find((l) => l.includes("┌"));
+      expect(boxLine).toMatch(/^\s+┌/);
+    });
+
+    it("supports individual margin per side", () => {
+      const result = renderBox("X", {
+        margin: { top: 2, bottom: 0, left: 3, right: 0 },
+      });
+      const lines = result.split("\n");
+
+      // Should have 2 empty lines at top
+      expect(lines[0]).toBe("");
+      expect(lines[1]).toBe("");
+      // Box should start at line 3 (index 2)
+      expect(lines[2]).toContain("┌");
+      // Left margin of 3 spaces
+      expect(lines[2]).toMatch(/^\s{3}┌/);
+    });
+
+    it("combines margin and padding", () => {
+      const result = renderBox("X", { margin: 1, padding: 2 });
+      const lines = result.split("\n");
+
+      // Should have margin (empty line)
+      expect(lines[0]).toBe("");
+      // Box content should have padding of 2
+      const contentLine = lines.find((l) => l.includes("X"));
+      expect(contentLine).toMatch(/│\s{2,}X\s{2,}│/);
+    });
+  });
+
+  // ============================================================================
+  // Individual Padding Tests (2 tests)
+  // ============================================================================
+
+  describe("individual padding", () => {
+    it("supports individual padding per side", () => {
+      const result = renderBox("X", {
+        padding: { top: 1, bottom: 0, left: 3, right: 1 },
+      });
+      const lines = result.split("\n");
+
+      // With top padding of 1, should have empty content line after top border
+      // Lines: top border, empty line (top padding), content, bottom border
+      expect(lines.length).toBe(4);
+      // Left padding of 3
+      const contentLine = lines.find((l) => l.includes("X"));
+      expect(contentLine).toMatch(/│\s{3}X\s{1}│/);
+    });
+
+    it("applies asymmetric vertical padding", () => {
+      const result = renderBox("X", {
+        padding: { top: 2, bottom: 1, left: 1, right: 1 },
+      });
+      const lines = result.split("\n");
+
+      // Lines: top border, 2 empty (top padding), content, 1 empty (bottom padding), bottom border
+      expect(lines.length).toBe(6);
+    });
+  });
+
+  // ============================================================================
   // Width and Alignment Tests (2 tests)
   // ============================================================================
 

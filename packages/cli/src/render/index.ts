@@ -17,7 +17,13 @@ export {
   type LinePosition,
 } from "./borders.js";
 // Box rendering
-export { type BoxAlign, type BoxOptions, renderBox } from "./box.js";
+export {
+  type BoxAlign,
+  type BoxBorders,
+  type BoxOptions,
+  type BoxSpacing,
+  renderBox,
+} from "./box.js";
 export {
   ANSI,
   applyColor,
