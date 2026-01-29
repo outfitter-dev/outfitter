@@ -11,7 +11,7 @@
  * Total: 12 tests
  */
 import { describe, expect, it } from "bun:test";
-import { renderBox } from "../render/index.js";
+import { createBox, renderBox } from "../render/index.js";
 
 // ============================================================================
 // Basic Box Rendering Tests (3 tests)
@@ -391,6 +391,95 @@ describe("renderBox()", () => {
       const rightSpace = contentLine.length - hiIndex - 2 - 1; // subtract for "Hi" and │
       // Left and right space should be roughly equal (within 1 for odd widths)
       expect(Math.abs(leftSpace - rightSpace)).toBeLessThanOrEqual(1);
+    });
+  });
+});
+
+// ============================================================================
+// createBox() Tests (6 tests)
+// ============================================================================
+
+describe("createBox()", () => {
+  describe("basic functionality", () => {
+    it("returns Box with output, width, and height", () => {
+      const box = createBox("Hello");
+
+      expect(box.output).toBeDefined();
+      expect(typeof box.output).toBe("string");
+      expect(box.width).toBeGreaterThan(0);
+      expect(box.height).toBeGreaterThan(0);
+
+      // Output should be valid box
+      expect(box.output).toContain("Hello");
+      expect(box.output).toContain("┌");
+      expect(box.output).toContain("└");
+    });
+
+    it("calculates correct width and height", () => {
+      const box = createBox("Test", { padding: 1 });
+      const lines = box.output.split("\n");
+
+      // Height should match actual line count
+      expect(box.height).toBe(lines.length);
+      // Width should match the actual line length
+      expect(box.width).toBe(lines[0]?.length ?? 0);
+    });
+  });
+
+  describe("nested boxes", () => {
+    it("accepts Box as content for nesting", () => {
+      const inner = createBox("Inner");
+      const outer = createBox(inner);
+
+      // Outer should contain inner box structure
+      expect(outer.output).toContain("Inner");
+      // Should have nested border characters
+      expect(outer.output.match(/│/g)?.length).toBeGreaterThan(2);
+    });
+
+    it("renders nested box correctly inside outer box", () => {
+      const inner = createBox("Inner", { border: "rounded" });
+      const outer = createBox(inner, { border: "double" });
+      const lines = outer.output.split("\n");
+
+      // Outer box should use double borders
+      expect(lines[0]).toContain("╔");
+      // Inner box should use rounded borders (embedded in output)
+      expect(outer.output).toContain("╭");
+      expect(outer.output).toContain("╯");
+    });
+
+    it("respects outer box padding with nested content", () => {
+      const inner = createBox("X", { padding: 0 });
+      const outer = createBox(inner, { padding: 2, border: "double" });
+      const lines = outer.output.split("\n");
+
+      // With padding 2, inner box should be indented
+      const innerBoxLine = lines.find((l) => l.includes("┌"));
+      expect(innerBoxLine).toMatch(/║\s{2,}┌/);
+    });
+
+    it("handles deeply nested boxes (3 levels)", () => {
+      const level1 = createBox("Core", { border: "single" });
+      const level2 = createBox(level1, { border: "rounded" });
+      const level3 = createBox(level2, { border: "double" });
+
+      // Should contain content
+      expect(level3.output).toContain("Core");
+      // Should have all three border styles present
+      expect(level3.output).toContain("╔"); // double outer
+      expect(level3.output).toContain("╭"); // rounded middle
+      expect(level3.output).toContain("┌"); // single inner
+    });
+
+    it("handles mixed content: string and Box together", () => {
+      const innerBox = createBox("Inner box");
+      // Pass both string content and a Box
+      const outer = createBox(["Header text", innerBox, "Footer text"]);
+
+      expect(outer.output).toContain("Header text");
+      expect(outer.output).toContain("Inner box");
+      expect(outer.output).toContain("Footer text");
     });
   });
 });

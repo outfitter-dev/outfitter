@@ -127,6 +127,26 @@ export interface BoxOptions {
   sections?: Array<string | string[]>;
 }
 
+/**
+ * A rendered box with metadata for composition.
+ */
+export interface Box {
+  /** Rendered string representation */
+  readonly output: string;
+  /** Width in characters */
+  readonly width: number;
+  /** Height in lines */
+  readonly height: number;
+}
+
+/**
+ * Content that can be rendered inside a box.
+ * - string: Plain text content
+ * - string[]: Multi-line content
+ * - Box: Nested box (rendered string with metadata)
+ */
+export type BoxContent = string | string[] | Box;
+
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -517,4 +537,103 @@ export function renderBox(
   }
 
   return output.join("\n");
+}
+
+// ============================================================================
+// Box Composition
+// ============================================================================
+
+/**
+ * Type guard to check if a value is a Box object.
+ */
+function isBox(value: unknown): value is Box {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "output" in value &&
+    "width" in value &&
+    "height" in value &&
+    typeof (value as Box).output === "string" &&
+    typeof (value as Box).width === "number" &&
+    typeof (value as Box).height === "number"
+  );
+}
+
+/**
+ * Converts BoxContent to an array of string lines.
+ */
+function contentToLines(content: BoxContent | BoxContent[]): string[] {
+  if (Array.isArray(content)) {
+    const lines: string[] = [];
+    for (const item of content) {
+      if (isBox(item)) {
+        lines.push(...item.output.split("\n"));
+      } else if (Array.isArray(item)) {
+        lines.push(...item);
+      } else {
+        lines.push(...item.split("\n"));
+      }
+    }
+    return lines;
+  }
+  if (isBox(content)) {
+    return content.output.split("\n");
+  }
+  if (typeof content === "string") {
+    return content.split("\n");
+  }
+  return content;
+}
+
+/**
+ * Creates a Box object that can be composed with other boxes.
+ *
+ * Unlike `renderBox` which returns a string, `createBox` returns a Box object
+ * with metadata (width, height) that enables nested composition.
+ *
+ * @param content - The content to render (string, string[], Box, or array of mixed)
+ * @param options - Optional configuration for border style, padding, etc.
+ * @returns Box object with output, width, and height
+ *
+ * @example
+ * ```typescript
+ * // Simple box
+ * const box = createBox("Hello");
+ * console.log(box.output);
+ * console.log(`Width: ${box.width}, Height: ${box.height}`);
+ *
+ * // Nested boxes
+ * const inner = createBox("Inner", { border: "rounded" });
+ * const outer = createBox(inner, { border: "double", title: "Container" });
+ * console.log(outer.output);
+ * // ╔═ Container ═══════════════╗
+ * // ║ ╭───────────────────────╮ ║
+ * // ║ │ Inner                 │ ║
+ * // ║ ╰───────────────────────╯ ║
+ * // ╚═══════════════════════════╝
+ * ```
+ */
+export function createBox(
+  content: BoxContent | BoxContent[],
+  options?: BoxOptions
+): Box {
+  // Convert BoxContent to string lines
+  const lines = contentToLines(content);
+  const output = renderBox(lines, options);
+  const outputLines = output.split("\n");
+
+  // Calculate max display width across all lines (handles ANSI, Unicode, margins)
+  let maxWidth = 0;
+  for (const line of outputLines) {
+    const lineWidth = getStringWidth(line);
+    if (lineWidth > maxWidth) {
+      maxWidth = lineWidth;
+    }
+  }
+
+  return {
+    output,
+    width: maxWidth,
+    height: outputLines.length,
+  };
 }

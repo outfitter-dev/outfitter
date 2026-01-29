@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { renderBox } from "../../render/box.js";
+import { createBox, renderBox } from "../../render/box.js";
 import type { Theme } from "../../render/colors.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
 import { getExample } from "../templates.js";
@@ -270,6 +270,59 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
       padding: { top: 1, bottom: 1, left: 3, right: 1 },
     })
   );
+  lines.push("");
+
+  // ==========================================================================
+  // Nested Boxes
+  // ==========================================================================
+  lines.push("NESTED BOXES");
+  lines.push("============");
+  lines.push("");
+
+  if (showDescriptions) {
+    lines.push(
+      theme.muted("Use createBox() to create composable boxes with metadata.")
+    );
+    lines.push("");
+  }
+
+  if (showCode) {
+    lines.push(
+      'const inner = createBox("Inner content", { border: "rounded" });'
+    );
+    lines.push(
+      'const outer = createBox(inner, { border: "double", title: "Container" });'
+    );
+    lines.push("console.log(outer.output);");
+    lines.push("");
+  }
+
+  const inner = createBox("Inner content", { border: "rounded" });
+  const outer = createBox(inner, { border: "double", title: "Container" });
+  lines.push(outer.output);
+  lines.push("");
+
+  // Deeply nested example
+  if (showDescriptions) {
+    lines.push(theme.muted("Boxes can be nested to any depth."));
+    lines.push("");
+  }
+
+  if (showCode) {
+    lines.push('const level1 = createBox("Core", { border: "single" });');
+    lines.push(
+      'const level2 = createBox(level1, { border: "rounded", title: "Middle" });'
+    );
+    lines.push(
+      'const level3 = createBox(level2, { border: "double", title: "Outer" });'
+    );
+    lines.push("");
+  }
+
+  const level1 = createBox("Core", { border: "single" });
+  const level2 = createBox(level1, { border: "rounded", title: "Middle" });
+  const level3 = createBox(level2, { border: "double", title: "Outer" });
+  lines.push(level3.output);
 
   return lines.join("\n");
 }

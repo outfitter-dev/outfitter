@@ -18,10 +18,13 @@ export {
 } from "./borders.js";
 // Box rendering
 export {
+  type Box,
   type BoxAlign,
   type BoxBorders,
+  type BoxContent,
   type BoxOptions,
   type BoxSpacing,
+  createBox,
   renderBox,
 } from "./box.js";
 export {
