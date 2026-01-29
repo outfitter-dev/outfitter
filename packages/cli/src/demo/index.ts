@@ -199,6 +199,16 @@ export {
   SPINNER_STYLE_META,
   THEME_METHOD_META,
 } from "./registry.js";
+// Section helpers
+export {
+  codeBlock,
+  demoContent,
+  demoSection,
+  demoSubsection,
+  description,
+  type SectionOptions,
+  type SubsectionOptions,
+} from "./section.js";
 export { DEFAULT_EXAMPLES, getExample } from "./templates.js";
 export type {
   DemoConfig,
