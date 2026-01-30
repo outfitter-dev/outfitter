@@ -77,6 +77,14 @@ export {
   treeNodeToRecord,
   unregisterRenderer,
 } from "./shapes.js";
+// Spinner rendering
+export {
+  getSpinnerFrame,
+  renderSpinner,
+  SPINNERS,
+  type SpinnerFrames,
+  type SpinnerStyle,
+} from "./spinner.js";
 // Table rendering
 export { renderTable, type TableOptions } from "./table.js";
 // Text formatting
