@@ -179,7 +179,7 @@ function alignLine(line: string, width: number, align: BoxAlign): string {
 /**
  * Normalized spacing with all four sides defined.
  */
-interface NormalizedSpacing {
+export interface NormalizedSpacing {
   top: number;
   right: number;
   bottom: number;
@@ -189,7 +189,7 @@ interface NormalizedSpacing {
 /**
  * Normalized borders with all four sides defined.
  */
-interface NormalizedBorders {
+export interface NormalizedBorders {
   top: boolean;
   right: boolean;
   bottom: boolean;
@@ -201,7 +201,7 @@ interface NormalizedBorders {
  * For backward compatibility, when padding is a number it only applies to horizontal (left/right).
  * When padding is an object, all sides can be specified.
  */
-function normalizePadding(
+export function normalizePadding(
   padding: number | BoxSpacing | undefined,
   defaultValue: number
 ): NormalizedSpacing {
@@ -224,7 +224,7 @@ function normalizePadding(
  * Normalizes margin input to have all four sides.
  * When margin is a number, it applies to all sides.
  */
-function normalizeMargin(
+export function normalizeMargin(
   margin: number | BoxSpacing | undefined,
   defaultValue: number
 ): NormalizedSpacing {
@@ -250,7 +250,9 @@ function normalizeMargin(
 /**
  * Normalizes borders input to have all four sides.
  */
-function normalizeBorders(borders: BoxBorders | undefined): NormalizedBorders {
+export function normalizeBorders(
+  borders: BoxBorders | undefined
+): NormalizedBorders {
   if (borders === undefined) {
     return { top: true, right: true, bottom: true, left: true };
   }

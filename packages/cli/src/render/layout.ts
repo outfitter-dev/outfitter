@@ -4,6 +4,102 @@
  * @packageDocumentation
  */
 
+import { type BoxOptions, normalizeBorders, normalizePadding } from "./box.js";
+
+// ============================================================================
+// Width Utilities
+// ============================================================================
+
+/**
+ * Gets the current terminal width.
+ *
+ * Returns `process.stdout.columns` if available, otherwise falls back to 80
+ * (standard terminal width).
+ *
+ * @returns Terminal width in characters
+ *
+ * @example
+ * ```typescript
+ * import { getTerminalWidth } from "@outfitter/cli/render";
+ *
+ * const width = getTerminalWidth();
+ * console.log(`Terminal is ${width} columns wide`);
+ * ```
+ */
+export function getTerminalWidth(): number {
+  return process.stdout.columns ?? 80;
+}
+
+/**
+ * Calculates box overhead (borders + padding) for each axis.
+ *
+ * Returns the total character/line count consumed by borders and padding,
+ * separate from content.
+ *
+ * @param options - Box options (padding, borders)
+ * @returns Object with horizontal and vertical overhead
+ *
+ * @example
+ * ```typescript
+ * import { getBoxOverhead } from "@outfitter/cli/render";
+ *
+ * const overhead = getBoxOverhead({ padding: 1, border: "single" });
+ * // { horizontal: 4, vertical: 2 }
+ * // horizontal: left border (1) + left padding (1) + right padding (1) + right border (1)
+ * // vertical: top border (1) + bottom border (1)
+ * ```
+ */
+export function getBoxOverhead(options: BoxOptions): {
+  horizontal: number;
+  vertical: number;
+} {
+  const pad = normalizePadding(options.padding, 1);
+  const borders = normalizeBorders(options.borders);
+
+  return {
+    horizontal:
+      (borders.left ? 1 : 0) + (borders.right ? 1 : 0) + pad.left + pad.right,
+    vertical:
+      (borders.top ? 1 : 0) + (borders.bottom ? 1 : 0) + pad.top + pad.bottom,
+  };
+}
+
+/**
+ * Calculates available content width inside a box.
+ *
+ * Accounts for borders and padding to determine how much space remains
+ * for content. Use this to size nested components appropriately.
+ *
+ * @param options - Box options (width, padding, borders)
+ * @returns Available width in characters for content
+ *
+ * @example
+ * ```typescript
+ * import { getContentWidth, createBox, renderProgress } from "@outfitter/cli/render";
+ *
+ * const boxOpts = { width: 40, padding: 1, border: "single" };
+ * const available = getContentWidth(boxOpts); // → 36
+ *
+ * const progress = renderProgress(0.5, { width: available });
+ * const box = createBox(progress, boxOpts);
+ * ```
+ */
+export function getContentWidth(options: BoxOptions): number {
+  const { horizontal } = getBoxOverhead(options);
+
+  if (options.width) {
+    const content = options.width - horizontal;
+    return Math.max(0, content); // Clamp to non-negative
+  }
+
+  // No fixed width - use terminal width, clamped to non-negative
+  return Math.max(0, getTerminalWidth() - horizontal);
+}
+
+// ============================================================================
+// Layout Types
+// ============================================================================
+
 /**
  * Vertical alignment for horizontal layout.
  */

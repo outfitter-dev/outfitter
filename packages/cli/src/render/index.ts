@@ -25,6 +25,11 @@ export {
   type BoxOptions,
   type BoxSpacing,
   createBox,
+  type NormalizedBorders,
+  type NormalizedSpacing,
+  normalizeBorders,
+  normalizeMargin,
+  normalizePadding,
   renderBox,
 } from "./box.js";
 export {
@@ -72,6 +77,9 @@ export { renderJson, renderText } from "./json.js";
 // Layout utilities
 export {
   type Alignment,
+  getBoxOverhead,
+  getContentWidth,
+  getTerminalWidth,
   type HorizontalLayoutOptions,
   joinHorizontal,
   joinVertical,
