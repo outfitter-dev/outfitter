@@ -42,7 +42,13 @@ export { formatRelative } from "./format-relative.js";
 export { renderJson, renderText } from "./json.js";
 
 // List rendering
-export { type ListItem, type NestedListItem, renderList } from "./list.js";
+export {
+  type ListItem,
+  type ListOptions,
+  type ListStyle,
+  type NestedListItem,
+  renderList,
+} from "./list.js";
 // Markdown rendering
 export { renderMarkdown } from "./markdown.js";
 

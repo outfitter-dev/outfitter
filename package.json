@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "bunup",
+    "build:local": "bunup && cd apps/outfitter && bun link",
     "build:turbo": "turbo run build",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
