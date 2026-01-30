@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-rc.3
+
+### Patch Changes
+
+- 2a45c44: Replace custom `wrapText()` implementation with native `Bun.wrapAnsi()` for 33-88x faster ANSI-aware text wrapping
+
 ## 0.1.0-rc.2
 
 ### Patch Changes
