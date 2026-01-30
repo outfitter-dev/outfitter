@@ -6,7 +6,29 @@
  * @packageDocumentation
  */
 
+// Visual Theme System
 // biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
+export {
+  boldTheme,
+  type CreateVisualThemeOptions,
+  createThemedContext,
+  createVisualTheme,
+  defaultTheme,
+  type GlyphPair,
+  getContextTheme,
+  type MarkerSpec,
+  minimalTheme,
+  type PartialVisualTheme,
+  resolveGlyph,
+  resolveStateMarker,
+  roundedTheme,
+  type SemanticState,
+  type ThemeColors,
+  type ThemedContextOptions,
+  type ThemedLayoutContext,
+  type ThemeSpacing,
+  type VisualTheme,
+} from "../theme/index.js";
 export {
   // Box-drawing borders
   BORDERS,
@@ -134,6 +156,34 @@ export {
   type SpinnerFrames,
   type SpinnerStyle,
 } from "./spinner.js";
+// Stack composition
+export {
+  type BoxifyOptions,
+  boxify,
+  createHStack,
+  createVStack,
+  DEFAULT_STACK_THEME,
+  DELIMITERS,
+  type DelimiterName,
+  type DelimiterSet,
+  getDelimiter,
+  getMarker,
+  type HStackOptions,
+  hstack,
+  type ItemState,
+  isRenderable,
+  type MarkerName,
+  type Renderable,
+  type StackBox,
+  type StackInput,
+  type StackItem,
+  type StackTheme,
+  unbox,
+  type VStackMode,
+  type VStackOptions,
+  vstack,
+  vstackItem,
+} from "./stack.js";
 // Table rendering
 export { renderTable, type TableOptions } from "./table.js";
 // Text formatting

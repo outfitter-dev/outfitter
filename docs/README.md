@@ -9,6 +9,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | [Architecture](./ARCHITECTURE.md) | Package tiers, dependency graph, design decisions |
 | [Getting Started](./GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
 | [Patterns](./PATTERNS.md) | Handlers, Result types, error taxonomy, validation |
+| [Stack Composition](./STACK-COMPOSITION.md) | Composable hstack/vstack primitives for CLI layouts |
 | [Migration](./MIGRATION.md) | Adopting Outfitter, upgrading between versions |
 
 ## Package READMEs

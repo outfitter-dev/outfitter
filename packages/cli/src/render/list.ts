@@ -214,7 +214,7 @@ export function renderList(items: ListItem[], options?: ListOptions): string {
   const baseIndent = options?.indent ?? 2;
 
   const lines: string[] = [];
-  let globalIndex = 0;
+  let _globalIndex = 0;
 
   /**
    * Renders a single item and its children.
@@ -248,7 +248,7 @@ export function renderList(items: ListItem[], options?: ListOptions): string {
 
     const marker = getMarker(currentStyle, depth, indexAtDepth, isChecked);
     lines.push(`${indentStr}${marker} ${text}`);
-    globalIndex++;
+    _globalIndex++;
 
     // Render children if present
     if (typeof item !== "string" && item.children) {
