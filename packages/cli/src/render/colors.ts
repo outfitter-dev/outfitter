@@ -20,6 +20,7 @@ export const ANSI = {
   bold: "\x1b[1m",
   dim: "\x1b[2m",
   italic: "\x1b[3m",
+  underline: "\x1b[4m",
   // Foreground colors
   green: "\x1b[32m",
   yellow: "\x1b[33m",
@@ -29,6 +30,12 @@ export const ANSI = {
   magenta: "\x1b[35m",
   white: "\x1b[37m",
   gray: "\x1b[90m",
+  // Bright foreground colors
+  brightCyan: "\x1b[96m",
+  brightRed: "\x1b[91m",
+  brightYellow: "\x1b[93m",
+  brightGreen: "\x1b[92m",
+  brightBlue: "\x1b[94m",
 } as const;
 
 // ============================================================================
@@ -50,6 +57,7 @@ export const ANSI = {
  * ```
  */
 export interface Theme {
+  // Semantic colors (existing)
   /** Applies green color for success messages */
   success: (text: string) => string;
   /** Applies yellow color for warning messages */
@@ -64,6 +72,28 @@ export interface Theme {
   secondary: (text: string) => string;
   /** Applies dim styling for de-emphasized text */
   muted: (text: string) => string;
+
+  // Semantic colors (new)
+  /** Applies cyan color for interactive elements and highlights */
+  accent: (text: string) => string;
+  /** Applies bold for strong emphasis */
+  highlight: (text: string) => string;
+  /** Applies cyan + underline for URLs and clickable references */
+  link: (text: string) => string;
+  /** Applies bright red for dangerous actions */
+  destructive: (text: string) => string;
+  /** Applies dim gray for less prominent text than muted */
+  subtle: (text: string) => string;
+
+  // Utility methods
+  /** Applies bold styling */
+  bold: (text: string) => string;
+  /** Applies italic styling */
+  italic: (text: string) => string;
+  /** Applies underline styling */
+  underline: (text: string) => string;
+  /** Applies dim styling (alias for muted style) */
+  dim: (text: string) => string;
 }
 
 /**
@@ -107,6 +137,7 @@ export type ColorName =
  * ```
  */
 export interface Tokens {
+  // Semantic colors (existing)
   /** Green color for success messages */
   success: string;
   /** Yellow color for warning messages */
@@ -115,14 +146,34 @@ export interface Tokens {
   error: string;
   /** Blue color for informational messages */
   info: string;
-  /** Dim/gray color for de-emphasized text */
-  muted: string;
-  /** Bright/highlight color for emphasis */
-  accent: string;
   /** Default text color (typically empty string) */
   primary: string;
   /** Subdued color for secondary text */
   secondary: string;
+  /** Dim/gray color for de-emphasized text */
+  muted: string;
+
+  // Semantic colors (new)
+  /** Cyan color for interactive elements and highlights */
+  accent: string;
+  /** Bold for strong emphasis */
+  highlight: string;
+  /** Cyan + underline for URLs and clickable references */
+  link: string;
+  /** Bright red for dangerous actions */
+  destructive: string;
+  /** Dim gray for less prominent text than muted */
+  subtle: string;
+
+  // Utility tokens
+  /** Bold styling */
+  bold: string;
+  /** Italic styling */
+  italic: string;
+  /** Underline styling */
+  underline: string;
+  /** Dim styling */
+  dim: string;
 }
 
 /**
@@ -198,15 +249,27 @@ export function createTheme(): Theme {
   };
 
   return {
-    // Semantic colors
+    // Semantic colors (existing)
     success: colorFn(ANSI.green),
     warning: colorFn(ANSI.yellow),
     error: colorFn(ANSI.red),
     info: colorFn(ANSI.blue),
-    // Text colors
     primary: colorFn(""), // No color, just the text
     secondary: colorFn(ANSI.gray),
     muted: colorFn(ANSI.dim),
+
+    // Semantic colors (new)
+    accent: colorFn(ANSI.cyan),
+    highlight: colorFn(ANSI.bold),
+    link: colorFn(`${ANSI.cyan}${ANSI.underline}`),
+    destructive: colorFn(ANSI.brightRed),
+    subtle: colorFn(`${ANSI.dim}${ANSI.gray}`),
+
+    // Utility methods
+    bold: colorFn(ANSI.bold),
+    italic: colorFn(ANSI.italic),
+    underline: colorFn(ANSI.underline),
+    dim: colorFn(ANSI.dim),
   };
 }
 
@@ -268,29 +331,49 @@ export function createTokens(options?: TokenOptions): Tokens {
   // Return empty strings when colors are disabled
   if (!colorEnabled) {
     return {
+      // Semantic colors (existing)
       success: "",
       warning: "",
       error: "",
       info: "",
-      muted: "",
-      accent: "",
       primary: "",
       secondary: "",
+      muted: "",
+      // Semantic colors (new)
+      accent: "",
+      highlight: "",
+      link: "",
+      destructive: "",
+      subtle: "",
+      // Utility tokens
+      bold: "",
+      italic: "",
+      underline: "",
+      dim: "",
     };
   }
 
   // Return ANSI codes when colors are enabled
   return {
-    // Semantic colors
+    // Semantic colors (existing)
     success: ANSI.green,
     warning: ANSI.yellow,
     error: ANSI.red,
     info: ANSI.blue,
-    // Text colors
-    muted: ANSI.dim,
-    accent: ANSI.cyan,
     primary: "", // Primary uses default terminal color
     secondary: ANSI.gray,
+    muted: ANSI.dim,
+    // Semantic colors (new)
+    accent: ANSI.cyan,
+    highlight: ANSI.bold,
+    link: `${ANSI.cyan}${ANSI.underline}`,
+    destructive: ANSI.brightRed,
+    subtle: `${ANSI.dim}${ANSI.gray}`,
+    // Utility tokens
+    bold: ANSI.bold,
+    italic: ANSI.italic,
+    underline: ANSI.underline,
+    dim: ANSI.dim,
   };
 }
 

@@ -3,13 +3,21 @@
  *
  * Tests cover:
  * - createTheme() (3 tests)
+ * - New semantic colors (2 tests)
+ * - Utility methods (2 tests)
  * - applyColor() (1 test)
+ * - createTokens() (2 tests)
  * - color environment handling (2 tests)
  *
- * Total: 6 tests
+ * Total: 12 tests
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { applyColor, createTheme } from "../render/index.js";
+import {
+  ANSI,
+  applyColor,
+  createTheme,
+  createTokens,
+} from "../render/index.js";
 import { supportsColor } from "../terminal/index.js";
 
 // ============================================================================
@@ -127,6 +135,137 @@ describe("Color Tokens", () => {
       const colorSupport = supportsColor({ isTTY: false });
 
       expect(colorSupport).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // New Semantic Colors Tests (2 tests)
+  // ============================================================================
+
+  describe("new semantic colors", () => {
+    it("has extended semantic colors (accent, highlight, link, destructive, subtle)", () => {
+      const theme = createTheme();
+
+      // New semantic colors
+      expect(theme.accent).toBeDefined();
+      expect(theme.highlight).toBeDefined();
+      expect(theme.link).toBeDefined();
+      expect(theme.destructive).toBeDefined();
+      expect(theme.subtle).toBeDefined();
+
+      // Each should return a string with text preserved
+      const accentText = theme.accent("interactive");
+      const highlightText = theme.highlight("important");
+      const linkText = theme.link("https://example.com");
+      const destructiveText = theme.destructive("delete");
+      const subtleText = theme.subtle("timestamp");
+
+      expect(accentText).toContain("interactive");
+      expect(highlightText).toContain("important");
+      expect(linkText).toContain("https://example.com");
+      expect(destructiveText).toContain("delete");
+      expect(subtleText).toContain("timestamp");
+    });
+
+    it("new semantic colors respect NO_COLOR", () => {
+      process.env.NO_COLOR = "1";
+      const theme = createTheme();
+
+      // With NO_COLOR, all colors should be plain text
+      expect(theme.accent("text")).toBe("text");
+      expect(theme.highlight("text")).toBe("text");
+      expect(theme.link("text")).toBe("text");
+      expect(theme.destructive("text")).toBe("text");
+      expect(theme.subtle("text")).toBe("text");
+    });
+  });
+
+  // ============================================================================
+  // Utility Methods Tests (2 tests)
+  // ============================================================================
+
+  describe("utility methods", () => {
+    it("has utility methods (bold, italic, underline, dim)", () => {
+      const theme = createTheme();
+
+      // Utility methods
+      expect(theme.bold).toBeDefined();
+      expect(theme.italic).toBeDefined();
+      expect(theme.underline).toBeDefined();
+      expect(theme.dim).toBeDefined();
+
+      // Each should return a string with text preserved
+      const boldText = theme.bold("strong");
+      const italicText = theme.italic("emphasis");
+      const underlineText = theme.underline("underlined");
+      const dimText = theme.dim("faded");
+
+      expect(boldText).toContain("strong");
+      expect(italicText).toContain("emphasis");
+      expect(underlineText).toContain("underlined");
+      expect(dimText).toContain("faded");
+    });
+
+    it("utility methods compose with semantic colors", () => {
+      const theme = createTheme();
+
+      // Should be able to compose utilities with semantic colors
+      const composed = theme.bold(theme.accent("text"));
+      expect(composed).toContain("text");
+    });
+  });
+
+  // ============================================================================
+  // createTokens() Tests (2 tests)
+  // ============================================================================
+
+  describe("createTokens()", () => {
+    it("creates tokens with new semantic colors", () => {
+      const tokens = createTokens({ forceColor: true });
+
+      // New tokens should be defined
+      expect(tokens.accent).toBeDefined();
+      expect(tokens.highlight).toBeDefined();
+      expect(tokens.link).toBeDefined();
+      expect(tokens.destructive).toBeDefined();
+      expect(tokens.subtle).toBeDefined();
+
+      // Utility tokens
+      expect(tokens.bold).toBeDefined();
+      expect(tokens.italic).toBeDefined();
+      expect(tokens.underline).toBeDefined();
+      expect(tokens.dim).toBeDefined();
+    });
+
+    it("tokens are empty strings when colors disabled", () => {
+      const tokens = createTokens({ colorLevel: 0 });
+
+      // All tokens should be empty
+      expect(tokens.accent).toBe("");
+      expect(tokens.highlight).toBe("");
+      expect(tokens.link).toBe("");
+      expect(tokens.destructive).toBe("");
+      expect(tokens.subtle).toBe("");
+      expect(tokens.bold).toBe("");
+      expect(tokens.italic).toBe("");
+      expect(tokens.underline).toBe("");
+      expect(tokens.dim).toBe("");
+    });
+  });
+
+  // ============================================================================
+  // ANSI Constants Tests (1 test)
+  // ============================================================================
+
+  describe("ANSI constants", () => {
+    it("includes new ANSI codes for extended colors", () => {
+      // New ANSI codes should be defined
+      expect(ANSI.underline).toBe("\x1b[4m");
+      expect(ANSI.brightCyan).toBe("\x1b[96m");
+      expect(ANSI.brightRed).toBe("\x1b[91m");
+      expect(ANSI.brightYellow).toBe("\x1b[93m");
+      expect(ANSI.brightGreen).toBe("\x1b[92m");
+      expect(ANSI.brightBlue).toBe("\x1b[94m");
     });
   });
 });
