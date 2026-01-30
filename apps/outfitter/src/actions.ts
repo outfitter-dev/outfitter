@@ -15,6 +15,7 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
+import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { runInit } from "./commands/init.js";
@@ -142,6 +143,50 @@ function createInitAction(options: {
   });
 }
 
+const demoInputSchema = z.object({
+  section: z.string().optional(),
+  list: z.boolean().optional(),
+  animate: z.boolean().optional(),
+});
+
+const demoAction = defineAction({
+  id: "demo",
+  description: "Showcase @outfitter/cli rendering capabilities",
+  surfaces: ["cli"],
+  input: demoInputSchema,
+  cli: {
+    command: "demo [section]",
+    description: "Showcase @outfitter/cli rendering capabilities",
+    options: [
+      {
+        flags: "-l, --list",
+        description: "List available demo sections",
+        defaultValue: false,
+      },
+      {
+        flags: "-a, --animate",
+        description: "Run animated demo (spinners only)",
+        defaultValue: false,
+      },
+    ],
+    mapInput: (context) => ({
+      section: context.args[0] as string | undefined,
+      list: Boolean(context.flags["list"]),
+      animate: Boolean(context.flags["animate"]),
+    }),
+  },
+  handler: async (input) => {
+    const result = await runDemo(input);
+    printDemoResults(result);
+
+    if (result.exitCode !== 0) {
+      process.exit(result.exitCode);
+    }
+
+    return Result.ok(result);
+  },
+});
+
 const doctorAction = defineAction({
   id: "doctor",
   description: "Validate environment and dependencies",
@@ -197,4 +242,5 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
       templateOverride: "daemon",
     })
   )
+  .add(demoAction)
   .add(doctorAction);
