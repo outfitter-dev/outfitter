@@ -284,8 +284,10 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
 
   process.on("SIGINT", cleanup);
 
-  // Keep running indefinitely
-  await new Promise(() => {});
+  // Keep running indefinitely (never resolves)
+  await new Promise(() => {
+    // Intentionally empty - promise never resolves to keep process alive
+  });
 }
 
 /**

@@ -40,6 +40,7 @@ export interface HeadingOptions {
 }
 
 /** ANSI escape sequence pattern */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape detection requires matching ESC character
 const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
 
 /**
@@ -84,8 +85,7 @@ function applyCase(text: string, caseMode: CaseMode): string {
 
   // Extract ANSI sequences and their positions
   const sequences: Array<{ index: number; seq: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = ANSI_PATTERN.exec(text)) !== null) {
+  for (const match of text.matchAll(ANSI_PATTERN)) {
     sequences.push({ index: match.index, seq: match[0] });
   }
 
