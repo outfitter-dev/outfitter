@@ -18,9 +18,11 @@
     "@outfitter/types": "0.1.0-rc.1"
   },
   "changesets": [
+    "cli-bun-wrapansi",
     "cli-utilities",
     "contracts-error-codes",
     "file-ops-shared-lock",
+    "fix-workspace-publish",
     "types-utilities"
   ]
 }
