@@ -10,7 +10,6 @@
 "@outfitter/state": patch
 "@outfitter/testing": patch
 "@outfitter/types": patch
-"outfitter": patch
 ---
 
 Fix npm publish to resolve workspace:\* dependencies to actual version numbers
