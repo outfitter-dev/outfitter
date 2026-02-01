@@ -24,4 +24,9 @@ pre-push:
       run: bun run build
 
     test:
+      # TDD Override: For RED phase support, override in your project's lefthook.yml:
+      #   pre-push:
+      #     commands:
+      #       test:
+      #         run: ./scripts/pre-push-test.sh  # allows *-tests branches with failing tests
       run: bun run test

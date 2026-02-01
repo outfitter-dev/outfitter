@@ -60,7 +60,7 @@ export function detectFrameworks(pkg: PackageJson): string[] {
  * @returns Array of command arguments
  */
 export function buildUltraciteCommand(options: UltraciteOptions): string[] {
-	const cmd = ["ultracite", "--linter", "biome", "--pm", "bun", "--quiet"];
+	const cmd = ["ultracite", "init", "--linter", "biome", "--pm", "bun", "--quiet"];
 
 	if (options.frameworks && options.frameworks.length > 0) {
 		cmd.push("--frameworks", ...options.frameworks);
