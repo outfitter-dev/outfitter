@@ -38,7 +38,8 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.7",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "yaml": "^2.8.2"
   },
   "peerDependencies": {
     "ultracite": "^7.0.0",

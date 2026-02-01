@@ -1,0 +1,27 @@
+# Lefthook configuration preset for Outfitter projects
+# https://github.com/evilmartians/lefthook
+#
+# Usage: In your project's .lefthook.yml, add:
+#   extends:
+#     - node_modules/@outfitter/tooling/lefthook.yml
+
+pre-commit:
+  parallel: true
+  commands:
+    ultracite:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: bun x ultracite fix {staged_files}
+      stage_fixed: true
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+
+pre-push:
+  parallel: false
+  commands:
+    build:
+      run: bun run build
+
+    test:
+      run: bun run test
