@@ -6,8 +6,8 @@
   "files": [
     "dist",
     "biome.json",
-    "tsconfig.json",
-    "tsconfig.bun.json",
+    "tsconfig.preset.json",
+    "tsconfig.preset.bun.json",
     "lefthook.yml"
   ],
   "module": "./dist/index.js",
