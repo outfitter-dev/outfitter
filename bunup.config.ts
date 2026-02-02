@@ -152,6 +152,10 @@ export default defineWorkspace(
       root: "packages/stack",
     },
     {
+      name: "@outfitter/tooling",
+      root: "packages/tooling",
+    },
+    {
       name: "outfitter",
       root: "apps/outfitter",
     },
