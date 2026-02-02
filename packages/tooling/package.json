@@ -37,7 +37,11 @@
         "default": "./dist/cli/check.js"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./biome.json": "./biome.json",
+    "./tsconfig.preset.json": "./tsconfig.preset.json",
+    "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+    "./lefthook.yml": "./lefthook.yml"
   },
   "bin": {
     "tooling": "./dist/cli/index.js"
