@@ -10,52 +10,9 @@ const supportsDtsSplitting =
   (bunVersion[0] === 1 && bunVersion[1] === 3 && bunVersion[2] >= 7);
 
 /**
- * Remove internal exports from @outfitter/cli package.json.
- * bunup workspace mode doesn't support per-package entry overrides,
- * so we clean up internal exports post-build.
+ * Work around Bun duplicate export bug with re-exported entrypoints.
+ * Removes duplicate export statements that appear consecutively.
  */
-const stripCliInternalExports = (): BunupPlugin => ({
-  name: "strip-cli-internal-exports",
-  hooks: {
-    onBuildDone: async ({ meta }) => {
-      if (!meta.rootDir.endsWith("packages/cli")) return;
-
-      const pkgPath = `${meta.rootDir}/package.json`;
-      const pkg = await Bun.file(pkgPath).json();
-
-      if (!pkg.exports) return;
-
-      // Internal exports to remove (consumers should use barrel exports)
-      const internalPatterns = [
-        /^\.\/render\/(?!index)/, // ./render/* except ./render (barrel)
-        /^\.\/demo\/renderers\//, // ./demo/renderers/*
-        /^\.\/demo\/registry$/, // ./demo/registry
-        /^\.\/demo\/templates$/, // ./demo/templates
-        /^\.\/demo\/types$/, // ./demo/types
-      ];
-
-      const filteredExports: Record<string, unknown> = {};
-      let removed = 0;
-
-      for (const [key, value] of Object.entries(pkg.exports)) {
-        const isInternal = internalPatterns.some((pattern) =>
-          pattern.test(key)
-        );
-        if (isInternal) {
-          removed += 1;
-        } else {
-          filteredExports[key] = value;
-        }
-      }
-
-      if (removed > 0) {
-        pkg.exports = filteredExports;
-        await Bun.write(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
-      }
-    },
-  },
-});
-
 const stripDuplicateExports = (): BunupPlugin => ({
   name: "strip-duplicate-exports",
   hooks: {
@@ -139,9 +96,18 @@ export default defineWorkspace(
     {
       name: "@outfitter/cli",
       root: "packages/cli",
-      // NOTE: bunup workspace mode doesn't support per-package entry/exports overrides
-      // Internal exports (./render/*, ./demo/*) are auto-generated but should be
-      // considered unstable. Consumers should use barrel exports: ./render, ./demo
+      // Exclude internal exports - consumers should use barrel exports (./render, ./demo)
+      config: {
+        exports: {
+          exclude: [
+            "./demo/renderers/*",
+            "./demo/registry",
+            "./demo/templates",
+            "./demo/types",
+            "./render/*",
+          ],
+        },
+      },
     },
     {
       name: "@outfitter/index",
@@ -154,6 +120,17 @@ export default defineWorkspace(
     {
       name: "@outfitter/tooling",
       root: "packages/tooling",
+      // Preserve static config file exports (not in src/)
+      config: {
+        exports: {
+          customExports: {
+            "./biome.json": "./biome.json",
+            "./tsconfig.preset.json": "./tsconfig.preset.json",
+            "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+            "./lefthook.yml": "./lefthook.yml",
+          },
+        },
+      },
     },
     {
       name: "outfitter",
@@ -168,8 +145,7 @@ export default defineWorkspace(
     // Output format: ESM only (Bun ecosystem)
     format: ["esm"],
     // Work around Bun duplicate export bug with re-exported entrypoints
-    // Strip internal exports from @outfitter/cli
-    plugins: [stripDuplicateExports(), stripCliInternalExports()],
+    plugins: [stripDuplicateExports()],
     // TypeScript declarations (splitting enabled when Bun >= 1.3.7)
     dts: supportsDtsSplitting ? { splitting: true } : true,
     // Auto-generate package.json exports field
