@@ -25,6 +25,13 @@ describe("CLI init command", () => {
 		expect(flags).not.toContain("--frameworks");
 	});
 
+	test("buildUltraciteCommand includes init subcommand", async () => {
+		const { buildUltraciteCommand } = await import("../cli/init.js");
+		const cmd = buildUltraciteCommand({});
+		expect(cmd[0]).toBe("ultracite");
+		expect(cmd[1]).toBe("init");
+	});
+
 	test("buildUltraciteCommand generates correct base flags", async () => {
 		const { buildUltraciteCommand } = await import("../cli/init.js");
 		const cmd = buildUltraciteCommand({});

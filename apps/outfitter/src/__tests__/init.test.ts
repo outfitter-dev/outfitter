@@ -88,7 +88,7 @@ describe("init command file creation", () => {
     expect(packageJson.name).toBe("test-project");
   });
 
-  test("creates tsconfig.json with strict TypeScript settings", async () => {
+  test("creates tsconfig.json extending @outfitter/tooling preset", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
@@ -102,8 +102,10 @@ describe("init command file creation", () => {
     expect(existsSync(tsconfigPath)).toBe(true);
 
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
+    expect(tsconfig.extends).toBe(
+      "@outfitter/tooling/tsconfig.preset.bun.json"
+    );
     expect(tsconfig.compilerOptions).toBeDefined();
-    expect(tsconfig.compilerOptions.strict).toBe(true);
   });
 
   test("creates src directory structure", async () => {

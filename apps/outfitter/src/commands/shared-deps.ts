@@ -15,6 +15,7 @@
  */
 export const SHARED_DEV_DEPS = {
   "@biomejs/biome": "^2.3.11",
+  "@outfitter/tooling": "^0.1.0-rc.1",
   "@types/bun": "latest",
   lefthook: "^2.0.15",
   typescript: "^5.9.3",

@@ -19,6 +19,24 @@
         "default": "./dist/index.js"
       }
     },
+    "./cli/init": {
+      "import": {
+        "types": "./dist/cli/init.d.ts",
+        "default": "./dist/cli/init.js"
+      }
+    },
+    "./cli/fix": {
+      "import": {
+        "types": "./dist/cli/fix.d.ts",
+        "default": "./dist/cli/fix.js"
+      }
+    },
+    "./cli/check": {
+      "import": {
+        "types": "./dist/cli/check.d.ts",
+        "default": "./dist/cli/check.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {
