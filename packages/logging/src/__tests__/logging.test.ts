@@ -826,6 +826,40 @@ describe("Sinks", () => {
     expect(stderrOutput.some((s) => s.includes("error message"))).toBe(true);
   });
 
+  it("Console sink strips ANSI codes when colors: false", () => {
+    const { createConsoleSink } = require("../index.js");
+    const consoleSink = createConsoleSink({ colors: false });
+
+    const logger = createLogger({
+      name: "test",
+      sinks: [consoleSink],
+    });
+
+    logger.info("no color message");
+
+    // Should not contain ANSI escape codes (ESC character = \u001b)
+    const output = stdoutOutput.join("");
+    expect(output).toContain("no color message");
+    expect(output).not.toContain("\u001b["); // No ANSI escape sequences
+  });
+
+  it("Console sink includes ANSI codes when colors: true", () => {
+    const { createConsoleSink } = require("../index.js");
+    const consoleSink = createConsoleSink({ colors: true });
+
+    const logger = createLogger({
+      name: "test",
+      sinks: [consoleSink],
+    });
+
+    logger.info("color message");
+
+    // Should contain ANSI escape codes for the level indicator (ESC character = \u001b)
+    const output = stdoutOutput.join("");
+    expect(output).toContain("color message");
+    expect(output).toContain("\u001b["); // Contains ANSI escape sequences
+  });
+
   it("File sink writes to specified path", async () => {
     const { createFileSink } = require("../index.js");
     const tempPath = `/tmp/test-log-${Date.now()}.log`;

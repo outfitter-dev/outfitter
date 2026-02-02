@@ -355,6 +355,34 @@ export interface PrettyFormatterOptions {
 }
 
 /**
+ * Options for the console sink.
+ *
+ * Controls ANSI color output for terminal display. By default, colors are
+ * auto-detected based on whether stdout is a TTY.
+ *
+ * @example
+ * ```typescript
+ * // Auto-detect TTY (default)
+ * const sink = createConsoleSink();
+ *
+ * // Force colors off (for piped output, CI)
+ * const plainSink = createConsoleSink({ colors: false });
+ *
+ * // Force colors on (even in non-TTY)
+ * const colorSink = createConsoleSink({ colors: true });
+ * ```
+ */
+export interface ConsoleSinkOptions {
+  /**
+   * Enable ANSI colors in output.
+   * - `undefined` (default): Auto-detect based on stdout TTY status
+   * - `true`: Always use colors
+   * - `false`: Never use colors
+   */
+  colors?: boolean;
+}
+
+/**
  * Options for the file sink.
  *
  * Configures the file path and append behavior for file-based logging.
@@ -951,6 +979,7 @@ export function createPrettyFormatter(
  * Create a console sink that writes to stdout/stderr.
  * Info and below go to stdout, warn and above go to stderr.
  *
+ * @param options - Console sink options
  * @returns Sink configured for console output
  *
  * @example
@@ -959,10 +988,17 @@ export function createPrettyFormatter(
  *   name: "app",
  *   sinks: [createConsoleSink()],
  * });
+ *
+ * // Disable colors for CI/piped output
+ * const plainLogger = createLogger({
+ *   name: "app",
+ *   sinks: [createConsoleSink({ colors: false })],
+ * });
  * ```
  */
-export function createConsoleSink(): Sink {
-  const formatter = createPrettyFormatter({ colors: true });
+export function createConsoleSink(options?: ConsoleSinkOptions): Sink {
+  const useColors = options?.colors ?? process.stdout.isTTY ?? false;
+  const formatter = createPrettyFormatter({ colors: useColors });
 
   const sink: Sink = {
     formatter,
