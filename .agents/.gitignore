@@ -1,3 +1,5 @@
-# Keep .agents directory local - not committed to repo
+# Keep most .agents content local
 *
 !.gitignore
+!plans/
+!plans/**
