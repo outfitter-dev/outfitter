@@ -25,6 +25,17 @@
       }
     ]
   },
-  "enabledPlugins": {},
-  "extraKnownMarketplaces": {}
+  "enabledPlugins": {
+    "outfitter@outfitter": true,
+    "outfitter-team@outfitter": true,
+    "outfitter-kit@outfitter": true
+  },
+  "extraKnownMarketplaces": {
+    "outfitter": {
+      "source": {
+        "source": "github",
+        "repo": "outfitter-dev/outfitter"
+      }
+    }
+  }
 }
