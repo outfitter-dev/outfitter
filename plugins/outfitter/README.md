@@ -6,7 +6,7 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 
 ```bash
 # Add the Outfitter marketplace (if not already added)
-/plugin marketplace add outfitter-dev/agents
+/plugin marketplace add outfitter-dev/outfitter
 
 # Install outfitter
 /plugin install outfitter@outfitter

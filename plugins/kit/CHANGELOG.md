@@ -1,4 +1,4 @@
-# outfitter-kit
+# kit
 
 ## 1.5.0
 

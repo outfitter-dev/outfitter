@@ -17,8 +17,7 @@ Checks both project (`.claude/settings.json`) and user (`~/.claude/settings.json
 
 | Alias | Repo | Required Plugin |
 |-------|------|-----------------|
-| `outfitter` | `outfitter-dev/agents` | `outfitter@outfitter` |
-| `outfitter-internal` | `outfitter-dev/agents-internal` | `outfitter-dev@outfitter-internal` |
+| `outfitter` | `outfitter-dev/outfitter` | `outfitter@outfitter` |
 
 ## Optional Plugins
 
@@ -36,15 +35,11 @@ From `outfitter` marketplace:
 {
   "extraKnownMarketplaces": {
     "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents" }
-    },
-    "outfitter-internal": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents-internal" }
+      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
     }
   },
   "enabledPlugins": {
-    "outfitter@outfitter": true,
-    "outfitter-dev@outfitter-internal": true
+    "outfitter@outfitter": true
   }
 }
 ```
@@ -55,15 +50,11 @@ From `outfitter` marketplace:
 {
   "extraKnownMarketplaces": {
     "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents" }
-    },
-    "outfitter-internal": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents-internal" }
+      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
     }
   },
   "enabledPlugins": {
     "outfitter@outfitter": true,
-    "outfitter-dev@outfitter-internal": true,
     "gt@outfitter": true,
     "but@outfitter": true,
     "cli-dev@outfitter": true

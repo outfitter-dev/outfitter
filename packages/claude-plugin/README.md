@@ -6,7 +6,7 @@ Claude Code plugin for @outfitter/* packages. Provides skills, agents, and comma
 
 ```bash
 # Add marketplace
-/plugin marketplace add outfitter-dev/agents
+/plugin marketplace add outfitter-dev/outfitter
 
 # Install plugin
 /plugin install stack@outfitter

@@ -12,18 +12,15 @@
   "plugins": [
     {
       "name": "outfitter",
-      "source": "./plugins/outfitter",
-      "description": "Core development methodology, debugging, architecture patterns"
+      "source": "./plugins/outfitter"
     },
     {
-      "name": "outfitter-kit",
-      "source": "./plugins/kit",
-      "description": "Docs, skills, and workflows for building with the Outfitter stack."
+      "name": "kit",
+      "source": "./plugins/kit"
     },
     {
-      "name": "outfitter-team",
-      "source": "./plugins/team",
-      "description": "Internal Outfitter team skills for docs, voice, and conventions"
+      "name": "team",
+      "source": "./plugins/team"
     }
   ]
 }
