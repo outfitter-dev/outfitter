@@ -86,6 +86,10 @@ export default defineWorkspace(
       root: "packages/types",
     },
     {
+      name: "@outfitter/agents",
+      root: "packages/agents",
+    },
+    {
       name: "@outfitter/contracts",
       root: "packages/contracts",
     },
