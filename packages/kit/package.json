@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/kit",
   "description": "Version coordination meta-package for Outfitter",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist",
@@ -19,17 +19,17 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@outfitter/cli": ">=0.1.0-rc.1",
-    "@outfitter/config": ">=0.1.0-rc.1",
-    "@outfitter/contracts": ">=0.1.0-rc.1",
-    "@outfitter/daemon": ">=0.1.0-rc.1",
-    "@outfitter/file-ops": ">=0.1.0-rc.1",
-    "@outfitter/index": ">=0.1.0-rc.1",
-    "@outfitter/logging": ">=0.1.0-rc.1",
-    "@outfitter/mcp": ">=0.1.0-rc.1",
-    "@outfitter/state": ">=0.1.0-rc.1",
-    "@outfitter/testing": ">=0.1.0-rc.1",
-    "@outfitter/types": ">=0.1.0-rc.1",
+    "@outfitter/cli": ">=0.1.0",
+    "@outfitter/config": ">=0.1.0",
+    "@outfitter/contracts": ">=0.1.0",
+    "@outfitter/daemon": ">=0.1.0",
+    "@outfitter/file-ops": ">=0.1.0",
+    "@outfitter/index": ">=0.1.0",
+    "@outfitter/logging": ">=0.1.0",
+    "@outfitter/mcp": ">=0.1.0",
+    "@outfitter/state": ">=0.1.0",
+    "@outfitter/testing": ">=0.1.0",
+    "@outfitter/types": ">=0.1.0",
     "@outfitter/ui": ">=0.1.0-rc.1"
   },
   "peerDependenciesMeta": {

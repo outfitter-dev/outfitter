@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/cli",
   "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
-  "version": "0.1.0-rc.3",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist"

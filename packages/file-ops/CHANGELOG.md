@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.1.0
+
+### Minor Changes
+
+- Release v0.1.0 - First stable release
+
+  This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
+
+  Key changes in this release cycle:
+
+  - Plugin system with registry for Claude Code integration
+  - Tooling CLI with upgrade-bun and pre-push commands
+  - Renamed stack package to kit
+  - GitHub issue templates and label system
+
+### Patch Changes
+
+- 4f58c46: Add withSharedLock for reader-writer locking with meta-lock protection against race conditions
+- 7522622: Fix npm publish to resolve workspace:\* dependencies to actual version numbers
+- Updated dependencies [4f58c46]
+- Updated dependencies [7522622]
+- Updated dependencies
+- Updated dependencies [4f58c46]
+  - @outfitter/contracts@0.1.0
+  - @outfitter/types@0.1.0
+
+## 0.1.0-rc.4
+
+### Minor Changes
+
+- Release v0.1.0 - First stable release
+
+  This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
+
+  Key changes in this release cycle:
+
+  - Plugin system with registry for Claude Code integration
+  - Tooling CLI with upgrade-bun and pre-push commands
+  - Renamed stack package to kit
+  - GitHub issue templates and label system
+
+### Patch Changes
+
+- Updated dependencies
+  - @outfitter/contracts@0.1.0-rc.3
+  - @outfitter/types@0.1.0-rc.4
+
 ## 0.1.0-rc.3
 
 ### Patch Changes

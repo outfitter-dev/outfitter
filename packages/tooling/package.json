@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/tooling",
   "description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist",
