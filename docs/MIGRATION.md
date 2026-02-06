@@ -288,7 +288,7 @@ await output(data);
 
 When upgrading Outfitter packages:
 
-- [ ] Update all `@outfitter/*` packages together (use `@outfitter/stack` for version coordination)
+- [ ] Update all `@outfitter/*` packages together (use `@outfitter/kit` for version coordination)
 - [ ] Run `bun install` to update lockfile
 - [ ] Run `bun run typecheck` to catch type errors
 - [ ] Run `bun run test` to verify functionality

@@ -110,8 +110,8 @@ export default defineWorkspace(
       root: "packages/index",
     },
     {
-      name: "@outfitter/stack",
-      root: "packages/stack",
+      name: "@outfitter/kit",
+      root: "packages/kit",
     },
     {
       name: "@outfitter/tooling",

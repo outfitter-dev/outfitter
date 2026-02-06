@@ -39,7 +39,7 @@ Each package has detailed API documentation. Stability labels indicate API matur
 
 - [outfitter](../apps/outfitter/README.md) — Umbrella CLI for scaffolding
 - [@outfitter/testing](../packages/testing/README.md) — Test harnesses for CLI and MCP
-- [@outfitter/stack](../packages/stack/README.md) — Version coordination
+- [@outfitter/kit](../packages/kit/README.md) — Version coordination
 
 ## Quick Links
 

@@ -1,0 +1,11 @@
+{
+  "name": "kit",
+  "version": "1.5.0",
+  "description": "Result types, handler contract, error taxonomy for @outfitter/* packages",
+  "author": {
+    "name": "Outfitter",
+    "email": "team@outfitter.dev"
+  },
+  "license": "MIT",
+  "keywords": ["result", "handler", "error-taxonomy", "outfitter"]
+}

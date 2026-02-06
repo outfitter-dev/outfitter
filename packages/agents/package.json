@@ -38,7 +38,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "cd ../.. && bunx bunup --filter @outfitter/agents",
+    "build": "cd ../.. && bunup --filter @outfitter/agents",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

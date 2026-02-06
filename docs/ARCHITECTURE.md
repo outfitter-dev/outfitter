@@ -108,7 +108,7 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 |---------|---------|
 | `outfitter` | Umbrella CLI for scaffolding projects |
 | `@outfitter/testing` | Test harnesses for CLI and MCP |
-| `@outfitter/stack` | Version coordination meta-package |
+| `@outfitter/kit` | Version coordination meta-package |
 
 ## Dependency Graph
 

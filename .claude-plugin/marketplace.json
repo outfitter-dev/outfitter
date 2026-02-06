@@ -16,8 +16,8 @@
       "description": "Core development methodology, debugging, architecture patterns"
     },
     {
-      "name": "outfitter-stack",
-      "source": "./plugins/stack",
+      "name": "outfitter-kit",
+      "source": "./plugins/kit",
       "description": "Docs, skills, and workflows for building with the Outfitter stack."
     },
     {
