@@ -1,16 +1,30 @@
 #!/usr/bin/env bun
 
 /**
- * Check if outfitter marketplaces are configured in project or user settings
+ * Check if outfitter marketplaces and plugins are configured.
+ * Reads marketplace-manifest.json (generated at prebuild) for all values.
+ *
  * Usage: bun check-outfitter.ts [project-root]
  */
 
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+
+const SCRIPT_DIR = dirname(new URL(import.meta.url).pathname);
+const MANIFEST_PATH = join(SCRIPT_DIR, "../marketplace-manifest.json");
 
 const ROOT = process.argv[2] || ".";
 const PROJECT_SETTINGS = join(ROOT, ".claude/settings.json");
 const USER_SETTINGS = join(homedir(), ".claude/settings.json");
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface Manifest {
+  marketplace: { name: string; repo: string; source: string };
+  plugins: { required: string[]; optional: string[] };
+}
 
 interface Settings {
   extraKnownMarketplaces?: Record<
@@ -20,42 +34,18 @@ interface Settings {
   enabledPlugins?: Record<string, boolean>;
 }
 
-interface MarketplaceConfig {
-  alias: string;
-  repo: string;
-  requiredPlugin: string;
-  label: string;
-}
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-const MARKETPLACES: MarketplaceConfig[] = [
-  {
-    alias: "outfitter",
-    repo: "outfitter-dev/outfitter",
-    requiredPlugin: "outfitter@outfitter",
-    label: "outfitter (core)",
-  },
-];
-
-const OPTIONAL_PLUGINS = ["gt@outfitter", "but@outfitter", "cli-dev@outfitter"];
-
-async function loadSettings(path: string): Promise<Settings | null> {
+async function loadJson<T>(path: string): Promise<T | null> {
   const file = Bun.file(path);
   if (!(await file.exists())) return null;
   return file.json();
 }
 
-function checkMarketplace(
-  settings: Settings | null,
-  config: MarketplaceConfig
-): boolean {
-  return (
-    settings?.extraKnownMarketplaces?.[config.alias]?.source?.repo ===
-    config.repo
-  );
-}
-
-function checkPlugin(settings: Settings | null, plugin: string): boolean {
-  return settings?.enabledPlugins?.[plugin] === true;
+function pluginId(name: string, marketplace: string): string {
+  return `${name}@${marketplace}`;
 }
 
 function location(project: boolean, user: boolean): string {
@@ -65,9 +55,37 @@ function location(project: boolean, user: boolean): string {
   return "none";
 }
 
+// ---------------------------------------------------------------------------
+// Checks
+// ---------------------------------------------------------------------------
+
+function isMarketplaceRegistered(
+  settings: Settings | null,
+  name: string,
+  repo: string
+): boolean {
+  return settings?.extraKnownMarketplaces?.[name]?.source?.repo === repo;
+}
+
+function isPluginEnabled(settings: Settings | null, id: string): boolean {
+  return settings?.enabledPlugins?.[id] === true;
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
 async function main() {
-  const projectSettings = await loadSettings(PROJECT_SETTINGS);
-  const userSettings = await loadSettings(USER_SETTINGS);
+  const manifest = await loadJson<Manifest>(MANIFEST_PATH);
+  if (!manifest) {
+    console.error(`Manifest not found: ${MANIFEST_PATH}`);
+    console.error("Run the prebuild to generate it.");
+    process.exit(1);
+  }
+
+  const { marketplace, plugins } = manifest;
+  const projectSettings = await loadJson<Settings>(PROJECT_SETTINGS);
+  const userSettings = await loadJson<Settings>(USER_SETTINGS);
 
   let allConfigured = true;
   const issues: string[] = [];
@@ -76,46 +94,68 @@ async function main() {
   console.log("=====================");
   console.log("");
 
-  // Check each marketplace and its required plugin
-  for (const mp of MARKETPLACES) {
-    const projectHasMp = checkMarketplace(projectSettings, mp);
-    const userHasMp = checkMarketplace(userSettings, mp);
-    const hasMp = projectHasMp || userHasMp;
+  // --- Marketplace registration ---
+  const projectHasMp = isMarketplaceRegistered(
+    projectSettings,
+    marketplace.name,
+    marketplace.repo
+  );
+  const userHasMp = isMarketplaceRegistered(
+    userSettings,
+    marketplace.name,
+    marketplace.repo
+  );
+  const hasMp = projectHasMp || userHasMp;
 
-    const projectHasPlugin = checkPlugin(projectSettings, mp.requiredPlugin);
-    const userHasPlugin = checkPlugin(userSettings, mp.requiredPlugin);
-    const hasPlugin = projectHasPlugin || userHasPlugin;
+  console.log(`Marketplace "${marketplace.name}":`);
+  if (hasMp) {
+    console.log(`  Registered: yes (${location(projectHasMp, userHasMp)})`);
+  } else {
+    console.log("  Registered: no");
+    issues.push(
+      `Register marketplace "${marketplace.name}" (${marketplace.source}:${marketplace.repo})`
+    );
+    allConfigured = false;
+  }
+  console.log("");
 
-    console.log(`${mp.label}:`);
-    if (hasMp) {
-      console.log(`  Marketplace: ✓ (${location(projectHasMp, userHasMp)})`);
+  // --- Required plugins ---
+  console.log("Required plugins:");
+  for (const name of plugins.required) {
+    const id = pluginId(name, marketplace.name);
+    const inProject = isPluginEnabled(projectSettings, id);
+    const inUser = isPluginEnabled(userSettings, id);
+    const enabled = inProject || inUser;
+
+    if (enabled) {
+      console.log(`  ${id}: enabled (${location(inProject, inUser)})`);
     } else {
-      console.log("  Marketplace: ✗ missing");
-      issues.push(`Add ${mp.alias} marketplace (${mp.repo})`);
+      console.log(`  ${id}: not enabled`);
+      issues.push(`Enable ${id}`);
       allConfigured = false;
     }
-
-    if (hasPlugin) {
-      console.log(`  Plugin: ✓ (${location(projectHasPlugin, userHasPlugin)})`);
-    } else {
-      console.log("  Plugin: ✗ missing");
-      issues.push(`Enable ${mp.requiredPlugin}`);
-      allConfigured = false;
-    }
-    console.log("");
   }
+  console.log("");
 
-  // Check optional plugins
-  const enabledOptional = OPTIONAL_PLUGINS.filter(
-    (p) => checkPlugin(projectSettings, p) || checkPlugin(userSettings, p)
-  ).map((p) => p.split("@")[0]);
+  // --- Optional plugins ---
+  const optionalStatuses = plugins.optional.map((name) => {
+    const id = pluginId(name, marketplace.name);
+    const inProject = isPluginEnabled(projectSettings, id);
+    const inUser = isPluginEnabled(userSettings, id);
+    return {
+      id,
+      enabled: inProject || inUser,
+      location: location(inProject, inUser),
+    };
+  });
 
-  if (enabledOptional.length > 0) {
-    console.log(`Optional: ${enabledOptional.join(", ")}`);
-    console.log("");
+  console.log("Optional plugins:");
+  for (const { id, enabled, location: loc } of optionalStatuses) {
+    console.log(`  ${id}: ${enabled ? `enabled (${loc})` : "not enabled"}`);
   }
+  console.log("");
 
-  // Summary
+  // --- Summary ---
   if (allConfigured) {
     console.log("Status: CONFIGURED");
   } else {
@@ -125,26 +165,20 @@ async function main() {
     for (const issue of issues) {
       console.log(`  - ${issue}`);
     }
-    console.log("");
-    printRecommendation();
   }
-}
 
-function printRecommendation() {
-  console.log("Required .claude/settings.json:");
+  // --- Identifiers (for agents to copy/paste) ---
   console.log("");
-  console.log(`{
-  "extraKnownMarketplaces": {
-    "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
-    }
-  },
-  "enabledPlugins": {
-    "outfitter@outfitter": true
+  console.log("Identifiers:");
+  console.log(
+    `  Marketplace: ${marketplace.name} (${marketplace.source}:${marketplace.repo})`
+  );
+  const allPlugins = [...plugins.required, ...plugins.optional];
+  for (const name of allPlugins) {
+    const id = pluginId(name, marketplace.name);
+    const isRequired = plugins.required.includes(name);
+    console.log(`  Plugin: ${id}${isRequired ? " (required)" : ""}`);
   }
-}`);
-  console.log("");
-  console.log("Optional: gt@outfitter, but@outfitter, cli-dev@outfitter");
 }
 
 main().catch(console.error);

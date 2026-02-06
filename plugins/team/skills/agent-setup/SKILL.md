@@ -13,51 +13,11 @@ Checks both project (`.claude/settings.json`) and user (`~/.claude/settings.json
 
 !`bun ${CLAUDE_PLUGIN_ROOT}/skills/agent-setup/scripts/check-outfitter.ts .`
 
-## Marketplaces
+## Settings Structure
 
-| Alias | Repo | Required Plugin |
-|-------|------|-----------------|
-| `outfitter` | `outfitter-dev/outfitter` | `outfitter@outfitter` |
+Claude Code settings use two keys for marketplace plugins:
 
-## Optional Plugins
+- **`extraKnownMarketplaces`** — registers a marketplace by alias, pointing to a GitHub repo
+- **`enabledPlugins`** — enables individual plugins using `<plugin>@<marketplace>` identifiers
 
-From `outfitter` marketplace:
-
-| Plugin | Purpose |
-|--------|---------|
-| `gt` | Graphite stacked PR workflows |
-| `but` | GitButler virtual branch workflows |
-| `cli-dev` | CLI development patterns |
-
-## Required Setup
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
-    }
-  },
-  "enabledPlugins": {
-    "outfitter@outfitter": true
-  }
-}
-```
-
-## Full Setup
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
-    }
-  },
-  "enabledPlugins": {
-    "outfitter@outfitter": true,
-    "gt@outfitter": true,
-    "but@outfitter": true,
-    "cli-dev@outfitter": true
-  }
-}
-```
+The check script above reports the concrete identifiers and their current status. Use its output to determine what needs to be added.

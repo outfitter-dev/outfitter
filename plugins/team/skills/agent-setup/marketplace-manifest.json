@@ -1,0 +1,19 @@
+{
+	"_generated": {
+		"source": ".claude-plugin/marketplace.json"
+	},
+	"marketplace": {
+		"name": "outfitter",
+		"repo": "outfitter-dev/outfitter",
+		"source": "github"
+	},
+	"plugins": {
+		"required": [
+			"outfitter"
+		],
+		"optional": [
+			"kit",
+			"team"
+		]
+	}
+}

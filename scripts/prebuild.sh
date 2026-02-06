@@ -33,6 +33,16 @@ sync_agent_scaffolding() {
 }
 
 # -----------------------------------------------------------------------------
+# Generate marketplace manifest
+# -----------------------------------------------------------------------------
+# Produces a JSON artifact from .claude-plugin/marketplace.json so the
+# agent-setup skill can read it at runtime without monorepo access.
+
+generate_marketplace_manifest() {
+  bun "$SCRIPT_DIR/generate-marketplace-manifest.ts"
+}
+
+# -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 
@@ -40,6 +50,7 @@ main() {
   echo "[prebuild] Starting..."
 
   sync_agent_scaffolding
+  generate_marketplace_manifest
 
   echo "[prebuild] Done"
 }
