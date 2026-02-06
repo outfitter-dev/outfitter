@@ -1,0 +1,132 @@
+name: Auto Changeset
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  create-changeset:
+    # Only run if PR was merged and has a release label
+    if: >
+      github.event.pull_request.merged == true &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'release:patch') ||
+        contains(github.event.pull_request.labels.*.name, 'release:minor') ||
+        contains(github.event.pull_request.labels.*.name, 'release:major')
+      )
+    runs-on: ubuntu-latest
+    concurrency:
+      group: auto-changeset
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine release type
+        id: release-type
+        run: |
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+
+          if echo "$LABELS" | grep -q "release:major"; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "release:minor"; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "release:patch"; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect affected packages
+        id: packages
+        run: |
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          PACKAGES=""
+
+          # Map labels to package names
+          declare -A LABEL_TO_PACKAGE=(
+            ["package/contracts"]="@outfitter/contracts"
+            ["package/types"]="@outfitter/types"
+            ["package/cli"]="@outfitter/cli"
+            ["package/config"]="@outfitter/config"
+            ["package/logging"]="@outfitter/logging"
+            ["package/file-ops"]="@outfitter/file-ops"
+            ["package/state"]="@outfitter/state"
+            ["package/index"]="@outfitter/index"
+            ["package/daemon"]="@outfitter/daemon"
+            ["package/mcp"]="@outfitter/mcp"
+            ["package/testing"]="@outfitter/testing"
+            ["package/tooling"]="@outfitter/tooling"
+            ["area/outfitter"]="outfitter"
+          )
+
+          for label in "${!LABEL_TO_PACKAGE[@]}"; do
+            if echo "$LABELS" | grep -q "\"$label\""; then
+              pkg="${LABEL_TO_PACKAGE[$label]}"
+              if [ -n "$PACKAGES" ]; then
+                PACKAGES="$PACKAGES,$pkg"
+              else
+                PACKAGES="$pkg"
+              fi
+            fi
+          done
+
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "Detected packages: $PACKAGES"
+
+      - name: Validate package labels
+        run: |
+          if [ -z "${{ steps.packages.outputs.packages }}" ]; then
+            echo "::error::PR has a release:* label but no package/* labels were detected. Add package labels to indicate which packages are affected."
+            exit 1
+          fi
+
+      - name: Generate changeset
+        run: |
+          RELEASE_TYPE="${{ steps.release-type.outputs.type }}"
+          PACKAGES="${{ steps.packages.outputs.packages }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+
+          # Generate a unique filename
+          FILENAME=".changeset/pr-${PR_NUMBER}-$(date +%s).md"
+
+          # Build the changeset content
+          echo "---" > "$FILENAME"
+
+          # Add each package with its bump type
+          IFS=',' read -ra PACKAGE_ARRAY <<< "$PACKAGES"
+          for pkg in "${PACKAGE_ARRAY[@]}"; do
+            echo "\"$pkg\": \"$RELEASE_TYPE\"" >> "$FILENAME"
+          done
+
+          echo "---" >> "$FILENAME"
+          echo "" >> "$FILENAME"
+          echo "$PR_TITLE" >> "$FILENAME"
+          echo "" >> "$FILENAME"
+          echo "PR: $PR_URL" >> "$FILENAME"
+
+          echo "Generated changeset:"
+          cat "$FILENAME"
+
+      - name: Commit changeset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .changeset/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore: add changeset for PR #${{ github.event.pull_request.number }}"
+          git push

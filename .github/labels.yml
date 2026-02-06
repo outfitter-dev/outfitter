@@ -282,6 +282,10 @@
   color: "fbca04"
   description: Contains fixes only (patch version bump)
 
+- name: release:none
+  color: "666666"
+  description: No release needed (docs, CI, internal changes)
+
 - name: release:prep
   color: "5e6ad2"
   description: Release preparation
