@@ -1,6 +1,7 @@
 {
   "name": "@outfitter/agents",
-  "description": "Default agent documentation and scaffolding for AI-ready projects",
+  "description": "DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects",
+  "deprecated": "Use `npx outfitter add scaffolding` instead. See https://github.com/outfitter-dev/outfitter for migration guide.",
   "version": "0.1.0-rc.3",
   "type": "module",
   "files": [

@@ -5,6 +5,7 @@
   "type": "module",
   "files": [
     "dist",
+    "registry",
     "biome.json",
     "tsconfig.preset.json",
     "tsconfig.preset.bun.json",
@@ -14,6 +15,12 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./registry": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -48,15 +55,18 @@
   },
   "sideEffects": false,
   "scripts": {
+    "build:registry": "bun run src/registry/build.ts",
+    "prebuild": "bun run build:registry",
     "build": "bunup --filter @outfitter/tooling",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist registry"
   },
   "dependencies": {
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "zod": "^3.25.17"
   },
   "devDependencies": {
     "@types/bun": "^1.3.7",

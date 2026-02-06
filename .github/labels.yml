@@ -119,6 +119,34 @@
   description: "@outfitter/types"
 
 # =============================================================================
+# PLUGINS - Claude Code plugins
+# =============================================================================
+
+- name: plugin/outfitter
+  color: "7c3aed"
+  description: Core methodology plugin
+
+- name: plugin/stack
+  color: "7c3aed"
+  description: Outfitter Stack patterns plugin
+
+- name: plugin/team
+  color: "7c3aed"
+  description: Internal team plugin
+
+- name: plugin/gt
+  color: "7c3aed"
+  description: Graphite workflows plugin
+
+- name: plugin/but
+  color: "7c3aed"
+  description: GitButler workflows plugin
+
+- name: plugin/cli-dev
+  color: "7c3aed"
+  description: CLI development plugin
+
+# =============================================================================
 # AREAS - Code areas (not package-specific)
 # =============================================================================
 

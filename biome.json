@@ -81,6 +81,26 @@
           }
         }
       }
+    },
+    {
+      "includes": ["plugins/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "useAwait": "off",
+            "noConsole": "off",
+            "noBitwiseOperators": "off"
+          },
+          "style": {
+            "noNestedTernary": "off",
+            "useDefaultSwitchClause": "off",
+            "noNonNullAssertion": "off"
+          },
+          "performance": {
+            "noNamespaceImport": "off"
+          }
+        }
+      }
     }
   ]
 }

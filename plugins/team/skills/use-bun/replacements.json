@@ -1,0 +1,1020 @@
+{
+  "version": "1.1.0",
+  "bunVersion": "1.3.0",
+  "replacements": [
+    {
+      "id": "testing",
+      "name": "Testing",
+      "category": "testing",
+      "bunApi": "bun:test",
+      "docs": "https://bun.sh/docs/cli/test",
+      "detectors": {
+        "packages": ["jest", "vitest", "mocha", "ava", "tap", "uvu"],
+        "imports": ["@jest/globals", "vitest"],
+        "files": ["jest.config.*", "vitest.config.*", ".mocharc.*"]
+      }
+    },
+    {
+      "id": "bundling",
+      "name": "Bundling",
+      "category": "bundling",
+      "bunApi": "Bun.build()",
+      "docs": "https://bun.sh/docs/bundler",
+      "detectors": {
+        "packages": ["webpack", "esbuild", "rollup", "parcel", "vite"],
+        "files": ["webpack.config.*", "rollup.config.*", "vite.config.*"]
+      }
+    },
+    {
+      "id": "file-io",
+      "name": "File I/O",
+      "category": "file-io",
+      "bunApi": "Bun.file() / Bun.write()",
+      "docs": "https://bun.sh/docs/api/file-io",
+      "detectors": {
+        "imports": ["node:fs", "node:fs/promises", "fs-extra"]
+      }
+    },
+    {
+      "id": "http-server",
+      "name": "HTTP Server",
+      "category": "http",
+      "bunApi": "Bun.serve()",
+      "docs": "https://bun.sh/docs/api/http",
+      "detectors": {
+        "packages": ["express", "fastify", "koa"],
+        "imports": ["node:http", "node:https"]
+      }
+    },
+    {
+      "id": "websocket",
+      "name": "WebSocket",
+      "category": "http",
+      "bunApi": "WebSocket (global)",
+      "docs": "https://bun.sh/docs/api/websockets",
+      "detectors": {
+        "packages": ["ws", "websocket"],
+        "imports": ["ws"]
+      }
+    },
+    {
+      "id": "eventsource",
+      "name": "Server-Sent Events",
+      "category": "http",
+      "bunApi": "EventSource (global)",
+      "docs": "https://bun.sh/docs/api/http#server-sent-events",
+      "detectors": {
+        "packages": ["eventsource"],
+        "imports": ["eventsource"]
+      }
+    },
+    {
+      "id": "html-rewriter",
+      "name": "HTML Transforms",
+      "category": "http",
+      "bunApi": "HTMLRewriter",
+      "docs": "https://bun.sh/docs/api/html-rewriter",
+      "detectors": {
+        "packages": ["cheerio", "htmlparser2", "node-html-parser"],
+        "imports": ["cheerio"]
+      },
+      "notes": "HTMLRewriter is for streaming transforms, not DOM queries. Keep cheerio for complex parsing."
+    },
+    {
+      "id": "sqlite",
+      "name": "SQLite",
+      "category": "database",
+      "bunApi": "bun:sqlite",
+      "docs": "https://bun.sh/docs/api/sqlite",
+      "detectors": {
+        "packages": ["better-sqlite3", "sql.js", "sqlite3"]
+      }
+    },
+    {
+      "id": "sql",
+      "name": "SQL Databases",
+      "category": "database",
+      "bunApi": "Bun.SQL",
+      "docs": "https://bun.sh/docs/api/sql",
+      "detectors": {
+        "packages": ["pg", "postgres", "mysql2", "mariadb"]
+      },
+      "notes": "Bun.SQL supports PostgreSQL and MySQL. Check feature parity for advanced features."
+    },
+    {
+      "id": "redis",
+      "name": "Redis",
+      "category": "database",
+      "bunApi": "Bun.redis / Bun.RedisClient",
+      "docs": "https://bun.sh/docs/api/redis",
+      "detectors": {
+        "packages": ["ioredis", "redis"],
+        "imports": ["ioredis", "redis"]
+      }
+    },
+    {
+      "id": "s3",
+      "name": "S3 Storage",
+      "category": "database",
+      "bunApi": "Bun.S3Client / Bun.s3",
+      "docs": "https://bun.sh/docs/api/s3",
+      "detectors": {
+        "packages": ["@aws-sdk/client-s3"],
+        "imports": ["@aws-sdk/client-s3"]
+      }
+    },
+    {
+      "id": "password-hashing",
+      "name": "Password Hashing",
+      "category": "crypto",
+      "bunApi": "Bun.password.hash() / Bun.password.verify()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-password",
+      "detectors": {
+        "packages": ["bcrypt", "bcryptjs", "argon2"],
+        "imports": ["bcrypt", "bcryptjs", "argon2"]
+      }
+    },
+    {
+      "id": "hash-adler32",
+      "name": "Adler-32 Hash",
+      "category": "hashing",
+      "bunApi": "Bun.hash.adler32()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["adler-32"],
+        "imports": ["adler-32"]
+      }
+    },
+    {
+      "id": "hash-crc32",
+      "name": "CRC-32 Hash",
+      "category": "hashing",
+      "bunApi": "Bun.hash.crc32()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["crc-32", "crc32"],
+        "imports": ["crc-32", "crc32"]
+      }
+    },
+    {
+      "id": "hash-cityhash",
+      "name": "CityHash",
+      "category": "hashing",
+      "bunApi": "Bun.hash.cityHash32() / Bun.hash.cityHash64()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["cityhash"],
+        "imports": ["cityhash"]
+      }
+    },
+    {
+      "id": "hash-murmur",
+      "name": "MurmurHash",
+      "category": "hashing",
+      "bunApi": "Bun.hash.murmur32v2() / Bun.hash.murmur32v3()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["murmurhash", "murmurhash3"],
+        "imports": ["murmurhash", "murmurhash3"]
+      }
+    },
+    {
+      "id": "hash-xxhash",
+      "name": "xxHash",
+      "category": "hashing",
+      "bunApi": "Bun.hash.xxHash32() / Bun.hash.xxHash64()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["xxhash", "xxhash-addon", "xxhashjs"],
+        "imports": ["xxhash", "xxhashjs"]
+      }
+    },
+    {
+      "id": "hash-wyhash",
+      "name": "wyhash",
+      "category": "hashing",
+      "bunApi": "Bun.hash() / Bun.hash.wyhash()",
+      "docs": "https://bun.sh/docs/api/hashing#bun-hash",
+      "detectors": {
+        "packages": ["wyhash"],
+        "imports": ["wyhash"]
+      }
+    },
+    {
+      "id": "child-process",
+      "name": "Shell/Subprocess",
+      "category": "process",
+      "bunApi": "Bun.$`` shell / Bun.spawn()",
+      "docs": "https://bun.sh/docs/runtime/shell",
+      "detectors": {
+        "packages": ["execa", "shelljs", "cross-spawn"],
+        "imports": ["node:child_process"]
+      }
+    },
+    {
+      "id": "which",
+      "name": "Executable Lookup",
+      "category": "process",
+      "bunApi": "Bun.which()",
+      "docs": "https://bun.sh/docs/api/utils#bun-which",
+      "detectors": {
+        "packages": ["which"],
+        "imports": ["which"]
+      }
+    },
+    {
+      "id": "dotenv",
+      "name": "Environment Variables",
+      "category": "config",
+      "bunApi": "Built-in .env support",
+      "docs": "https://bun.sh/docs/runtime/env",
+      "detectors": {
+        "packages": ["dotenv", "dotenv-expand"],
+        "files": [".env.example"]
+      }
+    },
+    {
+      "id": "cross-env",
+      "name": "Cross-platform Env",
+      "category": "config",
+      "bunApi": "Bun.$`` shell",
+      "docs": "https://bun.sh/docs/runtime/shell",
+      "detectors": {
+        "packages": ["cross-env"]
+      },
+      "notes": "Bun shell handles cross-platform env vars natively"
+    },
+    {
+      "id": "semver",
+      "name": "Semantic Versioning",
+      "category": "utilities",
+      "bunApi": "Bun.semver.satisfies() / Bun.semver.order()",
+      "docs": "https://bun.sh/docs/api/semver",
+      "detectors": {
+        "packages": ["semver"],
+        "imports": ["semver"]
+      }
+    },
+    {
+      "id": "yaml",
+      "name": "YAML Parsing",
+      "category": "utilities",
+      "bunApi": "Bun.YAML.parse()",
+      "docs": "https://bun.sh/docs/api/utils#bun-yaml",
+      "detectors": {
+        "packages": ["js-yaml", "yaml"],
+        "imports": ["js-yaml", "yaml"]
+      }
+    },
+    {
+      "id": "toml",
+      "name": "TOML Parsing",
+      "category": "utilities",
+      "bunApi": "Bun.TOML.parse()",
+      "docs": "https://bun.sh/docs/api/utils#bun-toml",
+      "detectors": {
+        "packages": ["@iarna/toml", "toml"],
+        "imports": ["@iarna/toml", "toml"]
+      }
+    },
+    {
+      "id": "string-width",
+      "name": "String Width",
+      "category": "utilities",
+      "bunApi": "Bun.stringWidth()",
+      "docs": "https://bun.sh/docs/api/utils#bun-stringwidth",
+      "detectors": {
+        "packages": ["string-width"],
+        "imports": ["string-width"]
+      }
+    },
+    {
+      "id": "escape-html",
+      "name": "HTML Escaping",
+      "category": "utilities",
+      "bunApi": "Bun.escapeHTML()",
+      "docs": "https://bun.sh/docs/api/utils#bun-escapehtml",
+      "detectors": {
+        "packages": ["escape-html", "lodash.escape"],
+        "imports": ["escape-html", "lodash.escape", "lodash/escape"]
+      }
+    },
+    {
+      "id": "deep-equal",
+      "name": "Deep Equality",
+      "category": "utilities",
+      "bunApi": "Bun.deepEquals()",
+      "docs": "https://bun.sh/docs/api/utils#bun-deepequals",
+      "detectors": {
+        "packages": ["deep-equal", "lodash.isequal", "fast-deep-equal"],
+        "imports": [
+          "deep-equal",
+          "lodash.isequal",
+          "lodash/isEqual",
+          "fast-deep-equal"
+        ]
+      }
+    },
+    {
+      "id": "strip-ansi",
+      "name": "ANSI Stripping",
+      "category": "utilities",
+      "bunApi": "Bun.stripANSI()",
+      "docs": "https://bun.sh/docs/api/utils#bun-stripansi",
+      "detectors": {
+        "packages": ["strip-ansi", "ansi-regex", "strip-ansi-cjs"],
+        "imports": ["strip-ansi", "ansi-regex"]
+      },
+      "notes": "6-57x faster than npm packages"
+    },
+    {
+      "id": "base64",
+      "name": "Base64/Hex Encoding",
+      "category": "utilities",
+      "bunApi": "Buffer / Uint8Array.fromBase64() / toBase64()",
+      "docs": "https://bun.sh/docs/api/binary-data",
+      "detectors": {
+        "packages": ["base64-js", "js-base64"],
+        "imports": ["base64-js", "js-base64"]
+      }
+    },
+    {
+      "id": "archive",
+      "name": "Archive Extraction",
+      "category": "archive",
+      "bunApi": "Bun.Archive",
+      "docs": "https://bun.sh/docs/api/archive",
+      "detectors": {
+        "packages": ["tar", "archiver", "tar-fs", "tar-stream"],
+        "imports": ["tar", "archiver", "tar-fs"]
+      }
+    },
+    {
+      "id": "ffi",
+      "name": "Foreign Function Interface",
+      "category": "ffi",
+      "bunApi": "bun:ffi",
+      "docs": "https://bun.sh/docs/api/ffi",
+      "detectors": {
+        "packages": ["ffi-napi", "node-ffi", "ref-napi"],
+        "imports": ["ffi-napi", "node-ffi"]
+      }
+    },
+    {
+      "id": "glob",
+      "name": "Glob Pattern Matching",
+      "category": "file-io",
+      "bunApi": "Bun.Glob",
+      "docs": "https://bun.sh/docs/api/glob",
+      "detectors": {
+        "packages": [
+          "glob",
+          "fast-glob",
+          "globby",
+          "minimatch",
+          "micromatch",
+          "picomatch",
+          "tiny-glob"
+        ]
+      }
+    },
+    {
+      "id": "fetch",
+      "name": "HTTP Client",
+      "category": "http",
+      "bunApi": "fetch (global)",
+      "docs": "https://bun.sh/docs/api/http",
+      "detectors": {
+        "packages": [
+          "node-fetch",
+          "cross-fetch",
+          "isomorphic-fetch",
+          "axios",
+          "got",
+          "ky",
+          "undici",
+          "whatwg-fetch"
+        ]
+      }
+    },
+    {
+      "id": "uuid",
+      "name": "UUID Generation",
+      "category": "crypto",
+      "bunApi": "Bun.randomUUIDv7() / crypto.randomUUID()",
+      "docs": "https://bun.sh/docs/api/utils#bun-randomuuidv7",
+      "detectors": {
+        "packages": ["uuid", "uuidv4", "nanoid"]
+      }
+    },
+    {
+      "id": "color",
+      "name": "Color Parsing",
+      "category": "utilities",
+      "bunApi": "Bun.color()",
+      "docs": "https://bun.sh/docs/api/color",
+      "detectors": {
+        "packages": ["color", "tinycolor2", "color-convert", "chroma-js"]
+      },
+      "notes": "For CSS color parsing/conversion, not terminal colors"
+    },
+    {
+      "id": "cookie",
+      "name": "Cookie Parsing",
+      "category": "http",
+      "bunApi": "Bun.Cookie / Bun.CookieMap",
+      "docs": "https://bun.sh/docs/api/cookies",
+      "detectors": {
+        "packages": ["cookie", "tough-cookie", "cookies"]
+      }
+    },
+    {
+      "id": "sleep",
+      "name": "Async Sleep",
+      "category": "utilities",
+      "bunApi": "Bun.sleep() / Bun.sleepSync()",
+      "docs": "https://bun.sh/docs/api/utils#bun-sleep",
+      "detectors": {
+        "packages": ["delay", "sleep-promise", "timers-promises"]
+      }
+    },
+    {
+      "id": "dns",
+      "name": "DNS Resolution",
+      "category": "network",
+      "bunApi": "Bun.dns",
+      "docs": "https://bun.sh/docs/api/dns",
+      "detectors": {
+        "imports": ["node:dns", "node:dns/promises"]
+      }
+    },
+    {
+      "id": "tcp",
+      "name": "TCP Networking",
+      "category": "network",
+      "bunApi": "Bun.listen() / Bun.connect()",
+      "docs": "https://bun.sh/docs/api/tcp",
+      "detectors": {
+        "imports": ["node:net"]
+      }
+    },
+    {
+      "id": "udp",
+      "name": "UDP Networking",
+      "category": "network",
+      "bunApi": "Bun.udpSocket()",
+      "docs": "https://bun.sh/docs/api/udp",
+      "detectors": {
+        "imports": ["node:dgram"]
+      }
+    },
+    {
+      "id": "transpiler",
+      "name": "Code Transpilation",
+      "category": "bundling",
+      "bunApi": "Bun.Transpiler",
+      "docs": "https://bun.sh/docs/api/transpiler",
+      "detectors": {
+        "packages": [
+          "@babel/core",
+          "@babel/preset-env",
+          "@babel/preset-typescript",
+          "@swc/core"
+        ],
+        "files": ["babel.config.*", ".babelrc*", ".swcrc"]
+      }
+    },
+    {
+      "id": "ts-runner",
+      "name": "TypeScript Runner",
+      "category": "bundling",
+      "bunApi": "bun run (native TS)",
+      "docs": "https://bun.sh/docs/runtime/typescript",
+      "detectors": {
+        "packages": [
+          "ts-node",
+          "tsx",
+          "esbuild-register",
+          "ts-node-dev",
+          "@swc-node/register"
+        ]
+      },
+      "notes": "Bun runs TypeScript natively without transpilation step"
+    },
+    {
+      "id": "watch",
+      "name": "File Watching",
+      "category": "process",
+      "bunApi": "bun --watch / bun --hot",
+      "docs": "https://bun.sh/docs/runtime/hot",
+      "detectors": {
+        "packages": ["nodemon", "ts-node-dev", "concurrently"]
+      },
+      "notes": "Use bun --watch for restart on change, --hot for hot module replacement"
+    },
+    {
+      "id": "dir-ops",
+      "name": "Directory Operations",
+      "category": "file-io",
+      "bunApi": "node:fs / Bun.$``",
+      "docs": "https://bun.sh/docs/api/file-io",
+      "detectors": {
+        "packages": [
+          "mkdirp",
+          "make-dir",
+          "rimraf",
+          "del",
+          "del-cli",
+          "fs-extra"
+        ]
+      },
+      "notes": "Use fs.mkdir with recursive:true, fs.rm with recursive:true"
+    },
+    {
+      "id": "formdata",
+      "name": "FormData",
+      "category": "web-apis",
+      "bunApi": "FormData (global)",
+      "docs": "https://bun.sh/docs/runtime/web-apis",
+      "detectors": {
+        "packages": ["form-data", "formdata-node", "formdata-polyfill"]
+      }
+    },
+    {
+      "id": "abort-controller",
+      "name": "AbortController",
+      "category": "web-apis",
+      "bunApi": "AbortController (global)",
+      "docs": "https://bun.sh/docs/runtime/web-apis",
+      "detectors": {
+        "packages": ["abort-controller", "node-abort-controller"]
+      }
+    },
+    {
+      "id": "gzip",
+      "name": "Gzip Compression",
+      "category": "compression",
+      "bunApi": "Bun.gzipSync() / Bun.gunzipSync()",
+      "docs": "https://bun.sh/docs/api/utils#bun-gzipsync",
+      "detectors": {
+        "imports": ["node:zlib"],
+        "packages": ["pako", "zlib"]
+      }
+    },
+    {
+      "id": "zstd",
+      "name": "Zstandard Compression",
+      "category": "compression",
+      "bunApi": "Bun.zstdCompressSync() / Bun.zstdDecompressSync()",
+      "docs": "https://bun.sh/docs/api/utils#bun-zstdcompresssync",
+      "detectors": {
+        "packages": ["zstd-codec", "@aspect-build/zstd", "simple-zstd"]
+      }
+    },
+    {
+      "id": "deflate",
+      "name": "Deflate Compression",
+      "category": "compression",
+      "bunApi": "Bun.deflateSync() / Bun.inflateSync()",
+      "docs": "https://bun.sh/docs/api/utils#bun-deflatesync",
+      "detectors": {
+        "packages": ["pako"]
+      }
+    },
+    {
+      "id": "inspect",
+      "name": "Object Inspection",
+      "category": "utilities",
+      "bunApi": "Bun.inspect()",
+      "docs": "https://bun.sh/docs/api/utils#bun-inspect",
+      "detectors": {
+        "imports": ["node:util"]
+      }
+    },
+    {
+      "id": "resolve",
+      "name": "Module Resolution",
+      "category": "utilities",
+      "bunApi": "Bun.resolveSync()",
+      "docs": "https://bun.sh/docs/api/utils#bun-resolvesync",
+      "detectors": {
+        "packages": ["resolve", "enhanced-resolve"]
+      }
+    },
+    {
+      "id": "peek",
+      "name": "Promise Inspection",
+      "category": "utilities",
+      "bunApi": "Bun.peek()",
+      "docs": "https://bun.sh/docs/api/utils#bun-peek",
+      "detectors": {
+        "packages": ["p-state", "promise-state"]
+      },
+      "notes": "Synchronously read a promise's state without awaiting"
+    },
+    {
+      "id": "main-check",
+      "name": "Main Module Check",
+      "category": "utilities",
+      "bunApi": "import.meta.main",
+      "docs": "https://bun.sh/docs/api/import-meta",
+      "detectors": {
+        "packages": ["es-main"]
+      }
+    },
+    {
+      "id": "path-to-fileurl",
+      "name": "Path to File URL",
+      "category": "utilities",
+      "bunApi": "Bun.pathToFileURL() / Bun.fileURLToPath()",
+      "docs": "https://bun.sh/docs/api/utils#bun-pathtofileurl",
+      "detectors": {
+        "imports": ["node:url"]
+      },
+      "notes": "Available on Bun global, faster than node:url"
+    },
+    {
+      "id": "nanoseconds",
+      "name": "High-Resolution Time",
+      "category": "utilities",
+      "bunApi": "Bun.nanoseconds()",
+      "docs": "https://bun.sh/docs/api/utils#bun-nanoseconds",
+      "detectors": {
+        "packages": ["microtime", "nanotimer"]
+      }
+    }
+  ],
+  "ignores": [
+    {
+      "pattern": "node:cluster",
+      "reason": "Cluster module not supported in Bun"
+    },
+    {
+      "pattern": "node:worker_threads",
+      "reason": "Bun uses Web Worker API - different interface than worker_threads"
+    },
+    {
+      "pattern": "node:vm",
+      "reason": "VM module has limited support in Bun"
+    },
+    {
+      "pattern": "node:inspector",
+      "reason": "Inspector module not fully supported"
+    },
+    {
+      "pattern": "node:v8",
+      "reason": "V8-specific module - Bun uses JavaScriptCore"
+    },
+    {
+      "pattern": "node:async_hooks",
+      "reason": "Async hooks only partially supported"
+    },
+    {
+      "pattern": "node:trace_events",
+      "reason": "Trace events not supported"
+    },
+    {
+      "pattern": "node:diagnostics_channel",
+      "reason": "Diagnostics channel only partially supported"
+    },
+    {
+      "pattern": "node:crypto",
+      "reason": "Bun's crypto compatibility is comprehensive - no replacement needed"
+    },
+    {
+      "pattern": "chalk",
+      "reason": "No native terminal coloring API (Bun.color is for CSS colors)"
+    },
+    {
+      "pattern": "picocolors",
+      "reason": "No native terminal coloring API"
+    },
+    {
+      "pattern": "kleur",
+      "reason": "No native terminal coloring API"
+    },
+    {
+      "pattern": "ansi-styles",
+      "reason": "No native terminal styling API"
+    },
+    {
+      "pattern": "supports-color",
+      "reason": "No native terminal color detection API"
+    },
+    {
+      "pattern": "colorette",
+      "reason": "No native terminal coloring API"
+    },
+    {
+      "pattern": "ora",
+      "reason": "No native spinner/progress API"
+    },
+    {
+      "pattern": "cli-spinners",
+      "reason": "No native spinner API"
+    },
+    {
+      "pattern": "listr",
+      "reason": "No native task runner UI API"
+    },
+    {
+      "pattern": "listr2",
+      "reason": "No native task runner UI API"
+    },
+    {
+      "pattern": "inquirer",
+      "reason": "No native interactive prompt API"
+    },
+    {
+      "pattern": "prompts",
+      "reason": "No native interactive prompt API"
+    },
+    {
+      "pattern": "@inquirer/*",
+      "reason": "No native interactive prompt API"
+    },
+    {
+      "pattern": "commander",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "yargs",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "meow",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "cac",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "arg",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "minimist",
+      "reason": "No native CLI argument parsing API"
+    },
+    {
+      "pattern": "cheerio",
+      "reason": "HTMLRewriter only handles streaming transforms, not DOM queries",
+      "partialReplacement": true
+    },
+    {
+      "pattern": "jsdom",
+      "reason": "No native DOM implementation"
+    },
+    {
+      "pattern": "happy-dom",
+      "reason": "No native DOM implementation"
+    },
+    {
+      "pattern": "linkedom",
+      "reason": "No native DOM implementation"
+    },
+    {
+      "pattern": "@aws-sdk/*",
+      "reason": "Only S3 has native Bun support; other AWS services need the SDK",
+      "exceptions": ["@aws-sdk/client-s3"]
+    },
+    {
+      "pattern": "debug",
+      "reason": "No native namespaced debug logging API"
+    },
+    {
+      "pattern": "pino",
+      "reason": "No native structured logging API"
+    },
+    {
+      "pattern": "winston",
+      "reason": "No native logging framework API"
+    },
+    {
+      "pattern": "bunyan",
+      "reason": "No native structured logging API"
+    },
+    {
+      "pattern": "log4js",
+      "reason": "No native logging framework API"
+    },
+    {
+      "pattern": "tslib",
+      "reason": "TypeScript runtime helpers - keep for compatibility"
+    },
+    {
+      "pattern": "type-fest",
+      "reason": "TypeScript type utilities - types only, no runtime"
+    },
+    {
+      "pattern": "ts-toolbelt",
+      "reason": "TypeScript type utilities - types only, no runtime"
+    },
+    {
+      "pattern": "ms",
+      "reason": "No native time duration parsing API"
+    },
+    {
+      "pattern": "dayjs",
+      "reason": "No native date manipulation library"
+    },
+    {
+      "pattern": "date-fns",
+      "reason": "No native date manipulation library"
+    },
+    {
+      "pattern": "moment",
+      "reason": "No native date manipulation library"
+    },
+    {
+      "pattern": "luxon",
+      "reason": "No native date manipulation library"
+    },
+    {
+      "pattern": "lodash",
+      "reason": "No native utility library replacement; consider individual lodash methods that have Bun equivalents",
+      "partialReplacement": true,
+      "exceptions": ["lodash.escape", "lodash.isequal"]
+    },
+    {
+      "pattern": "underscore",
+      "reason": "No native utility library replacement"
+    },
+    {
+      "pattern": "ramda",
+      "reason": "No native functional programming library"
+    },
+    {
+      "pattern": "async",
+      "reason": "No native async utility library"
+    },
+    {
+      "pattern": "p-limit",
+      "reason": "No native concurrency limiter API"
+    },
+    {
+      "pattern": "p-queue",
+      "reason": "No native promise queue API"
+    },
+    {
+      "pattern": "p-retry",
+      "reason": "No native retry API"
+    },
+    {
+      "pattern": "p-map",
+      "reason": "No native concurrent map API"
+    },
+    {
+      "pattern": "json5",
+      "reason": "No native JSON5 parsing - consider standard JSON"
+    },
+    {
+      "pattern": "ini",
+      "reason": "No native INI parsing API"
+    },
+    {
+      "pattern": "dotenv-vault",
+      "reason": "Encryption/vault features beyond basic .env loading"
+    },
+    {
+      "pattern": "lru-cache",
+      "reason": "No native LRU cache API"
+    },
+    {
+      "pattern": "quick-lru",
+      "reason": "No native LRU cache API"
+    },
+    {
+      "pattern": "escape-string-regexp",
+      "reason": "No native regex escaping API - simple to implement inline"
+    },
+    {
+      "pattern": "camelcase",
+      "reason": "No native case conversion API"
+    },
+    {
+      "pattern": "change-case",
+      "reason": "No native case conversion API"
+    },
+    {
+      "pattern": "zod",
+      "reason": "No native schema validation - domain library"
+    },
+    {
+      "pattern": "yup",
+      "reason": "No native schema validation - domain library"
+    },
+    {
+      "pattern": "joi",
+      "reason": "No native schema validation - domain library"
+    },
+    {
+      "pattern": "ajv",
+      "reason": "No native JSON Schema validation - domain library"
+    },
+    {
+      "pattern": "valibot",
+      "reason": "No native schema validation - domain library"
+    },
+    {
+      "pattern": "express",
+      "reason": "Framework - can use Bun.serve() but migration requires effort",
+      "partialReplacement": true
+    },
+    {
+      "pattern": "fastify",
+      "reason": "Framework - can use Bun.serve() but migration requires effort",
+      "partialReplacement": true
+    },
+    {
+      "pattern": "koa",
+      "reason": "Framework - can use Bun.serve() but migration requires effort",
+      "partialReplacement": true
+    },
+    {
+      "pattern": "hono",
+      "reason": "Framework designed for Bun - no replacement needed, works great"
+    },
+    {
+      "pattern": "elysia",
+      "reason": "Framework designed for Bun - no replacement needed, works great"
+    },
+    {
+      "pattern": "drizzle-orm",
+      "reason": "ORM - domain library, works with Bun.sql"
+    },
+    {
+      "pattern": "prisma",
+      "reason": "ORM - domain library with own runtime"
+    },
+    {
+      "pattern": "kysely",
+      "reason": "Query builder - domain library, works with Bun.sql"
+    },
+    {
+      "pattern": "typeorm",
+      "reason": "ORM - domain library"
+    },
+    {
+      "pattern": "sequelize",
+      "reason": "ORM - domain library"
+    },
+    {
+      "pattern": "mongoose",
+      "reason": "MongoDB ODM - domain library"
+    },
+    {
+      "pattern": "mongodb",
+      "reason": "MongoDB driver - no native Bun MongoDB support"
+    },
+    {
+      "pattern": "react",
+      "reason": "UI framework - domain library"
+    },
+    {
+      "pattern": "vue",
+      "reason": "UI framework - domain library"
+    },
+    {
+      "pattern": "svelte",
+      "reason": "UI framework - domain library"
+    },
+    {
+      "pattern": "next",
+      "reason": "Meta-framework - domain library"
+    },
+    {
+      "pattern": "nuxt",
+      "reason": "Meta-framework - domain library"
+    },
+    {
+      "pattern": "@testing-library/*",
+      "reason": "Testing utilities - work with bun:test"
+    },
+    {
+      "pattern": "supertest",
+      "reason": "HTTP testing - works with Bun"
+    },
+    {
+      "pattern": "nock",
+      "reason": "HTTP mocking - consider Bun's mock module"
+    },
+    {
+      "pattern": "sinon",
+      "reason": "Test mocking - bun:test has built-in mocking"
+    },
+    {
+      "pattern": "c8",
+      "reason": "V8 coverage tool - Bun has built-in coverage"
+    },
+    {
+      "pattern": "nyc",
+      "reason": "Istanbul coverage - Bun has built-in coverage"
+    },
+    {
+      "pattern": "istanbul",
+      "reason": "Coverage tool - Bun has built-in coverage"
+    }
+  ]
+}

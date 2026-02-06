@@ -13,6 +13,11 @@ pre-commit:
       glob: "*.{ts,tsx}"
       run: bun run typecheck
 
+    sync-agent-scaffolding:
+      glob: ".claude/{settings.json,hooks/*}"
+      run: ./scripts/prebuild.sh
+      stage_fixed: true
+
 pre-push:
   parallel: false
   commands:

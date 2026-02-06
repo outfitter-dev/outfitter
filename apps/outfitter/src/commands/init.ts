@@ -17,9 +17,11 @@ import {
 } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { confirm, isCancel, select, text } from "@clack/prompts";
+// CLI is non-interactive. For guided init, use /scaffold skill in Claude Code.
 import { Result } from "@outfitter/contracts";
+import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
+import { runAdd } from "./add.js";
 import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "./shared-deps.js";
 
 // =============================================================================
@@ -35,13 +37,25 @@ export interface InitOptions {
   /** Package name (defaults to directory name if not provided) */
   readonly name: string | undefined;
   /** Binary name (defaults to project name if not provided) */
-  readonly bin?: string;
+  readonly bin?: string | undefined;
   /** Template to use (defaults to 'basic') */
   readonly template: string | undefined;
   /** Whether to use local/workspace dependencies */
-  readonly local?: boolean;
+  readonly local?: boolean | undefined;
   /** Whether to overwrite existing files */
   readonly force: boolean;
+  /** Tooling blocks to add (e.g., "scaffolding" or "claude,biome,lefthook") */
+  readonly with?: string | undefined;
+  /** Skip tooling prompt in interactive mode */
+  readonly noTooling?: boolean | undefined;
+}
+
+/**
+ * Result of running init, including any blocks added.
+ */
+export interface InitResult {
+  /** The blocks that were added, if any */
+  readonly blocksAdded?: AddBlockResult | undefined;
 }
 
 /**
@@ -210,58 +224,17 @@ function getOutputFilename(templateFilename: string): string {
 // Name Resolution
 // =============================================================================
 
-function isInteractive(): boolean {
-  return process.stdout.isTTY === true && process.env["TERM"] !== "dumb";
+/**
+ * Checks if package.json exists in the target directory.
+ */
+function hasPackageJson(targetDir: string): boolean {
+  return existsSync(join(targetDir, "package.json"));
 }
 
-interface PackageInfo {
-  readonly name?: string;
-  readonly bin?: string;
-}
-
-function readPackageInfo(targetDir: string): PackageInfo {
-  const packageJsonPath = join(targetDir, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return {};
-  }
-
-  try {
-    const content = readFileSync(packageJsonPath, "utf-8");
-    const parsed = JSON.parse(content) as Record<string, unknown>;
-    const name = parsed["name"];
-    const resolvedName =
-      typeof name === "string" && name.length > 0 ? name : undefined;
-
-    const bin = parsed["bin"];
-    let resolvedBin: string | undefined;
-    if (typeof bin === "string") {
-      resolvedBin = bin.length > 0 ? bin : undefined;
-    } else if (typeof bin === "object" && bin !== null) {
-      const entries = Object.entries(bin as Record<string, unknown>).filter(
-        ([, value]) => typeof value === "string"
-      );
-      const keys = entries.map(([key]) => key);
-      if (keys.length > 0) {
-        const derived = resolvedName ? deriveBinName(resolvedName) : undefined;
-        if (derived && keys.includes(derived)) {
-          resolvedBin = derived;
-        } else if (resolvedName && keys.includes(resolvedName)) {
-          resolvedBin = resolvedName;
-        } else {
-          resolvedBin = keys[0];
-        }
-      }
-    }
-
-    return {
-      ...(resolvedName ? { name: resolvedName } : {}),
-      ...(resolvedBin ? { bin: resolvedBin } : {}),
-    };
-  } catch {
-    return {};
-  }
-}
-
+/**
+ * Derives project name from package name.
+ * For scoped packages (@org/name), returns the name part.
+ */
 function deriveProjectName(packageName: string): string {
   if (packageName.startsWith("@")) {
     const parts = packageName.split("/");
@@ -272,127 +245,28 @@ function deriveProjectName(packageName: string): string {
   return packageName;
 }
 
-function deriveBinName(projectName: string): string {
-  if (projectName.startsWith("@")) {
-    const parts = projectName.split("/");
-    if (parts.length > 1 && parts[1]) {
-      return parts[1];
-    }
-  }
-  return projectName;
-}
-
-async function resolvePackageName(
+/**
+ * Resolves package name from options or directory name.
+ */
+function resolvePackageName(
   options: InitOptions,
-  resolvedTargetDir: string,
-  packageInfo: PackageInfo
-): Promise<Result<string, InitError>> {
-  if (options.name) {
-    return Result.ok(options.name);
-  }
-
-  const detectedName = packageInfo.name;
-  const fallbackName = basename(resolvedTargetDir);
-
-  if (!isInteractive()) {
-    return Result.ok(detectedName ?? fallbackName);
-  }
-
-  const suggested = detectedName ?? fallbackName;
-  const custom = await text({
-    message: "Package name",
-    placeholder: suggested,
-  });
-
-  if (isCancel(custom)) {
-    return Result.err(new InitError("Initialization cancelled."));
-  }
-
-  const trimmed = String(custom).trim();
-  return Result.ok(trimmed.length > 0 ? trimmed : suggested);
+  resolvedTargetDir: string
+): string {
+  return options.name ?? basename(resolvedTargetDir);
 }
 
-async function resolveBinName(
-  options: InitOptions,
-  projectName: string,
-  packageInfo: PackageInfo
-): Promise<Result<string, InitError>> {
-  if (options.bin) {
-    return Result.ok(options.bin);
-  }
-
-  const derived = deriveBinName(projectName);
-  const detected = packageInfo.bin;
-  if (!isInteractive()) {
-    return Result.ok(detected ?? derived);
-  }
-
-  if (detected) {
-    const useDetected = await confirm({
-      message: `Detected package binary name "${detected}". Use this as the binary name?`,
-    });
-
-    if (isCancel(useDetected)) {
-      return Result.err(new InitError("Initialization cancelled."));
-    }
-
-    if (useDetected) {
-      return Result.ok(detected);
-    }
-  }
-
-  const useDerived = await confirm({
-    message: `Use "${derived}" as the binary name?`,
-  });
-
-  if (isCancel(useDerived)) {
-    return Result.err(new InitError("Initialization cancelled."));
-  }
-
-  if (useDerived) {
-    return Result.ok(derived);
-  }
-
-  const custom = await text({
-    message: "Binary name",
-    placeholder: derived,
-  });
-
-  if (isCancel(custom)) {
-    return Result.err(new InitError("Initialization cancelled."));
-  }
-
-  const trimmed = String(custom).trim();
-  return Result.ok(trimmed.length > 0 ? trimmed : derived);
+/**
+ * Resolves binary name from options or project name.
+ */
+function resolveBinName(options: InitOptions, projectName: string): string {
+  return options.bin ?? deriveProjectName(projectName);
 }
 
-async function resolveTemplateName(
-  options: InitOptions
-): Promise<Result<string, InitError>> {
-  if (options.template) {
-    return Result.ok(options.template);
-  }
-
-  if (!isInteractive()) {
-    return Result.ok("basic");
-  }
-
-  const selection = await select({
-    message: "Select a template",
-    options: [
-      { value: "basic", label: "basic", hint: "Minimal starter" },
-      { value: "cli", label: "cli", hint: "CLI application" },
-      { value: "mcp", label: "mcp", hint: "MCP server" },
-      { value: "daemon", label: "daemon", hint: "Daemon + CLI" },
-    ],
-  });
-
-  if (isCancel(selection)) {
-    return Result.err(new InitError("Initialization cancelled."));
-  }
-
-  const value = String(selection).trim();
-  return Result.ok(value.length > 0 ? value : "basic");
+/**
+ * Resolves template name from options or defaults to "basic".
+ */
+function resolveTemplateName(options: InitOptions): string {
+  return options.template ?? "basic";
 }
 
 function resolveAuthor(): string {
@@ -425,6 +299,29 @@ function resolveAuthor(): string {
 
 function resolveYear(): string {
   return String(new Date().getFullYear());
+}
+
+/**
+ * Resolves which tooling blocks to add.
+ * Defaults to scaffolding unless --no-tooling is specified.
+ */
+function resolveBlocks(options: InitOptions): string[] | undefined {
+  // If --no-tooling specified, skip entirely
+  if (options.noTooling) {
+    return undefined;
+  }
+
+  // If --with specified, parse and use those
+  if (options.with) {
+    const blocks = options.with
+      .split(",")
+      .map((b) => b.trim())
+      .filter(Boolean);
+    return blocks.length > 0 ? blocks : undefined;
+  }
+
+  // Default to scaffolding
+  return ["scaffolding"];
 }
 
 /**
@@ -616,10 +513,14 @@ function injectSharedConfig(targetDir: string): Result<void, InitError> {
  *   name: "my-project",
  *   template: "basic",
  *   force: false,
+ *   blocks: "scaffolding", // Optional: add tooling blocks
  * });
  *
  * if (result.isOk()) {
  *   console.log("Project initialized successfully!");
+ *   if (result.value.blocksAdded) {
+ *     console.log(`Added ${result.value.blocksAdded.created.length} tooling files`);
+ *   }
  * } else {
  *   console.error("Failed:", result.error.message);
  * }
@@ -627,18 +528,24 @@ function injectSharedConfig(targetDir: string): Result<void, InitError> {
  */
 export async function runInit(
   options: InitOptions
-): Promise<Result<void, InitError>> {
+): Promise<Result<InitResult, InitError>> {
   const { targetDir, force } = options;
 
   // Resolve target directory
   const resolvedTargetDir = resolve(targetDir);
 
-  // Determine template
-  const templateNameResult = await resolveTemplateName(options);
-  if (templateNameResult.isErr()) {
-    return templateNameResult;
+  // Check for existing package.json (indicates existing project)
+  if (hasPackageJson(resolvedTargetDir) && !force) {
+    return Result.err(
+      new InitError(
+        `Directory '${resolvedTargetDir}' already has a package.json. ` +
+          `Use --force to overwrite, or use 'outfitter add' to add tooling to an existing project.`
+      )
+    );
   }
-  const templateName = templateNameResult.value;
+
+  // Determine template
+  const templateName = resolveTemplateName(options);
 
   // Validate template exists
   const templateResult = validateTemplate(templateName);
@@ -647,25 +554,10 @@ export async function runInit(
   }
   const templatePath = templateResult.value;
 
-  // Determine package name
-  const packageInfo = readPackageInfo(resolvedTargetDir);
-  const packageNameResult = await resolvePackageName(
-    options,
-    resolvedTargetDir,
-    packageInfo
-  );
-  if (packageNameResult.isErr()) {
-    return packageNameResult;
-  }
-  const packageName = packageNameResult.value;
+  // Determine package name and binary name
+  const packageName = resolvePackageName(options, resolvedTargetDir);
   const projectName = deriveProjectName(packageName);
-
-  // Determine binary name
-  const binNameResult = await resolveBinName(options, projectName, packageInfo);
-  if (binNameResult.isErr()) {
-    return binNameResult;
-  }
-  const binName = binNameResult.value;
+  const binName = resolveBinName(options, projectName);
 
   const author = resolveAuthor();
   const year = resolveYear();
@@ -681,34 +573,6 @@ export async function runInit(
     author,
     year,
   };
-
-  // Check if target directory exists and has files
-  if (existsSync(resolvedTargetDir) && !force) {
-    try {
-      const entries = readdirSync(resolvedTargetDir);
-      // Filter out hidden files and common ignorable files
-      const significantEntries = entries.filter(
-        (e) => !e.startsWith(".") || e === ".gitignore"
-      );
-      if (significantEntries.length > 0) {
-        // Check if any files would be overwritten
-        for (const entry of significantEntries) {
-          const templateEntry = `${entry}.template`;
-          const templateFilePath = join(templatePath, templateEntry);
-          const plainFilePath = join(templatePath, entry);
-          if (existsSync(templateFilePath) || existsSync(plainFilePath)) {
-            return Result.err(
-              new InitError(
-                `Directory '${resolvedTargetDir}' already exists with files that would be overwritten. Use --force to overwrite.`
-              )
-            );
-          }
-        }
-      }
-    } catch {
-      // If we can't read the directory, proceed (will fail later if actually problematic)
-    }
-  }
 
   // Ensure target directory exists
   try {
@@ -764,7 +628,49 @@ export async function runInit(
     }
   }
 
-  return Result.ok(undefined);
+  // Resolve and add registry blocks
+  const blocks = resolveBlocks(options);
+  let blocksAdded: AddBlockResult | undefined;
+
+  if (blocks && blocks.length > 0) {
+    // Merge results from all blocks
+    const mergedResult: AddBlockResult = {
+      created: [],
+      skipped: [],
+      overwritten: [],
+      dependencies: {},
+      devDependencies: {},
+    };
+
+    for (const blockName of blocks) {
+      const addResult = await runAdd({
+        block: blockName,
+        force,
+        dryRun: false,
+        cwd: resolvedTargetDir,
+      });
+
+      if (addResult.isErr()) {
+        // Wrap add errors as init errors for consistent error handling
+        return Result.err(
+          new InitError(
+            `Failed to add block '${blockName}': ${addResult.error.message}`
+          )
+        );
+      }
+
+      const blockResult = addResult.value;
+      mergedResult.created.push(...blockResult.created);
+      mergedResult.skipped.push(...blockResult.skipped);
+      mergedResult.overwritten.push(...blockResult.overwritten);
+      Object.assign(mergedResult.dependencies, blockResult.dependencies);
+      Object.assign(mergedResult.devDependencies, blockResult.devDependencies);
+    }
+
+    blocksAdded = mergedResult;
+  }
+
+  return Result.ok({ blocksAdded });
 }
 
 /**
@@ -793,6 +699,8 @@ export function initCommand(program: Command): void {
     force?: boolean;
     local?: boolean;
     workspace?: boolean;
+    with?: string;
+    noTooling?: boolean;
     opts?: () => InitCommandFlags;
   }
 
@@ -815,7 +723,51 @@ export function initCommand(program: Command): void {
       .option("-b, --bin <name>", "Binary name (defaults to project name)")
       .option("-f, --force", "Overwrite existing files", false)
       .option("--local", "Use workspace:* for @outfitter dependencies", false)
-      .option("--workspace", "Alias for --local", false);
+      .option("--workspace", "Alias for --local", false)
+      .option(
+        "--with <blocks>",
+        "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+      )
+      .option("--no-tooling", "Skip tooling setup");
+
+  const printInitResult = (targetDir: string, result: InitResult): void => {
+    console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+
+    if (result.blocksAdded) {
+      const { created, skipped, dependencies, devDependencies } =
+        result.blocksAdded;
+
+      if (created.length > 0) {
+        console.log(`\nAdded ${created.length} tooling file(s):`);
+        for (const file of created) {
+          console.log(`  ✓ ${file}`);
+        }
+      }
+
+      if (skipped.length > 0) {
+        console.log(`\nSkipped ${skipped.length} existing file(s):`);
+        for (const file of skipped) {
+          console.log(`  - ${file}`);
+        }
+      }
+
+      const depCount =
+        Object.keys(dependencies).length + Object.keys(devDependencies).length;
+      if (depCount > 0) {
+        console.log(`\nAdded ${depCount} package(s) to package.json:`);
+        for (const [name, version] of Object.entries(dependencies)) {
+          console.log(`  + ${name}@${version}`);
+        }
+        for (const [name, version] of Object.entries(devDependencies)) {
+          console.log(`  + ${name}@${version} (dev)`);
+        }
+      }
+    }
+
+    console.log("\nNext steps:");
+    console.log("  bun install");
+    console.log("  bun run dev");
+  };
 
   withCommonOptions(
     init
@@ -837,6 +789,8 @@ export function initCommand(program: Command): void {
         template: resolvedFlags.template,
         local,
         force: resolvedFlags.force ?? false,
+        with: resolvedFlags.with,
+        noTooling: resolvedFlags.noTooling,
         ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
       });
 
@@ -845,7 +799,7 @@ export function initCommand(program: Command): void {
         process.exit(1);
       }
 
-      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+      printInitResult(targetDir, result.value);
     }
   );
 
@@ -867,6 +821,8 @@ export function initCommand(program: Command): void {
         template: "cli",
         local,
         force: resolvedFlags.force ?? false,
+        with: resolvedFlags.with,
+        noTooling: resolvedFlags.noTooling,
         ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
       });
 
@@ -875,7 +831,7 @@ export function initCommand(program: Command): void {
         process.exit(1);
       }
 
-      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+      printInitResult(targetDir, result.value);
     }
   );
 
@@ -897,6 +853,8 @@ export function initCommand(program: Command): void {
         template: "mcp",
         local,
         force: resolvedFlags.force ?? false,
+        with: resolvedFlags.with,
+        noTooling: resolvedFlags.noTooling,
         ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
       });
 
@@ -905,7 +863,7 @@ export function initCommand(program: Command): void {
         process.exit(1);
       }
 
-      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+      printInitResult(targetDir, result.value);
     }
   );
 
@@ -929,6 +887,8 @@ export function initCommand(program: Command): void {
         template: "daemon",
         local,
         force: resolvedFlags.force ?? false,
+        with: resolvedFlags.with,
+        noTooling: resolvedFlags.noTooling,
         ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
       });
 
@@ -937,7 +897,7 @@ export function initCommand(program: Command): void {
         process.exit(1);
       }
 
-      console.log(`Project initialized successfully in ${resolve(targetDir)}`);
+      printInitResult(targetDir, result.value);
     }
   );
 }

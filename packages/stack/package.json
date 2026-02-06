@@ -19,7 +19,6 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@outfitter/agents": ">=0.1.0-rc.1",
     "@outfitter/cli": ">=0.1.0-rc.1",
     "@outfitter/config": ">=0.1.0-rc.1",
     "@outfitter/contracts": ">=0.1.0-rc.1",
@@ -34,9 +33,6 @@
     "@outfitter/ui": ">=0.1.0-rc.1"
   },
   "peerDependenciesMeta": {
-    "@outfitter/agents": {
-      "optional": true
-    },
     "@outfitter/cli": {
       "optional": true
     },

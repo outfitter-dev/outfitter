@@ -15,6 +15,12 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
+import {
+  type AddInput,
+  listBlocks,
+  printAddResults,
+  runAdd,
+} from "./commands/add.js";
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
@@ -209,6 +215,91 @@ const doctorAction = defineAction({
   },
 });
 
+const addInputSchema = z.object({
+  block: z.string(),
+  force: z.boolean(),
+  dryRun: z.boolean(),
+  cwd: z.string().optional(),
+}) as z.ZodType<AddInput>;
+
+const addAction = defineAction({
+  id: "add",
+  description: "Add a block from the registry to your project",
+  surfaces: ["cli"],
+  input: addInputSchema,
+  cli: {
+    group: "add",
+    command: "<block>",
+    description:
+      "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
+    options: [
+      {
+        flags: "-f, --force",
+        description: "Overwrite existing files",
+        defaultValue: false,
+      },
+      {
+        flags: "--dry-run",
+        description: "Show what would be added without making changes",
+        defaultValue: false,
+      },
+    ],
+    mapInput: (context) => ({
+      block: context.args[0] as string,
+      force: Boolean(context.flags["force"]),
+      dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
+      cwd: process.cwd(),
+    }),
+  },
+  handler: async (input) => {
+    const result = await runAdd(input);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "add" },
+        })
+      );
+    }
+
+    printAddResults(result.value, input.dryRun);
+    return Result.ok(result.value);
+  },
+});
+
+const listBlocksAction = defineAction({
+  id: "add.list",
+  description: "List available blocks",
+  surfaces: ["cli"],
+  input: z.object({}),
+  cli: {
+    group: "add",
+    command: "list",
+    description: "List available blocks",
+    mapInput: () => ({}),
+  },
+  handler: () => {
+    const result = listBlocks();
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "add.list" },
+        })
+      );
+    }
+
+    console.log("Available blocks:");
+    for (const block of result.value) {
+      console.log(`  - ${block}`);
+    }
+
+    return Result.ok({ blocks: result.value });
+  },
+});
+
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(
     createInitAction({
@@ -243,4 +334,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
     })
   )
   .add(demoAction)
-  .add(doctorAction);
+  .add(doctorAction)
+  .add(addAction)
+  .add(listBlocksAction);

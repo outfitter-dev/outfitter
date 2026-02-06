@@ -56,6 +56,34 @@ package/types:
       - any-glob-to-any-file: packages/types/**
 
 # =============================================================================
+# PLUGINS
+# =============================================================================
+
+plugin/outfitter:
+  - changed-files:
+      - any-glob-to-any-file: plugins/outfitter/**
+
+plugin/stack:
+  - changed-files:
+      - any-glob-to-any-file: plugins/stack/**
+
+plugin/team:
+  - changed-files:
+      - any-glob-to-any-file: plugins/team/**
+
+plugin/gt:
+  - changed-files:
+      - any-glob-to-any-file: plugins/gt/**
+
+plugin/but:
+  - changed-files:
+      - any-glob-to-any-file: plugins/but/**
+
+plugin/cli-dev:
+  - changed-files:
+      - any-glob-to-any-file: plugins/cli-dev/**
+
+# =============================================================================
 # AREAS
 # =============================================================================
 
@@ -65,7 +93,7 @@ area/agents:
           - CLAUDE.md
           - AGENTS.md
           - .claude/**
-          - packages/claude-plugin/**
+          - plugins/**
           - "**/skills/**"
           - "**/agents/**"
 

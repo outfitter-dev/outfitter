@@ -1,0 +1,11 @@
+{
+  "name": "team",
+  "version": "0.5.0",
+  "description": "Internal Outfitter team skills for docs, voice, and conventions",
+  "author": {
+    "name": "Outfitter",
+    "email": "team@outfitter.dev"
+  },
+  "keywords": ["team", "documentation", "internal", "voice"],
+  "license": "MIT"
+}

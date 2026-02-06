@@ -1,5 +1,24 @@
 # @outfitter/agents
 
+> **⚠️ DEPRECATED**: This package is deprecated. Use `npx outfitter add scaffolding` instead.
+>
+> The shadcn-style registry in `outfitter` CLI now provides the same functionality with better flexibility:
+>
+> ```bash
+> # Add all scaffolding files
+> npx outfitter add scaffolding
+>
+> # Or add individual blocks
+> npx outfitter add claude      # Claude Code settings & hooks
+> npx outfitter add biome       # Biome configuration
+> npx outfitter add lefthook    # Git hooks
+> npx outfitter add bootstrap   # Bootstrap script
+> ```
+>
+> See the [outfitter CLI documentation](https://github.com/outfitter-dev/outfitter) for more details.
+
+---
+
 Agent scaffolding and bootstrap utilities for AI-ready projects.
 
 ## Installation

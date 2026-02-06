@@ -14,6 +14,7 @@ bun run dev
 ```
 
 **Output:**
+
 ```
 my-project v0.1.0
 
@@ -39,6 +40,7 @@ Outfitter is opinionated infrastructure for the Bun ecosystem. The patterns assu
 ## Packages
 
 Three tiers, one goal: shared infrastructure that works for humans and machines.
+
 - **Stable** — APIs locked, breaking changes rare
 - **Active** — APIs evolving based on usage
 - **Early** — APIs will change, not production-ready
@@ -65,7 +67,6 @@ The building blocks for applications.
 | `@outfitter/file-ops` | Path security, atomic writes, file locking |
 | `@outfitter/index` | SQLite full-text search (FTS5) with WAL mode |
 | `@outfitter/daemon` | Daemon lifecycle, health checks, IPC |
-| `@outfitter/agents` | Agent scaffolding and templates |
 | `@outfitter/state` | Pagination cursors and ephemeral state |
 
 ### Tooling (Early)
