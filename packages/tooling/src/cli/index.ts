@@ -11,6 +11,8 @@ import { Command } from "commander";
 import { runCheck } from "./check.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
+import { runPrePush } from "./pre-push.js";
+import { runUpgradeBun } from "./upgrade-bun.js";
 
 const program = new Command();
 
@@ -40,6 +42,23 @@ program
 	.argument("[paths...]", "Paths to fix")
 	.action(async (paths: string[]) => {
 		await runFix(paths);
+	});
+
+program
+	.command("upgrade-bun")
+	.description("Upgrade Bun version across the project")
+	.argument("[version]", "Target version (defaults to latest)")
+	.option("--no-install", "Skip installing Bun and updating lockfile")
+	.action(async (version: string | undefined, options: { install: boolean }) => {
+		await runUpgradeBun(version, options);
+	});
+
+program
+	.command("pre-push")
+	.description("TDD-aware pre-push test hook")
+	.option("-f, --force", "Skip tests entirely")
+	.action(async (options: { force?: boolean }) => {
+		await runPrePush(options);
 	});
 
 program.parse();

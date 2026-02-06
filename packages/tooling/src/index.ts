@@ -2,7 +2,7 @@
  * @outfitter/tooling
  *
  * Dev tooling configuration presets for Outfitter projects.
- * Provides standardized biome, TypeScript, and lefthook configurations.
+ * Provides standardized biome, TypeScript, lefthook, and markdownlint configurations.
  *
  * @example
  * ```json

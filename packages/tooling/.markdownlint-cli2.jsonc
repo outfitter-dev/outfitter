@@ -1,0 +1,66 @@
+{
+  // Outfitter markdownlint preset
+  // https://github.com/DavidAnson/markdownlint
+
+  "config": {
+    // Headings
+    "MD003": { "style": "atx" },           // ATX-style headings (# Heading)
+    "MD022": { "lines_above": 1, "lines_below": 1 }, // Blank lines around headings
+    "MD024": { "siblings_only": true },    // Allow duplicate headings in different sections
+    "MD041": false,                         // First line doesn't need to be h1 (frontmatter, etc.)
+
+    // Line length - disabled for prose flexibility
+    "MD013": false,
+
+    // Lists
+    "MD004": { "style": "dash" },           // Unordered list style: dash (-)
+    "MD007": { "indent": 2 },               // List indentation: 2 spaces
+    "MD032": true,                          // Blank lines around lists
+
+    // Code blocks
+    "MD040": true,                          // Fenced code blocks should have a language
+    "MD046": { "style": "fenced" },         // Code block style: fenced (```)
+    "MD048": { "style": "backtick" },       // Code fence style: backticks
+
+    // Links
+    "MD034": true,                          // No bare URLs (use <url> or [text](url))
+
+    // Whitespace
+    "MD009": { "br_spaces": 2 },            // Allow 2 trailing spaces for <br>
+    "MD010": { "spaces_per_tab": 2 },       // Tabs to spaces
+    "MD012": { "maximum": 1 },              // Max 1 consecutive blank line
+    "MD047": true,                          // Files should end with newline
+
+    // HTML - allow for GitHub-specific elements
+    "MD033": {
+      "allowed_elements": [
+        "details",
+        "summary",
+        "kbd",
+        "br",
+        "sup",
+        "sub",
+        "img",
+        "picture",
+        "source",
+        "a"
+      ]
+    },
+
+    // Emphasis
+    "MD049": { "style": "asterisk" },       // Emphasis style: *italic*
+    "MD050": { "style": "asterisk" }        // Strong style: **bold**
+  },
+
+  // Ignore patterns
+  "ignores": [
+    "node_modules/**",
+    "**/node_modules/**",
+    "dist/**",
+    "**/dist/**",
+    ".turbo/**",
+    "**/.turbo/**",
+    "CHANGELOG.md",
+    "**/CHANGELOG.md"
+  ]
+}

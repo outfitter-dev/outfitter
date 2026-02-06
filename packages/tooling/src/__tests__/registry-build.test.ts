@@ -56,6 +56,16 @@ describe("Registry Build Output", () => {
 		expect(biome.devDependencies?.ultracite).toBeDefined();
 	});
 
+	test("markdownlint block has correct file", () => {
+		const content = readFileSync(registryPath, "utf-8");
+		const registry = RegistrySchema.parse(JSON.parse(content));
+
+		const markdownlint = registry.blocks.markdownlint;
+		expect(markdownlint).toBeDefined();
+		expect(markdownlint.files).toHaveLength(1);
+		expect(markdownlint.files?.[0]?.path).toBe(".markdownlint-cli2.jsonc");
+	});
+
 	test("scaffolding block extends other blocks", () => {
 		const content = readFileSync(registryPath, "utf-8");
 		const registry = RegistrySchema.parse(JSON.parse(content));
@@ -65,6 +75,7 @@ describe("Registry Build Output", () => {
 			"claude",
 			"biome",
 			"lefthook",
+			"markdownlint",
 			"bootstrap",
 		]);
 		expect(scaffolding.files).toBeUndefined();

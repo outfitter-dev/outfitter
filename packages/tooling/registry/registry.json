@@ -35,12 +35,22 @@
       "files": [
         {
           "path": ".lefthook.yml",
-          "content": "# Lefthook configuration preset for Outfitter projects\n# https://github.com/evilmartians/lefthook\n#\n# Usage: In your project's .lefthook.yml, add:\n#   extends:\n#     - node_modules/@outfitter/tooling/lefthook.yml\n\npre-commit:\n  parallel: true\n  commands:\n    ultracite:\n      glob: \"*.{js,jsx,ts,tsx,json,jsonc,css}\"\n      run: bun x ultracite fix {staged_files}\n      stage_fixed: true\n\n    typecheck:\n      glob: \"*.{ts,tsx}\"\n      run: bun run typecheck\n\npre-push:\n  parallel: false\n  commands:\n    build:\n      run: bun run build\n\n    test:\n      # TDD Override: For RED phase support, override in your project's lefthook.yml:\n      #   pre-push:\n      #     commands:\n      #       test:\n      #         run: ./scripts/pre-push-test.sh  # allows *-tests branches with failing tests\n      run: bun run test\n"
+          "content": "# Lefthook configuration preset for Outfitter projects\n# https://github.com/evilmartians/lefthook\n#\n# Usage: In your project's .lefthook.yml, add:\n#   extends:\n#     - node_modules/@outfitter/tooling/lefthook.yml\n\npre-commit:\n  parallel: true\n  commands:\n    ultracite:\n      glob: \"*.{js,jsx,ts,tsx,json,jsonc,css}\"\n      run: bun x ultracite fix {staged_files}\n      stage_fixed: true\n\n    typecheck:\n      glob: \"*.{ts,tsx}\"\n      run: bun run typecheck\n\npre-push:\n  parallel: false\n  commands:\n    build:\n      run: bun run build\n\n    test:\n      # TDD-aware: skips tests on RED phase branches (*-tests, */tests, *_tests)\n      # Override with `run: bun run test` if you don't want TDD support\n      run: bunx @outfitter/tooling pre-push\n"
         }
       ],
       "devDependencies": {
         "lefthook": "^2.0.0"
       }
+    },
+    "markdownlint": {
+      "name": "markdownlint",
+      "description": "Markdown linting configuration via markdownlint-cli2",
+      "files": [
+        {
+          "path": ".markdownlint-cli2.jsonc",
+          "content": "{\n  // Outfitter markdownlint preset\n  // https://github.com/DavidAnson/markdownlint\n\n  \"config\": {\n    // Headings\n    \"MD003\": { \"style\": \"atx\" },           // ATX-style headings (# Heading)\n    \"MD022\": { \"lines_above\": 1, \"lines_below\": 1 }, // Blank lines around headings\n    \"MD024\": { \"siblings_only\": true },    // Allow duplicate headings in different sections\n    \"MD041\": false,                         // First line doesn't need to be h1 (frontmatter, etc.)\n\n    // Line length - disabled for prose flexibility\n    \"MD013\": false,\n\n    // Lists\n    \"MD004\": { \"style\": \"dash\" },           // Unordered list style: dash (-)\n    \"MD007\": { \"indent\": 2 },               // List indentation: 2 spaces\n    \"MD032\": true,                          // Blank lines around lists\n\n    // Code blocks\n    \"MD040\": true,                          // Fenced code blocks should have a language\n    \"MD046\": { \"style\": \"fenced\" },         // Code block style: fenced (```)\n    \"MD048\": { \"style\": \"backtick\" },       // Code fence style: backticks\n\n    // Links\n    \"MD034\": true,                          // No bare URLs (use <url> or [text](url))\n\n    // Whitespace\n    \"MD009\": { \"br_spaces\": 2 },            // Allow 2 trailing spaces for <br>\n    \"MD010\": { \"spaces_per_tab\": 2 },       // Tabs to spaces\n    \"MD012\": { \"maximum\": 1 },              // Max 1 consecutive blank line\n    \"MD047\": true,                          // Files should end with newline\n\n    // HTML - allow for GitHub-specific elements\n    \"MD033\": {\n      \"allowed_elements\": [\n        \"details\",\n        \"summary\",\n        \"kbd\",\n        \"br\",\n        \"sup\",\n        \"sub\",\n        \"img\",\n        \"picture\",\n        \"source\",\n        \"a\"\n      ]\n    },\n\n    // Emphasis\n    \"MD049\": { \"style\": \"asterisk\" },       // Emphasis style: *italic*\n    \"MD050\": { \"style\": \"asterisk\" }        // Strong style: **bold**\n  },\n\n  // Ignore patterns\n  \"ignores\": [\n    \"node_modules/**\",\n    \"**/node_modules/**\",\n    \"dist/**\",\n    \"**/dist/**\",\n    \".turbo/**\",\n    \"**/.turbo/**\",\n    \"CHANGELOG.md\",\n    \"**/CHANGELOG.md\"\n  ]\n}\n"
+        }
+      ]
     },
     "bootstrap": {
       "name": "bootstrap",
@@ -55,11 +65,12 @@
     },
     "scaffolding": {
       "name": "scaffolding",
-      "description": "Full starter kit: Claude settings, Biome, Lefthook, and bootstrap script",
+      "description": "Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
       "extends": [
         "claude",
         "biome",
         "lefthook",
+        "markdownlint",
         "bootstrap"
       ]
     }

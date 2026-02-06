@@ -146,13 +146,18 @@ const REGISTRY_CONFIG: RegistryBuildConfig = {
 			remap: { "packages/tooling/lefthook.yml": ".lefthook.yml" },
 			devDependencies: { lefthook: "^2.0.0" },
 		},
+		markdownlint: {
+			description: "Markdown linting configuration via markdownlint-cli2",
+			files: ["packages/tooling/.markdownlint-cli2.jsonc"],
+			remap: { "packages/tooling/.markdownlint-cli2.jsonc": ".markdownlint-cli2.jsonc" },
+		},
 		bootstrap: {
 			description: "Project bootstrap script for installing tools and dependencies",
 			files: ["scripts/bootstrap.sh"],
 		},
 		scaffolding: {
-			description: "Full starter kit: Claude settings, Biome, Lefthook, and bootstrap script",
-			extends: ["claude", "biome", "lefthook", "bootstrap"],
+			description: "Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
+			extends: ["claude", "biome", "lefthook", "markdownlint", "bootstrap"],
 		},
 	},
 };

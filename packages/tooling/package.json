@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/tooling",
-  "description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook)",
+  "description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
   "version": "0.1.0-rc.1",
   "type": "module",
   "files": [
@@ -9,7 +9,8 @@
     "biome.json",
     "tsconfig.preset.json",
     "tsconfig.preset.bun.json",
-    "lefthook.yml"
+    "lefthook.yml",
+    ".markdownlint-cli2.jsonc"
   ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -48,7 +49,8 @@
     "./biome.json": "./biome.json",
     "./tsconfig.preset.json": "./tsconfig.preset.json",
     "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
-    "./lefthook.yml": "./lefthook.yml"
+    "./lefthook.yml": "./lefthook.yml",
+    "./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc"
   },
   "bin": {
     "tooling": "./dist/cli/index.js"
@@ -75,13 +77,17 @@
   },
   "peerDependencies": {
     "ultracite": "^7.0.0",
-    "lefthook": "^2.0.0"
+    "lefthook": "^2.0.0",
+    "markdownlint-cli2": ">=0.17.0"
   },
   "peerDependenciesMeta": {
     "ultracite": {
       "optional": true
     },
     "lefthook": {
+      "optional": true
+    },
+    "markdownlint-cli2": {
       "optional": true
     }
   },
@@ -94,6 +100,7 @@
     "biome",
     "typescript",
     "lefthook",
+    "markdownlint",
     "config",
     "presets"
   ],
