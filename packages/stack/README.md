@@ -35,7 +35,6 @@ See [VERSIONS.md](./VERSIONS.md) for the complete compatibility matrix.
 
 | Package | Minimum Version |
 |---------|-----------------|
-| @outfitter/agents | 0.1.0-rc.1 |
 | @outfitter/contracts | 0.1.0-rc.1 |
 | @outfitter/types | 0.1.0-rc.1 |
 | @outfitter/cli | 0.1.0-rc.1 |

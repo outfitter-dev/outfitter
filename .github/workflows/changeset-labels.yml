@@ -1,0 +1,109 @@
+name: Changeset Labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .changeset/*.md
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect release type from changesets
+        id: detect
+        run: |
+          # Find all changeset files (exclude README)
+          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" 2>/dev/null || true)
+
+          if [ -z "$CHANGESETS" ]; then
+            echo "No changesets found"
+            echo "release_type=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Found changesets:"
+          echo "$CHANGESETS"
+
+          # Check for major/minor/patch in changeset content
+          # Changesets format: `"package": major|minor|patch`
+          HAS_MAJOR=false
+          HAS_MINOR=false
+          HAS_PATCH=false
+
+          for file in $CHANGESETS; do
+            if grep -qE '": *major' "$file" 2>/dev/null; then
+              HAS_MAJOR=true
+            fi
+            if grep -qE '": *minor' "$file" 2>/dev/null; then
+              HAS_MINOR=true
+            fi
+            if grep -qE '": *patch' "$file" 2>/dev/null; then
+              HAS_PATCH=true
+            fi
+          done
+
+          # Determine highest bump type
+          if [ "$HAS_MAJOR" = true ]; then
+            echo "release_type=major" >> $GITHUB_OUTPUT
+          elif [ "$HAS_MINOR" = true ]; then
+            echo "release_type=minor" >> $GITHUB_OUTPUT
+          elif [ "$HAS_PATCH" = true ]; then
+            echo "release_type=patch" >> $GITHUB_OUTPUT
+          else
+            echo "No version bumps detected in changesets"
+            echo "release_type=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply release label
+        if: steps.detect.outputs.release_type != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releaseType = '${{ steps.detect.outputs.release_type }}';
+            const labelToAdd = `release:${releaseType}`;
+            const labelsToRemove = ['release:major', 'release:minor', 'release:patch'].filter(l => l !== labelToAdd);
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            // Get current labels
+            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+              owner,
+              repo,
+              issue_number
+            });
+            const currentLabelNames = currentLabels.map(l => l.name);
+
+            // Remove other release labels if present
+            for (const label of labelsToRemove) {
+              if (currentLabelNames.includes(label)) {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: label
+                });
+                console.log(`Removed ${label}`);
+              }
+            }
+
+            // Add the correct label if not present
+            if (!currentLabelNames.includes(labelToAdd)) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: [labelToAdd]
+              });
+              console.log(`Added ${labelToAdd}`);
+            } else {
+              console.log(`${labelToAdd} already present`);
+            }

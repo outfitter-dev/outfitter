@@ -1,0 +1,157 @@
+# Path-based auto-labeling for PRs
+# Used by: .github/workflows/auto-label.yml
+#
+# Docs: https://github.com/actions/labeler
+
+# =============================================================================
+# PACKAGES
+# =============================================================================
+
+package/contracts:
+  - changed-files:
+      - any-glob-to-any-file: packages/contracts/**
+
+package/cli:
+  - changed-files:
+      - any-glob-to-any-file: packages/cli/**
+
+package/mcp:
+  - changed-files:
+      - any-glob-to-any-file: packages/mcp/**
+
+package/config:
+  - changed-files:
+      - any-glob-to-any-file: packages/config/**
+
+package/logging:
+  - changed-files:
+      - any-glob-to-any-file: packages/logging/**
+
+package/daemon:
+  - changed-files:
+      - any-glob-to-any-file: packages/daemon/**
+
+package/file-ops:
+  - changed-files:
+      - any-glob-to-any-file: packages/file-ops/**
+
+package/state:
+  - changed-files:
+      - any-glob-to-any-file: packages/state/**
+
+package/index:
+  - changed-files:
+      - any-glob-to-any-file: packages/index/**
+
+package/testing:
+  - changed-files:
+      - any-glob-to-any-file: packages/testing/**
+
+package/tooling:
+  - changed-files:
+      - any-glob-to-any-file: packages/tooling/**
+
+package/types:
+  - changed-files:
+      - any-glob-to-any-file: packages/types/**
+
+# =============================================================================
+# PLUGINS
+# =============================================================================
+
+plugin/outfitter:
+  - changed-files:
+      - any-glob-to-any-file: plugins/outfitter/**
+
+plugin/stack:
+  - changed-files:
+      - any-glob-to-any-file: plugins/stack/**
+
+plugin/team:
+  - changed-files:
+      - any-glob-to-any-file: plugins/team/**
+
+plugin/gt:
+  - changed-files:
+      - any-glob-to-any-file: plugins/gt/**
+
+plugin/but:
+  - changed-files:
+      - any-glob-to-any-file: plugins/but/**
+
+plugin/cli-dev:
+  - changed-files:
+      - any-glob-to-any-file: plugins/cli-dev/**
+
+# =============================================================================
+# AREAS
+# =============================================================================
+
+area/agents:
+  - changed-files:
+      - any-glob-to-any-file:
+          - CLAUDE.md
+          - AGENTS.md
+          - .claude/**
+          - plugins/**
+          - "**/skills/**"
+          - "**/agents/**"
+
+area/ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+          - .github/actions/**
+
+area/infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - scripts/**
+          - lefthook.yml
+          - .bun-version
+
+area/monorepo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - turbo.json
+          - bun.lock
+          - package.json
+          - tsconfig.json
+          - biome.json
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - docs/**
+
+testing:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.test.ts"
+          - "**/__tests__/**"
+          - "**/fixtures/**"
+
+deps:
+  - changed-files:
+      - any-glob-to-any-file:
+          - bun.lock
+          - "**/package.json"
+
+# =============================================================================
+# RELEASE
+# Note: Release labels (release:major/minor/patch) are handled by
+# changeset-labels.yml workflow which detects bump type from changeset content.
+# Do not add path-based release labels here.
+# =============================================================================
+
+# =============================================================================
+# TOOLS
+# =============================================================================
+
+graphite:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .graphite/**
+          - .graphiterc*

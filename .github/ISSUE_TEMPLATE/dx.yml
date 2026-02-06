@@ -1,0 +1,66 @@
+name: Developer Experience
+description: Report poor DX, confusing APIs, or ergonomic issues
+labels: ["dx", "feedback", "source/user"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package has the DX issue?
+      options:
+        - "@outfitter/contracts"
+        - "@outfitter/cli"
+        - "@outfitter/mcp"
+        - "@outfitter/config"
+        - "@outfitter/logging"
+        - "@outfitter/daemon"
+        - "@outfitter/file-ops"
+        - "@outfitter/state"
+        - "@outfitter/index"
+        - "@outfitter/testing"
+        - "@outfitter/tooling"
+        - "@outfitter/types"
+        - "outfitter (CLI)"
+        - "Multiple packages"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's the DX issue?
+      placeholder: Describe what made the experience frustrating or confusing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Experience
+      description: What does the current experience look like?
+      placeholder: |
+        - Error messages are unclear
+        - API requires too many steps
+        - Types don't help with autocomplete
+    validations:
+      required: true
+
+  - type: textarea
+    id: ideal
+    attributes:
+      label: Ideal Experience
+      description: What would a better experience look like?
+      placeholder: Describe what you expected or hoped would happen.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What were you trying to accomplish?
+      placeholder: Describe the task that led to this frustration.
+    validations:
+      required: false

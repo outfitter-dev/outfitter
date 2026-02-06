@@ -1,0 +1,67 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+labels: ["feature", "feedback", "source/user"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package would this affect?
+      options:
+        - "@outfitter/contracts"
+        - "@outfitter/cli"
+        - "@outfitter/mcp"
+        - "@outfitter/config"
+        - "@outfitter/logging"
+        - "@outfitter/daemon"
+        - "@outfitter/file-ops"
+        - "@outfitter/state"
+        - "@outfitter/index"
+        - "@outfitter/testing"
+        - "@outfitter/tooling"
+        - "@outfitter/types"
+        - "outfitter (CLI)"
+        - "New package"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What feature or improvement would you like?
+      placeholder: Describe the feature clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: What problem does this solve?
+      placeholder: Explain the scenario where you need this.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: Proposed API
+      description: How might this work?
+      placeholder: |
+        ```typescript
+        // Example usage
+        const result = await newFeature(input);
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches did you consider?
+      placeholder: Describe alternatives and why they don't work well.
+    validations:
+      required: false

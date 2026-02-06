@@ -34,7 +34,6 @@ Each package has detailed API documentation. Stability labels indicate API matur
 - [@outfitter/mcp](../packages/mcp/README.md) — MCP server framework with typed tools
 - [@outfitter/index](../packages/index/README.md) — SQLite FTS5 full-text search
 - [@outfitter/daemon](../packages/daemon/README.md) — Daemon lifecycle, IPC, health checks
-- [@outfitter/agents](../packages/agents/README.md) — Agent scaffolding and bootstrap
 
 ### Tooling (Early)
 

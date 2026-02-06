@@ -1,0 +1,199 @@
+name: Stack Position Labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Prevent label churn during active merges
+# Only one instance runs at a time per stack (based on base branch)
+concurrency:
+  group: stack-labels-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-position:
+    # Skip forks (can't reliably detect stack structure)
+    if: |
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Small delay to let rapid events settle (e.g., during merge queue)
+      - name: Debounce
+        run: sleep 5
+
+      - name: Detect stack position
+        id: detect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          echo "PR: #$PR_NUMBER"
+          echo "Base: $BASE_REF"
+          echo "Head: $HEAD_REF"
+
+          # Check if base is trunk
+          IS_BASE_TRUNK=false
+          if [[ "$BASE_REF" == "main" || "$BASE_REF" == "master" ]]; then
+            IS_BASE_TRUNK=true
+          fi
+
+          # Check if this branch has children (other open PRs targeting it)
+          CHILD_COUNT=$(gh pr list --repo "$REPO" --base "$HEAD_REF" --state open --json number --jq 'length')
+          HAS_CHILDREN=false
+          if [[ "$CHILD_COUNT" -gt 0 ]]; then
+            HAS_CHILDREN=true
+          fi
+
+          echo "is_base_trunk=$IS_BASE_TRUNK"
+          echo "has_children=$HAS_CHILDREN (count: $CHILD_COUNT)"
+
+          # Determine position
+          # Note: Split stacks can have multiple stack:top PRs
+          if [[ "$IS_BASE_TRUNK" == "true" && "$HAS_CHILDREN" == "false" ]]; then
+            POSITION="standalone"
+          elif [[ "$IS_BASE_TRUNK" == "true" && "$HAS_CHILDREN" == "true" ]]; then
+            POSITION="stack-base"
+          elif [[ "$IS_BASE_TRUNK" == "false" && "$HAS_CHILDREN" == "true" ]]; then
+            POSITION="stack-middle"
+          else
+            # base != trunk AND no children = top of this branch of the stack
+            POSITION="stack-top"
+          fi
+
+          echo "position=$POSITION"
+          echo "position=$POSITION" >> $GITHUB_OUTPUT
+
+      - name: Update stack labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          POSITION="${{ steps.detect.outputs.position }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+
+          # Get current labels
+          CURRENT_LABELS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '.labels[].name' || echo "")
+
+          case "$POSITION" in
+            "stack-base")
+              # Add stack:base, remove stack:top if present
+              if ! echo "$CURRENT_LABELS" | grep -q "^stack:base$"; then
+                echo "Adding stack:base to PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "stack:base" || true
+              fi
+              if echo "$CURRENT_LABELS" | grep -q "^stack:top$"; then
+                echo "Removing stack:top from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "stack:top" || true
+              fi
+              ;;
+            "stack-top")
+              # Add stack:top, remove stack:base if present
+              if ! echo "$CURRENT_LABELS" | grep -q "^stack:top$"; then
+                echo "Adding stack:top to PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "stack:top" || true
+              fi
+              if echo "$CURRENT_LABELS" | grep -q "^stack:base$"; then
+                echo "Removing stack:base from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "stack:base" || true
+              fi
+              ;;
+            *)
+              # Standalone or middle - remove both stack labels if present
+              if echo "$CURRENT_LABELS" | grep -q "^stack:base$"; then
+                echo "Removing stack:base from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "stack:base" || true
+              fi
+              if echo "$CURRENT_LABELS" | grep -q "^stack:top$"; then
+                echo "Removing stack:top from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "stack:top" || true
+              fi
+              ;;
+          esac
+
+  # When a PR closes, update the remaining stack
+  update-stack-on-close:
+    if: |
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Longer delay to let GitHub retarget PRs and things settle
+      - name: Wait for GitHub to retarget PRs
+        run: sleep 10
+
+      - name: Update remaining stack PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CLOSED_HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          CLOSED_PR_NUMBER="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+
+          echo "PR #$CLOSED_PR_NUMBER closed (head: $CLOSED_HEAD_REF)"
+          echo "Re-evaluating stack positions for remaining PRs..."
+
+          # Get all open PRs
+          OPEN_PRS=$(gh pr list --repo "$REPO" --state open --json number,baseRefName,headRefName)
+
+          # Process each open PR
+          echo "$OPEN_PRS" | jq -c '.[]' | while read -r pr; do
+            PR_NUM=$(echo "$pr" | jq -r '.number')
+            PR_BASE=$(echo "$pr" | jq -r '.baseRefName')
+            PR_HEAD=$(echo "$pr" | jq -r '.headRefName')
+
+            # Determine if this is trunk
+            IS_BASE_TRUNK=false
+            if [[ "$PR_BASE" == "main" || "$PR_BASE" == "master" ]]; then
+              IS_BASE_TRUNK=true
+            fi
+
+            # Check for children
+            CHILD_COUNT=$(gh pr list --repo "$REPO" --base "$PR_HEAD" --state open --json number --jq 'length')
+            HAS_CHILDREN=false
+            if [[ "$CHILD_COUNT" -gt 0 ]]; then
+              HAS_CHILDREN=true
+            fi
+
+            # Get current labels
+            CURRENT_LABELS=$(gh pr view "$PR_NUM" --repo "$REPO" --json labels --jq '.labels[].name' || echo "")
+
+            # Determine new position and update labels
+            if [[ "$IS_BASE_TRUNK" == "true" && "$HAS_CHILDREN" == "false" ]]; then
+              # Standalone - remove all stack labels
+              if echo "$CURRENT_LABELS" | grep -qE "^stack:(base|top)$"; then
+                echo "PR #$PR_NUM is now standalone, removing stack labels"
+                gh pr edit "$PR_NUM" --repo "$REPO" --remove-label "stack:base" --remove-label "stack:top" 2>/dev/null || true
+              fi
+            elif [[ "$IS_BASE_TRUNK" == "true" && "$HAS_CHILDREN" == "true" ]]; then
+              # Stack base
+              if ! echo "$CURRENT_LABELS" | grep -q "^stack:base$"; then
+                echo "PR #$PR_NUM is now stack:base"
+                gh pr edit "$PR_NUM" --repo "$REPO" --add-label "stack:base" --remove-label "stack:top" 2>/dev/null || true
+              fi
+            elif [[ "$IS_BASE_TRUNK" == "false" && "$HAS_CHILDREN" == "true" ]]; then
+              # Middle - remove all stack labels
+              if echo "$CURRENT_LABELS" | grep -qE "^stack:(base|top)$"; then
+                echo "PR #$PR_NUM is in middle of stack, removing stack labels"
+                gh pr edit "$PR_NUM" --repo "$REPO" --remove-label "stack:base" --remove-label "stack:top" 2>/dev/null || true
+              fi
+            else
+              # Stack top (may be multiple in split stacks)
+              if ! echo "$CURRENT_LABELS" | grep -q "^stack:top$"; then
+                echo "PR #$PR_NUM is stack:top"
+                gh pr edit "$PR_NUM" --repo "$REPO" --add-label "stack:top" --remove-label "stack:base" 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Stack position update complete"

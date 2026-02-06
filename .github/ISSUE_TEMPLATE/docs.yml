@@ -1,0 +1,69 @@
+name: Documentation
+description: Report missing, unclear, or incorrect documentation
+labels: ["docs", "feedback", "source/user"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package or Area
+      description: Which package or documentation area?
+      options:
+        - "@outfitter/contracts"
+        - "@outfitter/cli"
+        - "@outfitter/mcp"
+        - "@outfitter/config"
+        - "@outfitter/logging"
+        - "@outfitter/daemon"
+        - "@outfitter/file-ops"
+        - "@outfitter/state"
+        - "@outfitter/index"
+        - "@outfitter/testing"
+        - "@outfitter/tooling"
+        - "@outfitter/types"
+        - "AGENTS.md"
+        - "docs/PATTERNS.md"
+        - "docs/ARCHITECTURE.md"
+        - "docs/GETTING-STARTED.md"
+        - "README"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's the documentation issue?
+      placeholder: Describe what's missing, unclear, or incorrect.
+    validations:
+      required: true
+
+  - type: textarea
+    id: gap
+    attributes:
+      label: Documentation Gap
+      description: What specific information is missing or unclear?
+      placeholder: |
+        - Missing: How to handle X scenario
+        - Unclear: The explanation of Y doesn't cover Z
+        - Incorrect: The example shows A but should show B
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: How could this be improved?
+      placeholder: Describe what would make the documentation better.
+    validations:
+      required: false
+
+  - type: input
+    id: link
+    attributes:
+      label: Documentation Link
+      description: Link to the relevant documentation (if applicable)
+      placeholder: https://github.com/outfitter-dev/outfitter/blob/main/docs/...
+    validations:
+      required: false

@@ -1,0 +1,29 @@
+{
+  "name": "outfitter",
+  "owner": {
+    "name": "Outfitter",
+    "email": "team@outfitter.dev"
+  },
+  "metadata": {
+    "description": "Outfitter plugin ecosystem for AI-assisted development",
+    "version": "1.5.0"
+  },
+  "repository": "https://github.com/outfitter-dev/outfitter",
+  "plugins": [
+    {
+      "name": "outfitter",
+      "source": "./plugins/outfitter",
+      "description": "Core development methodology, debugging, architecture patterns"
+    },
+    {
+      "name": "outfitter-stack",
+      "source": "./plugins/stack",
+      "description": "Docs, skills, and workflows for building with the Outfitter stack."
+    },
+    {
+      "name": "outfitter-team",
+      "source": "./plugins/team",
+      "description": "Internal Outfitter team skills for docs, voice, and conventions"
+    }
+  ]
+}

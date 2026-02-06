@@ -1,0 +1,359 @@
+# Canonical label definitions for Outfitter repositories
+# This file is the source of truth for labels across all Outfitter repos.
+#
+# Usage:
+#   bun .github/scripts/sync-labels.ts [--dry-run]
+#
+# Migrations:
+#   Labels listed in `aliases` will be renamed to the canonical name.
+#   Example: `enhancement` → `feature`
+
+# =============================================================================
+# ISSUE TYPES (unprefixed for now)
+# =============================================================================
+
+- name: bug
+  color: "ef4444"
+  description: Something isn't working
+
+- name: feature
+  color: "6366f1"
+  description: New feature or enhancement
+  aliases: [enhancement]
+
+- name: question
+  color: "5e6ad2"
+  description: Question or clarification needed
+
+- name: docs
+  color: "64748b"
+  description: Documentation improvement
+  aliases: [documentation]
+
+- name: dx
+  color: "95a2b3"
+  description: Developer experience improvement
+
+- name: chore
+  color: "eab308"
+  description: Maintenance task
+
+- name: refactor
+  color: "f97316"
+  description: Code refactoring
+
+- name: research
+  color: "5e6ad2"
+  description: Investigation or exploration
+
+# =============================================================================
+# SOURCE - Where the issue/PR came from
+# =============================================================================
+
+- name: source/agent
+  color: "9333ea"
+  description: Created by an AI agent
+
+- name: source/user
+  color: "4cb782"
+  description: Created by a user
+
+- name: source/internal
+  color: "6f42c1"
+  description: Created internally
+
+- name: source/pr-review
+  color: "f7c8c1"
+  description: From PR review comments
+
+# =============================================================================
+# PACKAGES - @outfitter/* packages
+# =============================================================================
+
+- name: package/contracts
+  color: "1e3a8a"
+  description: "@outfitter/contracts"
+
+- name: package/cli
+  color: "1e3a8a"
+  description: "@outfitter/cli"
+
+- name: package/mcp
+  color: "1e3a8a"
+  description: "@outfitter/mcp"
+
+- name: package/config
+  color: "1e3a8a"
+  description: "@outfitter/config"
+
+- name: package/logging
+  color: "1e3a8a"
+  description: "@outfitter/logging"
+
+- name: package/daemon
+  color: "1e3a8a"
+  description: "@outfitter/daemon"
+
+- name: package/file-ops
+  color: "1e3a8a"
+  description: "@outfitter/file-ops"
+
+- name: package/state
+  color: "1e3a8a"
+  description: "@outfitter/state"
+
+- name: package/index
+  color: "1e3a8a"
+  description: "@outfitter/index"
+
+- name: package/testing
+  color: "1e3a8a"
+  description: "@outfitter/testing"
+
+- name: package/tooling
+  color: "1e3a8a"
+  description: "@outfitter/tooling"
+
+- name: package/types
+  color: "1e3a8a"
+  description: "@outfitter/types"
+
+# =============================================================================
+# PLUGINS - Claude Code plugins
+# =============================================================================
+
+- name: plugin/outfitter
+  color: "7c3aed"
+  description: Core methodology plugin
+
+- name: plugin/stack
+  color: "7c3aed"
+  description: Outfitter Stack patterns plugin
+
+- name: plugin/team
+  color: "7c3aed"
+  description: Internal team plugin
+
+- name: plugin/gt
+  color: "7c3aed"
+  description: Graphite workflows plugin
+
+- name: plugin/but
+  color: "7c3aed"
+  description: GitButler workflows plugin
+
+- name: plugin/cli-dev
+  color: "7c3aed"
+  description: CLI development plugin
+
+# =============================================================================
+# AREAS - Code areas (not package-specific)
+# =============================================================================
+
+- name: area/agents
+  color: "9333ea"
+  description: Agent files (CLAUDE.md, .claude/**, plugins, skills)
+
+- name: area/outfitter
+  color: "9333ea"
+  description: Outfitter umbrella CLI (apps/outfitter)
+
+- name: area/api
+  color: "f2c94c"
+  description: API-related
+
+- name: area/infra
+  color: "f7c8c1"
+  description: Infrastructure
+
+- name: area/ci-cd
+  color: "2ea44f"
+  description: CI/CD pipelines
+  aliases: [ci-cd]
+
+- name: area/monorepo
+  color: "95a2b3"
+  description: Monorepo tooling
+
+- name: area/logging
+  color: "0366d6"
+  description: Logging patterns
+  aliases: [logging]
+
+- name: area/error-handling
+  color: "d73a4a"
+  description: Error handling patterns
+  aliases: [error-handling]
+
+- name: area/types
+  color: "f2994a"
+  description: Type system and utilities
+  aliases: [types]
+
+- name: area/ui
+  color: "d946ef"
+  description: User interface
+  aliases: [ui]
+
+- name: area/security
+  color: "3b82f6"
+  description: Security-related
+  aliases: [security]
+
+- name: area/performance
+  color: "ededed"
+  description: Performance optimization
+  aliases: [performance]
+
+# =============================================================================
+# SEVERITY
+# =============================================================================
+
+- name: severity:critical
+  color: "b60205"
+  description: Critical issue requiring immediate attention
+
+- name: severity:high
+  color: "d93f0b"
+  description: High priority issue
+
+- name: severity:medium
+  color: "fbca04"
+  description: Medium priority issue
+
+- name: severity:low
+  color: "0e8a16"
+  description: Low priority issue
+
+# =============================================================================
+# QUALITY & TECHNICAL
+# =============================================================================
+
+- name: tech-debt
+  color: "ededed"
+  description: Technical debt
+
+- name: cleanup
+  color: "ededed"
+  description: Code cleanup
+
+- name: testing
+  color: "ededed"
+  description: Test-related
+
+- name: reliability
+  color: "fbca04"
+  description: Reliability improvement
+
+- name: deps
+  color: "eb5757"
+  description: Dependency updates
+
+# =============================================================================
+# PROCESS
+# =============================================================================
+
+- name: triage
+  color: "ffc107"
+  description: Needs triage
+
+- name: epic
+  color: "5319e7"
+  description: Epic/large initiative
+
+- name: feedback
+  color: "22c55e"
+  description: Community feedback
+  aliases: [stack-feedback]
+
+# =============================================================================
+# RELEASE & PUBLISH
+# =============================================================================
+
+- name: release:major
+  color: "b60205"
+  description: Contains breaking changes (major version bump)
+
+- name: release:minor
+  color: "0e8a16"
+  description: Contains new features (minor version bump)
+
+- name: release:patch
+  color: "fbca04"
+  description: Contains fixes only (patch version bump)
+
+- name: release:prep
+  color: "5e6ad2"
+  description: Release preparation
+
+- name: publish:ready
+  color: "2ea44f"
+  description: Ready to publish
+
+- name: publish:hold
+  color: "d93f0b"
+  description: Do not publish yet
+
+# =============================================================================
+# GRAPHITE MERGE QUEUE
+# =============================================================================
+
+- name: queue:merge
+  color: "2ea44f"
+  description: Enqueue PR for Graphite merge queue
+
+- name: queue:hotfix
+  color: "b60205"
+  description: Priority merge - jumps to front of queue
+
+# =============================================================================
+# GRAPHITE STACK POSITION (auto-managed)
+# =============================================================================
+
+- name: stack:base
+  color: "7c3aed"
+  description: Bottom of a Graphite stack (merge this first)
+
+- name: stack:top
+  color: "c4b5fd"
+  description: Top of a Graphite stack (may have multiple if stack splits)
+
+# =============================================================================
+# TOOLS (as-is, no prefix)
+# =============================================================================
+
+- name: claude
+  color: "cc785c"
+  description: Claude-related
+
+- name: cursor
+  color: "f7c8c1"
+  description: Cursor-related
+
+- name: codex
+  color: "eb5757"
+  description: Codex-related
+
+- name: devin
+  color: "26b5ce"
+  description: Devin-related
+
+- name: graphite
+  color: "ededed"
+  description: Graphite-related
+
+# =============================================================================
+# GITHUB DEFAULTS (kept for standard workflows)
+# =============================================================================
+
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or PR already exists
+
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right
+
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on

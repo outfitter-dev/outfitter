@@ -6,7 +6,6 @@ This document tracks version compatibility across @outfitter packages.
 
 | Package | Version | Status |
 |---------|---------|--------|
-| @outfitter/agents | 0.1.0-rc.0 | RC |
 | @outfitter/contracts | 0.1.0-rc.0 | RC |
 | @outfitter/types | 0.1.0-rc.0 | RC |
 | @outfitter/cli | 0.1.0-rc.0 | RC |

@@ -6,11 +6,24 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/bootstrap.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/bootstrap.sh\"",
             "timeout": 120
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun x ultracite fix"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "enabledPlugins": {},
+  "extraKnownMarketplaces": {}
 }

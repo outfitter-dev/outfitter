@@ -1,0 +1,51 @@
+name: Sync Labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/labels.yml
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run (show changes without applying)"
+        required: false
+        default: "false"
+        type: boolean
+      delete:
+        description: "Delete labels not in labels.yml"
+        required: false
+        default: "false"
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Sync labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FLAGS=""
+          if [[ "${{ inputs.dry-run }}" == "true" ]]; then
+            FLAGS="$FLAGS --dry-run"
+          fi
+          if [[ "${{ inputs.delete }}" == "true" ]]; then
+            FLAGS="$FLAGS --delete"
+          fi
+          bun .github/scripts/sync-labels.ts $FLAGS

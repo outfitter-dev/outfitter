@@ -99,7 +99,6 @@ APIs evolving based on usage. These implement the core functionality.
 | `@outfitter/mcp` | MCP server framework with typed tools |
 | `@outfitter/index` | SQLite FTS5 indexing with WAL mode |
 | `@outfitter/daemon` | Daemon lifecycle, IPC, health checks |
-| `@outfitter/agents` | Agent scaffolding and templates |
 
 ### Tooling Tier (Early)
 

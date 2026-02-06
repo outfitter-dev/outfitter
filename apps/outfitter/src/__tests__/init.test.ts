@@ -326,7 +326,7 @@ describe("init command --force flag", () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.message).toContain("already exists");
+      expect(result.error.message).toContain("already has a package.json");
     }
   });
 
@@ -428,5 +428,163 @@ describe("init command result type", () => {
     });
 
     expect(result.isErr()).toBe(true);
+  });
+});
+
+// =============================================================================
+// Init Command Registry Blocks Tests
+// =============================================================================
+
+describe("init command registry blocks", () => {
+  test("adds scaffolding by default in non-interactive mode", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      // No --with or --no-tooling specified, non-interactive mode
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeDefined();
+      // Should have scaffolding files
+      expect(result.value.blocksAdded?.created).toContain(
+        ".claude/settings.json"
+      );
+      expect(result.value.blocksAdded?.created).toContain("biome.json");
+    }
+  });
+
+  test("does not add tooling when noTooling is true", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      noTooling: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeUndefined();
+    }
+  });
+
+  test("adds claude block when specified", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      with: "claude",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeDefined();
+      expect(result.value.blocksAdded?.created).toContain(
+        ".claude/settings.json"
+      );
+    }
+
+    // Verify file was actually created
+    const settingsPath = join(tempDir, ".claude/settings.json");
+    expect(existsSync(settingsPath)).toBe(true);
+  });
+
+  test("adds biome block with biome.json file", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      with: "biome",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeDefined();
+      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      // Note: ultracite is already in SHARED_DEV_DEPS so it won't be in the added list
+    }
+
+    // Verify biome.json was created
+    const biomePath = join(tempDir, "biome.json");
+    expect(existsSync(biomePath)).toBe(true);
+  });
+
+  test("adds multiple blocks from comma-separated list", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      with: "claude,biome",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeDefined();
+      // Should have files from both blocks
+      expect(result.value.blocksAdded?.created).toContain(
+        ".claude/settings.json"
+      );
+      expect(result.value.blocksAdded?.created).toContain("biome.json");
+    }
+  });
+
+  test("adds scaffolding block which extends all other blocks", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      with: "scaffolding",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.blocksAdded).toBeDefined();
+      // Scaffolding creates files that don't exist in the template
+      expect(result.value.blocksAdded?.created).toContain(
+        ".claude/settings.json"
+      );
+      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(
+        "scripts/bootstrap.sh"
+      );
+      // .lefthook.yml is skipped because template already creates it
+      expect(result.value.blocksAdded?.skipped).toContain(".lefthook.yml");
+    }
+  });
+
+  test("returns error for invalid block name", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "basic",
+      force: false,
+      with: "nonexistent-block",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("nonexistent-block");
+    }
   });
 });

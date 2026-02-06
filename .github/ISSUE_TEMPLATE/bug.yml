@@ -1,0 +1,86 @@
+name: Bug Report
+description: Report a bug in @outfitter/* packages
+labels: ["bug", "feedback", "source/user"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package is affected?
+      options:
+        - "@outfitter/contracts"
+        - "@outfitter/cli"
+        - "@outfitter/mcp"
+        - "@outfitter/config"
+        - "@outfitter/logging"
+        - "@outfitter/daemon"
+        - "@outfitter/file-ops"
+        - "@outfitter/state"
+        - "@outfitter/index"
+        - "@outfitter/testing"
+        - "@outfitter/tooling"
+        - "@outfitter/types"
+        - "outfitter (CLI)"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+      placeholder: Describe the bug clearly and concisely.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Include error messages, unexpected output, or stack traces.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what should have happened instead.
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this?
+      placeholder: |
+        1. Install package...
+        2. Call function...
+        3. See error...
+    validations:
+      required: false
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Did you find a workaround?
+      placeholder: If you found a way around this, share it here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Version info
+      placeholder: |
+        - Package version: x.x.x
+        - Bun version: x.x.x
+        - OS: macOS/Linux/Windows
+    validations:
+      required: false

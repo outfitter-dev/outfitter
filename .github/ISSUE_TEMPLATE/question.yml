@@ -1,0 +1,59 @@
+name: Pattern Question
+description: Ask about unclear patterns or guidance
+labels: ["question", "feedback", "source/user"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package or Pattern
+      description: Which package or pattern is this about?
+      options:
+        - "Result types"
+        - "Handler contract"
+        - "Error taxonomy"
+        - "Validation patterns"
+        - "CLI patterns"
+        - "MCP patterns"
+        - "Logging patterns"
+        - "File operations"
+        - "Context propagation"
+        - "@outfitter/contracts"
+        - "@outfitter/cli"
+        - "@outfitter/mcp"
+        - "@outfitter/config"
+        - "@outfitter/logging"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Question
+      description: What's unclear about this pattern?
+      placeholder: Describe what you're trying to understand.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What scenario led to this question?
+      placeholder: |
+        I was trying to...
+        The docs say X but I'm not sure how to apply it to Y...
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What You Tried
+      description: What approaches did you attempt?
+      placeholder: |
+        ```typescript
+        // I tried this approach...
+        ```
+    validations:
+      required: false

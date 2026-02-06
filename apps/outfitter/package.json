@@ -10,6 +10,12 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./commands/demo/errors": {
+      "import": {
+        "types": "./dist/commands/demo/errors.d.ts",
+        "default": "./dist/commands/demo/errors.js"
+      }
+    },
     "./commands/demo": {
       "import": {
         "types": "./dist/commands/demo.d.ts",
@@ -46,10 +52,10 @@
         "default": "./dist/commands/shared-deps.js"
       }
     },
-    "./commands/demo/errors": {
+    "./commands/add": {
       "import": {
-        "types": "./dist/commands/demo/errors.d.ts",
-        "default": "./dist/commands/demo/errors.js"
+        "types": "./dist/commands/add.d.ts",
+        "default": "./dist/commands/add.js"
       }
     },
     "./package.json": "./package.json"
@@ -77,6 +83,7 @@
     "@outfitter/cli": "workspace:*",
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/tooling": "workspace:*",
     "commander": "^14.0.2",
     "zod": "^4.3.5"
   },

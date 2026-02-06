@@ -16,7 +16,6 @@ export const STACK_VERSION = "0.1.0-rc.1";
  * Minimum compatible versions for each package
  */
 export const MINIMUM_VERSIONS = {
-  "@outfitter/agents": "0.1.0-rc.1",
   "@outfitter/cli": "0.1.0-rc.1",
   "@outfitter/config": "0.1.0-rc.1",
   "@outfitter/contracts": "0.1.0-rc.1",

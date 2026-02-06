@@ -5,9 +5,11 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "plugins/*"
   ],
   "scripts": {
+    "prebuild": "./scripts/prebuild.sh",
     "build": "bunup",
     "build:local": "bunup && cd apps/outfitter && bun link",
     "build:turbo": "turbo run build",
@@ -18,7 +20,8 @@
     "fix": "ultracite fix",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
-    "version-packages": "changeset version",
+    "version-packages": "changeset version && bun run sync-plugin-versions",
+    "sync-plugin-versions": "bun run scripts/sync-plugin-versions.ts",
     "release": "turbo run build && bun run scripts/changeset-publish.ts",
     "publish:rc": "bun run scripts/publish-rc.ts",
     "prepare": "lefthook install"
