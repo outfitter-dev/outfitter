@@ -49,14 +49,14 @@ bun run release                            # Build + publish
 bun run clean                              # Clear Turbo artifacts and node_modules
 
 # Upgrade Bun
-./scripts/upgrade-bun.sh 1.4.0            # Upgrade to specific version
-./scripts/upgrade-bun.sh                   # Upgrade to latest
+bunx @outfitter/tooling upgrade-bun 1.4.0  # Upgrade to specific version
+bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 ```
 
 **Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
-1. Run `./scripts/upgrade-bun.sh <version>`
-2. Script updates `.bun-version`, installs locally, and updates `bun.lock`
-3. Commit both files together
+1. Run `bunx @outfitter/tooling upgrade-bun <version>`
+2. Command updates `.bun-version`, `engines.bun`, `@types/bun`, installs locally, and updates `bun.lock`
+3. Commit all files together
 
 ## Architecture
 
@@ -187,7 +187,9 @@ fix(cli): handle missing config gracefully
 ### Git Hooks (Lefthook)
 
 - **pre-commit**: Format, lint, typecheck (affected packages)
-- **pre-push**: Full test suite (TDD-aware: allows RED phase branches like `*-tests`)
+- **pre-push**: Build + TDD-aware test suite via `bunx @outfitter/tooling pre-push`
+  - Allows RED phase branches (`*-tests`, `*/tests`, `*_tests`) to skip tests
+  - Use `--force` to skip tests on any branch
 
 ### Changesets
 

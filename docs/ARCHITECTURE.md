@@ -166,7 +166,7 @@ outfitter/stack/
 │   ├── index/               # SQLite FTS5 indexing
 │   ├── logging/             # Structured logging
 │   ├── mcp/                 # MCP server framework
-│   ├── stack/               # Version coordination
+│   ├── kit/                 # Version coordination
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
 │   └── types/               # Type utilities

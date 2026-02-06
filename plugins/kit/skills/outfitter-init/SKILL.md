@@ -113,7 +113,10 @@ Run the setup script to scan the codebase and generate the plan.
 ### What to Run
 
 ```bash
-./packages/claude-plugin/skills/outfitter-init/scripts/setup.sh [project-root]
+# From the plugin directory (when installed):
+./skills/outfitter-init/scripts/setup.sh [project-root]
+
+# Or use the skill's scan functionality directly
 ```
 
 The script will refuse to run if a plan already exists (won't override).
