@@ -17,7 +17,7 @@ const PLUGINS_DIR = join(ROOT, "plugins");
 const MARKETPLACE_PATH = join(ROOT, ".claude-plugin/marketplace.json");
 
 // Plugins tracked by changesets (directory names)
-const PLUGINS = ["outfitter", "stack", "team"];
+const PLUGINS = ["outfitter", "kit", "team"];
 
 interface PluginJson {
   name: string;

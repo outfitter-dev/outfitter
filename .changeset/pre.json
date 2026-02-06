@@ -12,7 +12,7 @@
     "@outfitter/index": "0.1.0-rc.1",
     "@outfitter/logging": "0.1.0-rc.1",
     "@outfitter/mcp": "0.1.0-rc.1",
-    "@outfitter/stack": "0.1.0-rc.1",
+    "@outfitter/kit": "0.1.0-rc.1",
     "@outfitter/state": "0.1.0-rc.1",
     "@outfitter/testing": "0.1.0-rc.1",
     "@outfitter/types": "0.1.0-rc.1"

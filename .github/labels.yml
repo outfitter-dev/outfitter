@@ -126,7 +126,7 @@
   color: "7c3aed"
   description: Core methodology plugin
 
-- name: plugin/stack
+- name: plugin/kit
   color: "7c3aed"
   description: Outfitter Stack patterns plugin
 

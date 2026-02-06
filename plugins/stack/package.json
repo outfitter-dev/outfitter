@@ -1,6 +1,0 @@
-{
-  "name": "@outfitter-agents/stack",
-  "version": "1.5.0",
-  "private": true,
-  "description": "Result types, handler contract, error taxonomy for @outfitter/* packages"
-}

@@ -63,9 +63,9 @@ plugin/outfitter:
   - changed-files:
       - any-glob-to-any-file: plugins/outfitter/**
 
-plugin/stack:
+plugin/kit:
   - changed-files:
-      - any-glob-to-any-file: plugins/stack/**
+      - any-glob-to-any-file: plugins/kit/**
 
 plugin/team:
   - changed-files:
