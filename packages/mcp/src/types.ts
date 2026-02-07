@@ -64,6 +64,32 @@ export interface McpServerOptions {
 }
 
 // ============================================================================
+// Tool Annotations
+// ============================================================================
+
+/**
+ * Behavioral hints for MCP tools.
+ *
+ * Annotations help clients understand tool behavior without invoking them.
+ * All fields are optional — only include hints that apply.
+ *
+ * @see https://spec.modelcontextprotocol.io/specification/2025-03-26/server/tools/#annotations
+ */
+export interface ToolAnnotations {
+  /** When true, the tool does not modify any state. */
+  readOnlyHint?: boolean;
+
+  /** When true, the tool may perform destructive operations (e.g., deleting data). */
+  destructiveHint?: boolean;
+
+  /** When true, calling the tool multiple times with the same input has the same effect. */
+  idempotentHint?: boolean;
+
+  /** When true, the tool may interact with external systems beyond the server. */
+  openWorldHint?: boolean;
+}
+
+// ============================================================================
 // Tool Definition
 // ============================================================================
 
@@ -133,6 +159,12 @@ export interface ToolDefinition<
   inputSchema: z.ZodType<TInput>;
 
   /**
+   * Optional behavioral annotations for the tool.
+   * Helps clients understand tool behavior without invoking it.
+   */
+  annotations?: ToolAnnotations;
+
+  /**
    * Handler function that processes the tool invocation.
    * Receives validated input and HandlerContext, returns Result.
    */
@@ -155,6 +187,9 @@ export interface SerializedTool {
 
   /** MCP tool-search hint: whether tool is deferred */
   defer_loading?: boolean;
+
+  /** Behavioral annotations for the tool */
+  annotations?: ToolAnnotations;
 }
 
 // ============================================================================

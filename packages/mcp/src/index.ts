@@ -75,5 +75,6 @@ export {
   type McpServerOptions,
   type ResourceDefinition,
   type SerializedTool,
+  type ToolAnnotations,
   type ToolDefinition,
 } from "./types.js";

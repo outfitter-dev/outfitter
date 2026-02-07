@@ -22,6 +22,7 @@ import {
   type McpServerOptions,
   type ResourceDefinition,
   type SerializedTool,
+  type ToolAnnotations,
   type ToolDefinition,
 } from "./types.js";
 
@@ -60,6 +61,7 @@ interface StoredTool {
   description: string;
   inputSchema: unknown;
   deferLoading: boolean;
+  annotations?: ToolAnnotations;
   handler: (
     input: unknown,
     ctx: HandlerContext
@@ -185,14 +187,18 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         tool.handler(input as TInput, ctx);
       const deferLoading = tool.deferLoading ?? true;
 
-      tools.set(tool.name, {
+      const stored: StoredTool = {
         name: tool.name,
         description,
         inputSchema: jsonSchema,
         deferLoading,
         handler,
         zodSchema: tool.inputSchema,
-      });
+      };
+      if (tool.annotations !== undefined) {
+        stored.annotations = tool.annotations;
+      }
+      tools.set(tool.name, stored);
 
       logger.info("Tool registered", { name: tool.name });
     },
@@ -212,6 +218,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         description: tool.description,
         inputSchema: tool.inputSchema as Record<string, unknown>,
         defer_loading: tool.deferLoading,
+        ...(tool.annotations ? { annotations: tool.annotations } : {}),
       }));
     },
 
