@@ -12,7 +12,7 @@ Quick reference for the repo-to-plugin transformation workflow.
 | 4. Mapping | `outfitter:codify` | `artifacts/plugin-engineer/mapping.md` |
 | 5. Authoring | `outfitter:skills-dev` | `artifacts/plugin-engineer/components/` |
 | 6. Packaging | `outfitter:claude-plugins` | Plugin directory |
-| 7. Audit | `outfitter:claude-plugin-audit` | `artifacts/plugin-engineer/audit.md` |
+| 7. Audit | `outfitter:claude-plugins` | `artifacts/plugin-engineer/audit.md` |
 
 ## Quick Mode
 

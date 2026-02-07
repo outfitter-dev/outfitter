@@ -10,7 +10,7 @@ $ARGUMENTS
 
 ## Steps
 
-1. Delegate by loading the `outfitter:claude-plugin-audit` skill for plugin analysis
+1. Load the `outfitter:claude-plugins` skill and run audit checklists from `references/audit.md`
 2. Review findings and identify auto-fixable issues
 3. If auto-fixable issues exist, offer to apply fixes
 4. For applied fixes, verify each change

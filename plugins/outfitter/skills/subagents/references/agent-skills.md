@@ -13,12 +13,11 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | bun-dev | Bun runtime, package management |
 | react-dev | React components, hooks, state |
 | hono-dev | API routes, middleware, server |
-| ai-sdk | AI features, streaming, tools |
 
 **Typical combos**:
 - `software-craft` + `tdd` (standard feature)
 - `software-craft` + `react-dev` (frontend work)
-- `software-craft` + `hono-dev` + `ai-sdk` (AI API endpoint)
+- `software-craft` + `hono-dev` (API endpoint)
 
 ## reviewer (reviewing role)
 
@@ -124,7 +123,7 @@ Always relevant for the agent's identity:
 ### Domain-Specific
 
 Load based on technology in use:
-- bun-dev, react-dev, hono-dev, ai-sdk
+- bun-dev, react-dev, hono-dev
 
 ### Process-Oriented
 

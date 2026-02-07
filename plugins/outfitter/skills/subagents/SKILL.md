@@ -161,7 +161,7 @@ research (scope) → debugging (root cause) → coding (fix) → testing (verify
 | Refactor | software-craft + simplify |
 | API endpoint | hono-dev, software-craft |
 | React component | react-dev, software-craft |
-| AI feature | ai-sdk, software-craft |
+| AI feature | software-craft |
 
 ### Reviewing Role
 
@@ -313,11 +313,6 @@ Progress format:
 > **CRITICAL**: Subagents MUST NOT perform git operations (commit, push, branch creation) when running in parallel.
 >
 > Only the **orchestrator** handles git state. Subagents write code to the filesystem and report completion.
-
-For detailed workflows and recovery procedures, see the `source-control` plugin:
-
-- `source-control:multi-agent-vcs` — Full orchestrator-only workflow patterns
-- `source-control:graphite-stacks` — Graphite-specific commands and recovery
 
 ## Anti-Patterns
 
