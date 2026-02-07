@@ -5,7 +5,7 @@ paths:
 
 # Agent Development
 
-When creating or modifying agents, load the `outfitter:claude-agents` skill.
+When creating or modifying agents, load the `outfitter:claude-code` skill.
 
 ## Frontmatter
 

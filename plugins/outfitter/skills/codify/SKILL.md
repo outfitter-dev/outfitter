@@ -7,10 +7,7 @@ metadata:
   version: "1.3.0"
   related-skills:
     - patterns
-    - claude-skills
-    - claude-commands
-    - claude-hooks
-    - claude-agents
+    - claude-code
 ---
 
 # Codify
@@ -182,9 +179,6 @@ NEVER:
 Use `patterns` first to identify what's worth capturing. Use `codify` to turn identified patterns into skills, commands, hooks, or agents.
 
 **Component skills** (loaded during implementation):
-- `claude-skills` — skill authoring
-- `claude-commands` — command authoring
-- `claude-hooks` — hook authoring
-- `claude-agents` — agent authoring
+- `claude-code` — agents, commands, hooks, skills, rules, and config
 
 </references>

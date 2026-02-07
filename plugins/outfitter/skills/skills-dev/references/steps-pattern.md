@@ -90,7 +90,7 @@ Use Plan mode and AskUserQuestion for workflows that need user input or have dec
 ```markdown
 ## Steps
 
-1. Delegate by loading the `outfitter:claude-plugin-audit` skill for analysis
+1. Load the `outfitter:claude-plugins` skill and run audit checklists
 2. Apply auto-fixable issues
 3. Enter Plan mode
 4. Present remaining issues with AskUserQuestion
@@ -118,14 +118,14 @@ The Plan agent (`subagent_type: Plan`) explores the problem space independently,
 
 ## Examples
 
-### Extension Skill (claude-skills)
+### Extension Skill (claude-code)
 
 ```markdown
-# Claude Code Skills
+# Claude Code Extensibility
 
 ## Steps
 
-1. Load the `outfitter:skills-dev` skill
+1. Load the `outfitter:skills-dev` skill for base spec
 2. Apply Claude Code-specific extensions from this skill
 ```
 

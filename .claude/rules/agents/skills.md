@@ -7,7 +7,7 @@ paths:
 # Agent Skills Development
 
 - When creating or modifying agent skills, load the `outfitter:skills-dev` skill
-- If working on Claude skills, load the `outfitter:claude-skills` skill.
+- If working on Claude-specific skill features, load the `outfitter:claude-code` skill.
 
 ## XML Tags
 

@@ -8,7 +8,7 @@ Create high-quality components.
 
 ## Skill Authoring
 
-Load `outfitter:skills-dev` for base patterns, `outfitter:claude-skills` for Claude-specific features.
+Load `outfitter:skills-dev` for base patterns, `outfitter:claude-code` for Claude-specific features.
 
 **Frontmatter Template**:
 
@@ -51,7 +51,7 @@ ALWAYS/NEVER constraints
 
 ## Command Authoring
 
-Load `outfitter:claude-commands`.
+Load `outfitter:claude-code`.
 
 **Simple Command**:
 
@@ -76,7 +76,7 @@ Load the deployment skill and apply to current project.
 
 ## Hook Authoring
 
-Load `outfitter:claude-hooks`.
+Load `outfitter:claude-code`.
 
 **Common Triggers**:
 
@@ -88,7 +88,7 @@ Load `outfitter:claude-hooks`.
 
 ## Agent Authoring
 
-Load `outfitter:claude-agents`.
+Load `outfitter:claude-code`.
 
 Only create agents for complex orchestration. Most plugins don't need custom agents.
 

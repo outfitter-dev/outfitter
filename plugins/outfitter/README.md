@@ -14,13 +14,12 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 
 ## What's Included
 
-### Skills (35)
+### Skills (30)
 
 #### Development Methodology
 
 | Skill | Purpose |
 |-------|---------|
-| `ai-sdk` | Vercel AI SDK patterns for streaming, structured outputs, and agents |
 | `bun-dev` | Bun runtime APIs and patterns |
 | `cli-dev` | Redirect to cli-dev plugin |
 | `code-review` | Pre-commit quality gate checklist |
@@ -29,7 +28,6 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 | `session-analysis` | Signal extraction from chat history |
 | `debugging` | Systematic root cause investigation (no fixes without understanding) |
 | `hono-dev` | Type-safe Hono API development |
-| `multi-agent-vcs` | Tool-agnostic multi-agent git coordination |
 | `pathfinding` | Collaborative Q&A for unclear requirements |
 | `patterns` | Identify and extract reusable patterns |
 | `codify` | Extract reusable patterns from conversations |
@@ -52,13 +50,9 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 
 | Skill | Purpose |
 |-------|---------|
-| `skills-dev` | Agent Skills authoring (cross-platform spec + Claude extensions via `references/claude-code.md`) |
+| `skills-dev` | Agent Skills authoring (cross-platform spec) |
+| `claude-code` | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
 | `claude-plugins` | Full plugin lifecycle, marketplace distribution |
-| `claude-agents` | Subagent creation and validation |
-| `claude-commands` | Slash command authoring |
-| `claude-hooks` | Event hook creation and automation |
-| `claude-rules` | Project rules in .claude/rules/ |
-| `claude-config` | Claude Code/Desktop configuration |
 
 #### Platform Configuration
 

@@ -1,15 +1,4 @@
----
-name: claude-rules
-description: "This skill should be used when creating rule files, organizing conventions, or when .claude/rules/, FORMATTING.md, create rule, or project conventions are mentioned."
-metadata:
-  version: "1.0.0"
-  related-skills:
-    - claude-config
-    - claude-plugins
-allowed-tools: Read, Write, Edit, Grep, Glob
----
-
-# Claude Rules Authoring
+# Rules Authoring
 
 Create reusable instruction files in `.claude/rules/` for project conventions.
 
@@ -30,9 +19,9 @@ Create reusable instruction files in `.claude/rules/` for project conventions.
 
 ### Naming
 
-- **UPPERCASE.md** - All caps with `.md` extension
-- **Topic-focused** - One concern per file
-- **Kebab-case for multi-word** - `API-PATTERNS.md`, `CODE-REVIEW.md`
+- **UPPERCASE.md** — All caps with `.md` extension
+- **Topic-focused** — One concern per file
+- **Kebab-case for multi-word** — `API-PATTERNS.md`, `CODE-REVIEW.md`
 
 **Good**: `FORMATTING.md`, `TESTING.md`, `COMMITS.md`
 **Bad**: `formatting.md`, `MyRules.md`, `everything.md`
@@ -47,6 +36,41 @@ Create reusable instruction files in `.claude/rules/` for project conventions.
 ├── ARCHITECTURE.md    # Component structure, file organization
 └── SECURITY.md        # Security guidelines, auth patterns
 ```
+
+Subdirectories are supported:
+
+```
+.claude/rules/
+├── frontend/
+│   ├── react.md
+│   └── styles.md
+├── backend/
+│   ├── api.md
+│   └── database.md
+└── general.md
+```
+
+### Path-Specific Rules
+
+Use YAML frontmatter with glob patterns to scope rules to specific files:
+
+```yaml
+---
+paths:
+  - "src/api/**/*.ts"
+  - "lib/**/*.ts"
+---
+
+# API Development Rules
+```
+
+**Supported glob patterns**:
+- `**/*.ts` — All TypeScript files
+- `src/**/*` — All files under src/
+- `*.md` — Markdown in root
+- `src/components/*.tsx` — Specific directory
+- `src/**/*.{ts,tsx}` — Brace expansion
+- `{src,lib}/**/*.ts` — Multiple directories
 
 ## Content Structure
 
@@ -80,7 +104,7 @@ Brief description of what this covers.
 
 ### From CLAUDE.md
 
-Reference rules explicitly - they're not auto-loaded:
+Reference rules explicitly — they're not auto-loaded:
 
 ```markdown
 # CLAUDE.md
@@ -102,7 +126,14 @@ Use `@` syntax to include content from other files:
 @./project-specific/FORMATTING.md
 ```
 
-This keeps rules DRY by pointing to authoritative sources.
+### Symlinks
+
+Symlinks are supported for sharing rules:
+
+```bash
+ln -s ~/shared-claude-rules .claude/rules/shared
+ln -s ~/company-standards/security.md .claude/rules/security.md
+```
 
 ## Plugin Shared Rules
 
@@ -120,26 +151,9 @@ my-plugin/
     └── PATTERNS.md
 ```
 
-**Important limitation**: Shared rules only work WITHIN a single plugin. When plugins are installed, Claude Code copies them to a cache directory. Paths that traverse outside the plugin root (like `../other-plugin/rules/`) won't work after installation.
+**Important limitation**: Shared rules only work WITHIN a single plugin. Paths that traverse outside the plugin root won't work after installation due to plugin caching.
 
-**For cross-plugin patterns**: Use skill invocation instead of file references. Reference related skills by name (e.g., "load the `outfitter:formatting` skill") rather than file paths.
-
-## Quick Start
-
-### Create a New Rule
-
-1. Identify the convention scope (formatting, testing, commits, etc.)
-2. Create `TOPIC.md` in `.claude/rules/`
-3. Write scannable content with tables, do/don't lists
-4. Reference from CLAUDE.md
-
-### Validate a Rule
-
-- [ ] Filename is UPPERCASE.md
-- [ ] Single focused topic
-- [ ] Scannable structure (tables, lists)
-- [ ] Referenced from CLAUDE.md
-- [ ] No duplicate content with CLAUDE.md
+**For cross-plugin patterns**: Use skill invocation (`plugin:skill-name`) instead of file references.
 
 ## Anti-Patterns
 
@@ -154,8 +168,3 @@ my-plugin/
 - Use tables and lists for scannability
 - Reference shared rules via `@` when available
 - Document why, not just what
-
-## Related Skills
-
-- `claude-code-configuration` - CLAUDE.md and settings.json
-- `claude-plugin-development` - Plugin structure including rules/

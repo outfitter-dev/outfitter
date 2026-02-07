@@ -4,13 +4,8 @@ description: "This skill should be used when creating plugins, publishing to mar
 metadata:
   version: "1.0.0"
   related-skills:
-    - claude-plugin-audit
-    - claude-agents
-    - claude-commands
-    - claude-hooks
+    - claude-code
     - skills-dev
-    - claude-rules
-    - claude-config
 ---
 
 # Claude Plugin Development
@@ -21,11 +16,11 @@ Complete lifecycle for developing, validating, and distributing Claude Code plug
 
 1. Define plugin scope and components needed
 2. Initialize plugin structure with `plugin.json`
-3. If adding commands, load the `outfitter:claude-commands` skill
-4. If adding agents, load the `outfitter:claude-agents` skill
-5. If adding hooks, load the `outfitter:claude-hooks` skill
+3. If adding commands, load the `outfitter:claude-code` skill
+4. If adding agents, load the `outfitter:claude-code` skill
+5. If adding hooks, load the `outfitter:claude-code` skill
 6. If adding skills, load the `outfitter:skills-dev` skill
-7. Delegate by loading the `outfitter:claude-plugin-audit` skill for validation
+7. Validate against checklists in [audit.md](references/audit.md)
 8. Fix issues and distribute
 
 ## Quick Start
@@ -153,7 +148,7 @@ Review the following code: {{0}}
 Check for: code style, bugs, performance, security
 ```
 
-For complex commands, load the `outfitter:claude-commands` skill.
+For complex commands, load the `outfitter:claude-code` skill.
 
 ### Custom Agents
 
@@ -171,7 +166,7 @@ You are a security expert. When reviewing code:
 3. Report issues with severity levels
 ```
 
-For agent design patterns, load the `outfitter:claude-agents` skill.
+For agent design patterns, load the `outfitter:claude-code` skill.
 
 ### Event Hooks
 
@@ -196,7 +191,7 @@ Two ways to define hooks:
 
 Hook types: PreToolUse, PostToolUse, UserPromptSubmit, Stop, SessionStart, SessionEnd
 
-For hook implementation, load the `outfitter:claude-hooks` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
+For hook implementation, load the `outfitter:claude-code` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
 
 ### Skills
 
@@ -230,9 +225,9 @@ See [caching.md](references/caching.md) for workarounds and best practices.
 
 ## Stage 4: Validation
 
-Before distribution, validate the plugin.
+Before distribution, validate the plugin. See [audit.md](references/audit.md) for detailed per-component checklists, severity levels, and output format.
 
-### Checklist
+### Quick Checklist
 
 **Structure:**
 - [ ] Standalone: plugin.json exists and is valid JSON
@@ -390,6 +385,7 @@ See [marketplace.md](references/marketplace.md) for full schema, team configurat
 - [distribution.md](references/distribution.md) - Packaging, versioning, CI/CD, release automation
 - [marketplace.md](references/marketplace.md) - Marketplace schema, hosting, team configuration
 - [caching.md](references/caching.md) - Plugin caching behavior and cross-plugin dependencies
+- [audit.md](references/audit.md) - Detailed validation checklists, severity levels, output format
 
 </references>
 
@@ -414,7 +410,5 @@ NEVER:
 
 ## Related Skills
 
-- `claude-commands` - Slash command development
-- `claude-agents` - Custom agent design
-- `claude-hooks` - Event hook implementation
-- `skills-dev` - Skill creation patterns
+- `claude-code` - Agents, commands, hooks, skills, rules, and config
+- `skills-dev` - Cross-platform skill creation patterns

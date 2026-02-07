@@ -9,9 +9,8 @@ metadata:
     - patterns
     - codify
     - skills-dev
-    - claude-skills
+    - claude-code
     - claude-plugins
-    - claude-plugin-audit
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, Skill
 ---
 
@@ -30,9 +29,9 @@ External Repo → Research → Recon → Patterns → Codify → Author → Pack
 3. Load the `outfitter:codebase-recon` skill for internal analysis of target repo
 4. Load the `outfitter:patterns` skill to extract repeatable patterns worth automating
 5. Load the `outfitter:codify` skill to map patterns to component types
-6. Author components using `outfitter:skills-dev` or `outfitter:claude-skills`
+6. Author components using `outfitter:skills-dev` or `outfitter:claude-code`
 7. Load the `outfitter:claude-plugins` skill to package into distributable plugin
-8. Delegate by loading the `outfitter:claude-plugin-audit` skill for validation
+8. Validate using the `outfitter:claude-plugins` audit checklists
 
 <when_to_use>
 
@@ -42,7 +41,7 @@ External Repo → Research → Recon → Patterns → Codify → Author → Pack
 - Extracting automation opportunities from a third-party repo
 - Packaging workflow patterns around external tools
 
-NOT for: plugins from scratch (use `claude-plugins`), single-skill creation (use `skills-dev`), existing Claude Code plugins (use `claude-plugin-audit`)
+NOT for: plugins from scratch (use `claude-plugins`), single-skill creation (use `skills-dev`), auditing existing plugins (use `claude-plugins`)
 
 </when_to_use>
 
@@ -85,7 +84,7 @@ Load the `maintain-tasks` skill for stage tracking. Stages advance only.
 | 4. Mapping | `outfitter:codify` | "Mapping to components" |
 | 5. Authoring | `outfitter:skills-dev` | "Creating components" |
 | 6. Packaging | `outfitter:claude-plugins` | "Packaging plugin" |
-| 7. Audit | `outfitter:claude-plugin-audit` | "Validating plugin" |
+| 7. Audit | `outfitter:claude-plugins` | "Validating plugin" |
 
 <workflow>
 
@@ -129,7 +128,7 @@ See [stage-6-packaging.md](references/stage-6-packaging.md) for details.
 
 ### Stage 7: Audit
 
-Delegate by loading `outfitter:claude-plugin-audit` skill. Validate before distribution.
+Validate using the `outfitter:claude-plugins` audit checklists. See its `references/audit.md`.
 
 See [stage-7-audit.md](references/stage-7-audit.md) for details.
 

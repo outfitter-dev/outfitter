@@ -5,7 +5,7 @@ metadata:
   version: "1.0.0"
   related-skills:
     - skills-dev
-    - claude-skills
+    - claude-code
     - codify
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
@@ -18,7 +18,7 @@ Design skill systems that chain together with artifact-based state passing.
 
 1. Load the `outfitter:skills-dev` skill for base skill authoring
 2. Apply workflow patterns from this skill
-3. If Claude-specific features needed, load the `outfitter:claude-skills` skill
+3. If Claude-specific features needed, load the `outfitter:claude-code` skill
 
 <when_to_use>
 

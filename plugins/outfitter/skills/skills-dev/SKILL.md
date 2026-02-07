@@ -5,9 +5,8 @@ metadata:
   version: "2.2.0"
   author: outfitter
   related-skills:
-    - claude-skills
+    - claude-code
     - claude-plugins
-    - claude-agents
     - codex-config
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---

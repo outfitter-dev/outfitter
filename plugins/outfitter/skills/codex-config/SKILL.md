@@ -4,7 +4,7 @@ description: "This skill should be used when configuring Codex CLI, setting up p
 metadata:
   version: "1.0.0"
   related-skills:
-    - claude-config
+    - claude-code
     - skills-dev
 ---
 
