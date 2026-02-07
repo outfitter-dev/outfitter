@@ -303,6 +303,19 @@ const CancelledErrorBase: TaggedErrorClass<
 export class ValidationError extends ValidationErrorBase {
   readonly category = "validation" as const;
 
+  /** Create a ValidationError with auto-generated message from field name. */
+  static create(
+    field: string,
+    reason: string,
+    context?: Record<string, unknown>
+  ): ValidationError {
+    return new ValidationError({
+      message: `${field}: ${reason}`,
+      field,
+      ...(context != null && { context }),
+    });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -366,6 +379,20 @@ export class AssertionError extends AssertionErrorBase {
 export class NotFoundError extends NotFoundErrorBase {
   readonly category = "not_found" as const;
 
+  /** Create a NotFoundError with auto-generated message. */
+  static create(
+    resourceType: string,
+    resourceId: string,
+    context?: Record<string, unknown>
+  ): NotFoundError {
+    return new NotFoundError({
+      message: `${resourceType} not found: ${resourceId}`,
+      resourceType,
+      resourceId,
+      ...(context != null && { context }),
+    });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -385,6 +412,14 @@ export class NotFoundError extends NotFoundErrorBase {
  */
 export class ConflictError extends ConflictErrorBase {
   readonly category = "conflict" as const;
+
+  /** Create a ConflictError with optional context. */
+  static create(
+    message: string,
+    context?: Record<string, unknown>
+  ): ConflictError {
+    return new ConflictError({ message, ...(context != null && { context }) });
+  }
 
   exitCode(): number {
     return getExitCode(this.category);
@@ -406,6 +441,17 @@ export class ConflictError extends ConflictErrorBase {
 export class PermissionError extends PermissionErrorBase {
   readonly category = "permission" as const;
 
+  /** Create a PermissionError with optional context. */
+  static create(
+    message: string,
+    context?: Record<string, unknown>
+  ): PermissionError {
+    return new PermissionError({
+      message,
+      ...(context != null && { context }),
+    });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -425,6 +471,15 @@ export class PermissionError extends PermissionErrorBase {
  */
 export class TimeoutError extends TimeoutErrorBase {
   readonly category = "timeout" as const;
+
+  /** Create a TimeoutError with auto-generated message. */
+  static create(operation: string, timeoutMs: number): TimeoutError {
+    return new TimeoutError({
+      message: `${operation} timed out after ${timeoutMs}ms`,
+      operation,
+      timeoutMs,
+    });
+  }
 
   exitCode(): number {
     return getExitCode(this.category);
@@ -446,6 +501,14 @@ export class TimeoutError extends TimeoutErrorBase {
 export class RateLimitError extends RateLimitErrorBase {
   readonly category = "rate_limit" as const;
 
+  /** Create a RateLimitError with optional retry hint. */
+  static create(message: string, retryAfterSeconds?: number): RateLimitError {
+    return new RateLimitError({
+      message,
+      ...(retryAfterSeconds != null && { retryAfterSeconds }),
+    });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -465,6 +528,14 @@ export class RateLimitError extends RateLimitErrorBase {
  */
 export class NetworkError extends NetworkErrorBase {
   readonly category = "network" as const;
+
+  /** Create a NetworkError with optional context. */
+  static create(
+    message: string,
+    context?: Record<string, unknown>
+  ): NetworkError {
+    return new NetworkError({ message, ...(context != null && { context }) });
+  }
 
   exitCode(): number {
     return getExitCode(this.category);
@@ -486,6 +557,14 @@ export class NetworkError extends NetworkErrorBase {
 export class InternalError extends InternalErrorBase {
   readonly category = "internal" as const;
 
+  /** Create an InternalError with optional context. */
+  static create(
+    message: string,
+    context?: Record<string, unknown>
+  ): InternalError {
+    return new InternalError({ message, ...(context != null && { context }) });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -506,6 +585,14 @@ export class InternalError extends InternalErrorBase {
 export class AuthError extends AuthErrorBase {
   readonly category = "auth" as const;
 
+  /** Create an AuthError with optional reason. */
+  static create(
+    message: string,
+    reason?: "missing" | "invalid" | "expired"
+  ): AuthError {
+    return new AuthError({ message, ...(reason != null && { reason }) });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }
@@ -525,6 +612,11 @@ export class AuthError extends AuthErrorBase {
  */
 export class CancelledError extends CancelledErrorBase {
   readonly category = "cancelled" as const;
+
+  /** Create a CancelledError. */
+  static create(message: string): CancelledError {
+    return new CancelledError({ message });
+  }
 
   exitCode(): number {
     return getExitCode(this.category);
