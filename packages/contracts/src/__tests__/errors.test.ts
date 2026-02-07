@@ -522,6 +522,97 @@ describe("CancelledError", () => {
 });
 
 // ============================================================================
+// Static Factory Method Tests
+// ============================================================================
+
+describe("static create() methods", () => {
+  it("ValidationError.create() sets field and generates message", () => {
+    const error = ValidationError.create("email", "format invalid");
+    expect(error.message).toBe("email: format invalid");
+    expect(error.field).toBe("email");
+    expect(error._tag).toBe("ValidationError");
+    expect(error.category).toBe("validation");
+  });
+
+  it("ValidationError.create() accepts optional context", () => {
+    const error = ValidationError.create("age", "out of range", {
+      min: 0,
+      max: 150,
+    });
+    expect(error.context).toEqual({ min: 0, max: 150 });
+  });
+
+  it("NotFoundError.create() generates message from type and id", () => {
+    const error = NotFoundError.create("PR", "outfitter#123");
+    expect(error.message).toBe("PR not found: outfitter#123");
+    expect(error.resourceType).toBe("PR");
+    expect(error.resourceId).toBe("outfitter#123");
+  });
+
+  it("NotFoundError.create() accepts optional context", () => {
+    const error = NotFoundError.create("heading", "h:Intro", {
+      available: ["Introduction"],
+    });
+    expect(error.context).toEqual({ available: ["Introduction"] });
+  });
+
+  it("ConflictError.create() builds from message", () => {
+    const error = ConflictError.create("Resource was modified");
+    expect(error.message).toBe("Resource was modified");
+    expect(error.category).toBe("conflict");
+  });
+
+  it("TimeoutError.create() generates message from operation and ms", () => {
+    const error = TimeoutError.create("database query", 5000);
+    expect(error.message).toBe("database query timed out after 5000ms");
+    expect(error.operation).toBe("database query");
+    expect(error.timeoutMs).toBe(5000);
+  });
+
+  it("RateLimitError.create() includes retryAfterSeconds", () => {
+    const error = RateLimitError.create("Rate limit exceeded", 60);
+    expect(error.message).toBe("Rate limit exceeded");
+    expect(error.retryAfterSeconds).toBe(60);
+  });
+
+  it("AuthError.create() includes reason", () => {
+    const error = AuthError.create("Token expired", "expired");
+    expect(error.message).toBe("Token expired");
+    expect(error.reason).toBe("expired");
+  });
+
+  it("CancelledError.create() builds from message", () => {
+    const error = CancelledError.create("User aborted");
+    expect(error.message).toBe("User aborted");
+    expect(error.category).toBe("cancelled");
+  });
+
+  it("NetworkError.create() includes context", () => {
+    const error = NetworkError.create("Connection refused", {
+      host: "api.example.com",
+    });
+    expect(error.message).toBe("Connection refused");
+    expect(error.context).toEqual({ host: "api.example.com" });
+  });
+
+  it("InternalError.create() includes context", () => {
+    const error = InternalError.create("Unexpected state", {
+      state: "corrupted",
+    });
+    expect(error.message).toBe("Unexpected state");
+    expect(error.context).toEqual({ state: "corrupted" });
+  });
+
+  it("PermissionError.create() includes context", () => {
+    const error = PermissionError.create("Access denied", {
+      required: "admin",
+    });
+    expect(error.message).toBe("Access denied");
+    expect(error.context).toEqual({ required: "admin" });
+  });
+});
+
+// ============================================================================
 // Helper Functions Tests
 // ============================================================================
 
