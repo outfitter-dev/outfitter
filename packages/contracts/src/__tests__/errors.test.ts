@@ -10,6 +10,7 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
+  AmbiguousError,
   AssertionError,
   AuthError,
   CancelledError,
@@ -184,6 +185,75 @@ describe("ValidationError", () => {
     const error = new ValidationError({ message: "Invalid input" });
     expect(error.statusCode()).toBe(statusCodeMap.validation);
     expect(error.statusCode()).toBe(400);
+  });
+});
+
+describe("AmbiguousError", () => {
+  it("has correct _tag", () => {
+    const error = new AmbiguousError({
+      message: "Multiple matches",
+      candidates: ["a", "b"],
+    });
+    expect(error._tag).toBe("AmbiguousError");
+  });
+
+  it("has validation category", () => {
+    const error = new AmbiguousError({
+      message: "Multiple matches",
+      candidates: ["a", "b"],
+    });
+    expect(error.category).toBe("validation");
+  });
+
+  it("exposes candidates array", () => {
+    const error = new AmbiguousError({
+      message: "Multiple headings match",
+      candidates: ["Introduction", "Intro to APIs"],
+    });
+    expect(error.candidates).toEqual(["Introduction", "Intro to APIs"]);
+  });
+
+  it("exposes optional context", () => {
+    const error = new AmbiguousError({
+      message: "Multiple matches",
+      candidates: ["a", "b"],
+      context: { query: "Intro" },
+    });
+    expect(error.context).toEqual({ query: "Intro" });
+  });
+
+  it("exitCode() returns validation exit code", () => {
+    const error = new AmbiguousError({
+      message: "Multiple matches",
+      candidates: ["a"],
+    });
+    expect(error.exitCode()).toBe(1);
+  });
+
+  it("statusCode() returns 400", () => {
+    const error = new AmbiguousError({
+      message: "Multiple matches",
+      candidates: ["a"],
+    });
+    expect(error.statusCode()).toBe(400);
+  });
+});
+
+describe("AmbiguousError.create()", () => {
+  it("generates message from what and candidate count", () => {
+    const error = AmbiguousError.create("heading", [
+      "Introduction",
+      "Intro to APIs",
+    ]);
+    expect(error.message).toBe("Ambiguous heading: 2 matches found");
+    expect(error.candidates).toEqual(["Introduction", "Intro to APIs"]);
+  });
+
+  it("accepts optional context", () => {
+    const error = AmbiguousError.create("command", ["list", "lint"], {
+      input: "li",
+    });
+    expect(error.context).toEqual({ input: "li" });
   });
 });
 
@@ -757,6 +827,7 @@ describe("ERROR_CODES", () => {
     expect(ERROR_CODES.validation.INVALID_FORMAT).toBe(1002);
     expect(ERROR_CODES.validation.OUT_OF_RANGE).toBe(1003);
     expect(ERROR_CODES.validation.TYPE_MISMATCH).toBe(1004);
+    expect(ERROR_CODES.validation.AMBIGUOUS_MATCH).toBe(1005);
   });
 
   it("has expected not_found error codes", () => {

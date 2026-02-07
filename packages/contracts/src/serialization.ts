@@ -1,6 +1,8 @@
 import { Result } from "better-result";
 import type { z } from "zod";
 import {
+  AmbiguousError,
+  AssertionError,
   AuthError,
   CancelledError,
   ConflictError,
@@ -33,6 +35,8 @@ export interface SerializeErrorOptions {
  */
 const errorRegistry = {
   ValidationError,
+  AmbiguousError,
+  AssertionError,
   NotFoundError,
   ConflictError,
   PermissionError,
@@ -96,6 +100,14 @@ function extractContext(
       }
       break;
     }
+    case "AmbiguousError": {
+      const amb = error as InstanceType<typeof AmbiguousError>;
+      context["candidates"] = amb.candidates;
+      break;
+    }
+    case "AssertionError":
+      // No extra fields beyond message
+      break;
     case "ConflictError":
     case "PermissionError":
     case "NetworkError":
@@ -285,6 +297,17 @@ export function deserializeError(data: SerializedError): OutfitterError {
       }
       return new AuthError(props);
     }
+
+    case "AmbiguousError":
+      return new AmbiguousError({
+        message: data.message,
+        candidates: (context["candidates"] as string[]) ?? [],
+      });
+
+    case "AssertionError":
+      return new AssertionError({
+        message: data.message,
+      });
 
     case "CancelledError":
       return new CancelledError({

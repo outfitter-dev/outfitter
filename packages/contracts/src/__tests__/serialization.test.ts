@@ -3,15 +3,17 @@
  *
  * Tests cover:
  * - serializeError() (6 tests)
- * - deserializeError() (6 tests)
+ * - deserializeError() (8 tests)
  * - safeStringify() (5 tests)
  * - safeParse<T>() (4 tests)
  *
- * Total: 21 tests
+ * Total: 23 tests
  */
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import {
+  AmbiguousError,
+  AssertionError,
   ConflictError,
   InternalError,
   NotFoundError,
@@ -146,9 +148,11 @@ describe("deserializeError()", () => {
     }
   });
 
-  it("reconstructs all 10 error types", () => {
+  it("reconstructs all 12 error types", () => {
     const errorTags = [
       "ValidationError",
+      "AmbiguousError",
+      "AssertionError",
       "NotFoundError",
       "ConflictError",
       "PermissionError",
@@ -214,6 +218,43 @@ describe("deserializeError()", () => {
 
     expect(error._tag).toBe("InternalError");
     expect(error.message).toBe("Minimal error");
+  });
+
+  it("round-trips AmbiguousError with candidates", () => {
+    const original = new AmbiguousError({
+      message: "Multiple matches found",
+      candidates: ["Introduction", "Intro to APIs"],
+    });
+
+    const serialized = serializeError(original);
+    expect(serialized._tag).toBe("AmbiguousError");
+    expect(serialized.category).toBe("validation");
+    expect(serialized.context?.candidates).toEqual([
+      "Introduction",
+      "Intro to APIs",
+    ]);
+
+    const deserialized = deserializeError(serialized);
+    expect(deserialized._tag).toBe("AmbiguousError");
+    expect(deserialized.message).toBe("Multiple matches found");
+    expect((deserialized as AmbiguousError).candidates).toEqual([
+      "Introduction",
+      "Intro to APIs",
+    ]);
+  });
+
+  it("round-trips AssertionError", () => {
+    const original = new AssertionError({
+      message: "Expected non-null value",
+    });
+
+    const serialized = serializeError(original);
+    expect(serialized._tag).toBe("AssertionError");
+    expect(serialized.category).toBe("internal");
+
+    const deserialized = deserializeError(serialized);
+    expect(deserialized._tag).toBe("AssertionError");
+    expect(deserialized.message).toBe("Expected non-null value");
   });
 });
 

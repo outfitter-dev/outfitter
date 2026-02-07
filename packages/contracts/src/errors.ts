@@ -77,6 +77,7 @@ export const ERROR_CODES = {
     INVALID_FORMAT: 1002,
     OUT_OF_RANGE: 1003,
     TYPE_MISMATCH: 1004,
+    AMBIGUOUS_MATCH: 1005,
   },
   not_found: {
     RESOURCE_NOT_FOUND: 2001,
@@ -172,6 +173,19 @@ const ValidationErrorBase: TaggedErrorClass<
 > = TaggedError("ValidationError")<{
   message: string;
   field?: string;
+  context?: Record<string, unknown>;
+}>();
+
+const AmbiguousErrorBase: TaggedErrorClass<
+  "AmbiguousError",
+  {
+    message: string;
+    candidates: string[];
+    context?: Record<string, unknown>;
+  }
+> = TaggedError("AmbiguousError")<{
+  message: string;
+  candidates: string[];
   context?: Record<string, unknown>;
 }>();
 
@@ -312,6 +326,47 @@ export class ValidationError extends ValidationErrorBase {
     return new ValidationError({
       message: `${field}: ${reason}`,
       field,
+      ...(context != null && { context }),
+    });
+  }
+
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
+
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
+}
+
+/**
+ * Multiple matches found — user must disambiguate.
+ *
+ * Used in search/resolution systems where partial input matches
+ * multiple candidates. Carries the candidate list so transport
+ * layers can prompt disambiguation.
+ *
+ * @example
+ * ```typescript
+ * new AmbiguousError({
+ *   message: "Multiple headings match 'Intro'",
+ *   candidates: ["Introduction", "Intro to APIs"],
+ * });
+ * AmbiguousError.create("heading", ["Introduction", "Intro to APIs"]);
+ * ```
+ */
+export class AmbiguousError extends AmbiguousErrorBase {
+  readonly category = "validation" as const;
+
+  /** Create an AmbiguousError with auto-generated message. */
+  static create(
+    what: string,
+    candidates: string[],
+    context?: Record<string, unknown>
+  ): AmbiguousError {
+    return new AmbiguousError({
+      message: `Ambiguous ${what}: ${candidates.length} matches found`,
+      candidates,
       ...(context != null && { context }),
     });
   }
@@ -632,6 +687,7 @@ export class CancelledError extends CancelledErrorBase {
  */
 export type AnyKitError =
   | InstanceType<typeof ValidationError>
+  | InstanceType<typeof AmbiguousError>
   | InstanceType<typeof AssertionError>
   | InstanceType<typeof NotFoundError>
   | InstanceType<typeof ConflictError>
