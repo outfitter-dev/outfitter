@@ -337,8 +337,124 @@ export interface ResourceTemplateDefinition {
   /** Optional MIME type. */
   mimeType?: string;
 
+  /** Optional completion handlers keyed by parameter name. */
+  complete?: Record<string, CompletionHandler>;
+
   /** Handler for reading matched resources. */
   handler: ResourceTemplateReadHandler;
+}
+
+// ============================================================================
+// Completions
+// ============================================================================
+
+/**
+ * Result of a completion request.
+ */
+export interface CompletionResult {
+  /** Completion values */
+  values: string[];
+  /** Total number of available values (for pagination) */
+  total?: number;
+  /** Whether there are more values */
+  hasMore?: boolean;
+}
+
+/**
+ * Handler for generating completions.
+ */
+export type CompletionHandler = (value: string) => Promise<CompletionResult>;
+
+/**
+ * Reference to a prompt or resource for completion.
+ */
+export type CompletionRef =
+  | { type: "ref/prompt"; name: string }
+  | { type: "ref/resource"; uri: string };
+
+// ============================================================================
+// Prompt Definition
+// ============================================================================
+
+/**
+ * Argument definition for a prompt.
+ */
+export interface PromptArgument {
+  /** Argument name */
+  name: string;
+  /** Human-readable description */
+  description?: string;
+  /** Whether this argument is required */
+  required?: boolean;
+  /** Optional completion handler for this argument */
+  complete?: CompletionHandler;
+}
+
+/**
+ * Content block within a prompt message.
+ */
+export interface PromptMessageContent {
+  /** Content type */
+  type: "text";
+  /** Text content */
+  text: string;
+}
+
+/**
+ * A message in a prompt response.
+ */
+export interface PromptMessage {
+  /** Message role */
+  role: "user" | "assistant";
+  /** Message content */
+  content: PromptMessageContent;
+}
+
+/**
+ * Result returned from getting a prompt.
+ */
+export interface PromptResult {
+  /** Prompt messages */
+  messages: PromptMessage[];
+  /** Optional description override */
+  description?: string;
+}
+
+/**
+ * Handler for generating prompt messages.
+ */
+export type PromptHandler = (
+  args: Record<string, string | undefined>
+) => Promise<Result<PromptResult, OutfitterError>>;
+
+/**
+ * Definition of an MCP prompt.
+ *
+ * Prompts are reusable templates that generate messages for LLMs.
+ *
+ * @example
+ * ```typescript
+ * const reviewPrompt: PromptDefinition = {
+ *   name: "code-review",
+ *   description: "Review code changes",
+ *   arguments: [
+ *     { name: "language", description: "Programming language", required: true },
+ *   ],
+ *   handler: async (args) => Result.ok({
+ *     messages: [{ role: "user", content: { type: "text", text: `Review this ${args.language} code` } }],
+ *   }),
+ * };
+ * ```
+ */
+export interface PromptDefinition {
+  /** Unique prompt name */
+  name: string;
+  /** Human-readable description */
+  description?: string;
+  /** Prompt arguments */
+  arguments: PromptArgument[];
+  /** Handler to generate messages */
+  handler: PromptHandler;
 }
 
 // ============================================================================
@@ -464,6 +580,46 @@ export interface McpServer {
    * @returns Array of resource template definitions
    */
   getResourceTemplates(): ResourceTemplateDefinition[];
+
+  /**
+   * Complete an argument value.
+   * @param ref - Reference to the prompt or resource template
+   * @param argumentName - Name of the argument to complete
+   * @param value - Current value to complete
+   * @returns Result with completion values or McpError
+   */
+  complete(
+    ref: CompletionRef,
+    argumentName: string,
+    value: string
+  ): Promise<Result<CompletionResult, InstanceType<typeof McpError>>>;
+
+  /**
+   * Register a prompt with the server.
+   * @param prompt - Prompt definition to register
+   */
+  registerPrompt(prompt: PromptDefinition): void;
+
+  /**
+   * Get all registered prompts.
+   * @returns Array of prompt definitions (without handlers)
+   */
+  getPrompts(): Array<{
+    name: string;
+    description?: string;
+    arguments: PromptArgument[];
+  }>;
+
+  /**
+   * Get a specific prompt's messages.
+   * @param name - Prompt name
+   * @param args - Prompt arguments
+   * @returns Result with prompt result or McpError
+   */
+  getPrompt(
+    name: string,
+    args: Record<string, string | undefined>
+  ): Promise<Result<PromptResult, InstanceType<typeof McpError>>>;
 
   /**
    * Read a resource by URI.

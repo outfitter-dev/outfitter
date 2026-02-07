@@ -12,6 +12,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   type CallToolResult,
+  CompleteRequestSchema,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListResourceTemplatesRequestSchema,
   ListToolsRequestSchema,
@@ -124,6 +127,12 @@ export function createSdkServer(server: McpServer): Server {
     capabilities["resources"] = {};
   }
 
+  if (server.getPrompts().length > 0) {
+    capabilities["prompts"] = {};
+  }
+
+  capabilities["completions"] = {};
+
   const sdkServer = new Server(
     { name: server.name, version: server.version },
     { capabilities }
@@ -176,6 +185,46 @@ export function createSdkServer(server: McpServer): Server {
     }
 
     return { contents: result.value };
+  });
+
+  // Prompt handlers
+  sdkServer.setRequestHandler(ListPromptsRequestSchema, async () => ({
+    prompts: server.getPrompts(),
+  }));
+
+  sdkServer.setRequestHandler(GetPromptRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+    const result = await server.getPrompt(
+      name,
+      (args ?? {}) as Record<string, string | undefined>
+    );
+
+    if (result.isErr()) {
+      throw toSdkError(result.error);
+    }
+
+    return { ...result.value };
+  });
+
+  // Completion handler
+  sdkServer.setRequestHandler(CompleteRequestSchema, async (request) => {
+    const { ref, argument } = request.params;
+    const completionRef =
+      ref.type === "ref/prompt"
+        ? { type: "ref/prompt" as const, name: ref.name }
+        : { type: "ref/resource" as const, uri: ref.uri };
+
+    const result = await server.complete(
+      completionRef,
+      argument.name,
+      argument.value
+    );
+
+    if (result.isErr()) {
+      throw toSdkError(result.error);
+    }
+
+    return { completion: result.value };
   });
 
   return sdkServer;

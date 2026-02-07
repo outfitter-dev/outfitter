@@ -61,6 +61,7 @@ export { type JsonSchema, zodToJsonSchema } from "./schema.js";
 // Server
 export {
   createMcpServer,
+  definePrompt,
   defineResource,
   defineResourceTemplate,
   defineTool,
@@ -74,11 +75,20 @@ export {
 // Types
 export {
   type BlobResourceContent,
+  type CompletionHandler,
+  type CompletionRef,
+  type CompletionResult,
   type InvokeToolOptions,
   McpError,
   type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
+  type PromptArgument,
+  type PromptDefinition,
+  type PromptHandler,
+  type PromptMessage,
+  type PromptMessageContent,
+  type PromptResult,
   type ResourceContent,
   type ResourceDefinition,
   type ResourceReadHandler,

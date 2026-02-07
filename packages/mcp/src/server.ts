@@ -16,10 +16,15 @@ import { generateRequestId, Result } from "@outfitter/contracts";
 import type { z } from "zod";
 import { zodToJsonSchema } from "./schema.js";
 import {
+  type CompletionRef,
+  type CompletionResult,
   type InvokeToolOptions,
   McpError,
   type McpServer,
   type McpServerOptions,
+  type PromptArgument,
+  type PromptDefinition,
+  type PromptResult,
   type ResourceContent,
   type ResourceDefinition,
   type ResourceTemplateDefinition,
@@ -113,10 +118,11 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   const { name, version, logger: providedLogger } = options;
   const logger = providedLogger ?? createNoOpLogger();
 
-  // Tool, resource, and template storage
+  // Tool, resource, template, and prompt storage
   const tools = new Map<string, StoredTool>();
   const resources = new Map<string, ResourceDefinition>();
   const resourceTemplates = new Map<string, ResourceTemplateDefinition>();
+  const prompts = new Map<string, PromptDefinition>();
 
   // Create handler context for tool invocations
   function createHandlerContext(
@@ -243,6 +249,152 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 
     getResourceTemplates(): ResourceTemplateDefinition[] {
       return Array.from(resourceTemplates.values());
+    },
+
+    async complete(
+      ref: CompletionRef,
+      argumentName: string,
+      value: string
+    ): Promise<Result<CompletionResult, InstanceType<typeof McpError>>> {
+      if (ref.type === "ref/prompt") {
+        const prompt = prompts.get(ref.name);
+        if (!prompt) {
+          return Result.err(
+            new McpError({
+              message: `Prompt not found: ${ref.name}`,
+              code: -32_601,
+              context: { prompt: ref.name },
+            })
+          );
+        }
+
+        const arg = prompt.arguments.find((a) => a.name === argumentName);
+        if (!arg?.complete) {
+          return Result.ok({ values: [] });
+        }
+
+        try {
+          const result = await arg.complete(value);
+          return Result.ok(result);
+        } catch (error) {
+          return Result.err(
+            new McpError({
+              message: error instanceof Error ? error.message : "Unknown error",
+              code: -32_603,
+              context: {
+                prompt: ref.name,
+                argument: argumentName,
+                thrown: true,
+              },
+            })
+          );
+        }
+      }
+
+      if (ref.type === "ref/resource") {
+        const template = resourceTemplates.get(ref.uri);
+        if (!template) {
+          return Result.err(
+            new McpError({
+              message: `Resource template not found: ${ref.uri}`,
+              code: -32_601,
+              context: { uri: ref.uri },
+            })
+          );
+        }
+
+        const handler = template.complete?.[argumentName];
+        if (!handler) {
+          return Result.ok({ values: [] });
+        }
+
+        try {
+          const result = await handler(value);
+          return Result.ok(result);
+        } catch (error) {
+          return Result.err(
+            new McpError({
+              message: error instanceof Error ? error.message : "Unknown error",
+              code: -32_603,
+              context: { uri: ref.uri, argument: argumentName, thrown: true },
+            })
+          );
+        }
+      }
+
+      return Result.err(
+        new McpError({
+          message: "Invalid completion reference type",
+          code: -32_602,
+          context: { ref },
+        })
+      );
+    },
+
+    registerPrompt(prompt: PromptDefinition): void {
+      logger.debug("Registering prompt", { name: prompt.name });
+      prompts.set(prompt.name, prompt);
+      logger.info("Prompt registered", { name: prompt.name });
+    },
+
+    getPrompts(): Array<{
+      name: string;
+      description?: string;
+      arguments: PromptArgument[];
+    }> {
+      return Array.from(prompts.values()).map((p) => ({
+        name: p.name,
+        ...(p.description ? { description: p.description } : {}),
+        arguments: p.arguments,
+      }));
+    },
+
+    async getPrompt(
+      promptName: string,
+      args: Record<string, string | undefined>
+    ): Promise<Result<PromptResult, InstanceType<typeof McpError>>> {
+      const prompt = prompts.get(promptName);
+      if (!prompt) {
+        return Result.err(
+          new McpError({
+            message: `Prompt not found: ${promptName}`,
+            code: -32_601,
+            context: { prompt: promptName },
+          })
+        );
+      }
+
+      // Validate required arguments
+      for (const arg of prompt.arguments) {
+        if (
+          arg.required &&
+          (args[arg.name] === undefined || args[arg.name] === "")
+        ) {
+          return Result.err(
+            new McpError({
+              message: `Missing required argument: ${arg.name}`,
+              code: -32_602,
+              context: { prompt: promptName, argument: arg.name },
+            })
+          );
+        }
+      }
+
+      try {
+        const result = await prompt.handler(args);
+        if (result.isErr()) {
+          return Result.err(translateError(result.error));
+        }
+        return Result.ok(result.value);
+      } catch (error) {
+        return Result.err(
+          new McpError({
+            message: error instanceof Error ? error.message : "Unknown error",
+            code: -32_603,
+            context: { prompt: promptName, thrown: true },
+          })
+        );
+      }
     },
 
     async readResource(
@@ -556,5 +708,18 @@ export function defineResource(
 export function defineResourceTemplate(
   definition: ResourceTemplateDefinition
 ): ResourceTemplateDefinition {
+  return definition;
+}
+
+/**
+ * Define a prompt.
+ *
+ * Helper function for creating prompt definitions
+ * with consistent typing.
+ *
+ * @param definition - Prompt definition object
+ * @returns The same prompt definition
+ */
+export function definePrompt(definition: PromptDefinition): PromptDefinition {
   return definition;
 }
