@@ -68,24 +68,24 @@ function createTestLoggerWithContext(
     clear() {
       logs.length = 0;
     },
-    trace(message, metadata) {
+    trace: ((message: string, metadata?: Record<string, unknown>) => {
       write("trace", message, metadata);
-    },
-    debug(message, metadata) {
+    }) as Logger["trace"],
+    debug: ((message: string, metadata?: Record<string, unknown>) => {
       write("debug", message, metadata);
-    },
-    info(message, metadata) {
+    }) as Logger["debug"],
+    info: ((message: string, metadata?: Record<string, unknown>) => {
       write("info", message, metadata);
-    },
-    warn(message, metadata) {
+    }) as Logger["info"],
+    warn: ((message: string, metadata?: Record<string, unknown>) => {
       write("warn", message, metadata);
-    },
-    error(message, metadata) {
+    }) as Logger["warn"],
+    error: ((message: string, metadata?: Record<string, unknown>) => {
       write("error", message, metadata);
-    },
-    fatal(message, metadata) {
+    }) as Logger["error"],
+    fatal: ((message: string, metadata?: Record<string, unknown>) => {
       write("fatal", message, metadata);
-    },
+    }) as Logger["fatal"],
     child(childContext) {
       return createTestLoggerWithContext({ ...context, ...childContext }, logs);
     },

@@ -249,6 +249,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   trace(message: string, metadata?: Record<string, unknown>): void;
+  trace(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Log at debug level (development debugging).
@@ -256,6 +257,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   debug(message: string, metadata?: Record<string, unknown>): void;
+  debug(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Log at info level (normal operations).
@@ -263,6 +265,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   info(message: string, metadata?: Record<string, unknown>): void;
+  info(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Log at warn level (unexpected but handled situations).
@@ -270,6 +273,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   warn(message: string, metadata?: Record<string, unknown>): void;
+  warn(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Log at error level (failures requiring attention).
@@ -277,6 +281,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   error(message: string, metadata?: Record<string, unknown>): void;
+  error(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Log at fatal level (unrecoverable failures).
@@ -284,6 +289,7 @@ export interface LoggerInstance {
    * @param metadata - Optional structured metadata
    */
   fatal(message: string, metadata?: Record<string, unknown>): void;
+  fatal(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Get the current context metadata attached to this logger.
@@ -767,12 +773,18 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
   };
 
   return {
-    trace: (message, metadata) => log("trace", message, metadata),
-    debug: (message, metadata) => log("debug", message, metadata),
-    info: (message, metadata) => log("info", message, metadata),
-    warn: (message, metadata) => log("warn", message, metadata),
-    error: (message, metadata) => log("error", message, metadata),
-    fatal: (message, metadata) => log("fatal", message, metadata),
+    trace: ((message: string, metadata?: Record<string, unknown>) =>
+      log("trace", message, metadata)) as LoggerInstance["trace"],
+    debug: ((message: string, metadata?: Record<string, unknown>) =>
+      log("debug", message, metadata)) as LoggerInstance["debug"],
+    info: ((message: string, metadata?: Record<string, unknown>) =>
+      log("info", message, metadata)) as LoggerInstance["info"],
+    warn: ((message: string, metadata?: Record<string, unknown>) =>
+      log("warn", message, metadata)) as LoggerInstance["warn"],
+    error: ((message: string, metadata?: Record<string, unknown>) =>
+      log("error", message, metadata)) as LoggerInstance["error"],
+    fatal: ((message: string, metadata?: Record<string, unknown>) =>
+      log("fatal", message, metadata)) as LoggerInstance["fatal"],
     getContext: () => ({ ...state.context }),
     setLevel: (level) => {
       state.level = level;
@@ -859,18 +871,36 @@ export function createChildLogger(
 
   // Create child logger that delegates to parent but with merged context
   const childLogger: LoggerInstance = {
-    trace: (message, metadata) =>
-      parent.trace(message, { ...context, ...metadata }),
-    debug: (message, metadata) =>
-      parent.debug(message, { ...context, ...metadata }),
-    info: (message, metadata) =>
-      parent.info(message, { ...context, ...metadata }),
-    warn: (message, metadata) =>
-      parent.warn(message, { ...context, ...metadata }),
-    error: (message, metadata) =>
-      parent.error(message, { ...context, ...metadata }),
-    fatal: (message, metadata) =>
-      parent.fatal(message, { ...context, ...metadata }),
+    trace: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.trace(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["trace"],
+    debug: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.debug(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["debug"],
+    info: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.info(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["info"],
+    warn: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.warn(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["warn"],
+    error: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.error(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["error"],
+    fatal: ((message: string, metadata?: Record<string, unknown>) =>
+      parent.fatal(message, {
+        ...context,
+        ...metadata,
+      })) as LoggerInstance["fatal"],
     getContext: () => mergedContext,
     setLevel: (level) => parent.setLevel(level),
     addSink: (sink) => parent.addSink(sink),
@@ -997,7 +1027,13 @@ export function createPrettyFormatter(
  * ```
  */
 export function createConsoleSink(options?: ConsoleSinkOptions): Sink {
-  const useColors = options?.colors ?? process.stdout.isTTY ?? false;
+  const hasProcessStreams =
+    typeof process !== "undefined" &&
+    typeof process.stdout?.write === "function" &&
+    typeof process.stderr?.write === "function";
+  const useColors =
+    options?.colors ??
+    (hasProcessStreams ? (process.stdout.isTTY ?? false) : false);
   const formatter = createPrettyFormatter({ colors: useColors });
 
   const sink: Sink = {
@@ -1006,11 +1042,39 @@ export function createConsoleSink(options?: ConsoleSinkOptions): Sink {
       const output = formatted ?? formatter.format(record);
       const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
 
-      // info and below go to stdout, warn and above go to stderr
-      if (LEVEL_PRIORITY[record.level] >= LEVEL_PRIORITY.warn) {
-        process.stderr.write(outputWithNewline);
-      } else {
-        process.stdout.write(outputWithNewline);
+      if (hasProcessStreams) {
+        // info and below go to stdout, warn and above go to stderr
+        if (LEVEL_PRIORITY[record.level] >= LEVEL_PRIORITY.warn) {
+          process.stderr.write(outputWithNewline);
+        } else {
+          process.stdout.write(outputWithNewline);
+        }
+        return;
+      }
+
+      const outputWithoutTrailingNewline = outputWithNewline.endsWith("\n")
+        ? outputWithNewline.slice(0, -1)
+        : outputWithNewline;
+
+      switch (record.level) {
+        case "fatal":
+        case "error":
+          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
+          console.error(outputWithoutTrailingNewline);
+          break;
+        case "warn":
+          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
+          console.warn(outputWithoutTrailingNewline);
+          break;
+        case "trace":
+        case "debug":
+          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
+          console.debug(outputWithoutTrailingNewline);
+          break;
+        default:
+          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
+          console.log(outputWithoutTrailingNewline);
+          break;
       }
     },
   };

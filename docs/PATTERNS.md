@@ -53,6 +53,20 @@ export const getUser: Handler<GetUserInput, User, NotFoundError> = async (input,
 3. **Type Safety** — Input, output, and error types are explicit
 4. **Composability** — Handlers can wrap other handlers
 
+## Logging vs Output
+
+Structured logs are for diagnostics. User-facing output belongs to the transport adapter.
+
+| Context | Use | Why |
+| --- | --- | --- |
+| Handler internals | `ctx.logger` | Structured traces with redaction |
+| CLI success output | `@outfitter/cli` `output()` | Respects `--json/--jsonl` modes |
+| CLI errors | `exitWithError()` | Typed formatting + exit codes |
+| MCP tool output | `Result.ok(data)` | Transport-agnostic responses |
+| MCP diagnostics | `ctx.logger` | Structured traces for debugging |
+
+At the boundary (CLI/MCP/HTTP), create a logger once and inject it via `createContext({ logger })`.
+
 ## Result Types
 
 Outfitter uses `Result<T, E>` from `better-result` for explicit error handling.
