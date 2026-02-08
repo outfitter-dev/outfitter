@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { resolve } from "node:path";
 import { output } from "@outfitter/cli/output";
 import type { OutputMode } from "@outfitter/cli/types";
 import {
@@ -384,11 +385,19 @@ const updateAction = defineAction({
         description: "Show migration instructions for available updates",
         defaultValue: false,
       },
+      {
+        flags: "--cwd <path>",
+        description: "Working directory (defaults to current directory)",
+      },
     ],
     mapInput: (context) => {
       const outputMode = resolveOutputMode(context.flags);
+      const cwd =
+        typeof context.flags["cwd"] === "string"
+          ? resolve(process.cwd(), context.flags["cwd"])
+          : process.cwd();
       return {
-        cwd: process.cwd(),
+        cwd,
         guide: Boolean(context.flags["guide"]),
         ...(outputMode ? { outputMode } : {}),
       };
