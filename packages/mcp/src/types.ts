@@ -197,6 +197,47 @@ export interface SerializedTool {
 // ============================================================================
 
 /**
+ * Text content returned from a resource read.
+ */
+export interface TextResourceContent {
+  /** Resource URI */
+  uri: string;
+  /** Text content */
+  text: string;
+  /** Optional MIME type */
+  mimeType?: string;
+}
+
+/**
+ * Binary (base64-encoded) content returned from a resource read.
+ */
+export interface BlobResourceContent {
+  /** Resource URI */
+  uri: string;
+  /** Base64-encoded binary content */
+  blob: string;
+  /** Optional MIME type */
+  mimeType?: string;
+}
+
+/**
+ * Content returned from reading a resource.
+ */
+export type ResourceContent = TextResourceContent | BlobResourceContent;
+
+/**
+ * Handler for reading a resource's content.
+ *
+ * @param uri - The resource URI being read
+ * @param ctx - Handler context with logger and requestId
+ * @returns Array of resource content items
+ */
+export type ResourceReadHandler = (
+  uri: string,
+  ctx: HandlerContext
+) => Promise<Result<ResourceContent[], OutfitterError>>;
+
+/**
  * Definition of an MCP resource that can be read by clients.
  *
  * Resources represent data that clients can access, such as files,
@@ -209,6 +250,10 @@ export interface SerializedTool {
  *   name: "Application Config",
  *   description: "Main application configuration file",
  *   mimeType: "application/json",
+ *   handler: async (uri, ctx) => {
+ *     const content = await readFile(uri);
+ *     return Result.ok([{ uri, text: content }]);
+ *   },
  * };
  * ```
  */
@@ -236,6 +281,64 @@ export interface ResourceDefinition {
    * Helps clients understand how to process the resource.
    */
   mimeType?: string;
+
+  /**
+   * Optional handler for reading the resource content.
+   * If not provided, the resource is metadata-only.
+   */
+  handler?: ResourceReadHandler;
+}
+
+// ============================================================================
+// Resource Templates
+// ============================================================================
+
+/**
+ * Handler for reading a resource template's content.
+ *
+ * @param uri - The matched URI
+ * @param variables - Extracted template variables
+ * @param ctx - Handler context
+ */
+export type ResourceTemplateReadHandler = (
+  uri: string,
+  variables: Record<string, string>,
+  ctx: HandlerContext
+) => Promise<Result<ResourceContent[], OutfitterError>>;
+
+/**
+ * Definition of an MCP resource template with URI pattern matching.
+ *
+ * Templates use RFC 6570 Level 1 URI templates (e.g., `{param}`)
+ * to match and extract variables from URIs.
+ *
+ * @example
+ * ```typescript
+ * const userTemplate: ResourceTemplateDefinition = {
+ *   uriTemplate: "db:///users/{userId}/profile",
+ *   name: "User Profile",
+ *   handler: async (uri, variables) => {
+ *     const profile = await getProfile(variables.userId);
+ *     return Result.ok([{ uri, text: JSON.stringify(profile) }]);
+ *   },
+ * };
+ * ```
+ */
+export interface ResourceTemplateDefinition {
+  /** URI template with `{param}` placeholders (RFC 6570 Level 1). */
+  uriTemplate: string;
+
+  /** Human-readable name for the template. */
+  name: string;
+
+  /** Optional description. */
+  description?: string;
+
+  /** Optional MIME type. */
+  mimeType?: string;
+
+  /** Handler for reading matched resources. */
+  handler: ResourceTemplateReadHandler;
 }
 
 // ============================================================================
@@ -345,10 +448,31 @@ export interface McpServer {
   getTools(): SerializedTool[];
 
   /**
+   * Register a resource template with the server.
+   * @param template - Resource template definition to register
+   */
+  registerResourceTemplate(template: ResourceTemplateDefinition): void;
+
+  /**
    * Get all registered resources.
    * @returns Array of resource definitions
    */
   getResources(): ResourceDefinition[];
+
+  /**
+   * Get all registered resource templates.
+   * @returns Array of resource template definitions
+   */
+  getResourceTemplates(): ResourceTemplateDefinition[];
+
+  /**
+   * Read a resource by URI.
+   * @param uri - Resource URI
+   * @returns Result with resource content or McpError
+   */
+  readResource(
+    uri: string
+  ): Promise<Result<ResourceContent[], InstanceType<typeof McpError>>>;
 
   /**
    * Invoke a tool by name.

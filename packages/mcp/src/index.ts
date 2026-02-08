@@ -59,7 +59,12 @@ export {
 // Schema utilities
 export { type JsonSchema, zodToJsonSchema } from "./schema.js";
 // Server
-export { createMcpServer, defineResource, defineTool } from "./server.js";
+export {
+  createMcpServer,
+  defineResource,
+  defineResourceTemplate,
+  defineTool,
+} from "./server.js";
 // Transport helpers
 export {
   connectStdio,
@@ -68,13 +73,19 @@ export {
 } from "./transport.js";
 // Types
 export {
+  type BlobResourceContent,
   type InvokeToolOptions,
   McpError,
   type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
+  type ResourceContent,
   type ResourceDefinition,
+  type ResourceReadHandler,
+  type ResourceTemplateDefinition,
+  type ResourceTemplateReadHandler,
   type SerializedTool,
+  type TextResourceContent,
   type ToolAnnotations,
   type ToolDefinition,
 } from "./types.js";

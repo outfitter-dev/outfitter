@@ -20,7 +20,9 @@ import {
   McpError,
   type McpServer,
   type McpServerOptions,
+  type ResourceContent,
   type ResourceDefinition,
+  type ResourceTemplateDefinition,
   type SerializedTool,
   type ToolAnnotations,
   type ToolDefinition,
@@ -78,7 +80,8 @@ interface StoredTool {
  *
  * The server provides:
  * - Tool registration with Zod schema validation
- * - Resource registration
+ * - Resource registration with read handlers
+ * - Resource template registration with URI pattern matching
  * - Tool invocation with Result-based error handling
  * - Automatic error translation from OutfitterError to McpError
  *
@@ -110,9 +113,10 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   const { name, version, logger: providedLogger } = options;
   const logger = providedLogger ?? createNoOpLogger();
 
-  // Tool and resource storage
+  // Tool, resource, and template storage
   const tools = new Map<string, StoredTool>();
-  const resources: ResourceDefinition[] = [];
+  const resources = new Map<string, ResourceDefinition>();
+  const resourceTemplates = new Map<string, ResourceTemplateDefinition>();
 
   // Create handler context for tool invocations
   function createHandlerContext(
@@ -208,8 +212,19 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         uri: resource.uri,
         name: resource.name,
       });
-      resources.push(resource);
+      resources.set(resource.uri, resource);
       logger.info("Resource registered", { uri: resource.uri });
+    },
+
+    registerResourceTemplate(template: ResourceTemplateDefinition): void {
+      logger.debug("Registering resource template", {
+        uriTemplate: template.uriTemplate,
+        name: template.name,
+      });
+      resourceTemplates.set(template.uriTemplate, template);
+      logger.info("Resource template registered", {
+        uriTemplate: template.uriTemplate,
+      });
     },
 
     getTools(): SerializedTool[] {
@@ -223,7 +238,95 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     },
 
     getResources(): ResourceDefinition[] {
-      return [...resources];
+      return Array.from(resources.values());
+    },
+
+    getResourceTemplates(): ResourceTemplateDefinition[] {
+      return Array.from(resourceTemplates.values());
+    },
+
+    async readResource(
+      uri: string
+    ): Promise<Result<ResourceContent[], InstanceType<typeof McpError>>> {
+      // Try exact resource match first
+      const resource = resources.get(uri);
+      if (resource) {
+        if (!resource.handler) {
+          return Result.err(
+            new McpError({
+              message: `Resource not readable: ${uri}`,
+              code: -32_002,
+              context: { uri },
+            })
+          );
+        }
+
+        const requestId = generateRequestId();
+        const ctx: HandlerContext = {
+          requestId,
+          logger: logger.child({ resource: uri, requestId }),
+          cwd: process.cwd(),
+          env: process.env as Record<string, string | undefined>,
+        };
+
+        try {
+          const result = await resource.handler(uri, ctx);
+          if (result.isErr()) {
+            return Result.err(translateError(result.error));
+          }
+          return Result.ok(result.value);
+        } catch (error) {
+          return Result.err(
+            new McpError({
+              message: error instanceof Error ? error.message : "Unknown error",
+              code: -32_603,
+              context: { uri, thrown: true },
+            })
+          );
+        }
+      }
+
+      // Try template matching
+      for (const template of resourceTemplates.values()) {
+        const variables = matchUriTemplate(template.uriTemplate, uri);
+        if (variables) {
+          const templateRequestId = generateRequestId();
+          const templateCtx: HandlerContext = {
+            requestId: templateRequestId,
+            logger: logger.child({
+              resource: uri,
+              requestId: templateRequestId,
+            }),
+            cwd: process.cwd(),
+            env: process.env as Record<string, string | undefined>,
+          };
+
+          try {
+            const result = await template.handler(uri, variables, templateCtx);
+            if (result.isErr()) {
+              return Result.err(translateError(result.error));
+            }
+            return Result.ok(result.value);
+          } catch (error) {
+            return Result.err(
+              new McpError({
+                message:
+                  error instanceof Error ? error.message : "Unknown error",
+                code: -32_603,
+                context: { uri, thrown: true },
+              })
+            );
+          }
+        }
+      }
+
+      return Result.err(
+        new McpError({
+          message: `Resource not found: ${uri}`,
+          code: -32_002,
+          context: { uri },
+        })
+      );
     },
 
     async invokeTool<T = unknown>(
@@ -321,15 +424,11 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async start(): Promise<void> {
       logger.info("MCP server starting", { name, version, tools: tools.size });
-      // In a full implementation, this would start the transport layer
-      // For now, we just log the start
     },
 
     // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async stop(): Promise<void> {
       logger.info("MCP server stopping", { name, version });
-      // In a full implementation, this would stop the transport layer
-      // For now, we just log the stop
     },
   };
 
@@ -373,6 +472,54 @@ export function defineTool<
 }
 
 /**
+ * Match a URI against a RFC 6570 Level 1 URI template.
+ *
+ * Extracts named variables from `{param}` segments.
+ * Returns null if the URI doesn't match the template.
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function matchUriTemplate(
+  template: string,
+  uri: string
+): Record<string, string> | null {
+  // Split template into literal segments and {param} placeholders,
+  // escape literal segments to avoid regex metacharacter issues
+  const paramNames: string[] = [];
+  const parts = template.split(/(\{[^}]+\})/);
+  const regexSource = parts
+    .map((part) => {
+      const paramMatch = part.match(/^\{([^}]+)\}$/);
+      if (paramMatch?.[1]) {
+        paramNames.push(paramMatch[1]);
+        return "([^/]+)";
+      }
+      return escapeRegex(part);
+    })
+    .join("");
+
+  const regex = new RegExp(`^${regexSource}$`);
+  const match = uri.match(regex);
+
+  if (!match) {
+    return null;
+  }
+
+  const variables: Record<string, string> = {};
+  for (let i = 0; i < paramNames.length; i++) {
+    const name = paramNames[i];
+    const value = match[i + 1];
+    if (name !== undefined && value !== undefined) {
+      variables[name] = value;
+    }
+  }
+
+  return variables;
+}
+
+/**
  * Define a resource.
  *
  * This is a helper function for creating resource definitions
@@ -394,5 +541,20 @@ export function defineTool<
 export function defineResource(
   definition: ResourceDefinition
 ): ResourceDefinition {
+  return definition;
+}
+
+/**
+ * Define a resource template.
+ *
+ * Helper function for creating resource template definitions
+ * with URI pattern matching.
+ *
+ * @param definition - Resource template definition object
+ * @returns The same resource template definition
+ */
+export function defineResourceTemplate(
+  definition: ResourceTemplateDefinition
+): ResourceTemplateDefinition {
   return definition;
 }

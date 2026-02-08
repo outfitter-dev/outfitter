@@ -12,7 +12,11 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   type CallToolResult,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
   ListToolsRequestSchema,
+  ReadResourceRequestSchema,
+  McpError as SdkMcpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { safeStringify } from "@outfitter/contracts";
 import type { McpServer } from "./types.js";
@@ -93,14 +97,39 @@ function wrapToolError(error: unknown): McpToolResponse {
 }
 
 /**
+ * Convert an Outfitter McpError to the SDK's McpError,
+ * preserving the JSON-RPC error code and context.
+ */
+function toSdkError(error: {
+  message: string;
+  code: number;
+  context?: Record<string, unknown>;
+}): SdkMcpError {
+  return new SdkMcpError(error.code, error.message, error.context);
+}
+
+/**
  * Create an MCP SDK server from an Outfitter MCP server.
  */
 export function createSdkServer(server: McpServer): Server {
+  // Build capabilities dynamically based on registrations
+  const capabilities: Record<string, Record<string, unknown>> = {
+    tools: {},
+  };
+
+  if (
+    server.getResources().length > 0 ||
+    server.getResourceTemplates().length > 0
+  ) {
+    capabilities["resources"] = {};
+  }
+
   const sdkServer = new Server(
     { name: server.name, version: server.version },
-    { capabilities: { tools: {} } }
+    { capabilities }
   );
 
+  // Tool handlers
   sdkServer.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: server.getTools(),
   }));
@@ -117,6 +146,36 @@ export function createSdkServer(server: McpServer): Server {
     }
 
     return wrapToolResult(result.value);
+  });
+
+  // Resource handlers
+  sdkServer.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: server.getResources().map((r) => ({
+      uri: r.uri,
+      name: r.name,
+      ...(r.description ? { description: r.description } : {}),
+      ...(r.mimeType ? { mimeType: r.mimeType } : {}),
+    })),
+  }));
+
+  sdkServer.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+    resourceTemplates: server.getResourceTemplates().map((t) => ({
+      uriTemplate: t.uriTemplate,
+      name: t.name,
+      ...(t.description ? { description: t.description } : {}),
+      ...(t.mimeType ? { mimeType: t.mimeType } : {}),
+    })),
+  }));
+
+  sdkServer.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const { uri } = request.params;
+    const result = await server.readResource(uri);
+
+    if (result.isErr()) {
+      throw toSdkError(result.error);
+    }
+
+    return { contents: result.value };
   });
 
   return sdkServer;
