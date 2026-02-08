@@ -45,6 +45,33 @@ const user = result.unwrapOr(defaultUser);
 const user = result.unwrapOrElse(() => createDefaultUser());
 ```
 
+### `expect()` — Boundary Helper
+
+Unwraps a `Result` or throws with a contextual message. Use at system boundaries where you need to exit the Result railway (e.g., CLI entry points, test setup):
+
+```typescript
+import { expect } from "@outfitter/contracts";
+
+// Unwraps Ok value, throws on Err with context
+const config = expect(loadConfig(), "Failed to load config");
+// On error, throws: Error("Failed to load config: <original error>")
+
+// Useful in CLI entry points
+const result = await handler(input, ctx);
+const data = expect(result, "Handler failed");
+await output(data);
+```
+
+**When to use `expect()`:**
+- CLI/script entry points where you need to exit on failure
+- Test setup where failure means the test can't proceed
+- Initialization code at application boundaries
+
+**When NOT to use `expect()`:**
+- Inside handlers (return `Result` instead)
+- In library code (propagate errors, don't throw)
+- Anywhere the caller should handle the error
+
 ## Pattern Matching
 
 ```typescript

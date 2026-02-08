@@ -53,6 +53,24 @@
 
 {If none: "None found." — can omit this section entirely if focusing on blockers}
 
+## Migration Guidance
+
+**Installed versions:**
+
+| Package | Version |
+|---------|---------|
+| `{@outfitter/package}` | {version} |
+
+**Updates available:**
+
+| Package | Current | Available | Type |
+|---------|---------|-----------|------|
+| `{@outfitter/package}` | {current} | {available} | {minor (no breaking) | major (breaking)} |
+
+**Migration guide:**
+
+{Composed migration docs from `migration-guide.ts` output, or "All packages up to date."}
+
 ## Recommendations
 
 {Prioritized list of what to fix first}
