@@ -85,8 +85,7 @@ interface StoredTool {
  *
  * The server provides:
  * - Tool registration with Zod schema validation
- * - Resource registration with read handlers
- * - Resource template registration with URI pattern matching
+ * - Resource registration
  * - Tool invocation with Result-based error handling
  * - Automatic error translation from OutfitterError to McpError
  *
@@ -124,11 +123,17 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   const resourceTemplates = new Map<string, ResourceTemplateDefinition>();
   const prompts = new Map<string, PromptDefinition>();
 
+  // SDK server binding for notifications
+  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type from @modelcontextprotocol/sdk
+  let sdkServer: any = null;
+  const subscriptions = new Set<string>();
+
   // Create handler context for tool invocations
   function createHandlerContext(
     toolName: string,
     requestId: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    progressToken?: string | number
   ): HandlerContext {
     const ctx: HandlerContext = {
       requestId,
@@ -140,6 +145,23 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // Only add signal if it's defined (exactOptionalPropertyTypes)
     if (signal !== undefined) {
       ctx.signal = signal;
+    }
+
+    // Add progress reporter when token is present and SDK server is bound
+    if (progressToken !== undefined && sdkServer) {
+      (ctx as { progress?: unknown }).progress = {
+        report(progress: number, total?: number, message?: string) {
+          sdkServer?.notification?.({
+            method: "notifications/progress",
+            params: {
+              progressToken,
+              progress,
+              ...(total !== undefined ? { total } : {}),
+              ...(message ? { message } : {}),
+            },
+          });
+        },
+      };
     }
 
     return ctx;
@@ -211,6 +233,9 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       tools.set(tool.name, stored);
 
       logger.info("Tool registered", { name: tool.name });
+      if (sdkServer) {
+        sdkServer.sendToolListChanged?.();
+      }
     },
 
     registerResource(resource: ResourceDefinition): void {
@@ -220,6 +245,9 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       });
       resources.set(resource.uri, resource);
       logger.info("Resource registered", { uri: resource.uri });
+      if (sdkServer) {
+        sdkServer.sendResourceListChanged?.();
+      }
     },
 
     registerResourceTemplate(template: ResourceTemplateDefinition): void {
@@ -231,6 +259,9 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       logger.info("Resource template registered", {
         uriTemplate: template.uriTemplate,
       });
+      if (sdkServer) {
+        sdkServer.sendResourceListChanged?.();
+      }
     },
 
     getTools(): SerializedTool[] {
@@ -335,6 +366,9 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       logger.debug("Registering prompt", { name: prompt.name });
       prompts.set(prompt.name, prompt);
       logger.info("Prompt registered", { name: prompt.name });
+      if (sdkServer) {
+        sdkServer.sendPromptListChanged?.();
+      }
     },
 
     getPrompts(): Array<{
@@ -532,7 +566,8 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       const ctx = createHandlerContext(
         toolName,
         requestId,
-        invokeOptions?.signal
+        invokeOptions?.signal,
+        invokeOptions?.progressToken
       );
 
       // Invoke handler
@@ -573,14 +608,56 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       }
     },
 
+    subscribe(uri: string): void {
+      subscriptions.add(uri);
+      logger.debug("Resource subscription added", { uri });
+    },
+
+    unsubscribe(uri: string): void {
+      subscriptions.delete(uri);
+      logger.debug("Resource subscription removed", { uri });
+    },
+
+    notifyResourceUpdated(uri: string): void {
+      if (subscriptions.has(uri)) {
+        sdkServer?.sendResourceUpdated?.({ uri });
+      }
+    },
+
+    notifyToolsChanged(): void {
+      sdkServer?.sendToolListChanged?.();
+    },
+
+    notifyResourcesChanged(): void {
+      sdkServer?.sendResourceListChanged?.();
+    },
+
+    notifyPromptsChanged(): void {
+      sdkServer?.sendPromptListChanged?.();
+    },
+
+    setLogLevel(level: string): void {
+      logger.debug("Client log level set", { level });
+    },
+
+    // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
+    bindSdkServer(server: any): void {
+      sdkServer = server;
+      logger.debug("SDK server bound for notifications");
+    },
+
     // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async start(): Promise<void> {
       logger.info("MCP server starting", { name, version, tools: tools.size });
+      // In a full implementation, this would start the transport layer
+      // For now, we just log the start
     },
 
     // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async stop(): Promise<void> {
       logger.info("MCP server stopping", { name, version });
+      // In a full implementation, this would stop the transport layer
+      // For now, we just log the stop
     },
   };
 

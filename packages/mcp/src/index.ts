@@ -56,6 +56,12 @@ export {
   type QueryToolOptions,
   type QueryToolResponse,
 } from "./core-tools.js";
+// Logging
+export {
+  type McpLogLevel,
+  mapLogLevelToMcp,
+  shouldEmitLog,
+} from "./logging.js";
 // Schema utilities
 export { type JsonSchema, zodToJsonSchema } from "./schema.js";
 // Server
@@ -78,11 +84,13 @@ export {
   type CompletionHandler,
   type CompletionRef,
   type CompletionResult,
+  type ContentAnnotations,
   type InvokeToolOptions,
   McpError,
   type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
+  type ProgressReporter,
   type PromptArgument,
   type PromptDefinition,
   type PromptHandler,

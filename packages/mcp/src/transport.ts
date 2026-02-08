@@ -20,8 +20,12 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
   McpError as SdkMcpError,
+  SetLevelRequestSchema,
+  SubscribeRequestSchema,
+  UnsubscribeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { safeStringify } from "@outfitter/contracts";
+import type { McpLogLevel } from "./logging.js";
 import type { McpServer } from "./types.js";
 
 export type McpToolResponse = CallToolResult;
@@ -117,21 +121,22 @@ function toSdkError(error: {
 export function createSdkServer(server: McpServer): Server {
   // Build capabilities dynamically based on registrations
   const capabilities: Record<string, Record<string, unknown>> = {
-    tools: {},
+    tools: { listChanged: true },
   };
 
   if (
     server.getResources().length > 0 ||
     server.getResourceTemplates().length > 0
   ) {
-    capabilities["resources"] = {};
+    capabilities["resources"] = { listChanged: true, subscribe: true };
   }
 
   if (server.getPrompts().length > 0) {
-    capabilities["prompts"] = {};
+    capabilities["prompts"] = { listChanged: true };
   }
 
   capabilities["completions"] = {};
+  capabilities["logging"] = {};
 
   const sdkServer = new Server(
     { name: server.name, version: server.version },
@@ -145,9 +150,14 @@ export function createSdkServer(server: McpServer): Server {
 
   sdkServer.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
+    const progressToken = (
+      request.params as { _meta?: { progressToken?: string | number } }
+    )._meta?.progressToken;
+    const options = progressToken !== undefined ? { progressToken } : undefined;
     const result = await server.invokeTool(
       name,
-      (args ?? {}) as Record<string, unknown>
+      (args ?? {}) as Record<string, unknown>,
+      options
     );
 
     if (result.isErr()) {
@@ -186,6 +196,25 @@ export function createSdkServer(server: McpServer): Server {
 
     return { contents: result.value };
   });
+
+  // Subscription handlers
+  sdkServer.setRequestHandler(
+    SubscribeRequestSchema,
+    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    async (request) => {
+      server.subscribe(request.params.uri);
+      return {};
+    }
+  );
+
+  sdkServer.setRequestHandler(
+    UnsubscribeRequestSchema,
+    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    async (request) => {
+      server.unsubscribe(request.params.uri);
+      return {};
+    }
+  );
 
   // Prompt handlers
   sdkServer.setRequestHandler(ListPromptsRequestSchema, async () => ({
@@ -226,6 +255,20 @@ export function createSdkServer(server: McpServer): Server {
 
     return { completion: result.value };
   });
+
+  // Logging handler
+  sdkServer.setRequestHandler(
+    SetLevelRequestSchema,
+    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    async (request) => {
+      const level = request.params.level as McpLogLevel;
+      server.setLogLevel?.(level);
+      return {};
+    }
+  );
+
+  // Bind SDK server to allow notifications
+  server.bindSdkServer?.(sdkServer);
 
   return sdkServer;
 }

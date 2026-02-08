@@ -196,6 +196,30 @@ export interface SerializedTool {
 // Resource Definition
 // ============================================================================
 
+// ============================================================================
+// Content Annotations
+// ============================================================================
+
+/**
+ * Annotations for content items (resource content, prompt messages).
+ *
+ * Provides hints about content audience and priority.
+ *
+ * @see https://spec.modelcontextprotocol.io/specification/2025-03-26/server/utilities/annotations/
+ */
+export interface ContentAnnotations {
+  /**
+   * Who the content is intended for.
+   * Can include "user", "assistant", or both.
+   */
+  audience?: Array<"user" | "assistant">;
+
+  /**
+   * Priority level from 0.0 (least) to 1.0 (most important).
+   */
+  priority?: number;
+}
+
 /**
  * Text content returned from a resource read.
  */
@@ -206,6 +230,8 @@ export interface TextResourceContent {
   text: string;
   /** Optional MIME type */
   mimeType?: string;
+  /** Optional content annotations */
+  annotations?: ContentAnnotations;
 }
 
 /**
@@ -218,6 +244,8 @@ export interface BlobResourceContent {
   blob: string;
   /** Optional MIME type */
   mimeType?: string;
+  /** Optional content annotations */
+  annotations?: ContentAnnotations;
 }
 
 /**
@@ -345,6 +373,10 @@ export interface ResourceTemplateDefinition {
 }
 
 // ============================================================================
+// Prompt Definition
+// ============================================================================
+
+// ============================================================================
 // Completions
 // ============================================================================
 
@@ -372,10 +404,6 @@ export type CompletionRef =
   | { type: "ref/prompt"; name: string }
   | { type: "ref/resource"; uri: string };
 
-// ============================================================================
-// Prompt Definition
-// ============================================================================
-
 /**
  * Argument definition for a prompt.
  */
@@ -398,6 +426,8 @@ export interface PromptMessageContent {
   type: "text";
   /** Text content */
   text: string;
+  /** Optional content annotations */
+  annotations?: ContentAnnotations;
 }
 
 /**
@@ -515,6 +545,9 @@ export interface InvokeToolOptions {
 
   /** Custom request ID (auto-generated if not provided) */
   requestId?: string;
+
+  /** Progress token from client for tracking progress */
+  progressToken?: string | number;
 }
 
 /**
@@ -644,6 +677,55 @@ export interface McpServer {
   ): Promise<Result<T, InstanceType<typeof McpError>>>;
 
   /**
+   * Subscribe to updates for a resource URI.
+   * @param uri - Resource URI to subscribe to
+   */
+  subscribe(uri: string): void;
+
+  /**
+   * Unsubscribe from updates for a resource URI.
+   * @param uri - Resource URI to unsubscribe from
+   */
+  unsubscribe(uri: string): void;
+
+  /**
+   * Notify connected clients that a specific resource has been updated.
+   * Only emits for subscribed URIs.
+   * @param uri - URI of the updated resource
+   */
+  notifyResourceUpdated(uri: string): void;
+
+  /**
+   * Notify connected clients that the tool list has changed.
+   */
+  notifyToolsChanged(): void;
+
+  /**
+   * Notify connected clients that the resource list has changed.
+   */
+  notifyResourcesChanged(): void;
+
+  /**
+   * Notify connected clients that the prompt list has changed.
+   */
+  notifyPromptsChanged(): void;
+
+  /**
+   * Set the client-requested log level.
+   * Only log messages at or above this level will be forwarded.
+   * @param level - MCP log level string
+   */
+  setLogLevel?(level: string): void;
+
+  /**
+   * Bind the SDK server instance for notifications.
+   * Called internally by the transport layer.
+   * @param sdkServer - The MCP SDK Server instance
+   */
+  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
+  bindSdkServer?(sdkServer: any): void;
+
+  /**
    * Start the MCP server.
    * Begins listening for client connections.
    */
@@ -660,6 +742,27 @@ export interface McpServer {
 // Handler Context Extension
 // ============================================================================
 
+// ============================================================================
+// Progress Reporting
+// ============================================================================
+
+/**
+ * Reporter for sending progress updates to clients.
+ */
+export interface ProgressReporter {
+  /**
+   * Report progress for the current operation.
+   * @param progress - Current progress value
+   * @param total - Optional total value (for percentage calculation)
+   * @param message - Optional human-readable status message
+   */
+  report(progress: number, total?: number, message?: string): void;
+}
+
+// ============================================================================
+// Handler Context Extension
+// ============================================================================
+
 /**
  * Extended handler context for MCP tools.
  * Includes MCP-specific information in addition to standard HandlerContext.
@@ -667,4 +770,7 @@ export interface McpServer {
 export interface McpHandlerContext extends HandlerContext {
   /** The name of the tool being invoked */
   toolName?: string;
+
+  /** Progress reporter, present when client provides a progressToken */
+  progress?: ProgressReporter;
 }
