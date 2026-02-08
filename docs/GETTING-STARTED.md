@@ -37,6 +37,9 @@ This creates a working CLI with:
 - Error handling with exit codes
 - XDG-compliant config loading
 
+`@outfitter/types` is optional. Install it when you need branded IDs or shared
+type utility helpers across packages.
+
 ## Tutorial: Build a CLI App
 
 CLIs are the fastest path to useful software. Build once, run anywhere, pipe to anything.

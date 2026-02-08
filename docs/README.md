@@ -22,7 +22,10 @@ Each package has detailed API documentation. Stability labels indicate API matur
 ### Foundation (Stable)
 
 - [@outfitter/contracts](../packages/contracts/README.md) — Result/Error patterns, handler contract
-- [@outfitter/types](../packages/types/README.md) — Branded types, type utilities
+- [@outfitter/types](../packages/types/README.md) — Optional branded types, type utilities
+
+Adoption note: `@outfitter/types` is not a default dependency. Add it when you
+have concrete branded ID or shared utility adoption points.
 
 ### Runtime (Active)
 

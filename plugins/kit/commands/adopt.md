@@ -13,6 +13,9 @@ Target: $ARGUMENTS
 1. **Load Skills** — Use Skill tool to load `outfitter:context-management` for task persistence.
 2. **Init** — Delegate to **Plan subagent** with `kit:outfitter-init` to:
    - Scan codebase for adoption candidates (throws, console, paths, custom errors)
+   - Enumerate all published `@outfitter/*` packages (not just pattern-matched ones)
+   - Estimate caller blast radius for high-impact function conversions
+   - Keep `@outfitter/types` conditional unless clear adoption points exist
    - Assess scope and effort
    - Generate `.agents/plans/outfitter-init/` with scan results and staged plan
    - Return implementation strategy
