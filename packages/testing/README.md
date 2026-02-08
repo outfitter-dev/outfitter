@@ -69,6 +69,33 @@ const user2 = createUser({
 
 Each call returns a fresh copy, preventing test pollution from shared mutable state.
 
+#### Deep Merge Behavior
+
+Overrides are deep-merged for nested objects:
+
+```typescript
+const createConfig = createFixture({
+  env: {
+    region: "us-east-1",
+    flags: { beta: false, audit: true },
+  },
+  retries: 3,
+});
+
+const config = createConfig({
+  env: { flags: { beta: true } },
+});
+// Result:
+// {
+//   env: { region: "us-east-1", flags: { beta: true, audit: true } },
+//   retries: 3
+// }
+```
+
+Notes:
+- Arrays are replaced, not merged.
+- `undefined` override values are ignored (defaults remain).
+
 ### withTempDir
 
 Runs a function with an isolated temporary directory that is automatically cleaned up.
