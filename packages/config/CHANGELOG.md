@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- Add JSONC config file support
+
+  - Add JSONC (JSON with Comments) parsing for config files
+  - Add `.jsonc` to config file discovery preference order
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.2.0
+  - @outfitter/types@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- CLI improvements for scaffolding and diagnostics
+
+  - Add `--json` output mode for `init`, `add`, and `doctor` commands
+  - Route output through typed output contract
+  - Fix command registration for scaffolded projects
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/cli@0.2.0
+  - @outfitter/config@0.2.0
+  - @outfitter/contracts@0.2.0
+  - @outfitter/logging@0.2.0
+  - @outfitter/tooling@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

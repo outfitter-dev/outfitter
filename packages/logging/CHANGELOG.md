@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- Improve platform compatibility and add migration documentation
+
+  - Add console sink fallback to `console.*` when `process.stdout`/`process.stderr` are unavailable
+  - Add logger method overloads for reject level across adapters
+  - Remove top-level `node:*` imports for non-Node bundler compatibility (Cloudflare Workers, Deno Deploy, Convex)
+
+### Patch Changes
+
+- Updated dependencies
+  - @outfitter/contracts@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

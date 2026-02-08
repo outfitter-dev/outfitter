@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- Improve type portability and platform compatibility
+
+  - Re-export CLI and MCP testing types for consumer convenience
+  - Remove top-level `node:*` imports for non-Node bundler compatibility
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.2.0
+  - @outfitter/mcp@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,27 @@
 # @outfitter/mcp
 
+## 0.2.0
+
+### Minor Changes
+
+- Expand MCP spec compliance with resources, prompts, and infrastructure
+
+  - Add `ToolAnnotations` with behavioral hints (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`)
+  - Add resource read handlers with `ResourceContent` types (text and blob variants)
+  - Add `ResourceTemplateDefinition` with URI template expansion
+  - Add prompt system: `PromptDefinition`, `PromptArgument`, `PromptMessage`, `PromptResult`
+  - Add argument completions for prompts and resources
+  - Add `McpLogLevel` type with level mapping and `shouldEmitLog()` threshold filter
+  - Add content annotations, notifications, and subscription support
+  - Add progress reporting
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.2.0
+  - @outfitter/logging@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @outfitter/contracts
 
+## 0.2.0
+
+### Minor Changes
+
+- Add error ergonomics and Result boundary helpers
+
+  - Add optional `context` field to `NotFoundError` and `ValidationError` for attaching structured domain metadata
+  - Add `static create()` factory methods to all 10 error classes for concise construction
+  - Add `AmbiguousError` class (category: `validation`, code: `AMBIGUOUS_MATCH`) for disambiguation scenarios with a `candidates` field
+  - Add `expect(result, message)` utility — unwraps Ok or throws with a contextual error message
+
 ## 0.1.0
 
 ### Minor Changes

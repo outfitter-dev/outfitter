@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- Add JSON output mode, command normalization, and prompt improvements
+
+  - Normalize command signatures so argument syntax is separated from command name during registration
+  - Add portable `createCLI` return type re-exported from `@outfitter/cli/command`
+  - Add `--json` output mode for `init`, `add`, and `doctor` commands
+  - Route all CLI output through `output()` / `exitWithError()` contract
+  - Map `pageSize` prompt option to clack `maxItems`
+  - Add `ANSI.inverse` escape code to colors module
+  - Add `getSeverityIndicator()` utility
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/config@0.2.0
+  - @outfitter/contracts@0.2.0
+  - @outfitter/types@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

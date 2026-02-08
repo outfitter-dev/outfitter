@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- First npm publish — adoption planning and stack composition
+
+  - Version coordination meta-package for Outfitter stack
+  - Adoption planning, compliance checking, stack composition utilities
+
 ## 0.1.0
 
 ### Minor Changes

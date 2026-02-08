@@ -1,5 +1,16 @@
 # @outfitter/tooling
 
+## 0.2.0
+
+### Minor Changes
+
+- First npm publish — dev tooling presets and CLI
+
+  - Biome preset with Outfitter-specific rules
+  - TypeScript presets (strict base + Bun variant)
+  - Lefthook git hooks preset (pre-commit + pre-push)
+  - CLI commands: `init`, `check`, `fix`, `upgrade-bun`, `pre-push`
+
 ## 0.1.0
 
 ### Minor Changes

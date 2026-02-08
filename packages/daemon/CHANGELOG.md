@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- Version alignment for v0.2.0 release
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - @outfitter/contracts@0.2.0
+  - @outfitter/logging@0.2.0
+  - @outfitter/file-ops@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
