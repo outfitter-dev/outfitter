@@ -7,10 +7,52 @@
  * @packageDocumentation
  */
 
-import { readFileSync } from "node:fs";
-import { mkdir, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { extname, join } from "node:path";
+type NodeRequire = (specifier: string) => unknown;
+
+let cachedRequire: NodeRequire | null | undefined;
+
+function getNodeRequire(): NodeRequire {
+  if (cachedRequire !== undefined) {
+    if (cachedRequire === null) {
+      throw new Error("Node.js built-ins are unavailable in this runtime.");
+    }
+    return cachedRequire;
+  }
+
+  const metaRequire = (import.meta as ImportMeta & { require?: NodeRequire })
+    .require;
+  if (typeof metaRequire === "function") {
+    cachedRequire = metaRequire;
+    return metaRequire;
+  }
+
+  const globalRequire = (globalThis as { require?: NodeRequire }).require;
+  if (typeof globalRequire === "function") {
+    cachedRequire = globalRequire;
+    return globalRequire;
+  }
+
+  cachedRequire = null;
+  throw new Error("Node.js built-ins are unavailable in this runtime.");
+}
+
+function getNodeFs(): typeof import("node:fs") {
+  return getNodeRequire()("node:fs") as typeof import("node:fs");
+}
+
+function getNodeFsPromises(): typeof import("node:fs/promises") {
+  return getNodeRequire()(
+    "node:fs/promises"
+  ) as typeof import("node:fs/promises");
+}
+
+function getNodeOs(): typeof import("node:os") {
+  return getNodeRequire()("node:os") as typeof import("node:os");
+}
+
+function getNodePath(): typeof import("node:path") {
+  return getNodeRequire()("node:path") as typeof import("node:path");
+}
 
 // ============================================================================
 // Types
@@ -137,6 +179,8 @@ export function createFixture<T extends object>(
  * Generates a unique temporary directory path.
  */
 function generateTempDirPath(): string {
+  const { tmpdir } = getNodeOs();
+  const { join } = getNodePath();
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 10);
   return join(tmpdir(), `outfitter-test-${timestamp}-${random}`);
@@ -165,6 +209,7 @@ function generateTempDirPath(): string {
 export async function withTempDir<T>(
   fn: (dir: string) => Promise<T>
 ): Promise<T> {
+  const { mkdir, rm } = getNodeFsPromises();
   const dir = generateTempDirPath();
 
   // Create the directory
@@ -263,6 +308,8 @@ export function loadFixture<T = string>(
   name: string,
   options?: LoadFixtureOptions
 ): T {
+  const { readFileSync } = getNodeFs();
+  const { extname, join } = getNodePath();
   const baseDir = options?.fixturesDir ?? join(process.cwd(), "__fixtures__");
   const filePath = join(baseDir, name);
   const content = readFileSync(filePath, "utf-8");

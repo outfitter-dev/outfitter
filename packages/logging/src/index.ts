@@ -7,8 +7,6 @@
  * @packageDocumentation
  */
 
-import { writeFileSync } from "node:fs";
-
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -1039,11 +1037,7 @@ export function createFileSink(options: FileSinkOptions): Sink {
   const { path } = options;
   // append defaults to true
   const append = options.append ?? true;
-
-  // Clear file synchronously if not appending to prevent race with flush()
-  if (!append) {
-    writeFileSync(path, "");
-  }
+  let initialized = false;
 
   const sink: Sink = {
     formatter,
@@ -1057,10 +1051,14 @@ export function createFileSink(options: FileSinkOptions): Sink {
         const content = buffer.join("");
         buffer.length = 0;
 
-        // Append to file
-        const file = Bun.file(path);
-        const existing = (await file.exists()) ? await file.text() : "";
+        let existing = "";
+        if (append || initialized) {
+          const file = Bun.file(path);
+          existing = (await file.exists()) ? await file.text() : "";
+        }
+
         await Bun.write(path, existing + content);
+        initialized = true;
       }
     },
   };

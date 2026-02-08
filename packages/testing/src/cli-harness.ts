@@ -8,9 +8,6 @@
  * @packageDocumentation
  */
 
-import { spawn } from "node:child_process";
-import { constants } from "node:os";
-
 // ============================================================================
 // Types
 // ============================================================================
@@ -76,70 +73,35 @@ export interface CliHarness {
  */
 export function createCliHarness(command: string): CliHarness {
   return {
-    run(args: string[]): Promise<CliResult> {
-      return new Promise((resolve, reject) => {
-        const child = spawn(command, args, {
-          shell: false,
-          stdio: ["pipe", "pipe", "pipe"],
-        });
-
-        // Close stdin immediately so commands waiting for EOF don't hang
-        child.stdin.end();
-
-        const stdoutChunks: Uint8Array[] = [];
-        const stderrChunks: Uint8Array[] = [];
-
-        child.stdout.on("data", (chunk: Uint8Array) => {
-          stdoutChunks.push(chunk);
-        });
-
-        child.stderr.on("data", (chunk: Uint8Array) => {
-          stderrChunks.push(chunk);
-        });
-
-        child.on("error", (err) => {
-          reject(err);
-        });
-
-        child.on("close", (exitCode, signal) => {
-          const decoder = new TextDecoder("utf-8");
-
-          // Determine exit code:
-          // - If exitCode is provided, use it
-          // - If process was killed by signal, use 128 + signal number (Unix convention)
-          // - If signal is unknown, fall back to 1 (general error)
-          let finalExitCode: number;
-          if (exitCode !== null) {
-            finalExitCode = exitCode;
-          } else if (signal !== null) {
-            const signalNumber =
-              constants.signals[signal as keyof typeof constants.signals];
-            finalExitCode = signalNumber !== undefined ? 128 + signalNumber : 1;
-          } else {
-            finalExitCode = 1;
-          }
-
-          resolve({
-            stdout: decoder.decode(concatUint8Arrays(stdoutChunks)),
-            stderr: decoder.decode(concatUint8Arrays(stderrChunks)),
-            exitCode: finalExitCode,
-          });
-        });
+    async run(args: string[]): Promise<CliResult> {
+      const child = Bun.spawn([command, ...args], {
+        stdin: "pipe",
+        stdout: "pipe",
+        stderr: "pipe",
       });
+
+      // Close stdin immediately so commands waiting for EOF don't hang
+      child.stdin?.end();
+
+      const stdoutPromise = child.stdout
+        ? new Response(child.stdout).text()
+        : Promise.resolve("");
+      const stderrPromise = child.stderr
+        ? new Response(child.stderr).text()
+        : Promise.resolve("");
+      const exitCodePromise = child.exited;
+
+      const [stdout, stderr, exitCode] = await Promise.all([
+        stdoutPromise,
+        stderrPromise,
+        exitCodePromise,
+      ]);
+
+      return {
+        stdout,
+        stderr,
+        exitCode: typeof exitCode === "number" ? exitCode : 1,
+      };
     },
   };
-}
-
-/**
- * Concatenates multiple Uint8Array chunks into a single Uint8Array.
- */
-function concatUint8Arrays(chunks: Uint8Array[]): Uint8Array {
-  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return result;
 }
