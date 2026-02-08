@@ -1004,8 +1004,8 @@ export function createPrettyFormatter(
 }
 
 /**
- * Create a console sink that writes to stdout/stderr.
- * Info and below go to stdout, warn and above go to stderr.
+ * Create a console sink that writes via console methods.
+ * Info and below go to console.info/debug, warn and above go to console.warn/error.
  *
  * @param options - Console sink options
  * @returns Sink configured for console output
@@ -1025,55 +1025,31 @@ export function createPrettyFormatter(
  * ```
  */
 export function createConsoleSink(options?: ConsoleSinkOptions): Sink {
-  const hasProcessStreams =
-    typeof process !== "undefined" &&
-    typeof process.stdout?.write === "function" &&
-    typeof process.stderr?.write === "function";
   const useColors =
     options?.colors ??
-    (hasProcessStreams ? (process.stdout.isTTY ?? false) : false);
+    (typeof process !== "undefined" ? Boolean(process.stdout?.isTTY) : false);
   const formatter = createPrettyFormatter({ colors: useColors });
 
   const sink: Sink = {
     formatter,
     write(record: LogRecord, formatted?: string): void {
       const output = formatted ?? formatter.format(record);
-      const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
+      const outputLine = output.endsWith("\n") ? output.slice(0, -1) : output;
+      const runtimeConsole = globalThis["console"];
 
-      if (hasProcessStreams) {
-        // info and below go to stdout, warn and above go to stderr
-        if (LEVEL_PRIORITY[record.level] >= LEVEL_PRIORITY.warn) {
-          process.stderr.write(outputWithNewline);
-        } else {
-          process.stdout.write(outputWithNewline);
-        }
+      if (record.level === "fatal" || record.level === "error") {
+        runtimeConsole.error(outputLine);
         return;
       }
-
-      const outputWithoutTrailingNewline = outputWithNewline.endsWith("\n")
-        ? outputWithNewline.slice(0, -1)
-        : outputWithNewline;
-
-      switch (record.level) {
-        case "fatal":
-        case "error":
-          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
-          console.error(outputWithoutTrailingNewline);
-          break;
-        case "warn":
-          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
-          console.warn(outputWithoutTrailingNewline);
-          break;
-        case "trace":
-        case "debug":
-          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
-          console.debug(outputWithoutTrailingNewline);
-          break;
-        default:
-          // biome-ignore lint/suspicious/noConsole: fallback for non-Node runtimes
-          console.log(outputWithoutTrailingNewline);
-          break;
+      if (record.level === "warn") {
+        runtimeConsole.warn(outputLine);
+        return;
       }
+      if (record.level === "debug" || record.level === "trace") {
+        runtimeConsole.debug(outputLine);
+        return;
+      }
+      runtimeConsole.info(outputLine);
     },
   };
 

@@ -781,49 +781,66 @@ describe("Redaction", () => {
 // ============================================================================
 
 describe("Sinks", () => {
-  let originalStdout: typeof process.stdout.write;
-  let originalStderr: typeof process.stderr.write;
-  let stdoutOutput: string[];
-  let stderrOutput: string[];
+  let originalConsoleInfo: typeof console.info;
+  let originalConsoleWarn: typeof console.warn;
+  let originalConsoleError: typeof console.error;
+  let originalConsoleDebug: typeof console.debug;
+  let infoOutput: string[];
+  let warnOutput: string[];
+  let errorOutput: string[];
+  let debugOutput: string[];
 
   beforeEach(() => {
-    stdoutOutput = [];
-    stderrOutput = [];
+    infoOutput = [];
+    warnOutput = [];
+    errorOutput = [];
+    debugOutput = [];
 
-    originalStdout = process.stdout.write;
-    originalStderr = process.stderr.write;
+    originalConsoleInfo = console.info;
+    originalConsoleWarn = console.warn;
+    originalConsoleError = console.error;
+    originalConsoleDebug = console.debug;
 
-    process.stdout.write = ((chunk: string | Uint8Array) => {
-      stdoutOutput.push(chunk.toString());
-      return true;
-    }) as typeof process.stdout.write;
-
-    process.stderr.write = ((chunk: string | Uint8Array) => {
-      stderrOutput.push(chunk.toString());
-      return true;
-    }) as typeof process.stderr.write;
+    console.info = ((message?: unknown) => {
+      infoOutput.push(String(message ?? ""));
+    }) as typeof console.info;
+    console.warn = ((message?: unknown) => {
+      warnOutput.push(String(message ?? ""));
+    }) as typeof console.warn;
+    console.error = ((message?: unknown) => {
+      errorOutput.push(String(message ?? ""));
+    }) as typeof console.error;
+    console.debug = ((message?: unknown) => {
+      debugOutput.push(String(message ?? ""));
+    }) as typeof console.debug;
   });
 
   afterEach(() => {
-    process.stdout.write = originalStdout;
-    process.stderr.write = originalStderr;
+    console.info = originalConsoleInfo;
+    console.warn = originalConsoleWarn;
+    console.error = originalConsoleError;
+    console.debug = originalConsoleDebug;
   });
 
-  it("Console sink writes to stdout/stderr appropriately", () => {
+  it("Console sink writes to console methods appropriately", () => {
     const { createConsoleSink } = require("../index.js");
     const consoleSink = createConsoleSink();
 
     const logger = createLogger({
       name: "test",
+      level: "debug",
       sinks: [consoleSink],
     });
 
     logger.info("info message");
+    logger.debug("debug message");
     logger.error("error message");
+    logger.warn("warn message");
 
-    // Info should go to stdout, error should go to stderr
-    expect(stdoutOutput.some((s) => s.includes("info message"))).toBe(true);
-    expect(stderrOutput.some((s) => s.includes("error message"))).toBe(true);
+    expect(infoOutput.some((s) => s.includes("info message"))).toBe(true);
+    expect(debugOutput.some((s) => s.includes("debug message"))).toBe(true);
+    expect(errorOutput.some((s) => s.includes("error message"))).toBe(true);
+    expect(warnOutput.some((s) => s.includes("warn message"))).toBe(true);
   });
 
   it("Console sink strips ANSI codes when colors: false", () => {
@@ -838,7 +855,7 @@ describe("Sinks", () => {
     logger.info("no color message");
 
     // Should not contain ANSI escape codes (ESC character = \u001b)
-    const output = stdoutOutput.join("");
+    const output = infoOutput.join("");
     expect(output).toContain("no color message");
     expect(output).not.toContain("\u001b["); // No ANSI escape sequences
   });
@@ -855,66 +872,31 @@ describe("Sinks", () => {
     logger.info("color message");
 
     // Should contain ANSI escape codes for the level indicator (ESC character = \u001b)
-    const output = stdoutOutput.join("");
+    const output = infoOutput.join("");
     expect(output).toContain("color message");
     expect(output).toContain("\u001b["); // Contains ANSI escape sequences
   });
 
-  it("Console sink falls back to console methods when process streams are unavailable", () => {
+  it("Console sink works when process is unavailable", () => {
     const { createConsoleSink } = require("../index.js");
     const originalProcess = globalThis.process;
-    const originalConsole = {
-      log: console.log,
-      warn: console.warn,
-      error: console.error,
-      debug: console.debug,
-    };
-
-    const consoleOutput = {
-      log: [] as string[],
-      warn: [] as string[],
-      error: [] as string[],
-      debug: [] as string[],
-    };
-
-    console.log = (...args: unknown[]) => {
-      consoleOutput.log.push(args.map(String).join(" "));
-    };
-    console.warn = (...args: unknown[]) => {
-      consoleOutput.warn.push(args.map(String).join(" "));
-    };
-    console.error = (...args: unknown[]) => {
-      consoleOutput.error.push(args.map(String).join(" "));
-    };
-    console.debug = (...args: unknown[]) => {
-      consoleOutput.debug.push(args.map(String).join(" "));
-    };
+    // @ts-expect-error - test runtime without process global
+    globalThis.process = undefined;
 
     try {
-      (globalThis as { process?: NodeJS.Process }).process = undefined;
-
-      const consoleSink = createConsoleSink({ colors: false });
-      const logger = createLogger({
-        name: "test",
-        level: "debug",
-        sinks: [consoleSink],
+      const sink = createConsoleSink();
+      sink.write({
+        timestamp: Date.now(),
+        level: "info",
+        category: "test",
+        message: "works without process",
       });
-
-      logger.info("info message");
-      logger.warn("warn message");
-      logger.error("error message");
-      logger.debug("debug message");
-
-      expect(consoleOutput.log.join(" ")).toContain("info message");
-      expect(consoleOutput.warn.join(" ")).toContain("warn message");
-      expect(consoleOutput.error.join(" ")).toContain("error message");
-      expect(consoleOutput.debug.join(" ")).toContain("debug message");
+      expect(infoOutput.some((s) => s.includes("works without process"))).toBe(
+        true
+      );
     } finally {
-      (globalThis as { process?: NodeJS.Process }).process = originalProcess;
-      console.log = originalConsole.log;
-      console.warn = originalConsole.warn;
-      console.error = originalConsole.error;
-      console.debug = originalConsole.debug;
+      // @ts-expect-error - restoring process global
+      globalThis.process = originalProcess;
     }
   });
 
