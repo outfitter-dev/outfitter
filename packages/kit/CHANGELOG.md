@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [8850b62]
+- Updated dependencies [536f02a]
+  - @outfitter/contracts@0.2.0
+  - @outfitter/cli@0.1.1
+  - @outfitter/config@0.1.1
+  - @outfitter/daemon@0.1.1
+  - @outfitter/file-ops@0.1.1
+  - @outfitter/index@0.1.1
+  - @outfitter/logging@0.1.1
+  - @outfitter/mcp@0.1.1
+  - @outfitter/state@0.1.1
+  - @outfitter/testing@0.1.1
+  - @outfitter/types@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
