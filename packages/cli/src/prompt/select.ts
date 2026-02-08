@@ -52,12 +52,15 @@ export async function promptSelect<T>(
   });
 
   // Build select options, excluding undefined values for exactOptionalPropertyTypes
-  const selectOptions: Parameters<typeof select>[0] = {
+  const selectOptions: Parameters<typeof select>[0] & { maxItems?: number } = {
     message: options.message,
     options: clackOptions as Parameters<typeof select>[0]["options"],
   };
   if (options.initialValue !== undefined) {
     selectOptions.initialValue = options.initialValue;
+  }
+  if (options.pageSize !== undefined) {
+    selectOptions.maxItems = options.pageSize;
   }
 
   const result = await select(selectOptions);
@@ -106,7 +109,9 @@ export async function promptMultiSelect<T>(
   });
 
   // Build multiselect options, excluding undefined values for exactOptionalPropertyTypes
-  const multiselectOptions: Parameters<typeof multiselect>[0] = {
+  const multiselectOptions: Parameters<typeof multiselect>[0] & {
+    maxItems?: number;
+  } = {
     message: options.message,
     options: clackOptions as Parameters<typeof multiselect>[0]["options"],
   };
@@ -115,6 +120,9 @@ export async function promptMultiSelect<T>(
   }
   if (options.required !== undefined) {
     multiselectOptions.required = options.required;
+  }
+  if (options.pageSize !== undefined) {
+    multiselectOptions.maxItems = options.pageSize;
   }
 
   const result = await multiselect(multiselectOptions);

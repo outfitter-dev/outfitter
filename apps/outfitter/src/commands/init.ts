@@ -18,6 +18,8 @@ import {
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 // CLI is non-interactive. For guided init, use /scaffold skill in Claude Code.
+import { exitWithError, output } from "@outfitter/cli/output";
+import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
@@ -674,6 +676,67 @@ export async function runInit(
 }
 
 /**
+ * Prints the results of the init command.
+ */
+export async function printInitResults(
+  targetDir: string,
+  result: InitResult,
+  options?: { mode?: OutputMode }
+): Promise<void> {
+  const mode = options?.mode;
+  if (mode === "json" || mode === "jsonl") {
+    await output(
+      {
+        targetDir: resolve(targetDir),
+        blocksAdded: result.blocksAdded ?? null,
+        nextSteps: ["bun install", "bun run dev"],
+      },
+      { mode }
+    );
+    return;
+  }
+
+  const lines: string[] = [
+    `Project initialized successfully in ${resolve(targetDir)}`,
+  ];
+
+  if (result.blocksAdded) {
+    const { created, skipped, dependencies, devDependencies } =
+      result.blocksAdded;
+
+    if (created.length > 0) {
+      lines.push("", `Added ${created.length} tooling file(s):`);
+      for (const file of created) {
+        lines.push(`  ✓ ${file}`);
+      }
+    }
+
+    if (skipped.length > 0) {
+      lines.push("", `Skipped ${skipped.length} existing file(s):`);
+      for (const file of skipped) {
+        lines.push(`  - ${file}`);
+      }
+    }
+
+    const depCount =
+      Object.keys(dependencies).length + Object.keys(devDependencies).length;
+    if (depCount > 0) {
+      lines.push("", `Added ${depCount} package(s) to package.json:`);
+      for (const [name, version] of Object.entries(dependencies)) {
+        lines.push(`  + ${name}@${version}`);
+      }
+      for (const [name, version] of Object.entries(devDependencies)) {
+        lines.push(`  + ${name}@${version} (dev)`);
+      }
+    }
+  }
+
+  lines.push("", "Next steps:", "  bun install", "  bun run dev");
+
+  await output(lines);
+}
+
+/**
  * Registers the init command with the CLI program.
  *
  * @param program - Commander program instance
@@ -701,6 +764,7 @@ export function initCommand(program: Command): void {
     workspace?: boolean;
     with?: string;
     noTooling?: boolean;
+    json?: boolean;
     opts?: () => InitCommandFlags;
   }
 
@@ -724,49 +788,21 @@ export function initCommand(program: Command): void {
       .option("-f, --force", "Overwrite existing files", false)
       .option("--local", "Use workspace:* for @outfitter dependencies", false)
       .option("--workspace", "Alias for --local", false)
+      .option("--json", "Output as JSON", false)
       .option(
         "--with <blocks>",
         "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
       )
       .option("--no-tooling", "Skip tooling setup");
 
-  const printInitResult = (targetDir: string, result: InitResult): void => {
-    console.log(`Project initialized successfully in ${resolve(targetDir)}`);
-
-    if (result.blocksAdded) {
-      const { created, skipped, dependencies, devDependencies } =
-        result.blocksAdded;
-
-      if (created.length > 0) {
-        console.log(`\nAdded ${created.length} tooling file(s):`);
-        for (const file of created) {
-          console.log(`  ✓ ${file}`);
-        }
-      }
-
-      if (skipped.length > 0) {
-        console.log(`\nSkipped ${skipped.length} existing file(s):`);
-        for (const file of skipped) {
-          console.log(`  - ${file}`);
-        }
-      }
-
-      const depCount =
-        Object.keys(dependencies).length + Object.keys(devDependencies).length;
-      if (depCount > 0) {
-        console.log(`\nAdded ${depCount} package(s) to package.json:`);
-        for (const [name, version] of Object.entries(dependencies)) {
-          console.log(`  + ${name}@${version}`);
-        }
-        for (const [name, version] of Object.entries(devDependencies)) {
-          console.log(`  + ${name}@${version} (dev)`);
-        }
-      }
+  const resolveOutputMode = (
+    flags: InitCommandFlags
+  ): OutputMode | undefined => {
+    if (flags.json) {
+      process.env["OUTFITTER_JSON"] = "1";
+      return "json";
     }
-
-    console.log("\nNext steps:");
-    console.log("  bun install");
-    console.log("  bun run dev");
+    return undefined;
   };
 
   withCommonOptions(
@@ -781,6 +817,8 @@ export function initCommand(program: Command): void {
     ) => {
       const targetDir = directory ?? process.cwd();
       const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
       const local = resolveLocal(resolvedFlags);
 
       const result = await runInit({
@@ -795,11 +833,10 @@ export function initCommand(program: Command): void {
       });
 
       if (result.isErr()) {
-        console.error(`Error: ${result.error.message}`);
-        process.exit(1);
+        exitWithError(result.error, outputOptions);
       }
 
-      printInitResult(targetDir, result.value);
+      await printInitResults(targetDir, result.value, outputOptions);
     }
   );
 
@@ -813,6 +850,8 @@ export function initCommand(program: Command): void {
     ) => {
       const targetDir = directory ?? process.cwd();
       const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
       const local = resolveLocal(resolvedFlags);
 
       const result = await runInit({
@@ -827,11 +866,10 @@ export function initCommand(program: Command): void {
       });
 
       if (result.isErr()) {
-        console.error(`Error: ${result.error.message}`);
-        process.exit(1);
+        exitWithError(result.error, outputOptions);
       }
 
-      printInitResult(targetDir, result.value);
+      await printInitResults(targetDir, result.value, outputOptions);
     }
   );
 
@@ -845,6 +883,8 @@ export function initCommand(program: Command): void {
     ) => {
       const targetDir = directory ?? process.cwd();
       const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
       const local = resolveLocal(resolvedFlags);
 
       const result = await runInit({
@@ -859,11 +899,10 @@ export function initCommand(program: Command): void {
       });
 
       if (result.isErr()) {
-        console.error(`Error: ${result.error.message}`);
-        process.exit(1);
+        exitWithError(result.error, outputOptions);
       }
 
-      printInitResult(targetDir, result.value);
+      await printInitResults(targetDir, result.value, outputOptions);
     }
   );
 
@@ -879,6 +918,8 @@ export function initCommand(program: Command): void {
     ) => {
       const targetDir = directory ?? process.cwd();
       const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
       const local = resolveLocal(resolvedFlags);
 
       const result = await runInit({
@@ -893,11 +934,10 @@ export function initCommand(program: Command): void {
       });
 
       if (result.isErr()) {
-        console.error(`Error: ${result.error.message}`);
-        process.exit(1);
+        exitWithError(result.error, outputOptions);
       }
 
-      printInitResult(targetDir, result.value);
+      await printInitResults(targetDir, result.value, outputOptions);
     }
   );
 }

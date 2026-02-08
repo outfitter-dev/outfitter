@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -21,23 +21,18 @@ import {
   parseRange,
   parseSortSpec,
 } from "../input.js";
+import {
+  cancelSymbol,
+  confirmMock,
+  queueConfirmResponse,
+  resetClackMocks,
+} from "./clack-mock.js";
 
 // =============================================================================
 // Test Utilities
 // =============================================================================
 
-const cancelSymbol = Symbol("clack-cancel");
-const confirmQueue: unknown[] = [];
-const confirmMock = mock(async () => confirmQueue.shift());
-
-function queueConfirmResponse(value: unknown): void {
-  confirmQueue.push(value);
-}
-
-mock.module("@clack/prompts", () => ({
-  confirm: confirmMock,
-  isCancel: (value: unknown) => value === cancelSymbol,
-}));
+// clack prompt mocks are provided by ./clack-mock.ts
 
 /**
  * Creates a temporary directory for test fixtures.
@@ -97,8 +92,7 @@ beforeEach(() => {
 
 afterEach(() => {
   process.env = originalEnv;
-  mock.clearAllMocks();
-  confirmQueue.length = 0;
+  resetClackMocks();
   Object.defineProperty(process.stdout, "isTTY", {
     value: originalIsTTY,
     writable: true,

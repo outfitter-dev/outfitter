@@ -52,6 +52,14 @@ function writeWithBackpressure(
  *
  * Priority: explicit option > env var > TTY detection
  */
+function getStreamIsTTY(stream?: NodeJS.WritableStream): boolean | undefined {
+  if (!stream) return undefined;
+  if ("isTTY" in stream) {
+    return Boolean((stream as NodeJS.WriteStream).isTTY);
+  }
+  return undefined;
+}
+
 function detectMode(options?: OutputOptions): OutputMode {
   // Explicit mode takes highest priority
   if (options?.mode) {
@@ -66,7 +74,9 @@ function detectMode(options?: OutputOptions): OutputMode {
   if (envJsonl === "0" || envJson === "0") return "human";
 
   // Default: JSON for non-TTY, human for TTY
-  return process.stdout.isTTY ? "human" : "json";
+  const streamIsTTY = getStreamIsTTY(options?.stream);
+  const isTTY = streamIsTTY ?? process.stdout.isTTY;
+  return isTTY ? "human" : "json";
 }
 
 /**
@@ -304,7 +314,10 @@ export async function output(
  */
 export function exitWithError(error: Error, options?: OutputOptions): never {
   const exitCode = getExitCode(error);
-  const mode = detectMode(options);
+  const mode = detectMode({
+    ...options,
+    stream: options?.stream ?? process.stderr,
+  });
   const isJsonMode = mode === "json" || mode === "jsonl";
 
   if (isJsonMode) {

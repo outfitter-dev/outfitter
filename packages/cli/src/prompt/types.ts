@@ -64,6 +64,8 @@ export interface SelectPromptOptions<T> {
   }>;
   /** Initial selected index */
   initialValue?: T;
+  /** Maximum number of items to display at once */
+  pageSize?: number;
 }
 
 /**
@@ -82,6 +84,8 @@ export interface MultiSelectPromptOptions<T> {
   initialValues?: T[];
   /** Require at least one selection */
   required?: boolean;
+  /** Maximum number of items to display at once */
+  pageSize?: number;
 }
 
 /**

@@ -9,7 +9,9 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { output } from "@outfitter/cli/output";
 import { createTheme } from "@outfitter/cli/render";
+import type { OutputMode } from "@outfitter/cli/types";
 import type { Command } from "commander";
 
 // =============================================================================
@@ -340,34 +342,41 @@ export function runDoctor(options: DoctorOptions): DoctorResult {
 }
 
 /**
- * Formats and prints doctor results to the console.
+ * Formats and outputs doctor results.
  */
-export function printDoctorResults(result: DoctorResult): void {
-  const theme = createTheme();
+export async function printDoctorResults(
+  result: DoctorResult,
+  options?: { mode?: OutputMode }
+): Promise<void> {
+  const mode = options?.mode;
+  if (mode === "json" || mode === "jsonl") {
+    await output(result, { mode });
+    return;
+  }
 
-  console.log("\nOutfitter Doctor\n");
-  console.log("=".repeat(50));
+  const theme = createTheme();
+  const lines: string[] = ["", "Outfitter Doctor", "", "=".repeat(50)];
 
   // Bun Version
   const bunIcon = result.checks.bunVersion.passed
     ? theme.success("[PASS]")
     : theme.error("[FAIL]");
-  console.log(
+  lines.push(
     `${bunIcon} Bun Version: ${result.checks.bunVersion.version} (requires ${result.checks.bunVersion.required})`
   );
   if (result.checks.bunVersion.error) {
-    console.log(`       ${theme.muted(result.checks.bunVersion.error)}`);
+    lines.push(`       ${theme.muted(result.checks.bunVersion.error)}`);
   }
 
   // Package.json
   const pkgIcon = result.checks.packageJson.passed
     ? theme.success("[PASS]")
     : theme.error("[FAIL]");
-  console.log(`${pkgIcon} package.json`);
+  lines.push(`${pkgIcon} package.json`);
   if (result.checks.packageJson.error) {
-    console.log(`       ${theme.muted(result.checks.packageJson.error)}`);
+    lines.push(`       ${theme.muted(result.checks.packageJson.error)}`);
   } else if (result.checks.packageJson.name) {
-    console.log(
+    lines.push(
       `       ${theme.muted(`${result.checks.packageJson.name}@${result.checks.packageJson.version}`)}`
     );
   }
@@ -376,11 +385,11 @@ export function printDoctorResults(result: DoctorResult): void {
   const depsIcon = result.checks.dependencies.passed
     ? theme.success("[PASS]")
     : theme.error("[FAIL]");
-  console.log(`${depsIcon} Dependencies`);
+  lines.push(`${depsIcon} Dependencies`);
   if (result.checks.dependencies.error) {
-    console.log(`       ${theme.muted(result.checks.dependencies.error)}`);
+    lines.push(`       ${theme.muted(result.checks.dependencies.error)}`);
   } else if (result.checks.dependencies.count !== undefined) {
-    console.log(
+    lines.push(
       `       ${theme.muted(`${result.checks.dependencies.count} dependencies installed`)}`
     );
   }
@@ -389,28 +398,31 @@ export function printDoctorResults(result: DoctorResult): void {
   const tsconfigIcon = result.checks.configFiles.tsconfig
     ? theme.success("[PASS]")
     : theme.warning("[WARN]");
-  console.log(`${tsconfigIcon} tsconfig.json`);
+  lines.push(`${tsconfigIcon} tsconfig.json`);
 
   // Directories
   const srcIcon = result.checks.directories.src
     ? theme.success("[PASS]")
     : theme.warning("[WARN]");
-  console.log(`${srcIcon} src/ directory`);
+  lines.push(`${srcIcon} src/ directory`);
 
   // Summary
-  console.log(`\n${"=".repeat(50)}`);
+  lines.push("", "=".repeat(50));
   const summaryColor = result.exitCode === 0 ? theme.success : theme.error;
-  console.log(
+  lines.push(
     summaryColor(
       `${result.summary.passed}/${result.summary.total} checks passed`
     )
   );
 
   if (result.exitCode !== 0) {
-    console.log(
-      theme.muted("\nRun 'outfitter doctor' after fixing issues to verify.")
+    lines.push(
+      "",
+      theme.muted("Run 'outfitter doctor' after fixing issues to verify.")
     );
   }
+
+  await output(lines);
 }
 
 /**
@@ -431,10 +443,19 @@ export function doctorCommand(program: Command): void {
   program
     .command("doctor")
     .description("Validate environment and dependencies")
-    .action(async () => {
+    .option("--json", "Output as JSON", false)
+    .action(async (_flags: { json?: boolean }, command: Command) => {
+      const resolvedFlags = command.optsWithGlobals<{ json?: boolean }>();
+      const outputOptions = resolvedFlags.json
+        ? { mode: "json" as OutputMode }
+        : undefined;
+      if (resolvedFlags.json) {
+        process.env["OUTFITTER_JSON"] = "1";
+      }
+
       const result = await runDoctor({ cwd: process.cwd() });
 
-      printDoctorResults(result);
+      await printDoctorResults(result, outputOptions);
 
       process.exit(result.exitCode);
     });

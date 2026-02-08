@@ -117,17 +117,37 @@ function mockProcessExit(): {
   };
 }
 
+function setTTY(options: { stdout?: boolean; stderr?: boolean }): void {
+  if (options.stdout !== undefined) {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: options.stdout,
+      writable: true,
+      configurable: true,
+    });
+  }
+
+  if (options.stderr !== undefined) {
+    Object.defineProperty(process.stderr, "isTTY", {
+      value: options.stderr,
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
 // =============================================================================
 // Test Setup/Teardown
 // =============================================================================
 
 let originalEnv: NodeJS.ProcessEnv;
 let originalIsTTY: boolean | undefined;
+let originalStderrIsTTY: boolean | undefined;
 
 beforeEach(() => {
   // Save original environment
   originalEnv = { ...process.env };
   originalIsTTY = process.stdout.isTTY;
+  originalStderrIsTTY = process.stderr.isTTY;
 });
 
 afterEach(() => {
@@ -140,6 +160,11 @@ afterEach(() => {
     writable: true,
     configurable: true,
   });
+  Object.defineProperty(process.stderr, "isTTY", {
+    value: originalStderrIsTTY,
+    writable: true,
+    configurable: true,
+  });
 });
 
 // =============================================================================
@@ -148,11 +173,7 @@ afterEach(() => {
 
 describe("output() mode detection", () => {
   test("uses human mode by default when stdout is a TTY", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true });
 
     const captured = await captureOutput(() => {
       output({ name: "test" });
@@ -163,11 +184,7 @@ describe("output() mode detection", () => {
   });
 
   test("uses json mode when stdout is not a TTY", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false });
 
     const captured = await captureOutput(() => {
       output({ name: "test" });
@@ -179,11 +196,7 @@ describe("output() mode detection", () => {
   });
 
   test("respects explicit mode option", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true, // TTY would default to human
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true });
 
     const captured = await captureOutput(() => {
       output({ name: "test" }, { mode: "json" });
@@ -196,11 +209,7 @@ describe("output() mode detection", () => {
 
   test("respects OUTFITTER_JSON env var", async () => {
     process.env.OUTFITTER_JSON = "1";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true, // TTY would default to human
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true });
 
     const captured = await captureOutput(() => {
       output({ name: "test" });
@@ -214,11 +223,7 @@ describe("output() mode detection", () => {
   test("respects OUTFITTER_JSONL env var with priority over JSON", async () => {
     process.env.OUTFITTER_JSONL = "1";
     process.env.OUTFITTER_JSON = "1";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true });
 
     const captured = await captureOutput(() => {
       output([{ name: "test" }]);
@@ -231,11 +236,7 @@ describe("output() mode detection", () => {
 
   test("mode option takes precedence over env var", async () => {
     process.env.OUTFITTER_JSON = "1";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false });
 
     const captured = await captureOutput(() => {
       output({ name: "test" }, { mode: "jsonl" });
@@ -436,11 +437,7 @@ describe("output() human mode", () => {
 
 describe("exitWithError() error serialization (JSON mode)", () => {
   test("includes _tag field", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false, stderr: false });
 
     const error = createMockError(
       "ValidationError",
@@ -468,11 +465,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("includes category field", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false, stderr: false });
 
     const error = createMockError(
       "NotFoundError",
@@ -500,11 +493,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("includes message field", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false, stderr: false });
 
     const error = createMockError(
       "ValidationError",
@@ -532,11 +521,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("serializes context (non-sensitive fields)", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: false, stderr: false });
 
     const error = createMockError(
       "ValidationError",
@@ -816,11 +801,7 @@ describe("exitWithError() exit codes mapping", () => {
 
 describe("exitWithError() human mode output", () => {
   test("writes to stderr, not stdout", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true, stderr: true });
 
     const error = createMockError(
       "ValidationError",
@@ -847,11 +828,7 @@ describe("exitWithError() human mode output", () => {
   });
 
   test("includes error message", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true, stderr: true });
 
     const error = createMockError(
       "ValidationError",
@@ -876,11 +853,7 @@ describe("exitWithError() human mode output", () => {
   });
 
   test("includes error tag in human-readable format", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
+    setTTY({ stdout: true, stderr: true });
 
     const error = createMockError(
       "NotFoundError",

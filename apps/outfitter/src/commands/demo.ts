@@ -8,6 +8,7 @@
  */
 
 import { isCancel, select } from "@clack/prompts";
+import { output } from "@outfitter/cli/output";
 import { createTheme, renderTable, SPINNERS } from "@outfitter/cli/render";
 import { ANSI } from "@outfitter/cli/streaming";
 import { isInteractive } from "@outfitter/cli/terminal";
@@ -216,18 +217,21 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
 
   const stream = process.stdout;
   const isTTY = stream.isTTY ?? false;
+  const writeLine = (line: string): void => {
+    stream.write(`${line}\n`);
+  };
 
-  console.log("");
-  console.log(theme.bold("ANIMATED SPINNER DEMO"));
-  console.log(theme.muted("All styles running simultaneously"));
-  console.log(theme.muted("Press Ctrl+C to stop"));
-  console.log("");
+  writeLine("");
+  writeLine(theme.bold("ANIMATED SPINNER DEMO"));
+  writeLine(theme.muted("All styles running simultaneously"));
+  writeLine(theme.muted("Press Ctrl+C to stop"));
+  writeLine("");
 
   if (!isTTY) {
     // Non-TTY fallback: just show static frames
     for (const style of styles) {
       const spinner = SPINNERS[style];
-      console.log(`${style.padEnd(10)} ${spinner.frames.join(" ")}`);
+      writeLine(`${style.padEnd(10)} ${spinner.frames.join(" ")}`);
     }
     return;
   }
@@ -274,11 +278,9 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
   const cleanup = (): void => {
     clearInterval(timer);
     stream.write(ANSI.showCursor);
-    console.log("");
-    console.log(
-      theme.muted("Use createSpinner() from @outfitter/cli/streaming")
-    );
-    console.log("");
+    writeLine("");
+    writeLine(theme.muted("Use createSpinner() from @outfitter/cli/streaming"));
+    writeLine("");
     process.exit(0);
   };
 
@@ -291,10 +293,10 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
 }
 
 /**
- * Prints demo results to the console.
+ * Outputs demo results.
  */
-export function printDemoResults(result: DemoResult): void {
+export async function printDemoResults(result: DemoResult): Promise<void> {
   if (result.output) {
-    console.log(result.output);
+    await output(result.output, { mode: "human" });
   }
 }
