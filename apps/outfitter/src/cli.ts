@@ -11,6 +11,9 @@
 
 import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
+import { exitWithError } from "@outfitter/cli/output";
+import { createContext, generateRequestId } from "@outfitter/contracts";
+import { createLogger } from "@outfitter/logging";
 import { outfitterActions } from "./actions.js";
 
 // =============================================================================
@@ -23,21 +26,32 @@ import { outfitterActions } from "./actions.js";
  * @returns Configured Commander program
  */
 function createProgram() {
+  const logger = createLogger({ name: "outfitter" });
   const cli = createCLI({
     name: "outfitter",
     version: "0.1.0-rc.0",
     description: "Outfitter CLI for scaffolding and project management",
     onError: (error) => {
-      if (error instanceof Error) {
-        console.error(`Error: ${error.message}`);
-      } else {
-        console.error("An unexpected error occurred");
-      }
+      const err =
+        error instanceof Error
+          ? error
+          : new Error("An unexpected error occurred");
+      exitWithError(err);
     },
     onExit: (code) => process.exit(code),
   });
 
-  for (const command of buildCliCommands(outfitterActions)) {
+  for (const command of buildCliCommands(outfitterActions, {
+    createContext: ({ action }) => {
+      const requestId = generateRequestId();
+      return createContext({
+        cwd: process.cwd(),
+        env: process.env as Record<string, string | undefined>,
+        requestId,
+        logger: logger.child({ action: action.id, requestId }),
+      });
+    },
+  })) {
     cli.register(command);
   }
 
