@@ -18,6 +18,6 @@ program.register(
 		.description("Say hello")
 		.action(async ({ args }) => {
 			const name = args[0] ?? "World";
-			logger.info`Hello, ${name}!`;
+			logger.info(`Hello, ${name}!`);
 		}),
 );

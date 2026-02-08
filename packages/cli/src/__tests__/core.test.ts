@@ -5,12 +5,11 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { createCLI } from "../cli.js";
-import { command } from "../command.js";
+import { type CLI, command, createCLI } from "../command.js";
 
 describe("createCLI()", () => {
   it("sets name and description on the program", () => {
-    const cli = createCLI({
+    const cli: CLI = createCLI({
       name: "outfitter",
       version: "0.1.0-rc.0",
       description: "Outfitter CLI",
@@ -37,5 +36,42 @@ describe("command()", () => {
       (cmd) => cmd.name() === "hello"
     );
     expect(registered).toBe(true);
+  });
+
+  it("normalizes command names when arguments are included", () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+
+    cli.register(
+      command("get <id>")
+        .description("Get by id")
+        .action(() => {
+          // no-op
+        })
+    );
+
+    const registered = cli.program.commands.some((cmd) => cmd.name() === "get");
+    expect(registered).toBe(true);
+  });
+
+  it("parses command signature and preserves positional arguments", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let receivedArgs: readonly string[] = [];
+
+    cli.register(
+      command("hello [name]")
+        .description("Say hello")
+        .action(async ({ args }) => {
+          receivedArgs = args;
+        })
+    );
+
+    await cli.parse(["node", "test", "hello", "World"]);
+
+    const registered = cli.program.commands.find(
+      (cmd) => cmd.name() === "hello"
+    );
+    expect(registered).toBeDefined();
+    expect(registered?.name()).toBe("hello");
+    expect(receivedArgs).toEqual(["World"]);
   });
 });

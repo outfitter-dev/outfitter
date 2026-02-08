@@ -570,7 +570,7 @@ export async function runInit(
     projectName,
     packageName,
     binName,
-    version: "0.1.0-rc.0",
+    version: "0.1.0",
     description: "A new project created with Outfitter",
     author,
     year,

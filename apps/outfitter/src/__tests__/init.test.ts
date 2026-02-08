@@ -88,7 +88,7 @@ describe("init command file creation", () => {
     expect(packageJson.name).toBe("test-project");
   });
 
-  test("creates tsconfig.json extending @outfitter/tooling preset", async () => {
+  test("creates standalone tsconfig.json without tooling preset", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
@@ -102,10 +102,41 @@ describe("init command file creation", () => {
     expect(existsSync(tsconfigPath)).toBe(true);
 
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
-    expect(tsconfig.extends).toBe(
-      "@outfitter/tooling/tsconfig.preset.bun.json"
-    );
+    expect(tsconfig.extends).toBeUndefined();
     expect(tsconfig.compilerOptions).toBeDefined();
+  });
+
+  test("creates CLI template without unpublished tooling dependency coupling", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      template: "cli",
+      force: false,
+      noTooling: true,
+    });
+
+    const packageJsonPath = join(tempDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBeUndefined();
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.1.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.1.0");
+    expect(packageJson.dependencies["@outfitter/config"]).toBe("^0.1.0");
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0");
+
+    const tsconfigPath = join(tempDir, "tsconfig.json");
+    const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
+    expect(tsconfig.extends).toBeUndefined();
+
+    const biomePath = join(tempDir, "biome.json");
+    const biome = JSON.parse(readFileSync(biomePath, "utf-8"));
+    expect(biome.extends).toEqual(["ultracite/config/biome/core/biome.jsonc"]);
+
+    const programPath = join(tempDir, "src", "program.ts");
+    const programContent = readFileSync(programPath, "utf-8");
+    expect(programContent).toMatch(/logger\.info\(`Hello, \$\{name\}!`\);/);
+    expect(programContent).not.toMatch(/logger\.info`Hello, \$\{name\}!`;/);
   });
 
   test("creates src directory structure", async () => {
@@ -174,7 +205,7 @@ describe("init command placeholder replacement", () => {
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
 
-    expect(packageJson.version).toBe("0.1.0-rc.0");
+    expect(packageJson.version).toBe("0.1.0");
     const content = readFileSync(packageJsonPath, "utf-8");
     expect(content).not.toContain("{{version}}");
   });

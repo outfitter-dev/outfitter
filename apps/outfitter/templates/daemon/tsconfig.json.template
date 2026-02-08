@@ -1,10 +1,34 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
-	"extends": "@outfitter/tooling/tsconfig.preset.bun.json",
 	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ESNext"],
+		"types": ["@types/bun"],
+
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
 		"declarationDir": "dist",
 		"outDir": "dist",
-		"rootDir": "src"
+		"rootDir": "src",
+
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"resolveJsonModule": true
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "dist"]

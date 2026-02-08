@@ -26,10 +26,10 @@
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.0.0",
-		"@outfitter/mcp": "^0.1.0-rc.0",
-		"@outfitter/contracts": "^0.1.0-rc.0",
-		"@outfitter/config": "^0.1.0-rc.0",
-		"@outfitter/logging": "^0.1.0-rc.0"
+		"@outfitter/mcp": "^0.1.0",
+		"@outfitter/contracts": "^0.1.0",
+		"@outfitter/config": "^0.1.0",
+		"@outfitter/logging": "^0.1.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.0",

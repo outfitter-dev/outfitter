@@ -1,4 +1,4 @@
 {
 	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"extends": ["ultracite/config/biome/core/biome.jsonc", "@outfitter/tooling/biome.json"]
+	"extends": ["ultracite/config/biome/core/biome.jsonc"]
 }
