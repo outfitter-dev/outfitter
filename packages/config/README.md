@@ -68,7 +68,7 @@ if (result.isOk()) {
 2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
 3. `~/.config/{appName}/config.{ext}`
 
-**File Format Preference:** `.toml` > `.yaml` > `.yml` > `.json` > `.json5`
+**File Format Preference:** `.toml` > `.yaml` > `.yml` > `.json` > `.jsonc` > `.json5`
 
 **Returns:** `Result<T, NotFoundError | ValidationError | ParseError>`
 
@@ -267,6 +267,7 @@ Higher precedence sources override lower ones. Nested objects are deep-merged.
 | `.toml` | smol-toml | Preferred for configuration |
 | `.yaml`, `.yml` | yaml | YAML anchors/aliases supported |
 | `.json` | JSON.parse | Strict parsing |
+| `.jsonc` | json5 | JSON with comments and trailing commas |
 | `.json5` | json5 | Comments and trailing commas allowed |
 
 ---

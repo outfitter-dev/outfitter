@@ -344,6 +344,7 @@ function getExtension(filename: string): string {
  * - `.toml` - Parsed with smol-toml (preferred for config)
  * - `.yaml`, `.yml` - Parsed with yaml (merge key support enabled)
  * - `.json` - Parsed with strict JSON.parse
+ * - `.jsonc` - Parsed with json5 compatibility (comments/trailing commas)
  * - `.json5` - Parsed with json5 (comments and trailing commas allowed)
  *
  * @param content - Raw file content to parse
@@ -410,6 +411,7 @@ export function parseConfigFile(
         return Result.ok(parsed as Record<string, unknown>);
       }
 
+      case "jsonc":
       case "json5": {
         const parsed = JSON5.parse(content);
         return Result.ok(parsed as Record<string, unknown>);
@@ -556,7 +558,7 @@ export function resolveConfig<T>(
 // ============================================================================
 
 /** Supported config file extensions in preference order */
-const CONFIG_EXTENSIONS = ["toml", "yaml", "yml", "json", "json5"];
+const CONFIG_EXTENSIONS = ["toml", "yaml", "yml", "json", "jsonc", "json5"];
 
 /**
  * Options for the {@link loadConfig} function.
@@ -579,7 +581,7 @@ export interface LoadConfigOptions {
 
 /**
  * Find the first existing config file in the given directory.
- * Searches for config.{toml,yaml,yml,json,json5} in preference order.
+ * Searches for config.{toml,yaml,yml,json,jsonc,json5} in preference order.
  * @internal
  */
 function findConfigFile(dir: string): string | undefined {
@@ -622,7 +624,7 @@ function getDefaultSearchPaths(appName: string): string[] {
  * 2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
  * 3. `~/.config/{appName}/config.{ext}`
  *
- * File format preference: `.toml` > `.yaml` > `.yml` > `.json` > `.json5`
+ * File format preference: `.toml` > `.yaml` > `.yml` > `.json` > `.jsonc` > `.json5`
  *
  * @typeParam T - The configuration type (inferred from schema)
  * @param appName - Application name for XDG directory lookup

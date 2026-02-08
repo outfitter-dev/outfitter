@@ -365,9 +365,9 @@ count = 42
   describe("search order", () => {
     it("searches config files in correct precedence order", async () => {
       // Expected search order:
-      // 1. $XDG_CONFIG_HOME/{appName}/config.{toml,yaml,json}
-      // 2. ~/.config/{appName}/config.{toml,yaml,json}
-      // 3. ./{appName}.config.{toml,yaml,json} (project-local)
+      // 1. $XDG_CONFIG_HOME/{appName}/config.{toml,yaml,yml,json,jsonc,json5}
+      // 2. ~/.config/{appName}/config.{toml,yaml,yml,json,jsonc,json5}
+      // 3. ./{appName}.config.{toml,yaml,yml,json,jsonc,json5} (project-local)
       const result = await loadConfig("ordered-app", TestConfigSchema);
 
       // Test verifies the precedence is respected
@@ -392,7 +392,7 @@ count = 42
 });
 
 // ============================================================================
-// Format Parsing Tests (9 tests)
+// Format Parsing Tests (10 tests)
 // ============================================================================
 
 describe("parseConfigFile()", () => {
@@ -532,6 +532,23 @@ server:
       const result = parseConfigFile(json5Content, "config.json5");
 
       expect(result.isOk()).toBe(true);
+    });
+
+    it("supports JSONC files with comments and trailing commas", () => {
+      const jsoncContent = `{
+  // jsonc comment
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+  },
+}`;
+      const result = parseConfigFile(jsoncContent, "config.jsonc");
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const parsed = result.unwrap();
+        expect(parsed.server.port).toBe(3000);
+      }
     });
   });
 });

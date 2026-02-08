@@ -103,6 +103,7 @@ interface ResourceDefinition {
   name: string;          // Human-readable name
   description?: string;  // Optional description
   mimeType?: string;     // Content MIME type
+  handler?: ResourceReadHandler; // Optional resources/read handler
 }
 
 const configResource = defineResource({
@@ -110,7 +111,25 @@ const configResource = defineResource({
   name: "Application Config",
   description: "Main configuration file",
   mimeType: "application/json",
+  handler: async (uri, ctx) => {
+    ctx.logger.debug("Reading config resource", { uri });
+    return Result.ok([
+      {
+        uri,
+        mimeType: "application/json",
+        text: JSON.stringify({ debug: true }),
+      },
+    ]);
+  },
 });
+```
+
+Registered resources with handlers are exposed through MCP `resources/read`.
+
+```typescript
+server.registerResource(configResource);
+
+const contentResult = await server.readResource("file:///etc/app/config.json");
 ```
 
 ### Server Methods
@@ -123,12 +142,15 @@ interface McpServer {
   // Registration
   registerTool<TInput, TOutput, TError>(tool: ToolDefinition): void;
   registerResource(resource: ResourceDefinition): void;
+  registerResourceTemplate(template: ResourceTemplateDefinition): void;
 
   // Introspection
   getTools(): SerializedTool[];
   getResources(): ResourceDefinition[];
+  getResourceTemplates(): ResourceTemplateDefinition[];
 
   // Invocation
+  readResource(uri: string): Promise<Result<ResourceContent[], McpError>>;
   invokeTool<T>(name: string, input: unknown, options?: InvokeToolOptions): Promise<Result<T, McpError>>;
 
   // Lifecycle
