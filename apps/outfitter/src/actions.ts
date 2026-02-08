@@ -26,6 +26,7 @@ import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { printInitResults, runInit } from "./commands/init.js";
+import { printUpdateResults, runUpdate } from "./commands/update.js";
 
 interface InitFlags {
   readonly name?: string | undefined;
@@ -376,6 +377,71 @@ const listBlocksAction = defineAction({
   },
 });
 
+interface UpdateActionInput {
+  cwd: string;
+  guide: boolean;
+  outputMode?: OutputMode;
+}
+
+const updateInputSchema = z.object({
+  cwd: z.string(),
+  guide: z.boolean(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<UpdateActionInput>;
+
+const updateAction = defineAction({
+  id: "update",
+  description: "Check for @outfitter/* package updates and migration guidance",
+  surfaces: ["cli"],
+  input: updateInputSchema,
+  cli: {
+    command: "update",
+    description:
+      "Check for @outfitter/* package updates and migration guidance",
+    options: [
+      {
+        flags: "--guide",
+        description: "Show migration instructions for available updates",
+        defaultValue: false,
+      },
+      {
+        flags: "--json",
+        description: "Output as JSON",
+        defaultValue: false,
+      },
+    ],
+    mapInput: (context) => {
+      const outputMode = resolveOutputMode(context.flags);
+      return {
+        cwd: process.cwd(),
+        guide: Boolean(context.flags["guide"]),
+        ...(outputMode ? { outputMode } : {}),
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, ...updateInput } = input;
+    const result = await runUpdate(updateInput);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "update" },
+        })
+      );
+    }
+
+    await printUpdateResults(result.value, {
+      mode: outputMode,
+      guide: updateInput.guide,
+      cwd: updateInput.cwd,
+    });
+
+    return Result.ok(result.value);
+  },
+});
+
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(
     createInitAction({
@@ -412,4 +478,5 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(demoAction)
   .add(doctorAction)
   .add(addAction)
-  .add(listBlocksAction);
+  .add(listBlocksAction)
+  .add(updateAction);

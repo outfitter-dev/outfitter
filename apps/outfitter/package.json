@@ -10,6 +10,12 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./commands/update": {
+      "import": {
+        "types": "./dist/commands/update.d.ts",
+        "default": "./dist/commands/update.js"
+      }
+    },
     "./commands/demo/errors": {
       "import": {
         "types": "./dist/commands/demo/errors.d.ts",
