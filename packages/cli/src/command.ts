@@ -10,12 +10,33 @@ import type { CommandAction, CommandBuilder, CommandFlags } from "./types.js";
 // Re-export createCLI from cli.ts for convenience
 // biome-ignore lint/performance/noBarrelFile: Intentional re-export for public API
 export { createCLI } from "./cli.js";
+export type {
+  CLI,
+  CLIConfig,
+  CommandAction,
+  CommandBuilder,
+  CommandConfig,
+  CommandFlags,
+} from "./types.js";
+
+function splitCommandSpec(spec: string): { name: string; args: string[] } {
+  const parts = spec.trim().split(/\s+/).filter(Boolean);
+  const [commandName, ...args] = parts;
+  if (!commandName) {
+    throw new Error("Command name is required");
+  }
+  return { name: commandName, args };
+}
 
 class CommandBuilderImpl implements CommandBuilder {
   private readonly command: Command;
 
   constructor(name: string) {
-    this.command = new Command(name);
+    const { name: commandName, args } = splitCommandSpec(name);
+    this.command = new Command(commandName);
+    for (const arg of args) {
+      this.command.argument(arg);
+    }
   }
 
   description(text: string): this {
