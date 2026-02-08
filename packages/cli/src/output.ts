@@ -50,16 +50,12 @@ function writeWithBackpressure(
 /**
  * Detects output mode based on environment and options.
  *
- * Priority: explicit option > env var > TTY detection
+ * Priority: explicit option > env var > default (human)
+ *
+ * Per CLI conventions (clig.dev), human output is the default.
+ * Machine-readable output requires explicit opt-in via --json flag
+ * or OUTFITTER_JSON=1 environment variable.
  */
-function getStreamIsTTY(stream?: NodeJS.WritableStream): boolean | undefined {
-  if (!stream) return undefined;
-  if ("isTTY" in stream) {
-    return Boolean((stream as NodeJS.WriteStream).isTTY);
-  }
-  return undefined;
-}
-
 function detectMode(options?: OutputOptions): OutputMode {
   // Explicit mode takes highest priority
   if (options?.mode) {
@@ -73,10 +69,8 @@ function detectMode(options?: OutputOptions): OutputMode {
   if (envJson === "1") return "json";
   if (envJsonl === "0" || envJson === "0") return "human";
 
-  // Default: JSON for non-TTY, human for TTY
-  const streamIsTTY = getStreamIsTTY(options?.stream);
-  const isTTY = streamIsTTY ?? process.stdout.isTTY;
-  return isTTY ? "human" : "json";
+  // Default: always human. Use --json or OUTFITTER_JSON=1 for machine output.
+  return "human";
 }
 
 /**

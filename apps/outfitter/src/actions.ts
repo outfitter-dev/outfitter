@@ -433,7 +433,7 @@ const updateAction = defineAction({
     }
 
     await printUpdateResults(result.value, {
-      mode: outputMode,
+      ...(outputMode ? { mode: outputMode } : {}),
       guide: updateInput.guide,
       cwd: updateInput.cwd,
     });

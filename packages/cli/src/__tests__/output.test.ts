@@ -183,16 +183,17 @@ describe("output() mode detection", () => {
     expect(captured.stdout).not.toContain('{"name":"test"}');
   });
 
-  test("uses json mode when stdout is not a TTY", async () => {
+  test("uses human mode when stdout is not a TTY (no implicit JSON)", async () => {
     setTTY({ stdout: false });
 
     const captured = await captureOutput(() => {
       output({ name: "test" });
     });
 
-    // Non-TTY should output JSON
-    const parsed = JSON.parse(captured.stdout.trim());
-    expect(parsed).toEqual({ name: "test" });
+    // Non-TTY defaults to human — machine output requires explicit --json
+    expect(captured.stdout).not.toContain('{"name":"test"}');
+    expect(captured.stdout).toContain("name");
+    expect(captured.stdout).toContain("test");
   });
 
   test("respects explicit mode option", async () => {
@@ -437,8 +438,6 @@ describe("output() human mode", () => {
 
 describe("exitWithError() error serialization (JSON mode)", () => {
   test("includes _tag field", async () => {
-    setTTY({ stdout: false, stderr: false });
-
     const error = createMockError(
       "ValidationError",
       "validation",
@@ -449,7 +448,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error);
+          exitWithError(error, { mode: "json" });
         } catch {
           // Expected: process.exit mock throws
         }
@@ -465,8 +464,6 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("includes category field", async () => {
-    setTTY({ stdout: false, stderr: false });
-
     const error = createMockError(
       "NotFoundError",
       "not_found",
@@ -477,7 +474,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error);
+          exitWithError(error, { mode: "json" });
         } catch {
           // Expected: process.exit mock throws
         }
@@ -493,8 +490,6 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("includes message field", async () => {
-    setTTY({ stdout: false, stderr: false });
-
     const error = createMockError(
       "ValidationError",
       "validation",
@@ -505,7 +500,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error);
+          exitWithError(error, { mode: "json" });
         } catch {
           // Expected: process.exit mock throws
         }
@@ -521,8 +516,6 @@ describe("exitWithError() error serialization (JSON mode)", () => {
   });
 
   test("serializes context (non-sensitive fields)", async () => {
-    setTTY({ stdout: false, stderr: false });
-
     const error = createMockError(
       "ValidationError",
       "validation",
@@ -537,7 +530,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error);
+          exitWithError(error, { mode: "json" });
         } catch {
           // Expected: process.exit mock throws
         }
