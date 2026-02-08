@@ -38,4 +38,19 @@ describe("command()", () => {
     );
     expect(registered).toBe(true);
   });
+
+  it("normalizes command names when arguments are included", () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+
+    cli.register(
+      command("get <id>")
+        .description("Get by id")
+        .action(() => {
+          // no-op
+        })
+    );
+
+    const registered = cli.program.commands.some((cmd) => cmd.name() === "get");
+    expect(registered).toBe(true);
+  });
 });

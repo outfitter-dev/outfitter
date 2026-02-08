@@ -193,6 +193,35 @@ switch (error._tag) {
 }
 ```
 
+## Domain Error Factories
+
+Instead of sprinkling raw error constructors across handlers, define a small
+domain-specific factory that wraps the taxonomy with your language.
+
+```typescript
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@outfitter/contracts";
+
+export const UserErrors = {
+  notFound: (id: string) => new NotFoundError("user", id),
+  emailTaken: (email: string) =>
+    new ConflictError("Email already in use", { email }),
+  invalidEmail: (email: string) =>
+    new ValidationError("Invalid email", { field: "email", value: email }),
+};
+```
+
+Then in handlers:
+
+```typescript
+if (!user) return Result.err(UserErrors.notFound(userId));
+```
+
+This keeps handlers small, consistent, and makes errors easy to discover.
+
 ## Validation
 
 Use Zod schemas with `createValidator` for type-safe input validation that returns Results.
