@@ -46,9 +46,13 @@
       }
     },
     "./package.json": "./package.json",
+    "./biome": "./biome.json",
     "./biome.json": "./biome.json",
+    "./tsconfig": "./tsconfig.preset.json",
     "./tsconfig.preset.json": "./tsconfig.preset.json",
+    "./tsconfig-bun": "./tsconfig.preset.bun.json",
     "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+    "./lefthook": "./lefthook.yml",
     "./lefthook.yml": "./lefthook.yml",
     "./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc"
   },
