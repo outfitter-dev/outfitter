@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 536f02a: Add `ANSI.inverse` escape code (`\x1b[7m`) to the colors module, completing the set of common text decoration codes alongside bold, dim, italic, and underline. Also adds `inverse` to Theme and Tokens interfaces.
+- Updated dependencies [8850b62]
+  - @outfitter/contracts@0.2.0
+  - @outfitter/config@0.1.1
+  - @outfitter/types@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

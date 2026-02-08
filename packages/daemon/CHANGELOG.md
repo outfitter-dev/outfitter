@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [8850b62]
+  - @outfitter/contracts@0.2.0
+  - @outfitter/file-ops@0.1.1
+  - @outfitter/logging@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
