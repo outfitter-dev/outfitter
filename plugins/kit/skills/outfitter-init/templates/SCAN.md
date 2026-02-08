@@ -28,19 +28,29 @@
 | Documents | {{DOC_COUNT}} files | {{DOC_EFFORT}} |
 | Unknowns | {{UNKNOWN_COUNT}} items | Review required |
 
-## Dependencies to Add
+## Package Discovery
+
+Review all published `@outfitter/*` packages before deciding what to install.
+
+| Package | Purpose | Recommendation | Why |
+|---------|---------|----------------|-----|
+{{#each PACKAGE_RECOMMENDATIONS}}
+| `{{name}}` | {{purpose}} | **{{recommendation}}** | {{reason}} |
+{{/each}}
+
+Suggested first install set (adjust based on the table above):
 
 ```bash
 bun add @outfitter/contracts @outfitter/logging @outfitter/config
 ```
 
-Optional:
+Add transport/runtime packages as needed:
+
 ```bash
-bun add @outfitter/cli      # If building CLI
-bun add @outfitter/mcp      # If building MCP server
-bun add @outfitter/file-ops # If file operations with path security
-bun add @outfitter/daemon   # If building background services
+bun add @outfitter/cli @outfitter/mcp @outfitter/daemon @outfitter/file-ops @outfitter/testing
 ```
+
+Install `@outfitter/types` only when you have concrete branded type or utility adoption points.
 
 ## Migration Plan
 

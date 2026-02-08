@@ -140,6 +140,11 @@ The script will refuse to run if a plan already exists (won't override).
 | 16+ throws | High effort — work through stages methodically |
 | Custom error classes | Map each to taxonomy (see `stages/errors.md`) |
 | High console count | Lots of logging to convert (see `stages/handlers.md`) |
+| Package Discovery table | Review all `@outfitter/*` options before installing |
+| High blast radius handlers | Split into caller-focused sub-phases before converting |
+
+`@outfitter/types` should be treated as **optional** unless the target project
+has clear branded-type or utility adoption points.
 
 ### Decision Point
 

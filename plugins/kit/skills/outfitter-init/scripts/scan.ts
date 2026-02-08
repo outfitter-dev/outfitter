@@ -43,6 +43,9 @@ interface HandlerInfo {
   signature: string;
   throws: string[];
   priority: "high" | "medium" | "low";
+  callerCount: number;
+  callerFiles: number;
+  blastRadius: "low" | "medium" | "high";
 }
 
 interface ErrorClassInfo {
@@ -72,6 +75,13 @@ interface Unknown {
   options: string[];
 }
 
+interface PackageRecommendation {
+  name: string;
+  purpose: string;
+  recommendation: "recommended" | "conditional" | "optional";
+  reason: string;
+}
+
 interface ScanData {
   projectName: string;
   projectType: "greenfield" | "migration" | "partial";
@@ -84,6 +94,7 @@ interface ScanData {
   handlers: HandlerInfo[];
   docs: string[];
   unknowns: Unknown[];
+  packageRecommendations: PackageRecommendation[];
 }
 
 // Scanner functions
@@ -268,6 +279,40 @@ function getPriority(throwCount: number): "high" | "medium" | "low" {
   return "low";
 }
 
+function getBlastRadius(callerCount: number): "low" | "medium" | "high" {
+  if (callerCount >= 20) return "high";
+  if (callerCount >= 8) return "medium";
+  return "low";
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function estimateCallerBlastRadius(
+  name: string,
+  declarationFile: string,
+  declarationLine: number
+): Promise<{ callerCount: number; callerFiles: number }> {
+  const escapedName = escapeRegExp(name);
+  const matches = await runRg(`\\b${escapedName}\\(`, [
+    "-g",
+    "!*.test.ts",
+    "-g",
+    "!*.spec.ts",
+  ]);
+
+  const callers = matches.filter(
+    (match) =>
+      !(match.file === declarationFile && match.line === declarationLine)
+  );
+
+  return {
+    callerCount: callers.length,
+    callerFiles: new Set(callers.map((caller) => caller.file)).size,
+  };
+}
+
 async function scanHandlers(throws: ScanResult[]): Promise<HandlerInfo[]> {
   const handlers: HandlerInfo[] = [];
   const fileThrows = new Map<string, ScanResult[]>();
@@ -302,6 +347,11 @@ async function scanHandlers(throws: ScanResult[]): Promise<HandlerInfo[]> {
         );
 
         if (nearbyThrows.length > 0) {
+          const { callerCount, callerFiles } = await estimateCallerBlastRadius(
+            name,
+            func.file,
+            func.line
+          );
           handlers.push({
             name,
             file: func.file,
@@ -309,6 +359,9 @@ async function scanHandlers(throws: ScanResult[]): Promise<HandlerInfo[]> {
             signature: func.content.slice(0, 80),
             throws: nearbyThrows.map((t) => t.content),
             priority: getPriority(nearbyThrows.length),
+            callerCount,
+            callerFiles,
+            blastRadius: getBlastRadius(callerCount),
           });
         }
       }
@@ -316,6 +369,147 @@ async function scanHandlers(throws: ScanResult[]): Promise<HandlerInfo[]> {
   }
 
   return handlers;
+}
+
+async function detectProjectSignals() {
+  const [
+    cliSignals,
+    mcpSignals,
+    daemonSignals,
+    fileOpsSignals,
+    stateSignals,
+    indexSignals,
+    testSignals,
+  ] = await Promise.all([
+    countMatches("(from\\s+[\"']commander[\"']|createCLI\\(|\\.command\\()"),
+    countMatches(
+      "(from\\s+[\"']@modelcontextprotocol/sdk|createMcpServer\\(|registerTool\\()"
+    ),
+    countMatches("(createDaemon\\(|getSocketPath\\(|\\bipc\\b|\\bdaemon\\b)"),
+    countMatches("(from\\s+[\"']node:fs[\"']|from\\s+[\"']node:path[\"'])"),
+    countMatches("(cursor|pagination|pageToken|nextCursor)"),
+    countMatches("(sqlite|fts|full[- ]text|search index)"),
+    countMatches("(describe\\(|it\\(|test\\()"),
+  ]);
+
+  return {
+    hasCli: cliSignals > 0,
+    hasMcp: mcpSignals > 0,
+    hasDaemon: daemonSignals > 0,
+    hasFileOps: fileOpsSignals > 0,
+    hasState: stateSignals > 0,
+    hasIndex: indexSignals > 0,
+    hasTests: testSignals > 0,
+  };
+}
+
+async function buildPackageRecommendations(
+  data: Pick<ScanData, "throws" | "console" | "paths"> & {
+    docs: string[];
+  }
+): Promise<PackageRecommendation[]> {
+  const signals = await detectProjectSignals();
+
+  const recommendations: PackageRecommendation[] = [
+    {
+      name: "@outfitter/contracts",
+      purpose: "Result types, handler contract, error taxonomy",
+      recommendation: data.throws.length > 0 ? "recommended" : "conditional",
+      reason:
+        data.throws.length > 0
+          ? `Detected ${data.throws.length} throw sites to convert`
+          : "Use when introducing Result-based handlers",
+    },
+    {
+      name: "@outfitter/logging",
+      purpose: "Structured logs with redaction",
+      recommendation: data.console.length > 0 ? "recommended" : "conditional",
+      reason:
+        data.console.length > 0
+          ? `Detected ${data.console.length} console log sites`
+          : "Use when replacing ad-hoc logging",
+    },
+    {
+      name: "@outfitter/config",
+      purpose: "XDG-compliant config loading and env mapping",
+      recommendation: data.paths.length > 0 ? "recommended" : "conditional",
+      reason:
+        data.paths.length > 0
+          ? `Detected ${data.paths.length} path/config signals`
+          : "Use when you need config file and env resolution",
+    },
+    {
+      name: "@outfitter/cli",
+      purpose: "Typed command builder + output contracts",
+      recommendation: signals.hasCli ? "recommended" : "conditional",
+      reason: signals.hasCli
+        ? "Detected CLI/Commander patterns"
+        : "Use for command-line transports",
+    },
+    {
+      name: "@outfitter/mcp",
+      purpose: "Typed MCP server wrapper and tool/resource registry",
+      recommendation: signals.hasMcp ? "recommended" : "conditional",
+      reason: signals.hasMcp
+        ? "Detected MCP server/tooling signals"
+        : "Use when exposing tools/resources over MCP",
+    },
+    {
+      name: "@outfitter/daemon",
+      purpose: "Daemon lifecycle, IPC, and health checks",
+      recommendation: signals.hasDaemon ? "recommended" : "conditional",
+      reason: signals.hasDaemon
+        ? "Detected daemon/IPC signals"
+        : "Use for long-running background processes",
+    },
+    {
+      name: "@outfitter/file-ops",
+      purpose: "Path security, workspace detection, locking",
+      recommendation: signals.hasFileOps ? "conditional" : "optional",
+      reason: signals.hasFileOps
+        ? "Detected filesystem/path usage"
+        : "Install when you need secure path/file primitives",
+    },
+    {
+      name: "@outfitter/state",
+      purpose: "Cursor and pagination state persistence",
+      recommendation: signals.hasState ? "conditional" : "optional",
+      reason: signals.hasState
+        ? "Detected pagination/state signals"
+        : "Install when building cursor-based flows",
+    },
+    {
+      name: "@outfitter/index",
+      purpose: "SQLite FTS5 indexing/search",
+      recommendation: signals.hasIndex ? "conditional" : "optional",
+      reason: signals.hasIndex
+        ? "Detected sqlite/search signals"
+        : "Install for local full-text indexing",
+    },
+    {
+      name: "@outfitter/testing",
+      purpose: "Reusable fixtures and test harnesses",
+      recommendation: signals.hasTests ? "conditional" : "optional",
+      reason: signals.hasTests
+        ? "Detected test suite patterns"
+        : "Install if/when adding automated tests",
+    },
+    {
+      name: "@outfitter/types",
+      purpose: "Branded IDs and utility type guards",
+      recommendation: "optional",
+      reason:
+        "Install only when you have concrete branded-type or utility reuse needs",
+    },
+    {
+      name: "@outfitter/kit",
+      purpose: "Version coordination across @outfitter/* packages",
+      recommendation: "optional",
+      reason: "Useful when managing many Outfitter packages in one project",
+    },
+  ];
+
+  return recommendations;
 }
 
 async function scanDocs(): Promise<string[]> {
@@ -441,6 +635,7 @@ function generateScanReport(data: ScanData): string {
     ADAPTER_COUNT: 0,
     ADAPTER_EFFORT: "TBD",
     DOC_EFFORT: effortLevel(data.docs.length),
+    PACKAGE_RECOMMENDATIONS: data.packageRecommendations,
   });
 }
 
@@ -538,9 +733,11 @@ async function main() {
     handlers,
     docs,
     unknowns: [],
+    packageRecommendations: [],
   };
 
   data.unknowns = identifyUnknowns(data);
+  data.packageRecommendations = await buildPackageRecommendations(data);
 
   // Print summary
   console.log("\nScan Results:");

@@ -11,12 +11,13 @@ Convert functions with `throw` to handlers returning `Result<T, E>`.
 ## Handlers to Convert
 
 {{#each HANDLERS}}
-### {{this.name}}
+### {{name}}
 
-- **File:** `{{this.file}}:{{this.line}}`
-- **Current:** `{{this.signature}}`
-- **Throws:** {{this.throws}}
-- **Priority:** {{this.priority}}
+- **File:** `{{file}}:{{line}}`
+- **Current:** `{{signature}}`
+- **Throws:** {{throws}}
+- **Priority:** {{priority}}
+- **Blast Radius:** {{callerCount}} call sites across {{callerFiles}} files ({{blastRadius}})
 
 #### Conversion
 
@@ -27,11 +28,12 @@ Convert functions with `throw` to handlers returning `Result<T, E>`.
 - [ ] Replace `throw` with `Result.err()`
 - [ ] Add `createValidator()` for input
 - [ ] Update callers to use `isOk()` / `isErr()`
+- [ ] If blast radius is high, split into smaller caller-focused sub-phases
 - [ ] Add/update tests
 
 ```typescript
 // Target signature
-const {{this.name}}: Handler<{{this.inputType}}, {{this.outputType}}, {{this.errorType}}> = async (input, ctx) => {
+const {{name}}: Handler<{{inputType}}, {{outputType}}, {{errorType}}> = async (input, ctx) => {
   // ...
 };
 ```
