@@ -16,6 +16,8 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { output } from "@outfitter/cli/output";
+import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult, Block, Registry } from "@outfitter/tooling";
 import { RegistrySchema } from "@outfitter/tooling";
@@ -357,27 +359,48 @@ export async function runAdd(
 /**
  * Prints the results of the add command.
  */
-export function printAddResults(result: AddBlockResult, dryRun: boolean): void {
+export async function printAddResults(
+  result: AddBlockResult,
+  dryRun: boolean,
+  options?: { mode?: OutputMode }
+): Promise<void> {
+  const mode = options?.mode;
+  if (mode === "json" || mode === "jsonl") {
+    await output(
+      {
+        dryRun,
+        created: result.created,
+        overwritten: result.overwritten,
+        skipped: result.skipped,
+        dependencies: result.dependencies,
+        devDependencies: result.devDependencies,
+      },
+      { mode }
+    );
+    return;
+  }
+
+  const lines: string[] = [];
   const prefix = dryRun ? "[dry-run] Would " : "";
 
   if (result.created.length > 0) {
-    console.log(`${prefix}create ${result.created.length} file(s):`);
+    lines.push(`${prefix}create ${result.created.length} file(s):`);
     for (const file of result.created) {
-      console.log(`  ✓ ${file}`);
+      lines.push(`  ✓ ${file}`);
     }
   }
 
   if (result.overwritten.length > 0) {
-    console.log(`${prefix}overwrite ${result.overwritten.length} file(s):`);
+    lines.push(`${prefix}overwrite ${result.overwritten.length} file(s):`);
     for (const file of result.overwritten) {
-      console.log(`  ✓ ${file}`);
+      lines.push(`  ✓ ${file}`);
     }
   }
 
   if (result.skipped.length > 0) {
-    console.log(`Skipped ${result.skipped.length} existing file(s):`);
+    lines.push(`Skipped ${result.skipped.length} existing file(s):`);
     for (const file of result.skipped) {
-      console.log(`  - ${file} (use --force to overwrite)`);
+      lines.push(`  - ${file} (use --force to overwrite)`);
     }
   }
 
@@ -386,18 +409,20 @@ export function printAddResults(result: AddBlockResult, dryRun: boolean): void {
     Object.keys(result.devDependencies).length;
 
   if (depCount > 0) {
-    console.log(`\n${prefix}add ${depCount} package(s) to package.json:`);
+    lines.push("", `${prefix}add ${depCount} package(s) to package.json:`);
     for (const [name, version] of Object.entries(result.dependencies)) {
-      console.log(`  + ${name}@${version}`);
+      lines.push(`  + ${name}@${version}`);
     }
     for (const [name, version] of Object.entries(result.devDependencies)) {
-      console.log(`  + ${name}@${version} (dev)`);
+      lines.push(`  + ${name}@${version} (dev)`);
     }
 
     if (!dryRun) {
-      console.log("\nRun `bun install` to install new dependencies.");
+      lines.push("", "Run `bun install` to install new dependencies.");
     }
   }
+
+  await output(lines);
 }
 
 /**

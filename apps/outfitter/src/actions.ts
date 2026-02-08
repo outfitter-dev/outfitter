@@ -4,7 +4,8 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
+import { output } from "@outfitter/cli/output";
+import type { OutputMode } from "@outfitter/cli/types";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -24,7 +25,7 @@ import {
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
-import { runInit } from "./commands/init.js";
+import { printInitResults, runInit } from "./commands/init.js";
 
 interface InitFlags {
   readonly name?: string | undefined;
@@ -33,7 +34,13 @@ interface InitFlags {
   readonly force?: unknown;
   readonly local?: unknown;
   readonly workspace?: unknown;
+  readonly json?: unknown;
 }
+
+interface InitActionInput extends InitOptions {
+  outputMode?: OutputMode;
+}
+const outputModeSchema = z.enum(["human", "json", "jsonl"]).optional();
 
 const initInputSchema = z.object({
   targetDir: z.string(),
@@ -42,20 +49,36 @@ const initInputSchema = z.object({
   template: z.string().optional(),
   local: z.boolean().optional(),
   force: z.boolean(),
-}) as z.ZodType<InitOptions>;
+  outputMode: outputModeSchema,
+}) as z.ZodType<InitActionInput>;
 
+interface DoctorActionInput {
+  cwd: string;
+  outputMode?: OutputMode;
+}
 const doctorInputSchema = z.object({
   cwd: z.string(),
-});
+  outputMode: outputModeSchema,
+}) as z.ZodType<DoctorActionInput>;
 
 function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+function resolveOutputMode(
+  flags: Record<string, unknown>
+): OutputMode | undefined {
+  if (flags["json"]) {
+    process.env["OUTFITTER_JSON"] = "1";
+    return "json";
+  }
+  return undefined;
+}
+
 function resolveInitOptions(
   context: ActionCliInputContext,
   templateOverride?: string
-): InitOptions {
+): InitActionInput {
   const flags = context.flags as InitFlags;
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
@@ -63,6 +86,7 @@ function resolveInitOptions(
   const template = templateOverride ?? resolveStringFlag(flags.template);
   const local = Boolean(flags.local || flags.workspace);
   const force = Boolean(flags.force);
+  const outputMode = resolveOutputMode(context.flags);
 
   return {
     targetDir,
@@ -71,6 +95,7 @@ function resolveInitOptions(
     local,
     force,
     ...(bin ? { bin } : {}),
+    ...(outputMode ? { outputMode } : {}),
   };
 }
 
@@ -96,6 +121,11 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "--workspace",
     description: "Alias for --local",
+    defaultValue: false,
+  },
+  {
+    flags: "--json",
+    description: "Output as JSON",
     defaultValue: false,
   },
 ];
@@ -130,7 +160,9 @@ function createInitAction(options: {
         resolveInitOptions(context, options.templateOverride),
     },
     handler: async (input) => {
-      const result = await runInit(input);
+      const { outputMode, ...initInput } = input;
+      const outputOptions = outputMode ? { mode: outputMode } : undefined;
+      const result = await runInit(initInput);
       if (result.isErr()) {
         return Result.err(
           new InternalError({
@@ -140,9 +172,7 @@ function createInitAction(options: {
         );
       }
 
-      console.log(
-        `Project initialized successfully in ${resolve(input.targetDir)}`
-      );
+      await printInitResults(initInput.targetDir, result.value, outputOptions);
 
       return Result.ok({ ok: true });
     },
@@ -183,7 +213,7 @@ const demoAction = defineAction({
   },
   handler: async (input) => {
     const result = await runDemo(input);
-    printDemoResults(result);
+    await printDemoResults(result);
 
     if (result.exitCode !== 0) {
       process.exit(result.exitCode);
@@ -201,11 +231,26 @@ const doctorAction = defineAction({
   cli: {
     command: "doctor",
     description: "Validate environment and dependencies",
-    mapInput: () => ({ cwd: process.cwd() }),
+    options: [
+      {
+        flags: "--json",
+        description: "Output as JSON",
+        defaultValue: false,
+      },
+    ],
+    mapInput: (context) => {
+      const outputMode = resolveOutputMode(context.flags);
+      return {
+        cwd: process.cwd(),
+        ...(outputMode ? { outputMode } : {}),
+      };
+    },
   },
   handler: async (input) => {
-    const result = await runDoctor(input);
-    printDoctorResults(result);
+    const { outputMode, ...doctorInput } = input;
+    const outputOptions = outputMode ? { mode: outputMode } : undefined;
+    const result = await runDoctor(doctorInput);
+    await printDoctorResults(result, outputOptions);
 
     if (result.exitCode !== 0) {
       process.exit(result.exitCode);
@@ -220,7 +265,8 @@ const addInputSchema = z.object({
   force: z.boolean(),
   dryRun: z.boolean(),
   cwd: z.string().optional(),
-}) as z.ZodType<AddInput>;
+  outputMode: outputModeSchema,
+}) as z.ZodType<AddInput & { outputMode?: OutputMode }>;
 
 const addAction = defineAction({
   id: "add",
@@ -243,16 +289,27 @@ const addAction = defineAction({
         description: "Show what would be added without making changes",
         defaultValue: false,
       },
+      {
+        flags: "--json",
+        description: "Output as JSON",
+        defaultValue: false,
+      },
     ],
-    mapInput: (context) => ({
-      block: context.args[0] as string,
-      force: Boolean(context.flags["force"]),
-      dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
-      cwd: process.cwd(),
-    }),
+    mapInput: (context) => {
+      const outputMode = resolveOutputMode(context.flags);
+      return {
+        block: context.args[0] as string,
+        force: Boolean(context.flags["force"]),
+        dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
+        cwd: process.cwd(),
+        ...(outputMode ? { outputMode } : {}),
+      };
+    },
   },
   handler: async (input) => {
-    const result = await runAdd(input);
+    const { outputMode, ...addInput } = input;
+    const outputOptions = outputMode ? { mode: outputMode } : undefined;
+    const result = await runAdd(addInput);
 
     if (result.isErr()) {
       return Result.err(
@@ -263,7 +320,7 @@ const addAction = defineAction({
       );
     }
 
-    printAddResults(result.value, input.dryRun);
+    await printAddResults(result.value, addInput.dryRun, outputOptions);
     return Result.ok(result.value);
   },
 });
@@ -272,14 +329,28 @@ const listBlocksAction = defineAction({
   id: "add.list",
   description: "List available blocks",
   surfaces: ["cli"],
-  input: z.object({}),
+  input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
+    outputMode?: OutputMode;
+  }>,
   cli: {
     group: "add",
     command: "list",
     description: "List available blocks",
-    mapInput: () => ({}),
+    options: [
+      {
+        flags: "--json",
+        description: "Output as JSON",
+        defaultValue: false,
+      },
+    ],
+    mapInput: (context) => {
+      const outputMode = resolveOutputMode(context.flags);
+      return {
+        ...(outputMode ? { outputMode } : {}),
+      };
+    },
   },
-  handler: () => {
+  handler: async (input) => {
     const result = listBlocks();
 
     if (result.isErr()) {
@@ -291,9 +362,14 @@ const listBlocksAction = defineAction({
       );
     }
 
-    console.log("Available blocks:");
-    for (const block of result.value) {
-      console.log(`  - ${block}`);
+    if (input.outputMode === "json" || input.outputMode === "jsonl") {
+      await output({ blocks: result.value }, { mode: input.outputMode });
+    } else {
+      const lines = [
+        "Available blocks:",
+        ...result.value.map((block) => `  - ${block}`),
+      ];
+      await output(lines);
     }
 
     return Result.ok({ blocks: result.value });
