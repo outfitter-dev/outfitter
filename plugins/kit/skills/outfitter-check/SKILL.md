@@ -2,7 +2,7 @@
 name: outfitter-check
 version: 0.1.0
 description: "Verify Outfitter Stack compliance in a codebase. Scans for anti-patterns (throws, console, hardcoded paths) and produces a severity-ranked compliance report. Use for pre-commit checks, code review, or migration validation."
-allowed-tools: Read, Grep, Glob, Bash(rg *)
+allowed-tools: Read, Grep, Glob, Bash(rg *), Bash(bun *)
 ---
 
 # Outfitter Check
@@ -38,6 +38,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 3. [Run diagnostics](#step-2-run-diagnostics) — systematic anti-pattern scan
 4. [Categorize findings](#step-3-categorize-findings) — rank by severity
 5. [Produce report](#step-4-produce-report) — using [TEMPLATE.md](TEMPLATE.md)
+6. [Migration guidance](#step-5-migration-guidance) — detect version gaps and compose upgrade instructions
 
 ## Step 1: Determine Scope
 
@@ -184,6 +185,28 @@ rg "throw new|try \{" --type ts -g "!*.test.ts" -c | wc -l
 # High count (should be 0)
 rg "console\.(log|error|warn)|homedir\(\)" --type ts -g "!*.test.ts" -c | wc -l
 ```
+
+## Step 5: Migration Guidance
+
+After the compliance scan, detect installed `@outfitter/*` versions and check for available migrations.
+
+```bash
+# Run migration guide detection from the target cwd
+bun ${CLAUDE_PLUGIN_ROOT}/scripts/migration-guide.ts --cwd .
+```
+
+If migration docs are found, append a **Migration Guidance** section to the compliance report using the output. If all packages are up to date, note that in the report.
+
+For JSON output (useful for programmatic consumption):
+
+```bash
+bun ${CLAUDE_PLUGIN_ROOT}/scripts/migration-guide.ts --cwd . --json
+```
+
+The script:
+1. Reads `package.json` for `@outfitter/*` dependencies
+2. Finds migration docs newer than installed versions
+3. Composes a sequenced guide ordered by version then dependency tier
 
 ## Related Skills
 

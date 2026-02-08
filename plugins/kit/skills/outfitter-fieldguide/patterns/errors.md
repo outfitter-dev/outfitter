@@ -7,6 +7,7 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 | Category | Exit | HTTP | Class | When to Use |
 |----------|------|------|-------|-------------|
 | `validation` | 1 | 400 | `ValidationError` | Invalid input, schema failures, constraint violations |
+| `validation` | 1 | 400 | `AmbiguousError` | Multiple matches found, user must disambiguate |
 | `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
 | `conflict` | 3 | 409 | `ConflictError` | Already exists, version mismatch, optimistic lock failure |
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
@@ -14,6 +15,7 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
 | `network` | 7 | 503 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
 | `internal` | 8 | 500 | `InternalError` | Unexpected errors, bugs, unhandled cases |
+| `internal` | 8 | 500 | `AssertionError` | Invariant violations, programming bugs |
 | `auth` | 9 | 401 | `AuthError` | Authentication required, invalid credentials |
 | `cancelled` | 130 | 499 | `CancelledError` | User interrupted (Ctrl+C), operation aborted |
 
@@ -26,32 +28,132 @@ interface OutfitterError {
   readonly _tag: string;           // Discriminator for pattern matching
   readonly category: ErrorCategory; // One of the 10 categories
   readonly message: string;         // Human-readable message
-  readonly details?: unknown;       // Additional context
+  readonly context?: Record<string, unknown>; // Structured metadata
 }
 ```
+
+### `create()` Static Factories
+
+Most error classes provide a `create()` method that auto-generates messages. This is the preferred way to construct errors (except `AssertionError`, which uses direct construction):
+
+```typescript
+import {
+  ValidationError,
+  NotFoundError,
+  AmbiguousError,
+  ConflictError,
+  PermissionError,
+  TimeoutError,
+  RateLimitError,
+  NetworkError,
+  InternalError,
+  AuthError,
+  CancelledError,
+} from "@outfitter/contracts";
+
+ValidationError.create("email", "format invalid");
+// → { message: "email: format invalid", field: "email" }
+
+NotFoundError.create("user", "user-123");
+// → { message: "user not found: user-123", resourceType: "user", resourceId: "user-123" }
+
+AmbiguousError.create("heading", ["Introduction", "Intro to APIs"]);
+// → { message: "Ambiguous heading: 2 matches found", candidates: [...] }
+
+ConflictError.create("User already exists");
+PermissionError.create("Cannot delete admin users");
+TimeoutError.create("database query", 5000);
+RateLimitError.create("API rate limit exceeded", 30);
+NetworkError.create("Failed to connect to API");
+InternalError.create("Unexpected failure");
+AuthError.create("Invalid API key", "invalid");
+CancelledError.create("Operation cancelled by user");
+```
+
+Some factories accept an optional `context` parameter for structured metadata. Others have specialized signatures:
+
+```typescript
+// context parameter (ValidationError, AmbiguousError, NotFoundError, ConflictError,
+// PermissionError, NetworkError, InternalError)
+ValidationError.create("email", "format invalid", { received: "not-an-email" });
+NotFoundError.create("user", "user-123", { searchedIn: "active_users" });
+InternalError.create("Unexpected failure", { cause: originalError });
+
+// Specialized signatures (no context parameter)
+TimeoutError.create("database query", 5000);       // operation, timeoutMs
+RateLimitError.create("API rate limit exceeded", 30); // message, retryAfterSeconds
+AuthError.create("Invalid API key", "invalid");     // message, reason
+CancelledError.create("Operation cancelled");       // message only
+```
+
+### `context` Field
+
+All errors support a `context` field for attaching structured metadata:
+
+```typescript
+new InternalError({
+  message: "Failed to add block",
+  context: { action: "add", blockName: "scaffolding" },
+});
+
+new NotFoundError({
+  message: "Heading not found",
+  resourceType: "heading",
+  resourceId: "h:Intro",
+  context: { availableHeadings: ["Introduction", "Getting Started"] },
+});
+
+new ValidationError({
+  message: "Value out of range",
+  field: "age",
+  context: { min: 0, max: 150, received: -1 },
+});
+```
+
+Use `context` instead of ad-hoc details objects — it's a typed, consistent field across all error classes.
 
 ### ValidationError
 
 ```typescript
 import { ValidationError } from "@outfitter/contracts";
 
-// Basic
-new ValidationError("Invalid email format");
+// Factory (preferred)
+ValidationError.create("email", "format invalid");
 
-// With details
-new ValidationError("Validation failed", {
-  field: "email",
-  value: "not-an-email",
-  constraint: "email",
-});
+// With context
+ValidationError.create("email", "format invalid", { received: "not-an-email" });
+
+// Manual construction
+new ValidationError({ message: "Invalid email format", field: "email" });
 
 // From Zod
 const result = schema.safeParse(input);
 if (!result.success) {
-  return Result.err(new ValidationError("Invalid input", {
+  return Result.err(ValidationError.create("input", "schema validation failed", {
     issues: result.error.issues,
   }));
 }
+```
+
+### AmbiguousError
+
+For disambiguation scenarios where partial input matches multiple candidates:
+
+```typescript
+import { AmbiguousError } from "@outfitter/contracts";
+
+// Factory (preferred)
+AmbiguousError.create("heading", ["Introduction", "Intro to APIs"]);
+
+// Manual construction
+new AmbiguousError({
+  message: "Multiple headings match 'Intro'",
+  candidates: ["Introduction", "Intro to APIs"],
+});
+
+// Access candidates for disambiguation UI
+error.candidates;  // ["Introduction", "Intro to APIs"]
+error.category;    // "validation" (exit 1, HTTP 400)
 ```
 
 ### NotFoundError
@@ -59,13 +161,18 @@ if (!result.success) {
 ```typescript
 import { NotFoundError } from "@outfitter/contracts";
 
-// Resource type and ID
-new NotFoundError("user", "user-123");
+// Factory (preferred)
+NotFoundError.create("user", "user-123");
+// → message: "user not found: user-123"
+
+// With context
+NotFoundError.create("user", "user-123", {
+  searchedIn: "active_users",
+});
 
 // Access properties
 error.resourceType;  // "user"
 error.resourceId;    // "user-123"
-error.message;       // "user not found: user-123"
 ```
 
 ### ConflictError
@@ -73,14 +180,11 @@ error.message;       // "user not found: user-123"
 ```typescript
 import { ConflictError } from "@outfitter/contracts";
 
-// Already exists
-new ConflictError("User already exists", { email: "user@example.com" });
+// Factory (preferred)
+ConflictError.create("User already exists");
 
-// Version mismatch
-new ConflictError("Version mismatch", {
-  expected: 5,
-  actual: 7,
-});
+// With context
+ConflictError.create("Version mismatch", { expected: 5, actual: 7 });
 ```
 
 ### PermissionError
@@ -88,10 +192,12 @@ new ConflictError("Version mismatch", {
 ```typescript
 import { PermissionError } from "@outfitter/contracts";
 
-new PermissionError("Cannot delete admin users", {
+PermissionError.create("Cannot delete admin users");
+
+// With context
+PermissionError.create("Cannot delete admin users", {
   action: "delete",
   resource: "user",
-  resourceId: "admin-1",
 });
 ```
 
@@ -100,10 +206,9 @@ new PermissionError("Cannot delete admin users", {
 ```typescript
 import { TimeoutError } from "@outfitter/contracts";
 
-new TimeoutError("Database query timed out", {
-  operation: "findUsers",
-  timeoutMs: 5000,
-});
+// Factory — takes operation name and timeout in ms
+TimeoutError.create("database query", 5000);
+// → message: "database query timed out after 5000ms"
 ```
 
 ### RateLimitError
@@ -111,11 +216,8 @@ new TimeoutError("Database query timed out", {
 ```typescript
 import { RateLimitError } from "@outfitter/contracts";
 
-new RateLimitError("API rate limit exceeded", {
-  limit: 100,
-  window: "1m",
-  retryAfter: 30,
-});
+// Factory — message + optional retryAfterSeconds
+RateLimitError.create("API rate limit exceeded", 30);
 ```
 
 ### NetworkError
@@ -123,7 +225,10 @@ new RateLimitError("API rate limit exceeded", {
 ```typescript
 import { NetworkError } from "@outfitter/contracts";
 
-new NetworkError("Failed to connect to API", {
+NetworkError.create("Failed to connect to API");
+
+// With context
+NetworkError.create("Failed to connect to API", {
   host: "api.example.com",
   code: "ECONNREFUSED",
 });
@@ -134,12 +239,10 @@ new NetworkError("Failed to connect to API", {
 ```typescript
 import { InternalError } from "@outfitter/contracts";
 
-// Wrap unexpected errors
-try {
-  await riskyOperation();
-} catch (error) {
-  return Result.err(new InternalError("Unexpected error", { cause: error }));
-}
+InternalError.create("Unexpected failure");
+
+// With context (wrapping caught errors)
+InternalError.create("Unexpected failure", { cause: error });
 ```
 
 ### AuthError
@@ -147,8 +250,9 @@ try {
 ```typescript
 import { AuthError } from "@outfitter/contracts";
 
-new AuthError("Invalid API key");
-new AuthError("Token expired", { expiredAt: "2024-01-01T00:00:00Z" });
+// Factory — message + optional reason
+AuthError.create("Invalid API key", "invalid");
+AuthError.create("Token expired", "expired");
 ```
 
 ### CancelledError
@@ -157,8 +261,20 @@ new AuthError("Token expired", { expiredAt: "2024-01-01T00:00:00Z" });
 import { CancelledError } from "@outfitter/contracts";
 
 if (ctx.signal.aborted) {
-  return Result.err(new CancelledError("Operation cancelled by user"));
+  return Result.err(CancelledError.create("Operation cancelled by user"));
 }
+```
+
+### AssertionError
+
+For invariant violations — programming bugs, not user input validation:
+
+```typescript
+import { AssertionError } from "@outfitter/contracts";
+
+// Used by assertion utilities that return Result instead of throwing
+new AssertionError({ message: "Cache should always have value after init" });
+// category: "internal" (exit 8, HTTP 500)
 ```
 
 ## Pattern Matching
@@ -225,16 +341,29 @@ for (const [category, exitCode] of Object.entries(ERROR_CODES)) {
 }
 ```
 
-## Creating Custom Errors
+## Domain-Specific Error Factories
 
-Extend the base classes for domain-specific errors:
+For domain-specific errors, create factory functions that use `create()`:
+
+```typescript
+import { ValidationError, NotFoundError } from "@outfitter/contracts";
+
+// Domain factory wrapping the generic create()
+export const userNotFound = (id: string) =>
+  NotFoundError.create("user", id);
+
+export const invalidEmail = (email: string) =>
+  ValidationError.create("email", "invalid format", { received: email });
+```
+
+For more complex domain errors, extend the base classes:
 
 ```typescript
 import { ValidationError } from "@outfitter/contracts";
 
 export class EmailValidationError extends ValidationError {
   constructor(email: string) {
-    super("Invalid email format", { email, field: "email" });
+    super({ message: "Invalid email format", field: "email", context: { email } });
   }
 }
 ```
