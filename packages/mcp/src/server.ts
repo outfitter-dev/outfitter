@@ -42,16 +42,25 @@ import {
  * Used when no logger is provided to the server.
  */
 function createNoOpLogger(): Logger {
-  const noop = () => {
-    // intentional no-op
-  };
   return {
-    trace: noop,
-    debug: noop,
-    info: noop,
-    warn: noop,
-    error: noop,
-    fatal: noop,
+    trace: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["trace"],
+    debug: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["debug"],
+    info: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["info"],
+    warn: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["warn"],
+    error: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["error"],
+    fatal: ((..._args: unknown[]) => {
+      // intentional no-op
+    }) as Logger["fatal"],
     child: () => createNoOpLogger(),
   };
 }

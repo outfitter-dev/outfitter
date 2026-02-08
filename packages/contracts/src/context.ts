@@ -31,24 +31,24 @@ export interface CreateContextOptions {
  * Returns itself for child() to maintain the no-op behavior.
  */
 const noopLogger: Logger = {
-  trace: () => {
+  trace: ((..._args: unknown[]) => {
     // silent no-op
-  },
-  debug: () => {
+  }) as Logger["trace"],
+  debug: ((..._args: unknown[]) => {
     // silent no-op
-  },
-  info: () => {
+  }) as Logger["debug"],
+  info: ((..._args: unknown[]) => {
     // silent no-op
-  },
-  warn: () => {
+  }) as Logger["info"],
+  warn: ((..._args: unknown[]) => {
     // silent no-op
-  },
-  error: () => {
+  }) as Logger["warn"],
+  error: ((..._args: unknown[]) => {
     // silent no-op
-  },
-  fatal: () => {
+  }) as Logger["error"],
+  fatal: ((..._args: unknown[]) => {
     // silent no-op
-  },
+  }) as Logger["fatal"],
   child: () => noopLogger,
 };
 

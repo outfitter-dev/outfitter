@@ -184,6 +184,7 @@ Routes logs to stdout/stderr based on level:
 
 - `trace`, `debug`, `info` -> stdout
 - `warn`, `error`, `fatal` -> stderr
+ - Falls back to `console.*` when process streams are unavailable (edge/serverless)
 
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";

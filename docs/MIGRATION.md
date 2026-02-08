@@ -198,6 +198,11 @@ logger.debug("Config loaded", { config }); // Secrets auto-redacted
 1. Create a logger instance with `createLogger()`
 2. Use log level methods: `trace`, `debug`, `info`, `warn`, `error`, `fatal`
 3. Pass structured metadata as second argument
+
+### Logging API Migration (Message-First)
+
+If you're coming from Pino or another object-first logger, use the
+[Logging Migration Guide](./LOGGING-MIGRATION.md) to translate patterns.
 4. Sensitive fields are automatically redacted
 
 ### From Manual Paths to XDG Compliance

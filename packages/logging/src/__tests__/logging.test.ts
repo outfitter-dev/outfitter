@@ -860,6 +860,64 @@ describe("Sinks", () => {
     expect(output).toContain("\u001b["); // Contains ANSI escape sequences
   });
 
+  it("Console sink falls back to console methods when process streams are unavailable", () => {
+    const { createConsoleSink } = require("../index.js");
+    const originalProcess = globalThis.process;
+    const originalConsole = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+      debug: console.debug,
+    };
+
+    const consoleOutput = {
+      log: [] as string[],
+      warn: [] as string[],
+      error: [] as string[],
+      debug: [] as string[],
+    };
+
+    console.log = (...args: unknown[]) => {
+      consoleOutput.log.push(args.map(String).join(" "));
+    };
+    console.warn = (...args: unknown[]) => {
+      consoleOutput.warn.push(args.map(String).join(" "));
+    };
+    console.error = (...args: unknown[]) => {
+      consoleOutput.error.push(args.map(String).join(" "));
+    };
+    console.debug = (...args: unknown[]) => {
+      consoleOutput.debug.push(args.map(String).join(" "));
+    };
+
+    try {
+      (globalThis as { process?: NodeJS.Process }).process = undefined;
+
+      const consoleSink = createConsoleSink({ colors: false });
+      const logger = createLogger({
+        name: "test",
+        level: "debug",
+        sinks: [consoleSink],
+      });
+
+      logger.info("info message");
+      logger.warn("warn message");
+      logger.error("error message");
+      logger.debug("debug message");
+
+      expect(consoleOutput.log.join(" ")).toContain("info message");
+      expect(consoleOutput.warn.join(" ")).toContain("warn message");
+      expect(consoleOutput.error.join(" ")).toContain("error message");
+      expect(consoleOutput.debug.join(" ")).toContain("debug message");
+    } finally {
+      (globalThis as { process?: NodeJS.Process }).process = originalProcess;
+      console.log = originalConsole.log;
+      console.warn = originalConsole.warn;
+      console.error = originalConsole.error;
+      console.debug = originalConsole.debug;
+    }
+  });
+
   it("File sink writes to specified path", async () => {
     const { createFileSink } = require("../index.js");
     const tempPath = `/tmp/test-log-${Date.now()}.log`;

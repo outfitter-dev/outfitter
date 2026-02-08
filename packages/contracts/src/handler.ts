@@ -10,11 +10,17 @@ import type { OutfitterError } from "./errors.js";
  */
 export interface Logger {
   trace(message: string, metadata?: Record<string, unknown>): void;
+  trace(metadata: Record<string, unknown>, message: string): never;
   debug(message: string, metadata?: Record<string, unknown>): void;
+  debug(metadata: Record<string, unknown>, message: string): never;
   info(message: string, metadata?: Record<string, unknown>): void;
+  info(metadata: Record<string, unknown>, message: string): never;
   warn(message: string, metadata?: Record<string, unknown>): void;
+  warn(metadata: Record<string, unknown>, message: string): never;
   error(message: string, metadata?: Record<string, unknown>): void;
+  error(metadata: Record<string, unknown>, message: string): never;
   fatal(message: string, metadata?: Record<string, unknown>): void;
+  fatal(metadata: Record<string, unknown>, message: string): never;
 
   /**
    * Creates a child logger with additional context.
