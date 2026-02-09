@@ -128,15 +128,14 @@ function resolveDefaultLogLevel(options: McpServerOptions): McpLogLevel | null {
   }
 
   // 2. options.defaultLogLevel (validated)
-  if (options.defaultLogLevel !== undefined) {
-    if (
-      options.defaultLogLevel === null ||
-      VALID_MCP_LOG_LEVELS.has(options.defaultLogLevel)
-    ) {
-      return options.defaultLogLevel;
-    }
-    // Invalid value — fall through to profile
+  if (
+    options.defaultLogLevel !== undefined &&
+    (options.defaultLogLevel === null ||
+      VALID_MCP_LOG_LEVELS.has(options.defaultLogLevel))
+  ) {
+    return options.defaultLogLevel;
   }
+  // Invalid defaultLogLevel values fall through to profile
 
   // 3. Environment profile (map from config convention to MCP convention)
   const env = getEnvironment();
