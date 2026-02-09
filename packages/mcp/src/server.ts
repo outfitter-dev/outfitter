@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { getEnvironment, getEnvironmentDefaults } from "@outfitter/config";
 import type {
   HandlerContext,
   Logger,
@@ -87,6 +88,71 @@ interface StoredTool {
 }
 
 // ============================================================================
+// Default Log Level Resolution
+// ============================================================================
+
+/** Valid MCP log levels for env var and option validation. */
+const VALID_MCP_LOG_LEVELS: ReadonlySet<string> = new Set([
+  "debug",
+  "info",
+  "notice",
+  "warning",
+  "error",
+  "critical",
+  "alert",
+  "emergency",
+]);
+
+/** Map from EnvironmentDefaults logLevel to McpLogLevel. */
+const DEFAULTS_TO_MCP: Readonly<Record<string, McpLogLevel>> = {
+  debug: "debug",
+  info: "info",
+  warn: "warning",
+  error: "error",
+};
+
+/**
+ * Resolve the default client log level from the precedence chain.
+ *
+ * Precedence (highest wins):
+ * 1. `OUTFITTER_LOG_LEVEL` environment variable
+ * 2. `options.defaultLogLevel` (validated against MCP levels)
+ * 3. Environment profile (`OUTFITTER_ENV`)
+ * 4. `null` (no forwarding)
+ */
+function resolveDefaultLogLevel(options: McpServerOptions): McpLogLevel | null {
+  // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
+  const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
+  if (envLogLevel !== undefined && VALID_MCP_LOG_LEVELS.has(envLogLevel)) {
+    return envLogLevel as McpLogLevel;
+  }
+
+  // 2. options.defaultLogLevel (validated)
+  if (options.defaultLogLevel !== undefined) {
+    if (
+      options.defaultLogLevel === null ||
+      VALID_MCP_LOG_LEVELS.has(options.defaultLogLevel)
+    ) {
+      return options.defaultLogLevel;
+    }
+    // Invalid value — fall through to profile
+  }
+
+  // 3. Environment profile (map from config convention to MCP convention)
+  const env = getEnvironment();
+  const defaults = getEnvironmentDefaults(env);
+  if (defaults.logLevel !== null) {
+    const mapped = DEFAULTS_TO_MCP[defaults.logLevel];
+    if (mapped !== undefined) {
+      return mapped;
+    }
+  }
+
+  // 4. Default: no forwarding
+  return null;
+}
+
+// ============================================================================
 // Server Implementation
 // ============================================================================
 
@@ -137,7 +203,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   // biome-ignore lint/suspicious/noExplicitAny: SDK Server type from @modelcontextprotocol/sdk
   let sdkServer: any = null;
   const subscriptions = new Set<string>();
-  let clientLogLevel: McpLogLevel | null = null;
+  let clientLogLevel: McpLogLevel | null = resolveDefaultLogLevel(options);
 
   // Create handler context for tool invocations
   function createHandlerContext(
@@ -680,7 +746,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
     bindSdkServer(server: any): void {
       sdkServer = server;
-      clientLogLevel = null;
+      clientLogLevel = resolveDefaultLogLevel(options);
       logger.debug("SDK server bound for notifications");
     },
 

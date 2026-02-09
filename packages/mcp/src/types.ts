@@ -61,6 +61,20 @@ export interface McpServerOptions {
    * If not provided, a no-op logger is used.
    */
   logger?: Logger;
+
+  /**
+   * Default MCP log level for client-facing log forwarding.
+   *
+   * Precedence (highest wins):
+   * 1. `OUTFITTER_LOG_LEVEL` environment variable
+   * 2. This option
+   * 3. Environment profile (`OUTFITTER_ENV`)
+   * 4. `null` (no forwarding until client opts in)
+   *
+   * Set to `null` to explicitly disable forwarding regardless of environment.
+   * The MCP client can always override via `logging/setLevel`.
+   */
+  defaultLogLevel?: import("./logging.js").McpLogLevel | null;
 }
 
 // ============================================================================
