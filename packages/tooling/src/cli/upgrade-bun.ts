@@ -22,19 +22,19 @@ const COLORS = {
 };
 
 function log(msg: string): void {
-	console.log(msg);
+	process.stdout.write(`${msg}\n`);
 }
 
 function info(msg: string): void {
-	console.log(`${COLORS.blue}▸${COLORS.reset} ${msg}`);
+	process.stdout.write(`${COLORS.blue}▸${COLORS.reset} ${msg}\n`);
 }
 
 function success(msg: string): void {
-	console.log(`${COLORS.green}✓${COLORS.reset} ${msg}`);
+	process.stdout.write(`${COLORS.green}✓${COLORS.reset} ${msg}\n`);
 }
 
 function warn(msg: string): void {
-	console.log(`${COLORS.yellow}!${COLORS.reset} ${msg}`);
+	process.stdout.write(`${COLORS.yellow}!${COLORS.reset} ${msg}\n`);
 }
 
 /**
@@ -42,7 +42,7 @@ function warn(msg: string): void {
  */
 async function fetchLatestVersion(): Promise<string> {
 	const response = await fetch(
-		"https://api.github.com/repos/oven-sh/bun/releases/latest"
+		"https://api.github.com/repos/oven-sh/bun/releases/latest",
 	);
 	const data = (await response.json()) as { tag_name: string };
 	// tag_name is like "bun-v1.4.0", extract version
@@ -116,7 +116,7 @@ export interface UpgradeBunOptions {
  */
 export async function runUpgradeBun(
 	targetVersion?: string,
-	options: UpgradeBunOptions = {}
+	options: UpgradeBunOptions = {},
 ): Promise<void> {
 	const cwd = process.cwd();
 	const bunVersionFile = join(cwd, ".bun-version");
@@ -154,14 +154,14 @@ export async function runUpgradeBun(
 	info("Updating engines.bun...");
 	for (const file of packageFiles) {
 		if (updateEnginesBun(file, version)) {
-			log(`  ${file.replace(cwd + "/", "")}`);
+			log(`  ${file.replace(`${cwd}/`, "")}`);
 		}
 	}
 
 	info("Updating @types/bun...");
 	for (const file of packageFiles) {
 		if (updateTypesBun(file, version)) {
-			log(`  ${file.replace(cwd + "/", "")}`);
+			log(`  ${file.replace(`${cwd}/`, "")}`);
 		}
 	}
 
@@ -207,5 +207,7 @@ export async function runUpgradeBun(
 	log("  - package.json files (engines.bun, @types/bun)");
 	log("  - bun.lock");
 	log("");
-	log(`Commit with: git add -A && git commit -m 'chore: upgrade Bun to ${version}'`);
+	log(
+		`Commit with: git add -A && git commit -m 'chore: upgrade Bun to ${version}'`,
+	);
 }

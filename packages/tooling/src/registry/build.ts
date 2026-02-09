@@ -8,9 +8,24 @@
  * @packageDocumentation
  */
 
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
-import type { Block, BlockDefinition, Registry, RegistryBuildConfig } from "./schema.js";
+import type {
+	Block,
+	BlockDefinition,
+	Registry,
+	RegistryBuildConfig,
+} from "./schema.js";
+
+function log(message: string): void {
+	process.stdout.write(`${message}\n`);
+}
 
 /**
  * Find the repository root by looking for package.json with workspaces
@@ -49,7 +64,7 @@ function isExecutable(filePath: string): boolean {
 function readFileEntry(
 	repoRoot: string,
 	sourcePath: string,
-	destPath: string
+	destPath: string,
 ): { path: string; content: string; executable?: boolean } {
 	const fullPath = join(repoRoot, sourcePath);
 
@@ -73,7 +88,7 @@ function readFileEntry(
 function buildBlock(
 	repoRoot: string,
 	name: string,
-	def: BlockDefinition
+	def: BlockDefinition,
 ): Block {
 	const block: Block = {
 		name,
@@ -108,7 +123,10 @@ function buildBlock(
 /**
  * Build the complete registry from configuration
  */
-function buildRegistry(config: RegistryBuildConfig, repoRoot: string): Registry {
+function buildRegistry(
+	config: RegistryBuildConfig,
+	repoRoot: string,
+): Registry {
 	const blocks: Record<string, Block> = {};
 
 	for (const [name, def] of Object.entries(config.blocks)) {
@@ -129,10 +147,7 @@ const REGISTRY_CONFIG: RegistryBuildConfig = {
 	blocks: {
 		claude: {
 			description: "Claude Code settings and hooks for automated formatting",
-			files: [
-				".claude/settings.json",
-				".claude/hooks/format-code-on-stop.sh",
-			],
+			files: [".claude/settings.json", ".claude/hooks/format-code-on-stop.sh"],
 		},
 		biome: {
 			description: "Biome linter/formatter configuration via Ultracite",
@@ -149,14 +164,18 @@ const REGISTRY_CONFIG: RegistryBuildConfig = {
 		markdownlint: {
 			description: "Markdown linting configuration via markdownlint-cli2",
 			files: ["packages/tooling/.markdownlint-cli2.jsonc"],
-			remap: { "packages/tooling/.markdownlint-cli2.jsonc": ".markdownlint-cli2.jsonc" },
+			remap: {
+				"packages/tooling/.markdownlint-cli2.jsonc": ".markdownlint-cli2.jsonc",
+			},
 		},
 		bootstrap: {
-			description: "Project bootstrap script for installing tools and dependencies",
+			description:
+				"Project bootstrap script for installing tools and dependencies",
 			files: ["scripts/bootstrap.sh"],
 		},
 		scaffolding: {
-			description: "Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
+			description:
+				"Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
 			extends: ["claude", "biome", "lefthook", "markdownlint", "bootstrap"],
 		},
 	},
@@ -171,7 +190,7 @@ function main(): void {
 	const outputDir = join(repoRoot, "packages/tooling/registry");
 	const outputPath = join(outputDir, "registry.json");
 
-	console.log(`Building registry from: ${repoRoot}`);
+	log(`Building registry from: ${repoRoot}`);
 
 	// Ensure output directory exists
 	if (!existsSync(outputDir)) {
@@ -180,16 +199,16 @@ function main(): void {
 
 	// Build and write registry
 	const registry = buildRegistry(REGISTRY_CONFIG, repoRoot);
-	writeFileSync(outputPath, JSON.stringify(registry, null, 2) + "\n");
+	writeFileSync(outputPath, `${JSON.stringify(registry, null, 2)}\n`);
 
 	// Summary
 	const blockCount = Object.keys(registry.blocks).length;
-	const fileCount = Object.values(registry.blocks)
-		.flatMap((b) => b.files ?? [])
-		.length;
+	const fileCount = Object.values(registry.blocks).flatMap(
+		(b) => b.files ?? [],
+	).length;
 
-	console.log(`✓ Generated ${outputPath}`);
-	console.log(`  ${blockCount} blocks, ${fileCount} files embedded`);
+	log(`✓ Generated ${outputPath}`);
+	log(`  ${blockCount} blocks, ${fileCount} files embedded`);
 }
 
 main();

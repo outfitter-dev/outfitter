@@ -18,7 +18,7 @@ const COLORS = {
 };
 
 function log(msg: string): void {
-	console.log(msg);
+	process.stdout.write(`${msg}\n`);
 }
 
 /**
@@ -64,9 +64,7 @@ function hasRedPhaseBranchInContext(currentBranch: string): boolean {
 			branches = gtResult.stdout
 				.toString()
 				.split("\n")
-				.map((line) =>
-					line.replace(/^[│├└─◉◯ ]*/g, "").replace(/ \(.*/, "")
-				)
+				.map((line) => line.replace(/^[│├└─◉◯ ]*/g, "").replace(/ \(.*/, ""))
 				.filter(Boolean);
 		}
 	} catch {
@@ -125,10 +123,10 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 	// Check for RED phase branch
 	if (isRedPhaseBranch(branch)) {
 		log(
-			`${COLORS.yellow}TDD RED phase${COLORS.reset} detected: ${COLORS.blue}${branch}${COLORS.reset}`
+			`${COLORS.yellow}TDD RED phase${COLORS.reset} detected: ${COLORS.blue}${branch}${COLORS.reset}`,
 		);
 		log(
-			`${COLORS.yellow}Skipping test execution${COLORS.reset} - tests are expected to fail in RED phase`
+			`${COLORS.yellow}Skipping test execution${COLORS.reset} - tests are expected to fail in RED phase`,
 		);
 		log("");
 		log("Remember: GREEN phase (implementation) must make these tests pass!");
@@ -139,10 +137,10 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 	if (isScaffoldBranch(branch)) {
 		if (hasRedPhaseBranchInContext(branch)) {
 			log(
-				`${COLORS.yellow}Scaffold branch${COLORS.reset} with RED phase branch in context: ${COLORS.blue}${branch}${COLORS.reset}`
+				`${COLORS.yellow}Scaffold branch${COLORS.reset} with RED phase branch in context: ${COLORS.blue}${branch}${COLORS.reset}`,
 			);
 			log(
-				`${COLORS.yellow}Skipping test execution${COLORS.reset} - RED phase tests expected to fail`
+				`${COLORS.yellow}Skipping test execution${COLORS.reset} - RED phase tests expected to fail`,
 			);
 			log("");
 			process.exit(0);

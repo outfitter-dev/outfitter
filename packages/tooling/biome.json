@@ -1,74 +1,80 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "root": false,
-  "javascript": {
-    "globals": ["Bun"]
-  },
-  "linter": {
-    "rules": {
-      "complexity": {
-        "useLiteralKeys": "off",
-        "noVoid": "off",
-        "noExcessiveCognitiveComplexity": "off"
-      },
-      "performance": {
-        "useTopLevelRegex": "off"
-      },
-      "style": {
-        "useBlockStatements": "off"
-      },
-      "suspicious": {
-        "noConsole": "error"
-      }
-    }
-  },
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": true,
-    "includes": ["!**/node_modules", "!**/dist", "!**/.turbo", "!**/*.gen.ts"]
-  },
-  "overrides": [
-    {
-      "includes": ["packages/*/src/index.ts", "apps/*/src/index.ts", "**/index.ts"],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noBarrelFile": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["**/*.test.ts", "**/__tests__/**/*"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "useAwait": "off",
-            "noConsole": "off"
-          },
-          "performance": {
-            "noDelete": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "apps/**/*.ts",
-        "scripts/**/*.ts",
-        "**/scripts/**/*.ts"
-      ],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off"
-          }
-        }
-      }
-    }
-  ]
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"root": false,
+	"javascript": {
+		"globals": ["Bun"]
+	},
+	"linter": {
+		"rules": {
+			"complexity": {
+				"useLiteralKeys": "off",
+				"noVoid": "off",
+				"noExcessiveCognitiveComplexity": "off"
+			},
+			"performance": {
+				"useTopLevelRegex": "off"
+			},
+			"style": {
+				"useBlockStatements": "off"
+			},
+			"suspicious": {
+				"noConsole": "error"
+			}
+		}
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/.turbo",
+			"!**/*.gen.ts"
+		]
+	},
+	"overrides": [
+		{
+			"includes": [
+				"packages/*/src/index.ts",
+				"apps/*/src/index.ts",
+				"**/index.ts"
+			],
+			"linter": {
+				"rules": {
+					"performance": {
+						"noBarrelFile": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.ts", "**/__tests__/**/*"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"useAwait": "off",
+						"noConsole": "off"
+					},
+					"performance": {
+						"noDelete": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["apps/**/*.ts", "scripts/**/*.ts", "**/scripts/**/*.ts"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
 }

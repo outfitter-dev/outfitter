@@ -60,7 +60,15 @@ export function detectFrameworks(pkg: PackageJson): string[] {
  * @returns Array of command arguments
  */
 export function buildUltraciteCommand(options: UltraciteOptions): string[] {
-	const cmd = ["ultracite", "init", "--linter", "biome", "--pm", "bun", "--quiet"];
+	const cmd = [
+		"ultracite",
+		"init",
+		"--linter",
+		"biome",
+		"--pm",
+		"bun",
+		"--quiet",
+	];
 
 	if (options.frameworks && options.frameworks.length > 0) {
 		cmd.push("--frameworks", ...options.frameworks);
@@ -79,7 +87,7 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
 	const pkgFile = Bun.file(pkgPath);
 
 	if (!(await pkgFile.exists())) {
-		console.error("No package.json found in current directory");
+		process.stderr.write("No package.json found in current directory\n");
 		process.exit(1);
 	}
 
@@ -87,13 +95,12 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
 
 	// Detect frameworks
 	const frameworkFlags = detectFrameworks(pkg);
-	const frameworks =
-		frameworkFlags.length > 0 ? frameworkFlags.slice(1) : []; // Remove --frameworks flag
+	const frameworks = frameworkFlags.length > 0 ? frameworkFlags.slice(1) : []; // Remove --frameworks flag
 
 	// Build command
 	const cmd = buildUltraciteCommand({ frameworks });
 
-	console.log(`Running: bun x ${cmd.join(" ")}`);
+	process.stdout.write(`Running: bun x ${cmd.join(" ")}\n`);
 
 	// Execute ultracite
 	const proc = Bun.spawn(["bun", "x", ...cmd], {

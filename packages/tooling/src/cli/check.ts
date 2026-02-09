@@ -29,7 +29,7 @@ export function buildCheckCommand(options: CheckOptions): string[] {
 export async function runCheck(paths: string[] = []): Promise<void> {
 	const cmd = buildCheckCommand({ paths });
 
-	console.log(`Running: bun x ${cmd.join(" ")}`);
+	process.stdout.write(`Running: bun x ${cmd.join(" ")}\n`);
 
 	const proc = Bun.spawn(["bun", "x", ...cmd], {
 		stdio: ["inherit", "inherit", "inherit"],

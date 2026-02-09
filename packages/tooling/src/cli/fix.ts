@@ -29,7 +29,7 @@ export function buildFixCommand(options: FixOptions): string[] {
 export async function runFix(paths: string[] = []): Promise<void> {
 	const cmd = buildFixCommand({ paths });
 
-	console.log(`Running: bun x ${cmd.join(" ")}`);
+	process.stdout.write(`Running: bun x ${cmd.join(" ")}\n`);
 
 	const proc = Bun.spawn(["bun", "x", ...cmd], {
 		stdio: ["inherit", "inherit", "inherit"],
