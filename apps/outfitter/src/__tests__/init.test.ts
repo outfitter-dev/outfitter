@@ -120,10 +120,11 @@ describe("init command file creation", () => {
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     expect(packageJson.devDependencies["@outfitter/tooling"]).toBeUndefined();
-    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.1.0");
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.1.0");
-    expect(packageJson.dependencies["@outfitter/config"]).toBe("^0.1.0");
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0");
+    expect(packageJson.dependencies["@outfitter/kit"]).toBe("^0.1.0-rc.0");
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.1.0-rc.0");
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0-rc.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBeUndefined();
+    expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
 
     const tsconfigPath = join(tempDir, "tsconfig.json");
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
@@ -324,12 +325,11 @@ describe("init command local dependency rewriting", () => {
 
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.dependencies["@outfitter/kit"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
-    expect(packageJson.dependencies["@outfitter/config"]).toBe("workspace:*");
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
-      "workspace:*"
-    );
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
+    expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBeUndefined();
     expect(packageJson.dependencies.commander).toBe("^12.0.0");
   });
 });
