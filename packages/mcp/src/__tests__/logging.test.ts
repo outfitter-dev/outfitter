@@ -75,6 +75,7 @@ describe("MCP Logging", () => {
       };
 
       server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("debug");
       server.sendLogMessage("info", { action: "test" }, "my-logger");
 
       expect(sentMessages).toHaveLength(1);
@@ -120,7 +121,7 @@ describe("MCP Logging", () => {
       expect(sentMessages).toHaveLength(2);
     });
 
-    it("defaults to debug level when client hasn't set one", () => {
+    it("no forwarding by default until client sets level", () => {
       const server = createMcpServer({
         name: "test-server",
         version: "1.0.0",
@@ -139,9 +140,44 @@ describe("MCP Logging", () => {
 
       server.bindSdkServer?.(mockSdkServer);
 
-      // Without setLogLevel, should allow all messages (default: debug)
-      server.sendLogMessage("debug", "should pass");
+      // Without setLogLevel, no messages should be forwarded
+      server.sendLogMessage("debug", "should not pass");
+      server.sendLogMessage("error", "should not pass either");
+      expect(sentMessages).toHaveLength(0);
+
+      // After client opts in, messages flow
+      server.setLogLevel?.("debug");
+      server.sendLogMessage("debug", "now it passes");
       expect(sentMessages).toHaveLength(1);
+    });
+
+    it("resets log level on rebind", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const makeMock = () => ({
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      });
+
+      // First client sets level to debug
+      server.bindSdkServer?.(makeMock());
+      server.setLogLevel?.("debug");
+      server.sendLogMessage("debug", "first client");
+      expect(sentMessages).toHaveLength(1);
+
+      // Rebind to new client — should reset to no forwarding
+      server.bindSdkServer?.(makeMock());
+      server.sendLogMessage("debug", "should not forward");
+      expect(sentMessages).toHaveLength(1); // unchanged
     });
 
     it("no-op before SDK server binding", () => {
@@ -172,6 +208,7 @@ describe("MCP Logging", () => {
       };
 
       server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("debug");
       server.sendLogMessage("info", "test data");
 
       const msg = sentMessages[0] as Record<string, unknown>;
@@ -197,6 +234,7 @@ describe("MCP Logging", () => {
       };
 
       server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("debug");
       server.sendLogMessage("error", "something went wrong");
 
       const msg = sentMessages[0] as { data: unknown };

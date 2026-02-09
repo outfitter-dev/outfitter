@@ -137,7 +137,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   // biome-ignore lint/suspicious/noExplicitAny: SDK Server type from @modelcontextprotocol/sdk
   let sdkServer: any = null;
   const subscriptions = new Set<string>();
-  let clientLogLevel: McpLogLevel = "debug";
+  let clientLogLevel: McpLogLevel | null = null;
 
   // Create handler context for tool invocations
   function createHandlerContext(
@@ -657,7 +657,11 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       data: unknown,
       loggerName?: string
     ): void {
-      if (!(sdkServer && shouldEmitLog(level, clientLogLevel))) {
+      if (
+        !sdkServer ||
+        clientLogLevel === null ||
+        !shouldEmitLog(level, clientLogLevel)
+      ) {
         return;
       }
 
@@ -676,6 +680,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
     bindSdkServer(server: any): void {
       sdkServer = server;
+      clientLogLevel = null;
       logger.debug("SDK server bound for notifications");
     },
 
