@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [4894673]
+- Updated dependencies [0c099bc]
+- Updated dependencies [8d48564]
+- Updated dependencies [2da60d3]
+  - @outfitter/cli@0.3.0
+  - @outfitter/tooling@0.2.1
+  - @outfitter/config@0.3.0
+  - @outfitter/logging@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

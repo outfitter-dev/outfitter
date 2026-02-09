@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- 0c099bc: Add unified environment profiles (`OUTFITTER_ENV`) for cross-package defaults.
+
+  **@outfitter/config:** New `getEnvironment()` and `getEnvironmentDefaults()` for reading environment profiles (development/production/test).
+
+  **@outfitter/mcp:** Add `defaultLogLevel` option to `McpServerOptions` with precedence-based resolution: `OUTFITTER_LOG_LEVEL` > options > environment profile > null. Also adds `sendLogMessage()` for server-to-client log forwarding.
+
+  **@outfitter/logging:** New `resolveLogLevel()` utility with precedence: `OUTFITTER_LOG_LEVEL` > explicit level > environment profile > "info".
+
+  **@outfitter/cli:** New `resolveVerbose()` utility with precedence: `OUTFITTER_VERBOSE` > explicit flag > environment profile > false.
+
+- 2da60d3: Add `--json` as a global CLI option, replacing per-command definitions. All commands now inherit `--json` automatically via `createCLI()`.
+
+### Patch Changes
+
+- 4894673: Complete migration system: add `--cwd` flag to `outfitter update`, ship migration docs in `@outfitter/kit` npm package, add migration docs for all packages.
+- 8d48564: Fix `output()` to default to human mode for non-TTY environments. Previously, non-TTY output (piped, subprocess) unexpectedly emitted JSON. Machine-readable output now requires explicit `--json` flag or `OUTFITTER_JSON=1` env var, per CLI conventions.
+- Updated dependencies [0c099bc]
+  - @outfitter/config@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
