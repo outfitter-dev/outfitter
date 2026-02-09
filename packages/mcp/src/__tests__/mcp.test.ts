@@ -17,7 +17,7 @@ import {
   Result,
   ValidationError,
 } from "@outfitter/contracts";
-import { createLogger } from "@outfitter/logging";
+import { createLogger, type LogRecord, type Sink } from "@outfitter/logging";
 import { z } from "zod";
 import {
   createMcpServer,
@@ -324,6 +324,44 @@ describe("Tool Invocation", () => {
     expect((receivedContext as { logger: unknown }).logger).toBeDefined();
     expect((receivedContext as { requestId: string }).requestId).toBeDefined();
     expect((receivedContext as { cwd: string }).cwd).toBeDefined();
+  });
+
+  it("handler logger is scoped with tool and request metadata", async () => {
+    const records: LogRecord[] = [];
+    const sink: Sink = { write: (record) => records.push(record) };
+    const logger = createLogger({
+      name: "mcp-test",
+      level: "info",
+      sinks: [sink],
+      redaction: { enabled: false },
+    });
+
+    const server = createMcpServer({
+      name: "test-server",
+      version: "1.0.0",
+      logger,
+    });
+
+    server.registerTool(
+      defineTool({
+        name: "scope-test",
+        description: "Validate scoped logger metadata",
+        inputSchema: z.object({}),
+        handler: async (_input, ctx) => {
+          ctx.logger.info("handler log");
+          return Result.ok({ ok: true });
+        },
+      })
+    );
+
+    await server.invokeTool("scope-test", {});
+
+    const handlerRecord = records.find(
+      (record) => record.message === "handler log"
+    );
+    expect(handlerRecord).toBeDefined();
+    expect(handlerRecord?.metadata?.tool).toBe("scope-test");
+    expect(typeof handlerRecord?.metadata?.requestId).toBe("string");
   });
 
   it("handler receives signal in context", async () => {
