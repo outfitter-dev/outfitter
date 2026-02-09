@@ -46,6 +46,12 @@
         "default": "./dist/commands/doctor.js"
       }
     },
+    "./create/presets": {
+      "import": {
+        "types": "./dist/create/presets.d.ts",
+        "default": "./dist/create/presets.js"
+      }
+    },
     "./commands/init": {
       "import": {
         "types": "./dist/commands/init.d.ts",

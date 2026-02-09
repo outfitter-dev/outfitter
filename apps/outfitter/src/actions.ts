@@ -23,6 +23,11 @@ import {
   printAddResults,
   runAdd,
 } from "./commands/add.js";
+import {
+  type CreateOptions,
+  printCreateResults,
+  runCreate,
+} from "./commands/create.js";
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
@@ -39,6 +44,19 @@ interface InitFlags {
   readonly json?: unknown;
 }
 
+interface CreateFlags {
+  readonly name?: unknown;
+  readonly preset?: unknown;
+  readonly structure?: unknown;
+  readonly workspaceName?: unknown;
+  readonly workspace?: unknown;
+  readonly local?: unknown;
+  readonly force?: unknown;
+  readonly with?: unknown;
+  readonly noTooling?: unknown;
+  readonly yes?: unknown;
+}
+
 interface InitActionInput extends InitOptions {
   outputMode?: OutputMode;
 }
@@ -53,6 +71,24 @@ const initInputSchema = z.object({
   force: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<InitActionInput>;
+
+interface CreateActionInput extends CreateOptions {
+  outputMode?: OutputMode;
+}
+
+const createInputSchema = z.object({
+  targetDir: z.string(),
+  name: z.string().optional(),
+  preset: z.enum(["basic", "cli", "daemon", "mcp"]).optional(),
+  structure: z.enum(["single", "workspace"]).optional(),
+  workspaceName: z.string().optional(),
+  local: z.boolean().optional(),
+  force: z.boolean(),
+  with: z.string().optional(),
+  noTooling: z.boolean().optional(),
+  yes: z.boolean().optional(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<CreateActionInput>;
 
 interface DoctorActionInput {
   cwd: string;
@@ -77,6 +113,17 @@ function resolveOutputMode(
   return undefined;
 }
 
+function resolveLocalFlag(flags: {
+  readonly local?: unknown;
+  readonly workspace?: unknown;
+}): boolean | undefined {
+  if (flags.local === true || flags.workspace === true) {
+    return true;
+  }
+
+  return undefined;
+}
+
 function resolveInitOptions(
   context: ActionCliInputContext,
   templateOverride?: string
@@ -97,6 +144,36 @@ function resolveInitOptions(
     local,
     force,
     ...(bin ? { bin } : {}),
+    ...(outputMode ? { outputMode } : {}),
+  };
+}
+
+function resolveCreateOptions(
+  context: ActionCliInputContext
+): CreateActionInput {
+  const flags = context.flags as CreateFlags;
+  const outputMode = resolveOutputMode(context.flags);
+  const local = resolveLocalFlag(flags);
+
+  return {
+    targetDir: context.args[0] ?? process.cwd(),
+    name: resolveStringFlag(flags.name),
+    preset: resolveStringFlag(flags.preset) as
+      | "basic"
+      | "cli"
+      | "daemon"
+      | "mcp"
+      | undefined,
+    structure: resolveStringFlag(flags.structure) as
+      | "single"
+      | "workspace"
+      | undefined,
+    workspaceName: resolveStringFlag(flags.workspaceName),
+    force: Boolean(flags.force),
+    ...(local !== undefined ? { local } : {}),
+    with: resolveStringFlag(flags.with),
+    noTooling: Boolean(flags.noTooling),
+    yes: Boolean(flags.yes),
     ...(outputMode ? { outputMode } : {}),
   };
 }
@@ -175,6 +252,82 @@ function createInitAction(options: {
     },
   });
 }
+
+const createAction = defineAction({
+  id: "create",
+  description:
+    "Interactive scaffolding flow for Outfitter projects (single package or workspace)",
+  surfaces: ["cli"],
+  input: createInputSchema,
+  cli: {
+    command: "create [directory]",
+    description:
+      "Interactive scaffolding flow for Outfitter projects (single package or workspace)",
+    options: [
+      {
+        flags: "-n, --name <name>",
+        description: "Package name",
+      },
+      {
+        flags: "-p, --preset <preset>",
+        description: "Preset to scaffold (basic, cli, daemon, mcp)",
+      },
+      {
+        flags: "-s, --structure <structure>",
+        description: "Project structure (single|workspace)",
+      },
+      {
+        flags: "--workspace-name <name>",
+        description: "Workspace root package name",
+      },
+      {
+        flags: "--local",
+        description: "Use workspace:* for @outfitter dependencies",
+      },
+      {
+        flags: "--workspace",
+        description: "Alias for --local",
+      },
+      {
+        flags: "-f, --force",
+        description: "Overwrite existing files",
+        defaultValue: false,
+      },
+      {
+        flags: "--with <blocks>",
+        description: "Comma-separated tooling blocks to add",
+      },
+      {
+        flags: "--no-tooling",
+        description: "Skip default tooling blocks",
+        defaultValue: false,
+      },
+      {
+        flags: "-y, --yes",
+        description: "Skip prompts and use defaults for missing values",
+        defaultValue: false,
+      },
+    ],
+    mapInput: resolveCreateOptions,
+  },
+  handler: async (input) => {
+    const { outputMode, ...createInput } = input;
+    const outputOptions = outputMode ? { mode: outputMode } : undefined;
+    const result = await runCreate(createInput);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "create" },
+        })
+      );
+    }
+
+    await printCreateResults(result.value, outputOptions);
+    return Result.ok(result.value);
+  },
+});
 
 const demoInputSchema = z.object({
   section: z.string().optional(),
@@ -427,6 +580,7 @@ const updateAction = defineAction({
 });
 
 export const outfitterActions: ActionRegistry = createActionRegistry()
+  .add(createAction)
   .add(
     createInitAction({
       id: "init",

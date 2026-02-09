@@ -9,6 +9,16 @@
 
 // Action registry
 export { outfitterActions } from "./actions.js";
+// Create command
+export {
+  CreateError,
+  type CreateOptions,
+  type CreateResult,
+  type CreateStructure,
+  createCommand,
+  printCreateResults,
+  runCreate,
+} from "./commands/create.js";
 // Doctor command
 export {
   type BunVersionCheck,
@@ -23,14 +33,14 @@ export {
   type PackageJsonCheck,
   printDoctorResults,
   runDoctor,
-} from "./commands/doctor";
+} from "./commands/doctor.js";
 // Init command
 export {
   InitError,
   type InitOptions,
   initCommand,
   runInit,
-} from "./commands/init";
+} from "./commands/init.js";
 
 // Create planner
 export {
