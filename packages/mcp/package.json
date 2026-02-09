@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/mcp",
   "description": "MCP server framework with typed tools for Outfitter",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "files": [
     "dist"
