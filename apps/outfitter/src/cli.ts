@@ -29,7 +29,7 @@ function createProgram() {
   const logger = createLogger({ name: "outfitter" });
   const cli = createCLI({
     name: "outfitter",
-    version: "0.1.0-rc.0",
+    version: cliVersion,
     description: "Outfitter CLI for scaffolding and project management",
     onError: (error) => {
       const err =
