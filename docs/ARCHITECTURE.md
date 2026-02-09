@@ -110,11 +110,11 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 | `@outfitter/testing` | Test harnesses for CLI and MCP |
 | `@outfitter/kit` | Foundation facade over contracts and types |
 
-### Adoption IA (Draft)
+### Adoption IA
 
 For mixed-adoption sequencing across logging and non-logging workstreams, see:
 
-- [Mixed Adoption IA (Draft)](./ADOPTION-IA.md)
+- [Mixed Adoption IA](./ADOPTION-IA.md)
 
 ## Dependency Graph
 

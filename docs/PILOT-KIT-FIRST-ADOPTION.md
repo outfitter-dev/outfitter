@@ -1,11 +1,23 @@
 # Pilot Report: Kit-First Adoption
 
-Status: Draft (OS-91)  
+Status: Pilot Findings (OS-91), Resolutions Applied in OS-90  
 Date: 2026-02-09  
 Parent Workstream: OS-77
 
 This report captures pilot outcomes for kit-first adoption pathways and the
 follow-up issues required before final recommendation updates in OS-90.
+
+## Post-Pilot Resolution (OS-90)
+
+The pilot findings in this document were used as direct implementation input
+for OS-90 finalization. Current validated behavior:
+
+- `outfitter create --no-tooling` skips default tooling blocks.
+- `outfitter init --no-tooling` skips default tooling blocks.
+- `outfitter init --with <blocks>` and `create --with <blocks>` are available
+  for explicit tooling selection.
+
+Recommendation docs now reflect these resolved behaviors.
 
 ## Scope
 
@@ -63,12 +75,9 @@ Validated pathways:
 
 ## Inputs to OS-90
 
-- Recommendation language should not claim stable tooling-control behavior until
-  OS-94 and OS-95 are resolved.
-- Final docs should present a single preferred non-interactive setup entrypoint,
-  either:
-  - unified `create` flow with fixed `--no-tooling`, or
-  - explicit `init` deprecation strategy for this scenario.
+- Recommendation language now includes stable tooling-control behavior.
+- Final docs use a kit-first baseline recommendation with explicit progression
+  paths and command-level guidance for `init` and `create`.
 
 ## Related Docs
 

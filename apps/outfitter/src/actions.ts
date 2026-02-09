@@ -45,6 +45,9 @@ interface InitFlags {
   readonly force?: unknown;
   readonly local?: unknown;
   readonly workspace?: unknown;
+  readonly with?: unknown;
+  readonly noTooling?: unknown;
+  readonly tooling?: unknown;
   readonly json?: unknown;
 }
 
@@ -58,6 +61,7 @@ interface CreateFlags {
   readonly force?: unknown;
   readonly with?: unknown;
   readonly noTooling?: unknown;
+  readonly tooling?: unknown;
   readonly yes?: unknown;
 }
 
@@ -78,6 +82,8 @@ const initInputSchema = z.object({
   template: z.string().optional(),
   local: z.boolean().optional(),
   force: z.boolean(),
+  with: z.string().optional(),
+  noTooling: z.boolean().optional(),
   outputMode: outputModeSchema,
 }) as z.ZodType<InitActionInput>;
 
@@ -134,6 +140,25 @@ function resolveOutputMode(
   return undefined;
 }
 
+function resolveNoToolingFlag(flags: {
+  readonly noTooling?: unknown;
+  readonly tooling?: unknown;
+}): boolean | undefined {
+  if (typeof flags.noTooling === "boolean") {
+    return !flags.noTooling;
+  }
+
+  if (typeof flags.tooling === "boolean") {
+    if (!flags.tooling) {
+      return true;
+    }
+
+    return process.argv.includes("--tooling") ? false : undefined;
+  }
+
+  return undefined;
+}
+
 function resolveLocalFlag(flags: {
   readonly local?: unknown;
   readonly workspace?: unknown;
@@ -154,16 +179,20 @@ function resolveInitOptions(
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
   const template = templateOverride ?? resolveStringFlag(flags.template);
-  const local = Boolean(flags.local || flags.workspace);
+  const local = resolveLocalFlag(flags);
   const force = Boolean(flags.force);
+  const withBlocks = resolveStringFlag(flags.with);
+  const noTooling = resolveNoToolingFlag(flags);
   const outputMode = resolveOutputMode(context.flags);
 
   return {
     targetDir,
     name,
     template,
-    local,
     force,
+    ...(local !== undefined ? { local } : {}),
+    ...(withBlocks ? { with: withBlocks } : {}),
+    ...(noTooling !== undefined ? { noTooling } : {}),
     ...(bin ? { bin } : {}),
     ...(outputMode ? { outputMode } : {}),
   };
@@ -174,6 +203,7 @@ function resolveCreateOptions(
 ): CreateActionInput {
   const flags = context.flags as CreateFlags;
   const outputMode = resolveOutputMode(context.flags);
+  const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
 
   return {
@@ -193,7 +223,7 @@ function resolveCreateOptions(
     force: Boolean(flags.force),
     ...(local !== undefined ? { local } : {}),
     with: resolveStringFlag(flags.with),
-    noTooling: Boolean(flags.noTooling),
+    ...(noTooling !== undefined ? { noTooling } : {}),
     yes: Boolean(flags.yes),
     ...(outputMode ? { outputMode } : {}),
   };
@@ -229,12 +259,19 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "--local",
     description: "Use workspace:* for @outfitter dependencies",
-    defaultValue: false,
   },
   {
     flags: "--workspace",
     description: "Alias for --local",
-    defaultValue: false,
+  },
+  {
+    flags: "--with <blocks>",
+    description:
+      "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)",
+  },
+  {
+    flags: "--no-tooling",
+    description: "Skip tooling setup",
   },
 ];
 
@@ -334,7 +371,6 @@ const createAction = defineAction({
       {
         flags: "--no-tooling",
         description: "Skip default tooling blocks",
-        defaultValue: false,
       },
       {
         flags: "-y, --yes",

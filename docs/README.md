@@ -10,7 +10,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | [Getting Started](./GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
 | [Patterns](./PATTERNS.md) | Handlers, Result types, error taxonomy, validation |
 | [Stack Composition](./STACK-COMPOSITION.md) | Composable hstack/vstack primitives for CLI layouts |
-| [Mixed Adoption IA (Draft)](./ADOPTION-IA.md) | Three-state adoption model and cross-workstream narrative (OS-77) |
+| [Mixed Adoption IA](./ADOPTION-IA.md) | Final kit-first adoption recommendation, progression paths, and cross-workstream narrative (OS-77) |
 | [Pilot Report: Kit-First Adoption](./PILOT-KIT-FIRST-ADOPTION.md) | Archetype pilot outcomes and follow-up issues (OS-91) |
 | [Migration](./MIGRATION.md) | Adopting Outfitter, upgrading between versions |
 

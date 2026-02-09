@@ -1,19 +1,41 @@
-# Mixed Adoption IA (Draft)
+# Mixed Adoption IA
 
-Status: Draft (OS-92)  
+Status: Finalized (OS-90)  
 Parent Workstream: OS-77  
 Last Updated: 2026-02-09
 
-This document defines the initial information architecture for mixed adoption of
-Outfitter packages while the implementation stack is still moving.
+This document defines the finalized information architecture for mixed adoption
+of Outfitter packages after pilot validation.
 
-The goal is to make early adoption decisions explicit and reversible:
+## Final Recommendation
 
-- pick a starting posture based on risk and velocity,
-- make migration paths between postures explicit,
-- tie adoption guidance to specific implementation slices.
+Default recommendation: start kit-first and progress in small, explicit steps.
 
-Pilot-derived recommendations are intentionally marked as pending.
+1. Start in **State 1 (Baseline Foundation)** for all new and existing repos.
+2. Move to **State 2 (Baseline + Transport)** when one surface (CLI or MCP) is
+   actively being modernized.
+3. Move to **State 3 (Granular Runtime Adoption)** only when there is clear
+   package-level ownership and test coverage for incremental runtime rollout.
+
+Why this is the default:
+
+- It keeps the first change small (`@outfitter/kit` foundation imports) while
+  preserving forward paths to full runtime adoption.
+- It works for both greenfield scaffolding and existing repos.
+- It aligns with pilot outcomes and keeps migration blast radius low.
+
+## Validated Tooling Behavior (Post-Pilot)
+
+The following behavior is validated for non-interactive adoption workflows:
+
+- `outfitter create --no-tooling` skips default tooling blocks.
+- `outfitter init --no-tooling` skips default tooling blocks.
+- `outfitter init --with <blocks>` and `outfitter create --with <blocks>`
+  provide explicit tooling selection.
+- `outfitter init` remains non-destructive for existing repos unless `--force`
+  is provided.
+
+These points resolve the pilot friction captured in OS-94 and OS-95.
 
 ## Three-State Adoption Model
 
@@ -27,38 +49,39 @@ Use the foundation facade and keep transport/runtime dependencies explicit.
   - `@outfitter/kit/foundation/types`
 - Runtime dependencies are added only when used (`@outfitter/cli`,
   `@outfitter/mcp`, `@outfitter/logging`, etc.).
-- Best for teams that want a minimal contract-first baseline now.
+- Best for teams that want minimal change and a stable contract-first baseline.
 
 ### State 2: Baseline + Transport
 
 Start from State 1, then adopt one transport/runtime surface end-to-end.
 
-- Typical first transport:
-  - CLI (`@outfitter/cli`) or MCP (`@outfitter/mcp`).
-- Logging integration recommended once transport is active.
-- Best for product teams shipping one entrypoint first.
+- Typical first transport: CLI (`@outfitter/cli`) or MCP (`@outfitter/mcp`).
+- Logging integration is recommended once transport is active.
+- Best for teams shipping one entrypoint first.
 
 ### State 3: Granular Runtime Adoption
 
 Adopt additional runtime packages by concern over time.
 
 - Add targeted packages (`@outfitter/config`, `@outfitter/file-ops`,
-  `@outfitter/state`, `@outfitter/daemon`, `@outfitter/index`, `@outfitter/testing`).
+  `@outfitter/state`, `@outfitter/daemon`, `@outfitter/index`,
+  `@outfitter/testing`).
 - Keep each package adoption scoped and testable.
 - Best for mature repos migrating incrementally with package-level ownership.
 
-## Decision Matrix (Draft)
+## Decision Matrix
 
 | Signal | Choose | Why |
 |---|---|---|
-| Team needs the contract/error model immediately, transport later | State 1 | Smallest change surface and low migration risk |
-| Team has one active CLI or MCP surface to modernize now | State 2 | Fastest path to tangible workflow improvements |
-| Repo already has stable tooling boundaries and package owners | State 3 | Enables gradual migration without big-bang rewrites |
-| Repo has urgent logging consistency gaps | State 2 + logging track | Logging slices are already independently stackable |
+| Need contract/error model immediately, transport later | State 1 | Smallest change surface and low migration risk |
+| One active CLI or MCP surface needs modernization now | State 2 | Fast path to tangible workflow improvements |
+| Repo has package owners and concern-level test coverage | State 3 | Enables gradual migration without big-bang rewrites |
+| Urgent logging consistency gaps | State 2 + logging track | Logging slices are independently stackable |
+| Existing repo needs scaffolding safety | State 1 + `init/create --no-tooling` | Reduces accidental tooling churn during adoption |
 
 ## Migration Path Narrative
 
-### Path A: Foundation-first
+### Path A: Foundation-First
 
 1. Adopt foundation imports via `@outfitter/kit`.
 2. Run codemod where needed:
@@ -67,18 +90,20 @@ Adopt additional runtime packages by concern over time.
 3. Enable one transport slice (CLI or MCP).
 4. Expand into granular runtime packages only where justified.
 
-### Path B: Existing transport-first repos
+### Path B: Existing Transport-First Repos
 
 1. Keep current transport package usage.
 2. Migrate foundation imports to kit facade.
 3. Move logging to unified logger factory stack.
 4. Incrementally adopt missing runtime packages by concern.
 
-### Path C: Monorepo mixed state
+### Path C: Monorepo Mixed State
 
 1. Apply foundation codemod at workspace root (`outfitter migrate kit`).
 2. Prioritize package-level transport migrations by business impact.
-3. Track outliers in pilot follow-ups before standardizing defaults.
+3. Standardize tooling behavior with explicit flags:
+   - use `--no-tooling` for no-op tooling adoption,
+   - use `--with` for targeted tooling additions.
 
 ## Cross-Workstream Map
 
@@ -96,7 +121,7 @@ Adopt additional runtime packages by concern over time.
 
 Primary doc link: [LOGGING-MIGRATION.md](./LOGGING-MIGRATION.md)
 
-### Kit + Create/Adoption Track (A-track)
+### Kit + Create/Adoption Track
 
 | Issue | Scope | Adoption Impact |
 |---|---|---|
@@ -105,26 +130,18 @@ Primary doc link: [LOGGING-MIGRATION.md](./LOGGING-MIGRATION.md)
 | OS-88 | create planner/presets | deterministic scaffolding protocol |
 | OS-89 | interactive `outfitter create` flow | practical entrypoint for mixed adoption |
 | OS-87 | `outfitter migrate kit` codemod | one-command existing-repo foundation migration |
-| OS-92 | this IA and narrative draft | aligns docs before pilot feedback lands |
-| OS-91 | pilots and friction capture | validates defaults in real repos |
-| OS-90 | post-pilot init/recommendation finalize | converts draft guidance into final defaults |
+| OS-92 | IA draft and cross-workstream narrative | established pre-pilot model and framing |
+| OS-91 | pilots and friction capture | validated repo archetypes and surfaced gaps |
+| OS-90 | post-pilot finalize | recommendation and tooling behavior finalized |
 
-## Pilot-Dependent Placeholders
+## Evidence Base
 
-These sections are intentionally unresolved until OS-91/OS-90:
-
-- `TODO(OS-91)`: default starting state by repo archetype
-  - (single-package app, polyrepo service, monorepo package group).
-- `TODO(OS-91)`: common migration friction patterns and mitigations.
-- `TODO(OS-90)`: final `outfitter init` recommendation language.
-- `TODO(OS-90)`: final "when to choose granular adoption" thresholds.
-
-## Pilot Links
-
-- [Pilot Report: Kit-First Adoption](./PILOT-KIT-FIRST-ADOPTION.md)
-- Follow-up issues captured from pilots:
+- Pilot report: [PILOT-KIT-FIRST-ADOPTION.md](./PILOT-KIT-FIRST-ADOPTION.md)
+- Pilot-originated follow-ups:
   - OS-94: `create --no-tooling` behavior mismatch
   - OS-95: `init`/`create` tooling flag parity
+- OS-90 implementation resolves the behavior gaps and incorporates them into
+  final recommendation guidance above.
 
 ## Related Docs
 
