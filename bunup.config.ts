@@ -94,6 +94,10 @@ export default defineWorkspace(
       root: "packages/contracts",
     },
     {
+      name: "@outfitter/config",
+      root: "packages/config",
+    },
+    {
       name: "@outfitter/cli",
       root: "packages/cli",
       // Exclude internal exports - consumers should use barrel exports (./render, ./demo)

@@ -9,10 +9,22 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./environment": {
+      "import": {
+        "types": "./dist/environment.d.ts",
+        "default": "./dist/environment.js"
+      }
+    },
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      }
+    },
+    "./env": {
+      "import": {
+        "types": "./dist/env.d.ts",
+        "default": "./dist/env.js"
       }
     },
     "./package.json": "./package.json"
