@@ -1,11 +1,10 @@
 {
   "name": "@outfitter/kit",
-  "description": "Version coordination meta-package for Outfitter",
+  "description": "Foundation facade for Outfitter contracts and types",
   "version": "0.2.1",
   "type": "module",
   "files": [
     "dist",
-    "VERSIONS.md",
     "shared/migrations"
   ],
   "module": "./dist/index.js",
@@ -17,62 +16,33 @@
         "default": "./dist/index.js"
       }
     },
+    "./foundation/contracts": {
+      "import": {
+        "types": "./dist/foundation/contracts.d.ts",
+        "default": "./dist/foundation/contracts.js"
+      }
+    },
+    "./foundation/types": {
+      "import": {
+        "types": "./dist/foundation/types.d.ts",
+        "default": "./dist/foundation/types.js"
+      }
+    },
+    "./foundation": {
+      "import": {
+        "types": "./dist/foundation/index.d.ts",
+        "default": "./dist/foundation/index.js"
+      }
+    },
     "./package.json": "./package.json"
   },
-  "peerDependencies": {
-    "@outfitter/cli": ">=0.1.0",
-    "@outfitter/config": ">=0.1.0",
-    "@outfitter/contracts": ">=0.1.0",
-    "@outfitter/daemon": ">=0.1.0",
-    "@outfitter/file-ops": ">=0.1.0",
-    "@outfitter/index": ">=0.1.0",
-    "@outfitter/logging": ">=0.1.0",
-    "@outfitter/mcp": ">=0.1.0",
-    "@outfitter/state": ">=0.1.0",
-    "@outfitter/testing": ">=0.1.0",
-    "@outfitter/types": ">=0.1.0",
-    "@outfitter/ui": ">=0.1.0-rc.1"
-  },
-  "peerDependenciesMeta": {
-    "@outfitter/cli": {
-      "optional": true
-    },
-    "@outfitter/config": {
-      "optional": true
-    },
-    "@outfitter/contracts": {
-      "optional": true
-    },
-    "@outfitter/daemon": {
-      "optional": true
-    },
-    "@outfitter/file-ops": {
-      "optional": true
-    },
-    "@outfitter/index": {
-      "optional": true
-    },
-    "@outfitter/logging": {
-      "optional": true
-    },
-    "@outfitter/mcp": {
-      "optional": true
-    },
-    "@outfitter/state": {
-      "optional": true
-    },
-    "@outfitter/testing": {
-      "optional": true
-    },
-    "@outfitter/types": {
-      "optional": true
-    },
-    "@outfitter/ui": {
-      "optional": true
-    }
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/types": "workspace:*"
   },
   "scripts": {
-    "build": "bun run sync:migrations && bunup --filter @outfitter/kit",
+    "build": "bun run sync:migrations && cd ../.. && bunup --filter @outfitter/kit",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "sync:migrations": "bun run ../../scripts/sync-migrations.ts",
     "prepack": "bun run sync:migrations"

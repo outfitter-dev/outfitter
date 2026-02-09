@@ -1,35 +1,11 @@
 /**
- * @outfitter/kit - Version coordination meta-package
+ * @outfitter/kit - Foundation facade for Outfitter
  *
- * This package coordinates versions across all @outfitter packages.
- * Install it alongside specific packages to ensure compatible versions.
+ * Root exports the contracts surface and exposes @outfitter/types under
+ * `Types`. For explicit imports, use `@outfitter/kit/foundation/*` subpaths.
  *
  * @packageDocumentation
  */
 
-/**
- * Stack version - matches package.json version
- */
-export const STACK_VERSION = "0.1.0-rc.1";
-
-/**
- * Minimum compatible versions for each package
- */
-export const MINIMUM_VERSIONS = {
-  "@outfitter/cli": "0.1.0-rc.1",
-  "@outfitter/config": "0.1.0-rc.1",
-  "@outfitter/contracts": "0.1.0-rc.1",
-  "@outfitter/daemon": "0.1.0-rc.1",
-  "@outfitter/file-ops": "0.1.0-rc.1",
-  "@outfitter/index": "0.1.0-rc.1",
-  "@outfitter/logging": "0.1.0-rc.1",
-  "@outfitter/mcp": "0.1.0-rc.1",
-  "@outfitter/state": "0.1.0-rc.1",
-  "@outfitter/testing": "0.1.0-rc.1",
-  "@outfitter/types": "0.1.0-rc.1",
-} as const;
-
-/**
- * Type for package names in the stack
- */
-export type OutfitterPackage = keyof typeof MINIMUM_VERSIONS;
+export * from "@outfitter/contracts";
+export * as Types from "@outfitter/types";
