@@ -54,6 +54,9 @@ export function createCLI(config: CLIConfig): CLI {
     program.description(config.description);
   }
 
+  // Global --json flag available to all commands
+  program.option("--json", "Output as JSON", false);
+
   const exit = config.onExit ?? ((code: number): never => process.exit(code));
 
   program.exitOverride((error) => {

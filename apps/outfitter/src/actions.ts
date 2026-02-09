@@ -124,11 +124,6 @@ const commonInitOptions: ActionCliOption[] = [
     description: "Alias for --local",
     defaultValue: false,
   },
-  {
-    flags: "--json",
-    description: "Output as JSON",
-    defaultValue: false,
-  },
 ];
 
 const templateOption: ActionCliOption = {
@@ -206,11 +201,15 @@ const demoAction = defineAction({
         defaultValue: false,
       },
     ],
-    mapInput: (context) => ({
-      section: context.args[0] as string | undefined,
-      list: Boolean(context.flags["list"]),
-      animate: Boolean(context.flags["animate"]),
-    }),
+    mapInput: (context) => {
+      // Consume --json so it's not silently ignored
+      resolveOutputMode(context.flags);
+      return {
+        section: context.args[0] as string | undefined,
+        list: Boolean(context.flags["list"]),
+        animate: Boolean(context.flags["animate"]),
+      };
+    },
   },
   handler: async (input) => {
     const result = await runDemo(input);
@@ -232,13 +231,6 @@ const doctorAction = defineAction({
   cli: {
     command: "doctor",
     description: "Validate environment and dependencies",
-    options: [
-      {
-        flags: "--json",
-        description: "Output as JSON",
-        defaultValue: false,
-      },
-    ],
     mapInput: (context) => {
       const outputMode = resolveOutputMode(context.flags);
       return {
@@ -290,11 +282,6 @@ const addAction = defineAction({
         description: "Show what would be added without making changes",
         defaultValue: false,
       },
-      {
-        flags: "--json",
-        description: "Output as JSON",
-        defaultValue: false,
-      },
     ],
     mapInput: (context) => {
       const outputMode = resolveOutputMode(context.flags);
@@ -337,13 +324,6 @@ const listBlocksAction = defineAction({
     group: "add",
     command: "list",
     description: "List available blocks",
-    options: [
-      {
-        flags: "--json",
-        description: "Output as JSON",
-        defaultValue: false,
-      },
-    ],
     mapInput: (context) => {
       const outputMode = resolveOutputMode(context.flags);
       return {
@@ -402,11 +382,6 @@ const updateAction = defineAction({
       {
         flags: "--guide",
         description: "Show migration instructions for available updates",
-        defaultValue: false,
-      },
-      {
-        flags: "--json",
-        description: "Output as JSON",
         defaultValue: false,
       },
     ],

@@ -788,12 +788,12 @@ export function initCommand(program: Command): void {
       .option("-f, --force", "Overwrite existing files", false)
       .option("--local", "Use workspace:* for @outfitter dependencies", false)
       .option("--workspace", "Alias for --local", false)
-      .option("--json", "Output as JSON", false)
       .option(
         "--with <blocks>",
         "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
       )
-      .option("--no-tooling", "Skip tooling setup");
+      .option("--no-tooling", "Skip tooling setup")
+      .option("--json", "Output as JSON", false);
 
   const resolveOutputMode = (
     flags: InitCommandFlags
