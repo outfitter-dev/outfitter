@@ -155,7 +155,7 @@ async function getLatestVersion(name: string): Promise<string | null> {
 // Migration Doc Discovery
 // =============================================================================
 
-/** Known locations for migration docs. */
+/** Known relative locations for migration docs. */
 const MIGRATION_DOC_PATHS = [
   "plugins/kit/shared/migrations",
   "node_modules/@outfitter/kit/shared/migrations",
@@ -163,30 +163,89 @@ const MIGRATION_DOC_PATHS = [
 
 /**
  * Find migration docs directory, checking known locations.
+ *
+ * Searches:
+ * 1. Relative to the target cwd
+ * 2. Walking up parent directories from cwd (monorepo root detection)
+ * 3. Relative to the outfitter binary itself (development mode)
  */
-function findMigrationDocsDir(cwd: string): string | null {
+export function findMigrationDocsDir(cwd: string, binaryDir?: string): string | null {
+  // Check relative to target cwd
   for (const relative of MIGRATION_DOC_PATHS) {
     const dir = join(cwd, relative);
     if (existsSync(dir)) return dir;
   }
+
+  // Walk up from cwd looking for monorepo root with plugin docs
+  let current = resolve(cwd);
+  const root = resolve("/");
+  while (current !== root) {
+    const parent = resolve(current, "..");
+    if (parent === current) break;
+    current = parent;
+
+    for (const relative of MIGRATION_DOC_PATHS) {
+      const dir = join(current, relative);
+      if (existsSync(dir)) return dir;
+    }
+  }
+
+  // Check relative to the outfitter binary itself (dev mode)
+  // apps/outfitter/src/commands → ../../../.. → repo root (dev mode)
+  const resolvedBinaryDir = binaryDir ?? resolve(import.meta.dir, "../../../..");
+  for (const relative of MIGRATION_DOC_PATHS) {
+    const dir = join(resolvedBinaryDir, relative);
+    if (existsSync(dir)) return dir;
+  }
+
   return null;
 }
 
 /**
- * Read migration docs for a package upgrade.
+ * Read all migration docs for a package between two versions.
+ *
+ * Scans the migrations directory for docs matching the package name,
+ * filters to versions greater than `fromVersion` and at most `toVersion`,
+ * and returns their contents sorted by version ascending.
  */
-function readMigrationDoc(
+export function readMigrationDocs(
   migrationsDir: string,
   shortName: string,
-  version: string
-): string | null {
-  const filename = `outfitter-${shortName}-${version}.md`;
-  const filePath = join(migrationsDir, filename);
-  if (!existsSync(filePath)) return null;
+  fromVersion: string,
+  toVersion: string
+): string[] {
+  const glob = new Bun.Glob(`outfitter-${shortName}-*.md`);
+  const versionPattern = new RegExp(
+    `^outfitter-${shortName}-(\\d+\\.\\d+\\.\\d+)\\.md$`
+  );
 
-  const content = readFileSync(filePath, "utf-8");
-  // Strip frontmatter
-  return content.replace(/^---\n[\s\S]*?\n---\n*/, "").trim();
+  const docs: { version: string; content: string }[] = [];
+
+  for (const entry of glob.scanSync({ cwd: migrationsDir })) {
+    const match = entry.match(versionPattern);
+    if (!match?.[1]) continue;
+
+    const docVersion = match[1];
+
+    // Doc version must be greater than current installed version
+    if (Bun.semver.order(docVersion, fromVersion) <= 0) continue;
+
+    // Doc version must be at most the target version
+    if (Bun.semver.order(docVersion, toVersion) > 0) continue;
+
+    const filePath = join(migrationsDir, entry);
+    const content = readFileSync(filePath, "utf-8");
+    // Strip frontmatter
+    const body = content.replace(/^---\n[\s\S]*?\n---\n*/, "").trim();
+    if (body) {
+      docs.push({ version: docVersion, content: body });
+    }
+  }
+
+  // Sort by version ascending
+  docs.sort((a, b) => Bun.semver.order(a.version, b.version));
+
+  return docs.map((d) => d.content);
 }
 
 // =============================================================================
@@ -323,9 +382,14 @@ export async function printUpdateResults(
         if (!(pkg.updateAvailable && pkg.latest)) continue;
 
         const shortName = pkg.name.replace("@outfitter/", "");
-        const doc = readMigrationDoc(migrationsDir, shortName, pkg.latest);
+        const docs = readMigrationDocs(
+          migrationsDir,
+          shortName,
+          pkg.current,
+          pkg.latest
+        );
 
-        if (doc) {
+        for (const doc of docs) {
           lines.push(doc, "", "---", "");
         }
       }

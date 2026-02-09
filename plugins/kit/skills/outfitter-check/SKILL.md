@@ -188,25 +188,25 @@ rg "console\.(log|error|warn)|homedir\(\)" --type ts -g "!*.test.ts" -c | wc -l
 
 ## Step 5: Migration Guidance
 
-After the compliance scan, detect installed `@outfitter/*` versions and check for available migrations.
+After the compliance scan, detect installed `@outfitter/*` versions and check for available migrations using the `outfitter update` command.
 
 ```bash
-# Run migration guide detection from the target cwd
-bun ${CLAUDE_PLUGIN_ROOT}/scripts/migration-guide.ts --cwd .
+# Check for available updates (human-readable)
+bunx outfitter update --guide --cwd .
 ```
-
-If migration docs are found, append a **Migration Guidance** section to the compliance report using the output. If all packages are up to date, note that in the report.
 
 For JSON output (useful for programmatic consumption):
 
 ```bash
-bun ${CLAUDE_PLUGIN_ROOT}/scripts/migration-guide.ts --cwd . --json
+bunx outfitter update --json --cwd .
 ```
 
-The script:
+If updates are found, append a **Migration Guidance** section to the compliance report. If all packages are up to date, note that in the report.
+
+The command:
 1. Reads `package.json` for `@outfitter/*` dependencies
-2. Finds migration docs newer than installed versions
-3. Composes a sequenced guide ordered by version then dependency tier
+2. Queries npm for latest versions
+3. When `--guide` is used, composes migration docs from the kit plugin's shared migrations
 
 ## Related Skills
 
