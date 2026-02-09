@@ -15,16 +15,28 @@
         "default": "./dist/validation.js"
       }
     },
-    ".": {
+    "./result": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/result/index.d.ts",
+        "default": "./dist/result/index.js"
       }
     },
     "./actions": {
       "import": {
         "types": "./dist/actions.d.ts",
         "default": "./dist/actions.js"
+      }
+    },
+    "./redactor": {
+      "import": {
+        "types": "./dist/redactor.d.ts",
+        "default": "./dist/redactor.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./handler": {
@@ -39,16 +51,16 @@
         "default": "./dist/recovery.js"
       }
     },
+    "./logging": {
+      "import": {
+        "types": "./dist/logging.d.ts",
+        "default": "./dist/logging.js"
+      }
+    },
     "./assert": {
       "import": {
         "types": "./dist/assert/index.d.ts",
         "default": "./dist/assert/index.js"
-      }
-    },
-    "./result": {
-      "import": {
-        "types": "./dist/result/index.d.ts",
-        "default": "./dist/result/index.js"
       }
     },
     "./result/utilities": {
@@ -79,12 +91,6 @@
       "import": {
         "types": "./dist/serialization.d.ts",
         "default": "./dist/serialization.js"
-      }
-    },
-    "./redactor": {
-      "import": {
-        "types": "./dist/redactor.d.ts",
-        "default": "./dist/redactor.js"
       }
     },
     "./errors": {

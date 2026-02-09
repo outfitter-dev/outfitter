@@ -1,48 +1,11 @@
 import type { Result } from "better-result";
 import type { OutfitterError } from "./errors.js";
+import type { Logger } from "./logging.js";
 
 /**
- * Logger interface for handler context.
- * Implementations provided by @outfitter/logging.
- *
- * All log methods accept an optional context object that will be merged
- * with any context inherited from parent loggers created via `child()`.
+ * Re-export logger contract so existing imports from handler remain valid.
  */
-export interface Logger {
-  trace(message: string, metadata?: Record<string, unknown>): void;
-  trace(metadata: Record<string, unknown>, message: string): never;
-  debug(message: string, metadata?: Record<string, unknown>): void;
-  debug(metadata: Record<string, unknown>, message: string): never;
-  info(message: string, metadata?: Record<string, unknown>): void;
-  info(metadata: Record<string, unknown>, message: string): never;
-  warn(message: string, metadata?: Record<string, unknown>): void;
-  warn(metadata: Record<string, unknown>, message: string): never;
-  error(message: string, metadata?: Record<string, unknown>): void;
-  error(metadata: Record<string, unknown>, message: string): never;
-  fatal(message: string, metadata?: Record<string, unknown>): void;
-  fatal(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Creates a child logger with additional context.
-   *
-   * Context from the child is merged with the parent's context,
-   * with child context taking precedence for duplicate keys.
-   * Child loggers are composable (can create nested children).
-   *
-   * @param context - Additional context to include in all log messages
-   * @returns A new Logger instance with the merged context
-   *
-   * @example
-   * ```typescript
-   * const requestLogger = ctx.logger.child({ requestId: ctx.requestId });
-   * requestLogger.info("Processing request"); // includes requestId
-   *
-   * const opLogger = requestLogger.child({ operation: "create" });
-   * opLogger.debug("Starting"); // includes requestId + operation
-   * ```
-   */
-  child(context: Record<string, unknown>): Logger;
-}
+export type { Logger } from "./logging.js";
 
 /**
  * Resolved configuration interface.

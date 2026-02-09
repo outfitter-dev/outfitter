@@ -118,10 +118,20 @@ export {
 export type {
   Handler,
   HandlerContext,
-  Logger,
   ResolvedConfig,
   SyncHandler,
 } from "./handler.js";
+export type {
+  Logger,
+  LoggerAdapter,
+  LoggerFactory,
+  LoggerFactoryConfig,
+  LogLevel,
+  LogMetadata,
+  LogMethod,
+} from "./logging.js";
+// Logging contracts
+export { createLoggerFactory } from "./logging.js";
 // Recovery heuristics
 export {
   type BackoffOptions,
