@@ -1,10 +1,10 @@
 /**
  * Tests for MCP Server-to-Client Logging (OS-57)
  *
- * Verifies log level mapping and sendLoggingMessage integration.
+ * Verifies log level mapping, level filtering, and sendLogMessage integration.
  */
 import { describe, expect, it } from "bun:test";
-import { type McpLogLevel, mapLogLevelToMcp } from "../logging.js";
+import { createMcpServer, mapLogLevelToMcp, shouldEmitLog } from "../index.js";
 
 describe("MCP Logging", () => {
   describe("level mapping", () => {
@@ -33,33 +33,174 @@ describe("MCP Logging", () => {
     });
   });
 
-  describe("level filtering", () => {
-    const levels: McpLogLevel[] = [
-      "debug",
-      "info",
-      "notice",
-      "warning",
-      "error",
-      "critical",
-      "alert",
-      "emergency",
-    ];
-
+  describe("shouldEmitLog", () => {
     it("debug threshold allows all levels", () => {
-      const threshold = "debug";
-      const thresholdIdx = levels.indexOf(threshold);
-      for (const level of levels) {
-        const levelIdx = levels.indexOf(level);
-        expect(levelIdx >= thresholdIdx).toBe(true);
-      }
+      expect(shouldEmitLog("debug", "debug")).toBe(true);
+      expect(shouldEmitLog("info", "debug")).toBe(true);
+      expect(shouldEmitLog("warning", "debug")).toBe(true);
+      expect(shouldEmitLog("error", "debug")).toBe(true);
+      expect(shouldEmitLog("emergency", "debug")).toBe(true);
     });
 
     it("error threshold filters out debug/info/warning", () => {
-      const threshold = "error";
-      const thresholdIdx = levels.indexOf(threshold);
-      expect(levels.indexOf("debug") < thresholdIdx).toBe(true);
-      expect(levels.indexOf("info") < thresholdIdx).toBe(true);
-      expect(levels.indexOf("warning") < thresholdIdx).toBe(true);
+      expect(shouldEmitLog("debug", "error")).toBe(false);
+      expect(shouldEmitLog("info", "error")).toBe(false);
+      expect(shouldEmitLog("warning", "error")).toBe(false);
+      expect(shouldEmitLog("error", "error")).toBe(true);
+      expect(shouldEmitLog("emergency", "error")).toBe(true);
+    });
+
+    it("emergency threshold only allows emergency", () => {
+      expect(shouldEmitLog("error", "emergency")).toBe(false);
+      expect(shouldEmitLog("emergency", "emergency")).toBe(true);
+    });
+  });
+
+  describe("sendLogMessage", () => {
+    it("sends log message via SDK server", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.sendLogMessage("info", { action: "test" }, "my-logger");
+
+      expect(sentMessages).toHaveLength(1);
+      const msg = sentMessages[0] as {
+        level: string;
+        data: unknown;
+        logger?: string;
+      };
+      expect(msg.level).toBe("info");
+      expect(msg.data).toEqual({ action: "test" });
+      expect(msg.logger).toBe("my-logger");
+    });
+
+    it("filters messages below client-requested level", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("error");
+
+      // Below threshold — should be filtered
+      server.sendLogMessage("debug", "debug msg");
+      server.sendLogMessage("info", "info msg");
+      server.sendLogMessage("warning", "warning msg");
+
+      // At or above threshold — should be sent
+      server.sendLogMessage("error", "error msg");
+      server.sendLogMessage("emergency", "emergency msg");
+
+      expect(sentMessages).toHaveLength(2);
+    });
+
+    it("defaults to debug level when client hasn't set one", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+
+      // Without setLogLevel, should allow all messages (default: debug)
+      server.sendLogMessage("debug", "should pass");
+      expect(sentMessages).toHaveLength(1);
+    });
+
+    it("no-op before SDK server binding", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      // Should not throw when no SDK server bound
+      expect(() => server.sendLogMessage("info", "no crash")).not.toThrow();
+    });
+
+    it("omits logger field when not provided", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.sendLogMessage("info", "test data");
+
+      const msg = sentMessages[0] as Record<string, unknown>;
+      expect(msg.logger).toBeUndefined();
+      expect("logger" in msg).toBe(false);
+    });
+
+    it("accepts string data", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.sendLogMessage("error", "something went wrong");
+
+      const msg = sentMessages[0] as { data: unknown };
+      expect(msg.data).toBe("something went wrong");
     });
   });
 });

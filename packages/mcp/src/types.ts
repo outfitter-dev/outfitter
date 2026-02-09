@@ -718,6 +718,21 @@ export interface McpServer {
   setLogLevel?(level: string): void;
 
   /**
+   * Send a log message to connected clients.
+   * Filters by the client-requested log level threshold.
+   * No-op if no SDK server is bound or if the message is below the threshold.
+   *
+   * @param level - MCP log level for the message
+   * @param data - Log data (string, object, or any serializable value)
+   * @param loggerName - Optional logger name for client-side filtering
+   */
+  sendLogMessage(
+    level: import("./logging.js").McpLogLevel,
+    data: unknown,
+    loggerName?: string
+  ): void;
+
+  /**
    * Bind the SDK server instance for notifications.
    * Called internally by the transport layer.
    * @param sdkServer - The MCP SDK Server instance

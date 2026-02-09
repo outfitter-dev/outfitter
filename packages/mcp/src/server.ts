@@ -14,6 +14,7 @@ import type {
 } from "@outfitter/contracts";
 import { generateRequestId, Result } from "@outfitter/contracts";
 import type { z } from "zod";
+import { type McpLogLevel, shouldEmitLog } from "./logging.js";
 import { zodToJsonSchema } from "./schema.js";
 import {
   type CompletionRef,
@@ -136,6 +137,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   // biome-ignore lint/suspicious/noExplicitAny: SDK Server type from @modelcontextprotocol/sdk
   let sdkServer: any = null;
   const subscriptions = new Set<string>();
+  let clientLogLevel: McpLogLevel = "debug";
 
   // Create handler context for tool invocations
   function createHandlerContext(
@@ -646,7 +648,29 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     },
 
     setLogLevel(level: string): void {
+      clientLogLevel = level as McpLogLevel;
       logger.debug("Client log level set", { level });
+    },
+
+    sendLogMessage(
+      level: McpLogLevel,
+      data: unknown,
+      loggerName?: string
+    ): void {
+      if (!(sdkServer && shouldEmitLog(level, clientLogLevel))) {
+        return;
+      }
+
+      const params: { level: McpLogLevel; data: unknown; logger?: string } = {
+        level,
+        data,
+      };
+
+      if (loggerName !== undefined) {
+        params.logger = loggerName;
+      }
+
+      sdkServer.sendLoggingMessage?.(params);
     },
 
     // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
