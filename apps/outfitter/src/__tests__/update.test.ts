@@ -216,7 +216,10 @@ describe("findMigrationDocsDir", () => {
     mkdirSync(isolatedDir, { recursive: true });
 
     // Pass a non-existent binaryDir to disable phase 3 (binary-relative fallback)
-    const result = findMigrationDocsDir(isolatedDir, join(tempDir, "no-binary"));
+    const result = findMigrationDocsDir(
+      isolatedDir,
+      join(tempDir, "no-binary")
+    );
 
     expect(result).toBeNull();
   });

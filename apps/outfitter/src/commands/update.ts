@@ -169,7 +169,10 @@ const MIGRATION_DOC_PATHS = [
  * 2. Walking up parent directories from cwd (monorepo root detection)
  * 3. Relative to the outfitter binary itself (development mode)
  */
-export function findMigrationDocsDir(cwd: string, binaryDir?: string): string | null {
+export function findMigrationDocsDir(
+  cwd: string,
+  binaryDir?: string
+): string | null {
   // Check relative to target cwd
   for (const relative of MIGRATION_DOC_PATHS) {
     const dir = join(cwd, relative);
@@ -192,7 +195,8 @@ export function findMigrationDocsDir(cwd: string, binaryDir?: string): string | 
 
   // Check relative to the outfitter binary itself (dev mode)
   // apps/outfitter/src/commands → ../../../.. → repo root (dev mode)
-  const resolvedBinaryDir = binaryDir ?? resolve(import.meta.dir, "../../../..");
+  const resolvedBinaryDir =
+    binaryDir ?? resolve(import.meta.dir, "../../../..");
   for (const relative of MIGRATION_DOC_PATHS) {
     const dir = join(resolvedBinaryDir, relative);
     if (existsSync(dir)) return dir;
