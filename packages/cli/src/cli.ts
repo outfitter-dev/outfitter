@@ -57,35 +57,30 @@ export function createCLI(config: CLIConfig): CLI {
   // Global --json flag available to all commands
   program.option("--json", "Output as JSON", false);
 
-  const exit = config.onExit ?? ((code: number): never => process.exit(code));
+  const exit =
+    config.onExit ?? ((code: number): void => void process.exit(code));
 
-  program.exitOverride((error) => {
-    if (isCommanderHelp(error)) {
-      exit(0);
-    }
-
-    if (config.onError) {
-      config.onError(error);
-    }
-
-    const exitCode =
-      typeof error.exitCode === "number" && Number.isFinite(error.exitCode)
-        ? error.exitCode
-        : 1;
-    exit(exitCode);
-  });
+  // Force Commander to throw instead of exiting so parse() can route all exits
+  // through the configured onExit hook (including async cleanup).
+  program.exitOverride();
 
   const parse = async (argv?: readonly string[]): Promise<void> => {
     try {
       await program.parseAsync(argv ?? process.argv);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
+      if (isCommanderHelp(err as { code?: string })) {
+        await exit(0);
+        return;
+      }
+
       if (config.onError) {
         config.onError(err);
       }
+
       const errorExitCode = (error as { exitCode?: number }).exitCode;
       const exitCode = typeof errorExitCode === "number" ? errorExitCode : 1;
-      exit(exitCode);
+      await exit(exitCode);
     }
   };
 

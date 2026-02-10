@@ -18,6 +18,25 @@ describe("createCLI()", () => {
     expect(cli.program.name()).toBe("outfitter");
     expect(cli.program.description()).toBe("Outfitter CLI");
   });
+
+  it("awaits async onExit handlers", async () => {
+    const exitCodes: number[] = [];
+    const cli = createCLI({
+      name: "outfitter",
+      version: "0.1.0-rc.0",
+      onExit: async (code) => {
+        await Promise.resolve();
+        exitCodes.push(code);
+      },
+    });
+
+    cli.program.configureOutput({
+      writeErr: () => undefined,
+    });
+
+    await cli.parse(["node", "outfitter", "--unknown-flag"]);
+    expect(exitCodes).toEqual([1]);
+  });
 });
 
 describe("command()", () => {

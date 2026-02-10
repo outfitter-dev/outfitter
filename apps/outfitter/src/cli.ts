@@ -15,7 +15,7 @@ import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
 import { exitWithError } from "@outfitter/cli/output";
 import { createContext, generateRequestId } from "@outfitter/contracts";
-import { createLogger } from "@outfitter/logging";
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
 import { outfitterActions } from "./actions.js";
 
 // =============================================================================
@@ -29,7 +29,11 @@ import { outfitterActions } from "./actions.js";
  */
 function createProgram() {
   const cliVersion = readCliVersion();
-  const logger = createLogger({ name: "outfitter" });
+  const loggerFactory = createOutfitterLoggerFactory();
+  const logger = loggerFactory.createLogger({
+    name: "outfitter",
+    context: { surface: "cli" },
+  });
   const cli = createCLI({
     name: "outfitter",
     version: cliVersion,
@@ -41,7 +45,13 @@ function createProgram() {
           : new Error("An unexpected error occurred");
       exitWithError(err);
     },
-    onExit: (code) => process.exit(code),
+    onExit: async (code) => {
+      try {
+        await loggerFactory.flush();
+      } finally {
+        process.exit(code);
+      }
+    },
   });
 
   for (const command of buildCliCommands(outfitterActions, {

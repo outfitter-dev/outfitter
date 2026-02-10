@@ -36,7 +36,7 @@ export interface CLIConfig {
   readonly onError?: (error: Error) => void;
 
   /** Custom exit handler (defaults to process.exit) */
-  readonly onExit?: (code: number) => never;
+  readonly onExit?: (code: number) => void | Promise<void>;
 }
 
 /**

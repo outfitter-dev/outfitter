@@ -803,6 +803,15 @@ describe("normalizeId()", () => {
 // =============================================================================
 
 describe("confirmDestructive()", () => {
+  function setInteractiveTerminal(): void {
+    process.env.TERM = "xterm-256color";
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+
   test("returns Ok(true) when bypassFlag is true", async () => {
     const result = await confirmDestructive({
       message: "Delete 5 items?",
@@ -816,12 +825,7 @@ describe("confirmDestructive()", () => {
   });
 
   test("returns Ok(true) when user confirms (mock)", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-
+    setInteractiveTerminal();
     queueConfirmResponse(true);
 
     const result = await confirmDestructive({
@@ -836,12 +840,7 @@ describe("confirmDestructive()", () => {
   });
 
   test("returns Err(CancelledError) when user declines", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-
+    setInteractiveTerminal();
     queueConfirmResponse(false);
 
     const result = await confirmDestructive({
@@ -856,12 +855,7 @@ describe("confirmDestructive()", () => {
   });
 
   test("returns Err(CancelledError) when prompt is cancelled", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-
+    setInteractiveTerminal();
     queueConfirmResponse(cancelSymbol);
 
     const result = await confirmDestructive({
@@ -876,13 +870,7 @@ describe("confirmDestructive()", () => {
   });
 
   test("includes itemCount in prompt", async () => {
-    // Set TTY mode to test interactive prompt path
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-
+    setInteractiveTerminal();
     queueConfirmResponse(true);
 
     const result = await confirmDestructive({
