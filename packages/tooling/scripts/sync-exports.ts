@@ -25,7 +25,10 @@ export function shortAlias(filename: string): string {
 	// Handle .preset.variant → name-variant
 	const match = base.match(/^(.+)\.preset(?:\.(.+))?$/);
 	if (match) {
-		base = match[2] ? `${match[1]}-${match[2]}` : match[1]!;
+		const presetName = match[1];
+		if (presetName) {
+			base = match[2] ? `${presetName}-${match[2]}` : presetName;
+		}
 	}
 
 	return base;

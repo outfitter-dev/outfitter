@@ -57,8 +57,8 @@ program
 
 program
 	.command("pre-push")
-	.description("TDD-aware pre-push test hook")
-	.option("-f, --force", "Skip tests entirely")
+	.description("TDD-aware pre-push strict verification hook")
+	.option("-f, --force", "Skip strict verification entirely")
 	.action(async (options: { force?: boolean }) => {
 		await runPrePush(options);
 	});

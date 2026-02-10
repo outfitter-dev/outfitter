@@ -1,0 +1,687 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Registry Build Output generated registry output matches snapshot 1`] = `
+{
+  "blocks": {
+    "biome": {
+      "description": "Biome linter/formatter configuration via Ultracite",
+      "devDependencies": {
+        "ultracite": "^7.1.1",
+      },
+      "files": [
+        {
+          "content": 
+"{
+	"$schema": "https://biomejs.dev/schemas/2.3.12/schema.json",
+	"root": false,
+	"javascript": {
+		"globals": ["Bun"]
+	},
+	"linter": {
+		"rules": {
+			"complexity": {
+				"useLiteralKeys": "off",
+				"noVoid": "off",
+				"noExcessiveCognitiveComplexity": "off"
+			},
+			"performance": {
+				"useTopLevelRegex": "off"
+			},
+			"style": {
+				"useBlockStatements": "off"
+			},
+			"suspicious": {
+				"noConsole": "error"
+			}
+		}
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/.turbo",
+			"!**/*.gen.ts",
+			"!registry/registry.json"
+		]
+	},
+	"overrides": [
+		{
+			"includes": [
+				"packages/*/src/index.ts",
+				"apps/*/src/index.ts",
+				"**/index.ts"
+			],
+			"linter": {
+				"rules": {
+					"performance": {
+						"noBarrelFile": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.ts", "**/__tests__/**/*"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"useAwait": "off",
+						"noConsole": "off"
+					},
+					"performance": {
+						"noDelete": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["apps/**/*.ts", "scripts/**/*.ts", "**/scripts/**/*.ts"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
+}
+"
+,
+          "path": "biome.json",
+        },
+      ],
+      "name": "biome",
+    },
+    "bootstrap": {
+      "description": "Project bootstrap script for installing tools and dependencies",
+      "files": [
+        {
+          "content": 
+"#!/usr/bin/env bash
+#
+# bootstrap.sh — Get this repo from clone to runnable
+#
+# Usage: ./scripts/bootstrap.sh [--force]
+#
+# By default, exits immediately if all tools and deps are present.
+# Use --force to run full bootstrap regardless.
+#
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Fast path — exit immediately if all tools and deps are present
+# -----------------------------------------------------------------------------
+if [[ "\${1:-}" != "--force" ]]; then
+  all_present=true
+  command -v bun &>/dev/null || all_present=false
+  command -v gh &>/dev/null || all_present=false
+  command -v gt &>/dev/null || all_present=false
+  command -v markdownlint-cli2 &>/dev/null || all_present=false
+  [[ -d "node_modules" ]] || all_present=false
+
+  if $all_present; then
+    exit 0  # All good, nothing to do
+  fi
+fi
+
+# Strip --force if present
+[[ "\${1:-}" == "--force" ]] && shift
+
+# Colors
+RED='\\033[0;31m'
+GREEN='\\033[0;32m'
+YELLOW='\\033[0;33m'
+BLUE='\\033[0;34m'
+NC='\\033[0m' # No Color
+
+info() { echo -e "\${BLUE}▸\${NC} $1"; }
+success() { echo -e "\${GREEN}✓\${NC} $1"; }
+warn() { echo -e "\${YELLOW}!\${NC} $1"; }
+error() { echo -e "\${RED}✗\${NC} $1" >&2; }
+
+# Check if command exists
+has() { command -v "$1" &>/dev/null; }
+
+# Detect OS
+OS="$(uname -s)"
+case "$OS" in
+  Darwin) IS_MACOS=true ;;
+  Linux)  IS_MACOS=false ;;
+  *)      error "Unsupported OS: $OS"; exit 1 ;;
+esac
+
+# -----------------------------------------------------------------------------
+# Homebrew (macOS only)
+# -----------------------------------------------------------------------------
+install_homebrew() {
+  if $IS_MACOS && ! has brew; then
+    info "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    success "Homebrew installed"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Bun
+# -----------------------------------------------------------------------------
+install_bun() {
+  if has bun; then
+    success "Bun already installed ($(bun --version))"
+  else
+    info "Installing Bun..."
+    curl -fsSL https://bun.sh/install | bash
+    # Source the updated profile
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+    success "Bun installed ($(bun --version))"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# GitHub CLI (gh)
+# -----------------------------------------------------------------------------
+install_gh() {
+  if has gh; then
+    success "GitHub CLI already installed ($(gh --version | head -1))"
+  else
+    info "Installing GitHub CLI..."
+    if $IS_MACOS; then
+      brew install gh
+    else
+      # Linux: use official apt repo
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+      sudo apt update && sudo apt install gh -y
+    fi
+    success "GitHub CLI installed"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Graphite CLI (gt)
+# -----------------------------------------------------------------------------
+install_graphite() {
+  if has gt; then
+    success "Graphite CLI already installed ($(gt --version 2>/dev/null || echo 'unknown'))"
+  else
+    info "Installing Graphite CLI..."
+    if $IS_MACOS && has brew; then
+      brew install withgraphite/tap/graphite
+    else
+      bun install -g @withgraphite/graphite-cli
+    fi
+    success "Graphite CLI installed"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# markdownlint-cli2
+# -----------------------------------------------------------------------------
+install_markdownlint() {
+  if has markdownlint-cli2; then
+    success "markdownlint-cli2 already installed"
+  else
+    info "Installing markdownlint-cli2..."
+    bun install -g markdownlint-cli2
+    success "markdownlint-cli2 installed"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Auth checks
+# -----------------------------------------------------------------------------
+check_auth() {
+  echo ""
+  info "Checking authentication..."
+
+  # GitHub CLI
+  if [[ -n "\${GH_TOKEN:-}" ]] || [[ -n "\${GITHUB_TOKEN:-}" ]]; then
+    success "GitHub CLI token found in environment"
+  elif gh auth status &>/dev/null; then
+    success "GitHub CLI already authenticated"
+  else
+    echo "    GitHub CLI not authenticated. Run 'gh auth login' or set GH_TOKEN"
+  fi
+
+  # Graphite CLI
+  if [[ -n "\${GT_AUTH_TOKEN:-}" ]]; then
+    info "Authenticating Graphite CLI..."
+    gt auth --token "$GT_AUTH_TOKEN"
+    success "Graphite CLI authenticated"
+  elif gt auth status &>/dev/null 2>&1; then
+    success "Graphite CLI already authenticated"
+  else
+    echo "    Graphite CLI not authenticated. Run 'gt auth' or set GT_AUTH_TOKEN"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Project dependencies
+# -----------------------------------------------------------------------------
+install_deps() {
+  info "Installing project dependencies..."
+  bun install
+  success "Dependencies installed"
+}
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+main() {
+  echo ""
+  echo -e "\${BLUE}Outfitter Kit Bootstrap\${NC}"
+  echo "────────────────────────"
+  echo ""
+
+  # Prerequisites
+  if $IS_MACOS; then
+    install_homebrew
+  fi
+
+  # Core tools
+  install_bun
+  install_gh
+  install_graphite
+  install_markdownlint
+
+  # Auth status
+  check_auth
+
+  echo ""
+
+  # Project setup
+  install_deps
+
+  echo ""
+  echo -e "\${GREEN}Bootstrap complete!\${NC}"
+  echo ""
+  echo "Next steps:"
+  echo "  bun run build      # Build all packages"
+  echo "  bun run test       # Run tests"
+  echo ""
+}
+
+main "$@"
+"
+,
+          "executable": true,
+          "path": "scripts/bootstrap.sh",
+        },
+      ],
+      "name": "bootstrap",
+    },
+    "claude": {
+      "description": "Claude Code settings and hooks for automated formatting",
+      "files": [
+        {
+          "content": 
+"{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \\"$CLAUDE_PROJECT_DIR/scripts/bootstrap.sh\\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \\"$CLAUDE_PROJECT_DIR/.claude/hooks/format-code-on-stop.sh\\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "outfitter@outfitter": true,
+    "team@outfitter": true,
+    "kit@outfitter": true
+  },
+  "extraKnownMarketplaces": {
+    "outfitter": {
+      "source": {
+        "source": "github",
+        "repo": "outfitter/outfitter"
+      }
+    }
+  }
+}
+"
+,
+          "path": ".claude/settings.json",
+        },
+        {
+          "content": 
+"#!/usr/bin/env bash
+# format-code-on-stop.sh
+# Formats code and markdown files changed during the session.
+# Designed for Claude Code Stop hook - runs after agent completes work.
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+
+# File patterns for each formatter
+CODE_PATTERNS="*.js *.jsx *.ts *.tsx *.json *.jsonc *.css"
+MARKDOWN_PATTERNS="*.md"
+
+# -----------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------
+
+log() {
+  echo "[format] $*"
+}
+
+warn() {
+  echo "[format] WARNING: $*" >&2
+}
+
+hint() {
+  echo "[format] HINT: $*" >&2
+}
+
+# Check if a command exists
+has_cmd() {
+  command -v "$1" &>/dev/null
+}
+
+# Get changed files (staged + unstaged, excluding deleted)
+get_changed_files() {
+  local patterns=("$@")
+  local files=()
+
+  # Get both staged and unstaged changes, excluding deleted files
+  for pattern in "\${patterns[@]}"; do
+    while IFS= read -r file; do
+      [[ -n "$file" && -f "$file" ]] && files+=("$file")
+    done < <(git diff --name-only --diff-filter=d HEAD -- "$pattern" 2>/dev/null || true)
+
+    # Also check untracked files matching pattern
+    while IFS= read -r file; do
+      [[ -n "$file" && -f "$file" ]] && files+=("$file")
+    done < <(git ls-files --others --exclude-standard -- "$pattern" 2>/dev/null || true)
+  done
+
+  # Deduplicate
+  printf '%s\\n' "\${files[@]}" | sort -u
+}
+
+# -----------------------------------------------------------------------------
+# Formatters
+# -----------------------------------------------------------------------------
+
+format_code() {
+  local files=()
+
+  # Collect changed code files
+  while IFS= read -r file; do
+    [[ -n "$file" ]] && files+=("$file")
+  done < <(get_changed_files $CODE_PATTERNS)
+
+  if [[ \${#files[@]} -eq 0 ]]; then
+    log "No code files to format"
+    return 0
+  fi
+
+  log "Formatting \${#files[@]} code file(s)..."
+
+  # Check for bun
+  if ! has_cmd bun; then
+    warn "bun not found - skipping code formatting"
+    hint "Install bun: curl -fsSL https://bun.sh/install | bash"
+    return 0
+  fi
+
+  # Check for ultracite (via bun x)
+  if ! bun x ultracite --version &>/dev/null; then
+    warn "ultracite not available - skipping code formatting"
+    hint "Install ultracite: bun add -d ultracite"
+    return 0
+  fi
+
+  # Run ultracite fix on changed files
+  if bun x ultracite fix "\${files[@]}" 2>/dev/null; then
+    log "Code formatting complete"
+  else
+    warn "ultracite encountered errors (non-fatal)"
+  fi
+}
+
+format_markdown() {
+  local files=()
+
+  # Collect changed markdown files
+  while IFS= read -r file; do
+    [[ -n "$file" ]] && files+=("$file")
+  done < <(get_changed_files $MARKDOWN_PATTERNS)
+
+  if [[ \${#files[@]} -eq 0 ]]; then
+    log "No markdown files to format"
+    return 0
+  fi
+
+  log "Formatting \${#files[@]} markdown file(s)..."
+
+  # Check for markdownlint-cli2
+  if has_cmd markdownlint-cli2; then
+    if markdownlint-cli2 --fix "\${files[@]}" 2>/dev/null; then
+      log "Markdown formatting complete"
+    else
+      warn "markdownlint-cli2 encountered errors (non-fatal)"
+    fi
+    return 0
+  fi
+
+  # Try via bunx/npx
+  if has_cmd bun && bun x markdownlint-cli2 --help &>/dev/null; then
+    if bun x markdownlint-cli2 --fix "\${files[@]}" 2>/dev/null; then
+      log "Markdown formatting complete"
+    else
+      warn "markdownlint-cli2 encountered errors (non-fatal)"
+    fi
+    return 0
+  fi
+
+  if has_cmd npx && npx markdownlint-cli2 --help &>/dev/null; then
+    if npx markdownlint-cli2 --fix "\${files[@]}" 2>/dev/null; then
+      log "Markdown formatting complete"
+    else
+      warn "markdownlint-cli2 encountered errors (non-fatal)"
+    fi
+    return 0
+  fi
+
+  warn "markdownlint-cli2 not found - skipping markdown formatting"
+  hint "Install: bun add -g markdownlint-cli2  OR  npm install -g markdownlint-cli2"
+}
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+
+main() {
+  # Ensure we're in a git repo
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    warn "Not in a git repository - skipping formatting"
+    exit 0
+  fi
+
+  # Change to repo root
+  cd "$(git rev-parse --show-toplevel)"
+
+  log "Checking for files to format..."
+
+  format_code
+  format_markdown
+
+  log "Done"
+}
+
+main "$@"
+"
+,
+          "executable": true,
+          "path": ".claude/hooks/format-code-on-stop.sh",
+        },
+      ],
+      "name": "claude",
+    },
+    "lefthook": {
+      "description": "Git hooks via Lefthook for pre-commit and pre-push",
+      "devDependencies": {
+        "@outfitter/tooling": "^0.2.1",
+        "lefthook": "^2.0.16",
+        "ultracite": "^7.1.1",
+      },
+      "files": [
+        {
+          "content": 
+"# Lefthook configuration preset for Outfitter projects
+# https://github.com/evilmartians/lefthook
+#
+# Usage: In your project's .lefthook.yml, add:
+#   extends:
+#     - node_modules/@outfitter/tooling/lefthook.yml
+
+pre-commit:
+  parallel: true
+  commands:
+    ultracite:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: bun x ultracite fix {staged_files}
+      stage_fixed: true
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+
+pre-push:
+  parallel: false
+  commands:
+    verify:
+      # TDD-aware: skips strict verification on explicit RED phase branches
+      # (*-tests, */tests, *_tests). Otherwise runs verify:ci (or a strict
+      # fallback: typecheck/check-or-lint/build/test).
+      # Requires: @outfitter/tooling as a dev dependency.
+      run: bunx @outfitter/tooling pre-push
+"
+,
+          "path": ".lefthook.yml",
+        },
+      ],
+      "name": "lefthook",
+    },
+    "markdownlint": {
+      "description": "Markdown linting configuration via markdownlint-cli2",
+      "files": [
+        {
+          "content": 
+"{
+	// Outfitter markdownlint preset
+	// https://github.com/DavidAnson/markdownlint
+
+	"config": {
+		// Headings
+		"MD003": { "style": "atx" }, // ATX-style headings (# Heading)
+		"MD022": { "lines_above": 1, "lines_below": 1 }, // Blank lines around headings
+		"MD024": { "siblings_only": true }, // Allow duplicate headings in different sections
+		"MD041": false, // First line doesn't need to be h1 (frontmatter, etc.)
+
+		// Line length - disabled for prose flexibility
+		"MD013": false,
+
+		// Lists
+		"MD004": { "style": "dash" }, // Unordered list style: dash (-)
+		"MD007": { "indent": 2 }, // List indentation: 2 spaces
+		"MD032": true, // Blank lines around lists
+
+		// Code blocks
+		"MD040": true, // Fenced code blocks should have a language
+		"MD046": { "style": "fenced" }, // Code block style: fenced (\`\`\`)
+		"MD048": { "style": "backtick" }, // Code fence style: backticks
+
+		// Links
+		"MD034": true, // No bare URLs (use <url> or [text](url))
+
+		// Whitespace
+		"MD009": { "br_spaces": 2 }, // Allow 2 trailing spaces for <br>
+		"MD010": { "spaces_per_tab": 2 }, // Tabs to spaces
+		"MD012": { "maximum": 1 }, // Max 1 consecutive blank line
+		"MD047": true, // Files should end with newline
+
+		// HTML - allow for GitHub-specific elements
+		"MD033": {
+			"allowed_elements": [
+				"details",
+				"summary",
+				"kbd",
+				"br",
+				"sup",
+				"sub",
+				"img",
+				"picture",
+				"source",
+				"a"
+			]
+		},
+
+		// Emphasis
+		"MD049": { "style": "asterisk" }, // Emphasis style: *italic*
+		"MD050": { "style": "asterisk" } // Strong style: **bold**
+	},
+
+	// Ignore patterns
+	"ignores": [
+		"node_modules/**",
+		"**/node_modules/**",
+		"dist/**",
+		"**/dist/**",
+		".turbo/**",
+		"**/.turbo/**",
+		"CHANGELOG.md",
+		"**/CHANGELOG.md"
+	]
+}
+"
+,
+          "path": ".markdownlint-cli2.jsonc",
+        },
+      ],
+      "name": "markdownlint",
+    },
+    "scaffolding": {
+      "description": "Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
+      "extends": [
+        "claude",
+        "biome",
+        "lefthook",
+        "markdownlint",
+        "bootstrap",
+      ],
+      "name": "scaffolding",
+    },
+  },
+  "version": "1.0.0",
+}
+`;

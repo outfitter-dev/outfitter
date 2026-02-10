@@ -22,11 +22,11 @@
 			"files": [
 				{
 					"path": "biome.json",
-					"content": "{\n\t\"$schema\": \"https://biomejs.dev/schemas/1.9.4/schema.json\",\n\t\"root\": false,\n\t\"javascript\": {\n\t\t\"globals\": [\"Bun\"]\n\t},\n\t\"linter\": {\n\t\t\"rules\": {\n\t\t\t\"complexity\": {\n\t\t\t\t\"useLiteralKeys\": \"off\",\n\t\t\t\t\"noVoid\": \"off\",\n\t\t\t\t\"noExcessiveCognitiveComplexity\": \"off\"\n\t\t\t},\n\t\t\t\"performance\": {\n\t\t\t\t\"useTopLevelRegex\": \"off\"\n\t\t\t},\n\t\t\t\"style\": {\n\t\t\t\t\"useBlockStatements\": \"off\"\n\t\t\t},\n\t\t\t\"suspicious\": {\n\t\t\t\t\"noConsole\": \"error\"\n\t\t\t}\n\t\t}\n\t},\n\t\"vcs\": {\n\t\t\"enabled\": true,\n\t\t\"clientKind\": \"git\",\n\t\t\"useIgnoreFile\": true\n\t},\n\t\"files\": {\n\t\t\"ignoreUnknown\": true,\n\t\t\"includes\": [\n\t\t\t\"**\",\n\t\t\t\"!**/node_modules\",\n\t\t\t\"!**/dist\",\n\t\t\t\"!**/.turbo\",\n\t\t\t\"!**/*.gen.ts\",\n\t\t\t\"!registry/registry.json\"\n\t\t]\n\t},\n\t\"overrides\": [\n\t\t{\n\t\t\t\"includes\": [\n\t\t\t\t\"packages/*/src/index.ts\",\n\t\t\t\t\"apps/*/src/index.ts\",\n\t\t\t\t\"**/index.ts\"\n\t\t\t],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"performance\": {\n\t\t\t\t\t\t\"noBarrelFile\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"includes\": [\"**/*.test.ts\", \"**/__tests__/**/*\"],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"suspicious\": {\n\t\t\t\t\t\t\"useAwait\": \"off\",\n\t\t\t\t\t\t\"noConsole\": \"off\"\n\t\t\t\t\t},\n\t\t\t\t\t\"performance\": {\n\t\t\t\t\t\t\"noDelete\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"includes\": [\"apps/**/*.ts\", \"scripts/**/*.ts\", \"**/scripts/**/*.ts\"],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"suspicious\": {\n\t\t\t\t\t\t\"noConsole\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t]\n}\n"
+					"content": "{\n\t\"$schema\": \"https://biomejs.dev/schemas/2.3.12/schema.json\",\n\t\"root\": false,\n\t\"javascript\": {\n\t\t\"globals\": [\"Bun\"]\n\t},\n\t\"linter\": {\n\t\t\"rules\": {\n\t\t\t\"complexity\": {\n\t\t\t\t\"useLiteralKeys\": \"off\",\n\t\t\t\t\"noVoid\": \"off\",\n\t\t\t\t\"noExcessiveCognitiveComplexity\": \"off\"\n\t\t\t},\n\t\t\t\"performance\": {\n\t\t\t\t\"useTopLevelRegex\": \"off\"\n\t\t\t},\n\t\t\t\"style\": {\n\t\t\t\t\"useBlockStatements\": \"off\"\n\t\t\t},\n\t\t\t\"suspicious\": {\n\t\t\t\t\"noConsole\": \"error\"\n\t\t\t}\n\t\t}\n\t},\n\t\"vcs\": {\n\t\t\"enabled\": true,\n\t\t\"clientKind\": \"git\",\n\t\t\"useIgnoreFile\": true\n\t},\n\t\"files\": {\n\t\t\"ignoreUnknown\": true,\n\t\t\"includes\": [\n\t\t\t\"**\",\n\t\t\t\"!**/node_modules\",\n\t\t\t\"!**/dist\",\n\t\t\t\"!**/.turbo\",\n\t\t\t\"!**/*.gen.ts\",\n\t\t\t\"!registry/registry.json\"\n\t\t]\n\t},\n\t\"overrides\": [\n\t\t{\n\t\t\t\"includes\": [\n\t\t\t\t\"packages/*/src/index.ts\",\n\t\t\t\t\"apps/*/src/index.ts\",\n\t\t\t\t\"**/index.ts\"\n\t\t\t],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"performance\": {\n\t\t\t\t\t\t\"noBarrelFile\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"includes\": [\"**/*.test.ts\", \"**/__tests__/**/*\"],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"suspicious\": {\n\t\t\t\t\t\t\"useAwait\": \"off\",\n\t\t\t\t\t\t\"noConsole\": \"off\"\n\t\t\t\t\t},\n\t\t\t\t\t\"performance\": {\n\t\t\t\t\t\t\"noDelete\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"includes\": [\"apps/**/*.ts\", \"scripts/**/*.ts\", \"**/scripts/**/*.ts\"],\n\t\t\t\"linter\": {\n\t\t\t\t\"rules\": {\n\t\t\t\t\t\"suspicious\": {\n\t\t\t\t\t\t\"noConsole\": \"off\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t]\n}\n"
 				}
 			],
 			"devDependencies": {
-				"ultracite": "^7.0.0"
+				"ultracite": "^7.1.1"
 			}
 		},
 		"lefthook": {
@@ -35,11 +35,13 @@
 			"files": [
 				{
 					"path": ".lefthook.yml",
-					"content": "# Lefthook configuration preset for Outfitter projects\n# https://github.com/evilmartians/lefthook\n#\n# Usage: In your project's .lefthook.yml, add:\n#   extends:\n#     - node_modules/@outfitter/tooling/lefthook.yml\n\npre-commit:\n  parallel: true\n  commands:\n    ultracite:\n      glob: \"*.{js,jsx,ts,tsx,json,jsonc,css}\"\n      run: bun x ultracite fix {staged_files}\n      stage_fixed: true\n\n    typecheck:\n      glob: \"*.{ts,tsx}\"\n      run: bun run typecheck\n\npre-push:\n  parallel: false\n  commands:\n    build:\n      run: bun run build\n\n    test:\n      # TDD-aware: skips tests on RED phase branches (*-tests, */tests, *_tests)\n      # Override with `run: bun run test` if you don't want TDD support\n      # Requires: @outfitter/tooling must be a devDependency in your project\n      run: bunx @outfitter/tooling pre-push\n"
+					"content": "# Lefthook configuration preset for Outfitter projects\n# https://github.com/evilmartians/lefthook\n#\n# Usage: In your project's .lefthook.yml, add:\n#   extends:\n#     - node_modules/@outfitter/tooling/lefthook.yml\n\npre-commit:\n  parallel: true\n  commands:\n    ultracite:\n      glob: \"*.{js,jsx,ts,tsx,json,jsonc,css}\"\n      run: bun x ultracite fix {staged_files}\n      stage_fixed: true\n\n    typecheck:\n      glob: \"*.{ts,tsx}\"\n      run: bun run typecheck\n\npre-push:\n  parallel: false\n  commands:\n    verify:\n      # TDD-aware: skips strict verification on explicit RED phase branches\n      # (*-tests, */tests, *_tests). Otherwise runs verify:ci (or a strict\n      # fallback: typecheck/check-or-lint/build/test).\n      # Requires: @outfitter/tooling as a dev dependency.\n      run: bunx @outfitter/tooling pre-push\n"
 				}
 			],
 			"devDependencies": {
-				"lefthook": "^2.0.0"
+				"@outfitter/tooling": "^0.2.1",
+				"lefthook": "^2.0.16",
+				"ultracite": "^7.1.1"
 			}
 		},
 		"markdownlint": {

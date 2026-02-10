@@ -20,11 +20,9 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    build:
-      run: bun run build
-
-    test:
-      # TDD-aware: skips tests on RED phase branches (*-tests, */tests, *_tests)
-      # Override with `run: bun run test` if you don't want TDD support
-      # Requires: @outfitter/tooling must be a devDependency in your project
+    verify:
+      # TDD-aware: skips strict verification on explicit RED phase branches
+      # (*-tests, */tests, *_tests). Otherwise runs verify:ci (or a strict
+      # fallback: typecheck/check-or-lint/build/test).
+      # Requires: @outfitter/tooling as a dev dependency.
       run: bunx @outfitter/tooling pre-push

@@ -15,6 +15,12 @@ describe("lefthook.yml preset", () => {
 		expect(parsed).toBeDefined();
 	});
 
+	test("matches snapshot", async () => {
+		const content = await Bun.file(LEFTHOOK_PATH).text();
+		const parsed = parseYaml(content);
+		expect(parsed).toMatchSnapshot();
+	});
+
 	test("has pre-commit hooks", async () => {
 		const content = await Bun.file(LEFTHOOK_PATH).text();
 		const parsed = parseYaml(content);
@@ -64,42 +70,40 @@ describe("lefthook.yml preset", () => {
 		expect(hasTypecheck).toBe(true);
 	});
 
-	test("pre-push includes build", async () => {
+	test("pre-push uses tooling pre-push command", async () => {
 		const content = await Bun.file(LEFTHOOK_PATH).text();
 		const parsed = parseYaml(content);
 		const prePush = parsed["pre-push"];
 
 		const commands = prePush?.commands ?? {};
-		const hasBuild = Object.values(commands).some(
+		const hasToolingPrePush = Object.values(commands).some(
 			(cmd: unknown) =>
 				typeof cmd === "object" &&
 				cmd !== null &&
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
-				(cmd as { run: string }).run.includes("build"),
+				(cmd as { run: string }).run.includes("@outfitter/tooling pre-push"),
 		);
 
-		expect(hasBuild).toBe(true);
+		expect(hasToolingPrePush).toBe(true);
 	});
 
-	test("pre-push includes test command", async () => {
+	test("pre-push references strict verification flow", async () => {
 		const content = await Bun.file(LEFTHOOK_PATH).text();
 		const parsed = parseYaml(content);
 		const prePush = parsed["pre-push"];
 
 		const commands = prePush?.commands ?? {};
-		// Test command runs TDD-aware pre-push via tooling CLI
-		const hasTest = Object.values(commands).some(
+		const hasStrictVerifyReference = Object.values(commands).some(
 			(cmd: unknown) =>
 				typeof cmd === "object" &&
 				cmd !== null &&
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
-				((cmd as { run: string }).run.includes("test") ||
-					(cmd as { run: string }).run.includes("pre-push")),
+				(cmd as { run: string }).run.includes("pre-push"),
 		);
 
-		expect(hasTest).toBe(true);
+		expect(hasStrictVerifyReference).toBe(true);
 	});
 
 	test("pre-commit runs in parallel", async () => {

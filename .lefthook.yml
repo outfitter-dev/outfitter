@@ -21,8 +21,5 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    build:
-      run: bun run build
-
-    test:
-      run: ./scripts/pre-push-test.sh
+    verify:
+      run: bun run packages/tooling/src/cli/index.ts pre-push

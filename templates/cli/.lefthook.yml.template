@@ -20,8 +20,7 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    build:
-      run: bun run build
-
-    test:
-      run: bun run test
+    verify:
+      # TDD-aware strict verification with RED-phase branch carveout
+      # (*-tests, */tests, *_tests).
+      run: bunx @outfitter/tooling pre-push

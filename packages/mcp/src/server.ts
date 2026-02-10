@@ -752,7 +752,6 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       // For now, we just log the start
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async stop(): Promise<void> {
       logger.info("MCP server stopping", { name, version });
       if (loggerFactory !== null) {

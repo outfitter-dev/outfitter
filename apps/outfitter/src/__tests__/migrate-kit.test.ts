@@ -271,7 +271,7 @@ describe("migrate kit command", () => {
         'import { Result } from "@outfitter/contracts";',
         'import { ValidationError } from "@outfitter/contracts/errors";',
         "",
-        "export const value = Result.ok(new ValidationError({ message: \"x\" }));",
+        'export const value = Result.ok(new ValidationError({ message: "x" }));',
         "",
       ].join("\n"),
       "utf-8"
@@ -313,7 +313,9 @@ describe("migrate kit command", () => {
     const result = await runMigrateKit({ targetDir: tempDir, dryRun: true });
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.message).toContain("Failed to read source tree entry");
+      expect(result.error.message).toContain(
+        "Failed to read source tree entry"
+      );
     }
   });
 
@@ -324,7 +326,9 @@ describe("migrate kit command", () => {
     migrateKitCommand(program);
     migrateKitCommand(program);
 
-    const migrate = program.commands.find((command) => command.name() === "migrate");
+    const migrate = program.commands.find(
+      (command) => command.name() === "migrate"
+    );
     expect(migrate).toBeDefined();
     expect(
       migrate?.commands.filter((command) => command.name() === "kit")

@@ -1,0 +1,28 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`lefthook.yml preset matches snapshot 1`] = `
+{
+  "pre-commit": {
+    "commands": {
+      "typecheck": {
+        "glob": "*.{ts,tsx}",
+        "run": "bun run typecheck",
+      },
+      "ultracite": {
+        "glob": "*.{js,jsx,ts,tsx,json,jsonc,css}",
+        "run": "bun x ultracite fix {staged_files}",
+        "stage_fixed": true,
+      },
+    },
+    "parallel": true,
+  },
+  "pre-push": {
+    "commands": {
+      "verify": {
+        "run": "bunx @outfitter/tooling pre-push",
+      },
+    },
+    "parallel": false,
+  },
+}
+`;

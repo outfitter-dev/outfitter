@@ -68,18 +68,22 @@ bunx @outfitter/tooling upgrade-bun 1.4.0 --no-install
 
 ### `tooling pre-push`
 
-TDD-aware pre-push test hook. Detects RED phase branches and skips tests by design.
+TDD-aware pre-push strict verification hook. Detects RED phase branches and skips verification by design.
 
 RED phase branches follow these patterns:
 - `*-tests` (e.g., `feature/auth-tests`)
 - `*/tests` (e.g., `feature/auth/tests`)
 - `*_tests` (e.g., `feature/auth_tests`)
 
+Verification order:
+1. Run `verify:ci` if present.
+2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
+
 ```bash
 # Normal usage (in lefthook.yml)
 bunx @outfitter/tooling pre-push
 
-# Force skip tests
+# Force skip verification
 bunx @outfitter/tooling pre-push --force
 ```
 
@@ -124,7 +128,7 @@ extends:
 
 Default hooks:
 - **pre-commit**: Runs ultracite on staged files, typechecks
-- **pre-push**: Runs build, then TDD-aware tests via `tooling pre-push`
+- **pre-push**: Runs TDD-aware strict verification via `tooling pre-push`
 
 ### markdownlint
 

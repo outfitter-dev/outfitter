@@ -257,7 +257,8 @@ function collectSourceFiles(
       try {
         stat = statSync(fullPath);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
         return Result.err(
           new MigrateKitError(
             `Failed to read source tree entry ${fullPath}: ${message}`
@@ -915,7 +916,8 @@ export async function runMigrateKit(
       if (rewriteResult.value.rewrites > 0) {
         rewritesByPackage.set(
           packageDir,
-          (rewritesByPackage.get(packageDir) ?? 0) + rewriteResult.value.rewrites
+          (rewritesByPackage.get(packageDir) ?? 0) +
+            rewriteResult.value.rewrites
         );
       }
     }

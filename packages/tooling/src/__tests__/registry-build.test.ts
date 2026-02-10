@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { REGISTRY_CONFIG } from "../registry/build.js";
 import { RegistrySchema } from "../registry/schema.js";
 
 /**
@@ -12,89 +13,118 @@ describe("Registry Build Output", () => {
 		import.meta.dirname,
 		"../../registry/registry.json",
 	);
+	const repoRoot = join(import.meta.dirname, "../../../..");
+
+	function readRegistry() {
+		const content = readFileSync(registryPath, "utf-8");
+		return RegistrySchema.parse(JSON.parse(content));
+	}
 
 	test("registry.json exists", () => {
 		expect(existsSync(registryPath)).toBe(true);
 	});
 
 	test("registry.json is valid against schema", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = JSON.parse(content);
+		const registry = JSON.parse(readFileSync(registryPath, "utf-8"));
 		const result = RegistrySchema.safeParse(registry);
 		expect(result.success).toBe(true);
 	});
 
-	test("registry contains expected blocks", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
-
-		expect(registry.blocks.claude).toBeDefined();
-		expect(registry.blocks.biome).toBeDefined();
-		expect(registry.blocks.lefthook).toBeDefined();
-		expect(registry.blocks.bootstrap).toBeDefined();
-		expect(registry.blocks.scaffolding).toBeDefined();
+	test("registry contains exactly the configured blocks", () => {
+		const registry = readRegistry();
+		const actualBlockNames = Object.keys(registry.blocks).sort();
+		const expectedBlockNames = Object.keys(REGISTRY_CONFIG.blocks).sort();
+		expect(actualBlockNames).toEqual(expectedBlockNames);
 	});
 
-	test("claude block has expected files", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
+	for (const [name, config] of Object.entries(REGISTRY_CONFIG.blocks)) {
+		test(`block "${name}" matches REGISTRY_CONFIG`, () => {
+			const registry = readRegistry();
+			const block = registry.blocks[name];
+			expect(block).toBeDefined();
+			if (!block) {
+				throw new Error(`Missing block in generated registry: ${name}`);
+			}
 
-		const claude = registry.blocks.claude;
-		expect(claude.files).toHaveLength(2);
+			if (config.files && config.files.length > 0) {
+				const expectedPaths = config.files
+					.map((sourcePath) => config.remap?.[sourcePath] ?? sourcePath)
+					.sort();
+				const actualPaths = (block.files ?? []).map((file) => file.path).sort();
+				expect(actualPaths).toEqual(expectedPaths);
+			} else {
+				expect(block.files).toBeUndefined();
+			}
 
-		const paths = claude.files?.map((f) => f.path) ?? [];
-		expect(paths).toContain(".claude/settings.json");
-		expect(paths).toContain(".claude/hooks/format-code-on-stop.sh");
+			if (config.dependencies && Object.keys(config.dependencies).length > 0) {
+				expect(block.dependencies).toEqual(config.dependencies);
+			} else {
+				expect(block.dependencies).toBeUndefined();
+			}
+
+			if (
+				config.devDependencies &&
+				Object.keys(config.devDependencies).length > 0
+			) {
+				expect(block.devDependencies).toEqual(config.devDependencies);
+			} else {
+				expect(block.devDependencies).toBeUndefined();
+			}
+
+			if (config.extends && config.extends.length > 0) {
+				expect(block.extends).toEqual(config.extends);
+				for (const extendedName of config.extends) {
+					expect(registry.blocks[extendedName]).toBeDefined();
+				}
+			} else {
+				expect(block.extends).toBeUndefined();
+			}
+		});
+	}
+
+	test("composition blocks do not include direct files", () => {
+		const registry = readRegistry();
+		for (const [name, config] of Object.entries(REGISTRY_CONFIG.blocks)) {
+			if (!config.extends || config.extends.length === 0) {
+				continue;
+			}
+
+			const block = registry.blocks[name];
+			expect(block).toBeDefined();
+			expect(block?.files).toBeUndefined();
+			expect(block?.extends).toBeDefined();
+		}
 	});
 
-	test("biome block has devDependencies", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
+	test("executable flags match source file permissions", () => {
+		const registry = readRegistry();
+		for (const [name, config] of Object.entries(REGISTRY_CONFIG.blocks)) {
+			if (!config.files) {
+				continue;
+			}
 
-		const biome = registry.blocks.biome;
-		expect(biome.devDependencies).toBeDefined();
-		expect(biome.devDependencies?.ultracite).toBeDefined();
+			const block = registry.blocks[name];
+			if (!block) {
+				throw new Error(`Missing block in generated registry: ${name}`);
+			}
+			for (const sourcePath of config.files) {
+				const destPath = config.remap?.[sourcePath] ?? sourcePath;
+				const fileEntry = block.files?.find((file) => file.path === destPath);
+				expect(fileEntry).toBeDefined();
+
+				const sourceFilePath = join(repoRoot, sourcePath);
+				const isExecutable = (statSync(sourceFilePath).mode & 0o100) !== 0;
+				if (isExecutable) {
+					expect(fileEntry?.executable).toBe(true);
+				} else {
+					expect(fileEntry?.executable).toBeUndefined();
+				}
+			}
+		}
 	});
 
-	test("markdownlint block has correct file", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
-
-		const markdownlint = registry.blocks.markdownlint;
-		expect(markdownlint).toBeDefined();
-		expect(markdownlint.files).toHaveLength(1);
-		expect(markdownlint.files?.[0]?.path).toBe(".markdownlint-cli2.jsonc");
-	});
-
-	test("scaffolding block extends other blocks", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
-
-		const scaffolding = registry.blocks.scaffolding;
-		expect(scaffolding.extends).toEqual([
-			"claude",
-			"biome",
-			"lefthook",
-			"markdownlint",
-			"bootstrap",
-		]);
-		expect(scaffolding.files).toBeUndefined();
-	});
-
-	test("executable files have executable flag", () => {
-		const content = readFileSync(registryPath, "utf-8");
-		const registry = RegistrySchema.parse(JSON.parse(content));
-
-		// Check format hook is marked executable
-		const formatHook = registry.blocks.claude.files?.find((f) =>
-			f.path.includes("format-code-on-stop.sh"),
-		);
-		expect(formatHook?.executable).toBe(true);
-
-		// Check bootstrap is marked executable
-		const bootstrap = registry.blocks.bootstrap.files?.find((f) =>
-			f.path.includes("bootstrap.sh"),
-		);
-		expect(bootstrap?.executable).toBe(true);
+	test("generated registry output matches snapshot", () => {
+		const registry = readRegistry();
+		expect(registry).toMatchSnapshot();
 	});
 });

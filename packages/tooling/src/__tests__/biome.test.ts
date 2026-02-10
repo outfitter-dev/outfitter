@@ -13,6 +13,11 @@ describe("biome.json preset", () => {
 		expect(content).toBeDefined();
 	});
 
+	test("matches snapshot", async () => {
+		const content = await Bun.file(BIOME_PATH).json();
+		expect(content).toMatchSnapshot();
+	});
+
 	test("has $schema for editor support", async () => {
 		const content = await Bun.file(BIOME_PATH).json();
 		expect(content.$schema).toContain("biome");
