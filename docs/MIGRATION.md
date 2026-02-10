@@ -246,11 +246,19 @@ const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
 
 ## Version Upgrades
 
-For current package upgrades, use:
+To check current package versions and read migration guidance, use:
 
 ```bash
 outfitter update
 outfitter update --guide
+```
+
+These commands do not modify `package.json` or lockfiles.
+
+After reviewing the report, upgrade dependencies with your package manager, for example:
+
+```bash
+bun update @outfitter/cli @outfitter/config @outfitter/logging @outfitter/mcp @outfitter/contracts
 ```
 
 `--guide` composes package migration docs from
