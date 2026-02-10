@@ -1,147 +1,312 @@
 # File Operations Patterns
 
-Deep dive into @outfitter/file-ops patterns for safe file handling.
+Deep dive into @outfitter/file-ops patterns for workspace detection, path security, glob matching, file locking, and atomic writes.
 
-## Secure Paths
+## Workspace Detection
 
-Prevent path traversal attacks with `securePath`:
+### Find Workspace Root
+
+Search upward from a path for marker files (`.git`, `package.json` by default):
+
+```typescript
+import { findWorkspaceRoot } from "@outfitter/file-ops";
+
+const result = await findWorkspaceRoot("/path/to/some/file.ts");
+if (result.isOk()) {
+  console.log(result.value); // "/path/to" (where .git lives)
+}
+
+// Custom markers and stop boundary
+const result2 = await findWorkspaceRoot("/deep/nested/path", {
+  markers: [".git", "deno.json", "Cargo.toml"],
+  stopAt: "/deep",
+});
+```
+
+**Signature:** `findWorkspaceRoot(startPath: string, options?: FindWorkspaceRootOptions) → Promise<Result<string, NotFoundError>>`
+
+### Get Relative Path
+
+Convert an absolute path to workspace-relative with forward slashes:
+
+```typescript
+import { getRelativePath } from "@outfitter/file-ops";
+
+const result = await getRelativePath("/workspace/src/index.ts");
+// → "src/index.ts"
+```
+
+**Signature:** `getRelativePath(absolutePath: string) → Promise<Result<string, NotFoundError>>`
+
+### Check Workspace Membership
+
+```typescript
+import { isInsideWorkspace } from "@outfitter/file-ops";
+
+isInsideWorkspace("/workspace/src/file.ts", "/workspace");  // true
+isInsideWorkspace("/other/path", "/workspace");              // false
+```
+
+**Signature:** `isInsideWorkspace(path: string, workspaceRoot: string) → boolean`
+
+## Path Security
+
+Prevent path traversal attacks when handling user-provided paths.
+
+### securePath
+
+Validates a relative path and resolves it within a base directory. Returns `Result<string, ValidationError>` — does **not** throw.
 
 ```typescript
 import { securePath } from "@outfitter/file-ops";
 
-const path = securePath("/data", userInput);
-// Throws if userInput tries to escape /data via ../
+const result = securePath("notes/meeting.md", "/data");
+if (result.isOk()) {
+  console.log(result.value); // "/data/notes/meeting.md"
+}
+
+// Rejects traversal
+const bad = securePath("../etc/passwd", "/data");
+// → Result.err(ValidationError: "Path contains traversal sequence")
+
+// Rejects null bytes
+const bad2 = securePath("file\x00.txt", "/data");
+// → Result.err(ValidationError: "Path contains null bytes")
+
+// Rejects absolute paths
+const bad3 = securePath("/etc/passwd", "/data");
+// → Result.err(ValidationError: "Absolute paths are not allowed")
 ```
 
-## Atomic Writes
+**Signature:** `securePath(path: string, basePath: string) → Result<string, ValidationError>`
 
-Write files atomically to prevent corruption:
+### isPathSafe
+
+Boolean convenience wrapper around `securePath`:
 
 ```typescript
-import { writeFileAtomic } from "@outfitter/file-ops";
+import { isPathSafe } from "@outfitter/file-ops";
 
-await writeFileAtomic("/path/to/file.json", JSON.stringify(data, null, 2));
-// Writes to temp file, then renames (atomic on POSIX)
+if (isPathSafe(userInput, "/data")) {
+  // Safe to use
+}
 ```
+
+**Signature:** `isPathSafe(path: string, basePath: string) → boolean`
+
+### resolveSafePath
+
+Joins multiple path segments with per-segment validation:
+
+```typescript
+import { resolveSafePath } from "@outfitter/file-ops";
+
+const result = resolveSafePath("/data", "users", "profile.json");
+if (result.isOk()) {
+  console.log(result.value); // "/data/users/profile.json"
+}
+
+// Each segment validated individually
+const bad = resolveSafePath("/data", "users", "../secrets");
+// → Result.err(ValidationError: "Path segment contains traversal sequence")
+```
+
+**Signature:** `resolveSafePath(basePath: string, ...segments: string[]) → Result<string, ValidationError>`
+
+## Glob Patterns
+
+File matching powered by `Bun.Glob`. Returns absolute paths.
+
+### Async Glob
+
+```typescript
+import { glob } from "@outfitter/file-ops";
+
+const result = await glob("**/*.ts", {
+  cwd: "/workspace/src",
+  ignore: ["**/*.test.ts", "!**/*.integration.test.ts"],
+  dot: false,
+});
+
+if (result.isOk()) {
+  for (const file of result.value) {
+    console.log(file); // absolute paths
+  }
+}
+```
+
+**Signature:** `glob(pattern: string, options?: GlobOptions) → Promise<Result<string[], InternalError>>`
+
+### Sync Glob
+
+For initialization code only — blocks the event loop:
+
+```typescript
+import { globSync } from "@outfitter/file-ops";
+
+const result = globSync("*.json", { cwd: "/config" });
+```
+
+**Signature:** `globSync(pattern: string, options?: GlobOptions) → Result<string[], InternalError>`
+
+### GlobOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `cwd` | `string` | `process.cwd()` | Base directory for matching |
+| `ignore` | `string[]` | — | Exclude patterns (prefix `!` to re-include) |
+| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
+| `dot` | `boolean` | `false` | Include dotfiles |
 
 ## File Locking
 
-### Exclusive Lock
+Advisory file locking via `.lock` files. All processes must cooperate — the filesystem does **not** enforce locks.
 
-For write operations that need exclusive access:
+### Exclusive Lock (Recommended: withLock)
 
 ```typescript
-import { withExclusiveLock } from "@outfitter/file-ops";
+import { withLock } from "@outfitter/file-ops";
 
-const result = await withExclusiveLock("/path/to/file.lock", async () => {
-  const data = await Bun.file("/path/to/data.json").json();
+const result = await withLock("/data/state.json", async () => {
+  const data = await Bun.file("/data/state.json").json();
   data.counter += 1;
-  await writeFileAtomic("/path/to/data.json", JSON.stringify(data));
+  await Bun.write("/data/state.json", JSON.stringify(data));
   return data;
 });
 
 if (result.isErr()) {
-  // Lock acquisition failed or operation threw
+  // ConflictError: file already locked
+  // InternalError: callback or release failed
 }
 ```
 
-### Shared Lock (Reader-Writer)
+**Signature:** `withLock<T>(path: string, callback: () => Promise<T>) → Promise<Result<T, ConflictError | InternalError>>`
 
-Use `withSharedLock()` for read operations that can run concurrently:
+### Manual Exclusive Lock
+
+For cases where you need lock lifetime control:
 
 ```typescript
-import { withSharedLock, withExclusiveLock } from "@outfitter/file-ops";
+import { acquireLock, releaseLock, isLocked } from "@outfitter/file-ops";
 
-// Multiple readers can hold shared locks simultaneously
-const readResult = await withSharedLock("/path/to/data.lock", async () => {
-  return await Bun.file("/path/to/data.json").json();
+// Check if locked
+if (await isLocked("/data/state.json")) {
+  console.log("File is locked");
+}
+
+// Acquire with timeout
+const lockResult = await acquireLock("/data/state.json", {
+  timeout: 5000,      // Wait up to 5s
+  retryInterval: 100, // Poll every 100ms
 });
 
-// Writers need exclusive lock (blocks readers)
-const writeResult = await withExclusiveLock("/path/to/data.lock", async () => {
-  const data = await Bun.file("/path/to/data.json").json();
+if (lockResult.isOk()) {
+  const lock = lockResult.value;
+  try {
+    // Do work...
+  } finally {
+    await releaseLock(lock);
+  }
+}
+```
+
+### Shared (Reader) Locks
+
+Multiple readers can hold shared locks simultaneously. Shared locks block exclusive locks and vice versa.
+
+```typescript
+import { withSharedLock, withLock } from "@outfitter/file-ops";
+
+// Multiple readers can run concurrently
+const readResult = await withSharedLock("/data/db.json", async () => {
+  return await Bun.file("/data/db.json").json();
+});
+
+// Writers need exclusive lock (blocks and is blocked by shared locks)
+const writeResult = await withLock("/data/db.json", async () => {
+  const data = await Bun.file("/data/db.json").json();
   data.updated = Date.now();
-  await writeFileAtomic("/path/to/data.json", JSON.stringify(data));
+  await Bun.write("/data/db.json", JSON.stringify(data));
   return data;
 });
 ```
 
-**Lock fairness note:** Reader-writer locks can cause starvation. With many concurrent readers, writers may wait indefinitely (and vice versa). For high-contention scenarios, consider using exclusive locks only or implementing application-level queuing.
+Manual shared lock API:
+
+```typescript
+import { acquireSharedLock, releaseSharedLock } from "@outfitter/file-ops";
+
+const lockResult = await acquireSharedLock("/data/db.json", { timeout: 3000 });
+if (lockResult.isOk()) {
+  const lock = lockResult.value;
+  lock.lockType;  // "shared"
+  lock.readerId;  // unique reader ID (UUIDv7)
+  // ... read data ...
+  await releaseSharedLock(lock);
+}
+```
 
 ### Lock Options
 
-```typescript
-await withExclusiveLock("/path/to/file.lock", operation, {
-  timeout: 5000,      // Max wait time in ms (default: 10000)
-  retryDelay: 100,    // Delay between retries (default: 50)
-  staleThreshold: 60000,  // Consider lock stale after this many ms
-});
-```
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `timeout` | `number` | `0` (fail immediately) | Max wait time in ms |
+| `retryInterval` | `number` | `50` | Delay between retries in ms |
 
 ### Lock File Conventions
 
-- Use `.lock` extension for lock files
-- Place lock files alongside the protected resource
-- Use consistent lock file paths across all accessors
+- Lock files are created at `${path}.lock` automatically
+- Place locks alongside the protected resource
+- Use consistent lock paths across all accessors
+
+## Atomic Writes
+
+Write files atomically using temp-file-then-rename. The file either has old content or new content — never a partial state.
+
+### atomicWrite
 
 ```typescript
-// Good: Lock file next to data file
-const dataPath = "/data/users.json";
-const lockPath = "/data/users.json.lock";
+import { atomicWrite } from "@outfitter/file-ops";
 
-// Good: Named lock in XDG state
-import { getStatePath } from "@outfitter/config";
-const lockPath = getStatePath("myapp", "db.lock");
-```
+const result = await atomicWrite("/data/config.json", JSON.stringify(data, null, 2));
 
-## Safe Directory Operations
-
-### Ensure Directory Exists
-
-```typescript
-import { ensureDir } from "@outfitter/file-ops";
-
-await ensureDir("/path/to/nested/dir");
-// Creates all parent directories if needed
-```
-
-### Safe Removal
-
-```typescript
-import { safeRemove } from "@outfitter/file-ops";
-
-await safeRemove("/path/to/file-or-dir");
-// No error if doesn't exist, removes recursively if dir
-```
-
-## Temp Files
-
-### Create Temp File
-
-```typescript
-import { createTempFile } from "@outfitter/file-ops";
-
-const tempPath = await createTempFile("myapp", ".json");
-// Returns path like /tmp/myapp-abc123.json
-```
-
-### With Cleanup
-
-```typescript
-import { withTempFile } from "@outfitter/file-ops";
-
-const result = await withTempFile("myapp", ".json", async (tempPath) => {
-  await Bun.write(tempPath, JSON.stringify(data));
-  return await processFile(tempPath);
+// With options
+const result2 = await atomicWrite("/data/config.json", content, {
+  createParentDirs: true,   // default: true
+  preservePermissions: true, // copy perms from existing file
+  mode: 0o644,              // fallback file mode
 });
-// Temp file automatically cleaned up
 ```
+
+**Signature:** `atomicWrite(path: string, content: string, options?: AtomicWriteOptions) → Promise<Result<void, InternalError>>`
+
+### atomicWriteJson
+
+Shorthand for serializing + atomic write:
+
+```typescript
+import { atomicWriteJson } from "@outfitter/file-ops";
+
+const result = await atomicWriteJson("/data/state.json", { counter: 42 });
+// ValidationError if data isn't serializable
+// InternalError if write fails
+```
+
+**Signature:** `atomicWriteJson<T>(path: string, data: T, options?: AtomicWriteOptions) → Promise<Result<void, InternalError | ValidationError>>`
+
+### AtomicWriteOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `createParentDirs` | `boolean` | `true` | Create parent dirs recursively |
+| `preservePermissions` | `boolean` | `false` | Copy permissions from existing file |
+| `mode` | `number` | `0o644` | File mode for new files |
 
 ## Best Practices
 
-1. **Always use atomic writes** for critical data
-2. **Lock before read-modify-write** operations
-3. **Use shared locks** for read-only operations to improve concurrency
-4. **Validate paths** with `securePath` before using user input
-5. **Clean up temp files** with `withTempFile` pattern
+1. **Always use `securePath` or `resolveSafePath`** when handling user-provided paths
+2. **Prefer `withLock`** over manual acquire/release — it handles cleanup on errors
+3. **Use shared locks** for read operations to improve concurrency
+4. **Use `atomicWrite`** for critical data to prevent corruption
+5. **Use `findWorkspaceRoot`** instead of hardcoding paths
 6. **Use XDG paths** from `@outfitter/config` for state/cache files

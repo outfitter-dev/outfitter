@@ -1,6 +1,6 @@
 # Logging Patterns
 
-Deep dive into @outfitter/logging patterns.
+Deep dive into @outfitter/logging patterns. Two layers: `@outfitter/contracts/logging` defines the interfaces, `@outfitter/logging` provides the implementation.
 
 ## Creating a Logger
 
@@ -25,6 +25,7 @@ const logger = createLogger({
 | `warn` | `logger.warn()` | Unexpected but handled |
 | `error` | `logger.error()` | Failures requiring attention |
 | `fatal` | `logger.fatal()` | Unrecoverable failures |
+| `silent` | — | Disables all output (filter only) |
 
 Level hierarchy: `trace` < `debug` < `info` < `warn` < `error` < `fatal`
 
@@ -32,7 +33,7 @@ Setting level to `info` hides `trace` and `debug`.
 
 ## Structured Logging
 
-Always use metadata objects:
+Always use metadata objects (message first, metadata second):
 
 ```typescript
 // GOOD: Structured metadata
@@ -44,6 +45,9 @@ logger.info("User created", {
 
 // BAD: String concatenation
 logger.info("User " + user.name + " created in " + duration + "ms");
+
+// BAD: Metadata first (TypeScript resolves to `never`)
+logger.info({ userId: user.id }, "User created"); // compile error
 ```
 
 ## Child Loggers
@@ -51,6 +55,10 @@ logger.info("User " + user.name + " created in " + duration + "ms");
 Add context that persists across calls:
 
 ```typescript
+// Method on LoggerInstance
+const requestLogger = logger.child({ requestId: ctx.requestId });
+
+// Or standalone function
 import { createChildLogger } from "@outfitter/logging";
 
 const requestLogger = createChildLogger(logger, {
@@ -59,9 +67,8 @@ const requestLogger = createChildLogger(logger, {
 });
 
 // All logs include requestId and handler
-requestLogger.info("Processing");           // Has requestId, handler
-requestLogger.debug("Validated input");     // Has requestId, handler
-requestLogger.info("User created", { userId }); // Has requestId, handler, userId
+requestLogger.info("Processing");
+requestLogger.debug("Validated input");
 ```
 
 ## Redaction
@@ -83,31 +90,38 @@ logger.info("Config", {
 });
 ```
 
-### Default Redaction Patterns
+### Default Sensitive Keys
 
-Automatically redacted:
-- `password`, `pwd`
-- `apiKey`, `api_key`
-- `secret`, `secretKey`
-- `token`, `accessToken`
-- `auth`, `authorization`
-- `key` (when containing sensitive data)
-- `credential`, `credentials`
+Always redacted (case-insensitive): `password`, `secret`, `token`, `apikey`
+
+### Default Patterns
+
+Automatically matched and redacted in string values:
+- Bearer tokens (`Bearer xxx`)
+- API key patterns (`api_key=xxx`, `apikey: xxx`)
+- GitHub tokens (`ghp_`, `gho_`, `ghs_`, `ghr_`)
+- PEM-encoded private keys
 
 ### Custom Patterns
 
 ```typescript
+import { DEFAULT_PATTERNS, configureRedaction } from "@outfitter/logging";
+
+// Per-logger
 const logger = createLogger({
   name: "my-app",
   redaction: {
     enabled: true,
-    patterns: [
-      "password",
-      "apiKey",
-      "myCustomSecret",
-      "internalToken",
-    ],
+    patterns: [/my-custom-secret-\w+/gi],
+    keys: ["privateKey", "credentials"],
+    replacement: "***", // default: "[REDACTED]"
   },
+});
+
+// Global (applies to all loggers)
+configureRedaction({
+  patterns: [/sk-[a-zA-Z0-9]{20,}/g],
+  keys: ["myCustomKey"],
 });
 ```
 
@@ -135,12 +149,17 @@ logger.info("Request", {
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";
 
-const consoleSink = createConsoleSink({
-  colorize: true,           // ANSI colors
-  prettyPrint: true,        // Formatted output
-  timestampFormat: "iso",   // ISO 8601 timestamps
-});
+// Auto-detect TTY for colors (default)
+const sink = createConsoleSink();
+
+// Force colors off (for CI/piped output)
+const plainSink = createConsoleSink({ colors: false });
+
+// Force colors on
+const colorSink = createConsoleSink({ colors: true });
 ```
+
+Routes to `console.error`/`console.warn`/`console.info`/`console.debug` based on level.
 
 ### File Sink
 
@@ -149,9 +168,39 @@ import { createFileSink } from "@outfitter/logging";
 
 const fileSink = createFileSink({
   path: "/var/log/myapp/app.log",
-  maxSize: 10 * 1024 * 1024,  // 10MB
-  maxFiles: 5,                 // Keep 5 rotated files
+  append: true,  // default: true (append to existing)
 });
+
+// Call flush() before exit to ensure buffered writes complete
+await flush();
+```
+
+### Formatters
+
+```typescript
+import { createJsonFormatter, createPrettyFormatter } from "@outfitter/logging";
+
+// JSON (machine-readable)
+const jsonFormatter = createJsonFormatter();
+// → {"timestamp":1705936800000,"level":"info","message":"Hello",...}
+
+// Pretty (human-readable)
+const prettyFormatter = createPrettyFormatter({
+  colors: true,     // ANSI colors (default: false)
+  timestamp: true,  // ISO 8601 timestamp (default: true)
+});
+// → 2024-01-22T12:00:00.000Z [INFO] my-service: Hello world
+
+// Custom sink with formatter
+const customSink: Sink = {
+  formatter: jsonFormatter,
+  write(record, formatted) {
+    sendToService(formatted ?? jsonFormatter.format(record));
+  },
+  async flush() {
+    await flushPendingRequests();
+  },
+};
 ```
 
 ### Multiple Sinks
@@ -161,103 +210,169 @@ const logger = createLogger({
   name: "my-app",
   level: "debug",
   sinks: [
-    createConsoleSink({ level: "info" }),     // Console: info+
-    createFileSink({                           // File: debug+
-      path: "/var/log/myapp/debug.log",
-      level: "debug",
-    }),
+    createConsoleSink(),
+    createFileSink({ path: "/var/log/myapp/debug.log" }),
   ],
 });
 ```
 
-### Custom Sink
+### Runtime Sink Management
 
 ```typescript
-const customSink = {
-  log: (record) => {
-    // Send to external service
-    externalService.send({
-      level: record.level,
-      message: record.message,
-      metadata: record.metadata,
-      timestamp: record.timestamp,
-    });
+// Add sink at runtime
+logger.addSink(createFileSink({ path: "/tmp/debug.log" }));
+
+// Change level at runtime
+logger.setLevel("debug");
+```
+
+## Flushing
+
+```typescript
+import { flush } from "@outfitter/logging";
+
+logger.info("Shutting down");
+await flush(); // Flushes ALL registered sinks
+process.exit(0);
+```
+
+## Logger Factory Contract
+
+The `@outfitter/contracts/logging` module defines backend-agnostic logger interfaces:
+
+```typescript
+import {
+  type Logger,
+  type LoggerFactory,
+  type LoggerAdapter,
+  createLoggerFactory,
+} from "@outfitter/contracts";
+
+// Logger — minimal surface for handler contexts
+interface Logger {
+  trace(message: string, metadata?: LogMetadata): void;
+  debug(message: string, metadata?: LogMetadata): void;
+  info(message: string, metadata?: LogMetadata): void;
+  warn(message: string, metadata?: LogMetadata): void;
+  error(message: string, metadata?: LogMetadata): void;
+  fatal(message: string, metadata?: LogMetadata): void;
+  child(context: LogMetadata): Logger;
+}
+
+// LoggerFactory — creates loggers with configuration
+interface LoggerFactory<TBackendOptions = unknown> {
+  createLogger(config: LoggerFactoryConfig<TBackendOptions>): Logger;
+  flush(): Promise<void>;
+}
+
+// LoggerAdapter — backend implementations provide this
+interface LoggerAdapter<TBackendOptions = unknown> {
+  createLogger(config: LoggerFactoryConfig<TBackendOptions>): Logger;
+  flush?(): Promise<void>;
+}
+
+// Create a factory from any adapter
+const factory = createLoggerFactory(myAdapter);
+```
+
+## Outfitter Logger Factory
+
+`@outfitter/logging` provides a ready-made factory with environment defaults and redaction:
+
+```typescript
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
+const factory = createOutfitterLoggerFactory({
+  defaults: {
+    sinks: [createConsoleSink()],
+    redaction: { enabled: true },
   },
-};
-
-const logger = createLogger({
-  name: "my-app",
-  sinks: [customSink],
 });
+
+const logger = factory.createLogger({
+  name: "my-handler",
+  context: { service: "api" },
+});
+
+// Clean up
+await factory.flush();
 ```
 
-## Environment Configuration
+Defaults applied by the factory:
+- Log level resolved via `resolveOutfitterLogLevel()` (environment-aware)
+- Redaction enabled by default
+- Console sink when no explicit sinks provided
+
+## Environment-Aware Log Level
+
+### resolveLogLevel
+
+Resolves log level from the environment with a precedence chain:
 
 ```typescript
+import { createLogger, resolveLogLevel } from "@outfitter/logging";
+
 const logger = createLogger({
   name: "my-app",
-  level: process.env.LOG_LEVEL || "info",
-  sinks: [
-    createConsoleSink({
-      colorize: process.stdout.isTTY,
-      prettyPrint: process.env.NODE_ENV !== "production",
-    }),
-  ],
+  level: resolveLogLevel(), // environment-aware
+  sinks: [createConsoleSink()],
 });
 ```
+
+**Precedence (highest wins):**
+
+1. `OUTFITTER_LOG_LEVEL` environment variable
+2. Explicit `level` parameter
+3. `OUTFITTER_ENV` environment profile defaults
+4. `"info"` (default)
+
+### Environment Profiles
+
+| `OUTFITTER_ENV` | Default logLevel |
+|-----------------|-----------------|
+| `development` | `"debug"` |
+| `production` | `null` (falls through to `"info"`) |
+| `test` | `null` (falls through to `"info"`) |
+
+### resolveOutfitterLogLevel
+
+Same as `resolveLogLevel` but defaults to `"silent"` when the profile disables logging:
+
+```typescript
+import { resolveOutfitterLogLevel } from "@outfitter/logging";
+
+// With OUTFITTER_ENV=production → "silent" (not "info")
+// With OUTFITTER_ENV=development → "debug"
+// With OUTFITTER_LOG_LEVEL=error → "error" (overrides everything)
+```
+
+Used internally by the Outfitter logger factory.
 
 ## Handler Context Integration
 
 ```typescript
-import { createContext } from "@outfitter/contracts";
-import { createLogger, createChildLogger } from "@outfitter/logging";
+import { createOutfitterLoggerFactory, createConsoleSink } from "@outfitter/logging";
 
-const baseLogger = createLogger({ name: "my-app", level: "info" });
+const factory = createOutfitterLoggerFactory({
+  defaults: { sinks: [createConsoleSink()] },
+});
 
-export function createHandlerContext() {
-  const ctx = createContext({ logger: baseLogger });
-
-  // Child logger with requestId
-  return {
-    ...ctx,
-    logger: createChildLogger(baseLogger, { requestId: ctx.requestId }),
-  };
-}
+const logger = factory.createLogger({
+  name: "my-app",
+  context: { service: "api" },
+});
 
 // In handler
 const myHandler: Handler<Input, Output, Error> = async (input, ctx) => {
-  ctx.logger.info("Processing", { input });  // Includes requestId
-  // ...
+  ctx.logger.info("Processing", { input });  // Includes requestId via context
 };
-```
-
-## Performance
-
-### Conditional Logging
-
-```typescript
-// Level check before expensive operations
-if (logger.isEnabled("debug")) {
-  const expensiveData = computeDebugInfo();
-  logger.debug("Debug info", { data: expensiveData });
-}
-```
-
-### Lazy Evaluation
-
-```typescript
-logger.debug("State", () => ({
-  // Only computed if debug level is enabled
-  memory: process.memoryUsage(),
-  connections: getActiveConnections(),
-}));
 ```
 
 ## Best Practices
 
-1. **Structured metadata** - Always use objects, not string concatenation
-2. **Child loggers** - Add request context that persists
-3. **Enable redaction** - Prevent secrets from leaking
-4. **Level per environment** - Debug in dev, info in prod
-5. **Request IDs** - Include for tracing across handlers
-6. **Lazy evaluation** - Avoid expensive computations at disabled levels
+1. **Structured metadata** — Always use objects, not string concatenation
+2. **Child loggers** — Add request context that persists
+3. **Enable redaction** — Prevent secrets from leaking
+4. **Use `resolveLogLevel()`** — Let the environment control verbosity
+5. **Request IDs** — Include for tracing across handlers
+6. **Flush before exit** — Call `flush()` to ensure buffered logs are written

@@ -78,7 +78,9 @@ bun add @outfitter/cli
 
 ```typescript
 // src/commands/greet.ts
-import { command, output, exitWithError } from "@outfitter/cli";
+import { command } from "@outfitter/cli/command";
+import { output } from "@outfitter/cli";
+import { exitWithError } from "@outfitter/cli/output";
 import { createContext } from "@outfitter/contracts";
 import { greet } from "../handlers/greet.js";
 

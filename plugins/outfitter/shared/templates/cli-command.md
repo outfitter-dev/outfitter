@@ -5,7 +5,9 @@ Commander.js command that wraps a handler.
 ## Template
 
 ```typescript
-import { command, output, exitWithError } from "@outfitter/cli";
+import { command } from "@outfitter/cli/command";
+import { output } from "@outfitter/cli";
+import { exitWithError } from "@outfitter/cli/output";
 import { createContext } from "@outfitter/contracts";
 import { myHandler } from "../handlers/my-handler.js";
 
@@ -67,7 +69,7 @@ export const myCommand = command("my-command")
 ## Registration
 
 ```typescript
-import { createCLI } from "@outfitter/cli";
+import { createCLI } from "@outfitter/cli/command";
 import { myCommand } from "./commands/my-command.js";
 import { otherCommand } from "./commands/other-command.js";
 
@@ -78,11 +80,11 @@ const cli = createCLI({
 });
 
 // Register commands
-cli.program.addCommand(myCommand);
-cli.program.addCommand(otherCommand);
+cli.register(myCommand);
+cli.register(otherCommand);
 
 // Parse and execute
-cli.program.parse();
+await cli.parse();
 ```
 
 ## Checklist
@@ -100,7 +102,7 @@ cli.program.parse();
 ### Pagination Support
 
 ```typescript
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli";
+import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
 
 export const listCommand = command("list")
   .option("-n, --next", "Continue from previous position")
@@ -162,7 +164,7 @@ cli.program.addCommand(userCommand);
 ### Interactive Prompts
 
 ```typescript
-import { confirm, text, select } from "@clack/prompts";
+import { confirm, text, select } from "@outfitter/cli/prompt";
 
 export const deleteCommand = command("delete")
   .argument("<id>", "Resource ID")
