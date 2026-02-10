@@ -2,6 +2,20 @@
 
 How to adopt Outfitter patterns in existing projects and upgrade between versions.
 
+## Adoption IA
+
+Before choosing an adoption path, review:
+
+- [Mixed Adoption IA](./ADOPTION-IA.md)
+- [Pilot Report: Kit-First Adoption](./PILOT-KIT-FIRST-ADOPTION.md)
+
+It defines the current three-state model (baseline foundation, baseline +
+transport, granular runtime adoption), a final recommendation, and explicit
+cross-workstream mapping for:
+
+- Logging slices: OS-78 .. OS-84
+- Kit/create/adoption slices: OS-85 .. OS-92
+
 ## Adopting Outfitter
 
 ### From Raw Commander.js to @outfitter/cli
@@ -198,12 +212,12 @@ logger.debug("Config loaded", { config }); // Secrets auto-redacted
 1. Create a logger instance with `createLogger()`
 2. Use log level methods: `trace`, `debug`, `info`, `warn`, `error`, `fatal`
 3. Pass structured metadata as second argument
+4. Sensitive fields are automatically redacted
 
 ### Logging API Migration (Message-First)
 
 If you're coming from Pino or another object-first logger, use the
 [Logging Migration Guide](./LOGGING-MIGRATION.md) to translate patterns.
-4. Sensitive fields are automatically redacted
 
 ### From Manual Paths to XDG Compliance
 

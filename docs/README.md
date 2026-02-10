@@ -10,6 +10,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | [Getting Started](./GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
 | [Patterns](./PATTERNS.md) | Handlers, Result types, error taxonomy, validation |
 | [Stack Composition](./STACK-COMPOSITION.md) | Composable hstack/vstack primitives for CLI layouts |
+| [Mixed Adoption IA (Draft)](./ADOPTION-IA.md) | Three-state adoption model and cross-workstream narrative (OS-77) |
 | [Migration](./MIGRATION.md) | Adopting Outfitter, upgrading between versions |
 
 ## Package READMEs
@@ -43,7 +44,7 @@ have concrete branded ID or shared utility adoption points.
 - [outfitter](../apps/outfitter/README.md) — Umbrella CLI for scaffolding
 - [@outfitter/testing](../packages/testing/README.md) — Test harnesses for CLI and MCP
 - [@outfitter/tooling](../packages/tooling/README.md) — Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
-- [@outfitter/kit](../packages/kit/README.md) — Version coordination
+- [@outfitter/kit](../packages/kit/README.md) — Foundation facade over contracts/types
 
 ## Quick Links
 

@@ -108,7 +108,13 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 |---------|---------|
 | `outfitter` | Umbrella CLI for scaffolding projects |
 | `@outfitter/testing` | Test harnesses for CLI and MCP |
-| `@outfitter/kit` | Version coordination meta-package |
+| `@outfitter/kit` | Foundation facade over contracts and types |
+
+### Adoption IA (Draft)
+
+For mixed-adoption sequencing across logging and non-logging workstreams, see:
+
+- [Mixed Adoption IA (Draft)](./ADOPTION-IA.md)
 
 ## Dependency Graph
 
@@ -166,7 +172,7 @@ outfitter/stack/
 │   ├── index/               # SQLite FTS5 indexing
 │   ├── logging/             # Structured logging
 │   ├── mcp/                 # MCP server framework
-│   ├── kit/                 # Version coordination
+│   ├── kit/                 # Foundation facade over contracts/types
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
 │   └── types/               # Type utilities
