@@ -135,7 +135,7 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 
 ## Trail Map: Designing a System
 
-Five things to know when building with the Outfitter stack. For the complete design process with templates, see [guides/architecture.md](guides/architecture.md).
+Five things to know when building with the Outfitter stack. For the complete design process with templates, see [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md).
 
 ### 1. Know Your Terrain
 
@@ -209,8 +209,8 @@ Deeper dives into specific topics.
 
 | Guide | What's Covered | Location |
 |-------|----------------|----------|
-| **Getting Started** | First handler, CLI + MCP adapters | [guides/getting-started.md](guides/getting-started.md) |
-| **Architecture Design** | 5-step process, templates, constraints | [guides/architecture.md](guides/architecture.md) |
+| **Getting Started** | First handler, CLI + MCP adapters | [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md) |
+| **Architecture Design** | 5-step process, templates, constraints | [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md) |
 
 ## Pattern Deep Dives
 
@@ -218,16 +218,16 @@ When you need the details, not just the overview.
 
 | Pattern | What's Covered | Location |
 |---------|----------------|----------|
-| **Handler Contract** | Input, context, Result | [patterns/handler.md](patterns/handler.md) |
-| **Error Taxonomy** | 10 categories, exit/HTTP mapping | [patterns/errors.md](patterns/errors.md) |
-| **Result Utilities** | Creating, checking, transforming | [patterns/results.md](patterns/results.md) |
-| **CLI Patterns** | Commands, output modes, pagination | [patterns/cli.md](patterns/cli.md) |
-| **MCP Patterns** | Tools, resources, prompts | [patterns/mcp.md](patterns/mcp.md) |
-| **Daemon Patterns** | Lifecycle, IPC, health checks | [patterns/daemon.md](patterns/daemon.md) |
-| **File Operations** | Atomic writes, locking, paths | [patterns/file-ops.md](patterns/file-ops.md) |
-| **Logging** | Structured logging, redaction | [patterns/logging.md](patterns/logging.md) |
-| **Testing** | Harnesses, fixtures, mocks | [patterns/testing.md](patterns/testing.md) |
-| **Converting Code** | Migrating to the stack | [patterns/conversion.md](patterns/conversion.md) |
+| **Handler Contract** | Input, context, Result | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) |
+| **Error Taxonomy** | 10 categories, exit/HTTP mapping | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) |
+| **Result Utilities** | Creating, checking, transforming | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md) |
+| **CLI Patterns** | Commands, output modes, pagination | [patterns/cli.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/cli.md) |
+| **MCP Patterns** | Tools, resources, prompts | [patterns/mcp.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/mcp.md) |
+| **Daemon Patterns** | Lifecycle, IPC, health checks | [patterns/daemon.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/daemon.md) |
+| **File Operations** | Atomic writes, locking, paths | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md) |
+| **Logging** | Structured logging, redaction | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md) |
+| **Testing** | Harnesses, fixtures, mocks | [patterns/testing.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/testing.md) |
+| **Converting Code** | Migrating to the stack | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
 
 ## Templates: Just Add Code
 
@@ -235,11 +235,11 @@ Copy, paste, customize.
 
 | Template | For | Location |
 |----------|-----|----------|
-| **Handler** | Transport-agnostic business logic | [templates/handler.md](templates/handler.md) |
-| **Handler Test** | Testing handlers with Bun | [templates/handler-test.md](templates/handler-test.md) |
-| **CLI Command** | Commander.js wrapper | [templates/cli-command.md](templates/cli-command.md) |
-| **MCP Tool** | Zod-schema tool definition | [templates/mcp-tool.md](templates/mcp-tool.md) |
-| **Daemon Service** | Background service with IPC | [templates/daemon-service.md](templates/daemon-service.md) |
+| **Handler** | Transport-agnostic business logic | [templates/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler.md) |
+| **Handler Test** | Testing handlers with Bun | [templates/handler-test.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler-test.md) |
+| **CLI Command** | Commander.js wrapper | [templates/cli-command.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/cli-command.md) |
+| **MCP Tool** | Zod-schema tool definition | [templates/mcp-tool.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/mcp-tool.md) |
+| **Daemon Service** | Background service with IPC | [templates/daemon-service.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/daemon-service.md) |
 
 ## Quick Start
 
@@ -261,7 +261,7 @@ bun add -D @outfitter/testing @outfitter/tooling
 bun add @outfitter/kit
 ```
 
-New here? Start with [guides/getting-started.md](guides/getting-started.md).
+New here? Start with [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md).
 
 ## The Rules
 

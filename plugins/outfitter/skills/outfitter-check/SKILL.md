@@ -167,12 +167,12 @@ Point to fieldguide patterns for each issue type:
 
 | Issue | Fix Pattern |
 |-------|-------------|
-| `throw new` | [patterns/conversion.md](../outfitter-atlas/patterns/conversion.md) |
-| `try/catch` | [patterns/results.md](../outfitter-atlas/patterns/results.md) |
-| `console.log` | [patterns/logging.md](../outfitter-atlas/patterns/logging.md) |
-| Hardcoded paths | [patterns/file-ops.md](../outfitter-atlas/patterns/file-ops.md) |
-| Custom errors | [patterns/errors.md](../outfitter-atlas/patterns/errors.md) |
-| Missing context | [patterns/handler.md](../outfitter-atlas/patterns/handler.md) |
+| `throw new` | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
+| `try/catch` | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md) |
+| `console.log` | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md) |
+| Hardcoded paths | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md) |
+| Custom errors | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) |
+| Missing context | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) |
 
 ## Quick Check
 

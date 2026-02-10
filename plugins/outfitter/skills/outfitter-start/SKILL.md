@@ -194,10 +194,10 @@ Work through stages in order, updating `stages/overview.md` as you go.
 1. Open the stage file (e.g., `stages/foundation.md`)
 2. Work through the checklist items
 3. Reference fieldguide for conversion patterns:
-   - **Throws → Result**: [patterns/conversion.md](../outfitter-atlas/patterns/conversion.md)
-   - **Error taxonomy**: [patterns/errors.md](../outfitter-atlas/patterns/errors.md)
-   - **Logging**: [patterns/logging.md](../outfitter-atlas/patterns/logging.md)
-   - **Templates**: [templates/](../outfitter-atlas/templates/)
+   - **Throws → Result**: [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md)
+   - **Error taxonomy**: [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md)
+   - **Logging**: [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md)
+   - **Templates**: [templates/](${CLAUDE_PLUGIN_ROOT}/shared/templates/)
 4. Mark complete in `stages/overview.md`
 5. Move to next unblocked stage
 

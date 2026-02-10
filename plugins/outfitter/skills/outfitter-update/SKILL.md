@@ -57,7 +57,7 @@ Package                      Current    Available  Migration
 
 ## Migration Docs
 
-Migration guides live in `shared/migrations/` with the naming convention:
+Migration guides live in `${CLAUDE_PLUGIN_ROOT}/shared/migrations/` with the naming convention:
 
 ```
 outfitter-<package>-<version>.md
