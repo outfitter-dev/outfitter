@@ -58,7 +58,7 @@ export interface McpServerOptions {
 
   /**
    * Optional logger instance for server logging.
-   * If not provided, a no-op logger is used.
+   * If not provided, the server uses the Outfitter logger factory defaults.
    */
   logger?: Logger;
 

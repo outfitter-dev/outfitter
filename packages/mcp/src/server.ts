@@ -8,12 +8,13 @@
  */
 
 import { getEnvironment, getEnvironmentDefaults } from "@outfitter/config";
-import type {
-  HandlerContext,
-  Logger,
-  OutfitterError,
-} from "@outfitter/contracts";
+import type { HandlerContext, OutfitterError } from "@outfitter/contracts";
 import { generateRequestId, Result } from "@outfitter/contracts";
+import {
+  createOutfitterLoggerFactory,
+  createPrettyFormatter,
+  type Sink,
+} from "@outfitter/logging";
 import type { z } from "zod";
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
 import { zodToJsonSchema } from "./schema.js";
@@ -34,38 +35,6 @@ import {
   type ToolAnnotations,
   type ToolDefinition,
 } from "./types.js";
-
-// ============================================================================
-// No-Op Logger
-// ============================================================================
-
-/**
- * Creates a no-op logger that discards all log messages.
- * Used when no logger is provided to the server.
- */
-function createNoOpLogger(): Logger {
-  return {
-    trace: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["trace"],
-    debug: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["debug"],
-    info: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["info"],
-    warn: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["warn"],
-    error: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["error"],
-    fatal: ((..._args: unknown[]) => {
-      // intentional no-op
-    }) as Logger["fatal"],
-    child: () => createNoOpLogger(),
-  };
-}
 
 // ============================================================================
 // Tool Storage
@@ -110,6 +79,21 @@ const DEFAULTS_TO_MCP: Readonly<Record<string, McpLogLevel>> = {
   warn: "warning",
   error: "error",
 };
+
+function createDefaultMcpSink(): Sink {
+  const formatter = createPrettyFormatter({ colors: false });
+  return {
+    formatter,
+    write(record, formatted) {
+      const serialized = formatted ?? formatter.format(record);
+      const line = serialized.endsWith("\n") ? serialized : `${serialized}\n`;
+
+      if (typeof process !== "undefined" && process.stderr?.write) {
+        process.stderr.write(line);
+      }
+    },
+  };
+}
 
 /**
  * Resolve the default client log level from the precedence chain.
@@ -190,7 +174,19 @@ function resolveDefaultLogLevel(options: McpServerOptions): McpLogLevel | null {
  */
 export function createMcpServer(options: McpServerOptions): McpServer {
   const { name, version, logger: providedLogger } = options;
-  const logger = providedLogger ?? createNoOpLogger();
+  let loggerFactory: ReturnType<typeof createOutfitterLoggerFactory> | null =
+    null;
+  const logger =
+    providedLogger ??
+    (() => {
+      loggerFactory = createOutfitterLoggerFactory({
+        defaults: { sinks: [createDefaultMcpSink()] },
+      });
+      return loggerFactory.createLogger({
+        name: "mcp",
+        context: { serverName: name, serverVersion: version, surface: "mcp" },
+      });
+    })();
 
   // Tool, resource, template, and prompt storage
   const tools = new Map<string, StoredTool>();
@@ -759,6 +755,9 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
     async stop(): Promise<void> {
       logger.info("MCP server stopping", { name, version });
+      if (loggerFactory !== null) {
+        await loggerFactory.flush();
+      }
       // In a full implementation, this would stop the transport layer
       // For now, we just log the stop
     },
