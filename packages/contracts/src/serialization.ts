@@ -1,6 +1,7 @@
 import { Result } from "better-result";
 import type { z } from "zod";
 import {
+  AlreadyExistsError,
   AmbiguousError,
   AssertionError,
   AuthError,
@@ -38,6 +39,7 @@ const errorRegistry = {
   AmbiguousError,
   AssertionError,
   NotFoundError,
+  AlreadyExistsError,
   ConflictError,
   PermissionError,
   TimeoutError,
@@ -76,8 +78,20 @@ function extractContext(
     }
     case "NotFoundError": {
       const nfe = error as InstanceType<typeof NotFoundError>;
+      if (nfe.context !== undefined) {
+        Object.assign(context, nfe.context);
+      }
       context["resourceType"] = nfe.resourceType;
       context["resourceId"] = nfe.resourceId;
+      break;
+    }
+    case "AlreadyExistsError": {
+      const aee = error as InstanceType<typeof AlreadyExistsError>;
+      if (aee.context !== undefined) {
+        Object.assign(context, aee.context);
+      }
+      context["resourceType"] = aee.resourceType;
+      context["resourceId"] = aee.resourceId;
       break;
     }
     case "TimeoutError": {
@@ -215,12 +229,55 @@ export function deserializeError(data: SerializedError): OutfitterError {
       return new ValidationError(props);
     }
 
-    case "NotFoundError":
-      return new NotFoundError({
+    case "NotFoundError": {
+      const props: {
+        message: string;
+        resourceType: string;
+        resourceId: string;
+        context?: Record<string, unknown>;
+      } = {
         message: data.message,
         resourceType: (context["resourceType"] as string) ?? "unknown",
         resourceId: (context["resourceId"] as string) ?? "unknown",
-      });
+      };
+
+      const contextWithoutIdentity = Object.fromEntries(
+        Object.entries(context).filter(
+          ([key]) => key !== "resourceType" && key !== "resourceId"
+        )
+      );
+
+      if (Object.keys(contextWithoutIdentity).length > 0) {
+        props.context = contextWithoutIdentity;
+      }
+
+      return new NotFoundError(props);
+    }
+
+    case "AlreadyExistsError": {
+      const props: {
+        message: string;
+        resourceType: string;
+        resourceId: string;
+        context?: Record<string, unknown>;
+      } = {
+        message: data.message,
+        resourceType: (context["resourceType"] as string) ?? "unknown",
+        resourceId: (context["resourceId"] as string) ?? "unknown",
+      };
+
+      const contextWithoutIdentity = Object.fromEntries(
+        Object.entries(context).filter(
+          ([key]) => key !== "resourceType" && key !== "resourceId"
+        )
+      );
+
+      if (Object.keys(contextWithoutIdentity).length > 0) {
+        props.context = contextWithoutIdentity;
+      }
+
+      return new AlreadyExistsError(props);
+    }
 
     case "ConflictError": {
       const props: { message: string; context?: Record<string, unknown> } = {

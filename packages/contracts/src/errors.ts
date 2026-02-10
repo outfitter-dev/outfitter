@@ -213,6 +213,21 @@ const NotFoundErrorBase: TaggedErrorClass<
   context?: Record<string, unknown>;
 }>();
 
+const AlreadyExistsErrorBase: TaggedErrorClass<
+  "AlreadyExistsError",
+  {
+    message: string;
+    resourceType: string;
+    resourceId: string;
+    context?: Record<string, unknown>;
+  }
+> = TaggedError("AlreadyExistsError")<{
+  message: string;
+  resourceType: string;
+  resourceId: string;
+  context?: Record<string, unknown>;
+}>();
+
 const ConflictErrorBase: TaggedErrorClass<
   "ConflictError",
   {
@@ -458,12 +473,74 @@ export class NotFoundError extends NotFoundErrorBase {
 }
 
 /**
- * State conflict (optimistic locking, concurrent modification).
+ * Resource already exists — the inverse of {@link NotFoundError}.
+ *
+ * Use when a create/write operation fails because the target resource
+ * is already present. Carries `resourceType` and `resourceId` to identify
+ * what already exists, mirroring {@link NotFoundError}'s structure.
+ *
+ * Maps to HTTP 409 (Conflict) and exit code 3.
+ *
+ * @example
+ * ```typescript
+ * new AlreadyExistsError({
+ *   message: "File already exists: notes/meeting.md",
+ *   resourceType: "file",
+ *   resourceId: "notes/meeting.md",
+ * });
+ * AlreadyExistsError.create("file", "notes/meeting.md");
+ * ```
+ *
+ * @see ConflictError - For general state conflicts (version mismatch, concurrent modification)
+ * @see NotFoundError - The inverse: resource does not exist
+ */
+export class AlreadyExistsError extends AlreadyExistsErrorBase {
+  readonly category = "conflict" as const;
+
+  /** Create an AlreadyExistsError with auto-generated message. */
+  static create(
+    resourceType: string,
+    resourceId: string,
+    context?: Record<string, unknown>
+  ): AlreadyExistsError {
+    return new AlreadyExistsError({
+      message: `${resourceType} already exists: ${resourceId}`,
+      resourceType,
+      resourceId,
+      ...(context != null && { context }),
+    });
+  }
+
+  exitCode(): number {
+    return getExitCode(this.category);
+  }
+
+  statusCode(): number {
+    return getStatusCode(this.category);
+  }
+}
+
+/**
+ * State conflict (version mismatch, concurrent modification).
+ *
+ * Use for general conflicts that don't fit {@link AlreadyExistsError}:
+ * optimistic locking failures, concurrent writes, ETag mismatches,
+ * or any case where the operation can't proceed due to state divergence.
+ *
+ * Maps to HTTP 409 (Conflict) and exit code 3.
+ *
+ * **Choosing the right conflict error:**
+ * - Resource already exists? Use {@link AlreadyExistsError}
+ * - Version/ETag mismatch? Use {@link ConflictError}
+ * - Concurrent modification detected? Use {@link ConflictError}
  *
  * @example
  * ```typescript
  * new ConflictError({ message: "Resource was modified by another process" });
+ * ConflictError.create("ETag mismatch: expected abc, got def");
  * ```
+ *
+ * @see AlreadyExistsError - For "resource already exists" specifically
  */
 export class ConflictError extends ConflictErrorBase {
   readonly category = "conflict" as const;
@@ -690,6 +767,7 @@ export type AnyKitError =
   | InstanceType<typeof AmbiguousError>
   | InstanceType<typeof AssertionError>
   | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof AlreadyExistsError>
   | InstanceType<typeof ConflictError>
   | InstanceType<typeof PermissionError>
   | InstanceType<typeof TimeoutError>

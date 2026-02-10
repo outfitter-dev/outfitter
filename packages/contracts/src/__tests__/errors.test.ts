@@ -10,6 +10,7 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
+  AlreadyExistsError,
   AmbiguousError,
   AssertionError,
   AuthError,
@@ -373,6 +374,64 @@ describe("NotFoundError", () => {
   });
 });
 
+describe("AlreadyExistsError", () => {
+  it("has correct _tag", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+    });
+    expect(error._tag).toBe("AlreadyExistsError");
+  });
+
+  it("has conflict category", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+    });
+    expect(error.category).toBe("conflict");
+  });
+
+  it("exposes resourceType and resourceId", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+    });
+    expect(error.resourceType).toBe("file");
+    expect(error.resourceId).toBe("notes/meeting.md");
+  });
+
+  it("exposes optional context", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+      context: { suggestion: "Use --force to overwrite" },
+    });
+    expect(error.context).toEqual({ suggestion: "Use --force to overwrite" });
+  });
+
+  it("exitCode() returns conflict exit code", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+    });
+    expect(error.exitCode()).toBe(3);
+  });
+
+  it("statusCode() returns 409", () => {
+    const error = new AlreadyExistsError({
+      message: "file already exists",
+      resourceType: "file",
+      resourceId: "notes/meeting.md",
+    });
+    expect(error.statusCode()).toBe(409);
+  });
+});
+
 describe("ConflictError", () => {
   it("has correct _tag", () => {
     const error = new ConflictError({ message: "Resource modified" });
@@ -624,6 +683,21 @@ describe("static create() methods", () => {
       available: ["Introduction"],
     });
     expect(error.context).toEqual({ available: ["Introduction"] });
+  });
+
+  it("AlreadyExistsError.create() generates message from type and id", () => {
+    const error = AlreadyExistsError.create("file", "notes/meeting.md");
+    expect(error.message).toBe("file already exists: notes/meeting.md");
+    expect(error.resourceType).toBe("file");
+    expect(error.resourceId).toBe("notes/meeting.md");
+    expect(error.category).toBe("conflict");
+  });
+
+  it("AlreadyExistsError.create() accepts optional context", () => {
+    const error = AlreadyExistsError.create("file", "notes/meeting.md", {
+      suggestion: "Use --force to overwrite",
+    });
+    expect(error.context).toEqual({ suggestion: "Use --force to overwrite" });
   });
 
   it("ConflictError.create() builds from message", () => {

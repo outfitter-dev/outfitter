@@ -12,6 +12,7 @@
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import {
+  AlreadyExistsError,
   AmbiguousError,
   AssertionError,
   ConflictError,
@@ -148,12 +149,13 @@ describe("deserializeError()", () => {
     }
   });
 
-  it("reconstructs all 12 error types", () => {
+  it("reconstructs all supported error types", () => {
     const errorTags = [
       "ValidationError",
       "AmbiguousError",
       "AssertionError",
       "NotFoundError",
+      "AlreadyExistsError",
       "ConflictError",
       "PermissionError",
       "TimeoutError",
@@ -255,6 +257,74 @@ describe("deserializeError()", () => {
     const deserialized = deserializeError(serialized);
     expect(deserialized._tag).toBe("AssertionError");
     expect(deserialized.message).toBe("Expected non-null value");
+  });
+
+  it("round-trips AlreadyExistsError with custom context", () => {
+    const original = AlreadyExistsError.create("file", "notes/meeting.md", {
+      suggestion: "Use --force to overwrite",
+      scope: "workspace",
+    });
+
+    const serialized = serializeError(original);
+    expect(serialized._tag).toBe("AlreadyExistsError");
+    expect(serialized.context?.resourceType).toBe("file");
+    expect(serialized.context?.resourceId).toBe("notes/meeting.md");
+    expect(serialized.context?.suggestion).toBe("Use --force to overwrite");
+    expect(serialized.context?.scope).toBe("workspace");
+
+    const deserialized = deserializeError(serialized);
+    expect(deserialized._tag).toBe("AlreadyExistsError");
+    if (deserialized._tag === "AlreadyExistsError") {
+      expect((deserialized as AlreadyExistsError).resourceType).toBe("file");
+      expect((deserialized as AlreadyExistsError).resourceId).toBe(
+        "notes/meeting.md"
+      );
+      expect((deserialized as AlreadyExistsError).context?.suggestion).toBe(
+        "Use --force to overwrite"
+      );
+      expect((deserialized as AlreadyExistsError).context?.scope).toBe(
+        "workspace"
+      );
+      expect((deserialized as AlreadyExistsError).context?.resourceType).toBe(
+        undefined
+      );
+      expect((deserialized as AlreadyExistsError).context?.resourceId).toBe(
+        undefined
+      );
+    }
+  });
+
+  it("round-trips NotFoundError with custom context", () => {
+    const original = NotFoundError.create("note", "abc123", {
+      suggestion: "Use list-notes to inspect available notes",
+      scope: "workspace",
+    });
+
+    const serialized = serializeError(original);
+    expect(serialized._tag).toBe("NotFoundError");
+    expect(serialized.context?.resourceType).toBe("note");
+    expect(serialized.context?.resourceId).toBe("abc123");
+    expect(serialized.context?.suggestion).toBe(
+      "Use list-notes to inspect available notes"
+    );
+    expect(serialized.context?.scope).toBe("workspace");
+
+    const deserialized = deserializeError(serialized);
+    expect(deserialized._tag).toBe("NotFoundError");
+    if (deserialized._tag === "NotFoundError") {
+      expect((deserialized as NotFoundError).resourceType).toBe("note");
+      expect((deserialized as NotFoundError).resourceId).toBe("abc123");
+      expect((deserialized as NotFoundError).context?.suggestion).toBe(
+        "Use list-notes to inspect available notes"
+      );
+      expect((deserialized as NotFoundError).context?.scope).toBe("workspace");
+      expect((deserialized as NotFoundError).context?.resourceType).toBe(
+        undefined
+      );
+      expect((deserialized as NotFoundError).context?.resourceId).toBe(
+        undefined
+      );
+    }
   });
 });
 

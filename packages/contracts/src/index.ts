@@ -85,6 +85,7 @@ export {
 } from "./envelope.js";
 // Errors
 export {
+  AlreadyExistsError,
   AmbiguousError,
   type AnyKitError,
   AssertionError,
