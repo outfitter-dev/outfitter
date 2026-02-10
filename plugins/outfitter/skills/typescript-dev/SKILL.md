@@ -446,6 +446,7 @@ PREFER:
 
 **Examples:**
 - [api-response.md](examples/api-response.md) - end-to-end type-safe API
+- [framework-adapters.md](examples/framework-adapters.md) - framework-agnostic handlers adapted to Express/Fastify/Hono
 - [form-validation.md](examples/form-validation.md) - Zod + React Hook Form
 - [resource-management.md](examples/resource-management.md) - using declarations
 - [state-machine.md](examples/state-machine.md) - discriminated union patterns

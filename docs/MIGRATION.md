@@ -67,7 +67,7 @@ cli.program.addCommand(
         exitWithError(result.error); // Auto exit code from error category
       }
 
-      await output(result.value); // Auto human/JSON based on TTY
+      await output(result.value); // Human by default; use --json for machine output
     })
     .build()
 );
@@ -112,7 +112,7 @@ import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
   const user = await db.users.findById(input.id);
   if (!user) {
-    return Result.err(new NotFoundError("user", input.id));
+    return Result.err(NotFoundError.create("user", input.id));
   }
   return Result.ok(user);
 };
@@ -161,16 +161,16 @@ class ValidationError extends Error {
 import { NotFoundError, ValidationError } from "@outfitter/contracts";
 
 // NotFoundError includes resourceType and resourceId
-new NotFoundError("user", "user-123");
+NotFoundError.create("user", "user-123");
 // .message = "user not found: user-123"
 // .category = "not_found"
 // ._tag = "NotFoundError"
 
 // ValidationError includes structured details
-new ValidationError("Invalid input", { field: "email", reason: "Invalid format" });
+ValidationError.create("email", "Invalid format");
 // .category = "validation"
 // ._tag = "ValidationError"
-// .details = { field: "email", reason: "Invalid format" }
+// .field = "email"
 ```
 
 **Key changes:**
@@ -246,62 +246,43 @@ const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
 
 ## Version Upgrades
 
-### 0.1.0-rc.0 to 0.1.0-rc.1
-
-This release candidate includes minor fixes and documentation improvements. No breaking changes.
-
-**Update dependencies:**
+For current package upgrades, use:
 
 ```bash
-bun update @outfitter/cli @outfitter/contracts @outfitter/config
+outfitter update
+outfitter update --guide
 ```
 
-### Pre-RC to 0.1.0-rc.x
+`--guide` composes package migration docs from
+`plugins/kit/shared/migrations/` for versions between your installed package and
+the target release.
 
-If you were using pre-release versions, the following changes apply:
+### 0.2.x to 0.3.0 (Runtime Packages)
 
-#### Error Classes Renamed
+The current runtime upgrade path to `0.3.0` covers:
 
-| Old | New |
-|-----|-----|
-| `KitError` | `OutfitterError` |
-| `AnyKitError` | `OutfitterError` |
+- `@outfitter/cli`
+- `@outfitter/config`
+- `@outfitter/logging`
+- `@outfitter/mcp`
 
-```typescript
-// Before
-import { KitError } from "@outfitter/contracts";
+High-impact changes:
 
-// After
-import { OutfitterError } from "@outfitter/contracts";
-```
+1. Unified environment profiles via `OUTFITTER_ENV`
+2. Standardized precedence for log level and verbose defaults
+3. Global `--json` support at the CLI root
+4. Explicit human-first output defaults (machine output is opt-in)
+5. MCP client log forwarding controls via `defaultLogLevel` and
+   `sendLogMessage()`
 
-#### Handler Context Required
+### Contracts Patch Track (Ahead-of-Time)
 
-Handlers now require a context parameter. If you have handlers without context:
+An ahead-of-time migration doc is included for `@outfitter/contracts` `0.2.1`
+to document:
 
-```typescript
-// Before
-const getUser = async (input: Input): Promise<Result<User, Error>> => { ... };
-
-// After
-const getUser: Handler<Input, User, NotFoundError> = async (input, ctx) => { ... };
-
-// Call site
-const ctx = createContext({});
-const result = await getUser(input, ctx);
-```
-
-#### Output Function is Async
-
-The `output()` function is now async:
-
-```typescript
-// Before
-output(data);
-
-// After
-await output(data);
-```
+1. Logger factory contract abstractions
+2. `AlreadyExistsError` for duplicate-resource conflicts
+3. Serialization support for the new error tag
 
 ## Upgrade Checklist
 
