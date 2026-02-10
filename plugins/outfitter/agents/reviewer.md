@@ -27,4 +27,4 @@ Load as needed based on review scope:
 | `security` | Auth/authz review, input validation, threat modeling, OWASP patterns |
 | `performance` | Profiling, bottleneck analysis, optimization validation |
 | `architecture` | Design review, technology evaluation, scalability assessment |
-| `codebase-recon` | Need to understand context before reviewing unfamiliar code |
+| `codebase-analysis` | Need to understand context before reviewing unfamiliar code |

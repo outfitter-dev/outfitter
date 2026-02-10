@@ -100,9 +100,9 @@ Escalating:
 
   ```text
   Decisions Made:
-  ✓ /simplify offers two modes: quick (skill) vs deep (agent)
+  ✓ /sanity-check offers two modes: quick (skill) vs deep (agent)
   ✓ Agent returns: complexity identified + alternatives + escalation level
-  ✓ Uses ◇/◆/◈ indicators from simplify skill
+  ✓ Uses ◇/◆/◈ indicators from sanity-check skill
   ```
 
 ### Emphasis
@@ -164,7 +164,7 @@ When referencing skills in documentation, use specific language based on skill t
 
 | Skill Type | Language | Example |
 |------------|----------|---------|
-| Standard | "Load the skill" | Load the `outfitter:skills-dev` skill |
+| Standard | "Load the skill" | Load the `outfitter:skillcraft` skill |
 | Delegated (`context: fork` + `agent`) | "Delegate by loading" | Delegate by loading the `outfitter:security-audit` skill |
 
 **Standard skills** load instructions into the current context. The agent continues with those instructions available.
@@ -177,10 +177,10 @@ When referencing skills in documentation, use specific language based on skill t
 
 ```markdown
 # Wrong
-See [skills-dev](../skills-dev/SKILL.md) for patterns.
+See [skillcraft](../skillcraft/SKILL.md) for patterns.
 
 # Right
-Load the `outfitter:skills-dev` skill for patterns.
+Load the `outfitter:skillcraft` skill for patterns.
 ```
 
 ## Steps in Skills

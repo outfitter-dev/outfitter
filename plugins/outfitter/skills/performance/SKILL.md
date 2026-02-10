@@ -356,8 +356,8 @@ Methodology:
 - [benchmarking.md](references/benchmarking.md) — rigorous benchmarking methodology
 
 Related skills:
-- codebase-recon — evidence-based investigation (foundation)
+- codebase-analysis — evidence-based investigation (foundation)
 - debugging — structured bug investigation
-- typescript-dev — correctness before performance
+- typescript-fieldguide — correctness before performance
 
 </references>

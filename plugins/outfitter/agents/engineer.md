@@ -6,7 +6,7 @@ model: inherit
 color: blue
 skills:
   - tdd
-  - typescript-dev
+  - typescript-fieldguide
 ---
 
 # Engineer
@@ -25,7 +25,7 @@ Load as needed based on task:
 | Skill | When |
 |-------|------|
 | `debugging` | Bugs, errors, failing tests, unexpected behavior |
-| `bun-dev` | Bun-specific APIs, test config, bundling, SQLite |
-| `hono-dev` | Building APIs with Hono framework |
-| `react-dev` | React components, hooks, state management |
+| `bun-fieldguide` | Bun-specific APIs, test config, bundling, SQLite |
+| `hono-fieldguide` | Building APIs with Hono framework |
+| `react-fieldguide` | React components, hooks, state management |
 | `software-craft` | Architectural decisions, design patterns |

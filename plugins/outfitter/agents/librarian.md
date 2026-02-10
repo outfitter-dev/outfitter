@@ -20,7 +20,7 @@ skills:
 
 | Skill | When |
 |-------|------|
-| `codebase-recon` | Understanding how existing code uses a library before finding docs |
+| `codebase-analysis` | Understanding how existing code uses a library before finding docs |
 
 ## Query Routing
 

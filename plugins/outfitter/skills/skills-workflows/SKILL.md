@@ -4,8 +4,8 @@ description: "Design multi-skill workflow systems with artifact-based state hand
 metadata:
   version: "1.0.0"
   related-skills:
-    - skills-dev
-    - claude-code
+    - skillcraft
+    - claude-craft
     - codify
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
@@ -16,9 +16,9 @@ Design skill systems that chain together with artifact-based state passing.
 
 ## Steps
 
-1. Load the `outfitter:skills-dev` skill for base skill authoring
+1. Load the `outfitter:skillcraft` skill for base skill authoring
 2. Apply workflow patterns from this skill
-3. If Claude-specific features needed, load the `outfitter:claude-code` skill
+3. If Claude-specific features needed, load the `outfitter:claude-craft` skill
 
 <when_to_use>
 

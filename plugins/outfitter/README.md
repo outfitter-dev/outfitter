@@ -14,44 +14,44 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 
 ## What's Included
 
-### Skills (30)
+### Skills (29)
 
 #### Development Methodology
 
 | Skill | Purpose |
 |-------|---------|
-| `bun-dev` | Bun runtime APIs and patterns |
+| `bun-fieldguide` | Bun runtime APIs and patterns |
 | `cli-dev` | Redirect to cli-dev plugin |
 | `code-review` | Pre-commit quality gate checklist |
-| `codebase-recon` | Evidence-based codebase investigation methodology |
-| `simplify` | Pushback against over-engineering |
+| `codebase-analysis` | Evidence-based codebase investigation methodology |
+| `sanity-check` | Pushback against over-engineering |
 | `session-analysis` | Signal extraction from chat history |
 | `debugging` | Systematic root cause investigation (no fixes without understanding) |
-| `hono-dev` | Type-safe Hono API development |
+| `hono-fieldguide` | Type-safe Hono API development |
 | `pathfinding` | Collaborative Q&A for unclear requirements |
-| `patterns` | Identify and extract reusable patterns |
+| `find-patterns` | Identify and extract reusable patterns |
 | `codify` | Extract reusable patterns from conversations |
 | `performance` | Profiling and optimization |
-| `react-dev` | React 18-19 TypeScript patterns |
+| `react-fieldguide` | React 18-19 TypeScript patterns |
 | `report-findings` | Structure and present research findings |
 | `research` | Multi-source technical research with citations |
 | `find-root-causes` | Systematic problem investigation methodology |
-| `scenarios` | End-to-end testing without mocks |
+| `prove-it-works` | End-to-end testing without mocks |
 | `security` | Security auditing and vulnerability detection |
-| `architecture` | System design with technology selection frameworks |
+| `systems-design` | System design with technology selection frameworks |
 | `software-craft` | Engineering judgment and decision principles |
 | `check-status` | Comprehensive status reports across VCS, PRs, issues, CI/CD |
-| `subagents` | Orchestrate outfitter subagents for complex tasks |
+| `use-subagents` | Orchestrate outfitter subagents for complex tasks |
 | `tdd` | Test-driven development with Red-Green-Refactor cycles |
-| `typescript-dev` | TypeScript patterns and strict typing |
+| `typescript-fieldguide` | TypeScript patterns and strict typing |
 | `which-tool` | Detect and select optimal CLI tools for tasks |
 
 #### Claude Code Extensibility
 
 | Skill | Purpose |
 |-------|---------|
-| `skills-dev` | Agent Skills authoring (cross-platform spec) |
-| `claude-code` | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
+| `skillcraft` | Agent Skills authoring (cross-platform spec) |
+| `claude-craft` | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
 | `claude-plugins` | Full plugin lifecycle, marketplace distribution |
 
 #### Platform Configuration
@@ -107,7 +107,7 @@ Use the reviewer agent to check this code
 
 ```
 "Design a notification system for 100k users"
-→ Loads architecture skill → Options with tradeoffs
+→ Loads systems-design skill → Options with tradeoffs
 ```
 
 **Research:**
@@ -132,8 +132,8 @@ Outfitter enforces disciplined development practices:
 outfitter/
 ├── .claude-plugin/
 │   └── plugin.json
-├── skills/           # 35 skills (methodology + extensibility)
-├── agents/           # 11 specialized agents
+├── skills/           # 29 skills (methodology + extensibility)
+├── agents/           # 10 specialized agents
 ├── commands/         # Slash commands
 ├── templates/        # Plugin/skill templates
 ├── scripts/          # Plugin utility scripts

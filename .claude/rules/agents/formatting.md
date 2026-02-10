@@ -76,9 +76,9 @@ Escalating:
 
   ```text
   Decisions Made:
-  ✓ /simplify offers two modes: quick (skill) vs deep (agent)
+  ✓ /sanity-check offers two modes: quick (skill) vs deep (agent)
   ✓ Agent returns: complexity identified + alternatives + escalation level
-  ✓ Uses ◇/◆/◈ indicators from simplify skill
+  ✓ Uses ◇/◆/◈ indicators from sanity-check skill
   ```
 
 ### Emphasis

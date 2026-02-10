@@ -6,7 +6,7 @@ model: inherit
 color: blue
 skills:
   - research
-  - codebase-recon
+  - codebase-analysis
 ---
 
 # Analyst
@@ -27,5 +27,5 @@ Load as needed based on investigation type:
 | `pathfinding` | Requirements ambiguous, exploring ideas, planning features |
 | `codify` | Capturing repeated workflows as reusable patterns |
 | `session-analysis` | Recalling past conversations, extracting learnings |
-| `architecture` | Understanding system structure, planning refactors |
+| `systems-design` | Understanding system structure, planning refactors |
 | `security` | Threat modeling alongside research |

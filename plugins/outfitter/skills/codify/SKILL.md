@@ -1,13 +1,13 @@
 ---
 name: codify
-description: "This skill should be used when implementing patterns as Claude Code components (skills, commands, hooks, agents), or when codify, capture workflow, turn into a skill, or make reusable are mentioned. For pattern identification, see patterns skill."
+description: "This skill should be used when implementing patterns as Claude Code components (skills, commands, hooks, agents), or when codify, capture workflow, turn into a skill, or make reusable are mentioned. For pattern identification, see find-patterns skill."
 agent: analyst
 context: fork
 metadata:
   version: "1.3.0"
   related-skills:
-    - patterns
-    - claude-code
+    - find-patterns
+    - claude-craft
 ---
 
 # Codify
@@ -101,7 +101,7 @@ All five quality checks must pass before codifying.
 1. Identify: Spot repeatable behavior in conversation
    - If hint/argument provided, focus analysis on that specific pattern
    - Otherwise scan for: workflows, orchestrations, and heuristics worth capturing
-   - For deep analysis, load `outfitter:codebase-recon` skill and use `outfitter:patterns` techniques
+   - For deep analysis, load `outfitter:codebase-analysis` skill and use `outfitter:find-patterns` techniques
    - Extract success, frustration, workflow, and request signals
    - Look for 3+ occurrences of similar behavior
 2. Classify: Workflow, Orchestration, or Heuristic?
@@ -173,12 +173,12 @@ NEVER:
 - [examples/](examples/) — captured pattern examples
 
 **Identification vs Implementation**:
-- `patterns` skill identifies and documents patterns
+- `find-patterns` skill identifies and documents patterns
 - This skill (`codify`) implements patterns as Claude Code components
 
-Use `patterns` first to identify what's worth capturing. Use `codify` to turn identified patterns into skills, commands, hooks, or agents.
+Use `find-patterns` first to identify what's worth capturing. Use `codify` to turn identified patterns into skills, commands, hooks, or agents.
 
 **Component skills** (loaded during implementation):
-- `claude-code` — agents, commands, hooks, skills, rules, and config
+- `claude-craft` — agents, commands, hooks, skills, rules, and config
 
 </references>

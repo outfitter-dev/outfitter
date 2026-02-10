@@ -6,8 +6,8 @@ paths:
 
 # Agent Skills Development
 
-- When creating or modifying agent skills, load the `outfitter:skills-dev` skill
-- If working on Claude-specific skill features, load the `outfitter:claude-code` skill.
+- When creating or modifying agent skills, load the `outfitter:skillcraft` skill
+- If working on Claude-specific skill features, load the `outfitter:claude-craft` skill.
 
 ## XML Tags
 
@@ -45,7 +45,7 @@ When referencing skills in documentation, use specific language based on skill t
 
 | Skill Type | Language | Example |
 |------------|----------|---------|
-| Standard | "Load the skill" | Load the `outfitter:skills-dev` skill |
+| Standard | "Load the skill" | Load the `outfitter:skillcraft` skill |
 | Delegated (`context: fork` + `agent: general-purpose`) | "Delegate by loading" | Delegate by loading the `outfitter:security-audit` skill |
 
 Standard skills load instructions into the current context. The agent continues with those instructions available.
@@ -58,10 +58,10 @@ Never link to SKILL.md files. Always use the load/delegate pattern.
 
 ```markdown
 # Wrong
-See [skills-dev](../skills-dev/SKILL.md) for patterns.
+See [skillcraft](../skillcraft/SKILL.md) for patterns.
 
 # Right
-Load the `outfitter:skills-dev` skill for patterns.
+Load the `outfitter:skillcraft` skill for patterns.
 ```
 
 ## Steps

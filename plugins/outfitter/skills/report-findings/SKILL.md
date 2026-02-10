@@ -5,8 +5,8 @@ metadata:
   version: "1.1.0"
   related-skills:
     - research
-    - codebase-recon
-    - patterns
+    - codebase-analysis
+    - find-patterns
 ---
 
 # Report Findings

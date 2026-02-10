@@ -78,7 +78,7 @@ Type safety across languages.
 - **Parse, don't validate** - Transform untyped to typed at boundaries, trust types internally
 
 See [type-patterns.md](references/type-patterns.md) for detailed concepts.
-Load `typescript-dev/SKILL.md` for TypeScript implementations.
+Load `typescript-fieldguide/SKILL.md` for TypeScript implementations.
 
 </type_safety>
 
@@ -300,7 +300,7 @@ Connect with other outfitter skills.
 
 **With debugging**: Senior judgment decides if worth fixing now. Debugging skill provides systematic investigation.
 
-**With dev-* skills**: Software engineering provides the "why" and "when". dev-* skills provide the "how" for specific technologies (typescript-dev, react-dev, hono-dev, bun-dev).
+**With dev-* skills**: Software engineering provides the "why" and "when". dev-* skills provide the "how" for specific technologies (typescript-fieldguide, react-fieldguide, hono-fieldguide, bun-fieldguide).
 
 </workflow_integration>
 
@@ -338,10 +338,10 @@ Complements other outfitter skills:
 - [pathfinding/SKILL.md](../pathfinding/SKILL.md) - requirements clarification
 
 **Development Skills** (load for implementation patterns):
-- [typescript-dev/SKILL.md](../typescript-dev/SKILL.md) - TypeScript, Zod, modern features
-- [react-dev/SKILL.md](../react-dev/SKILL.md) - React 18-19, hooks typing
-- [hono-dev/SKILL.md](../hono-dev/SKILL.md) - Hono API framework
-- [bun-dev/SKILL.md](../bun-dev/SKILL.md) - Bun runtime, SQLite, testing
+- [typescript-fieldguide/SKILL.md](../typescript-fieldguide/SKILL.md) - TypeScript, Zod, modern features
+- [react-fieldguide/SKILL.md](../react-fieldguide/SKILL.md) - React 18-19, hooks typing
+- [hono-fieldguide/SKILL.md](../hono-fieldguide/SKILL.md) - Hono API framework
+- [bun-fieldguide/SKILL.md](../bun-fieldguide/SKILL.md) - Bun runtime, SQLite, testing
 
 **Detailed Patterns:**
 - [type-patterns.md](references/type-patterns.md) - language-agnostic type patterns

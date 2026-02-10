@@ -303,7 +303,7 @@ Core methodology:
 - [checklist.md](references/checklist.md) — extended checklist details, examples, severity guidance
 
 Related skills:
-- codebase-recon — evidence-based investigation (foundation for review)
+- codebase-analysis — evidence-based investigation (foundation for review)
 - debugging — structured bug investigation
 
 </references>

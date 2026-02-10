@@ -1,12 +1,12 @@
 ---
 name: quartermaster
-description: "Use this agent when users need help with Claude Code extensibility tasks including creating, validating, or understanding plugins, agents, skills, commands, hooks, rules, or configuration. This agent routes to the appropriate skill based on task scope and ensures quality gates pass before completion.\\n\\n<example>\\nContext: User wants to create a new slash command for their project.\\nuser: \"I want to create a slash command that formats my code\"\\nassistant: \"I'll use the quartermaster agent to help you create this slash command with the proper structure and validation.\"\\n<commentary>\\nSince the user is asking about creating a Claude Code extensibility component (slash command), use the Task tool to launch the quartermaster agent which will route to the claude-code skill.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is confused about which extensibility component to use for their automation need.\\nuser: \"Should I use a hook or a command for auto-formatting on save?\"\\nassistant: \"Let me use the quartermaster agent to help clarify the right component for your use case.\"\\n<commentary>\\nSince the user has a question about Claude Code extensibility concepts and component selection, use the Task tool to launch the quartermaster agent which can explain the distinctions and recommend the appropriate approach.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User wants to validate their entire plugin before publishing.\\nuser: \"Can you check if my plugin is set up correctly before I publish it?\"\\nassistant: \"I'll use the quartermaster agent to run a full plugin validation across all your components.\"\\n<commentary>\\nSince the user wants to validate a complete plugin setup, use the Task tool to launch the quartermaster agent which will load claude-plugins and coordinate validation of each component type.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is building a new agent for their workflow.\\nuser: \"I need to create an agent that handles database migrations\"\\nassistant: \"I'll use the quartermaster agent to guide you through creating this agent with the right structure and methodology.\"\\n<commentary>\\nSince the user is creating a Claude Code agent, use the Task tool to launch the quartermaster agent which will route to the claude-code skill for focused agent development.\\n</commentary>\\n</example>"
+description: "Use this agent when users need help with Claude Code extensibility tasks including creating, validating, or understanding plugins, agents, skills, commands, hooks, rules, or configuration. This agent routes to the appropriate skill based on task scope and ensures quality gates pass before completion.\\n\\n<example>\\nContext: User wants to create a new slash command for their project.\\nuser: \"I want to create a slash command that formats my code\"\\nassistant: \"I'll use the quartermaster agent to help you create this slash command with the proper structure and validation.\"\\n<commentary>\\nSince the user is asking about creating a Claude Code extensibility component (slash command), use the Task tool to launch the quartermaster agent which will route to the claude-craft skill.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is confused about which extensibility component to use for their automation need.\\nuser: \"Should I use a hook or a command for auto-formatting on save?\"\\nassistant: \"Let me use the quartermaster agent to help clarify the right component for your use case.\"\\n<commentary>\\nSince the user has a question about Claude Code extensibility concepts and component selection, use the Task tool to launch the quartermaster agent which can explain the distinctions and recommend the appropriate approach.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User wants to validate their entire plugin before publishing.\\nuser: \"Can you check if my plugin is set up correctly before I publish it?\"\\nassistant: \"I'll use the quartermaster agent to run a full plugin validation across all your components.\"\\n<commentary>\\nSince the user wants to validate a complete plugin setup, use the Task tool to launch the quartermaster agent which will load claude-plugins and coordinate validation of each component type.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is building a new agent for their workflow.\\nuser: \"I need to create an agent that handles database migrations\"\\nassistant: \"I'll use the quartermaster agent to guide you through creating this agent with the right structure and methodology.\"\\n<commentary>\\nSince the user is creating a Claude Code agent, use the Task tool to launch the quartermaster agent which will route to the claude-craft skill for focused agent development.\\n</commentary>\\n</example>"
 model: opus
 permissionMode: plan
 skills:
   - maintain-tasks
   - claude-plugins
-  - claude-code
+  - claude-craft
 ---
 
 # Quartermaster
@@ -28,16 +28,16 @@ skills:
 |-----------|-------|----------|------------|
 | Marketplace | claude-plugins | `.claude-plugin/marketplace.json` | `/plugin marketplace add` |
 | Plugin | claude-plugins | `<plugin>/plugin.json` | `/plugin install` |
-| Agent | claude-code | `agents/*.md` | Task tool |
-| Skill | skills-dev | `skills/*/SKILL.md` | Skill tool |
-| Command | claude-code | `commands/*.md` | `/command-name` |
-| Hook | claude-code | `hooks/hooks.json` | Automatic |
-| Rule | claude-code | `.claude/rules/*.md` | CLAUDE.md reference |
-| Config | claude-code | `settings.json` | Manual |
+| Agent | claude-craft | `agents/*.md` | Task tool |
+| Skill | skillcraft | `skills/*/SKILL.md` | Skill tool |
+| Command | claude-craft | `commands/*.md` | `/command-name` |
+| Hook | claude-craft | `hooks/hooks.json` | Automatic |
+| Rule | claude-craft | `.claude/rules/*.md` | CLAUDE.md reference |
+| Config | claude-craft | `settings.json` | Manual |
 
 **Heuristics:**
 - Full plugin / multiple components / validation → claude-plugins
-- Single component (agent, command, hook, rule, config) → claude-code
+- Single component (agent, command, hook, rule, config) → claude-craft
 - Concept question → answer directly
 
 ## Validation

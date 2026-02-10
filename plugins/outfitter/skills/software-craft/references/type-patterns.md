@@ -155,6 +155,6 @@ Control flow should inform the type system. After checking a condition, subseque
 ## See Also
 
 For TypeScript-specific implementations of these patterns:
-- Load `typescript-dev/SKILL.md` for code examples
+- Load `typescript-fieldguide/SKILL.md` for code examples
 - Result types, branded types, discriminated unions with TypeScript syntax
 - Zod for runtime validation with type inference

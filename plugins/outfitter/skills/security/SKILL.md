@@ -324,7 +324,7 @@ NEVER:
 - [report-templates.md](references/report-templates.md) - finding and audit report templates
 
 **Related skills**:
-- codebase-recon - evidence-based investigation foundation
+- codebase-analysis - evidence-based investigation foundation
 - debugging - when security issues manifest as bugs
 
 **External**:

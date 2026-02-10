@@ -4,8 +4,8 @@ description: "This skill should be used when creating plugins, publishing to mar
 metadata:
   version: "1.0.0"
   related-skills:
-    - claude-code
-    - skills-dev
+    - claude-craft
+    - skillcraft
 ---
 
 # Claude Plugin Development
@@ -16,10 +16,10 @@ Complete lifecycle for developing, validating, and distributing Claude Code plug
 
 1. Define plugin scope and components needed
 2. Initialize plugin structure with `plugin.json`
-3. If adding commands, load the `outfitter:claude-code` skill
-4. If adding agents, load the `outfitter:claude-code` skill
-5. If adding hooks, load the `outfitter:claude-code` skill
-6. If adding skills, load the `outfitter:skills-dev` skill
+3. If adding commands, load the `outfitter:claude-craft` skill
+4. If adding agents, load the `outfitter:claude-craft` skill
+5. If adding hooks, load the `outfitter:claude-craft` skill
+6. If adding skills, load the `outfitter:skillcraft` skill
 7. Validate against checklists in [audit.md](references/audit.md)
 8. Fix issues and distribute
 
@@ -148,7 +148,7 @@ Review the following code: {{0}}
 Check for: code style, bugs, performance, security
 ```
 
-For complex commands, load the `outfitter:claude-code` skill.
+For complex commands, load the `outfitter:claude-craft` skill.
 
 ### Custom Agents
 
@@ -166,7 +166,7 @@ You are a security expert. When reviewing code:
 3. Report issues with severity levels
 ```
 
-For agent design patterns, load the `outfitter:claude-code` skill.
+For agent design patterns, load the `outfitter:claude-craft` skill.
 
 ### Event Hooks
 
@@ -191,11 +191,11 @@ Two ways to define hooks:
 
 Hook types: PreToolUse, PostToolUse, UserPromptSubmit, Stop, SessionStart, SessionEnd
 
-For hook implementation, load the `outfitter:claude-code` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
+For hook implementation, load the `outfitter:claude-craft` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
 
 ### Skills
 
-Add reusable methodology patterns in `skills/` directory. For skill authoring, load the `outfitter:skills-dev` skill.
+Add reusable methodology patterns in `skills/` directory. For skill authoring, load the `outfitter:skillcraft` skill.
 
 ### MCP Servers
 
@@ -410,5 +410,5 @@ NEVER:
 
 ## Related Skills
 
-- `claude-code` - Agents, commands, hooks, skills, rules, and config
-- `skills-dev` - Cross-platform skill creation patterns
+- `claude-craft` - Agents, commands, hooks, skills, rules, and config
+- `skillcraft` - Cross-platform skill creation patterns

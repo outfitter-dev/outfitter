@@ -6,7 +6,7 @@ metadata:
   related-skills:
     - maintain-tasks
     - find-root-causes
-    - codebase-recon
+    - codebase-analysis
 ---
 
 # Systematic Debugging

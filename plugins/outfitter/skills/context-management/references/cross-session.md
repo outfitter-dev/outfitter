@@ -125,7 +125,7 @@ Configure hooks to auto-save state at session boundaries:
 }
 ```
 
-See outfitter's `claude-code` skill for hook configuration details.
+See outfitter's `claude-craft` skill for hook configuration details.
 
 ## Multi-Day Project Pattern
 

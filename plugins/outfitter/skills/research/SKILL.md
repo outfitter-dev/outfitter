@@ -5,7 +5,7 @@ metadata:
   version: "2.1.0"
   related-skills:
     - report-findings
-    - codebase-recon
+    - codebase-analysis
 ---
 
 # Research

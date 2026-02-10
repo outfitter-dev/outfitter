@@ -7,7 +7,7 @@ metadata:
   version: "2.0.0"
   related-skills:
     - debugging
-    - codebase-recon
+    - codebase-analysis
     - report-findings
 ---
 

@@ -5,7 +5,7 @@ user-invocable: false
 metadata:
   version: "1.0.0"
   related-skills:
-    - subagents
+    - use-subagents
     - pathfinding
 ---
 
@@ -343,6 +343,6 @@ NEVER:
 - [task-patterns.md](references/task-patterns.md) — deep patterns and templates
 - [delegation-patterns.md](references/delegation-patterns.md) — context-preserving delegation
 - [cross-session.md](references/cross-session.md) — episodic memory integration
-- subagents skill — agent orchestration patterns
+- use-subagents skill — agent orchestration patterns
 
 </references>
