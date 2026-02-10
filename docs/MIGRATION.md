@@ -67,7 +67,7 @@ cli.program.addCommand(
         exitWithError(result.error); // Auto exit code from error category
       }
 
-      await output(result.value); // Auto human/JSON based on TTY
+      await output(result.value); // Human by default; use --json for machine output
     })
     .build()
 );
@@ -112,7 +112,7 @@ import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
   const user = await db.users.findById(input.id);
   if (!user) {
-    return Result.err(new NotFoundError("user", input.id));
+    return Result.err(NotFoundError.create("user", input.id));
   }
   return Result.ok(user);
 };
@@ -161,16 +161,16 @@ class ValidationError extends Error {
 import { NotFoundError, ValidationError } from "@outfitter/contracts";
 
 // NotFoundError includes resourceType and resourceId
-new NotFoundError("user", "user-123");
+NotFoundError.create("user", "user-123");
 // .message = "user not found: user-123"
 // .category = "not_found"
 // ._tag = "NotFoundError"
 
 // ValidationError includes structured details
-new ValidationError("Invalid input", { field: "email", reason: "Invalid format" });
+ValidationError.create("email", "Invalid format");
 // .category = "validation"
 // ._tag = "ValidationError"
-// .details = { field: "email", reason: "Invalid format" }
+// .field = "email"
 ```
 
 **Key changes:**
@@ -246,62 +246,51 @@ const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
 
 ## Version Upgrades
 
-### 0.1.0-rc.0 to 0.1.0-rc.1
-
-This release candidate includes minor fixes and documentation improvements. No breaking changes.
-
-**Update dependencies:**
+To check current package versions and read migration guidance, use:
 
 ```bash
-bun update @outfitter/cli @outfitter/contracts @outfitter/config
+outfitter update
+outfitter update --guide
 ```
 
-### Pre-RC to 0.1.0-rc.x
+These commands do not modify `package.json` or lockfiles.
 
-If you were using pre-release versions, the following changes apply:
+After reviewing the report, upgrade dependencies with your package manager, for example:
 
-#### Error Classes Renamed
-
-| Old | New |
-|-----|-----|
-| `KitError` | `OutfitterError` |
-| `AnyKitError` | `OutfitterError` |
-
-```typescript
-// Before
-import { KitError } from "@outfitter/contracts";
-
-// After
-import { OutfitterError } from "@outfitter/contracts";
+```bash
+bun update @outfitter/cli @outfitter/config @outfitter/logging @outfitter/mcp @outfitter/contracts
 ```
 
-#### Handler Context Required
+`--guide` composes package migration docs from
+`plugins/kit/shared/migrations/` for versions between your installed package and
+the target release.
 
-Handlers now require a context parameter. If you have handlers without context:
+### 0.2.x to 0.3.0 (Runtime Packages)
 
-```typescript
-// Before
-const getUser = async (input: Input): Promise<Result<User, Error>> => { ... };
+The current runtime upgrade path to `0.3.0` covers:
 
-// After
-const getUser: Handler<Input, User, NotFoundError> = async (input, ctx) => { ... };
+- `@outfitter/cli`
+- `@outfitter/config`
+- `@outfitter/logging`
+- `@outfitter/mcp`
 
-// Call site
-const ctx = createContext({});
-const result = await getUser(input, ctx);
-```
+High-impact changes:
 
-#### Output Function is Async
+1. Unified environment profiles via `OUTFITTER_ENV`
+2. Standardized precedence for log level and verbose defaults
+3. Global `--json` support at the CLI root
+4. Explicit human-first output defaults (machine output is opt-in)
+5. MCP client log forwarding controls via `defaultLogLevel` and
+   `sendLogMessage()`
 
-The `output()` function is now async:
+### Contracts Patch Track (Ahead-of-Time)
 
-```typescript
-// Before
-output(data);
+An ahead-of-time migration doc is included for `@outfitter/contracts` `0.2.1`
+to document:
 
-// After
-await output(data);
-```
+1. Logger factory contract abstractions
+2. `AlreadyExistsError` for duplicate-resource conflicts
+3. Serialization support for the new error tag
 
 ## Upgrade Checklist
 

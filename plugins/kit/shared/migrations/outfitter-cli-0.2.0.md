@@ -64,7 +64,7 @@ Mode is auto-detected:
 1. Explicit `mode` option
 2. `OUTFITTER_JSONL=1` env var → jsonl
 3. `OUTFITTER_JSON=1` env var → json
-4. TTY → human, non-TTY → json
+4. Default fallback → human
 
 ### `pageSize` Prompt Option
 

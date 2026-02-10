@@ -570,6 +570,38 @@ But:
 - Easier to optimize (JIT-friendly)
 - Predictable control flow
 
+## Framework Adapters (Non-Outfitter)
+
+You can keep core logic transport-agnostic and adapt at the framework boundary.
+
+```typescript
+type ApiError =
+  | { readonly type: 'not-found'; readonly id: string }
+  | { readonly type: 'validation'; readonly message: string };
+
+function toHttp(error: ApiError): { status: number; body: unknown } {
+  switch (error.type) {
+    case 'not-found':
+      return { status: 404, body: { error: `User ${error.id} not found` } };
+    case 'validation':
+      return { status: 400, body: { error: error.message } };
+  }
+}
+
+// Express
+app.get('/users/:id', async (req, res) => {
+  const result = await getUser(req.params.id);
+  if (!result.ok) {
+    const http = toHttp(result.error);
+    return res.status(http.status).json(http.body);
+  }
+  return res.json(result.value);
+});
+```
+
+The same core `getUser()` function can be adapted to Fastify or Hono with only
+transport-layer changes.
+
 ## Migration Strategy
 
 1. **Start with new code**: Use Result for all new error-prone functions

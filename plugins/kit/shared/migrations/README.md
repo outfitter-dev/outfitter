@@ -11,6 +11,8 @@ outfitter-<package>-<version>.md
 Examples:
 - `outfitter-contracts-0.2.0.md`
 - `outfitter-cli-0.2.0.md`
+- `outfitter-contracts-0.2.1.md`
+- `outfitter-cli-0.3.0.md`
 
 ## Ordering
 
@@ -61,3 +63,11 @@ When releasing a new version:
 3. Include before/after code examples for any API changes
 4. Mark `breaking: true` if there are breaking changes
 5. Omit packages that only received dependency bumps (no API changes)
+
+## Current Docs Snapshot
+
+The migration set currently includes:
+
+- Foundation updates through `@outfitter/contracts` `0.2.1` (planned release)
+- Runtime updates through `@outfitter/cli`, `@outfitter/config`,
+  `@outfitter/logging`, and `@outfitter/mcp` `0.3.0`

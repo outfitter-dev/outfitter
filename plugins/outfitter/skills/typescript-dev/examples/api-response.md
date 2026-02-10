@@ -340,6 +340,34 @@ function assertNever(value: never): never {
 4. **Discriminated errors**: Specific error types for different failure modes
 5. **Exhaustive handling**: `assertNever` ensures all cases covered
 
+## Framework Integration (Non-Outfitter)
+
+Use a thin adapter per framework while preserving the same `fetchUser` /
+`validateUser` domain logic.
+
+```typescript
+function toHttpStatus(error: ApiError): number {
+  switch (error.type) {
+    case 'not-found': return 404;
+    case 'validation': return 400;
+    case 'unauthorized': return 401;
+    case 'server': return 500;
+    case 'network': return 502;
+  }
+}
+
+// Express route adapter
+app.get('/users/:id', async (req, res) => {
+  const result = await fetchUser(req.params.id);
+  if (!result.ok) {
+    return res.status(toHttpStatus(result.error)).json({ error: result.error });
+  }
+  return res.json(result.value);
+});
+```
+
+The same adapter approach applies to Fastify and Hono.
+
 ## Testing Strategy
 
 ```typescript

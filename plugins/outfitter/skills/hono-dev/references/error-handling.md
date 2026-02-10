@@ -688,6 +688,39 @@ app.get('/slow-api', async (c) => {
 });
 ```
 
+## Framework-Agnostic Result Adapter
+
+Keep domain handlers free of Hono-specific APIs, then adapt the `Result` to
+HTTP at the route boundary.
+
+```typescript
+type Result<T, E> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+type DomainError =
+  | { type: 'not-found'; resource: string; id: string }
+  | { type: 'validation'; message: string };
+
+function toHttp(error: DomainError): { status: number; body: unknown } {
+  switch (error.type) {
+    case 'not-found':
+      return { status: 404, body: { error: `${error.resource} not found`, id: error.id } };
+    case 'validation':
+      return { status: 400, body: { error: error.message } };
+  }
+}
+
+app.get('/users/:id', async (c) => {
+  const result = await getUser({ id: c.req.param('id') }); // pure domain handler
+  if (!result.ok) {
+    const { status, body } = toHttp(result.error);
+    return c.json(body, status);
+  }
+  return c.json(result.value, 200);
+});
+```
+
 ## Error Response Format
 
 ### Consistent Structure
