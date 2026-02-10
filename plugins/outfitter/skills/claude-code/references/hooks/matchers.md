@@ -156,11 +156,12 @@ Some hooks use special matchers for lifecycle events instead of tool names.
 ### SessionEnd Matchers
 
 ```json
-{"matcher": "clear"}             // User ran /clear
-{"matcher": "logout"}            // User logged out
-{"matcher": "prompt_input_exit"} // Exited during prompt
-{"matcher": "other"}             // Other reasons
-{"matcher": "*"}                 // Any end reason
+{"matcher": "clear"}                        // User ran /clear
+{"matcher": "logout"}                       // User logged out
+{"matcher": "prompt_input_exit"}            // Exited during prompt
+{"matcher": "bypass_permissions_disabled"}  // Bypass permissions disabled
+{"matcher": "other"}                        // Other reasons
+{"matcher": "*"}                            // Any end reason
 ```
 
 ### PreCompact Matchers
@@ -171,10 +172,39 @@ Some hooks use special matchers for lifecycle events instead of tool names.
 {"matcher": "*"}         // Any compact type
 ```
 
-### Stop/SubagentStop Matchers
+### Notification Matchers
 
 ```json
-{"matcher": "*"}         // Always matches (lifecycle events)
+{"matcher": "permission_prompt"}   // Permission dialog needs attention
+{"matcher": "idle_prompt"}         // Claude is idle and waiting
+{"matcher": "auth_success"}        // Authentication succeeded
+{"matcher": "elicitation_dialog"}  // User input dialog
+{"matcher": "*"}                   // All notification types
+```
+
+### SubagentStart/SubagentStop Matchers
+
+Match on agent type name:
+
+```json
+{"matcher": "Explore"}         // Built-in Explore agent
+{"matcher": "Plan"}            // Built-in Plan agent
+{"matcher": "Bash"}            // Built-in Bash agent
+{"matcher": "general-purpose"} // Built-in general-purpose agent
+{"matcher": "db-agent"}        // Custom agent by name
+{"matcher": ".*"}              // All agent types
+```
+
+### Stop Matchers
+
+```json
+// Stop does not support matchers — always fires on every stop
+```
+
+### TeammateIdle/TaskCompleted Matchers
+
+```json
+// No matcher support — always fires on every occurrence
 ```
 
 ## Complex Matcher Examples

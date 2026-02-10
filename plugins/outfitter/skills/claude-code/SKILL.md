@@ -61,9 +61,18 @@ description: |                 # Required: triggers + examples
   user: "Review auth code for vulnerabilities"
   assistant: "I'll use the security-reviewer agent."
   </example>
-model: inherit                 # Optional: inherit|haiku|sonnet|opus
+model: inherit                 # Optional: inherit(default)|haiku|sonnet|opus
 tools: Glob, Grep, Read       # Optional: comma-separated (default: inherit all)
+disallowedTools: Write, Edit   # Optional: deny specific tools
 skills: tdd, debugging         # Optional: auto-load skills (NOT inherited)
+maxTurns: 50                   # Optional: max agentic turns
+memory: user                   # Optional: user|project|local — persistent memory
+hooks:                         # Optional: lifecycle hooks scoped to this agent
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate.sh"
 ---
 ```
 
@@ -233,28 +242,35 @@ Event handlers that automate workflows, validate operations, and respond to Clau
 
 ### Hook Types
 
-| Type | Best For | Example |
-|------|----------|---------|
-| **command** | Deterministic checks, external tools | Bash script validates paths |
-| **prompt** | Complex reasoning, context-aware validation | LLM evaluates safety |
-| **agent** | Multi-step verification requiring tool access | Agent with Read/Grep verifies consistency |
+| Type | Best For | Response Format | Default Timeout |
+|------|----------|-----------------|-----------------|
+| **command** | Deterministic checks, external tools | Exit codes + JSON | 600s |
+| **prompt** | Complex reasoning, context-aware validation | `{"ok": bool, "reason": "..."}` | 30s |
+| **agent** | Multi-step verification requiring tool access | `{"ok": bool, "reason": "..."}` (up to 50 turns) | 60s |
+
+**Prompt hooks**: Send prompt + hook input to a Claude model (Haiku by default, override with `model` field). Return `{"ok": true}` to proceed or `{"ok": false, "reason": "..."}` to block.
+
+**Agent hooks**: Spawn a subagent with tool access (`allowedTools`) for multi-step verification. Same `ok`/`reason` response format as prompt hooks.
 
 ### Events
 
-| Event | When | Can Block | Common Uses |
-|-------|------|-----------|-------------|
-| **PreToolUse** | Before tool executes | Yes | Validate commands, check paths |
-| **PostToolUse** | After tool succeeds | No | Auto-format, run linters |
-| **PostToolUseFailure** | After tool fails | No | Error logging, retry logic |
-| **PermissionRequest** | Permission dialog shown | Yes | Auto-allow/deny rules |
-| **UserPromptSubmit** | User submits prompt | No | Add context, log activity |
-| **Notification** | Claude sends notification | No | External alerts |
-| **Stop** | Main agent finishes | No | Cleanup, notifications |
-| **SubagentStart/Stop** | Subagent lifecycle | No | Track usage, log results |
-| **Setup** | `--init` or `--maintenance` | No | Initialize environment |
-| **PreCompact** | Before context compaction | No | Backup conversation |
-| **SessionStart** | Session starts/resumes | No | Load context, show status |
-| **SessionEnd** | Session ends | No | Cleanup, save state |
+| Event | When | Can Block | Matcher | Common Uses |
+|-------|------|-----------|---------|-------------|
+| **PreToolUse** | Before tool executes | Yes | Tool name | Validate commands, check paths |
+| **PostToolUse** | After tool succeeds | No | Tool name | Auto-format, run linters |
+| **PostToolUseFailure** | After tool fails | No | Tool name | Error logging, retry logic |
+| **PermissionRequest** | Permission dialog shown | Yes | Tool name | Auto-allow/deny rules |
+| **UserPromptSubmit** | User submits prompt | No | (none) | Add context, log activity |
+| **Notification** | Claude sends notification | No | Notification type | External alerts, desktop notify |
+| **Stop** | Claude finishes responding | No | (none) | Cleanup, verify completion |
+| **SubagentStart** | Subagent spawns | No | Agent type | Track spawning, setup resources |
+| **SubagentStop** | Subagent finishes | No | Agent type | Log results, trigger follow-ups |
+| **TeammateIdle** | Team agent about to idle | No | (none) | Coordination, reassignment |
+| **TaskCompleted** | Task marked completed | No | (none) | Validation, notifications |
+| **Setup** | `--init` or `--maintenance` | No | (none) | Initialize environment |
+| **PreCompact** | Before context compaction | No | Trigger type | Backup conversation |
+| **SessionStart** | Session starts/resumes | No | Start reason | Load context, show status |
+| **SessionEnd** | Session ends | No | End reason | Cleanup, save state |
 
 See [hooks/hook-types.md](references/hooks/hook-types.md) for detailed per-event documentation.
 
@@ -297,7 +313,12 @@ See [hooks/hook-types.md](references/hooks/hook-types.md) for detailed per-event
 {"matcher": "mcp__memory__.*"}          // MCP server tools
 ```
 
-Lifecycle hooks use special matchers: `startup`, `resume`, `clear`, `compact`, `manual`, `auto`.
+Lifecycle event matchers:
+- **SessionStart**: `startup`, `resume`, `clear`, `compact`
+- **SessionEnd**: `clear`, `logout`, `prompt_input_exit`, `bypass_permissions_disabled`, `other`
+- **Notification**: `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`
+- **SubagentStart/Stop**: Agent type name (e.g., `Explore`, `Plan`, `db-agent`)
+- **PreCompact**: `manual`, `auto`
 
 See [hooks/matchers.md](references/hooks/matchers.md) for advanced patterns.
 
@@ -325,9 +346,17 @@ See [hooks/matchers.md](references/hooks/matchers.md) for advanced patterns.
 }
 ```
 
+### Execution Model
+
+All matching hooks run **in parallel** (not sequentially). Identical handlers are automatically deduplicated. Design hooks to be independent — they cannot see each other's output.
+
+**Hot-swap**: Hooks added via `/hooks` menu take effect immediately. Manual edits to settings files require a session restart or `/hooks` menu visit.
+
+**Stop hooks**: Fire whenever Claude finishes responding, not only at task completion. Do NOT fire on user interrupts. To prevent infinite loops, check `stop_hook_active` in the input JSON and exit early if `true`.
+
 ### Component-Scoped Hooks
 
-Skills, agents, and commands can define hooks in frontmatter (supported events: PreToolUse, PostToolUse, Stop):
+Skills, agents, and commands can define hooks in frontmatter. All hook events are supported. `Stop` hooks in agent/skill frontmatter are automatically converted to `SubagentStop` events at runtime.
 
 ```yaml
 ---
@@ -338,6 +367,10 @@ hooks:
       hooks:
         - type: prompt
           prompt: "Validate this write operation..."
+  Stop:  # Converted to SubagentStop at runtime
+    - hooks:
+        - type: command
+          command: "./scripts/on-complete.sh"
 ---
 ```
 
@@ -355,7 +388,7 @@ hooks:
 
 - [ ] Hook scripts are executable (`chmod +x`)
 - [ ] Matchers use correct case-sensitive tool names
-- [ ] Timeouts set (default: 600s command, 30s prompt, 60s agent)
+- [ ] Timeouts set (default: 600s command, 30s prompt, 60s agent; max: 10 minutes)
 - [ ] Scripts use `set -euo pipefail` and quote variables
 - [ ] Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` for paths
 

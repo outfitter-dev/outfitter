@@ -74,10 +74,15 @@ Hooks are configured in JSON settings files:
 **Valid values**:
 - `PreToolUse`
 - `PostToolUse`
+- `PostToolUseFailure`
+- `PermissionRequest`
 - `UserPromptSubmit`
 - `Notification`
 - `Stop`
+- `SubagentStart`
 - `SubagentStop`
+- `TeammateIdle`
+- `TaskCompleted`
 - `PreCompact`
 - `SessionStart`
 - `SessionEnd`
@@ -155,13 +160,17 @@ Hooks are configured in JSON settings files:
 
 **Type**: String
 **Required**: Yes
-**Valid values**: `"command"`
-**Description**: Hook execution type (currently only "command" supported)
+**Valid values**: `"command"`, `"prompt"`, `"agent"`
+**Description**: Hook execution type
+
+- `"command"` — Run a shell command. Receives JSON on stdin, returns exit code + optional JSON stdout.
+- `"prompt"` — Send prompt to a Claude model (Haiku by default). Returns `{"ok": true/false, "reason": "..."}`.
+- `"agent"` — Spawn a subagent with tool access for multi-step verification. Same response format as prompt. Up to 50 turns, 60s default timeout.
 
 #### `command`
 
 **Type**: String
-**Required**: Yes
+**Required**: Yes (for `type: "command"`)
 **Description**: Shell command to execute
 
 **Features:**
@@ -178,11 +187,59 @@ Hooks are configured in JSON settings files:
 }
 ```
 
+#### `prompt`
+
+**Type**: String
+**Required**: Yes (for `type: "prompt"` or `type: "agent"`)
+**Description**: Prompt sent to the Claude model or agent
+
+**Placeholders:**
+- `$ARGUMENTS` — Full context passed to the hook
+- `$TOOL_INPUT` — Tool input for tool-related events
+- `$TOOL_RESULT` — Tool result (PostToolUse only)
+- `$USER_PROMPT` — User prompt (UserPromptSubmit only)
+
+```json
+{
+  "type": "prompt",
+  "prompt": "Evaluate if this write is safe: $TOOL_INPUT"
+}
+```
+
+#### `model`
+
+**Type**: String
+**Required**: No (only for `type: "prompt"`)
+**Default**: Haiku
+**Description**: Override model for prompt hooks
+
+```json
+{
+  "type": "prompt",
+  "prompt": "Complex evaluation...",
+  "model": "sonnet"
+}
+```
+
+#### `allowedTools`
+
+**Type**: Array of strings
+**Required**: No (only for `type: "agent"`)
+**Description**: Tools the agent hook's subagent can use
+
+```json
+{
+  "type": "agent",
+  "prompt": "Verify consistency...",
+  "allowedTools": ["Read", "Grep", "Glob", "Bash"]
+}
+```
+
 #### `timeout`
 
 **Type**: Number (seconds)
 **Required**: No
-**Default**: 30
+**Default**: 600 (command), 30 (prompt), 60 (agent). Max: 600 (10 minutes).
 **Description**: Maximum execution time
 
 ```json
@@ -400,7 +457,7 @@ Executes when Claude Code sends a notification.
 
 **Can block**: No
 
-**Matcher**: Always `*`
+**Matchers**: Notification type — `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`
 
 **Use cases**:
 - Send to external systems (Slack, email)
@@ -432,13 +489,13 @@ Executes when Claude Code sends a notification.
 
 Executes when main Claude agent finishes responding.
 
-**Timing**: After Claude completes response
+**Timing**: After Claude completes response (fires on every response, not only task completion; does NOT fire on user interrupts)
 
-**Input**: Session metadata and completion reason
+**Input**: Session metadata, completion reason, `stop_hook_active` (boolean for loop prevention)
 
 **Can block**: No
 
-**Matcher**: Always `*`
+**Matcher**: No matcher support (always fires)
 
 **Use cases**:
 - Clean up temporary resources
@@ -472,11 +529,11 @@ Executes when a subagent (Task tool) finishes.
 
 **Timing**: After subagent completes
 
-**Input**: Subagent metadata and result
+**Input**: `agent_id`, `agent_type`, `reason`, subagent result metadata
 
 **Can block**: No
 
-**Matcher**: Always `*`
+**Matchers**: Agent type name — e.g., `Explore`, `Plan`, `db-agent`
 
 **Use cases**:
 - Track subagent usage
@@ -600,6 +657,7 @@ Executes when session ends.
 - `clear` - User ran `/clear`
 - `logout` - User logged out
 - `prompt_input_exit` - Exited during prompt input
+- `bypass_permissions_disabled` - Bypass permissions was disabled
 - `other` - Other reasons
 
 **Use cases**:

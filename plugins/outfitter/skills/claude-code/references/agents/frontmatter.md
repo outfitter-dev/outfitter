@@ -59,24 +59,33 @@ description: |
 
 ### `model`
 
-Model selection. Default: `sonnet` (NOT inherited automatically).
+Controls which model the subagent uses. Three strategies:
+
+| Strategy | Syntax | Behavior |
+|----------|--------|----------|
+| **Omit entirely** | _(no `model` field)_ | Inherits parent's model. Same as `inherit`. |
+| **Explicit inherit** | `model: inherit` | Inherits parent's model. Use when you want to be explicit about the intent. |
+| **Pin a specific model** | `model: haiku\|sonnet\|opus` | Always uses that model regardless of parent. |
 
 ```yaml
-model: inherit  # Use parent's model (recommended)
-model: haiku    # Fast/cheap - simple tasks, quick exploration
-model: sonnet   # Balanced - standard tasks (default if omitted)
+# Strategy 1: Omit — inherits parent model (most common)
+# (no model field)
+
+# Strategy 2: Explicit inherit — same result, clearer intent
+model: inherit
+
+# Strategy 3: Pin a specific model
+model: haiku    # Fast/cheap — simple tasks, quick exploration
+model: sonnet   # Balanced cost/capability
 model: opus     # Complex reasoning, high-stakes decisions
 ```
 
-**Guidance:**
-- `inherit` — Recommended default. Adapts to parent's model context
-- `haiku` — Fast exploration, simple pattern matching, low-latency
-- `sonnet` — Good default. Balanced cost/capability
-- `opus` — Deeper reasoning, higher quality output, complex analysis
+**When to pin a model:**
+- `haiku` — Read-only exploration, simple pattern matching, high-volume low-stakes work. Saves cost and latency.
+- `sonnet` — Straightforward implementation, standard review, test generation, docs.
+- `opus` — Nuanced judgment, multi-step reasoning, security/architecture review, complex refactoring, irreversible decisions.
 
-**When to use `opus`:** Nuanced judgment, multi-step reasoning, security/architecture review, complex refactoring, irreversible decisions, when quality matters more than speed.
-
-**When `sonnet` is fine:** Straightforward implementation, standard review, test generation, docs.
+**When to inherit:** When the subagent should adapt to however the user is running the main session. This is the right default for most agents.
 
 ### `skills`
 
@@ -88,18 +97,78 @@ skills: tdd, debugging, type-safety
 
 If your agent needs specific skills, you must explicitly list them here.
 
-### `permissionMode`
+### `disallowedTools`
 
-Control permission handling for automation scenarios.
+Tools to deny, removed from inherited or specified list.
 
 ```yaml
-permissionMode: default           # Standard permission handling
-permissionMode: acceptEdits       # Auto-accept edit operations
-permissionMode: bypassPermissions # Skip permission prompts entirely
-permissionMode: plan              # Planning mode permissions
+disallowedTools: Write, Edit    # Deny write access even if tools inherits all
 ```
 
-Use `acceptEdits` or `bypassPermissions` for CI/CD or batch processing agents.
+### `permissionMode`
+
+Control permission handling for automation scenarios. Subagents inherit permission context from parent but can override the mode.
+
+```yaml
+permissionMode: default           # Standard permission checking with prompts
+permissionMode: acceptEdits       # Auto-accept file edits
+permissionMode: dontAsk           # Auto-deny permission prompts (explicitly allowed tools still work)
+permissionMode: delegate          # Coordination-only mode for agent team leads
+permissionMode: bypassPermissions # Skip all permission checks (use with caution)
+permissionMode: plan              # Plan mode (read-only exploration)
+```
+
+If parent uses `bypassPermissions`, this takes precedence and cannot be overridden.
+
+### `maxTurns`
+
+Maximum number of agentic turns before the subagent stops.
+
+```yaml
+maxTurns: 50
+```
+
+### `mcpServers`
+
+MCP servers available to this subagent. Each entry is a server name referencing an already-configured server or an inline definition.
+
+```yaml
+mcpServers:
+  - slack                          # Reference existing server by name
+  - my-server:                     # Inline definition
+      command: npx
+      args: ["-y", "@my/server"]
+```
+
+### `hooks`
+
+Lifecycle hooks scoped to this subagent. Only active while the subagent runs. All hook events supported. `Stop` hooks are auto-converted to `SubagentStop`.
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-command.sh"
+  PostToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "./scripts/run-linter.sh"
+```
+
+### `memory`
+
+Persistent memory scope. Gives the subagent a directory that survives across conversations for building knowledge over time.
+
+```yaml
+memory: user      # ~/.claude/agent-memory/<name>/       — all projects
+memory: project   # .claude/agent-memory/<name>/         — project-specific, shareable via git
+memory: local     # .claude/agent-memory-local/<name>/   — project-specific, not committed
+```
+
+When enabled, the first 200 lines of `MEMORY.md` in the memory directory are included in the subagent's system prompt. Read, Write, and Edit tools are automatically enabled.
 
 ### `tools`
 
@@ -142,11 +211,12 @@ agents/db-migrator.md           → subagent_type: "db-migrator"
 
 | Scope | Path | Priority |
 |-------|------|----------|
-| Project | `.claude/agents/` | Highest |
-| Personal | `~/.claude/agents/` | Medium |
-| Plugin | `<plugin>/agents/` | Lowest |
+| CLI flag | `--agents '{...}'` (JSON) | 1 (highest) |
+| Project | `.claude/agents/` | 2 |
+| Personal | `~/.claude/agents/` | 3 |
+| Plugin | `<plugin>/agents/` | 4 (lowest) |
 
-Project-level agents take precedence over personal agents. This allows team-specific agents to override personal defaults.
+When multiple subagents share the same name, the higher-priority location wins. CLI-defined agents exist only for that session and aren't saved to disk.
 
 ## Minimal Example
 

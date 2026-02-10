@@ -313,17 +313,40 @@ Executes when Claude Code sends a notification.
 **Input fields**:
 - Notification message and metadata
 
-**Matcher**: Always `*`
+**Matchers** (notification types):
+
+```json
+"permission_prompt"    // Permission dialog needs attention
+"idle_prompt"          // Claude is idle and waiting
+"auth_success"         // Authentication succeeded
+"elicitation_dialog"   // User input dialog
+"*"                    // All notification types
+```
 
 **Use cases**:
 - Send to external systems (Slack, email)
+- Desktop notifications when Claude needs attention
 - Log notifications
 - Trigger alerts
 - Update dashboards
 - Archive important messages
 - Text-to-speech announcements
 
-**Example - Slack integration**:
+**Example - Desktop notification on permission prompt**:
+
+```json
+{
+  "Notification": [{
+    "matcher": "permission_prompt",
+    "hooks": [{
+      "type": "command",
+      "command": "osascript -e 'display notification \"Claude needs permission\" with title \"Claude Code\"'"
+    }]
+  }]
+}
+```
+
+**Example - Slack integration for all notifications**:
 
 ```json
 {
@@ -348,12 +371,29 @@ Executes when main Claude agent finishes responding.
 
 **Can block**: No
 
-**Supports**: Both `command` and `prompt` hook types
+**Supports**: `command`, `prompt`, and `agent` hook types
 
 **Input fields**:
 - `reason`: Why the agent stopped
+- `stop_hook_active`: Boolean — `true` if this stop was triggered by a previous stop hook continuation
 
-**Matcher**: Always `*`
+**Matcher**: No matcher support (always fires on every stop)
+
+**Important behavior**:
+- Fires whenever Claude finishes responding, **not only at task completion**
+- Does **NOT** fire on user interrupts
+- `Stop` hooks defined in agent/skill frontmatter are automatically converted to `SubagentStop` events at runtime
+
+**Loop prevention**: Stop hooks that return `{"ok": false}` cause Claude to continue working, which triggers another Stop when done. To prevent infinite loops, check `stop_hook_active` and exit early:
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+if [ "$(echo "$INPUT" | jq -r '.stop_hook_active')" = "true" ]; then
+  exit 0  # Allow Claude to stop
+fi
+# ... rest of hook logic
+```
 
 **Use cases**:
 - Clean up temporary resources
@@ -361,14 +401,13 @@ Executes when main Claude agent finishes responding.
 - Update external systems
 - Log session metrics
 - Archive conversation
-- Verify task completion
+- Verify task completion (with loop protection)
 
 **Example - Completion notification**:
 
 ```json
 {
   "Stop": [{
-    "matcher": "*",
     "hooks": [{
       "type": "command",
       "command": "echo 'Task completed at $(date +%H:%M)'",
@@ -383,11 +422,24 @@ Executes when main Claude agent finishes responding.
 ```json
 {
   "Stop": [{
-    "matcher": "*",
     "hooks": [{
       "type": "prompt",
-      "prompt": "Review if the task was completed satisfactorily. Check for any unfinished work or follow-up items.",
+      "prompt": "Check if all tasks are complete. If not, respond with {\"ok\": false, \"reason\": \"what remains to be done\"}.",
       "timeout": 30
+    }]
+  }]
+}
+```
+
+**Example - Verify with agent (multi-step)**:
+
+```json
+{
+  "Stop": [{
+    "hooks": [{
+      "type": "agent",
+      "prompt": "Verify that all unit tests pass. Run the test suite and check the results. $ARGUMENTS",
+      "timeout": 120
     }]
   }]
 }
@@ -404,13 +456,24 @@ Executes when a subagent (Task tool) spawns.
 **Supports**: `command` hook type
 
 **Input fields**:
-- Subagent metadata
+- `agent_id`: Unique identifier for this subagent instance
+- `agent_type`: Type/name of the subagent (e.g., `Explore`, `Plan`, `general-purpose`, or custom agent name)
 
-**Matcher**: Always `*`
+**Matchers** (agent type name):
+
+```json
+"Explore"          // Built-in Explore agent
+"Plan"             // Built-in Plan agent
+"Bash"             // Built-in Bash agent
+"general-purpose"  // Built-in general-purpose agent
+"db-agent"         // Custom agent by name
+".*"               // All agent types
+```
 
 **Use cases**:
 - Track subagent spawning
 - Log subagent parameters
+- Setup resources per agent type (e.g., DB connections)
 - Monitor parallel execution
 - Resource allocation
 
@@ -419,11 +482,25 @@ Executes when a subagent (Task tool) spawns.
 ```json
 {
   "SubagentStart": [{
-    "matcher": "*",
+    "matcher": ".*",
     "hooks": [{
       "type": "command",
       "command": "./.claude/hooks/log-subagent-start.sh",
       "timeout": 2
+    }]
+  }]
+}
+```
+
+**Example - Setup for specific agent type**:
+
+```json
+{
+  "SubagentStart": [{
+    "matcher": "db-agent",
+    "hooks": [{
+      "type": "command",
+      "command": "./scripts/setup-db-connection.sh"
     }]
   }]
 }
@@ -437,17 +514,28 @@ Executes when a subagent (Task tool) finishes.
 
 **Can block**: No
 
-**Supports**: Both `command` and `prompt` hook types
+**Supports**: `command`, `prompt`, and `agent` hook types
 
 **Input fields**:
 - `reason`: Why the subagent stopped
-- Subagent result metadata
+- `agent_id`: Unique identifier of the subagent instance
+- `agent_type`: Type/name of the subagent
 
-**Matcher**: Always `*`
+**Matchers** (agent type name — same values as SubagentStart):
+
+```json
+"Explore"          // Built-in Explore agent
+"Plan"             // Built-in Plan agent
+"db-agent"         // Custom agent by name
+".*"               // All agent types
+```
+
+**Note**: `Stop` hooks defined in agent/skill frontmatter are automatically converted to `SubagentStop` events at runtime.
 
 **Use cases**:
 - Track subagent completion
 - Log subagent results
+- Cleanup resources per agent type
 - Trigger follow-up actions
 - Update metrics
 - Debug subagent behavior
@@ -457,11 +545,25 @@ Executes when a subagent (Task tool) finishes.
 ```json
 {
   "SubagentStop": [{
-    "matcher": "*",
+    "matcher": ".*",
     "hooks": [{
       "type": "command",
       "command": "./.claude/hooks/log-subagent-stop.sh",
       "timeout": 3
+    }]
+  }]
+}
+```
+
+**Example - Cleanup for specific agent type**:
+
+```json
+{
+  "SubagentStop": [{
+    "matcher": "db-agent",
+    "hooks": [{
+      "type": "command",
+      "command": "./scripts/cleanup-db-connection.sh"
     }]
   }]
 }
@@ -550,10 +652,11 @@ Executes when session ends.
 **Matchers** (reasons):
 
 ```json
-"clear"               // User ran /clear
-"logout"              // User logged out
-"prompt_input_exit"   // Exited during prompt input
-"other"               // Other reasons
+"clear"                        // User ran /clear
+"logout"                       // User logged out
+"prompt_input_exit"            // Exited during prompt input
+"bypass_permissions_disabled"  // Bypass permissions was disabled
+"other"                        // Other reasons
 ```
 
 **Use cases**:
@@ -620,22 +723,115 @@ Executes before conversation compacts.
 }
 ```
 
+## Team Coordination Hooks
+
+### TeammateIdle
+
+Executes when an agent team teammate is about to go idle.
+
+**Timing**: When a teammate finishes its turn and will go idle
+
+**Can block**: Yes (exit code 2 pattern)
+
+**Supports**: `command` hook type
+
+**Input fields**:
+- Teammate metadata
+
+**Matcher**: No matcher support (always fires)
+
+**Use cases**:
+- Reassign work to idle teammates
+- Trigger coordination logic
+- Update team status
+
+### TaskCompleted
+
+Executes when a task is being marked as completed.
+
+**Timing**: When a task status changes to completed
+
+**Can block**: Yes (exit code 2 pattern)
+
+**Supports**: `command` hook type
+
+**Input fields**:
+- Task metadata
+
+**Matcher**: No matcher support (always fires)
+
+**Use cases**:
+- Validate task completion criteria
+- Trigger follow-up tasks
+- Send notifications
+
+## Prompt and Agent Hook Types
+
+### Prompt Hooks (`type: "prompt"`)
+
+Prompt hooks send the hook prompt plus input data to a Claude model for judgment-based decisions. The model returns a structured yes/no decision.
+
+**Model**: Haiku by default. Override with the `model` field.
+
+**Response format**: The model returns JSON:
+- `{"ok": true}` — action proceeds
+- `{"ok": false, "reason": "explanation"}` — action is blocked, reason fed back to Claude
+
+**Configuration**:
+
+```json
+{
+  "type": "prompt",
+  "prompt": "Evaluate if this operation is safe. $TOOL_INPUT",
+  "model": "sonnet",
+  "timeout": 30
+}
+```
+
+**Placeholders**: `$ARGUMENTS` (full context), `$TOOL_INPUT`, `$TOOL_RESULT`, `$USER_PROMPT`
+
+### Agent Hooks (`type: "agent"`)
+
+Agent hooks spawn a subagent with tool access for multi-step verification. Unlike prompt hooks (single LLM call), agent hooks can read files, search code, and run commands.
+
+**Default timeout**: 60 seconds
+**Max turns**: Up to 50 tool-use turns
+
+**Response format**: Same `ok`/`reason` format as prompt hooks.
+
+**Configuration**:
+
+```json
+{
+  "type": "agent",
+  "prompt": "Verify all tests pass. Run the test suite. $ARGUMENTS",
+  "allowedTools": ["Read", "Grep", "Glob", "Bash"],
+  "timeout": 120
+}
+```
+
+**When to use prompt vs agent**:
+- **Prompt**: Hook input data alone is enough to decide
+- **Agent**: Need to verify against actual codebase state (read files, run tests)
+
 ## Hook Type Comparison
 
-| Event | Can Block | Prompt Type | Command Type | Common Use |
-|-------|-----------|-------------|--------------|------------|
-| PreToolUse | Yes | Yes | Yes | Validation, security |
-| PostToolUse | No | No | Yes | Formatting, linting |
-| PostToolUseFailure | No | No | Yes | Error logging |
-| PermissionRequest | Yes | Yes | Yes | Auto-approve/deny |
-| UserPromptSubmit | No | Yes | Yes | Context injection |
-| Notification | No | No | Yes | External alerts |
-| Stop | No | Yes | Yes | Cleanup, verification |
-| SubagentStart | No | No | Yes | Tracking |
-| SubagentStop | No | Yes | Yes | Logging |
-| SessionStart | No | No | Yes | Initialization |
-| SessionEnd | No | No | Yes | Cleanup |
-| PreCompact | No | No | Yes | Backup |
+| Event | Can Block | Command | Prompt | Agent | Matcher On |
+|-------|-----------|---------|--------|-------|------------|
+| PreToolUse | Yes | Yes | Yes | Yes | Tool name |
+| PostToolUse | No | Yes | No | No | Tool name |
+| PostToolUseFailure | No | Yes | No | No | Tool name |
+| PermissionRequest | Yes | Yes | Yes | No | Tool name |
+| UserPromptSubmit | No | Yes | Yes | No | (none) |
+| Notification | No | Yes | No | No | Notification type |
+| Stop | No | Yes | Yes | Yes | (none) |
+| SubagentStart | No | Yes | No | No | Agent type |
+| SubagentStop | No | Yes | Yes | No | Agent type |
+| TeammateIdle | Yes | Yes | No | No | (none) |
+| TaskCompleted | Yes | Yes | No | No | (none) |
+| SessionStart | No | Yes | No | No | Start reason |
+| SessionEnd | No | Yes | No | No | End reason |
+| PreCompact | No | Yes | No | No | Trigger type |
 
 ## Tool Use ID Correlation
 
