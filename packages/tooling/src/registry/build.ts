@@ -142,7 +142,7 @@ function buildRegistry(
 /**
  * Registry build configuration
  */
-const REGISTRY_CONFIG: RegistryBuildConfig = {
+export const REGISTRY_CONFIG: RegistryBuildConfig = {
 	version: "1.0.0",
 	blocks: {
 		claude: {
@@ -215,4 +215,6 @@ function main(): void {
 	log(`  ${blockCount} blocks, ${fileCount} files embedded`);
 }
 
-main();
+if (import.meta.main) {
+	main();
+}

@@ -14,6 +14,11 @@ describe("tsconfig.preset.json (base)", () => {
 		expect(content).toBeDefined();
 	});
 
+	test("matches snapshot", async () => {
+		const content = await Bun.file(TSCONFIG_BASE_PATH).json();
+		expect(content).toMatchSnapshot();
+	});
+
 	test("has $schema for editor support", async () => {
 		const content = await Bun.file(TSCONFIG_BASE_PATH).json();
 		expect(content.$schema).toContain("tsconfig");
@@ -53,6 +58,11 @@ describe("tsconfig.preset.bun.json", () => {
 
 		const content = await file.json();
 		expect(content).toBeDefined();
+	});
+
+	test("matches snapshot", async () => {
+		const content = await Bun.file(TSCONFIG_BUN_PATH).json();
+		expect(content).toMatchSnapshot();
 	});
 
 	test("extends the base tsconfig preset", async () => {

@@ -15,6 +15,12 @@ describe("lefthook.yml preset", () => {
 		expect(parsed).toBeDefined();
 	});
 
+	test("matches snapshot", async () => {
+		const content = await Bun.file(LEFTHOOK_PATH).text();
+		const parsed = parseYaml(content);
+		expect(parsed).toMatchSnapshot();
+	});
+
 	test("has pre-commit hooks", async () => {
 		const content = await Bun.file(LEFTHOOK_PATH).text();
 		const parsed = parseYaml(content);
