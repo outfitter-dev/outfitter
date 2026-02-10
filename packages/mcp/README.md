@@ -56,14 +56,82 @@ Creates an MCP server instance.
 interface McpServerOptions {
   name: string;           // Server name for MCP handshake
   version: string;        // Server version (semver)
-  logger?: Logger;        // Optional structured logger
+  logger?: Logger;        // Optional structured logger (BYO)
   defaultLogLevel?: McpLogLevel | null; // Default log forwarding level
 }
 
 const server = createMcpServer({
   name: "my-server",
   version: "1.0.0",
-  logger: createLogger({ name: "mcp" }),
+});
+
+// If `logger` is omitted, Outfitter logger factory defaults are used.
+```
+
+### Bring Your Own Logger (BYO)
+
+`createMcpServer` accepts any logger implementing the shared `Logger` contract.
+This lets you use the default Outfitter backend or a custom backend adapter.
+
+#### Outfitter factory backend
+
+```typescript
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
+const loggerFactory = createOutfitterLoggerFactory();
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  logger: loggerFactory.createLogger({
+    name: "mcp",
+    context: { surface: "mcp" },
+  }),
+});
+```
+
+#### Custom adapter backend
+
+```typescript
+import {
+  createLoggerFactory,
+  type Logger,
+  type LoggerAdapter,
+} from "@outfitter/contracts";
+
+type BackendOptions = { write: (line: string) => void };
+
+const adapter: LoggerAdapter<BackendOptions> = {
+  createLogger(config) {
+    const write = config.backend?.write ?? (() => {});
+    const createMethod = (level: string): Logger["info"] =>
+      ((message: string) => {
+        write(`[${level}] ${config.name}: ${message}`);
+      }) as Logger["info"];
+
+    return {
+      trace: createMethod("trace"),
+      debug: createMethod("debug"),
+      info: createMethod("info"),
+      warn: createMethod("warn"),
+      error: createMethod("error"),
+      fatal: createMethod("fatal"),
+      child: (childContext) =>
+        adapter.createLogger({
+          ...config,
+          context: { ...(config.context ?? {}), ...childContext },
+        }),
+    };
+  },
+};
+
+const loggerFactory = createLoggerFactory(adapter);
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  logger: loggerFactory.createLogger({
+    name: "mcp",
+    backend: { write: (line) => console.log(line) },
+  }),
 });
 ```
 

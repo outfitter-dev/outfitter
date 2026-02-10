@@ -332,6 +332,63 @@ const logger = createLogger({
 
 MCP-style level names are mapped automatically: `warning` to `warn`, `emergency`/`critical`/`alert` to `fatal`, `notice` to `info`.
 
+## Logger Factory + BYO Backends
+
+Use the Outfitter logger factory when wiring runtimes (CLI, MCP, daemons). It applies Outfitter defaults for log level resolution and redaction.
+
+```typescript
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
+const factory = createOutfitterLoggerFactory();
+const logger = factory.createLogger({
+  name: "mcp",
+  context: { surface: "mcp" },
+});
+
+logger.info("Tool invoked", { tool: "search" });
+await factory.flush();
+```
+
+If you need a different backend, you can use the shared contracts factory with your own adapter and still satisfy the same `Logger` interface expected by Outfitter packages.
+
+```typescript
+import {
+  createLoggerFactory,
+  type Logger,
+  type LoggerAdapter,
+} from "@outfitter/contracts";
+
+type BackendOptions = { write: (line: string) => void };
+
+const adapter: LoggerAdapter<BackendOptions> = {
+  createLogger(config) {
+    const write = config.backend?.write ?? (() => {});
+    const createMethod = (level: string): Logger["info"] =>
+      ((message: string) => {
+        write(`[${level}] ${message}`);
+      }) as Logger["info"];
+
+    return {
+      trace: createMethod("trace"),
+      debug: createMethod("debug"),
+      info: createMethod("info"),
+      warn: createMethod("warn"),
+      error: createMethod("error"),
+      fatal: createMethod("fatal"),
+      child: () => adapter.createLogger(config),
+    };
+  },
+};
+
+const customFactory = createLoggerFactory(adapter);
+const customLogger = customFactory.createLogger({
+  name: "custom-runtime",
+  backend: { write: (line) => console.log(line) },
+});
+
+customLogger.info("Hello from custom backend");
+```
+
 ## API Reference
 
 ### Functions
