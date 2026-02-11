@@ -51,6 +51,19 @@ export interface PackageVersionInfo {
   readonly breaking: boolean;
 }
 
+export interface MigrationGuide {
+  /** The @outfitter/* package name */
+  readonly packageName: string;
+  /** Currently installed version */
+  readonly fromVersion: string;
+  /** Latest available version */
+  readonly toVersion: string;
+  /** Whether this is a breaking change */
+  readonly breaking: boolean;
+  /** Migration step strings (empty if no guide exists) */
+  readonly steps: readonly string[];
+}
+
 export interface UpdateResult {
   /** Package version info */
   readonly packages: PackageVersionInfo[];
@@ -66,6 +79,8 @@ export interface UpdateResult {
   readonly appliedPackages: string[];
   /** Package names skipped because they contain breaking changes */
   readonly skippedBreaking: string[];
+  /** Structured migration guides (populated when --guide is used) */
+  readonly guides?: readonly MigrationGuide[];
 }
 
 // =============================================================================
@@ -197,6 +212,54 @@ export function readMigrationDocs(
   docs.sort((a, b) => Bun.semver.order(a.version, b.version));
 
   return docs.map((d) => d.content);
+}
+
+// =============================================================================
+// Migration Guide Builder
+// =============================================================================
+
+/**
+ * Build structured migration guides for packages with available updates.
+ *
+ * For each package with an update, produces a `MigrationGuide` with steps
+ * extracted from migration docs (if a migrations directory is available).
+ * Packages without updates or without a resolved latest version are skipped.
+ *
+ * This function is pure — no side effects beyond reading migration doc files
+ * when `migrationsDir` is provided.
+ */
+export function buildMigrationGuides(
+  packages: readonly PackageVersionInfo[],
+  migrationsDir: string | null
+): MigrationGuide[] {
+  const guides: MigrationGuide[] = [];
+
+  for (const pkg of packages) {
+    if (!pkg.updateAvailable || pkg.latest === null) continue;
+
+    let steps: string[] = [];
+
+    if (migrationsDir !== null) {
+      const shortName = pkg.name.replace("@outfitter/", "");
+      const docs = readMigrationDocs(
+        migrationsDir,
+        shortName,
+        pkg.current,
+        pkg.latest
+      );
+      steps = docs;
+    }
+
+    guides.push({
+      packageName: pkg.name,
+      fromVersion: pkg.current,
+      toVersion: pkg.latest,
+      breaking: pkg.breaking,
+      steps,
+    });
+  }
+
+  return guides;
 }
 
 // =============================================================================
@@ -432,6 +495,12 @@ export async function runUpdate(
     appliedPackages.push(...packagesToApply.map((a) => a.name));
   }
 
+  // Build structured migration guides when --guide is requested
+  const guidesData =
+    options.guide === true
+      ? buildMigrationGuides(packages, findMigrationDocsDir(cwd))
+      : undefined;
+
   return Result.ok({
     packages,
     total: packages.length,
@@ -440,6 +509,7 @@ export async function runUpdate(
     applied,
     appliedPackages,
     skippedBreaking,
+    ...(guidesData !== undefined ? { guides: guidesData } : {}),
   });
 }
 
@@ -585,8 +655,31 @@ export async function printUpdateResults(
     }
   }
 
-  // Migration guide section
-  if (options?.guide && result.updatesAvailable > 0) {
+  // Structured migration guide section (from result.guides)
+  if (options?.guide && result.guides && result.guides.length > 0) {
+    lines.push("", "=".repeat(60), "", "Migration Guide", "");
+
+    for (const guide of result.guides) {
+      const label = guide.breaking
+        ? theme.error("BREAKING")
+        : theme.success("non-breaking");
+      lines.push(
+        `${theme.info(guide.packageName)} ${guide.fromVersion} -> ${guide.toVersion} [${label}]`
+      );
+
+      if (guide.steps.length > 0) {
+        for (const step of guide.steps) {
+          lines.push(`  ${step}`);
+        }
+      } else {
+        lines.push(
+          `  ${theme.muted("No migration steps available. Check release notes.")}`
+        );
+      }
+      lines.push("");
+    }
+  } else if (options?.guide && result.updatesAvailable > 0 && !result.guides) {
+    // Fallback: --guide was requested in output but guides weren't built into the result
     const cwd = options.cwd ?? process.cwd();
     const migrationsDir = findMigrationDocsDir(cwd);
 
