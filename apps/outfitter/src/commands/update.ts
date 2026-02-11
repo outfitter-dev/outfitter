@@ -14,6 +14,7 @@ import { createTheme } from "@outfitter/cli/render";
 import type { OutputMode } from "@outfitter/cli/types";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
+import { analyzeUpdates } from "./update-planner.js";
 
 // =============================================================================
 // Types
@@ -238,7 +239,13 @@ export function readMigrationDocs(
     if (Bun.semver.order(docVersion, toVersion) > 0) continue;
 
     const filePath = join(migrationsDir, entry);
-    const content = readFileSync(filePath, "utf-8");
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch {
+      // Skip unreadable migration docs
+      continue;
+    }
     // Strip frontmatter
     const body = content.replace(/^---\n[\s\S]*?\n---\n*/, "").trim();
     if (body) {
@@ -279,25 +286,39 @@ export async function runUpdate(
   }
 
   // Query npm for latest versions in parallel
-  const packages: PackageVersionInfo[] = await Promise.all(
-    installed.map(async (pkg) => {
-      const latest = await getLatestVersion(pkg.name);
-      const updateAvailable =
-        latest !== null && Bun.semver.order(latest, pkg.version) > 0;
-      const breaking =
-        updateAvailable && latest !== null
-          ? getMajor(latest) > getMajor(pkg.version)
-          : false;
+  const latestVersions = new Map<
+    string,
+    { version: string; breaking: boolean }
+  >();
+  const installedMap = new Map<string, string>();
+  const npmFailures = new Set<string>();
 
-      return {
-        name: pkg.name,
-        current: pkg.version,
-        latest,
-        updateAvailable,
-        breaking,
-      };
+  await Promise.all(
+    installed.map(async (pkg) => {
+      installedMap.set(pkg.name, pkg.version);
+      const latest = await getLatestVersion(pkg.name);
+      if (latest !== null) {
+        // npm doesn't tell us if it's breaking; the planner infers from semver
+        latestVersions.set(pkg.name, { version: latest, breaking: false });
+      } else {
+        npmFailures.add(pkg.name);
+      }
     })
   );
+
+  // Use the pure planner for analysis
+  const plan = analyzeUpdates(installedMap, latestVersions);
+
+  // Map planner output back to the existing PackageVersionInfo shape
+  const packages: PackageVersionInfo[] = plan.packages.map((action) => ({
+    name: action.name,
+    current: action.currentVersion,
+    latest: npmFailures.has(action.name) ? null : action.latestVersion,
+    updateAvailable:
+      action.classification === "upgradableNonBreaking" ||
+      action.classification === "upgradableBreaking",
+    breaking: action.breaking,
+  }));
 
   const updatesAvailable = packages.filter((p) => p.updateAvailable).length;
   const hasBreaking = packages.some((p) => p.breaking);
@@ -308,11 +329,6 @@ export async function runUpdate(
     updatesAvailable,
     hasBreaking,
   });
-}
-
-function getMajor(version: string): number {
-  const parts = version.split(".");
-  return Number.parseInt(parts[0] ?? "0", 10);
 }
 
 /**
@@ -356,9 +372,9 @@ export async function printUpdateResults(
     } else if (!pkg.updateAvailable) {
       migration = theme.muted("up to date");
     } else if (pkg.breaking) {
-      migration = theme.error("major (breaking)");
+      migration = theme.error("breaking");
     } else {
-      migration = theme.success("minor (no breaking)");
+      migration = theme.success("non-breaking");
     }
 
     lines.push(`  ${name} ${current} ${available} ${migration}`);
