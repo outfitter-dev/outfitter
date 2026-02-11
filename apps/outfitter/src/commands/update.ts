@@ -15,6 +15,11 @@ import type { OutputMode } from "@outfitter/cli/types";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
 import { analyzeUpdates } from "./update-planner.js";
+import {
+  applyUpdatesToWorkspace,
+  getInstalledPackagesFromWorkspace,
+  runInstall,
+} from "./update-workspace.js";
 
 // =============================================================================
 // Types
@@ -64,81 +69,6 @@ export interface UpdateResult {
 // =============================================================================
 // Version Detection
 // =============================================================================
-
-interface PackageDeps {
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-
-/**
- * Extract @outfitter/* packages from package.json at the given cwd.
- */
-function getInstalledPackages(
-  cwd: string
-): Result<{ name: string; version: string }[], OutfitterError> {
-  const pkgPath = join(cwd, "package.json");
-
-  if (!existsSync(pkgPath)) {
-    return Result.err(InternalError.create("No package.json found", { cwd }));
-  }
-
-  let raw: string;
-  try {
-    raw = readFileSync(pkgPath, "utf-8");
-  } catch {
-    return Result.err(
-      InternalError.create("Failed to read package.json", { cwd })
-    );
-  }
-
-  let pkg: PackageDeps;
-  try {
-    pkg = JSON.parse(raw);
-  } catch {
-    return Result.err(
-      InternalError.create("Invalid JSON in package.json", { cwd })
-    );
-  }
-
-  const deps = {
-    ...(pkg.dependencies ?? {}),
-    ...(pkg.devDependencies ?? {}),
-  };
-  const packages: { name: string; version: string }[] = [];
-
-  for (const [name, version] of Object.entries(deps)) {
-    if (!name.startsWith("@outfitter/")) continue;
-
-    // Handle workspace protocol: workspace:* → skip, workspace:^0.1.0 → extract
-    if (version.startsWith("workspace:")) {
-      const wsVersion = version.slice("workspace:".length);
-      if (wsVersion === "*" || wsVersion === "~" || wsVersion === "^") {
-        continue;
-      }
-      const wsClean = wsVersion.replace(/^[\^~>=<]+/, "");
-      try {
-        if (!Bun.semver.satisfies(wsClean, "*")) continue;
-      } catch {
-        continue;
-      }
-      packages.push({ name, version: wsClean });
-      continue;
-    }
-
-    const cleaned = version.replace(/^[\^~>=<]+/, "");
-
-    // Skip non-semver versions (file:, git+ssh:, etc.)
-    try {
-      if (!Bun.semver.satisfies(cleaned, "*")) continue;
-    } catch {
-      continue;
-    }
-
-    packages.push({ name, version: cleaned });
-  }
-
-  return Result.ok(packages);
-}
 
 /**
  * Query npm registry for the latest version of a package.
@@ -396,11 +326,16 @@ export async function runUpdate(
   options: UpdateOptions
 ): Promise<Result<UpdateResult, OutfitterError>> {
   const cwd = resolve(options.cwd);
-  const installedResult = getInstalledPackages(cwd);
 
-  if (installedResult.isErr()) return installedResult;
+  // Workspace-aware scanning: detect workspace root and collect all manifests
+  const scanResult = getInstalledPackagesFromWorkspace(cwd);
+  if (scanResult.isErr()) return scanResult;
 
-  const installed = installedResult.value;
+  const scan = scanResult.value;
+  const installed = scan.packages;
+
+  // Determine the effective root for install (workspace root or cwd)
+  const installRoot = scan.workspaceRoot ?? cwd;
 
   if (installed.length === 0) {
     return Result.ok({
@@ -466,8 +401,23 @@ export async function runUpdate(
 
   // Apply non-breaking updates if --apply is set
   if (options.apply && nonBreakingUpgradable.length > 0) {
-    const applyResult = await applyUpdates(cwd, nonBreakingUpgradable);
-    if (applyResult.isErr()) return applyResult;
+    if (scan.workspaceRoot !== null) {
+      // Workspace mode: update all manifests in one pass, then install once at root
+      const applyResult = await applyUpdatesToWorkspace(
+        scan.manifestPaths,
+        scan.manifestsByPackage,
+        nonBreakingUpgradable
+      );
+      if (applyResult.isErr()) return applyResult;
+
+      const installResult = await runInstall(installRoot);
+      if (installResult.isErr()) return installResult;
+    } else {
+      // Single-package mode: applyUpdates handles both write and install
+      const applyResult = await applyUpdates(cwd, nonBreakingUpgradable);
+      if (applyResult.isErr()) return applyResult;
+    }
+
     applied = true;
     appliedPackages.push(...nonBreakingUpgradable.map((a) => a.name));
   }
