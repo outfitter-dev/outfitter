@@ -1,6 +1,6 @@
 ---
 name: quartermaster
-description: "Builds and validates agentic development components — plugins, agents, skills, commands, hooks, rules, and configuration. Use when creating, scaffolding, or validating extensibility components, choosing between component types, or structuring a plugin for distribution."
+description: "Builds and validates agentic development components for Claude Code and compatible agent platforms. Covers Claude plugins (plugin.json, marketplace.json), agents (.claude/agents/*.md, plugins/*/agents/*.md), skills (SKILL.md, scripts/, references/), slash commands (.claude/commands/*.md), hooks (hooks.json, PreToolUse/PostToolUse), rules (.claude/rules/*.md), and settings (.claude/settings.json). Use when creating, scaffolding, validating, or troubleshooting any .claude/**/*.* extensibility component, structuring a plugin for distribution, or choosing between component types."
 model: opus
 permissionMode: plan
 skills:
