@@ -485,11 +485,11 @@ When gerund feels awkward: `pdf-processing`, `spreadsheet-analysis`, `code-revie
 
 ### Avoid
 
-| Name | Problem |
-|------|---------|
-| `helper`, `utils`, `tools`, `stuff` | Vague — says nothing about what the skill does |
-| `documents`, `data`, `files`, `code` | Too generic — could mean anything |
-| `anthropic-helper`, `claude-tools`, `claude-assistant` | Reserved words — `anthropic` and `claude` are reserved |
+| Good | Bad | Why |
+|------|-----|-----|
+| `processing-pdfs` | `helper`, `utils` | Vague — says nothing about what the skill does |
+| `api-integration` | `data`, `files`, `code` | Too generic — could mean anything |
+| `skill-creator` | `claude-tools`, `anthropic-helper` | Reserved — `anthropic` and `claude` are reserved words |
 
 ### File Naming
 
