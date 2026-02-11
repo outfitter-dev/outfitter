@@ -9,6 +9,12 @@ type Handler<TInput, TOutput, TError extends OutfitterError> = (
   input: TInput,
   ctx: HandlerContext
 ) => Promise<Result<TOutput, TError>>;
+
+// Synchronous variant for operations that don't need async
+type SyncHandler<TInput, TOutput, TError extends OutfitterError> = (
+  input: TInput,
+  ctx: HandlerContext
+) => Result<TOutput, TError>;
 ```
 
 ## Type Parameters
@@ -165,9 +171,29 @@ const handler: Handler<unknown, Output, ValidationError | OtherError> = async (r
 };
 ```
 
-## Context Usage
+## HandlerContext
 
-Access cross-cutting concerns via context:
+All cross-cutting concerns are passed via `HandlerContext`:
+
+```typescript
+interface HandlerContext {
+  signal?: AbortSignal;           // Cancellation propagation
+  requestId: string;              // UUIDv7 for tracing
+  logger: Logger;                 // Structured logger with redaction
+  config?: ResolvedConfig;        // Resolved configuration values
+  workspaceRoot?: string;         // Workspace root path, if detected
+  cwd: string;                    // Current working directory
+  env: Record<string, string | undefined>; // Environment variables (filtered)
+}
+
+// ResolvedConfig interface (provided by @outfitter/config)
+interface ResolvedConfig {
+  get<T>(key: string): T | undefined;
+  getRequired<T>(key: string): T;
+}
+```
+
+### Context Usage
 
 ```typescript
 const handler: Handler<Input, Output, Error> = async (input, ctx) => {
@@ -177,16 +203,25 @@ const handler: Handler<Input, Output, Error> = async (input, ctx) => {
   // Request tracing
   const requestId = ctx.requestId;
 
-  // Configuration
-  const apiUrl = ctx.config.apiUrl;
+  // Configuration (typed access)
+  const apiUrl = ctx.config?.get<string>("apiUrl");
+  const port = ctx.config?.getRequired<number>("port");
+
+  // Current working directory
+  const resolvedPath = path.resolve(ctx.cwd, input.filename);
+
+  // Environment variables
+  const token = ctx.env["API_TOKEN"];
 
   // Cancellation
-  if (ctx.signal.aborted) {
+  if (ctx.signal?.aborted) {
     return Result.err(CancelledError.create("Operation cancelled"));
   }
 
   // Workspace paths
-  const filePath = path.join(ctx.workspaceRoot, input.filename);
+  if (ctx.workspaceRoot) {
+    const filePath = path.join(ctx.workspaceRoot, input.filename);
+  }
 };
 ```
 

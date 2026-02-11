@@ -9,7 +9,8 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 | `validation` | 1 | 400 | `ValidationError` | Invalid input, schema failures, constraint violations |
 | `validation` | 1 | 400 | `AmbiguousError` | Multiple matches found, user must disambiguate |
 | `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
-| `conflict` | 3 | 409 | `ConflictError` | Already exists, version mismatch, optimistic lock failure |
+| `conflict` | 3 | 409 | `AlreadyExistsError` | Resource already exists (inverse of NotFoundError) |
+| `conflict` | 3 | 409 | `ConflictError` | Version mismatch, optimistic lock failure, concurrent modification |
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
 | `timeout` | 5 | 504 | `TimeoutError` | Operation took too long |
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
@@ -40,6 +41,7 @@ Most error classes provide a `create()` method that auto-generates messages. Thi
 import {
   ValidationError,
   NotFoundError,
+  AlreadyExistsError,
   AmbiguousError,
   ConflictError,
   PermissionError,
@@ -57,10 +59,13 @@ ValidationError.create("email", "format invalid");
 NotFoundError.create("user", "user-123");
 // → { message: "user not found: user-123", resourceType: "user", resourceId: "user-123" }
 
+AlreadyExistsError.create("file", "notes/meeting.md");
+// → { message: "file already exists: notes/meeting.md", resourceType: "file", resourceId: "notes/meeting.md" }
+
 AmbiguousError.create("heading", ["Introduction", "Intro to APIs"]);
 // → { message: "Ambiguous heading: 2 matches found", candidates: [...] }
 
-ConflictError.create("User already exists");
+ConflictError.create("ETag mismatch: expected abc, got def");
 PermissionError.create("Cannot delete admin users");
 TimeoutError.create("database query", 5000);
 RateLimitError.create("API rate limit exceeded", 30);
@@ -73,8 +78,8 @@ CancelledError.create("Operation cancelled by user");
 Some factories accept an optional `context` parameter for structured metadata. Others have specialized signatures:
 
 ```typescript
-// context parameter (ValidationError, AmbiguousError, NotFoundError, ConflictError,
-// PermissionError, NetworkError, InternalError)
+// context parameter (ValidationError, AmbiguousError, NotFoundError, AlreadyExistsError,
+// ConflictError, PermissionError, NetworkError, InternalError)
 ValidationError.create("email", "format invalid", { received: "not-an-email" });
 NotFoundError.create("user", "user-123", { searchedIn: "active_users" });
 InternalError.create("Unexpected failure", { cause: originalError });
@@ -175,13 +180,40 @@ error.resourceType;  // "user"
 error.resourceId;    // "user-123"
 ```
 
+### AlreadyExistsError
+
+The inverse of `NotFoundError` — use when a create/write operation fails because the resource already exists:
+
+```typescript
+import { AlreadyExistsError } from "@outfitter/contracts";
+
+// Factory (preferred)
+AlreadyExistsError.create("file", "notes/meeting.md");
+// → message: "file already exists: notes/meeting.md"
+
+// With context
+AlreadyExistsError.create("user", "user-123", { email: "alice@example.com" });
+
+// Access properties (mirrors NotFoundError)
+error.resourceType;  // "file"
+error.resourceId;    // "notes/meeting.md"
+error.category;      // "conflict" (exit 3, HTTP 409)
+```
+
+**Choosing between AlreadyExistsError and ConflictError:**
+- Resource already exists? Use `AlreadyExistsError`
+- Version/ETag mismatch? Use `ConflictError`
+- Concurrent modification? Use `ConflictError`
+
 ### ConflictError
+
+For general state conflicts — version mismatch, concurrent modification, ETag failures:
 
 ```typescript
 import { ConflictError } from "@outfitter/contracts";
 
 // Factory (preferred)
-ConflictError.create("User already exists");
+ConflictError.create("ETag mismatch: expected abc, got def");
 
 // With context
 ConflictError.create("Version mismatch", { expected: 5, actual: 7 });
@@ -290,6 +322,9 @@ if (result.isErr()) {
     case "NotFoundError":
       console.log(`${result.error.resourceType} not found`);
       break;
+    case "AlreadyExistsError":
+      console.log(`${result.error.resourceType} already exists: ${result.error.resourceId}`);
+      break;
     case "ConflictError":
       console.log("Conflict:", result.error.message);
       break;
@@ -319,26 +354,21 @@ res.status(status).json({ error: error.message });
 
 ## ERROR_CODES Constant
 
-Use `ERROR_CODES` for type-safe category validation and iteration:
+Use `ERROR_CODES` for granular numeric error codes within each category:
 
 ```typescript
-import { ERROR_CODES, type ErrorCategory } from "@outfitter/contracts";
+import { ERROR_CODES, type ErrorCode } from "@outfitter/contracts";
 
-// ERROR_CODES is a readonly object mapping category names to exit codes
-ERROR_CODES.validation;  // 1
-ERROR_CODES.not_found;   // 2
-ERROR_CODES.conflict;    // 3
-// ... etc
+// ERROR_CODES maps categories to specific numeric codes
+ERROR_CODES.validation.FIELD_REQUIRED;    // 1001
+ERROR_CODES.validation.INVALID_FORMAT;    // 1002
+ERROR_CODES.not_found.RESOURCE_NOT_FOUND; // 2001
+ERROR_CODES.conflict.ALREADY_EXISTS;      // 3001
+ERROR_CODES.conflict.VERSION_MISMATCH;    // 3002
+ERROR_CODES.internal.UNEXPECTED_STATE;    // 8001
 
-// Validate a category exists
-const isValidCategory = (cat: string): cat is ErrorCategory => {
-  return cat in ERROR_CODES;
-};
-
-// Iterate over all categories
-for (const [category, exitCode] of Object.entries(ERROR_CODES)) {
-  console.log(`${category}: exit ${exitCode}`);
-}
+// ErrorCode is the union of all numeric codes
+const code: ErrorCode = ERROR_CODES.validation.FIELD_REQUIRED;
 ```
 
 ## Domain-Specific Error Factories

@@ -1,7 +1,7 @@
 ---
 name: outfitter-atlas
 version: 0.2.0
-description: "Your trail map for @outfitter/* packages. Patterns, templates, and the thinking behind transport-agnostic handler systems. Use when working with @outfitter/*, Result types, Handler contract, error taxonomy, or when Result, Handler, ValidationError, NotFoundError, OutfitterError, or package names like contracts, cli, mcp, daemon, config, logging are mentioned."
+description: "Generates patterns, templates, and guides for @outfitter/* packages. Covers transport-agnostic handler systems, Result types, error taxonomy, and package APIs. Use when working with @outfitter/*, Result types, Handler contract, error taxonomy, or when Result, Handler, ValidationError, NotFoundError, OutfitterError, or package names like contracts, cli, mcp, daemon, config, logging are mentioned."
 ---
 
 # Outfitter Atlas
@@ -113,7 +113,7 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│  META: @outfitter/kit (version coordination across all tiers) │
+│  META: @outfitter/kit (foundation facade: re-exports contracts + types) │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -131,7 +131,7 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 | `@outfitter/index` | SQLite FTS5, WAL mode, BM25 ranking | Full-text search indexing |
 | `@outfitter/testing` | Test harnesses, fixtures | Testing (always) |
 | `@outfitter/tooling` | Biome, TypeScript, Lefthook presets | Project setup (dev dependency) |
-| `@outfitter/kit` | Version coordination meta-package | Ensuring compatible versions |
+| `@outfitter/kit` | Foundation facade (re-exports contracts + types) | Single import for core types |
 
 ## Trail Map: Designing a System
 
@@ -178,7 +178,8 @@ Ten categories. Memorize the exit codes—you'll use them.
 |----------|------|------|-------|------|
 | `validation` | 1 | 400 | `ValidationError` | Bad input, schema failures |
 | `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
-| `conflict` | 3 | 409 | `ConflictError` | Already exists, version mismatch |
+| `conflict` | 3 | 409 | `AlreadyExistsError` | Resource already exists |
+| `conflict` | 3 | 409 | `ConflictError` | Version mismatch, concurrent modification |
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action |
 | `timeout` | 5 | 504 | `TimeoutError` | Took too long |
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests |
@@ -257,7 +258,7 @@ bun add @outfitter/index     # Full-text search
 # Dev dependencies
 bun add -D @outfitter/testing @outfitter/tooling
 
-# Version coordination (optional)
+# Foundation facade (optional — re-exports contracts + types)
 bun add @outfitter/kit
 ```
 
