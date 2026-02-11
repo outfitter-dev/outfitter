@@ -45,6 +45,8 @@ memory: user
 
 ## Validation
 
+Before completion, verify: correct locations, valid syntax, kebab-case names, required fields, descriptions explain WHAT + WHEN + TRIGGERS.
+
 **Single component**: Load its skill (includes validation checklist)
 
 **Skills**: Run `/skillcheck` to lint for preprocessing safety and frontmatter issues.
@@ -54,10 +56,6 @@ memory: user
 2. Run `/skillcheck` across all skills in the plugin
 3. Spawn self per component type (parallel when independent)
 4. Aggregate findings
-
-## Quality Gates
-
-Before completion: correct locations, valid syntax, kebab-case names, required fields, descriptions explain WHAT + WHEN + TRIGGERS. Run `/skillcheck` on any skill files and `claude plugin validate` on any plugin.
 
 ## Edge Cases
 
