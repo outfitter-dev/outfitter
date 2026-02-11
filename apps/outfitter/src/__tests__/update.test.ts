@@ -186,7 +186,7 @@ describe("update command output structure", () => {
 describe("findMigrationDocsDir", () => {
   test("finds docs relative to cwd", () => {
     // Create the migration docs directory structure in the temp dir
-    const migrationsDir = join(tempDir, "plugins/kit/shared/migrations");
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(join(migrationsDir, "README.md"), "# Migrations");
 
@@ -198,7 +198,7 @@ describe("findMigrationDocsDir", () => {
   test("walks up parent directories to find monorepo root", () => {
     // Create a "monorepo root" with migrations dir
     const monoRoot = join(tempDir, "monorepo");
-    const migrationsDir = join(monoRoot, "plugins/kit/shared/migrations");
+    const migrationsDir = join(monoRoot, "plugins/outfitter/shared/migrations");
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(join(migrationsDir, "README.md"), "# Migrations");
 

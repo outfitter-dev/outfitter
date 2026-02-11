@@ -157,7 +157,7 @@ async function getLatestVersion(name: string): Promise<string | null> {
 
 /** Known relative locations for migration docs. */
 const MIGRATION_DOC_PATHS = [
-  "plugins/kit/shared/migrations",
+  "plugins/outfitter/shared/migrations",
   "node_modules/@outfitter/kit/shared/migrations",
 ];
 

@@ -74,9 +74,9 @@ Example using 6 keys:
 ```markdown
 - **IDENTITY:** You are an adoption guide for `@outfitter/*` packages
 - **TASK:** Help users initialize Outfitter patterns in their codebase.
-- **PROCESS:** Follow the `outfitter-init` skill's 4-stage workflow.
-- **PATTERNS:** Reference `outfitter-fieldguide` for conversion patterns.
-- **OUTPUT:** Produce a plan at `.agents/plans/outfitter-init/`.
+- **PROCESS:** Follow the `outfitter-start` skill's staged workflow.
+- **PATTERNS:** Reference `outfitter-atlas` for conversion patterns.
+- **OUTPUT:** Produce a plan at `.agents/plans/outfitter-start/`.
 - **COMPLETION:** All handlers return Result types and compliance is verified.
 ```
 

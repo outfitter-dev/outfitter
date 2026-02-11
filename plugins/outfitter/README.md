@@ -16,32 +16,32 @@ Skills and workflows for working with @outfitter/* packages. Patterns, templates
 
 | Skill | Purpose |
 |-------|---------|
-| `outfitter-fieldguide` | Complete guide: patterns, templates, architecture, package reference |
-| `outfitter-init` | Initialize Stack patterns in any codebase (greenfield or migration) |
+| `outfitter-atlas` | Complete guide: patterns, templates, architecture, package reference |
+| `outfitter-start` | Start with Outfitter — scaffold new projects or adopt existing codebases |
+| `outfitter-update` | Update @outfitter/* packages with migration guidance |
 | `outfitter-check` | Verify Stack compliance with severity-ranked reports |
-| `outfitter-feedback` | Report issues to outfitter-dev/outfitter |
+| `outfitter-issue` | Report issues to outfitter-dev/outfitter |
 | `debug-outfitter` | Systematic debugging with investigation reports |
 
 ## Agents
 
 | Agent | Purpose |
 |-------|---------|
-| `stacker` | Skill-aware generalist for all stack work |
-| `outfitter-debugger` | Systematic debugger with investigation reports |
+| `outfitter` | Generalist for all @outfitter/* work — routes to the right skill |
+| `tracker` | Debug @outfitter/* issues with evidence-based investigation |
 
 ## Commands
 
 | Command | Purpose |
 |---------|---------|
-| `/adopt [path]` | Phased Outfitter Stack adoption workflow |
 | `/audit [path]` | Quick compliance audit of file or directory |
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `skills/outfitter-init/scripts/setup.sh` | Initialize Stack adoption plan |
-| `skills/outfitter-feedback/scripts/create-issue.ts` | Create GitHub issues for stack feedback |
+| `skills/outfitter-start/scripts/setup.sh` | Initialize Stack adoption plan |
+| `skills/outfitter-issue/scripts/create-issue.ts` | Create GitHub issues for stack feedback |
 
 ## Quick Start
 
@@ -51,7 +51,7 @@ Skills and workflows for working with @outfitter/* packages. Patterns, templates
 Tell me about Outfitter Stack patterns
 ```
 
-The `outfitter-fieldguide` skill activates automatically.
+The `outfitter-atlas` skill activates automatically.
 
 ### Create a Handler
 
@@ -59,7 +59,7 @@ The `outfitter-fieldguide` skill activates automatically.
 Create a handler for fetching user profiles
 ```
 
-The `outfitter-fieldguide` skill provides patterns and templates.
+The `outfitter-atlas` skill provides patterns and templates.
 
 ### Review Code
 
@@ -76,16 +76,16 @@ Or use the command:
 ### Adopt Outfitter Stack
 
 ```
-/adopt
+Help me adopt Outfitter Stack patterns
 ```
 
-The `/adopt` command orchestrates a phased workflow:
-1. **Init** — Scan and plan with `outfitter-init`
-2. **Foundation** — Scaffold infrastructure with `outfitter-fieldguide`
-3. **Convert** — TDD handler conversion with `tdd` + `outfitter-fieldguide`
-4. **Adapters** — Wire CLI/MCP with `outfitter-fieldguide`
+The `outfitter-start` skill orchestrates a phased workflow:
+1. **Scan** — Detect adoption candidates and generate staged plan
+2. **Foundation** — Scaffold infrastructure with `outfitter-atlas`
+3. **Convert** — TDD handler conversion with `tdd-fieldguide` + `outfitter-atlas`
+4. **Adapters** — Wire CLI/MCP with `outfitter-atlas`
 5. **Check** — Verify compliance with `outfitter-check`
-6. **Feedback** — Report issues with `outfitter-feedback`
+6. **Feedback** — Report issues with `outfitter-issue`
 
 ## Stack Overview
 

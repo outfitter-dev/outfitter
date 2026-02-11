@@ -22,7 +22,7 @@ Investigate issues methodically and produce a structured report documenting:
 **DO:**
 - Gather evidence before forming hypotheses
 - Use the diagnostic patterns in this skill
-- Reference `outfitter-fieldguide` for correct patterns
+- Reference `outfitter-atlas` for correct patterns
 - Assign a confidence level to your diagnosis
 - Produce a Debug Report at the end
 
@@ -34,12 +34,12 @@ Investigate issues methodically and produce a structured report documenting:
 
 ## Steps
 
-1. Load the `outfitter-fieldguide` skill to gain expertise in the Outfitter packages.
+1. Load the `outfitter-atlas` skill to gain expertise in the Outfitter packages.
 2. [Collect evidence](#stage-1-evidence-collection) — gather symptoms before hypothesizing
 3. [Categorize the issue](#stage-2-categorize-the-issue) — identify which area is affected
 4. [Investigate](#stage-3-targeted-investigation) — use category-specific diagnostics
 5. Produce a [Debug Report](#stage-4-document-findings) using [TEMPLATE.md](TEMPLATE.md)
-6. If the issue is in Outfitter's packages themselves, [escalate](#when-to-escalate) via `outfitter-feedback`
+6. If the issue is in Outfitter's packages themselves, [escalate](#when-to-escalate) via `outfitter-issue`
 
 ## Stage 1: Evidence Collection
 
@@ -239,7 +239,7 @@ Assess confidence in your diagnosis:
 Based on diagnosis, recommend:
 - **Code fix** — Provide specific fix with before/after
 - **Pattern guidance** — Reference correct pattern from fieldguide
-- **Escalation** — If issue is in Outfitter itself, use `outfitter-feedback`
+- **Escalation** — If issue is in Outfitter itself, use `outfitter-issue`
 
 Produce a Debug Report using [TEMPLATE.md](TEMPLATE.md).
 
@@ -248,11 +248,11 @@ Produce a Debug Report using [TEMPLATE.md](TEMPLATE.md).
 If investigation reveals an issue in @outfitter/* packages themselves (not user code):
 
 1. Document the issue clearly in the Debug Report
-2. Recommend using `outfitter-feedback` skill to file an issue
+2. Recommend using `outfitter-issue` skill to file an issue
 3. Include reproduction steps and expected vs actual behavior
 
 ## Related Skills
 
-- `outfitter-fieldguide` — Correct patterns reference
+- `outfitter-atlas` — Correct patterns reference
 - `outfitter-check` — Compliance verification
-- `outfitter-feedback` — Report issues to Outfitter team
+- `outfitter-issue` — Report issues to Outfitter team

@@ -19,7 +19,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 ## Constraints
 
 **DO:**
-- Load `outfitter-fieldguide` first for pattern knowledge
+- Load `outfitter-atlas` first for pattern knowledge
 - Scan systematically using the diagnostic commands
 - Rank findings by severity (Critical > High > Medium > Low)
 - Reference fieldguide patterns for fixes
@@ -33,7 +33,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 
 ## Steps
 
-1. Load `outfitter-fieldguide` for pattern expertise
+1. Load `outfitter-atlas` for pattern expertise
 2. [Determine scope](#step-1-determine-scope) — what are we checking?
 3. [Run diagnostics](#step-2-run-diagnostics) — systematic anti-pattern scan
 4. [Categorize findings](#step-3-categorize-findings) — rank by severity
@@ -167,12 +167,12 @@ Point to fieldguide patterns for each issue type:
 
 | Issue | Fix Pattern |
 |-------|-------------|
-| `throw new` | [patterns/conversion.md](../outfitter-fieldguide/patterns/conversion.md) |
-| `try/catch` | [patterns/results.md](../outfitter-fieldguide/patterns/results.md) |
-| `console.log` | [patterns/logging.md](../outfitter-fieldguide/patterns/logging.md) |
-| Hardcoded paths | [patterns/file-ops.md](../outfitter-fieldguide/patterns/file-ops.md) |
-| Custom errors | [patterns/errors.md](../outfitter-fieldguide/patterns/errors.md) |
-| Missing context | [patterns/handler.md](../outfitter-fieldguide/patterns/handler.md) |
+| `throw new` | [patterns/conversion.md](../outfitter-atlas/patterns/conversion.md) |
+| `try/catch` | [patterns/results.md](../outfitter-atlas/patterns/results.md) |
+| `console.log` | [patterns/logging.md](../outfitter-atlas/patterns/logging.md) |
+| Hardcoded paths | [patterns/file-ops.md](../outfitter-atlas/patterns/file-ops.md) |
+| Custom errors | [patterns/errors.md](../outfitter-atlas/patterns/errors.md) |
+| Missing context | [patterns/handler.md](../outfitter-atlas/patterns/handler.md) |
 
 ## Quick Check
 
@@ -210,6 +210,6 @@ The command:
 
 ## Related Skills
 
-- `outfitter-fieldguide` — Patterns and fix guidance (load first)
-- `outfitter-init` — Full adoption workflow with staged plan
+- `outfitter-atlas` — Patterns and fix guidance (load first)
+- `outfitter-start` — Full adoption workflow with staged plan
 - `debug-outfitter` — Deep investigation of specific issues
