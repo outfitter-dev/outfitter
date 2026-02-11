@@ -1,6 +1,6 @@
 ---
-name: skills-check
-description: "Validates skill quality — preprocessing safety, frontmatter, line counts, references. Use when checking skills, validating SKILL.md, or when skills-check, lint skill, or validate skill are mentioned."
+name: skillcheck
+description: "Validates skill quality — preprocessing safety, frontmatter, line counts, references. Use when checking skills, validating SKILL.md, or when skillcheck, lint skill, or validate skill are mentioned."
 metadata:
   version: "1.0.0"
   author: outfitter
@@ -20,7 +20,7 @@ Validate skill quality across one or more skill directories.
 
 Scan SKILL.md files for <bang>`command` patterns that trigger Claude Code's preprocessor unintentionally:
 
-!`bun ${CLAUDE_PLUGIN_ROOT}/skills/skills-check/scripts/lint-preprocessing.ts ${ARGUMENTS:-${CLAUDE_PLUGIN_ROOT}}`
+!`bun ${CLAUDE_PLUGIN_ROOT}/skills/skillcheck/scripts/lint-preprocessing.ts ${ARGUMENTS:-${CLAUDE_PLUGIN_ROOT}}`
 
 ## Interpreting Results
 
