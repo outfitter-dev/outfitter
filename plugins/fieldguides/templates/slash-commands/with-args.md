@@ -1,11 +1,11 @@
 ---
-description: [YOUR_DESCRIPTION] (e.g., "Fix a specific issue by number")
-argument-hint: [YOUR_ARG_HINT] (e.g., "<issue-number>" or "<file1> <file2>")
+description: {YOUR_DESCRIPTION} (e.g., "Fix a specific issue by number")
+argument-hint: {YOUR_ARG_HINT} (e.g., "<issue-number>" or "<file1> <file2>")
 ---
 
-# [YOUR_COMMAND_NAME]
+# {YOUR_COMMAND_NAME}
 
-[YOUR_PROMPT_WITH_ARGUMENTS]
+{YOUR_PROMPT_WITH_ARGUMENTS}
 
 ## Examples:
 
@@ -35,4 +35,4 @@ Compare @$1 with @$2 and summarize differences
 
 ## Your implementation:
 
-[REPLACE WITH YOUR COMMAND LOGIC]
+{REPLACE_WITH_YOUR_COMMAND_LOGIC}

@@ -1,9 +1,9 @@
 ---
-description: [YOUR_DESCRIPTION] (e.g., "Create a git commit from staged changes")
-allowed-tools: [YOUR_ALLOWED_TOOLS] (e.g., "Bash(git *)")
+description: {YOUR_DESCRIPTION} (e.g., "Create a git commit from staged changes")
+allowed-tools: {YOUR_ALLOWED_TOOLS} (e.g., "Bash(git *)")
 ---
 
-# [YOUR_COMMAND_NAME]
+# {YOUR_COMMAND_NAME}
 
 ## Context
 
@@ -11,7 +11,7 @@ Current branch: !`git branch --show-current`
 
 Recent commits: !`git log --oneline -5`
 
-[YOUR_BASH_COMMANDS]
+{YOUR_BASH_COMMANDS}
 Examples:
 - Git diff: !`git diff --staged`
 - Git status: !`git status`
@@ -21,7 +21,7 @@ Examples:
 
 ## Task
 
-[YOUR_INSTRUCTIONS_USING_THE_BASH_OUTPUT_ABOVE]
+{YOUR_INSTRUCTIONS_USING_THE_BASH_OUTPUT_ABOVE}
 
 Example:
 Based on the staged changes shown above, create a single commit with:

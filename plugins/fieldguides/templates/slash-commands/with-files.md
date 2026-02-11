@@ -1,15 +1,15 @@
 ---
-description: [YOUR_DESCRIPTION] (e.g., "Analyze and explain a specific file")
-argument-hint: [YOUR_ARG_HINT] (e.g., "<file-path>")
+description: {YOUR_DESCRIPTION} (e.g., "Analyze and explain a specific file")
+argument-hint: {YOUR_ARG_HINT} (e.g., "<file-path>")
 ---
 
-# [YOUR_COMMAND_NAME]
+# {YOUR_COMMAND_NAME}
 
 ## File Contents
 
 **File**: @$1
 
-[ADDITIONAL_FILE_REFERENCES]
+{ADDITIONAL_FILE_REFERENCES}
 Examples:
 - Single file: @src/utils/helpers.ts
 - Multiple files: @$1 and @$2
@@ -17,7 +17,7 @@ Examples:
 
 ## Analysis
 
-[YOUR_INSTRUCTIONS_FOR_ANALYZING_THE_FILE_CONTENTS]
+{YOUR_INSTRUCTIONS_FOR_ANALYZING_THE_FILE_CONTENTS}
 
 Example:
 Provide a detailed explanation of:

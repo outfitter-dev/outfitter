@@ -360,18 +360,18 @@ Emoji conventions from official Anthropic skills.
 
 | Emoji | Meaning | Example |
 |-------|---------|---------|
-| `[icon]` | Guidelines/checklist | `[checklist] MCP Best Practices` |
-| `[lightning]` | Quick guide | `[lightning] Quick Start` |
-| `[python]` | Python-specific | `[python] Python Setup` |
-| `[check]` | Evaluation/testing | `[check] Test Suite` |
+| `📋` | Guidelines/checklist | `📋 MCP Best Practices` |
+| `⚡` | Quick guide | `⚡ Quick Start` |
+| `🐍` | Python-specific | `🐍 Python Setup` |
+| `✅` | Evaluation/testing | `✅ Test Suite` |
 
 **In context:**
 
 ```markdown
 Load these resources as needed:
-- [checklist] [MCP Best Practices](references/best-practices.md)
-- [lightning] [Quick Start](references/quick-start.md)
-- [python] [Python Client](references/python.md)
+- 📋 [MCP Best Practices](references/best-practices.md)
+- ⚡ [Quick Start](references/quick-start.md)
+- 🐍 [Python Client](references/python.md)
 ```
 
 ### Status Indicators
@@ -379,9 +379,9 @@ Load these resources as needed:
 ```markdown
 ## Implementation Status
 
-- [check] Core API endpoints
-- [check] Authentication flow
-- [pending] Webhook handlers
+- ✅ Core API endpoints
+- ✅ Authentication flow
+- ⏳ Webhook handlers
 - [x] Rate limiting
 ```
 

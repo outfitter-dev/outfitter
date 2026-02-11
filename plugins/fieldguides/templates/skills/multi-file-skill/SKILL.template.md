@@ -1,54 +1,54 @@
 ---
-name: [YOUR_SKILL_NAME]
-description: [YOUR_DESCRIPTION] - Be specific about WHAT the skill does and WHEN to use it. Include trigger keywords. Example: "Test REST APIs with validation and reporting. Use when testing APIs, endpoints, HTTP services, or when users mention API testing, endpoint validation, or integration testing."
+name: {YOUR_SKILL_NAME}
+description: {YOUR_DESCRIPTION} - Be specific about WHAT the skill does and WHEN to use it. Include trigger keywords. Example: "Test REST APIs with validation and reporting. Use when testing APIs, endpoints, HTTP services, or when users mention API testing, endpoint validation, or integration testing."
 allowed-tools: Read, Grep, Glob, Bash
 version: 1.0.0
 ---
 
-# [YOUR_SKILL_NAME]
+# {YOUR_SKILL_NAME}
 
-[Brief overview - 1-2 sentences]
+{ brief overview - 1-2 sentences }
 
 ## Overview
 
-This skill provides comprehensive [CAPABILITY]:
-- **Feature 1**: [Description]
-- **Feature 2**: [Description]
-- **Feature 3**: [Description]
+This skill provides comprehensive {CAPABILITY}:
+- **Feature 1**: { description }
+- **Feature 2**: { description }
+- **Feature 3**: { description }
 
 ## Quick Start
 
 ### Basic Example
 
-```[language]
+```{language}
 [SIMPLE_EXAMPLE]
 ```
 
 ### Key Concepts
 
-1. **Concept 1**: [Explanation]
-2. **Concept 2**: [Explanation]
-3. **Concept 3**: [Explanation]
+1. **Concept 1**: { explanation }
+2. **Concept 2**: { explanation }
+3. **Concept 3**: { explanation }
 
 ## Core Workflows
 
-### Workflow 1: [Name]
+### Workflow 1: { name }
 
-1. [Step 1 description]
-2. [Step 2 description]
-3. [Step 3 description]
+1. { step 1 description }
+2. { step 2 description }
+3. { step 3 description }
 
-```[language]
+```{language}
 [EXAMPLE_CODE]
 ```
 
-### Workflow 2: [Name]
+### Workflow 2: { name }
 
-1. [Step 1 description]
-2. [Step 2 description]
-3. [Step 3 description]
+1. { step 1 description }
+2. { step 2 description }
+3. { step 3 description }
 
-```[language]
+```{language}
 [EXAMPLE_CODE]
 ```
 
@@ -63,47 +63,47 @@ For advanced patterns and detailed API reference, see:
 This skill restricts tool usage to: **Read, Grep, Glob, Bash**
 
 Why these restrictions?
-- **Read/Grep/Glob**: [Explanation]
-- **Bash**: [Explanation]
-- **No Write/Edit**: [Explanation]
+- **Read/Grep/Glob**: { explanation }
+- **Bash**: { explanation }
+- **No Write/Edit**: { explanation }
 
 ## Best Practices
 
 1. **Practice 1**
-   - What: [Description]
-   - Why: [Reasoning]
-   - How: [Implementation tip]
+   - What: { description }
+   - Why: { reasoning }
+   - How: { implementation tip }
 
 2. **Practice 2**
-   - What: [Description]
-   - Why: [Reasoning]
-   - How: [Implementation tip]
+   - What: { description }
+   - Why: { reasoning }
+   - How: { implementation tip }
 
 ## Common Patterns
 
-### Pattern 1: [Name]
+### Pattern 1: { name }
 
-```[language]
+```{language}
 [CODE_EXAMPLE]
 ```
 
-**Use when**: [Scenario description]
+**Use when**: { scenario description }
 
-### Pattern 2: [Name]
+### Pattern 2: { name }
 
-```[language]
+```{language}
 [CODE_EXAMPLE]
 ```
 
-**Use when**: [Scenario description]
+**Use when**: { scenario description }
 
 ## Troubleshooting
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| [Problem 1] | [Cause] | [Fix] |
-| [Problem 2] | [Cause] | [Fix] |
-| [Problem 3] | [Cause] | [Fix] |
+| { problem 1 } | { cause } | { fix } |
+| { problem 2 } | { cause } | { fix } |
+| { problem 3 } | { cause } | { fix } |
 
 ## Requirements
 
@@ -136,6 +136,6 @@ This SKILL.md provides the essentials. For deeper information:
 ## Version History
 
 - **1.0.0**: Initial release
-  - [Feature 1]
-  - [Feature 2]
-  - [Feature 3]
+  - { feature 1 }
+  - { feature 2 }
+  - { feature 3 }

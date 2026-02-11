@@ -1,6 +1,6 @@
-# [YOUR_SKILL_NAME] - Reference Documentation
+# {YOUR_SKILL_NAME} - Reference Documentation
 
-Complete API documentation and advanced patterns for [YOUR_SKILL_NAME].
+Complete API documentation and advanced patterns for {YOUR_SKILL_NAME}.
 
 ## Table of Contents
 
@@ -15,47 +15,47 @@ Complete API documentation and advanced patterns for [YOUR_SKILL_NAME].
 
 ## API Reference
 
-### Module 1: [Name]
+### Module 1: { name }
 
 #### Function 1
 
-```[language]
+```{language}
 [FUNCTION_SIGNATURE]
 ```
 
 **Parameters**:
-- `param1` ([type]): [Description]
-- `param2` ([type], optional): [Description]
+- `param1` ({ type }): { description }
+- `param2` ({ type }, optional): { description }
 
-**Returns**: ([type]) [Description]
+**Returns**: ({ type }) { description }
 
 **Example**:
 
-```[language]
+```{language}
 [USAGE_EXAMPLE]
 ```
 
 #### Function 2
 
-```[language]
+```{language}
 [FUNCTION_SIGNATURE]
 ```
 
 **Parameters**:
-- `param1` ([type]): [Description]
-- `param2` ([type], optional): [Description]
+- `param1` ({ type }): { description }
+- `param2` ({ type }, optional): { description }
 
-**Returns**: ([type]) [Description]
+**Returns**: ({ type }) { description }
 
 **Example**:
 
-```[language]
+```{language}
 [USAGE_EXAMPLE]
 ```
 
-### Module 2: [Name]
+### Module 2: { name }
 
-[Similar structure for other modules/functions]
+{ similar structure for other modules/functions }
 
 ---
 
@@ -63,9 +63,9 @@ Complete API documentation and advanced patterns for [YOUR_SKILL_NAME].
 
 ### Configuration File
 
-Create a config file at `[path/to/config]`:
+Create a config file at `{ path/to/config }`:
 
-```[format]
+```{format}
 [CONFIGURATION_EXAMPLE]
 ```
 
@@ -73,51 +73,51 @@ Create a config file at `[path/to/config]`:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `option1` | [type] | [value] | [Description] |
-| `option2` | [type] | [value] | [Description] |
-| `option3` | [type] | [value] | [Description] |
+| `option1` | { type } | { value } | { description } |
+| `option2` | { type } | { value } | { description } |
+| `option3` | { type } | { value } | { description } |
 
 ### Environment Variables
 
-- `VAR_1`: [Description]
-- `VAR_2`: [Description]
-- `VAR_3`: [Description]
+- `VAR_1`: { description }
+- `VAR_2`: { description }
+- `VAR_3`: { description }
 
 ---
 
 ## Advanced Patterns
 
-### Pattern 1: [Name]
+### Pattern 1: { name }
 
-**Use case**: [Description]
+**Use case**: { description }
 
 **Implementation**:
 
-```[language]
+```{language}
 [DETAILED_CODE_EXAMPLE]
 ```
 
 **Explanation**:
-1. [Step 1 explanation]
-2. [Step 2 explanation]
-3. [Step 3 explanation]
+1. { step 1 explanation }
+2. { step 2 explanation }
+3. { step 3 explanation }
 
 **Trade-offs**:
-- ✅ Pros: [List]
-- ❌ Cons: [List]
+- ✅ Pros: { list }
+- ❌ Cons: { list }
 
-### Pattern 2: [Name]
+### Pattern 2: { name }
 
-**Use case**: [Description]
+**Use case**: { description }
 
 **Implementation**:
 
-```[language]
+```{language}
 [DETAILED_CODE_EXAMPLE]
 ```
 
 **Explanation**:
-[Detailed explanation]
+{ detailed explanation }
 
 ---
 
@@ -125,28 +125,28 @@ Create a config file at `[path/to/config]`:
 
 ### Optimization Strategies
 
-1. **Strategy 1**: [Name]
-   - Approach: [Description]
-   - Impact: [Performance improvement]
-   - Trade-offs: [Considerations]
+1. **Strategy 1**: { name }
+   - Approach: { description }
+   - Impact: { performance improvement }
+   - Trade-offs: { considerations }
 
-2. **Strategy 2**: [Name]
-   - Approach: [Description]
-   - Impact: [Performance improvement]
-   - Trade-offs: [Considerations]
+2. **Strategy 2**: { name }
+   - Approach: { description }
+   - Impact: { performance improvement }
+   - Trade-offs: { considerations }
 
 ### Benchmarks
 
 | Operation | Time | Memory | Notes |
 |-----------|------|--------|-------|
-| [Op 1] | [Time] | [Mem] | [Notes] |
-| [Op 2] | [Time] | [Mem] | [Notes] |
+| { op 1 } | { time } | { mem } | { notes } |
+| { op 2 } | { time } | { mem } | { notes } |
 
 ### Best Practices for Performance
 
-- **Practice 1**: [Description and reasoning]
-- **Practice 2**: [Description and reasoning]
-- **Practice 3**: [Description and reasoning]
+- **Practice 1**: { description and reasoning }
+- **Practice 2**: { description and reasoning }
+- **Practice 3**: { description and reasoning }
 
 ---
 
@@ -154,17 +154,17 @@ Create a config file at `[path/to/config]`:
 
 ### Security Considerations
 
-1. **Consideration 1**: [Name]
-   - Risk: [Description]
-   - Mitigation: [Solution]
+1. **Consideration 1**: { name }
+   - Risk: { description }
+   - Mitigation: { solution }
 
-2. **Consideration 2**: [Name]
-   - Risk: [Description]
-   - Mitigation: [Solution]
+2. **Consideration 2**: { name }
+   - Risk: { description }
+   - Mitigation: { solution }
 
 ### Secure Coding Practices
 
-```[language]
+```{language}
 // ❌ INSECURE - Don't do this
 [BAD_EXAMPLE]
 
@@ -174,9 +174,9 @@ Create a config file at `[path/to/config]`:
 
 ### Input Validation
 
-[Description of validation requirements and patterns]
+{ description of validation requirements and patterns }
 
-```[language]
+```{language}
 [VALIDATION_EXAMPLE]
 ```
 
@@ -184,31 +184,31 @@ Create a config file at `[path/to/config]`:
 
 ## Integration
 
-### Integration with [System 1]
+### Integration with { system 1 }
 
 **Setup**:
 
-```[language]
+```{language}
 [INTEGRATION_CODE]
 ```
 
 **Configuration**:
 
-```[format]
+```{format}
 [INTEGRATION_CONFIG]
 ```
 
-### Integration with [System 2]
+### Integration with { system 2 }
 
 **Setup**:
 
-```[language]
+```{language}
 [INTEGRATION_CODE]
 ```
 
 **Configuration**:
 
-```[format]
+```{format}
 [INTEGRATION_CONFIG]
 ```
 
@@ -221,7 +221,7 @@ Create a config file at `[path/to/config]`:
 ```
 
 **Other CI Systems**:
-[Instructions for other systems]
+{ instructions for other systems }
 
 ---
 
@@ -231,17 +231,17 @@ Create a config file at `[path/to/config]`:
 
 | Code | Message | Cause | Solution |
 |------|---------|-------|----------|
-| [Code] | [Msg] | [Cause] | [Solution] |
+| { code } | { msg } | { cause } | { solution } |
 
 ### Glossary
 
-- **Term 1**: [Definition]
-- **Term 2**: [Definition]
-- **Term 3**: [Definition]
+- **Term 1**: { definition }
+- **Term 2**: { definition }
+- **Term 3**: { definition }
 
 ### Resources
 
-- Official Documentation: [URL]
-- Community Forum: [URL]
-- Issue Tracker: [URL]
-- Contributing Guide: [URL]
+- Official Documentation: { url }
+- Community Forum: { url }
+- Issue Tracker: { url }
+- Contributing Guide: { url }

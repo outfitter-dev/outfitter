@@ -1,6 +1,6 @@
-# [YOUR_SKILL_NAME] - Examples
+# {YOUR_SKILL_NAME} - Examples
 
-Real-world examples and use cases for [YOUR_SKILL_NAME].
+Real-world examples and use cases for {YOUR_SKILL_NAME}.
 
 ## Table of Contents
 
@@ -14,13 +14,13 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 ## Basic Examples
 
-### Example 1: [Simple Use Case]
+### Example 1: { simple use case }
 
-**Scenario**: [Description of the problem this solves]
+**Scenario**: { description of the problem this solves }
 
 **Solution**:
 
-```[language]
+```{language}
 [CODE_EXAMPLE_WITH_DETAILED_COMMENTS]
 ```
 
@@ -31,18 +31,18 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 ```
 
 **Key Takeaways**:
-- [Learning point 1]
-- [Learning point 2]
+- { learning point 1 }
+- { learning point 2 }
 
 ---
 
-### Example 2: [Another Simple Use Case]
+### Example 2: { another simple use case }
 
-**Scenario**: [Description]
+**Scenario**: { description }
 
 **Solution**:
 
-```[language]
+```{language}
 [CODE_EXAMPLE]
 ```
 
@@ -56,38 +56,38 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 ## Intermediate Examples
 
-### Example 3: [More Complex Use Case]
+### Example 3: { more complex use case }
 
-**Scenario**: [Description of a more complex problem]
+**Scenario**: { description of a more complex problem }
 
 **Step 1: Setup**
 
-```[language]
+```{language}
 [SETUP_CODE]
 ```
 
 **Step 2: Implementation**
 
-```[language]
+```{language}
 [IMPLEMENTATION_CODE]
 ```
 
 **Step 3: Usage**
 
-```[language]
+```{language}
 [USAGE_CODE]
 ```
 
 **Complete Example**:
 
-```[language]
+```{language}
 [FULL_CODE_WITH_COMMENTS]
 ```
 
 **Explanation**:
-1. [Explanation of step 1]
-2. [Explanation of step 2]
-3. [Explanation of step 3]
+1. { explanation of step 1 }
+2. { explanation of step 2 }
+3. { explanation of step 3 }
 
 **Output**:
 
@@ -97,33 +97,33 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 ---
 
-### Example 4: [Error Handling Example]
+### Example 4: { error handling example }
 
-**Scenario**: [Description including potential errors]
+**Scenario**: { description including potential errors }
 
 **Solution**:
 
-```[language]
+```{language}
 [CODE_WITH_ERROR_HANDLING]
 ```
 
 **Testing the Error Handling**:
 
-```[language]
+```{language}
 [TEST_CODE_FOR_ERRORS]
 ```
 
 **Key Points**:
-- [Error handling insight 1]
-- [Error handling insight 2]
+- { error handling insight 1 }
+- { error handling insight 2 }
 
 ---
 
 ## Advanced Examples
 
-### Example 5: [Complex Real-World Scenario]
+### Example 5: { complex real-world scenario }
 
-**Scenario**: [Detailed description of a production use case]
+**Scenario**: { detailed description of a production use case }
 
 **Architecture Overview**:
 
@@ -133,27 +133,27 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 **Implementation**:
 
-**File 1**: `[filename]`
+**File 1**: `{ filename }`
 
-```[language]
+```{language}
 [CODE_FOR_FILE_1]
 ```
 
-**File 2**: `[filename]`
+**File 2**: `{ filename }`
 
-```[language]
+```{language}
 [CODE_FOR_FILE_2]
 ```
 
-**File 3**: `[filename]`
+**File 3**: `{ filename }`
 
-```[language]
+```{language}
 [CODE_FOR_FILE_3]
 ```
 
-**Configuration**: `[config-file]`
+**Configuration**: `{ config-file }`
 
-```[format]
+```{format}
 [CONFIGURATION]
 ```
 
@@ -164,47 +164,47 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 ```
 
 **Expected Behavior**:
-[Detailed description of what should happen]
+{ detailed description of what should happen }
 
 **Trade-offs and Considerations**:
-- ✅ **Advantages**: [List]
-- ⚠️  **Considerations**: [List]
-- 🔧 **Customization Options**: [List]
+- ✅ **Advantages**: { list }
+- ⚠️  **Considerations**: { list }
+- 🔧 **Customization Options**: { list }
 
 ---
 
-### Example 6: [Performance-Optimized Example]
+### Example 6: { performance-optimized example }
 
-**Scenario**: [Description of performance-critical use case]
+**Scenario**: { description of performance-critical use case }
 
 **Naive Implementation** (slower):
 
-```[language]
+```{language}
 [NAIVE_CODE]
 ```
 
-*Performance*: [Benchmark]
+*Performance*: { benchmark }
 
 **Optimized Implementation** (faster):
 
-```[language]
+```{language}
 [OPTIMIZED_CODE]
 ```
 
-*Performance*: [Benchmark]
+*Performance*: { benchmark }
 
 **Explanation of Optimizations**:
-1. [Optimization 1 and why it helps]
-2. [Optimization 2 and why it helps]
-3. [Optimization 3 and why it helps]
+1. { optimization 1 and why it helps }
+2. { optimization 2 and why it helps }
+3. { optimization 3 and why it helps }
 
 ---
 
 ## Integration Examples
 
-### Example 7: Integration with [External System 1]
+### Example 7: Integration with { external system 1 }
 
-**Scenario**: [Description of integration need]
+**Scenario**: { description of integration need }
 
 **Setup**:
 
@@ -214,19 +214,19 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 **Implementation**:
 
-```[language]
+```{language}
 [INTEGRATION_CODE]
 ```
 
 **Usage**:
 
-```[language]
+```{language}
 [USAGE_EXAMPLE]
 ```
 
 **Testing**:
 
-```[language]
+```{language}
 [TEST_CODE]
 ```
 
@@ -234,7 +234,7 @@ Real-world examples and use cases for [YOUR_SKILL_NAME].
 
 ### Example 8: CI/CD Pipeline Integration
 
-**Scenario**: Automating [task] in CI/CD pipeline
+**Scenario**: Automating { task } in CI/CD pipeline
 
 **GitHub Actions Workflow**:
 
@@ -268,68 +268,68 @@ jobs:
 
 ## Common Scenarios
 
-### Scenario 1: [Common Problem]
+### Scenario 1: { common problem }
 
-**Problem**: [Description]
+**Problem**: { description }
 
 **Solution**:
 
-```[language]
+```{language}
 [SOLUTION_CODE]
 ```
 
 **Why This Works**:
-[Explanation]
+{ explanation }
 
 ---
 
-### Scenario 2: [Another Common Problem]
+### Scenario 2: { another common problem }
 
-**Problem**: [Description]
+**Problem**: { description }
 
 **Wrong Approach** ❌:
 
-```[language]
+```{language}
 [WRONG_CODE]
 ```
 
-*Why this is wrong*: [Explanation]
+*Why this is wrong*: { explanation }
 
 **Correct Approach** ✅:
 
-```[language]
+```{language}
 [CORRECT_CODE]
 ```
 
-*Why this is better*: [Explanation]
+*Why this is better*: { explanation }
 
 ---
 
-### Scenario 3: [Migration Example]
+### Scenario 3: { migration example }
 
-**Problem**: Migrating from [old approach] to [new approach]
+**Problem**: Migrating from { old approach } to { new approach }
 
 **Before** (old way):
 
-```[language]
+```{language}
 [OLD_CODE]
 ```
 
 **After** (new way):
 
-```[language]
+```{language}
 [NEW_CODE]
 ```
 
 **Migration Steps**:
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+1. { step 1 }
+2. { step 2 }
+3. { step 3 }
 
 **Benefits**:
-- [Benefit 1]
-- [Benefit 2]
-- [Benefit 3]
+- { benefit 1 }
+- { benefit 2 }
+- { benefit 3 }
 
 ---
 
@@ -337,7 +337,7 @@ jobs:
 
 ### Common Patterns Cheat Sheet
 
-```[language]
+```{language}
 // Pattern 1: [Name]
 [CODE_SNIPPET]
 
@@ -350,21 +350,21 @@ jobs:
 
 ### Troubleshooting Examples
 
-**Issue**: [Common error message]
+**Issue**: { common error message }
 
 ```
 [ERROR_OUTPUT]
 ```
 
-**Solution**: [Fix with code example]
+**Solution**: { fix with code example }
 
-**Issue**: [Another common error]
+**Issue**: { another common error }
 
 ```
 [ERROR_OUTPUT]
 ```
 
-**Solution**: [Fix with code example]
+**Solution**: { fix with code example }
 
 ---
 
@@ -372,15 +372,15 @@ jobs:
 
 Examples from real-world usage:
 
-1. **[Project Name]**: [Description and link]
-2. **[Project Name]**: [Description and link]
-3. **[Project Name]**: [Description and link]
+1. **{ project name }**: { description and link }
+2. **{ project name }**: { description and link }
+3. **{ project name }**: { description and link }
 
 ## Contributing Examples
 
 Have a great example? Contribute it by:
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+1. { step 1 }
+2. { step 2 }
+3. { step 3 }
 
-[Link to contribution guidelines]
+{ link to contribution guidelines }

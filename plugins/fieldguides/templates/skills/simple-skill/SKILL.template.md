@@ -1,39 +1,39 @@
 ---
-name: [YOUR_SKILL_NAME]
-description: [YOUR_DESCRIPTION] - Be specific about WHAT the skill does and WHEN to use it. Include trigger keywords users might mention. Example: "Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction."
+name: {YOUR_SKILL_NAME}
+description: {YOUR_DESCRIPTION} - Be specific about WHAT the skill does and WHEN to use it. Include trigger keywords users might mention. Example: "Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction."
 version: 1.0.0
 ---
 
-# [YOUR_SKILL_NAME]
+# {YOUR_SKILL_NAME}
 
-[Brief overview of what this skill does and its purpose]
+{ brief overview of what this skill does and its purpose }
 
 ## Overview
 
-This skill provides [CORE_CAPABILITY]:
-- **Feature 1**: [Description]
-- **Feature 2**: [Description]
-- **Feature 3**: [Description]
+This skill provides {CORE_CAPABILITY}:
+- **Feature 1**: { description }
+- **Feature 2**: { description }
+- **Feature 3**: { description }
 
 ## Quick Start
 
 ### Basic Usage
 
-```[language]
+```{language}
 [CODE_EXAMPLE]
 ```
 
 ### Common Patterns
 
-1. **Pattern 1**: [Description]
+1. **Pattern 1**: { description }
 
-   ```[language]
+   ```{language}
    [CODE_EXAMPLE]
    ```
 
-2. **Pattern 2**: [Description]
+2. **Pattern 2**: { description }
 
-   ```[language]
+   ```{language}
    [CODE_EXAMPLE]
    ```
 
@@ -41,35 +41,35 @@ This skill provides [CORE_CAPABILITY]:
 
 When this skill is activated, follow these steps:
 
-1. **Step 1**: [Clear instruction]
+1. **Step 1**: { clear instruction }
    - Detail 1
    - Detail 2
 
-2. **Step 2**: [Clear instruction]
+2. **Step 2**: { clear instruction }
    - Detail 1
    - Detail 2
 
-3. **Step 3**: [Clear instruction]
+3. **Step 3**: { clear instruction }
    - Detail 1
    - Detail 2
 
 ## Best Practices
 
-- **Practice 1**: [Description and reasoning]
-- **Practice 2**: [Description and reasoning]
-- **Practice 3**: [Description and reasoning]
+- **Practice 1**: { description and reasoning }
+- **Practice 2**: { description and reasoning }
+- **Practice 3**: { description and reasoning }
 
 ## Examples
 
-### Example 1: [Use Case Name]
+### Example 1: { use case name }
 
-```[language]
+```{language}
 [CODE_EXAMPLE_WITH_COMMENTS]
 ```
 
-### Example 2: [Use Case Name]
+### Example 2: { use case name }
 
-```[language]
+```{language}
 [CODE_EXAMPLE_WITH_COMMENTS]
 ```
 
@@ -78,18 +78,18 @@ When this skill is activated, follow these steps:
 Common issues and solutions:
 
 1. **Error Type 1**
-   - Cause: [Description]
-   - Solution: [Fix]
+   - Cause: { description }
+   - Solution: { fix }
 
 2. **Error Type 2**
-   - Cause: [Description]
-   - Solution: [Fix]
+   - Cause: { description }
+   - Solution: { fix }
 
 ## Requirements
 
 This skill requires:
-- [Dependency 1]: [Version or details]
-- [Dependency 2]: [Version or details]
+- { dependency 1 }: { version or details }
+- { dependency 2 }: { version or details }
 
 Installation:
 
@@ -99,11 +99,11 @@ Installation:
 
 ## Tips
 
-- 💡 **Tip 1**: [Helpful advice]
-- 💡 **Tip 2**: [Helpful advice]
-- 💡 **Tip 3**: [Helpful advice]
+- 💡 **Tip 1**: { helpful advice }
+- 💡 **Tip 2**: { helpful advice }
+- 💡 **Tip 3**: { helpful advice }
 
 ## Related Skills
 
-- **[skill-name]**: [Brief description of relationship]
-- **[skill-name]**: [Brief description of relationship]
+- /skill-name: { brief description of relationship }
+- /skill-name: { brief description of relationship }

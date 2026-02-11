@@ -57,10 +57,10 @@ Adjust tone based on severity:
 > "Interesting approach. Help me understand why X over the more common Y?"
 
 ◆ **Caution** (Moderate risk):
-> "This pattern often leads to [specific problems]. Are we solving for something I'm not seeing?"
+> "This pattern often leads to { specific problems }. Are we solving for something I'm not seeing?"
 
 ◈ **Hazard** (High risk):
-> "This violates [principle] and will likely cause [specific issues]. I strongly recommend [alternative]. If we must proceed, we need to document the reasoning."
+> "This violates { principle } and will likely cause { specific issues }. I strongly recommend { alternative }. If we must proceed, we need to document the reasoning."
 
 </escalation>
 

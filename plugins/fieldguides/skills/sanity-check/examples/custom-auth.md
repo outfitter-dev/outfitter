@@ -140,7 +140,7 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 **If "We need full control over user data"**:
 > "BetterAuth and Lucia are self-hosted - you maintain complete control over user data in your own database. Clerk also offers self-hosted enterprise options. Control doesn't require building from scratch."
 
-**If "We have unique requirements for [specific flow]"**:
+**If "We have unique requirements for { specific flow }"**:
 > "What's the specific requirement? Most auth providers support custom flows:
 > - **Custom fields**: Clerk metadata, BetterAuth custom schema
 > - **Custom verification**: Email/SMS hooks available

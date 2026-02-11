@@ -229,7 +229,7 @@ Before starting, you need:
 [Detailed instructions for step 1]
 
 ```code
-[Code example]
+{ code example }
 ```
 
 ### Step 2: [Action]
@@ -237,7 +237,7 @@ Before starting, you need:
 [Detailed instructions for step 2]
 
 ```code
-[Code example]
+{ code example }
 ```
 
 ## Common Patterns
@@ -247,7 +247,7 @@ Before starting, you need:
 [When to use this pattern and why]
 
 ```code
-[Example code]
+{ example code }
 ```
 
 ### Pattern 2: [Use Case]
@@ -255,7 +255,7 @@ Before starting, you need:
 [When to use this pattern and why]
 
 ```code
-[Example code]
+{ example code }
 ```
 
 ## Best Practices
@@ -273,7 +273,7 @@ Before starting, you need:
 **Solution**: [How to fix]
 
 ```code
-[Fix example]
+{ fix example }
 ```
 
 ## Next Steps

@@ -1,4 +1,4 @@
-# [Feature/Component Name]
+# { feature/component name }
 
 Brief description of what this covers and why it matters.
 

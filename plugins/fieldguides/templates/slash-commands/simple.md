@@ -1,10 +1,10 @@
 ---
-description: [YOUR_DESCRIPTION] (e.g., "Review code for best practices and potential issues")
+description: {YOUR_DESCRIPTION} (e.g., "Review code for best practices and potential issues")
 ---
 
-# [YOUR_COMMAND_NAME]
+# {YOUR_COMMAND_NAME}
 
-[YOUR_PROMPT_INSTRUCTIONS]
+{YOUR_PROMPT_INSTRUCTIONS}
 
 Example:
 Review the following code for:

@@ -1,26 +1,26 @@
 ---
-name: [YOUR_SKILL_NAME]
-description: [YOUR_DESCRIPTION] - Be specific about what the skill does, when to use it, and include trigger keywords. Example: "Deploy applications to production with automated testing, health checks, and rollback capabilities. Use when deploying, shipping to production, or when users mention deployment, release, or going live."
+name: {YOUR_SKILL_NAME}
+description: {YOUR_DESCRIPTION} - Be specific about what the skill does, when to use it, and include trigger keywords. Example: "Deploy applications to production with automated testing, health checks, and rollback capabilities. Use when deploying, shipping to production, or when users mention deployment, release, or going live."
 allowed-tools: Read, Bash
 version: 1.0.0
 ---
 
-# [YOUR_SKILL_NAME]
+# {YOUR_SKILL_NAME}
 
-[Brief overview of the skill and its purpose]
+{ brief overview of the skill and its purpose }
 
 ## Overview
 
-This skill provides automated [CAPABILITY] using helper scripts:
-- **Feature 1**: [Description]
-- **Feature 2**: [Description]
-- **Feature 3**: [Description]
+This skill provides automated {CAPABILITY} using helper scripts:
+- **Feature 1**: { description }
+- **Feature 2**: { description }
+- **Feature 3**: { description }
 
 ## Quick Start
 
 ### Using the Helper Script
 
-The main script is located at `scripts/[script-name].sh`:
+The main script is located at `scripts/{script-name}.sh`:
 
 ```bash
 # Basic usage
@@ -32,9 +32,9 @@ The main script is located at `scripts/[script-name].sh`:
 
 ## Core Workflows
 
-### Workflow 1: [Name]
+### Workflow 1: { name }
 
-**When to use**: [Description of scenario]
+**When to use**: { description of scenario }
 
 **Steps**:
 1. Run the helper script:
@@ -44,9 +44,9 @@ The main script is located at `scripts/[script-name].sh`:
    ```
 
 2. The script will:
-   - [Action 1]
-   - [Action 2]
-   - [Action 3]
+   - { action 1 }
+   - { action 2 }
+   - { action 3 }
 
 3. Verify the result:
 
@@ -61,18 +61,18 @@ The main script is located at `scripts/[script-name].sh`:
 [COMPLETE_EXAMPLE]
 ```
 
-### Workflow 2: [Name]
+### Workflow 2: { name }
 
-**When to use**: [Description]
+**When to use**: { description }
 
 **Steps**:
-[Instructions for second workflow using scripts]
+{ instructions for second workflow using scripts }
 
 ## Helper Scripts
 
-### scripts/[script-name].sh
+### scripts/{script-name}.sh
 
-**Purpose**: [Description of what the script does]
+**Purpose**: { description of what the script does }
 
 **Usage**:
 
@@ -81,8 +81,8 @@ The main script is located at `scripts/[script-name].sh`:
 ```
 
 **Arguments**:
-- `arg1`: [Description]
-- `arg2` (optional): [Description]
+- `arg1`: { description }
+- `arg2` (optional): { description }
 
 **Example**:
 
@@ -96,9 +96,9 @@ The main script is located at `scripts/[script-name].sh`:
 [EXPECTED_OUTPUT]
 ```
 
-### scripts/[another-script].sh
+### scripts/{another-script}.sh
 
-**Purpose**: [Description]
+**Purpose**: { description }
 
 **Usage**:
 
@@ -107,8 +107,8 @@ The main script is located at `scripts/[script-name].sh`:
 ```
 
 **Options**:
-- `--option1`: [Description]
-- `--option2`: [Description]
+- `--option1`: { description }
+- `--option2`: { description }
 
 ## Instructions for Claude
 
@@ -158,14 +158,14 @@ All scripts follow these conventions:
 - **Exit code 0**: Success
 - **Exit code 1**: General error
 - **Exit code 2**: Invalid arguments
-- **Exit code 3**: [Custom error type]
+- **Exit code 3**: { custom error type }
 
 ### Environment Variables
 
 Scripts may use these environment variables:
-- `VAR_1`: [Description]
-- `VAR_2`: [Description]
-- `VAR_3`: [Description]
+- `VAR_1`: { description }
+- `VAR_2`: { description }
+- `VAR_3`: { description }
 
 Set them in `.env` or pass inline:
 
@@ -175,9 +175,9 @@ VAR_1=value ./scripts/[script-name].sh
 
 ## Examples
 
-### Example 1: [Common Use Case]
+### Example 1: { common use case }
 
-**Scenario**: [Description]
+**Scenario**: { description }
 
 **Commands**:
 
@@ -198,9 +198,9 @@ VAR_1=value ./scripts/[script-name].sh
 [OUTPUT_EXAMPLE]
 ```
 
-### Example 2: [Another Use Case]
+### Example 2: { another use case }
 
-**Scenario**: [Description]
+**Scenario**: { description }
 
 **Commands**:
 
@@ -254,8 +254,8 @@ direnv allow
 ## Requirements
 
 **System Requirements**:
-- [Requirement 1]
-- [Requirement 2]
+- { requirement 1 }
+- { requirement 2 }
 
 **Dependencies**:
 
@@ -284,5 +284,5 @@ skill-directory/
 
 ## Related Skills
 
-- **[related-skill-1]**: [Description]
-- **[related-skill-2]**: [Description]
+- /related-skill-1: { description }
+- /related-skill-2: { description }

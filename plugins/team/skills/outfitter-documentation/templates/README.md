@@ -1,8 +1,8 @@
-# Project Name
+# { project name }
 
 One-line description of what this does.
 
-## Why [Project Name]?
+## Why { project name }?
 
 Brief explanation of the problem this solves (2-3 sentences).
 
