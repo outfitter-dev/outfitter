@@ -14,6 +14,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { Manifest } from "../manifest.js";
 
 function createTempDir(): string {
   const tempDir = join(
@@ -153,5 +154,119 @@ describe("create command", () => {
 
     expect(result.isErr()).toBe(true);
     expect(readFileSync(existingReadmePath, "utf-8")).toBe("existing README\n");
+  });
+});
+
+// =============================================================================
+// Create Command Manifest Stamping Tests
+// =============================================================================
+
+describe("create command manifest stamping", () => {
+  test("stamps manifest with blocks after successful create", async () => {
+    const { runCreate } = await import("../commands/create.js");
+
+    const result = await runCreate({
+      targetDir: tempDir,
+      name: "stamped-cli",
+      preset: "cli",
+      structure: "single",
+      yes: true,
+      force: false,
+      // Default tooling includes scaffolding block
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const manifestPath = join(tempDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(true);
+
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+    expect(manifest.version).toBe(1);
+    expect(manifest.blocks["scaffolding"]).toBeDefined();
+    expect(manifest.blocks["scaffolding"]?.installedFrom).toMatch(
+      /^\d+\.\d+\.\d+/
+    );
+    expect(manifest.blocks["scaffolding"]?.installedAt).toBeDefined();
+  });
+
+  test("does not create manifest when noTooling is true", async () => {
+    const { runCreate } = await import("../commands/create.js");
+
+    const result = await runCreate({
+      targetDir: tempDir,
+      name: "no-tooling-cli",
+      preset: "cli",
+      structure: "single",
+      yes: true,
+      force: false,
+      noTooling: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const manifestPath = join(tempDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(false);
+  });
+
+  test("stamps manifest in project directory for workspace layout", async () => {
+    const { runCreate } = await import("../commands/create.js");
+
+    const result = await runCreate({
+      targetDir: tempDir,
+      name: "@acme/my-tool",
+      preset: "basic",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      // Default tooling includes scaffolding block
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    // Manifest should be in the project directory, not the workspace root
+    const projectDir = join(tempDir, "packages", "my-tool");
+    const manifestPath = join(projectDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(true);
+
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+    expect(manifest.version).toBe(1);
+    expect(manifest.blocks["scaffolding"]).toBeDefined();
+  });
+
+  test("stamps manifest with custom blocks from --with flag", async () => {
+    const { runCreate } = await import("../commands/create.js");
+
+    const result = await runCreate({
+      targetDir: tempDir,
+      name: "custom-blocks",
+      preset: "basic",
+      structure: "single",
+      yes: true,
+      force: false,
+      with: "claude,biome",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const manifestPath = join(tempDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(true);
+
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+    expect(manifest.version).toBe(1);
+    expect(manifest.blocks["claude"]).toBeDefined();
+    expect(manifest.blocks["biome"]).toBeDefined();
   });
 });
