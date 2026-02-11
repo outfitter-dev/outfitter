@@ -25,6 +25,8 @@ export interface UpdateOptions {
   readonly cwd: string;
   /** Show migration guide */
   readonly guide?: boolean;
+  /** Apply non-breaking updates to package.json and run bun install */
+  readonly apply?: boolean;
   /** Output mode */
   readonly outputMode?: OutputMode;
 }
@@ -51,6 +53,12 @@ export interface UpdateResult {
   readonly updatesAvailable: number;
   /** Whether any update is a breaking change */
   readonly hasBreaking: boolean;
+  /** Whether mutations were made (--apply was used and changes were written) */
+  readonly applied: boolean;
+  /** Package names that were updated in package.json */
+  readonly appliedPackages: string[];
+  /** Package names skipped because they contain breaking changes */
+  readonly skippedBreaking: string[];
 }
 
 // =============================================================================
@@ -260,11 +268,129 @@ export function readMigrationDocs(
 }
 
 // =============================================================================
+// Apply Updates
+// =============================================================================
+
+/**
+ * Determine the version range prefix used for a dependency specifier.
+ *
+ * Returns the prefix (e.g. "^", "~", ">=") or "" if the version has no prefix.
+ * Workspace protocol versions are preserved as-is.
+ */
+function getVersionPrefix(specifier: string): string {
+  if (specifier.startsWith("workspace:")) {
+    const inner = specifier.slice("workspace:".length);
+    return `workspace:${getVersionPrefix(inner)}`;
+  }
+  const match = specifier.match(/^([\^~>=<]+)/);
+  return match?.[1] ?? "";
+}
+
+interface PackageJsonContent {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
+
+/**
+ * Apply non-breaking updates to package.json and run `bun install`.
+ *
+ * Reads the package.json, updates version ranges for the specified packages
+ * (preserving the existing range prefix), writes it back, and runs install.
+ */
+async function applyUpdates(
+  cwd: string,
+  updates: readonly { name: string; latestVersion: string }[]
+): Promise<Result<void, OutfitterError>> {
+  const pkgPath = join(cwd, "package.json");
+
+  let raw: string;
+  try {
+    raw = readFileSync(pkgPath, "utf-8");
+  } catch {
+    return Result.err(
+      InternalError.create("Failed to read package.json for apply", { cwd })
+    );
+  }
+
+  let pkg: PackageJsonContent;
+  try {
+    pkg = JSON.parse(raw);
+  } catch {
+    return Result.err(
+      InternalError.create("Invalid JSON in package.json", { cwd })
+    );
+  }
+
+  // Build a lookup for quick access
+  const updateMap = new Map<string, string>();
+  for (const u of updates) {
+    updateMap.set(u.name, u.latestVersion);
+  }
+
+  // Update dependencies and devDependencies in-place
+  for (const section of ["dependencies", "devDependencies"] as const) {
+    const deps = pkg[section];
+    if (!deps) continue;
+
+    for (const name of Object.keys(deps)) {
+      const newVersion = updateMap.get(name);
+      if (newVersion === undefined) continue;
+
+      const currentSpecifier = deps[name];
+      if (currentSpecifier === undefined) continue;
+
+      const prefix = getVersionPrefix(currentSpecifier);
+      deps[name] = `${prefix}${newVersion}`;
+    }
+  }
+
+  // Write the updated package.json, preserving 2-space indentation
+  try {
+    const updated = `${JSON.stringify(pkg, null, 2)}\n`;
+    await Bun.write(pkgPath, updated);
+  } catch {
+    return Result.err(
+      InternalError.create("Failed to write updated package.json", { cwd })
+    );
+  }
+
+  // Run bun install to update the lockfile
+  try {
+    const proc = Bun.spawn(["bun", "install"], {
+      cwd,
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    const exitCode = await proc.exited;
+    if (exitCode !== 0) {
+      const stderr = await new Response(proc.stderr).text();
+      return Result.err(
+        InternalError.create("bun install failed", {
+          cwd,
+          exitCode,
+          stderr: stderr.trim(),
+        })
+      );
+    }
+  } catch {
+    return Result.err(
+      InternalError.create("Failed to run bun install", { cwd })
+    );
+  }
+
+  return Result.ok(undefined);
+}
+
+// =============================================================================
 // Public API
 // =============================================================================
 
 /**
  * Run the update command — detect installed versions and query npm for latest.
+ *
+ * When `apply` is true, writes updated version ranges to `package.json`
+ * for non-breaking upgrades only, then runs `bun install`.
  */
 export async function runUpdate(
   options: UpdateOptions
@@ -282,6 +408,9 @@ export async function runUpdate(
       total: 0,
       updatesAvailable: 0,
       hasBreaking: false,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking: [],
     });
   }
 
@@ -323,11 +452,34 @@ export async function runUpdate(
   const updatesAvailable = packages.filter((p) => p.updateAvailable).length;
   const hasBreaking = packages.some((p) => p.breaking);
 
+  // Identify non-breaking upgradable and breaking-skipped packages
+  const nonBreakingUpgradable = plan.packages.filter(
+    (a) => a.classification === "upgradableNonBreaking"
+  );
+  const breakingSkipped = plan.packages.filter(
+    (a) => a.classification === "upgradableBreaking"
+  );
+
+  let applied = false;
+  const appliedPackages: string[] = [];
+  const skippedBreaking: string[] = breakingSkipped.map((a) => a.name);
+
+  // Apply non-breaking updates if --apply is set
+  if (options.apply && nonBreakingUpgradable.length > 0) {
+    const applyResult = await applyUpdates(cwd, nonBreakingUpgradable);
+    if (applyResult.isErr()) return applyResult;
+    applied = true;
+    appliedPackages.push(...nonBreakingUpgradable.map((a) => a.name));
+  }
+
   return Result.ok({
     packages,
     total: packages.length,
     updatesAvailable,
     hasBreaking,
+    applied,
+    appliedPackages,
+    skippedBreaking,
   });
 }
 
@@ -336,7 +488,12 @@ export async function runUpdate(
  */
 export async function printUpdateResults(
   result: UpdateResult,
-  options?: { mode?: OutputMode; guide?: boolean; cwd?: string }
+  options?: {
+    mode?: OutputMode;
+    guide?: boolean;
+    cwd?: string;
+    applied?: boolean | undefined;
+  }
 ): Promise<void> {
   const mode = options?.mode;
   if (mode === "json" || mode === "jsonl") {
@@ -382,12 +539,64 @@ export async function printUpdateResults(
 
   lines.push("");
 
-  if (result.updatesAvailable > 0) {
+  // Apply summary
+  if (result.applied && result.appliedPackages.length > 0) {
     lines.push(
-      theme.muted("Run 'outfitter update --guide' for migration instructions.")
+      theme.success(
+        `Applied ${result.appliedPackages.length} non-breaking update(s):`
+      )
     );
-  } else {
-    lines.push(theme.success("All packages are up to date."));
+    for (const name of result.appliedPackages) {
+      lines.push(`  - ${name}`);
+    }
+    lines.push("");
+  } else if (options?.applied !== undefined && options.applied === false) {
+    // --apply was passed but nothing was applied
+    if (result.updatesAvailable === 0) {
+      lines.push(
+        theme.success("All packages are up to date. Nothing to apply.")
+      );
+    } else if (
+      result.appliedPackages.length === 0 &&
+      result.skippedBreaking.length > 0
+    ) {
+      lines.push(
+        theme.muted(
+          "No non-breaking updates to apply. All available updates contain breaking changes."
+        )
+      );
+    }
+  }
+
+  // Warn about skipped breaking updates
+  if (result.skippedBreaking.length > 0 && result.applied) {
+    lines.push(
+      theme.error(
+        `Skipped ${result.skippedBreaking.length} breaking update(s):`
+      )
+    );
+    for (const name of result.skippedBreaking) {
+      lines.push(`  - ${name}`);
+    }
+    lines.push(
+      "",
+      theme.muted(
+        "Use 'outfitter update --apply --breaking' to include breaking updates."
+      )
+    );
+    lines.push("");
+  }
+
+  if (!result.applied) {
+    if (result.updatesAvailable > 0) {
+      lines.push(
+        theme.muted(
+          "Run 'outfitter update --guide' for migration instructions."
+        )
+      );
+    } else {
+      lines.push(theme.success("All packages are up to date."));
+    }
   }
 
   // Migration guide section

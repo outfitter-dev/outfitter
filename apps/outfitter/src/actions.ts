@@ -584,12 +584,14 @@ const listBlocksAction = defineAction({
 interface UpdateActionInput {
   cwd: string;
   guide: boolean;
+  apply: boolean;
   outputMode?: OutputMode;
 }
 
 const updateInputSchema = z.object({
   cwd: z.string(),
   guide: z.boolean(),
+  apply: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<UpdateActionInput>;
 
@@ -609,6 +611,12 @@ const updateAction = defineAction({
         defaultValue: false,
       },
       {
+        flags: "--apply",
+        description:
+          "Apply non-breaking updates to package.json and run bun install",
+        defaultValue: false,
+      },
+      {
         flags: "--cwd <path>",
         description: "Working directory (defaults to current directory)",
       },
@@ -622,6 +630,7 @@ const updateAction = defineAction({
       return {
         cwd,
         guide: Boolean(context.flags["guide"]),
+        apply: Boolean(context.flags["apply"]),
         ...(outputMode ? { outputMode } : {}),
       };
     },
@@ -643,6 +652,7 @@ const updateAction = defineAction({
       ...(outputMode ? { mode: outputMode } : {}),
       guide: updateInput.guide,
       cwd: updateInput.cwd,
+      applied: updateInput.apply ? result.value.applied : undefined,
     });
 
     return Result.ok(result.value);
