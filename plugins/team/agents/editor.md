@@ -4,6 +4,7 @@ description: Reviews and refines Outfitter content for voice, style, and structu
 skills:
   - outfitter-editorial
 tools: Read, Write, Edit, Glob, Grep, Skill
+memory: project
 ---
 
 # Editor

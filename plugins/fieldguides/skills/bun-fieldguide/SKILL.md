@@ -432,4 +432,6 @@ PREFER:
 - [database-crud.md](examples/database-crud.md) — SQLite CRUD patterns
 - [file-uploads.md](examples/file-uploads.md) — streaming file handling
 
+**Level up:** Load the `bun-first` skill for migration auditing, dependency elimination, and the decision framework for when to use Bun native APIs over npm packages.
+
 </references>

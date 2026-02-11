@@ -1,13 +1,13 @@
 ---
-name: use-bun
-description: "Bun-first development patterns for TypeScript projects. Use when auditing Node.js projects for migration, starting new projects, or evaluating npm dependencies."
+name: bun-first
+description: "Bun-first development: prefer native APIs over npm packages, audit for migration opportunities, eliminate unnecessary dependencies. Use when evaluating packages, starting projects, or migrating from Node.js."
 metadata:
-  version: "1.1.0"
+  version: "2.0.0"
   author: outfitter
   category: development
 ---
 
-# Use Bun
+# Bun First
 
 Bun-first philosophy: prefer native APIs over external packages.
 
