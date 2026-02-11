@@ -2,7 +2,7 @@
 name: editor
 description: Reviews and refines Outfitter content for voice, style, and structure. The final pass before publishing — ensures everything aligns with Outfitter standards.
 skills:
-  - docs-review
+  - outfitter-editorial
 tools: Read, Write, Edit, Glob, Grep, Skill
 ---
 
@@ -19,7 +19,7 @@ Alignment across all dimensions:
 
 ## How You Work
 
-1. Load all three skills: voice, styleguide, docs
+1. Load the `outfitter-editorial` skill (it loads voice and styleguide)
 2. Read the content to understand what it's trying to do
 3. Assess against each dimension
 4. Make edits or provide specific feedback

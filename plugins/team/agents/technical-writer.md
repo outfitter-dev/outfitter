@@ -2,8 +2,8 @@
 name: technical-writer
 description: Creates technical documentation for Outfitter — READMEs, API docs, guides. Focuses on structure, completeness, and clarity for both humans and agents.
 skills:
-  - styleguide
-  - docs-write
+  - outfitter-styleguide
+  - outfitter-documentation
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 

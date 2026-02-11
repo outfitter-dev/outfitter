@@ -2,8 +2,8 @@
 name: comms
 description: Creates compelling copy for Outfitter — blog posts, announcements, marketing content. Writes with voice and style, not structure.
 skills:
-  - voice
-  - styleguide
+  - outfitter-voice
+  - outfitter-styleguide
 tools: Read, Write, Edit, Glob, Grep, Skill, WebSearch, WebFetch
 ---
 

@@ -1,159 +1,118 @@
 # Outfitter
 
-Core development methodology and Claude Code extensibility. Provides disciplined approaches to TDD, debugging, architecture, research, code quality, plus skills for authoring plugins, agents, skills, commands, and hooks.
+Skills and workflows for working with @outfitter/* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Stack.
 
 ## Installation
 
 ```bash
-# Add the Outfitter marketplace (if not already added)
+# Add marketplace
 /plugin marketplace add outfitter-dev/outfitter
 
-# Install outfitter
+# Install plugin
 /plugin install outfitter@outfitter
 ```
 
-## What's Included
-
-### Skills (29)
-
-#### Development Methodology
+## Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `bun-fieldguide` | Bun runtime APIs and patterns |
-| `cli-dev` | Redirect to cli-dev plugin |
-| `code-review` | Pre-commit quality gate checklist |
-| `codebase-analysis` | Evidence-based codebase investigation methodology |
-| `sanity-check` | Pushback against over-engineering |
-| `session-analysis` | Signal extraction from chat history |
-| `debugging` | Systematic root cause investigation (no fixes without understanding) |
-| `hono-fieldguide` | Type-safe Hono API development |
-| `pathfinding` | Collaborative Q&A for unclear requirements |
-| `find-patterns` | Identify and extract reusable patterns |
-| `codify` | Extract reusable patterns from conversations |
-| `performance` | Profiling and optimization |
-| `react-fieldguide` | React 18-19 TypeScript patterns |
-| `report-findings` | Structure and present research findings |
-| `research` | Multi-source technical research with citations |
-| `find-root-causes` | Systematic problem investigation methodology |
-| `prove-it-works` | End-to-end testing without mocks |
-| `security` | Security auditing and vulnerability detection |
-| `systems-design` | System design with technology selection frameworks |
-| `software-craft` | Engineering judgment and decision principles |
-| `check-status` | Comprehensive status reports across VCS, PRs, issues, CI/CD |
-| `use-subagents` | Orchestrate outfitter subagents for complex tasks |
-| `tdd` | Test-driven development with Red-Green-Refactor cycles |
-| `typescript-fieldguide` | TypeScript patterns and strict typing |
-| `which-tool` | Detect and select optimal CLI tools for tasks |
+| `outfitter-fieldguide` | Complete guide: patterns, templates, architecture, package reference |
+| `outfitter-init` | Initialize Stack patterns in any codebase (greenfield or migration) |
+| `outfitter-check` | Verify Stack compliance with severity-ranked reports |
+| `outfitter-feedback` | Report issues to outfitter-dev/outfitter |
+| `debug-outfitter` | Systematic debugging with investigation reports |
 
-#### Claude Code Extensibility
+## Agents
 
-| Skill | Purpose |
+| Agent | Purpose |
 |-------|---------|
-| `skillcraft` | Agent Skills authoring (cross-platform spec) |
-| `claude-craft` | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
-| `claude-plugins` | Full plugin lifecycle, marketplace distribution |
+| `stacker` | Skill-aware generalist for all stack work |
+| `outfitter-debugger` | Systematic debugger with investigation reports |
 
-#### Platform Configuration
+## Commands
 
-| Skill | Purpose |
-|-------|---------|
-| `codex-config` | OpenAI Codex CLI configuration |
+| Command | Purpose |
+|---------|---------|
+| `/adopt [path]` | Phased Outfitter Stack adoption workflow |
+| `/audit [path]` | Quick compliance audit of file or directory |
 
-### Agents (10)
+## Scripts
 
-| Agent | Role |
-|-------|------|
-| `quartermaster` | Equips and provisions Claude Code extensions (plugins, agents, skills, hooks) |
-| `analyst` | Investigate, research, explore, identify patterns |
-| `debugger` | Debug, diagnose, troubleshoot, trace |
-| `librarian` | Find documentation, API references |
-| `reviewer` | Review, critique, check, audit |
-| `scout` | Status reports, project health, what's changed |
-| `engineer` | Build, fix, implement, refactor |
-| `skeptic` | Challenge assumptions and complexity |
-| `specialist` | Domain-specific tasks (CI/CD, deploy) |
-| `tester` | Test, validate, verify |
+| Script | Purpose |
+|--------|---------|
+| `skills/outfitter-init/scripts/setup.sh` | Initialize Stack adoption plan |
+| `skills/outfitter-feedback/scripts/create-issue.ts` | Create GitHub issues for stack feedback |
 
-## Usage
+## Quick Start
 
-Skills are loaded automatically when relevant triggers are detected. You can also invoke them explicitly:
+### Learn the Stack
 
 ```
-Use the tdd skill to implement this feature
+Tell me about Outfitter Stack patterns
 ```
 
-```
-Use the reviewer agent to check this code
-```
+The `outfitter-fieldguide` skill activates automatically.
 
-### Common Workflows
-
-**Test-Driven Development:**
+### Create a Handler
 
 ```
-"Implement user authentication using TDD"
-→ Loads tdd skill → Red-Green-Refactor cycle
+Create a handler for fetching user profiles
 ```
 
-**Debugging:**
+The `outfitter-fieldguide` skill provides patterns and templates.
+
+### Review Code
 
 ```
-"This API returns 500 errors intermittently"
-→ Loads debugging skill → Root cause investigation
+Audit src/handlers/ for stack compliance
 ```
 
-**Architecture Design:**
+Or use the command:
 
 ```
-"Design a notification system for 100k users"
-→ Loads systems-design skill → Options with tradeoffs
+/audit src/handlers/
 ```
 
-**Research:**
+### Adopt Outfitter Stack
 
 ```
-"What's the best approach for rate limiting?"
-→ Loads research skill → Multi-source analysis with citations
+/adopt
 ```
 
-## Philosophy
+The `/adopt` command orchestrates a phased workflow:
+1. **Init** — Scan and plan with `outfitter-init`
+2. **Foundation** — Scaffold infrastructure with `outfitter-fieldguide`
+3. **Convert** — TDD handler conversion with `tdd` + `outfitter-fieldguide`
+4. **Adapters** — Wire CLI/MCP with `outfitter-fieldguide`
+5. **Check** — Verify compliance with `outfitter-check`
+6. **Feedback** — Report issues with `outfitter-feedback`
 
-Outfitter enforces disciplined development practices:
+## Stack Overview
 
-- **Evidence over assumption** — Investigate before fixing
-- **Tests before code** — Red-Green-Refactor, no exceptions
-- **Simplicity over cleverness** — Challenge unnecessary complexity
-- **Confidence tracking** — Know what you know and don't know
+Outfitter Stack provides transport-agnostic infrastructure:
 
-## Structure
+- **Handler Contract**: Pure functions returning `Result<T, E>`
+- **Error Taxonomy**: 10 categories with exit/HTTP code mapping
+- **Result Types**: Explicit error handling with `better-result`
+- **Validation**: Zod schemas with `createValidator()`
 
-```
-outfitter/
-├── .claude-plugin/
-│   └── plugin.json
-├── skills/           # 29 skills (methodology + extensibility)
-├── agents/           # 10 specialized agents
-├── commands/         # Slash commands
-├── templates/        # Plugin/skill templates
-├── scripts/          # Plugin utility scripts
-└── README.md
-```
+Write handlers once, expose via CLI, MCP, or HTTP.
 
-## Capabilities
+## Packages
 
-This plugin uses only standard Claude Code tools:
+| Package | Purpose |
+|---------|---------|
+| `@outfitter/contracts` | Result types, errors, Handler contract |
+| `@outfitter/cli` | CLI commands with output modes |
+| `@outfitter/mcp` | MCP server framework |
+| `@outfitter/config` | XDG-compliant configuration |
+| `@outfitter/logging` | Structured logging with redaction |
+| `@outfitter/daemon` | Background services with IPC |
+| `@outfitter/file-ops` | Secure paths, atomic writes |
+| `@outfitter/testing` | Test harnesses for CLI/MCP |
 
-| Capability | Used | Notes |
-|------------|------|-------|
-| Filesystem | read | Reads code for analysis and review |
-| Shell | no | — |
-| Network | no | Research uses built-in WebSearch |
-| MCP | no | — |
-| Scripts | no | Instructions-only, no executable scripts |
+## Links
 
-See [SECURITY.md](../SECURITY.md) for the full security model.
-
-## License
-
-MIT
+- [Outfitter Stack Repository](https://github.com/outfitter-dev/outfitter)
+- [Documentation](https://github.com/outfitter-dev/outfitter/tree/main/docs)
+- [npm Packages](https://www.npmjs.com/org/outfitter)
