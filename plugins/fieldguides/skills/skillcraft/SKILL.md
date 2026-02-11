@@ -133,6 +133,7 @@ description: "Extracts text and tables from PDF files, fills forms, merges docum
 - [ ] Matches parent directory name
 - [ ] No `--`, leading/trailing hyphens
 - [ ] No `anthropic` or `claude` in name
+- [ ] Does not collide with a built-in slash command
 
 #### C. Description Quality
 
@@ -212,6 +213,7 @@ See [patterns.md](references/patterns.md) for detailed examples.
 - Cannot start/end with hyphen or contain `--`
 - Must match parent directory name
 - Cannot contain `anthropic` or `claude`
+- Must not collide with built-in slash commands (`/help`, `/status`, `/config`, `/compact`, `/review`, `/model`, `/init`, `/login`, `/logout`, `/doctor`, `/clear`, `/mcp`, `/memory`, `/permissions`, `/terminal-setup`, `/vim`, `/cost`, `/bug`). Built-in commands take precedence — a skill with a colliding name will be unreachable via slash invocation.
 
 **Recommended**: Gerund form (`processing-pdfs`, `reviewing-code`)
 
