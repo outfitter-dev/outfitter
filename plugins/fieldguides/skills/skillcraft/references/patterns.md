@@ -44,8 +44,8 @@ Use when a preferred pattern exists but variation is acceptable.
 
 1. Extract fields from input
 2. For each field:
-   - Check type matches schema[field].type
-   - Check value passes schema[field].validator
+   - Check type matches schema.{field}.type
+   - Check value passes schema.{field}.validator
    - Collect errors for invalid fields
 3. If errors: return { valid: false, errors }
 4. Return { valid: true, data: sanitized }
@@ -440,7 +440,7 @@ a PDF file, you'll need to use a specialized library. We recommend pdfplumber
 because it's easy to use and handles most PDF formats. First, you'll need to
 install it with pip install pdfplumber, then you can open the file and...
 
-[50 more lines explaining basic concepts]
+{ 50 more lines explaining basic concepts }
 ```
 
 ### Template Pattern
