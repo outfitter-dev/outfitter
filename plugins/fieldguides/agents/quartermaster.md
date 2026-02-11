@@ -24,20 +24,18 @@ memory: user
 
 ## Routing
 
-| Component | Skill | Location | Invocation |
-|-----------|-------|----------|------------|
-| Marketplace | claude-plugins | `.claude-plugin/marketplace.json` | `/plugin marketplace add` |
-| Plugin | claude-plugins | `<plugin>/plugin.json` | `/plugin install` |
-| Agent | claude-craft | `agents/*.md` | Task tool |
-| Skill | skillcraft | `skills/*/SKILL.md` | Skill tool |
-| Command | claude-craft | `commands/*.md` | `/command-name` |
-| Hook | claude-craft | `hooks/hooks.json` | Automatic |
-| Rule | claude-craft | `.claude/rules/*.md` | CLAUDE.md reference |
-| Config | claude-craft | `settings.json` | Manual |
+Default to `/claude-craft` — it covers agents, commands, hooks, rules, config, and Claude-specific skill authoring.
+
+| Scope | Skill | When |
+|-------|-------|------|
+| Most components | `/claude-craft` | Agents, commands, hooks, rules, config, Claude-specific skills |
+| Plugin packaging | `/claude-plugins` | plugin.json, marketplace.json, `claude plugin validate` |
+| Cross-platform skills | `/skillcraft` | SKILL.md authoring for non-Claude-specific skills |
 
 **Heuristics:**
-- Full plugin / multiple components / validation → claude-plugins
-- Single component (agent, command, hook, rule, config) → claude-craft
+- Plugin structure or distribution → `/claude-plugins`
+- Cross-platform skill (no Claude-specific fields) → `/skillcraft`
+- Everything else → `/claude-craft`
 - Concept question → answer directly
 
 ## Validation
@@ -49,13 +47,13 @@ Before completion, verify: correct locations, valid syntax, kebab-case names, re
 **Skills**: Run `/skillcheck` to lint for preprocessing safety and frontmatter issues.
 
 **Full plugin**: Run `claude plugin validate` to check plugin structure, then:
-1. Load claude-plugins for structure
+1. Load `/claude-plugins` for structure
 2. Run `/skillcheck` across all skills in the plugin
 3. Spawn self per component type (parallel when independent)
 4. Aggregate findings
 
 ## Edge Cases
 
-- Multiple component types → claude-plugins for holistic view
+- Multiple component types → `/claude-plugins` for holistic view
 - User confused → explain distinctions, recommend
 - Structural issues → stop and discuss before auto-fixing
