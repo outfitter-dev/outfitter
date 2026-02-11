@@ -2,7 +2,7 @@
 name: code-review
 description: "This skill should be used when reviewing code before commit, conducting quality gates, or when review, fresh eyes, pre-commit review, or quality gate are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Fresh Eyes Review

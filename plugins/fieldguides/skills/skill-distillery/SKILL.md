@@ -2,7 +2,7 @@
 name: skill-distillery
 description: "Distills tool patterns from external repositories into teachable skills and plugins. Use when build plugin for, create skills for CLI, package as plugin, repo to plugin, or turn into plugin are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   related-skills:
     - research
     - codebase-analysis

@@ -4,7 +4,7 @@ description: "This skill should be used when designing, implementing, or reviewi
 license: CC-BY-SA-4.0 (docs, adapted from clig.dev); MIT (scripts)
 compatibility: Scripts use Python 3.10+ (scripts/cli_audit.py).
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
   upstream: "clig.dev + POSIX/GNU/Heroku/12-factor + Agent Skills spec"
 ---
 # CLI Development Guidelines

@@ -2,7 +2,7 @@
 name: bun-first
 description: "Bun-first development: prefer native APIs over npm packages, audit for migration opportunities, eliminate unnecessary dependencies. Use when evaluating packages, starting projects, or migrating from Node.js."
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   author: outfitter
   category: development
 ---

@@ -1,6 +1,6 @@
 {
   "name": "outfitter",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Skills and workflows for working with @outfitter/* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Stack.",
   "author": {
     "name": "Outfitter",

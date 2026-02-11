@@ -1,6 +1,6 @@
 ---
 name: outfitter-issue
-version: 0.4.0
+version: 0.4.1
 description: "Submit feedback to the Outfitter team via GitHub issues. Use after discovering bugs, missing features, unclear docs, or improvement opportunities in @outfitter/* packages."
 allowed-tools: Bash(gh *), Bash(bun *), Bash(./scripts/*), Read
 user-invocable: true

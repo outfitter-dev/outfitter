@@ -2,7 +2,7 @@
 name: debugging
 description: "This skill should be used when encountering bugs, errors, failing tests, or unexpected behavior. Provides systematic debugging with evidence-based root cause investigation using a four-stage framework."
 metadata:
-  version: "2.2.0"
+  version: "2.2.1"
   related-skills:
     - maintain-tasks
     - find-root-causes

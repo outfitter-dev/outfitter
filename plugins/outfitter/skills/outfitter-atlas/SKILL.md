@@ -1,6 +1,6 @@
 ---
 name: outfitter-atlas
-version: 0.2.0
+version: 0.2.1
 description: "Generates patterns, templates, and guides for @outfitter/* packages. Covers transport-agnostic handler systems, Result types, error taxonomy, and package APIs. Use when working with @outfitter/*, Result types, Handler contract, error taxonomy, or when Result, Handler, ValidationError, NotFoundError, OutfitterError, or package names like contracts, cli, mcp, daemon, config, logging are mentioned."
 ---
 

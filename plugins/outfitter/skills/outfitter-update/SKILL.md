@@ -1,6 +1,6 @@
 ---
 name: outfitter-update
-version: 1.0.0
+version: 1.0.1
 description: "Update @outfitter/* packages to latest versions with migration guidance. Detects installed versions, surfaces breaking changes, and applies migration steps."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, AskUserQuestion
 ---

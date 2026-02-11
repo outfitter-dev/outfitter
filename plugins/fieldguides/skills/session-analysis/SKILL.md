@@ -2,7 +2,7 @@
 name: session-analysis
 description: "This skill should be used when analyzing conversation patterns, identifying frustration or success signals, or when analyze conversation, what went wrong, or patterns are mentioned."
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
 ---
 
 # Conversation Analysis

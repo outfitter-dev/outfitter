@@ -1,6 +1,6 @@
 ---
 name: outfitter-check
-version: 0.1.0
+version: 0.1.1
 description: "Verify Outfitter Stack compliance in a codebase. Scans for anti-patterns (throws, console, hardcoded paths) and produces a severity-ranked compliance report. Use for pre-commit checks, code review, or migration validation."
 allowed-tools: Read, Grep, Glob, Bash(rg *), Bash(bun *)
 ---

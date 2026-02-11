@@ -2,7 +2,7 @@
 name: find-patterns
 description: "This skill should be used when recognizing recurring themes, identifying patterns in work or data, or when pattern, recurring, or repeated are mentioned. For implementation, see codify skill."
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   related-skills:
     - codify
     - codebase-analysis

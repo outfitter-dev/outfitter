@@ -2,7 +2,7 @@
 name: claude-plugins
 description: "This skill should be used when creating plugins, publishing to marketplaces, or when plugin.json, marketplace, create plugin, or distribute plugin are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   related-skills:
     - claude-craft
     - skillcraft

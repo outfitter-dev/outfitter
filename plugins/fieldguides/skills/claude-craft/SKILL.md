@@ -2,7 +2,7 @@
 name: claude-craft
 description: "Claude Code extensibility — agents, commands, hooks, skills, rules, and configuration. Use when creating, configuring, or troubleshooting Claude Code components, or when agent.md, /command, hooks.json, SKILL.md, .claude/rules, settings.json, MCP server, PreToolUse, or create agent/command/hook are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   related-skills:
     - skillcraft
     - claude-plugins

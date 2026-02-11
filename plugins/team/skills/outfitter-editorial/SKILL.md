@@ -4,7 +4,7 @@ description: "Complete editorial review for Outfitter documentation — voice, s
 context: fork
 agent: editor
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   author: outfitter
   category: documentation
 ---

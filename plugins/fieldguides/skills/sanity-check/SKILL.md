@@ -2,7 +2,7 @@
 name: sanity-check
 description: "This skill should be used when evaluating complexity, planning features, or when over-engineering, simpler, is this overkill, or keep it simple are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Challenge Complexity

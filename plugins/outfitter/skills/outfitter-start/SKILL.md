@@ -1,6 +1,6 @@
 ---
 name: outfitter-start
-version: 1.0.0
+version: 1.0.1
 description: "Start with Outfitter Stack — scaffold new projects or adopt patterns in existing codebases. Detects context, scans for adoption candidates, and orchestrates phased conversion."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---

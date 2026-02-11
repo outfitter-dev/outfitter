@@ -2,7 +2,7 @@
 name: outfitter-agents-check
 description: "Checks and configures Outfitter marketplaces and plugins. Use when setting up projects or checking plugin configuration."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: outfitter
   category: setup
 ---

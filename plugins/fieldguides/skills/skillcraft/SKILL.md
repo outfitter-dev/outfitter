@@ -2,7 +2,7 @@
 name: skillcraft
 description: "Creates and validates Agent Skills (SKILL.md). Use when creating skills, writing frontmatter, or validating skill structure."
 metadata:
-  version: "2.2.0"
+  version: "2.2.1"
   author: outfitter
   related-skills:
     - claude-craft

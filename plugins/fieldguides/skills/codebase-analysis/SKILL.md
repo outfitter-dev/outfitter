@@ -2,7 +2,7 @@
 name: codebase-analysis
 description: "This skill should be used when analyzing codebases, understanding architecture, or when analyze, investigate, explore code, or understand architecture are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Codebase Analysis

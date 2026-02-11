@@ -2,7 +2,7 @@
 name: security
 description: "This skill should be used when auditing code for security issues, reviewing authentication/authorization, evaluating input validation, analyzing cryptographic usage, or reviewing dependency security. Provides OWASP patterns, CWE analysis, and threat modeling guidance."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Security Engineering

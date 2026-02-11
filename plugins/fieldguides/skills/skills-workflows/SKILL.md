@@ -2,7 +2,7 @@
 name: skills-workflows
 description: "Design multi-skill workflow systems with artifact-based state handoff. Use when building skill pipelines, sequenced workflows, or when workflow system, skill pipeline, state handoff, or artifacts are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   related-skills:
     - skillcraft
     - claude-craft

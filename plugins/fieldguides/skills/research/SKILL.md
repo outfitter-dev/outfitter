@@ -2,7 +2,7 @@
 name: research
 description: "This skill should be used when researching best practices, evaluating technologies, comparing approaches, or when research, evaluation, or comparison are mentioned."
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   related-skills:
     - report-findings
     - codebase-analysis

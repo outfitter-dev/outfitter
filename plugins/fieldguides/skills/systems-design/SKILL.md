@@ -2,7 +2,7 @@
 name: systems-design
 description: "This skill should be used when designing systems, evaluating architectures, making technology decisions, or planning for scale. Provides technology selection frameworks, scalability planning, and architectural tradeoff analysis."
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
 ---
 
 # Software Architecture

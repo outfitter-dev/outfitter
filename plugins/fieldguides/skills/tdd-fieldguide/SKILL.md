@@ -2,7 +2,7 @@
 name: tdd-fieldguide
 description: "This skill should be used when implementing features with TDD, writing tests first, or refactoring with test coverage. Applies disciplined Red-Green-Refactor cycles with TypeScript/Bun and Rust tooling."
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
 ---
 
 # Test-Driven Development

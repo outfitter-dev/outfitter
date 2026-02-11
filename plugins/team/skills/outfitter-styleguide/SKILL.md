@@ -2,7 +2,7 @@
 name: outfitter-styleguide
 description: "Writing craft and style patterns for Outfitter content — sentence rhythm, metaphors, enthusiasm calibration. Use when drafting or reviewing blog posts, docs, announcements, or READMEs."
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   author: outfitter
   category: content
 ---

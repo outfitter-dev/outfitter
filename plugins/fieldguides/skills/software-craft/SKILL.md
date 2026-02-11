@@ -2,7 +2,7 @@
 name: software-craft
 description: "This skill should be used when making design decisions, evaluating trade-offs, assessing code quality, or when engineering judgment or code quality are mentioned."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Software Engineering

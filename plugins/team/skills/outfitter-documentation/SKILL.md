@@ -2,7 +2,7 @@
 name: outfitter-documentation
 description: "Documentation structure and templates for READMEs, API docs, guides, and CLI references. Use when creating docs, writing READMEs, or structuring a docs/ directory."
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   author: outfitter
   category: documentation
 ---

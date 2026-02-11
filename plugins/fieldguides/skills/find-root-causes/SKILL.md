@@ -4,7 +4,7 @@ description: "This skill should be used when diagnosing failures, investigating 
 agent: debugger
 context: fork
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   related-skills:
     - debugging
     - codebase-analysis

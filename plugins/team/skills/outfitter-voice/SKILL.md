@@ -2,7 +2,7 @@
 name: outfitter-voice
 description: "Outfitter's philosophical voice and values — opinionated stance, agent-first design, earned confidence. Use when writing content, reviewing drafts, or establishing tone."
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: outfitter
   category: content
 ---

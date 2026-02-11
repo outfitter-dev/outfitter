@@ -1,6 +1,6 @@
 ---
 name: debug-outfitter
-version: 0.2.0
+version: 0.2.1
 description: "Systematic debugging process for @outfitter/* package issues. Use when debugging Result handling, MCP problems, CLI output, exit codes, logging, or unexpected behavior. Produces structured investigation reports with root cause analysis."
 allowed-tools: Read, Grep, Glob, Bash(bun *), Bash(rg *)
 ---

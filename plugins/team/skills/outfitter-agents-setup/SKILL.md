@@ -2,7 +2,7 @@
 name: outfitter-agents-setup
 description: "Documentation patterns for AI agents — AGENTS.md, CLAUDE.md, and agent-readable content. Use when creating agent entry points or structuring .claude/ directories."
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: outfitter
   category: documentation
 ---
