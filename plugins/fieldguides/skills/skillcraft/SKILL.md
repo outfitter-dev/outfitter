@@ -31,6 +31,7 @@ Ask about the skill:
 - What are the main capabilities?
 - What triggers should invoke it? (phrases users would say)
 - Where should it live? (personal, project, or plugin)
+- Is it for use within a Claude plugin? If so, load the `/claude-craft` and `/claude-plugins` skills.
 
 ## Stage 2: Archetype Selection
 
@@ -79,7 +80,7 @@ metadata:                              # optional
 
 **Important**:
 - Always wrap `description` in double quotes — values containing colons, commas, or special characters can break YAML parsing otherwise.
-- Platform-specific fields (e.g., Claude's `allowed-tools`, `user-invocable`) should be added per-platform. See [claude-craft.md](references/claude-craft.md) for Claude Code extensions.
+- Platform-specific fields (e.g., Claude's `allowed-tools`, `user-invocable`) should be added per-platform. Load the `/claude-craft` skill for Claude-specific fields.
 
 ### Custom Frontmatter
 
@@ -146,6 +147,7 @@ description: "Extracts text and tables from PDF files, fills forms, merges docum
 - [ ] All referenced files exist
 - [ ] No TODO/placeholder markers
 - [ ] Progressive disclosure (details in `references/`)
+- [ ] No <bang>`command` preprocessing patterns (use `<bang>` instead of `!`)
 
 ### Report Format
 
@@ -184,6 +186,12 @@ Keep SKILL.md under 500 lines. Move details to:
 - `scripts/` - Executable utilities (code never enters context)
 - `assets/` - Templates, data files
 
+### Preprocessing safety
+
+SKILL.md files are preprocessed by Claude Code — <bang>`command` syntax executes at load time, even inside code fences. When documenting this syntax in SKILL.md, use `<bang>` as a stand-in for `!`. Reference files and EXAMPLES.md are not preprocessed, so literal `!` is safe there.
+
+Skills that intentionally preprocess should declare `metadata.preprocess: true`. Run `/skillcheck` to lint for unintentional preprocessing patterns.
+
 Token loading:
 1. **Metadata** (~100 tokens): name + description at startup
 2. **Instructions** (<5000 tokens): SKILL.md body when activated
@@ -211,7 +219,7 @@ See [patterns.md](references/patterns.md) for detailed examples.
 
 Skills are cross-platform, but each tool has specific implementation details:
 
-- **Claude Code**: See [claude-craft.md](references/claude-craft.md) for tool restrictions, testing, troubleshooting, and Claude-specific frontmatter extensions
+- **Claude Code**: Load the `/claude-craft` skill for Claude-specific skill authoring
 - **Codex CLI**: See [codex.md](references/codex.md) for discovery paths, `$skill-name` invocation
 
 See [implementations.md](references/implementations.md) for storage paths and [invocations.md](references/invocations.md) for activation patterns.
