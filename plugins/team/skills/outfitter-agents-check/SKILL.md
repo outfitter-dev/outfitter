@@ -5,6 +5,7 @@ metadata:
   version: "1.0.1"
   author: outfitter
   category: setup
+  preprocess: true
 ---
 
 # Agent Setup

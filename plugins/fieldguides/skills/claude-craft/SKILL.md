@@ -177,7 +177,7 @@ See [commands/frontmatter.md](references/commands/frontmatter.md) for complete s
 | Feature | Syntax | Purpose |
 |---------|--------|---------|
 | Arguments | `$1`, `$2`, `$ARGUMENTS` | Dynamic input from user |
-| Bash execution | `` !`command` `` | Include shell output in context |
+| Bash execution | <bang>`command` | Include shell output in context |
 | File references | `@path/to/file` | Include file contents |
 | Tool restrictions | `allowed-tools:` | Limit Claude's capabilities |
 
