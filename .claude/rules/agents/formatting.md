@@ -125,3 +125,4 @@ Avoid: `[path/to/filename.md](path/to/filename.md)`
 - [references/confidence.md](references/confidence.md)
 - [../rules/FORMATTING.md](../rules/FORMATTING.md)
 ```
+
