@@ -136,3 +136,28 @@ Pattern: `N. Option name ⭐ — brief description *why recommended*`
 - `⭐` visually distinguishes the recommendation
 - `*italicized rationale*` provides quick reasoning
 - Everything scannable in one place
+
+## Preprocessing Safety
+
+Claude Code's preprocessor executes `` !`command` `` syntax in SKILL.md files — including inside markdown code fences. This means any literal `` !`command` `` in a SKILL.md will be executed when the skill loads.
+
+### The `<bang>` convention
+
+Use `<bang>` as a stand-in for `!` when referencing the preprocessing syntax in `SKILL.md` files as examples. Agents should interpret `<bang>` as `!` in context.
+
+| File type | Preprocessing | Convention |
+|-----------|--------------|------------|
+| SKILL.md | Active (always) | Use `` !`command` `` |
+| References, EXAMPLES.md | None | Literal `!` encouraged (good demos) |
+| Command files (`commands/*.md`) | Intentional | Literal `!` required |
+
+### `metadata.preprocess: true`
+
+Skills that intentionally use preprocessing should declare it in frontmatter. This is used in conjunction with the `/skillcheck` skill, which will lint for violations:
+
+```yaml
+metadata:
+  preprocess: true
+```
+
+This signals to linters that `` !`command` `` usage is intentional and should not be flagged.
