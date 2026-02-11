@@ -11,7 +11,7 @@ metadata:
 
 Craft-level guidance for Outfitter writing. This covers *how* to write — rhythm, metaphors, structural patterns.
 
-For the philosophical foundation (*why* we write this way), load the `team:voice` skill.
+For the philosophical foundation (*why* we write this way), load the `voice` skill.
 
 Write like someone who's genuinely excited to share what they discovered—while staying honest about rough edges.
 

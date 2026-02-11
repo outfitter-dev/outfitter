@@ -25,13 +25,13 @@ External Repo → Research → Recon → Patterns → Codify → Author → Pack
 ## Steps
 
 1. Clarify target repo and plugin goals
-2. Load the `outfitter:research` skill for external discovery (docs, APIs, community patterns)
-3. Load the `outfitter:codebase-analysis` skill for internal analysis of target repo
-4. Load the `outfitter:find-patterns` skill to extract repeatable patterns worth automating
-5. Load the `outfitter:codify` skill to map patterns to component types
-6. Author components using `outfitter:skillcraft` or `outfitter:claude-craft`
-7. Load the `outfitter:claude-plugins` skill to package into distributable plugin
-8. Validate using the `outfitter:claude-plugins` audit checklists
+2. Load the `research` skill for external discovery (docs, APIs, community patterns)
+3. Load the `codebase-analysis` skill for internal analysis of target repo
+4. Load the `find-patterns` skill to extract repeatable patterns worth automating
+5. Load the `codify` skill to map patterns to component types
+6. Author components using `skillcraft` or `claude-craft`
+7. Load the `claude-plugins` skill to package into distributable plugin
+8. Validate using the `claude-plugins` audit checklists
 
 <when_to_use>
 
@@ -78,37 +78,37 @@ Load the `maintain-tasks` skill for stage tracking. Stages advance only.
 
 | Stage | Skill | activeForm |
 |-------|-------|------------|
-| 1. Discovery | `outfitter:research` | "Researching external docs" |
-| 2. Recon | `outfitter:codebase-analysis` | "Analyzing target repo" |
-| 3. Patterns | `outfitter:find-patterns` | "Extracting patterns" |
-| 4. Mapping | `outfitter:codify` | "Mapping to components" |
-| 5. Authoring | `outfitter:skillcraft` | "Creating components" |
-| 6. Packaging | `outfitter:claude-plugins` | "Packaging plugin" |
-| 7. Audit | `outfitter:claude-plugins` | "Validating plugin" |
+| 1. Discovery | `research` | "Researching external docs" |
+| 2. Recon | `codebase-analysis` | "Analyzing target repo" |
+| 3. Patterns | `find-patterns` | "Extracting patterns" |
+| 4. Mapping | `codify` | "Mapping to components" |
+| 5. Authoring | `skillcraft` | "Creating components" |
+| 6. Packaging | `claude-plugins` | "Packaging plugin" |
+| 7. Audit | `claude-plugins` | "Validating plugin" |
 
 <workflow>
 
 ### Stage 1: Discovery
 
-Load `outfitter:research` skill. Gather external docs, community patterns, pain points.
+Load `research` skill. Gather external docs, community patterns, pain points.
 
 See [stage-1-discovery.md](references/stage-1-discovery.md) for details.
 
 ### Stage 2: Recon
 
-Load `outfitter:codebase-analysis` skill. Analyze structure, API surface, conventions.
+Load `codebase-analysis` skill. Analyze structure, API surface, conventions.
 
 See [stage-2-recon.md](references/stage-2-recon.md) for details.
 
 ### Stage 3: Patterns
 
-Load `outfitter:find-patterns` skill. Extract workflows, command sequences, decision points.
+Load `find-patterns` skill. Extract workflows, command sequences, decision points.
 
 See [stage-3-patterns.md](references/stage-3-patterns.md) for details.
 
 ### Stage 4: Mapping
 
-Load `outfitter:codify` skill. Map patterns to component types (skill, command, hook, agent).
+Load `codify` skill. Map patterns to component types (skill, command, hook, agent).
 
 See [stage-4-mapping.md](references/stage-4-mapping.md) for details.
 
@@ -120,7 +120,7 @@ See [stage-5-authoring.md](references/stage-5-authoring.md) for details.
 
 ### Stage 6: Packaging
 
-Load `outfitter:claude-plugins` skill. Create plugin structure with manifest and README.
+Load `claude-plugins` skill. Create plugin structure with manifest and README.
 
 Ask: "Do you have an existing marketplace to add this plugin to?" If yes, prepare the marketplace entry.
 
@@ -128,7 +128,7 @@ See [stage-6-packaging.md](references/stage-6-packaging.md) for details.
 
 ### Stage 7: Audit
 
-Validate using the `outfitter:claude-plugins` audit checklists. See its `references/audit.md`.
+Validate using the `claude-plugins` audit checklists. See its `references/audit.md`.
 
 See [stage-7-audit.md](references/stage-7-audit.md) for details.
 
@@ -191,10 +191,10 @@ Stage guides:
 - [repo-types.md](references/repo-types.md) — CLI vs Library vs MCP patterns
 
 Skills loaded:
-- `outfitter:research` — external discovery methodology
-- `outfitter:codebase-analysis` — repo analysis approach
-- `outfitter:find-patterns` — pattern extraction
-- `outfitter:codify` — pattern-to-component mapping
-- `outfitter:claude-plugins` — plugin packaging
+- `research` — external discovery methodology
+- `codebase-analysis` — repo analysis approach
+- `find-patterns` — pattern extraction
+- `codify` — pattern-to-component mapping
+- `claude-plugins` — plugin packaging
 
 </references>

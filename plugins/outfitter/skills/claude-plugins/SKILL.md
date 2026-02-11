@@ -16,10 +16,10 @@ Complete lifecycle for developing, validating, and distributing Claude Code plug
 
 1. Define plugin scope and components needed
 2. Initialize plugin structure with `plugin.json`
-3. If adding commands, load the `outfitter:claude-craft` skill
-4. If adding agents, load the `outfitter:claude-craft` skill
-5. If adding hooks, load the `outfitter:claude-craft` skill
-6. If adding skills, load the `outfitter:skillcraft` skill
+3. If adding commands, load the `claude-craft` skill
+4. If adding agents, load the `claude-craft` skill
+5. If adding hooks, load the `claude-craft` skill
+6. If adding skills, load the `skillcraft` skill
 7. Validate against checklists in [audit.md](references/audit.md)
 8. Fix issues and distribute
 
@@ -148,7 +148,7 @@ Review the following code: {{0}}
 Check for: code style, bugs, performance, security
 ```
 
-For complex commands, load the `outfitter:claude-craft` skill.
+For complex commands, load the `claude-craft` skill.
 
 ### Custom Agents
 
@@ -166,7 +166,7 @@ You are a security expert. When reviewing code:
 3. Report issues with severity levels
 ```
 
-For agent design patterns, load the `outfitter:claude-craft` skill.
+For agent design patterns, load the `claude-craft` skill.
 
 ### Event Hooks
 
@@ -191,11 +191,11 @@ Two ways to define hooks:
 
 Hook types: PreToolUse, PostToolUse, UserPromptSubmit, Stop, SessionStart, SessionEnd
 
-For hook implementation, load the `outfitter:claude-craft` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
+For hook implementation, load the `claude-craft` skill. See [structure.md](references/structure.md) for hook JSON format and script interface.
 
 ### Skills
 
-Add reusable methodology patterns in `skills/` directory. For skill authoring, load the `outfitter:skillcraft` skill.
+Add reusable methodology patterns in `skills/` directory. For skill authoring, load the `skillcraft` skill.
 
 ### MCP Servers
 
@@ -219,7 +219,7 @@ When plugins are installed, Claude Code copies them to a cache directory. This h
 
 - **Path traversal breaks**: `../../shared/file.md` will not work after install
 - **Keep resources inside plugin**: Shared scripts, rules, and assets must be within plugin directory
-- **Cross-plugin dependencies**: Use skill invocation (`plugin:skill-name`) instead of file references
+- **Cross-plugin dependencies**: Use skill invocation (`skill-name`) instead of file references
 
 See [caching.md](references/caching.md) for workarounds and best practices.
 

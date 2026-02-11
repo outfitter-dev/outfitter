@@ -17,7 +17,7 @@ Delegated investigation: symptom → hypothesis → elimination → root cause �
 
 ## Steps
 
-1. Load the `outfitter:debugging` skill for systematic investigation
+1. Load the `debugging` skill for systematic investigation
 2. Apply elimination techniques from this skill's references
 3. Document investigation trail using RCA templates
 4. Deliver root cause report with prevention recommendations

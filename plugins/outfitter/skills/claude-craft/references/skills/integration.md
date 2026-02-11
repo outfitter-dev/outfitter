@@ -157,7 +157,7 @@ Skills can specify agents for forked execution.
 ---
 name: deep-analysis
 context: fork
-agent: outfitter:analyst
+agent: analyst
 model: opus
 description: Deep analysis requiring extensive reasoning
 ---
@@ -210,7 +210,7 @@ Response to user
 ---
 name: security-audit
 context: fork
-agent: outfitter:reviewer
+agent: reviewer
 ---
 ```
 
@@ -220,7 +220,7 @@ agent: outfitter:reviewer
 ---
 name: performance-analysis
 context: fork
-agent: outfitter:analyst
+agent: analyst
 ---
 ```
 
@@ -231,13 +231,13 @@ agent: outfitter:analyst
   {
     "description": "Security audit",
     "prompt": "Run security-audit skill on src/auth/",
-    "subagent_type": "outfitter:reviewer",
+    "subagent_type": "reviewer",
     "run_in_background": true
   },
   {
     "description": "Performance analysis",
     "prompt": "Run performance-analysis skill on src/api/",
-    "subagent_type": "outfitter:analyst",
+    "subagent_type": "analyst",
     "run_in_background": true
   }
 ]

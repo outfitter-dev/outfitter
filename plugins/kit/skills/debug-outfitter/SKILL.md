@@ -34,12 +34,12 @@ Investigate issues methodically and produce a structured report documenting:
 
 ## Steps
 
-1. Load the `kit:outfitter-fieldguide` skill to gain expertise in the Outfitter packages.
+1. Load the `outfitter-fieldguide` skill to gain expertise in the Outfitter packages.
 2. [Collect evidence](#stage-1-evidence-collection) — gather symptoms before hypothesizing
 3. [Categorize the issue](#stage-2-categorize-the-issue) — identify which area is affected
 4. [Investigate](#stage-3-targeted-investigation) — use category-specific diagnostics
 5. Produce a [Debug Report](#stage-4-document-findings) using [TEMPLATE.md](TEMPLATE.md)
-6. If the issue is in Outfitter's packages themselves, [escalate](#when-to-escalate) via `kit:outfitter-feedback`
+6. If the issue is in Outfitter's packages themselves, [escalate](#when-to-escalate) via `outfitter-feedback`
 
 ## Stage 1: Evidence Collection
 
@@ -248,11 +248,11 @@ Produce a Debug Report using [TEMPLATE.md](TEMPLATE.md).
 If investigation reveals an issue in @outfitter/* packages themselves (not user code):
 
 1. Document the issue clearly in the Debug Report
-2. Recommend using `kit:outfitter-feedback` skill to file an issue
+2. Recommend using `outfitter-feedback` skill to file an issue
 3. Include reproduction steps and expected vs actual behavior
 
 ## Related Skills
 
-- `kit:outfitter-fieldguide` — Correct patterns reference
-- `kit:outfitter-check` — Compliance verification
-- `kit:outfitter-feedback` — Report issues to Outfitter team
+- `outfitter-fieldguide` — Correct patterns reference
+- `outfitter-check` — Compliance verification
+- `outfitter-feedback` — Report issues to Outfitter team

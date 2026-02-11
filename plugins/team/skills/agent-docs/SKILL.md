@@ -11,7 +11,7 @@ metadata:
 
 Structure and patterns for documentation that AI agents consume — the files and directories that help Claude, Codex, and other agents understand and work with your project.
 
-For human-facing documentation (READMEs, guides, API docs), load the `team:docs-write` skill.
+For human-facing documentation (READMEs, guides, API docs), load the `docs-write` skill.
 
 ## File Architecture
 

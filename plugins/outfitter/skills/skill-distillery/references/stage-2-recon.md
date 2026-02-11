@@ -4,7 +4,7 @@ Codebase analysis to map internal structure.
 
 **Goal**: Identify automation-worthy surfaces in the code.
 
-**Skill**: Load `outfitter:codebase-analysis`
+**Skill**: Load `codebase-analysis`
 
 ## Analysis Checklist
 

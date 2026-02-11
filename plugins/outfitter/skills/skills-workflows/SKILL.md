@@ -16,9 +16,9 @@ Design skill systems that chain together with artifact-based state passing.
 
 ## Steps
 
-1. Load the `outfitter:skillcraft` skill for base skill authoring
+1. Load the `skillcraft` skill for base skill authoring
 2. Apply workflow patterns from this skill
-3. If Claude-specific features needed, load the `outfitter:claude-craft` skill
+3. If Claude-specific features needed, load the `claude-craft` skill
 
 <when_to_use>
 

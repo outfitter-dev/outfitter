@@ -11,7 +11,7 @@ Generate a scannable status report for the current project.
 
 1. **Detect** — Load the `check-status` skill and run the detection script.
 2. **Consider** — Parse the context below for time range and service filters. Ultrathink.
-3. **Dispatch** — Launch the `outfitter:scout` agent via Task tool with detected services and context
+3. **Dispatch** — Launch the `scout` agent via Task tool with detected services and context
 4. **Retain** — Keep the agent ID for follow-up questions (use `resume` parameter)
 
 ## Guidance

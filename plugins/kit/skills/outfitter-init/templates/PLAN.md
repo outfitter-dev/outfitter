@@ -22,7 +22,7 @@
 1. Review [SCAN.md](./SCAN.md) to understand scope
 2. Adjust priorities in [stages/overview.md](./stages/overview.md)
 3. Begin with [stages/foundation.md](./stages/foundation.md)
-4. Load `kit:outfitter-fieldguide` for patterns and templates
+4. Load `outfitter-fieldguide` for patterns and templates
 
 ## Recommended Order
 
@@ -53,10 +53,10 @@ rg "console\.(log|error|warn)" --type ts
 rg "homedir\(\)" --type ts
 ```
 
-Then use `kit:outfitter-check` for full compliance audit.
+Then use `outfitter-check` for full compliance audit.
 
 ## Resources
 
-- [outfitter-fieldguide](kit:outfitter-fieldguide) — Patterns and templates
-- [outfitter-check](kit:outfitter-check) — Compliance verification
+- [outfitter-fieldguide](outfitter-fieldguide) — Patterns and templates
+- [outfitter-check](outfitter-check) — Compliance verification
 - [AGENTS.md](../../AGENTS.md) — Project development guide

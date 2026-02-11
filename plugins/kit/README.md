@@ -16,18 +16,18 @@ Claude Code plugin for @outfitter/* packages. Provides skills, agents, and comma
 
 | Skill | Purpose |
 |-------|---------|
-| `kit:outfitter-fieldguide` | Complete guide: patterns, templates, architecture, package reference |
-| `kit:outfitter-init` | Initialize Stack patterns in any codebase (greenfield or migration) |
-| `kit:outfitter-check` | Verify Stack compliance with severity-ranked reports |
-| `kit:outfitter-feedback` | Report issues to outfitter-dev/outfitter |
-| `kit:debug-outfitter` | Systematic debugging with investigation reports |
+| `outfitter-fieldguide` | Complete guide: patterns, templates, architecture, package reference |
+| `outfitter-init` | Initialize Stack patterns in any codebase (greenfield or migration) |
+| `outfitter-check` | Verify Stack compliance with severity-ranked reports |
+| `outfitter-feedback` | Report issues to outfitter-dev/outfitter |
+| `debug-outfitter` | Systematic debugging with investigation reports |
 
 ## Agents
 
 | Agent | Purpose |
 |-------|---------|
-| `kit:stacker` | Skill-aware generalist for all stack work |
-| `kit:outfitter-debugger` | Systematic debugger with investigation reports |
+| `stacker` | Skill-aware generalist for all stack work |
+| `outfitter-debugger` | Systematic debugger with investigation reports |
 
 ## Commands
 
@@ -51,7 +51,7 @@ Claude Code plugin for @outfitter/* packages. Provides skills, agents, and comma
 Tell me about Outfitter Stack patterns
 ```
 
-The `kit:outfitter-fieldguide` skill activates automatically.
+The `outfitter-fieldguide` skill activates automatically.
 
 ### Create a Handler
 
@@ -59,7 +59,7 @@ The `kit:outfitter-fieldguide` skill activates automatically.
 Create a handler for fetching user profiles
 ```
 
-The `kit:outfitter-fieldguide` skill provides patterns and templates.
+The `outfitter-fieldguide` skill provides patterns and templates.
 
 ### Review Code
 
@@ -80,12 +80,12 @@ Or use the command:
 ```
 
 The `/adopt` command orchestrates a phased workflow:
-1. **Init** — Scan and plan with `kit:outfitter-init`
-2. **Foundation** — Scaffold infrastructure with `kit:outfitter-fieldguide`
-3. **Convert** — TDD handler conversion with `outfitter:tdd` + `kit:outfitter-fieldguide`
-4. **Adapters** — Wire CLI/MCP with `kit:outfitter-fieldguide`
-5. **Check** — Verify compliance with `kit:outfitter-check`
-6. **Feedback** — Report issues with `kit:outfitter-feedback`
+1. **Init** — Scan and plan with `outfitter-init`
+2. **Foundation** — Scaffold infrastructure with `outfitter-fieldguide`
+3. **Convert** — TDD handler conversion with `tdd` + `outfitter-fieldguide`
+4. **Adapters** — Wire CLI/MCP with `outfitter-fieldguide`
+5. **Check** — Verify compliance with `outfitter-check`
+6. **Feedback** — Report issues with `outfitter-feedback`
 
 ## Stack Overview
 

@@ -788,7 +788,7 @@ async function main() {
   console.log("  1. Review PLAN.md for navigation");
   console.log("  2. Check SCAN.md for scope");
   console.log("  3. Adjust priorities in stages/overview.md");
-  console.log("  4. Load kit:outfitter-fieldguide for patterns and templates");
+  console.log("  4. Load outfitter-fieldguide for patterns and templates");
   console.log("  5. Begin adoption with stages/foundation.md");
 }
 

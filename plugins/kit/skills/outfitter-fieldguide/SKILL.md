@@ -286,11 +286,11 @@ New here? Start with [guides/getting-started.md](guides/getting-started.md).
 
 ## Troubleshooting
 
-Something not working? Use `kit:debug-outfitter` for systematic investigation with structured reports. Common issues:
+Something not working? Use `debug-outfitter` for systematic investigation with structured reports. Common issues:
 
 - **Result always error** — Check for missing `await` on async handlers
 - **Type narrowing broken** — Don't reassign Result variables after checking
 - **MCP tool not appearing** — Register before `start()`, add `.describe()` to schema fields
 - **Wrong exit code** — Use `exitWithError()`, not `process.exit()`
 
-If the issue is in Outfitter itself, use `kit:outfitter-feedback` to file a bug.
+If the issue is in Outfitter itself, use `outfitter-feedback` to file a bug.

@@ -10,8 +10,8 @@ Target: $ARGUMENTS
 
 ## Steps
 
-1. **Load Skills** — Use Skill tool to load `outfitter:context-management` for task persistence.
-2. **Init** — Delegate to **Plan subagent** with `kit:outfitter-init` to:
+1. **Load Skills** — Use Skill tool to load `context-management` for task persistence.
+2. **Init** — Delegate to **Plan subagent** with `outfitter-init` to:
    - Scan codebase for adoption candidates (throws, console, paths, custom errors)
    - Enumerate all published `@outfitter/*` packages (not just pattern-matched ones)
    - Estimate caller blast radius for high-impact function conversions
@@ -19,12 +19,12 @@ Target: $ARGUMENTS
    - Assess scope and effort
    - Generate `.agents/plans/outfitter-init/` with scan results and staged plan
    - Return implementation strategy
-3. **Execute** — Delegate phases to `kit:stacker`:
-   - `kit:outfitter-fieldguide` — Scaffold context, logger, dependencies
-   - `outfitter:tdd` + `kit:outfitter-fieldguide` — TDD handler conversions
-   - `kit:outfitter-fieldguide` — Wire CLI/MCP transport layers
-   - `kit:outfitter-check` — Verify compliance
+3. **Execute** — Delegate phases to `stacker`:
+   - `outfitter-fieldguide` — Scaffold context, logger, dependencies
+   - `tdd` + `outfitter-fieldguide` — TDD handler conversions
+   - `outfitter-fieldguide` — Wire CLI/MCP transport layers
+   - `outfitter-check` — Verify compliance
 4. **Persist** — Update Tasks throughout with progress and decisions.
-5. **Feedback** — If issues discovered, delegate to `kit:stacker` with `kit:outfitter-feedback`.
+5. **Feedback** — If issues discovered, delegate to `stacker` with `outfitter-feedback`.
 
 Proceed without interrupting the user, unless necessary.

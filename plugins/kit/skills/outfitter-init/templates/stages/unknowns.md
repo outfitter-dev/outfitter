@@ -111,7 +111,7 @@ Issues discovered that should be reported to outfitter-dev/outfitter:
 - [ ] {{this.title}} — {{this.type}}
 {{/each}}
 
-Use `kit:outfitter-feedback` skill to create GitHub issues.
+Use `outfitter-feedback` skill to create GitHub issues.
 
 ## Completion Checklist
 

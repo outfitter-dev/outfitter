@@ -12,10 +12,10 @@ metadata:
 Structure and templates for project documentation — the human-facing docs that help developers understand and use your project.
 
 This skill covers *what* to include and *where* it goes. For *how* to write it:
-- Load the `team:styleguide` skill for sentence rhythm, metaphors, structural moves
-- Load the `team:voice` skill for philosophical foundation (apply as review pass)
+- Load the `styleguide` skill for sentence rhythm, metaphors, structural moves
+- Load the `voice` skill for philosophical foundation (apply as review pass)
 
-For agent-specific documentation (CLAUDE.md, AGENTS.md), load the `team:agent-docs` skill.
+For agent-specific documentation (CLAUDE.md, AGENTS.md), load the `agent-docs` skill.
 
 ## Documentation Hierarchy
 

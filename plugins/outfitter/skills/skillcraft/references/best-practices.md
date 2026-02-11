@@ -100,7 +100,7 @@ skill-name/
 ```markdown
 ## Error Investigation
 
-Load the `outfitter:debugging` skill using the Skill tool to investigate
+Load the `debugging` skill using the Skill tool to investigate
 this authentication failure systematically.
 
 Pass these parameters to the debugging workflow:
@@ -118,7 +118,7 @@ Pass these parameters to the debugging workflow:
 
 ### Subagent Architecture
 
-For orchestrating specialized work with context isolation, load the `outfitter:claude-craft` skill (see the `context: fork` mode and agent delegation patterns).
+For orchestrating specialized work with context isolation, load the `claude-craft` skill (see the `context: fork` mode and agent delegation patterns).
 
 ### Skill + External Service Integration
 
@@ -466,7 +466,7 @@ const tddSkillEvals: SkillEval[] = [
 
 ### Hook-Based Validation
 
-For platform-specific hook implementation patterns, load the `outfitter:claude-craft` skill (see the Hooks section).
+For platform-specific hook implementation patterns, load the `claude-craft` skill (see the Hooks section).
 
 **General principle**: Use hooks to enforce constraints at decision points—prevent destructive operations, enforce testing requirements, validate configuration before deployment.
 

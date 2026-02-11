@@ -6,7 +6,7 @@ allowed-tools: Read Glob Bash Skill AskUserQuestion TaskCreate TaskUpdate TaskLi
 
 # Create Outfitter Project
 
-Load the `kit:outfitter-init` skill and begin initialization.
+Load the `outfitter-init` skill and begin initialization.
 
 ## Detection
 

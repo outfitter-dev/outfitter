@@ -9,7 +9,7 @@ Adaptive Q&A workflow to clarify requirements and build confidence before delive
 
 ## Steps
 
-1. **Load** — Use the Skill tool to load the `outfitter:pathfinding` skill
+1. **Load** — Use the Skill tool to load the `pathfinding` skill
 2. **Consider** — Assess the recent conversation and any context provided below
 3. **Plan** — Enter `Plan` mode to talk through the problem or feature to explore
 3. **Execute** — Begin the workflow per the skill

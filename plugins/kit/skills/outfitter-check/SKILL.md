@@ -33,7 +33,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 
 ## Steps
 
-1. Load `kit:outfitter-fieldguide` for pattern expertise
+1. Load `outfitter-fieldguide` for pattern expertise
 2. [Determine scope](#step-1-determine-scope) — what are we checking?
 3. [Run diagnostics](#step-2-run-diagnostics) — systematic anti-pattern scan
 4. [Categorize findings](#step-3-categorize-findings) — rank by severity
@@ -210,6 +210,6 @@ The command:
 
 ## Related Skills
 
-- `kit:outfitter-fieldguide` — Patterns and fix guidance (load first)
-- `kit:outfitter-init` — Full adoption workflow with staged plan
-- `kit:debug-outfitter` — Deep investigation of specific issues
+- `outfitter-fieldguide` — Patterns and fix guidance (load first)
+- `outfitter-init` — Full adoption workflow with staged plan
+- `debug-outfitter` — Deep investigation of specific issues

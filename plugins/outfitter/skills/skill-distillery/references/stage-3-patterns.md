@@ -4,7 +4,7 @@ Extract repeatable behaviors worth automating.
 
 **Goal**: Identify patterns with automation value.
 
-**Skill**: Load `outfitter:find-patterns`
+**Skill**: Load `find-patterns`
 
 ## Pattern Categories
 

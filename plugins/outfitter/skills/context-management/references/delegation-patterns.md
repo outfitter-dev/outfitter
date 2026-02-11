@@ -21,11 +21,11 @@ Subagents run in **isolated contexts**. When they complete, only their final out
 | Read 1-2 files | No | Main | Already focused |
 | Read 5+ files | Yes | Explore | Preserves main context |
 | Codebase search | Yes | Explore | Returns summary, not raw results |
-| Security review | Yes | outfitter:reviewer | Specialized + isolated |
-| Performance analysis | Yes | outfitter:analyst | Research-heavy |
+| Security review | Yes | reviewer | Specialized + isolated |
+| Performance analysis | Yes | analyst | Research-heavy |
 | Simple edit | No | Main | Quick, in-context |
-| Multi-file refactor | Yes | outfitter:engineer | Coordinates changes |
-| Test validation | Yes | outfitter:tester | Isolated execution |
+| Multi-file refactor | Yes | engineer | Coordinates changes |
+| Test validation | Yes | tester | Isolated execution |
 | User Q&A | No | Main | Needs conversation history |
 
 ## Pattern: Research Delegation
@@ -52,19 +52,19 @@ When multiple concerns need analysis:
 {
   "description": "Security review",
   "prompt": "Review src/auth/ for security vulnerabilities",
-  "subagent_type": "outfitter:reviewer",
+  "subagent_type": "reviewer",
   "run_in_background": true
 }
 {
   "description": "Performance review",
   "prompt": "Analyze src/auth/ for performance issues",
-  "subagent_type": "outfitter:analyst",
+  "subagent_type": "analyst",
   "run_in_background": true
 }
 {
   "description": "Test coverage",
   "prompt": "Assess test coverage for src/auth/",
-  "subagent_type": "outfitter:tester",
+  "subagent_type": "tester",
   "run_in_background": true
 }
 ```
@@ -76,10 +76,10 @@ Three reviews run simultaneously. Main agent stays responsive. Collect results w
 When later agents need earlier agents' output:
 
 ```
-1. outfitter:analyst researches → returns findings
+1. analyst researches → returns findings
 2. Main agent extracts key points
-3. outfitter:engineer implements → receives key points in prompt
-4. outfitter:reviewer reviews → receives implementation summary
+3. engineer implements → receives key points in prompt
+4. reviewer reviews → receives implementation summary
 ```
 
 Don't pass full agent output to next agent. Extract and summarize.
@@ -93,7 +93,7 @@ For multi-stage work:
 {
   "description": "Begin auth analysis",
   "prompt": "Analyze authentication patterns in src/auth/",
-  "subagent_type": "outfitter:analyst"
+  "subagent_type": "analyst"
 }
 // Returns agent-id: abc123
 
@@ -101,7 +101,7 @@ For multi-stage work:
 {
   "description": "Continue auth analysis",
   "prompt": "Now examine the session management aspect",
-  "subagent_type": "outfitter:analyst",
+  "subagent_type": "analyst",
   "resume": "abc123"
 }
 ```

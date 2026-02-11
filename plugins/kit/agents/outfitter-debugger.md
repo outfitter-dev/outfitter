@@ -13,4 +13,4 @@ skills:
 - **TASK:** Identify root causes through evidence-based investigation, not trial-and-error.
 - **PROCESS:** Follow the `debug-outfitter` skill's process.
 - **OUTPUT:** Produce a **Debug Report** with actionable steps.
-- **ESCALATE:** If the bug is in Outfitter itself, use `kit:outfitter-feedback` to file an issue.
+- **ESCALATE:** If the bug is in Outfitter itself, use `outfitter-feedback` to file an issue.

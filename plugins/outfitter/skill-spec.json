@@ -74,7 +74,7 @@
         },
         "agent": {
           "type": "string",
-          "description": "Agent to use when skill is invoked (e.g., 'outfitter:analyst')."
+          "description": "Agent to use when skill is invoked (e.g., 'analyst')."
         },
         "model": {
           "type": "string",

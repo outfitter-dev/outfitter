@@ -33,9 +33,9 @@ The `subagent_type` format depends on agent source:
 |--------|--------|---------|
 | Built-in | `name` | `Explore`, `Plan`, `general-purpose` |
 | Same plugin | `name` | `security-reviewer` (file: `agents/security-reviewer.md`) |
-| Other plugin | `plugin:name` | `outfitter:reviewer`, `outfitter:quartermaster` |
+| Other plugin | `name` | `reviewer`, `quartermaster` |
 
-**Note**: Examples in this file use short names assuming agents are in the same plugin. When invoking plugin agents from outside, use the `plugin:name` format.
+**Note**: Always use bare names for agents regardless of plugin source.
 
 ## Invocation Examples
 

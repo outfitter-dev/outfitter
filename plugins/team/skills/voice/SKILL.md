@@ -96,11 +96,11 @@ We're not hedging. We're not "just a simple tool." We're building something with
 This skill is the philosophical foundation — the *why* and *how we think*.
 
 It's not:
-- Sentence-level style guidance (load the `team:styleguide` skill)
-- Documentation structure templates (load the `team:docs-write` skill)
+- Sentence-level style guidance (load the `styleguide` skill)
+- Documentation structure templates (load the `docs-write` skill)
 - Code style or formatting rules
 
-Load this skill to ground your writing in Outfitter's values. Load `team:styleguide` for craft, `team:docs-write` for structure.
+Load this skill to ground your writing in Outfitter's values. Load `styleguide` for craft, `docs-write` for structure.
 
 ## Review Checklist
 

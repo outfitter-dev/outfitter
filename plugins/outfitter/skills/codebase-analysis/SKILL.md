@@ -14,9 +14,9 @@ Evidence-based investigation → findings → confidence-tracked conclusions.
 1. Gather evidence from multiple sources (code, docs, tests, history)
 2. Track confidence level as investigation progresses
 3. Based on findings:
-   - If pattern analysis needed → load the `outfitter:find-patterns` skill
-   - If root cause investigation → load the `outfitter:find-root-causes` skill
-   - If ready to report → load the `outfitter:report-findings` skill
+   - If pattern analysis needed → load the `find-patterns` skill
+   - If root cause investigation → load the `find-root-causes` skill
+   - If ready to report → load the `report-findings` skill
 4. Deliver findings with confidence level and caveats
 
 <when_to_use>
@@ -172,9 +172,9 @@ Lower confidence areas:
 
 Load skills for specialized analysis (see Steps section):
 
-- **Pattern analysis** → `outfitter:find-patterns`
-- **Root cause investigation** → `outfitter:find-root-causes`
-- **Research synthesis** → `outfitter:report-findings`
+- **Pattern analysis** → `find-patterns`
+- **Root cause investigation** → `find-root-causes`
+- **Research synthesis** → `report-findings`
 - **Architecture analysis** → see [architecture-analysis.md](references/architecture-analysis.md)
 
 </specialized_techniques>
@@ -252,15 +252,15 @@ Core methodology:
 - [confidence.md](../pathfinding/references/confidence.md) — confidence calibration (shared with pathfinding)
 
 Micro-skills (load as needed):
-- `outfitter:find-patterns` — extracting and validating patterns
-- `outfitter:find-root-causes` — systematic problem diagnosis
-- `outfitter:report-findings` — multi-source research synthesis
+- `find-patterns` — extracting and validating patterns
+- `find-root-causes` — systematic problem diagnosis
+- `report-findings` — multi-source research synthesis
 
 Local references:
 - [architecture-analysis.md](references/architecture-analysis.md) — system structure mapping
 
 Related skills:
-- `outfitter:pathfinding` — clarifying requirements before analysis
-- `outfitter:debugging` — structured bug investigation
+- `pathfinding` — clarifying requirements before analysis
+- `debugging` — structured bug investigation
 
 </references>

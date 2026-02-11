@@ -15,7 +15,7 @@ Evidence-based investigation -> root cause -> verified fix.
 
 ## Steps
 
-1. Load the `outfitter:maintain-tasks` skill for stage tracking
+1. Load the `maintain-tasks` skill for stage tracking
 2. Collect evidence (reproduce, gather symptoms)
 3. Isolate variables (narrow scope)
 4. Formulate and test hypotheses

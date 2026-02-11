@@ -17,7 +17,7 @@ Systematic investigation → evidence-based analysis → authoritative recommend
 1. Define scope and evaluation criteria
 2. Discover sources using MCP tools (context7, octocode, firecrawl)
 3. Gather information with multi-source approach
-4. Load the `outfitter:report-findings` skill for synthesis
+4. Load the `report-findings` skill for synthesis
 5. Compile report with confidence levels and citations
 
 <when_to_use>

@@ -164,14 +164,14 @@ When referencing skills in documentation, use specific language based on skill t
 
 | Skill Type | Language | Example |
 |------------|----------|---------|
-| Standard | "Load the skill" | Load the `outfitter:skillcraft` skill |
-| Delegated (`context: fork` + `agent`) | "Delegate by loading" | Delegate by loading the `outfitter:security-audit` skill |
+| Standard | "Load the skill" | Load the `skillcraft` skill |
+| Delegated (`context: fork` + `agent`) | "Delegate by loading" | Delegate by loading the `security-audit` skill |
 
 **Standard skills** load instructions into the current context. The agent continues with those instructions available.
 
 **Delegated skills** hand off work to a subagent. The subagent runs in isolation and returns results.
 
-**Format**: Always use backticks for skill names: `` `plugin:skill-name` ``
+**Format**: Always use backticks for skill names: `` `skill-name` ``
 
 **Never**: Link to SKILL.md files. Always use the load/delegate pattern.
 
@@ -180,7 +180,7 @@ When referencing skills in documentation, use specific language based on skill t
 See [skillcraft](../skillcraft/SKILL.md) for patterns.
 
 # Right
-Load the `outfitter:skillcraft` skill for patterns.
+Load the `skillcraft` skill for patterns.
 ```
 
 ## Steps in Skills
@@ -190,16 +190,16 @@ Use a `## Steps` section for composable skill workflows. Place immediately after
 ```markdown
 ## Steps
 
-1. Load the `plugin:prerequisite-skill` skill
+1. Load the `prerequisite-skill` skill
 2. { main action for this skill }
-3. If { condition }, load the `plugin:conditional-skill` skill
+3. If { condition }, load the `conditional-skill` skill
 4. { final action or output }
 ```
 
 **Pattern rules**:
 
 - Numbered list (order matters)
-- Skill references use: "Load the `plugin:skill-name` skill"
+- Skill references use: "Load the `skill-name` skill"
 - Conditional steps: `If { condition }, load...` or `If { condition }, { action }`
 - Action descriptions: brief, imperative, no articles
 - Keep to 3-6 steps; split into stages if longer

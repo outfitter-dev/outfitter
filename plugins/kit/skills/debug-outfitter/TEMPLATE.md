@@ -45,4 +45,4 @@
 
 - [ ] Fix applied and tested
 - [ ] Related code reviewed for similar issues
-- [ ] If Outfitter bug: filed via `kit:outfitter-feedback`
+- [ ] If Outfitter bug: filed via `outfitter-feedback`

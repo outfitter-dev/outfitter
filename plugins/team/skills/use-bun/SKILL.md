@@ -19,7 +19,7 @@ Bun-first philosophy: prefer native APIs over external packages.
 - Reviewing code that uses Node.js APIs
 - Cleaning up package.json bloat
 
-**Boundary**: This skill covers *when* to use Bun and *what* it replaces. For detailed Bun API patterns and implementation examples, load the `outfitter:bun-fieldguide` skill instead.
+**Boundary**: This skill covers *when* to use Bun and *what* it replaces. For detailed Bun API patterns and implementation examples, load the `bun-fieldguide` skill instead.
 
 </when_to_use>
 
@@ -341,7 +341,7 @@ DOCUMENT:
 - [bun:test](https://bun.sh/docs/test)
 
 **Related skills**:
-- `outfitter:bun-fieldguide` — Detailed Bun API patterns, implementation examples, testing strategies
-- `outfitter:typescript-fieldguide` — TypeScript patterns for Bun projects, strict typing, Zod validation
+- `bun-fieldguide` — Detailed Bun API patterns, implementation examples, testing strategies
+- `typescript-fieldguide` — TypeScript patterns for Bun projects, strict typing, Zod validation
 
 </references>

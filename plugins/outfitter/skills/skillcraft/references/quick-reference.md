@@ -102,7 +102,7 @@ Clear criteria for when this applies
 ### Reference Other Skills
 
 ```markdown
-Load the `outfitter:debugging` skill using the Skill tool to investigate.
+Load the `debugging` skill using the Skill tool to investigate.
 ```
 
 ### Skill Chaining

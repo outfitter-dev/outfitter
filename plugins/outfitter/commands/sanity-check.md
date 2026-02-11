@@ -14,7 +14,7 @@ Evaluate the proposed solution for unnecessary complexity before committing to i
 
 ## Steps
 
-1. **Load** — Use the Skill tool and load the `outfitter:sanity-check` skill
+1. **Load** — Use the Skill tool and load the `sanity-check` skill
 2. **Consider** — Ultrathink and analyze the proposal, identify initial complexity concerns
 3. **Dispatch or Execute** — Choose execution path based on available tools:
    - **If Task tool available**: Run the simplify loop (see below)
@@ -26,7 +26,7 @@ Run iterative cycles with a persistent skeptic agent until complexity is resolve
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  1. ANALYZE — Dispatch outfitter:skeptic                    │
+│  1. ANALYZE — Dispatch skeptic                    │
 │     └─ Examine proposal, identify complexity triggers,      │
 │        generate alternatives, return structured findings    │
 │                          ↓                                  │

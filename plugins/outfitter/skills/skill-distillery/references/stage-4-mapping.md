@@ -4,7 +4,7 @@ Choose the right component for each pattern.
 
 **Goal**: Map patterns to Claude Code components.
 
-**Skill**: Load `outfitter:codify`
+**Skill**: Load `codify`
 
 ## Decision Tree
 

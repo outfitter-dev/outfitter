@@ -100,7 +100,7 @@ Produce a structured adoption plan at `.agents/plans/outfitter-init/` containing
 
 ### Steps
 
-1. Load `kit:outfitter-fieldguide` — you need it for conversion patterns
+1. Load `outfitter-fieldguide` — you need it for conversion patterns
 2. [Assess the codebase](#stage-1-assess) — run the setup script, review SCAN.md
 3. [Configure the plan](#stage-2-configure) — adjust priorities in `stages/overview.md`
 4. [Execute stage by stage](#stage-3-execute) — Foundation → Handlers → Errors → Adapters → Documents
@@ -238,7 +238,7 @@ rg "homedir\(\)" --type ts
 Run the review skill for comprehensive checking:
 
 ```
-/kit:outfitter-check
+/outfitter-check
 ```
 
 ### Completion Criteria
@@ -274,5 +274,5 @@ rm -rf .agents/plans/outfitter-init
 
 ## Related Skills
 
-- `kit:outfitter-fieldguide` — Patterns and templates (load first)
-- `kit:outfitter-check` — Compliance verification
+- `outfitter-fieldguide` — Patterns and templates (load first)
+- `outfitter-check` — Compliance verification

@@ -124,4 +124,4 @@ After manual scan:
 1. Create task files based on findings
 2. Prioritize by impact and complexity
 3. Begin with Foundation stage
-4. Load `kit:outfitter-fieldguide` for patterns
+4. Load `outfitter-fieldguide` for patterns

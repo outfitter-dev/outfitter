@@ -37,9 +37,9 @@ Create and configure the six Claude Code extension points: agents, commands, hoo
 | Task | Use |
 |------|-----|
 | Creating agents, commands, hooks, rules, config | This skill |
-| Creating skills (Claude-specific features) | This skill + `outfitter:skillcraft` for base spec |
-| Creating skills (cross-platform spec) | `outfitter:skillcraft` |
-| Packaging/distributing plugins | `outfitter:claude-plugins` |
+| Creating skills (Claude-specific features) | This skill + `skillcraft` for base spec |
+| Creating skills (cross-platform spec) | `skillcraft` |
+| Packaging/distributing plugins | `claude-plugins` |
 
 ---
 
@@ -406,7 +406,7 @@ hooks:
 
 ## Skills (Claude-Specific)
 
-Claude Code extends the base [Agent Skills specification](https://agentskills.io/specification) with additional features. For the cross-platform spec, load `outfitter:skillcraft`.
+Claude Code extends the base [Agent Skills specification](https://agentskills.io/specification) with additional features. For the cross-platform spec, load `skillcraft`.
 
 ### Frontmatter Extensions
 
@@ -416,7 +416,7 @@ Claude Code extends the base [Agent Skills specification](https://agentskills.io
 | `user-invocable` | boolean | Default `true`. Set `false` to prevent `/skill-name` access |
 | `disable-model-invocation` | boolean | Prevents auto-activation; requires manual Skill tool |
 | `context` | string | `inherit` (default) or `fork` for isolated subagent execution |
-| `agent` | string | Agent for `context: fork` (e.g., `Explore`, `outfitter:analyst`) |
+| `agent` | string | Agent for `context: fork` (e.g., `Explore`, `analyst`) |
 | `model` | string | Override model: `haiku`, `sonnet`, or `opus` |
 | `hooks` | object | Lifecycle hooks active while skill loaded |
 | `argument-hint` | string | Hint shown after `/skill-name` (e.g., `[file path]`) |
@@ -451,7 +451,7 @@ Tool names are case-sensitive. See [skills/integration.md](references/skills/int
 
 ```yaml
 context: fork
-agent: outfitter:analyst
+agent: analyst
 model: haiku
 ```
 

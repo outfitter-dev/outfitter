@@ -153,7 +153,7 @@ my-plugin/
 
 **Important limitation**: Shared rules only work WITHIN a single plugin. Paths that traverse outside the plugin root won't work after installation due to plugin caching.
 
-**For cross-plugin patterns**: Use skill invocation (`plugin:skill-name`) instead of file references.
+**For cross-plugin patterns**: Use skill invocation (`skill-name`) instead of file references.
 
 ## Anti-Patterns
 

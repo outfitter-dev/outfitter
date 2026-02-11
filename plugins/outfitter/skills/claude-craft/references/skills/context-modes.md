@@ -44,7 +44,7 @@ Skill runs in isolated subagent context.
 ---
 name: security-audit
 context: fork
-agent: outfitter:reviewer
+agent: reviewer
 model: sonnet
 ---
 ```
@@ -55,7 +55,7 @@ When using `context: fork`, additional fields control the subagent:
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `agent` | Agent type for the fork | `outfitter:analyst` |
+| `agent` | Agent type for the fork | `analyst` |
 | `model` | Model override | `haiku`, `sonnet`, `opus` |
 
 ### Agent Selection
@@ -64,9 +64,9 @@ Choose agents based on the skill's purpose:
 
 | Agent | Best For |
 |-------|----------|
-| `outfitter:analyst` | Research, analysis, synthesis |
-| `outfitter:reviewer` | Code review, security audit |
-| `outfitter:engineer` | Implementation, refactoring |
+| `analyst` | Research, analysis, synthesis |
+| `reviewer` | Code review, security audit |
+| `engineer` | Implementation, refactoring |
 | `Explore` | Read-only codebase exploration |
 
 ### Model Selection
@@ -85,7 +85,7 @@ Choose agents based on the skill's purpose:
 ---
 name: codebase-metrics
 context: fork
-agent: outfitter:analyst
+agent: analyst
 model: haiku
 description: Analyzes codebase for metrics without polluting main context
 ---
@@ -99,7 +99,7 @@ The skill can do extensive file reading and analysis; only the summary returns.
 ---
 name: security-scan
 context: fork
-agent: outfitter:reviewer
+agent: reviewer
 model: sonnet
 ---
 ```

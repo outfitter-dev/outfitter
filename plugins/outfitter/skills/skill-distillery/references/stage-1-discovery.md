@@ -4,7 +4,7 @@ External research before analyzing code.
 
 **Goal**: Understand the tool from a user's perspective.
 
-**Skill**: Load `outfitter:research`
+**Skill**: Load `research`
 
 ## What to Gather
 

@@ -97,7 +97,7 @@ Use the report structure in [TEMPLATE.md](TEMPLATE.md).
 
 ## Relationship with docs-review
 
-For combined voice/style and technical verification, load both this skill and the `team:docs-review` skill.
+For combined voice/style and technical verification, load both this skill and the `docs-review` skill.
 
 | Dimension | docs-review | docs-check |
 |-----------|-------------|------------|

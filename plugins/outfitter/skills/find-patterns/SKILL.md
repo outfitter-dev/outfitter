@@ -19,7 +19,7 @@ Observe signals → classify patterns → validate with evidence → document fi
 2. Classify pattern type (workflow, orchestration, heuristic, anti-pattern)
 3. Validate against evidence threshold (3+ instances, multiple contexts)
 4. Document pattern with constraints and examples
-5. If implementation needed, delegate by loading the `outfitter:codify` skill
+5. If implementation needed, delegate by loading the `codify` skill
 
 <when_to_use>
 

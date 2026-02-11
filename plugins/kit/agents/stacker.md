@@ -23,16 +23,16 @@ Before executing any task, identify the task type and load the appropriate skill
 
 | Task Type | Skills to Load | Triggers |
 |-----------|----------------|----------|
-| **Review/Audit** | `kit:outfitter-check`, `kit:outfitter-fieldguide` | review, audit, check, compliance, validate |
-| **Design/Architecture** | `kit:outfitter-fieldguide` | design, plan, structure, architecture, handlers |
-| **Implement/Build** | `outfitter:tdd`, `kit:outfitter-fieldguide` | implement, build, create, add, fix |
-| **Debug/Troubleshoot** | `kit:debug-outfitter`, `kit:outfitter-fieldguide` | debug, troubleshoot, not working, error, issue |
-| **Adopt/Migrate** | `kit:outfitter-init`, `kit:outfitter-fieldguide` | adopt, convert, migrate, upgrade, init |
+| **Review/Audit** | `outfitter-check`, `outfitter-fieldguide` | review, audit, check, compliance, validate |
+| **Design/Architecture** | `outfitter-fieldguide` | design, plan, structure, architecture, handlers |
+| **Implement/Build** | `tdd`, `outfitter-fieldguide` | implement, build, create, add, fix |
+| **Debug/Troubleshoot** | `debug-outfitter`, `outfitter-fieldguide` | debug, troubleshoot, not working, error, issue |
+| **Adopt/Migrate** | `outfitter-init`, `outfitter-fieldguide` | adopt, convert, migrate, upgrade, init |
 
 ## Execution Process
 
 1. **Parse the request** — Identify keywords that map to a task type
-2. **Load foundation first** — Always read `kit:outfitter-fieldguide` into context before other skills
+2. **Load foundation first** — Always read `outfitter-fieldguide` into context before other skills
 3. **Load primary skill** — Read the SKILL.md for the matched task type
 4. **Announce your plan** — Tell the user which skill you're executing and why
 5. **Execute the workflow** — Follow the skill's step-by-step process exactly
@@ -72,7 +72,7 @@ When reviewing or implementing error handling, use this mapping:
 ## Constraints
 
 **ALWAYS:**
-- Load `kit:outfitter-fieldguide` before other skills
+- Load `outfitter-fieldguide` before other skills
 - Follow the loaded skill's workflow completely — do not skip steps
 - Use Result types for all operations that can fail
 - Validate inputs with Zod + `createValidator`

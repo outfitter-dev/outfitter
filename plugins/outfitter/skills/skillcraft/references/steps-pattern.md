@@ -21,16 +21,16 @@ Place `## Steps` immediately after the H1 title, before any other content.
 ### Loading Skills
 
 ```markdown
-1. Load the `outfitter:skillcraft` skill
+1. Load the `skillcraft` skill
 ```
 
-Always use the full `plugin:skill-name` format. Never link to SKILL.md files.
+Always use the skill name directly. Never link to SKILL.md files.
 
 ### Conditional Steps
 
 ```markdown
-3. If working with TypeScript, load the `outfitter:typescript-fieldguide` skill
-4. If tests fail, load the `outfitter:debugging` skill
+3. If working with TypeScript, load the `typescript-fieldguide` skill
+4. If tests fail, load the `debugging` skill
 ```
 
 Conditions should be brief and contextual.
@@ -49,8 +49,8 @@ Use imperative voice, drop articles, keep brief.
 Skills with `context: fork` + `agent` delegate work to agents rather than loading instructions into the current context. Use "delegate by loading" language:
 
 ```markdown
-3. Delegate by loading the `outfitter:security-audit` skill for vulnerability analysis
-4. Delegate by loading the `outfitter:codebase-analysis` skill for deep analysis
+3. Delegate by loading the `security-audit` skill for vulnerability analysis
+4. Delegate by loading the `codebase-analysis` skill for deep analysis
 ```
 
 **Key difference**:
@@ -63,7 +63,7 @@ Delegated skills are defined with:
 ---
 name: security-audit
 context: fork
-agent: outfitter:reviewer
+agent: reviewer
 model: sonnet
 ---
 ```
@@ -75,12 +75,12 @@ When referenced in Steps, make the delegation explicit so readers understand wor
 ```markdown
 ## Steps
 
-1. Load the `outfitter:codebase-analysis` skill
+1. Load the `codebase-analysis` skill
 2. Investigate the problem area
 3. Based on findings:
-   - If pattern issue → load `outfitter:find-patterns` skill
-   - If root cause needed → load `outfitter:find-root-causes` skill
-   - If ready to report → load `outfitter:report-findings` skill
+   - If pattern issue → load `find-patterns` skill
+   - If root cause needed → load `find-root-causes` skill
+   - If ready to report → load `report-findings` skill
 ```
 
 ### Plan Mode and User Questions
@@ -90,7 +90,7 @@ Use Plan mode and AskUserQuestion for workflows that need user input or have dec
 ```markdown
 ## Steps
 
-1. Load the `outfitter:claude-plugins` skill and run audit checklists
+1. Load the `claude-plugins` skill and run audit checklists
 2. Apply auto-fixable issues
 3. Enter Plan mode
 4. Present remaining issues with AskUserQuestion
@@ -125,7 +125,7 @@ The Plan agent (`subagent_type: Plan`) explores the problem space independently,
 
 ## Steps
 
-1. Load the `outfitter:skillcraft` skill for base spec
+1. Load the `skillcraft` skill for base spec
 2. Apply Claude Code-specific extensions from this skill
 ```
 
@@ -138,10 +138,10 @@ Simple two-step: load base, extend with specifics.
 
 ## Steps
 
-1. Load the `outfitter:codebase-analysis` skill
+1. Load the `codebase-analysis` skill
 2. Gather evidence from codebase
 3. If external research needed, use WebSearch/WebFetch
-4. Load the `outfitter:report-findings` skill
+4. Load the `report-findings` skill
 5. Synthesize into structured report
 ```
 
@@ -154,10 +154,10 @@ Linear workflow with conditional mid-step.
 
 ## Steps
 
-1. Load the `outfitter:find-root-causes` skill
+1. Load the `find-root-causes` skill
 2. Investigate with systematic diagnosis
 3. If code-level issue, apply fix
-4. If architectural issue, load the `outfitter:systems-design` skill
+4. If architectural issue, load the `systems-design` skill
 5. Validate fix resolves the issue
 ```
 
@@ -172,7 +172,7 @@ Branching based on diagnosis outcome.
 
 1. Write failing test (Red)
 2. Implement minimal code to pass (Green)
-3. Load the `outfitter:sanity-check` skill
+3. Load the `sanity-check` skill
 4. Refactor while keeping tests green
 5. Repeat from step 1 for next requirement
 ```
@@ -187,13 +187,13 @@ Cyclical workflow with embedded skill.
 ## Steps
 
 1. Gather changed files from PR
-2. Delegate by loading the `outfitter:security-audit` skill for vulnerability scan
+2. Delegate by loading the `security-audit` skill for vulnerability scan
 3. Review findings and severity levels
 4. If critical issues, block merge with explanation
 5. If clean, approve with security sign-off
 ```
 
-The `security-audit` skill has `context: fork` and `agent: outfitter:reviewer`, so step 2 delegates to a subagent. Results return to main context for steps 3-5.
+The `security-audit` skill has `context: fork` and `agent: reviewer`, so step 2 delegates to a subagent. Results return to main context for steps 3-5.
 
 ## Guidelines
 
@@ -257,7 +257,7 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 1. See [skillcraft](../skillcraft/SKILL.md) for base patterns
 
 # Right
-1. Load the `outfitter:skillcraft` skill
+1. Load the `skillcraft` skill
 ```
 
 ### Verbose Steps
@@ -268,7 +268,7 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
    Agent Skills specification that this skill extends
 
 # Right
-1. Load the `outfitter:skillcraft` skill
+1. Load the `skillcraft` skill
 ```
 
 ### Steps That Are Just Headers
@@ -282,9 +282,9 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 # Right - actionable steps
 ## Steps
-1. Load the `outfitter:codebase-analysis` skill
+1. Load the `codebase-analysis` skill
 2. Investigate problem area
-3. Load the `outfitter:report-findings` skill
+3. Load the `report-findings` skill
 ```
 
 ### Too Many Steps
@@ -305,7 +305,7 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 # Right - high-level steps, detail in body
 ## Steps
-1. Load the `outfitter:find-root-causes` skill
+1. Load the `find-root-causes` skill
 2. Diagnose with systematic investigation
 3. Implement and validate fix
 ```

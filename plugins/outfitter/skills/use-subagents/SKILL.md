@@ -200,7 +200,7 @@ Run agents asynchronously for parallel work:
 {
   "description": "Security review",
   "prompt": "Review auth module for vulnerabilities",
-  "subagent_type": "outfitter:reviewer",
+  "subagent_type": "reviewer",
   "run_in_background": true
 }
 ```
@@ -238,7 +238,7 @@ Continue long-running work across invocations:
 {
   "description": "Continue security analysis",
   "prompt": "Now examine session management",
-  "subagent_type": "outfitter:reviewer",
+  "subagent_type": "reviewer",
   "resume": "agent-abc123"
 }
 ```
@@ -256,7 +256,7 @@ Override model for specific needs:
 
 ```json
 {
-  "subagent_type": "outfitter:analyst",
+  "subagent_type": "analyst",
   "model": "haiku"  // Fast, cheap for exploration
 }
 ```

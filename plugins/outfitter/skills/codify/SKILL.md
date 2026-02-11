@@ -101,7 +101,7 @@ All five quality checks must pass before codifying.
 1. Identify: Spot repeatable behavior in conversation
    - If hint/argument provided, focus analysis on that specific pattern
    - Otherwise scan for: workflows, orchestrations, and heuristics worth capturing
-   - For deep analysis, load `outfitter:codebase-analysis` skill and use `outfitter:find-patterns` techniques
+   - For deep analysis, load `codebase-analysis` skill and use `find-patterns` techniques
    - Extract success, frustration, workflow, and request signals
    - Look for 3+ occurrences of similar behavior
 2. Classify: Workflow, Orchestration, or Heuristic?

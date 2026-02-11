@@ -14,7 +14,7 @@ Start a methodical debugging session using the four-stage investigation framewor
 
 ## Steps
 
-1. **Load** — Use the Skill tool and load the `outfitter:debugging` skill
+1. **Load** — Use the Skill tool and load the `debugging` skill
 2. **Consider** — Ultrathink and analyze the problem, consider available evidence, potential causes, and investigation approach
 3. **Dispatch or Execute** — Choose execution path based on available tools:
    - **If Task tool available**: Run the debug loop (see below)
@@ -26,10 +26,10 @@ Run iterative cycles until the issue is resolved:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  1. INVESTIGATE — Dispatch outfitter:debugger           │
+│  1. INVESTIGATE — Dispatch debugger           │
 │     └─ Collect evidence, form hypothesis, propose fix   │
 │                          ↓                              │
-│  2. REVIEW — Dispatch outfitter:reviewer                │
+│  2. REVIEW — Dispatch reviewer                │
 │     └─ Validate fix, check for regressions, verify      │
 │        root cause addressed (not just symptoms)         │
 │                          ↓                              │

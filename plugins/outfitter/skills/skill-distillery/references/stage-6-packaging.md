@@ -4,7 +4,7 @@ Create distributable plugin structure.
 
 **Goal**: Package components into a valid plugin.
 
-**Skill**: Load `outfitter:claude-plugins`
+**Skill**: Load `claude-plugins`
 
 ## Directory Structure
 
@@ -116,7 +116,7 @@ Brief description.
 
 ## Skills
 
-- `plugin:skill-name` — when to use
+- `skill-name` — when to use
 
 ## Requirements
 

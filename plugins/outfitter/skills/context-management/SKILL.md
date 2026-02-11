@@ -165,8 +165,6 @@ Task arrives
 └── Simple, focused, single-file? → Main agent (maybe)
 ```
 
-> **Note**: Plugin agents require the `plugin:agent-name` format (e.g., `outfitter:reviewer`). Built-in agents (`Explore`, `Plan`, `general-purpose`) work without prefix. Use `/agents` to see available agents.
-
 ### Context-Saving Patterns
 
 **Research delegation** — Instead of reading 10 files:
@@ -185,8 +183,8 @@ Main agent receives: concise summary, not 10 file contents.
 
 ```json
 // Single message, multiple calls, all run_in_background: true
-{ "subagent_type": "outfitter:reviewer", "run_in_background": true, "prompt": "Security review..." }
-{ "subagent_type": "outfitter:analyst", "run_in_background": true, "prompt": "Performance review..." }
+{ "subagent_type": "reviewer", "run_in_background": true, "prompt": "Security review..." }
+{ "subagent_type": "analyst", "run_in_background": true, "prompt": "Performance review..." }
 ```
 
 Main agent: stays lean, collects results when ready.
@@ -195,7 +193,7 @@ Main agent: stays lean, collects results when ready.
 
 ```json
 {
-  "subagent_type": "outfitter:tester",
+  "subagent_type": "tester",
   "run_in_background": true,
   "prompt": "Run integration tests for auth module"
 }

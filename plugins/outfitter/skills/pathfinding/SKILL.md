@@ -184,7 +184,7 @@ When auto-invoking:
 ```
 
 Launch with Task tool:
-- subagent_type: "outfitter:skeptic"
+- subagent_type: "skeptic"
 - prompt: Include current decisions, unknowns, and caveats
 - run_in_background: false (wait for findings before delivery)
 
@@ -257,6 +257,6 @@ NEVER:
 - [confidence.md](references/confidence.md) — confidence deep dive
 - [questions.md](references/questions.md) — question crafting
 - [examples/](examples/) — session examples
-- skeptic agent (outfitter:skeptic) — complexity sanity checks
+- skeptic agent (skeptic) — complexity sanity checks
 
 </references>
