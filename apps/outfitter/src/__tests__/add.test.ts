@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   readFileSync,
@@ -9,6 +10,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { listBlocks, runAdd } from "../commands/add.js";
+import type { Manifest } from "../manifest.js";
 
 describe("runAdd", () => {
   const testDir = join(import.meta.dirname, ".test-add-output");
@@ -187,6 +189,88 @@ describe("runAdd", () => {
     if (result.isErr()) {
       expect(result.error.message).toContain("not found");
     }
+  });
+
+  // ===========================================================================
+  // Manifest stamping
+  // ===========================================================================
+
+  test("stamps manifest after successful add", async () => {
+    const result = await runAdd({
+      block: "biome",
+      force: false,
+      dryRun: false,
+      cwd: testDir,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    // Verify manifest was created
+    const manifestPath = join(testDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(true);
+
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+    expect(manifest.version).toBe(1);
+    expect(manifest.blocks["biome"]).toBeDefined();
+    expect(manifest.blocks["biome"]?.installedFrom).toMatch(/^\d+\.\d+\.\d+/);
+    expect(manifest.blocks["biome"]?.installedAt).toBeDefined();
+  });
+
+  test("manifest records correct installedFrom version", async () => {
+    await runAdd({
+      block: "claude",
+      force: false,
+      dryRun: false,
+      cwd: testDir,
+    });
+
+    const manifestPath = join(testDir, ".outfitter/manifest.json");
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+
+    // The installedFrom should match @outfitter/tooling package.json version
+    const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
+    const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8")) as {
+      version: string;
+    };
+    expect(manifest.blocks["claude"]?.installedFrom).toBe(toolingPkg.version);
+  });
+
+  test("dry run does not stamp manifest", async () => {
+    await runAdd({
+      block: "biome",
+      force: false,
+      dryRun: true,
+      cwd: testDir,
+    });
+
+    expect(existsSync(join(testDir, ".outfitter/manifest.json"))).toBe(false);
+  });
+
+  test("add succeeds even when manifest directory is read-only", async () => {
+    // Create a read-only .outfitter directory to prevent manifest writes
+    const outfitterDir = join(testDir, ".outfitter");
+    mkdirSync(outfitterDir, { recursive: true });
+    // Write an invalid file to block the manifest write
+    writeFileSync(join(outfitterDir, "manifest.json"), "not valid json {{{");
+    chmodSync(join(outfitterDir, "manifest.json"), 0o444);
+
+    const result = await runAdd({
+      block: "biome",
+      force: false,
+      dryRun: false,
+      cwd: testDir,
+    });
+
+    // The add command should still succeed — stamping is best-effort
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.created).toContain("biome.json");
+    }
+
+    // Clean up: restore write permission for afterEach cleanup
+    chmodSync(join(outfitterDir, "manifest.json"), 0o644);
   });
 });
 

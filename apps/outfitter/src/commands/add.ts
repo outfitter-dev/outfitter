@@ -21,6 +21,7 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult, Block, Registry } from "@outfitter/tooling";
 import { RegistrySchema } from "@outfitter/tooling";
+import { stampBlock } from "../manifest.js";
 
 // =============================================================================
 // Types
@@ -91,15 +92,43 @@ function getRegistryPath(): string {
 }
 
 /**
+ * Reads the `@outfitter/tooling` package version from the same install tree
+ * where the registry was resolved.
+ *
+ * @param registryPath - Absolute path to `registry/registry.json`
+ * @returns The version string, or `"unknown"` if it cannot be read
+ */
+function readToolingVersion(registryPath: string): string {
+  try {
+    // registry lives at <tooling-root>/registry/registry.json
+    const toolingRoot = dirname(dirname(registryPath));
+    const pkgPath = join(toolingRoot, "package.json");
+    const content = readFileSync(pkgPath, "utf-8");
+    const pkg = JSON.parse(content) as { version?: string };
+    return pkg.version ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+/** Result of loading the registry, including the tooling version. */
+interface LoadedRegistry {
+  readonly registry: Registry;
+  /** Version of `@outfitter/tooling` that provided the registry. */
+  readonly toolingVersion: string;
+}
+
+/**
  * Loads and validates the registry.
  */
-function loadRegistry(): Result<Registry, AddError> {
+function loadRegistry(): Result<LoadedRegistry, AddError> {
   try {
     const registryPath = getRegistryPath();
     const content = readFileSync(registryPath, "utf-8");
     const parsed = JSON.parse(content);
     const registry = RegistrySchema.parse(parsed);
-    return Result.ok(registry);
+    const toolingVersion = readToolingVersion(registryPath);
+    return Result.ok({ registry, toolingVersion });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return Result.err(new AddError(`Failed to load registry: ${message}`));
@@ -291,7 +320,6 @@ function updatePackageJson(
  * }
  * ```
  */
-// biome-ignore lint/suspicious/useAwait: async for API consistency with runInit
 export async function runAdd(
   input: AddInput
 ): Promise<Result<AddBlockResult, AddError>> {
@@ -303,7 +331,7 @@ export async function runAdd(
   if (registryResult.isErr()) {
     return registryResult;
   }
-  const registry = registryResult.value;
+  const { registry, toolingVersion } = registryResult.value;
 
   // Resolve block (handles extends)
   const blockResult = resolveBlock(registry, blockName);
@@ -346,6 +374,21 @@ export async function runAdd(
     block.devDependencies ?? {},
     dryRun
   );
+
+  // Stamp manifest (best-effort — block files are already written)
+  if (!dryRun) {
+    const stampResult = await stampBlock(
+      resolvedCwd,
+      blockName,
+      toolingVersion
+    );
+    if (stampResult.isErr()) {
+      // Log warning but don't fail the command
+      process.stderr.write(
+        `Warning: failed to stamp manifest: ${stampResult.error.message}\n`
+      );
+    }
+  }
 
   return Result.ok({
     created,
@@ -434,6 +477,6 @@ export function listBlocks(): Result<string[], AddError> {
     return registryResult;
   }
 
-  const blocks = Object.keys(registryResult.value.blocks);
+  const blocks = Object.keys(registryResult.value.registry.blocks);
   return Result.ok(blocks);
 }
