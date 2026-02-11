@@ -7,6 +7,7 @@ skills:
   - maintain-tasks
   - claude-plugins
   - claude-craft
+  - skillcraft
 memory: user
 ---
 
