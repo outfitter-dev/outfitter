@@ -1,14 +1,15 @@
 ---
 name: skillcheck
 description: "Validates skill quality — preprocessing safety, frontmatter, line counts, references. Use when checking skills, validating SKILL.md, or when skillcheck, lint skill, or validate skill are mentioned."
+context: fork
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: outfitter
   preprocess: true
   related-skills:
     - skillcraft
     - claude-craft
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools: Read, Glob, Grep, Bash, Task
 argument-hint: "[path]"
 ---
 
@@ -62,6 +63,10 @@ bun ${CLAUDE_PLUGIN_ROOT}/scripts/validate-skill-frontmatter.ts <path-to-SKILL.m
 # Full plugin validation
 bun ${CLAUDE_PLUGIN_ROOT}/scripts/validate-plugin.ts <plugin-directory>
 ```
+
+## Deep Validation
+
+After reviewing linter results, spawn the `quartermaster` agent to run deeper validation — frontmatter schema, naming conventions, description quality, line counts, and reference integrity. Pass it the same path argument.
 
 ## Quality Checklist
 
