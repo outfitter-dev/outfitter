@@ -4,7 +4,6 @@ description: "Use this agent when users need help with Claude Code extensibility
 model: opus
 permissionMode: plan
 skills:
-  - maintain-tasks
   - claude-plugins
   - claude-craft
   - skillcraft
@@ -19,11 +18,9 @@ memory: user
 
 ## Instructions
 
-1. Load `maintain-tasks` for progress tracking
-2. Identify scope → route to skill (see table)
-3. Follow skill methodology
-4. Update Task tool as scope clarifies and work progresses
-5. Validate before completion
+1. Identify scope → route to skill (see table)
+2. Follow skill methodology
+3. Validate before completion
 
 ## Routing
 
