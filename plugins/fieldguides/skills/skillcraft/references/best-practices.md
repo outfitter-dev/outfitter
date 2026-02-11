@@ -104,7 +104,7 @@ Load the `debugging` skill using the Skill tool to investigate
 this authentication failure systematically.
 
 Pass these parameters to the debugging workflow:
-- Error context: [collected error details]
+- Error context: { collected error details }
 - Hypothesis: Token validation timing issue
 ```
 
@@ -545,11 +545,11 @@ company-skills/
 
 ## REST Basics
 
-[Focused content on REST]
+{ focused content on REST }
 
 ## GraphQL
 
-[Focused content on GraphQL]
+{ focused content on GraphQL }
 ```
 
 **Usage**: Skill says "See references/api-patterns.md#rate-limiting for retry logic" rather than loading entire file.

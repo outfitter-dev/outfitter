@@ -211,13 +211,13 @@ Complete guide for deploying to AWS.
 - IAM credentials configured
 
 ## Infrastructure Setup
-[Complete AWS-specific content]
+{ complete AWS-specific content }
 
 ## Deployment
-[Complete AWS-specific content]
+{ complete AWS-specific content }
 
 ## Troubleshooting
-[AWS-specific issues]
+{ AWS-specific issues }
 ```
 
 ### Why This Pattern Works
@@ -269,11 +269,11 @@ Files over 100 lines should include a TOC for partial reads.
 
 ## Authentication
 
-[Section content...]
+{ section content }
 
 ## Core Methods
 
-[Section content...]
+{ section content }
 ```
 
 **Why it matters:** Claude may use `head -100` previews. A TOC ensures visibility of full scope even in partial reads.

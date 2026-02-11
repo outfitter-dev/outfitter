@@ -71,8 +71,8 @@ Logs are freeform notes for capturing anything worth preserving.
 
 > YYYY-MM-DD HH:MM · Session `<short-id>`
 
-[Freeform content - research findings, technical discoveries,
-meeting notes, ideas, observations, etc.]
+{ freeform content — research findings, technical discoveries,
+meeting notes, ideas, observations, etc. }
 ```
 
 ### Log Use Cases

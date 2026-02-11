@@ -158,7 +158,7 @@ mkdir -p .agents/notes
 **Status**: PASS | WARNINGS | FAIL
 **Issues**: X critical, Y high, Z medium, W low
 
-[Details follow...]
+{ details follow }
 ```
 
 ## Fix References
