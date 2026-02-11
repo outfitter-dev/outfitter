@@ -57,7 +57,7 @@ Use when a preferred pattern exists but variation is acceptable.
 
 Use for fragile operations requiring exact sequences.
 
-```markdown
+````markdown
 ## Data Validation
 
 Run the validation script:
@@ -67,8 +67,7 @@ bun run scripts/validate.ts --schema=user.json --input=$INPUT_FILE
 ```
 
 Do not modify the validation logic inline. If changes are needed, update scripts/validate.ts.
-
-```
+````
 
 **When to use:** Security-critical, deterministic reliability, complex algorithms.
 
@@ -296,7 +295,7 @@ Files over 100 lines should include a TOC for partial reads.
 
 **Domain-based routing:**
 
-```markdown
+````markdown
 ## Available Datasets
 
 - **Finance**: Revenue, ARR, billing -> See [finance.md](references/finance.md)
@@ -309,46 +308,35 @@ Find specific metrics:
 ```bash
 grep -i "revenue" references/finance.md
 ```
-
-```
+````
 
 ### Keep References One Level Deep
 
-```
-
+```text
 # Good
-
 SKILL.md -> reference.md
 
 # Bad (too deep)
-
 SKILL.md -> advanced.md -> details.md -> specifics.md
-
 ```
 
 Claude may partially read nested files, getting incomplete information.
 
 ### Topic-Based File Naming
 
-```
-
-references/
-├── finance.md          # Clear domain
-├── sales.md
-└── product.md
-
-```
+| File | Why it works |
+|------|-------------|
+| `finance.md` | Clear domain |
+| `sales.md` | Clear domain |
+| `product.md` | Clear domain |
 
 **Not:**
 
-```
-
-references/
-├── doc1.md             # What's in this?
-├── reference2.md
-└── stuff.md
-
-```
+| File | Problem |
+|------|---------|
+| `doc1.md` | What's in this? |
+| `reference2.md` | Generic numbering |
+| `stuff.md` | Meaningless name |
 
 ---
 
@@ -447,11 +435,10 @@ install it with pip install pdfplumber, then you can open the file and...
 
 For strict output requirements, provide exact templates.
 
-```markdown
+````markdown
 ALWAYS use this exact commit message format:
 
-```
-
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -463,7 +450,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 Example:
 
-```
+```text
 feat(auth): add refresh token rotation
 
 Implements automatic token rotation on refresh to improve security.
@@ -471,8 +458,7 @@ Tokens are invalidated after single use.
 
 Closes #123
 ```
-
-```
+````
 
 ### Checklist Pattern
 
@@ -499,69 +485,30 @@ Conventions for skill, file, and reference naming.
 
 ### Gerund Form (Preferred)
 
-Use verb + -ing form for skill names.
-
-```
-processing-pdfs
-analyzing-spreadsheets
-managing-databases
-testing-code
-writing-documentation
-deploying-applications
-debugging-issues
-```
+Use verb + -ing form for skill names: `processing-pdfs`, `analyzing-spreadsheets`, `managing-databases`, `testing-code`, `writing-documentation`, `deploying-applications`, `debugging-issues`.
 
 ### Noun Form (Acceptable)
 
-When gerund feels awkward.
-
-```
-pdf-processing
-spreadsheet-analysis
-code-review
-api-integration
-```
+When gerund feels awkward: `pdf-processing`, `spreadsheet-analysis`, `code-review`, `api-integration`.
 
 ### Avoid
 
-```
-# Vague
-helper
-utils
-tools
-stuff
-
-# Too Generic
-documents
-data
-files
-code
-
-# Reserved Words
-anthropic-helper
-claude-tools
-claude-assistant
-```
+| Name | Problem |
+|------|---------|
+| `helper`, `utils`, `tools`, `stuff` | Vague — says nothing about what the skill does |
+| `documents`, `data`, `files`, `code` | Too generic — could mean anything |
+| `anthropic-helper`, `claude-tools`, `claude-assistant` | Reserved words — `anthropic` and `claude` are reserved |
 
 ### File Naming
 
-```
-references/
-├── authentication.md    # Domain topic
-├── error-handling.md    # Concept
-├── aws-deployment.md    # Variant-specific
-└── quick-start.md       # Purpose
-```
+| File | Naming Strategy |
+|------|----------------|
+| `authentication.md` | Domain topic |
+| `error-handling.md` | Concept |
+| `aws-deployment.md` | Variant-specific |
+| `quick-start.md` | Purpose |
 
-**Not:**
-
-```
-references/
-├── ref1.md
-├── DOCS.md
-├── more_stuff.md
-└── NEW-FILE.md
-```
+**Not:** `ref1.md`, `DOCS.md`, `more_stuff.md`, `NEW-FILE.md`
 
 ---
 
