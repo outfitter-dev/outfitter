@@ -6,24 +6,24 @@
   },
   "metadata": {
     "description": "Outfitter plugin ecosystem for AI-assisted development",
-    "version": "1.5.0"
+    "version": "2.0.0"
   },
   "repository": "https://github.com/outfitter-dev/outfitter",
   "plugins": [
     {
-      "name": "outfitter",
-      "source": "./plugins/outfitter",
-      "description": "Core development methodology and Claude Code extensibility."
+      "name": "fieldguides",
+      "source": "./plugins/fieldguides",
+      "description": "Development methodology fieldguides — TDD, debugging, architecture, research, and Claude Code authoring skills."
     },
     {
-      "name": "kit",
-      "source": "./plugins/kit",
-      "description": "Skills and workflows for working with @outfitter/* packages"
+      "name": "outfitter",
+      "source": "./plugins/outfitter",
+      "description": "Skills and workflows for working with @outfitter/* packages."
     },
     {
       "name": "team",
       "source": "./plugins/team",
-      "description": "Internal Outfitter team skills for docs, voice, and conventions"
+      "description": "Internal Outfitter team skills for docs, voice, and conventions."
     }
   ]
 }

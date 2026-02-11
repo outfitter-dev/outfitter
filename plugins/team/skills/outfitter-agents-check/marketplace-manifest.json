@@ -9,6 +9,6 @@
   },
   "plugins": {
     "required": ["outfitter"],
-    "optional": ["kit", "team"]
+    "optional": ["fieldguides", "team"]
   }
 }

@@ -13,7 +13,7 @@ const ROOT = dirname(dirname(new URL(import.meta.url).pathname));
 const SOURCE = join(ROOT, ".claude-plugin/marketplace.json");
 const DEST = join(
   ROOT,
-  "plugins/team/skills/agent-setup/marketplace-manifest.json"
+  "plugins/team/skills/outfitter-agents-check/marketplace-manifest.json"
 );
 
 interface MarketplaceJson {
