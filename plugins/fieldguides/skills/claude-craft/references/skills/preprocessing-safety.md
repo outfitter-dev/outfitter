@@ -27,7 +27,7 @@ Add an HTML comment near `<bang>` usage explaining the convention:
 
 | File type | Write | Why |
 |-----------|-------|-----|
-| SKILL.md | `<bang>` backtick`command` backtick | Prevents accidental execution |
+| SKILL.md | `` <bang>`command` `` | Prevents accidental execution |
 | References, EXAMPLES.md | `!`command`` | Literal — safe and good for copy-paste |
 | Command files | `!`command`` | Intentional execution |
 
@@ -69,8 +69,8 @@ Commands can inject shell output using the preprocessing syntax:
 
 <!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
 
-- <bang>`git status` — injects current git status
-- <bang>`gh pr view --json title` — injects PR details
+- `` <bang>`git status` `` — injects current git status
+- `` <bang>`gh pr view --json title` `` — injects PR details
 
 See [bash-execution.md](references/bash-execution.md) for examples.
 ```

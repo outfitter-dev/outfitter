@@ -179,7 +179,7 @@ See [commands/frontmatter.md](references/commands/frontmatter.md) for complete s
 | Feature | Syntax | Purpose |
 |---------|--------|---------|
 | Arguments | `$1`, `$2`, `$ARGUMENTS` | Dynamic input from user |
-| Bash execution | <bang>`command` | Include shell output in context |
+| Bash execution | `` <bang>`command` `` | Include shell output in context |
 | File references | `@path/to/file` | Include file contents |
 | Tool restrictions | `allowed-tools:` | Limit Claude's capabilities |
 
@@ -474,7 +474,7 @@ See [skills/context-modes.md](references/skills/context-modes.md) for patterns.
 
 <!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
 
-Claude Code preprocesses <bang>`command` syntax — executing shell commands and injecting output before content reaches Claude. This powers live context in commands (git state, PR details, environment info).
+Claude Code preprocesses `` <bang>`command` `` syntax — executing shell commands and injecting output before content reaches Claude. This powers live context in commands (git state, PR details, environment info).
 
 **Critical**: Preprocessing runs in both command files AND SKILL.md files, including inside markdown code fences. There is no escape mechanism.
 
@@ -499,8 +499,8 @@ Add an HTML comment explaining the convention:
 
 Then use `<bang>` for any inline references:
 
-- <bang>`git status` — injects current git status
-- <bang>`gh pr view --json title` — injects PR details
+- `` <bang>`git status` `` — injects current git status
+- `` <bang>`gh pr view --json title` `` — injects PR details
 
 Move real copy-paste examples with literal `!` to reference files — those are not preprocessed.
 
