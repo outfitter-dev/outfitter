@@ -23,6 +23,7 @@ import {
   printAddResults,
   runAdd,
 } from "./commands/add.js";
+import { printCheckResults, runCheck } from "./commands/check.js";
 import {
   type CreateOptions,
   printCreateResults,
@@ -581,6 +582,96 @@ const listBlocksAction = defineAction({
   },
 });
 
+interface CheckActionInput {
+  cwd: string;
+  verbose: boolean;
+  block?: string;
+  ci: boolean;
+  outputMode?: OutputMode;
+}
+
+const checkInputSchema = z.object({
+  cwd: z.string(),
+  verbose: z.boolean(),
+  block: z.string().optional(),
+  ci: z.boolean(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<CheckActionInput>;
+
+const checkAction = defineAction({
+  id: "check",
+  description:
+    "Compare local config blocks against the registry for drift detection",
+  surfaces: ["cli"],
+  input: checkInputSchema,
+  cli: {
+    command: "check",
+    description:
+      "Compare local config blocks against the registry for drift detection",
+    options: [
+      {
+        flags: "-v, --verbose",
+        description: "Show diffs for drifted files",
+        defaultValue: false,
+      },
+      {
+        flags: "-b, --block <name>",
+        description: "Check a specific block only",
+      },
+      {
+        flags: "--ci",
+        description: "Machine-oriented output for CI",
+        defaultValue: false,
+      },
+      {
+        flags: "--cwd <path>",
+        description: "Working directory (defaults to current directory)",
+      },
+    ],
+    mapInput: (context) => {
+      const outputMode = resolveOutputMode(context.flags);
+      const cwd =
+        typeof context.flags["cwd"] === "string"
+          ? resolve(process.cwd(), context.flags["cwd"])
+          : process.cwd();
+      const block = resolveStringFlag(context.flags["block"]);
+      return {
+        cwd,
+        verbose: Boolean(context.flags["verbose"]),
+        ...(block !== undefined ? { block } : {}),
+        ci: Boolean(context.flags["ci"]),
+        ...(outputMode ? { outputMode } : {}),
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, ci, ...checkInput } = input;
+    const effectiveMode = ci ? "json" : outputMode;
+    const result = await runCheck(checkInput);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check" },
+        })
+      );
+    }
+
+    await printCheckResults(result.value, {
+      ...(effectiveMode ? { mode: effectiveMode } : {}),
+      verbose: checkInput.verbose,
+    });
+
+    // Exit code 1 if any blocks drifted or missing
+    if (result.value.driftedCount > 0 || result.value.missingCount > 0) {
+      process.exit(1);
+    }
+
+    return Result.ok(result.value);
+  },
+});
+
 interface UpdateActionInput {
   cwd: string;
   guide: boolean;
@@ -744,5 +835,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(doctorAction)
   .add(addAction)
   .add(listBlocksAction)
+  .add(checkAction)
   .add(migrateKitAction)
   .add(updateAction);
