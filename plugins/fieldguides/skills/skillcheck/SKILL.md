@@ -34,16 +34,16 @@ The linter reports:
 
 | Finding | Fix |
 |---------|-----|
-| Unintentional `` <bang>`command` `` in SKILL.md | Replace `!` with `<bang>` |
+| Unintentional `` <bang>`command` `` in SKILL.md | Replace ``!`` with `` <bang> `` |
 | Intentional preprocessing | Add `metadata.preprocess: true` to frontmatter |
 
 ### The `<bang>` Convention
 
 SKILL.md files are preprocessed by Claude Code — any `` <bang>`command` `` syntax executes when the skill loads. To safely document or reference the syntax:
 
-- In SKILL.md: use `<bang>` as a stand-in for `!`
-- In reference files (references/, EXAMPLES.md): literal `!` is fine and encouraged
-- In command files (commands/*.md): literal `!` is required (that's the feature)
+- In SKILL.md: use `` <bang> `` as a stand-in for ``!``
+- In reference files (references/, EXAMPLES.md): literal ``!`` is fine and encouraged
+- In command files (commands/*.md): literal ``!`` is required (that's the feature)
 
 Skills that intentionally preprocess (running scripts at load time) should declare it:
 

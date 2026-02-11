@@ -143,13 +143,13 @@ Claude Code's preprocessor executes `` !`command` `` syntax in SKILL.md files â€
 
 ### The `<bang>` convention
 
-Use `<bang>` as a stand-in for `!` when referencing the preprocessing syntax in `SKILL.md` files as examples. Agents should interpret `<bang>` as `!` in context.
+Use `` <bang> `` as a stand-in for ``!`` when referencing the preprocessing syntax in `SKILL.md` files as examples. Agents should interpret `` <bang> `` as ``!`` in context.
 
 | File type | Preprocessing | Convention |
 |-----------|--------------|------------|
 | SKILL.md | Active (always) | Use `` !`command` `` |
-| References, EXAMPLES.md | None | Literal `!` encouraged (good demos) |
-| Command files (`commands/*.md`) | Intentional | Literal `!` required |
+| References, EXAMPLES.md | None | Literal ``!`` encouraged (good demos) |
+| Command files (`commands/*.md`) | Intentional | Literal ``!`` required |
 
 ### `metadata.preprocess: true`
 

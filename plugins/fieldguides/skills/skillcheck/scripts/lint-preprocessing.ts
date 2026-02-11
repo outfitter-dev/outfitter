@@ -73,11 +73,17 @@ function hasPreprocessFlag(frontmatter: Record<string, unknown>): boolean {
 // ── Scanner ─────────────────────────────────────────────────────────────────
 
 /**
- * Pattern: ! followed by backtick, any content, closing backtick.
- * Matches all occurrences — including inside double-backtick spans —
- * since preprocessing executes regardless of surrounding context.
+ * Pattern 1: !`content` — bang immediately before backtick-delimited content.
+ * This is the canonical preprocessing trigger.
  */
 const BANG_BACKTICK = /!`[^`]+`/g;
+
+/**
+ * Pattern 2: `!` — bang inside single backticks (not double backticks).
+ * The closing backtick creates !+backtick adjacency that the preprocessor
+ * interprets as the start of a command. Safe variant: ``!`` (double backticks).
+ */
+const SINGLE_BACKTICK_BANG = /(?<!`)`!`(?!`)/g;
 
 function scanFile(filePath: string): ScanResult {
   const content = readFileSync(filePath, "utf-8");
@@ -95,19 +101,23 @@ function scanFile(filePath: string): ScanResult {
 
   const lines = content.split("\n");
   const findings: Finding[] = [];
-  let inComment = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Skip HTML comments (not preprocessed)
-    if (line.includes("<!--")) inComment = true;
-    if (inComment) {
-      if (line.includes("-->")) inComment = false;
-      continue;
+    // Check for !`content` pattern
+    for (const match of line.matchAll(BANG_BACKTICK)) {
+      findings.push({
+        file: filePath,
+        line: i + 1,
+        column: (match.index ?? 0) + 1,
+        match: match[0],
+        context: line.trim(),
+      });
     }
 
-    for (const match of line.matchAll(BANG_BACKTICK)) {
+    // Check for `!` pattern (not ``!``)
+    for (const match of line.matchAll(SINGLE_BACKTICK_BANG)) {
       findings.push({
         file: filePath,
         line: i + 1,

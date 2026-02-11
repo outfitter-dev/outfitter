@@ -413,7 +413,7 @@ NEVER:
 - `any` (use `unknown` + guards)
 - `@ts-ignore` (fix types or document)
 - TypeScript enums (use const assertions or z.enum)
-- Non-null assertions `!` (use guards)
+- Non-null assertions ``!`` (use guards)
 - Loose state (use discriminated unions)
 - Hidden errors (use Result)
 

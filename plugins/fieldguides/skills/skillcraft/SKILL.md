@@ -148,7 +148,7 @@ description: "Extracts text and tables from PDF files, fills forms, merges docum
 - [ ] All referenced files exist
 - [ ] No TODO/placeholder markers
 - [ ] Progressive disclosure (details in `references/`)
-- [ ] No `` <bang>`command` `` preprocessing patterns (use `<bang>` instead of `!`)
+- [ ] No `` <bang>`command` `` preprocessing patterns (use `` <bang> `` instead of literal ``!``)
 
 ### Report Format
 
@@ -189,7 +189,7 @@ Keep SKILL.md under 500 lines. Move details to:
 
 ### Preprocessing safety
 
-SKILL.md files are preprocessed by Claude Code — `` <bang>`command` `` syntax executes at load time, even inside code fences. When documenting this syntax in SKILL.md, use `<bang>` as a stand-in for `!`. Reference files and EXAMPLES.md are not preprocessed, so literal `!` is safe there.
+SKILL.md files are preprocessed by Claude Code — `` <bang>`command` `` syntax executes at load time, even inside code fences. When documenting this syntax in SKILL.md, use `` <bang> `` as a stand-in for ``!``. Reference files and EXAMPLES.md are not preprocessed, so literal ``!`` is safe there.
 
 Skills that intentionally preprocess should declare `metadata.preprocess: true`. Run `/skillcheck` to lint for unintentional preprocessing patterns.
 

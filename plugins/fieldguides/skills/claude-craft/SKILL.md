@@ -174,7 +174,7 @@ See [commands/frontmatter.md](references/commands/frontmatter.md) for complete s
 
 ### Core Features
 
-<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+<!-- <bang> = exclamation mark; used as stand-in to avoid triggering preprocessing -->
 
 | Feature | Syntax | Purpose |
 |---------|--------|---------|
@@ -472,7 +472,7 @@ See [skills/context-modes.md](references/skills/context-modes.md) for patterns.
 
 ## Preprocessing
 
-<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+<!-- <bang> = exclamation mark; used as stand-in to avoid triggering preprocessing -->
 
 Claude Code preprocesses `` <bang>`command` `` syntax — executing shell commands and injecting output before content reaches Claude. This powers live context in commands (git state, PR details, environment info).
 
@@ -480,35 +480,35 @@ Claude Code preprocesses `` <bang>`command` `` syntax — executing shell comman
 
 ### Where preprocessing runs
 
-| Context | Preprocessed | Safe to use literal `!`? |
+| Context | Preprocessed | Safe to use literal ``!``? |
 |---------|-------------|--------------------------|
 | Command files (`commands/*.md`) | Yes | Yes — intentional |
-| SKILL.md | Yes | No — use `<bang>` instead |
+| SKILL.md | Yes | No — use `` <bang> `` instead |
 | References, EXAMPLES.md | No | Yes — great for copy-paste demos |
 | Rules, CLAUDE.md, agents | No | Yes |
 
 ### Writing SKILL.md files
 
-When documenting or referencing the preprocessing syntax in a SKILL.md, use `<bang>` as a stand-in for `!`. Agents interpret `<bang>` as `!`.
+When documenting or referencing the preprocessing syntax in a SKILL.md, use `` <bang> `` as a stand-in for ``!``. Agents interpret `` <bang> `` as ``!``.
 
 Add an HTML comment explaining the convention:
 
 ```html
-<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+<!-- <bang> = exclamation mark; used as stand-in to avoid triggering preprocessing -->
 ```
 
-Then use `<bang>` for any inline references:
+Then use `` <bang> `` for any inline references:
 
 - `` <bang>`git status` `` — injects current git status
 - `` <bang>`gh pr view --json title` `` — injects PR details
 
-Move real copy-paste examples with literal `!` to reference files — those are not preprocessed.
+Move real copy-paste examples with literal ``!`` to reference files — those are not preprocessed.
 
 ### Writing reference files
 
-Reference files (`references/`, `EXAMPLES.md`) are not preprocessed. Use literal `!` freely — these serve as copy-paste sources for command authors:
+Reference files (`references/`, `EXAMPLES.md`) are not preprocessed. Use literal ``!`` freely — these serve as copy-paste sources for command authors:
 
-See [commands/bash-execution.md](references/commands/bash-execution.md) for the full reference with real `!` syntax.
+See [commands/bash-execution.md](references/commands/bash-execution.md) for the full reference with real ``!`` syntax.
 
 ### Intentional preprocessing in skills
 
