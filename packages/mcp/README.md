@@ -359,7 +359,73 @@ for (const tool of coreTools) {
 }
 ```
 
+## Tool Annotations
+
+Use `TOOL_ANNOTATIONS` presets to declare tool behavior hints without manually specifying all four booleans:
+
+```typescript
+import { defineTool, TOOL_ANNOTATIONS } from "@outfitter/mcp";
+
+// Use a preset directly
+const listTool = defineTool({
+  name: "list-items",
+  description: "List all items",
+  inputSchema: z.object({}),
+  annotations: TOOL_ANNOTATIONS.readOnly,
+  handler: async (input, ctx) => { /* ... */ },
+});
+
+// Spread and override for edge cases
+const searchTool = defineTool({
+  name: "search",
+  description: "Search external APIs",
+  inputSchema: z.object({ q: z.string() }),
+  annotations: { ...TOOL_ANNOTATIONS.readOnly, openWorldHint: true },
+  handler: async (input, ctx) => { /* ... */ },
+});
+```
+
+| Preset | readOnly | destructive | idempotent | openWorld |
+|--------|----------|-------------|------------|-----------|
+| `readOnly` | true | false | true | false |
+| `write` | false | false | false | false |
+| `writeIdempotent` | false | false | true | false |
+| `destructive` | false | true | true | false |
+| `openWorld` | false | false | false | true |
+
+For multi-action tools, use the most conservative union of hints. Per-action annotations are an MCP spec limitation.
+
+### adaptHandler
+
+When your handler returns domain errors that extend `Error` but not `OutfitterError`, use `adaptHandler` instead of an unsafe cast:
+
+```typescript
+import { adaptHandler, defineTool } from "@outfitter/mcp";
+
+const tool = defineTool({
+  name: "my-tool",
+  inputSchema: z.object({ id: z.string() }),
+  handler: adaptHandler(myDomainHandler),
+});
+```
+
 ## Transport Helpers
+
+### wrapToolResult / wrapToolError
+
+Format handler output as MCP tool responses. Useful when building custom transport layers or testing:
+
+```typescript
+import { wrapToolResult, wrapToolError } from "@outfitter/mcp";
+
+// Wrap a plain value as MCP tool content
+const response = wrapToolResult({ count: 42 });
+// { content: [{ type: "text", text: '{"count":42}' }] }
+
+// Wrap an error with isError flag
+const errorResponse = wrapToolError(new Error("not found"));
+// { content: [{ type: "text", text: "not found" }], isError: true }
+```
 
 ### connectStdio
 
