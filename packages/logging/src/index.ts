@@ -1467,6 +1467,21 @@ export async function flush(): Promise<void> {
 }
 
 // ============================================================================
+// Runtime Safety Helpers
+// ============================================================================
+
+/**
+ * Safely read an environment variable.
+ * Returns undefined in runtimes where `process` is not available (e.g., edge runtimes, V8 isolates).
+ */
+function safeGetEnv(key: string): string | undefined {
+  if (typeof process !== "undefined") {
+    return process.env?.[key];
+  }
+  return undefined;
+}
+
+// ============================================================================
 // Environment-Aware Log Level Resolution
 // ============================================================================
 
@@ -1518,29 +1533,33 @@ const ENV_LEVEL_MAP: Readonly<Record<string, LogLevel>> = {
  * // With nothing set → "info"
  * ```
  */
-export function resolveLogLevel(level?: LogLevel): LogLevel {
+export function resolveLogLevel(level?: LogLevel | string): LogLevel {
   // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
-  const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
-  if (envLogLevel !== undefined) {
-    const mapped = ENV_LEVEL_MAP[envLogLevel];
-    if (mapped !== undefined) {
-      return mapped;
-    }
+  const envLogLevel = safeGetEnv("OUTFITTER_LOG_LEVEL");
+  if (envLogLevel !== undefined && Object.hasOwn(ENV_LEVEL_MAP, envLogLevel)) {
+    // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+    return ENV_LEVEL_MAP[envLogLevel]!;
   }
 
-  // 2. Explicit level parameter
-  if (level !== undefined) {
-    return level;
+  // 2. Explicit level parameter (validate strings via ENV_LEVEL_MAP)
+  if (level !== undefined && Object.hasOwn(ENV_LEVEL_MAP, level)) {
+    // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+    return ENV_LEVEL_MAP[level]!;
   }
 
-  // 3. Environment profile
-  const env = _getEnvironment();
-  const defaults = _getEnvironmentDefaults(env);
-  if (defaults.logLevel !== null) {
-    const mapped = ENV_LEVEL_MAP[defaults.logLevel];
-    if (mapped !== undefined) {
-      return mapped;
+  // 3. Environment profile (guarded for edge runtimes without process)
+  try {
+    const env = _getEnvironment();
+    const defaults = _getEnvironmentDefaults(env);
+    if (
+      defaults.logLevel !== null &&
+      Object.hasOwn(ENV_LEVEL_MAP, defaults.logLevel)
+    ) {
+      // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+      return ENV_LEVEL_MAP[defaults.logLevel]!;
     }
+  } catch {
+    // process.env unavailable (edge runtime) — fall through to default
   }
 
   // 4. Default
@@ -1556,29 +1575,33 @@ export function resolveLogLevel(level?: LogLevel): LogLevel {
  * 3. `OUTFITTER_ENV` profile defaults
  * 4. `"silent"` (when profile default is null)
  */
-export function resolveOutfitterLogLevel(level?: LogLevel): LogLevel {
+export function resolveOutfitterLogLevel(level?: LogLevel | string): LogLevel {
   // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
-  const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
-  if (envLogLevel !== undefined) {
-    const mapped = ENV_LEVEL_MAP[envLogLevel];
-    if (mapped !== undefined) {
-      return mapped;
-    }
+  const envLogLevel = safeGetEnv("OUTFITTER_LOG_LEVEL");
+  if (envLogLevel !== undefined && Object.hasOwn(ENV_LEVEL_MAP, envLogLevel)) {
+    // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+    return ENV_LEVEL_MAP[envLogLevel]!;
   }
 
-  // 2. Explicit level parameter
-  if (level !== undefined) {
-    return level;
+  // 2. Explicit level parameter (validate strings via ENV_LEVEL_MAP)
+  if (level !== undefined && Object.hasOwn(ENV_LEVEL_MAP, level)) {
+    // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+    return ENV_LEVEL_MAP[level]!;
   }
 
-  // 3. Environment profile
-  const env = _getEnvironment();
-  const defaults = _getEnvironmentDefaults(env);
-  if (defaults.logLevel !== null) {
-    const mapped = ENV_LEVEL_MAP[defaults.logLevel];
-    if (mapped !== undefined) {
-      return mapped;
+  // 3. Environment profile (guarded for edge runtimes without process)
+  try {
+    const env = _getEnvironment();
+    const defaults = _getEnvironmentDefaults(env);
+    if (
+      defaults.logLevel !== null &&
+      Object.hasOwn(ENV_LEVEL_MAP, defaults.logLevel)
+    ) {
+      // biome-ignore lint/style/noNonNullAssertion: hasOwn guarantees key exists
+      return ENV_LEVEL_MAP[defaults.logLevel]!;
     }
+  } catch {
+    // process.env unavailable (edge runtime) — fall through to default
   }
 
   // 4. Default: profile disabled logging
