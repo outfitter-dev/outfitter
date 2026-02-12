@@ -43,6 +43,15 @@ generate_marketplace_manifest() {
 }
 
 # -----------------------------------------------------------------------------
+# Assemble package docs
+# -----------------------------------------------------------------------------
+# Uses the docs-core package source entrypoint so prebuild can run before build.
+
+assemble_package_docs() {
+  bun "$ROOT_DIR/packages/docs-core/src/cli-sync.ts" --cwd "$ROOT_DIR"
+}
+
+# -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 
@@ -51,6 +60,7 @@ main() {
 
   sync_agent_scaffolding
   generate_marketplace_manifest
+  assemble_package_docs
 
   echo "[prebuild] Done"
 }

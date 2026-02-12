@@ -16,7 +16,7 @@ import {
   relative,
   resolve,
 } from "node:path";
-import { InternalError, Result, ValidationError } from "@outfitter/contracts";
+import { Result } from "better-result";
 
 export interface PackageDocsOptions {
   readonly workspaceRoot?: string;
@@ -45,9 +45,46 @@ export interface CheckPackageDocsResult {
   readonly isUpToDate: boolean;
 }
 
-export type PackageDocsError =
-  | InstanceType<typeof ValidationError>
-  | InstanceType<typeof InternalError>;
+export class DocsCoreError extends Error {
+  readonly _tag = "DocsCoreError" as const;
+  readonly category: "validation" | "internal";
+  readonly context: Record<string, unknown> | undefined;
+
+  constructor(input: {
+    message: string;
+    category: "validation" | "internal";
+    context?: Record<string, unknown>;
+  }) {
+    super(input.message);
+    this.name = "DocsCoreError";
+    this.category = input.category;
+    this.context = input.context;
+  }
+
+  static validation(
+    message: string,
+    context?: Record<string, unknown>
+  ): DocsCoreError {
+    return new DocsCoreError({
+      message,
+      category: "validation",
+      ...(context ? { context } : {}),
+    });
+  }
+
+  static internal(
+    message: string,
+    context?: Record<string, unknown>
+  ): DocsCoreError {
+    return new DocsCoreError({
+      message,
+      category: "internal",
+      ...(context ? { context } : {}),
+    });
+  }
+}
+
+export type PackageDocsError = DocsCoreError;
 
 interface ResolvedPackageDocsOptions {
   readonly workspaceRoot: string;
@@ -134,7 +171,7 @@ function resolveOptions(
 
   if (!existsSync(workspaceRoot)) {
     return Result.err(
-      ValidationError.fromMessage("workspaceRoot does not exist", {
+      DocsCoreError.validation("workspaceRoot does not exist", {
         workspaceRoot,
       })
     );
@@ -142,7 +179,7 @@ function resolveOptions(
 
   if (!existsSync(packagesRoot)) {
     return Result.err(
-      ValidationError.fromMessage("packages directory does not exist", {
+      DocsCoreError.validation("packages directory does not exist", {
         packagesRoot,
       })
     );
@@ -645,7 +682,7 @@ export async function syncPackageDocs(
     });
   } catch (error) {
     return Result.err(
-      InternalError.create("Failed to sync package docs", {
+      DocsCoreError.internal("Failed to sync package docs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
       })
     );
@@ -678,7 +715,7 @@ export async function checkPackageDocs(
     });
   } catch (error) {
     return Result.err(
-      InternalError.create("Failed to check package docs", {
+      DocsCoreError.internal("Failed to check package docs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
       })
     );

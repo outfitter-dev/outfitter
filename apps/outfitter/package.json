@@ -149,6 +149,7 @@
     "@outfitter/cli": "workspace:*",
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/docs": "workspace:*",
     "@outfitter/logging": "workspace:*",
     "@outfitter/tooling": "workspace:*",
     "commander": "^14.0.2",

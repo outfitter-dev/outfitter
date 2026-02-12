@@ -30,6 +30,7 @@
         "@outfitter/cli": "workspace:*",
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
+        "@outfitter/docs": "workspace:*",
         "@outfitter/logging": "workspace:*",
         "@outfitter/tooling": "workspace:*",
         "commander": "^14.0.2",
@@ -132,7 +133,7 @@
       "name": "@outfitter/docs-core",
       "version": "0.1.0",
       "dependencies": {
-        "@outfitter/contracts": "workspace:*",
+        "better-result": "^2.5.0",
       },
       "devDependencies": {
         "@types/bun": "latest",
