@@ -1,6 +1,6 @@
 ---
 name: outfitter-update
-version: 1.0.1
+version: 1.0.2
 description: "Update @outfitter/* packages to latest versions with migration guidance. Detects installed versions, surfaces breaking changes, and applies migration steps."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, AskUserQuestion
 ---
@@ -56,6 +56,11 @@ Package                      Current    Available  Migration
 | **Breaking** (flagged) | Must follow migration doc — code changes required |
 
 ## Migration Docs
+
+Migration guides are discoverable via:
+- **CLI**: `outfitter update --guide` (or `outfitter update --guide @outfitter/contracts` for a specific package)
+- **GitHub**: [outfitter-dev/outfitter/plugins/outfitter/shared/migrations](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations)
+- **Package READMEs**: Each package has an "Upgrading" section linking to migration docs
 
 Migration guides live in `${CLAUDE_PLUGIN_ROOT}/shared/migrations/` with the naming convention:
 
