@@ -47,9 +47,12 @@ function cleanupTempDir(dir: string): void {
 
 let tempDir: string;
 let originalIsTTY: boolean | undefined;
+let originalDisablePostScaffold: string | undefined;
 
 beforeEach(() => {
   originalIsTTY = process.stdout.isTTY;
+  originalDisablePostScaffold = process.env["OUTFITTER_DISABLE_POST_SCAFFOLD"];
+  process.env["OUTFITTER_DISABLE_POST_SCAFFOLD"] = "1";
   Object.defineProperty(process.stdout, "isTTY", {
     value: false,
     writable: true,
@@ -60,6 +63,12 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanupTempDir(tempDir);
+  if (originalDisablePostScaffold === undefined) {
+    delete process.env["OUTFITTER_DISABLE_POST_SCAFFOLD"];
+  } else {
+    process.env["OUTFITTER_DISABLE_POST_SCAFFOLD"] =
+      originalDisablePostScaffold;
+  }
   Object.defineProperty(process.stdout, "isTTY", {
     value: originalIsTTY,
     writable: true,
@@ -78,7 +87,7 @@ describe("init command file creation", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -95,7 +104,7 @@ describe("init command file creation", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -113,7 +122,7 @@ describe("init command file creation", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "cli",
+      preset: "cli",
       force: false,
       noTooling: true,
     });
@@ -154,7 +163,7 @@ describe("init command file creation", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -168,7 +177,7 @@ describe("init command file creation", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -188,7 +197,7 @@ describe("init command placeholder replacement", () => {
     await runInit({
       targetDir: tempDir,
       name: "my-awesome-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -207,7 +216,7 @@ describe("init command placeholder replacement", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -225,7 +234,7 @@ describe("init command placeholder replacement", () => {
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -241,7 +250,7 @@ describe("init command placeholder replacement", () => {
     await runInit({
       targetDir: tempDir,
       name: "my-awesome-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -267,7 +276,7 @@ describe("init command default behavior", () => {
     await runInit({
       targetDir: projectDir,
       name: undefined,
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -298,7 +307,7 @@ describe("init command default behavior", () => {
     await runInit({
       targetDir: tempDir,
       name: "@outfitter/scoped-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -324,7 +333,7 @@ describe("init command local dependency rewriting", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "cli",
+      preset: "cli",
       local: true,
       force: false,
     });
@@ -339,6 +348,138 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.dependencies["@outfitter/contracts"]).toBeUndefined();
     expect(packageJson.dependencies.commander).toBe("^12.0.0");
+  });
+});
+
+// =============================================================================
+// Init Command Workspace Scaffolding Tests
+// =============================================================================
+
+describe("init command workspace scaffolding", () => {
+  test("scaffolds workspace root and places runnable preset under apps/", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "@acme/my-mcp",
+      preset: "mcp",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const rootPackageJsonPath = join(tempDir, "package.json");
+    expect(existsSync(rootPackageJsonPath)).toBe(true);
+    const rootPackageJson = JSON.parse(
+      readFileSync(rootPackageJsonPath, "utf-8")
+    );
+    expect(rootPackageJson.name).toBe("acme-workspace");
+    expect(rootPackageJson.private).toBe(true);
+    expect(rootPackageJson.workspaces).toEqual(["apps/*", "packages/*"]);
+
+    const projectPackageJsonPath = join(
+      tempDir,
+      "apps",
+      "my-mcp",
+      "package.json"
+    );
+    expect(existsSync(projectPackageJsonPath)).toBe(true);
+
+    const projectPackageJson = JSON.parse(
+      readFileSync(projectPackageJsonPath, "utf-8")
+    );
+    expect(projectPackageJson.name).toBe("@acme/my-mcp");
+    expect(result.value.structure).toBe("workspace");
+    expect(result.value.projectDir).toBe(join(tempDir, "apps", "my-mcp"));
+  });
+
+  test("stamps manifest inside workspace project directory", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "@acme/my-tool",
+      preset: "minimal",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const projectDir = join(tempDir, "packages", "my-tool");
+    const manifestPath = join(projectDir, ".outfitter/manifest.json");
+    expect(existsSync(manifestPath)).toBe(true);
+
+    const raw = readFileSync(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw) as Manifest;
+    expect(manifest.version).toBe(1);
+    expect(manifest.blocks["scaffolding"]).toBeDefined();
+  });
+
+  test("dry-run workspace init does not write workspace root files", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "@acme/my-mcp",
+      preset: "mcp",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      dryRun: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    expect(result.value.dryRunPlan).toBeDefined();
+    expect(existsSync(join(tempDir, "package.json"))).toBe(false);
+    expect(existsSync(join(tempDir, "apps"))).toBe(false);
+    expect(existsSync(join(tempDir, "packages"))).toBe(false);
+  });
+});
+
+describe("init command next steps", () => {
+  test("quotes rootDir in suggested cd command", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const targetDir = join(tempDir, "my project");
+    const result = await runInit({
+      targetDir,
+      name: "my-project",
+      preset: "minimal",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    expect(result.value.postScaffold.nextSteps[0]).toBe(
+      `cd ${JSON.stringify(targetDir)}`
+    );
   });
 });
 
@@ -359,7 +500,7 @@ describe("init command --force flag", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -381,7 +522,7 @@ describe("init command --force flag", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "new-project",
-      template: "basic",
+      preset: "minimal",
       force: true,
     });
 
@@ -424,7 +565,7 @@ describe("init command error handling", () => {
     const result = await runInit({
       targetDir: invalidPath,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -443,7 +584,7 @@ describe("init command result type", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -462,7 +603,7 @@ describe("init command result type", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
     });
 
@@ -481,7 +622,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       // No --with or --no-tooling specified, non-interactive mode
     });
@@ -503,7 +644,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       noTooling: true,
     });
@@ -520,7 +661,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "claude",
     });
@@ -544,7 +685,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "biome",
     });
@@ -567,7 +708,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "claude,biome",
     });
@@ -589,7 +730,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "scaffolding",
     });
@@ -616,7 +757,7 @@ describe("init command registry blocks", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "nonexistent-block",
     });
@@ -639,7 +780,7 @@ describe("init command manifest stamping", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "claude",
     });
@@ -663,7 +804,7 @@ describe("init command manifest stamping", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       // Default: adds "scaffolding" block
     });
@@ -688,7 +829,7 @@ describe("init command manifest stamping", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       noTooling: true,
     });
@@ -705,7 +846,7 @@ describe("init command manifest stamping", () => {
     const result = await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: "basic",
+      preset: "minimal",
       force: false,
       with: "claude,biome",
     });

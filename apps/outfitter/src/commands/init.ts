@@ -1,77 +1,113 @@
 /**
  * `outfitter init` - Scaffolds a new Outfitter project.
  *
- * Creates a new project structure from a template, replacing placeholders
- * with project-specific values.
+ * Supports both interactive and non-interactive flows, plus workspace-aware
+ * scaffolding and post-scaffold automation.
  *
  * @packageDocumentation
  */
 
+import { existsSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
 import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
-import { basename, dirname, extname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-// CLI is non-interactive. For guided init, use /scaffold skill in Claude Code.
+  cancel,
+  confirm,
+  intro,
+  isCancel,
+  outro,
+  select,
+  text,
+} from "@clack/prompts";
 import { exitWithError, output } from "@outfitter/cli/output";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
-import { runAdd } from "./add.js";
-import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "./shared-deps.js";
+import {
+  deriveBinName,
+  deriveProjectName,
+  executePlan,
+  resolveAuthor,
+  resolvePackageName,
+  resolveYear,
+  type ScaffoldPlan,
+  scaffoldWorkspaceRoot,
+} from "../engine/index.js";
+import { OperationCollector } from "../engine/collector.js";
+import type { PostScaffoldResult } from "../engine/post-scaffold.js";
+import { runPostScaffold } from "../engine/post-scaffold.js";
+import { renderOperationPlan } from "../engine/render-plan.js";
+import {
+  getInitTarget,
+  INIT_TARGET_IDS,
+  TARGET_REGISTRY,
+  type TargetDefinition,
+  type TargetId,
+} from "../targets/index.js";
 
 // =============================================================================
 // Types
 // =============================================================================
 
+export type InitStructure = "single" | "workspace";
+export type InitPresetId = Extract<
+  TargetId,
+  "minimal" | "cli" | "mcp" | "daemon"
+>;
+
 /**
  * Options for the init command.
  */
 export interface InitOptions {
-  /** Target directory to initialize the project in */
   readonly targetDir: string;
-  /** Package name (defaults to directory name if not provided) */
   readonly name: string | undefined;
-  /** Binary name (defaults to project name if not provided) */
   readonly bin?: string | undefined;
-  /** Template to use (defaults to 'basic') */
-  readonly template: string | undefined;
-  /** Whether to use local/workspace dependencies */
+  readonly preset?: InitPresetId | undefined;
+  /** @deprecated Use `preset` instead. */
+  readonly template?: string | undefined;
+  readonly structure?: InitStructure | undefined;
+  readonly workspaceName?: string | undefined;
   readonly local?: boolean | undefined;
-  /** Whether to overwrite existing files */
   readonly force: boolean;
-  /** Tooling blocks to add (e.g., "scaffolding" or "claude,biome,lefthook") */
   readonly with?: string | undefined;
-  /** Skip tooling prompt in interactive mode */
   readonly noTooling?: boolean | undefined;
+  readonly yes?: boolean | undefined;
+  readonly dryRun?: boolean | undefined;
+  readonly skipInstall?: boolean | undefined;
+  readonly skipGit?: boolean | undefined;
+  readonly skipCommit?: boolean | undefined;
+  readonly installTimeout?: number | undefined;
 }
 
 /**
- * Result of running init, including any blocks added.
+ * Result of running init.
  */
 export interface InitResult {
-  /** The blocks that were added, if any */
+  readonly structure: InitStructure;
+  readonly rootDir: string;
+  readonly projectDir: string;
+  readonly preset: InitPresetId;
+  readonly packageName: string;
   readonly blocksAdded?: AddBlockResult | undefined;
+  readonly postScaffold: PostScaffoldResult;
+  readonly dryRunPlan?:
+    | {
+        readonly operations: readonly unknown[];
+        readonly summary: Record<string, number>;
+      }
+    | undefined;
 }
 
-/**
- * Placeholder values for template substitution.
- */
-interface PlaceholderValues {
-  readonly name: string;
-  readonly projectName: string;
+interface ResolvedInitInput {
+  readonly rootDir: string;
   readonly packageName: string;
-  readonly binName: string;
-  readonly version: string;
-  readonly description: string;
-  readonly author: string;
-  readonly year: string;
+  readonly preset: InitPresetId;
+  readonly structure: InitStructure;
+  readonly workspaceName?: string | undefined;
+  readonly includeTooling: boolean;
+  readonly blocksOverride?: readonly string[];
+  readonly local: boolean;
+  readonly binName?: string | undefined;
 }
 
 /**
@@ -87,609 +123,510 @@ export class InitError extends Error {
 }
 
 // =============================================================================
-// Binary File Detection
+// Input Resolution
 // =============================================================================
 
-/**
- * Set of file extensions known to be binary formats.
- * These files should be copied as raw buffers without placeholder substitution.
- */
-const BINARY_EXTENSIONS = new Set([
-  // Images
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".ico",
-  ".webp",
-  ".bmp",
-  ".tiff",
-  ".svg", // SVG is text but often contains complex content that shouldn't be modified
-  // Fonts
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".eot",
-  // Audio/Video
-  ".mp3",
-  ".mp4",
-  ".wav",
-  ".ogg",
-  ".webm",
-  // Archives
-  ".zip",
-  ".tar",
-  ".gz",
-  ".bz2",
-  ".7z",
-  // Documents
-  ".pdf",
-  // Executables/Libraries
-  ".exe",
-  ".dll",
-  ".so",
-  ".dylib",
-  ".node",
-  ".wasm",
-  // Other binary formats
-  ".bin",
-  ".dat",
-  ".db",
-  ".sqlite",
-  ".sqlite3",
-]);
-
-/**
- * Checks if a file should be treated as binary based on its extension.
- *
- * @param filename - The filename to check
- * @returns True if the file is binary, false otherwise
- */
-function isBinaryFile(filename: string): boolean {
-  const ext = extname(filename).toLowerCase();
-  return BINARY_EXTENSIONS.has(ext);
-}
-
-// =============================================================================
-// Template Processing
-// =============================================================================
-
-/**
- * Gets the path to the templates directory.
- */
-function getTemplatesDir(): string {
-  // Templates are stored at the monorepo root
-  // Walk up from the current file location to find templates/
-  // Use fileURLToPath to properly decode percent-encoded paths (e.g., spaces)
-  let currentDir = dirname(fileURLToPath(import.meta.url));
-
-  // Walk up until we find the templates directory
-  for (let i = 0; i < 10; i++) {
-    const templatesPath = join(currentDir, "templates");
-    if (existsSync(templatesPath)) {
-      return templatesPath;
-    }
-    currentDir = dirname(currentDir);
+function parseBlocks(
+  withFlag: string | undefined
+): readonly string[] | undefined {
+  if (!withFlag) {
+    return undefined;
   }
 
-  // Fallback: assume we're running from the monorepo root
-  return join(process.cwd(), "templates");
+  const blocks = withFlag
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  return blocks.length > 0 ? blocks : undefined;
 }
 
-/**
- * Validates that a template exists.
- */
-function validateTemplate(templateName: string): Result<string, InitError> {
-  const templatesDir = getTemplatesDir();
-  const templatePath = join(templatesDir, templateName);
+function isBinaryPreset(preset: InitPresetId): boolean {
+  return preset === "cli" || preset === "daemon";
+}
 
-  if (!existsSync(templatePath)) {
+function isValidInitPreset(value: string): value is InitPresetId {
+  return (
+    value === "minimal" ||
+    value === "cli" ||
+    value === "mcp" ||
+    value === "daemon"
+  );
+}
+
+function resolvePresetFromFlags(
+  options: InitOptions
+): Result<InitPresetId | undefined, InitError> {
+  const presetFromFlag = options.preset as string | undefined;
+  if (presetFromFlag) {
+    if (!isValidInitPreset(presetFromFlag)) {
+      return Result.err(
+        new InitError(
+          `Unknown preset '${presetFromFlag}'. Available presets: ${INIT_TARGET_IDS.join(", ")}`
+        )
+      );
+    }
+    return Result.ok(presetFromFlag);
+  }
+
+  if (options.template) {
+    const mapped = options.template === "basic" ? "minimal" : options.template;
+    process.stderr.write(
+      "Warning: --template is deprecated and will be removed in the next major version.\n" +
+        `  Use --preset instead: outfitter init --preset ${mapped}\n` +
+        (options.template === "basic"
+          ? '  Note: "basic" has been renamed to "minimal".\n'
+          : "")
+    );
+
+    if (isValidInitPreset(mapped)) {
+      return Result.ok(mapped);
+    }
+
     return Result.err(
       new InitError(
-        `Template '${templateName}' not found. Available templates are in: ${templatesDir}`
+        `Unknown template '${options.template}'. Available presets: ${INIT_TARGET_IDS.join(", ")}`
       )
     );
   }
 
-  return Result.ok(templatePath);
+  return Result.ok(undefined);
 }
 
-/**
- * Replaces placeholders in content.
- *
- * Placeholders are in the format {{name}}, {{version}}, etc.
- */
-function replacePlaceholders(
-  content: string,
-  values: PlaceholderValues
-): string {
-  return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    if (Object.hasOwn(values, key)) {
-      return values[key as keyof PlaceholderValues];
+async function resolveInitInput(
+  options: InitOptions,
+  presetOverride?: InitPresetId
+): Promise<Result<ResolvedInitInput, InitError>> {
+  const rootDir = resolve(options.targetDir);
+  const defaultName = basename(rootDir);
+  const presetFromFlagsResult = resolvePresetFromFlags(options);
+  if (presetFromFlagsResult.isErr()) {
+    return presetFromFlagsResult;
+  }
+  const presetFromFlags = presetFromFlagsResult.value;
+
+  // Non-interactive path for explicit --yes or non-TTY contexts.
+  if (options.yes || !process.stdout.isTTY) {
+    const packageName = resolvePackageName(rootDir, options.name).trim();
+    if (packageName.length === 0) {
+      return Result.err(new InitError("Project name must not be empty"));
     }
-    return match;
+
+    const preset = presetOverride ?? presetFromFlags ?? "minimal";
+    const structure = options.structure ?? "single";
+    const blocksOverride = parseBlocks(options.with);
+    const workspaceName =
+      structure === "workspace"
+        ? (options.workspaceName ?? defaultName).trim() || defaultName
+        : undefined;
+
+    return Result.ok({
+      rootDir,
+      packageName,
+      preset,
+      structure,
+      includeTooling: !(options.noTooling ?? false),
+      local: Boolean(options.local),
+      ...(blocksOverride ? { blocksOverride } : {}),
+      ...(workspaceName ? { workspaceName } : {}),
+      ...(options.bin ? { binName: options.bin } : {}),
+    });
+  }
+
+  intro("Outfitter init");
+
+  const packageNameValue =
+    options.name ??
+    (await text({
+      message: "Project package name",
+      placeholder: defaultName,
+      initialValue: defaultName,
+      validate: (value) =>
+        value.trim().length === 0 ? "Project name is required" : undefined,
+    }));
+
+  if (isCancel(packageNameValue)) {
+    cancel("Init cancelled.");
+    return Result.err(new InitError("Init cancelled"));
+  }
+
+  const presetValue =
+    presetOverride ??
+    presetFromFlags ??
+    (await select<InitPresetId>({
+      message: "Select a preset",
+      options: INIT_TARGET_IDS.map((id) => {
+        const target = TARGET_REGISTRY.get(id);
+        return {
+          value: id as InitPresetId,
+          label: id,
+          hint: target?.description ?? "",
+        };
+      }),
+      initialValue: "minimal",
+    }));
+
+  if (isCancel(presetValue)) {
+    cancel("Init cancelled.");
+    return Result.err(new InitError("Init cancelled"));
+  }
+
+  const structureValue =
+    options.structure ??
+    (await select<InitStructure>({
+      message: "Project structure",
+      options: [
+        {
+          value: "single",
+          label: "Single package",
+          hint: "One package in the target directory",
+        },
+        {
+          value: "workspace",
+          label: "Workspace",
+          hint: "Root workspace with project under apps/ or packages/",
+        },
+      ],
+      initialValue: "single",
+    }));
+
+  if (isCancel(structureValue)) {
+    cancel("Init cancelled.");
+    return Result.err(new InitError("Init cancelled"));
+  }
+
+  let binName: string | undefined;
+  if (isBinaryPreset(presetValue) && process.stdout.isTTY) {
+    const defaultBin = deriveBinName(
+      deriveProjectName(packageNameValue.trim())
+    );
+    const binValue =
+      options.bin ??
+      (await text({
+        message: "Binary name",
+        placeholder: defaultBin,
+        initialValue: defaultBin,
+      }));
+
+    if (isCancel(binValue)) {
+      cancel("Init cancelled.");
+      return Result.err(new InitError("Init cancelled"));
+    }
+
+    binName = binValue.trim();
+  }
+
+  let includeTooling: boolean | symbol;
+  if (options.noTooling !== undefined) {
+    includeTooling = !options.noTooling;
+  } else if (options.with !== undefined) {
+    includeTooling = true;
+  } else {
+    includeTooling = await confirm({
+      message: "Add default tooling blocks?",
+      initialValue: true,
+    });
+  }
+
+  if (isCancel(includeTooling)) {
+    cancel("Init cancelled.");
+    return Result.err(new InitError("Init cancelled"));
+  }
+
+  const localValue =
+    options.local !== undefined
+      ? options.local
+      : await confirm({
+          message: "Use workspace:* for @outfitter dependencies?",
+          initialValue: false,
+        });
+
+  if (isCancel(localValue)) {
+    cancel("Init cancelled.");
+    return Result.err(new InitError("Init cancelled"));
+  }
+
+  let workspaceName: string | undefined;
+  if (structureValue === "workspace") {
+    const workspaceNameValue =
+      options.workspaceName ??
+      (await text({
+        message: "Workspace package name",
+        placeholder: defaultName,
+        initialValue: defaultName,
+        validate: (value) =>
+          value.trim().length === 0 ? "Workspace name is required" : undefined,
+      }));
+
+    if (isCancel(workspaceNameValue)) {
+      cancel("Init cancelled.");
+      return Result.err(new InitError("Init cancelled"));
+    }
+
+    workspaceName = workspaceNameValue.trim();
+  }
+
+  outro("Scaffolding project...");
+
+  const packageName = packageNameValue.trim();
+  if (packageName.length === 0) {
+    return Result.err(new InitError("Project name must not be empty"));
+  }
+
+  const blocksOverride = parseBlocks(options.with);
+
+  return Result.ok({
+    rootDir,
+    packageName,
+    preset: presetValue,
+    structure: structureValue,
+    includeTooling,
+    local: Boolean(localValue),
+    ...(blocksOverride ? { blocksOverride } : {}),
+    ...(workspaceName ? { workspaceName } : {}),
+    ...(binName ? { binName } : {}),
   });
 }
 
-/**
- * Gets the output filename by removing .template extension.
- */
-function getOutputFilename(templateFilename: string): string {
-  if (templateFilename.endsWith(".template")) {
-    return templateFilename.slice(0, -".template".length);
+function toInitError(error: unknown): InitError {
+  if (error instanceof InitError) {
+    return error;
   }
-  return templateFilename;
+  if (error instanceof Error) {
+    return new InitError(error.message);
+  }
+  return new InitError("Unknown init error");
 }
 
-// =============================================================================
-// Name Resolution
-// =============================================================================
+function buildInitPlan(
+  target: TargetDefinition,
+  input: ResolvedInitInput,
+  projectDir: string,
+  resolvedBinName: string
+): ScaffoldPlan {
+  const blocks = input.includeTooling
+    ? (input.blocksOverride ?? [...target.defaultBlocks])
+    : [];
 
-/**
- * Checks if package.json exists in the target directory.
- */
-function hasPackageJson(targetDir: string): boolean {
-  return existsSync(join(targetDir, "package.json"));
-}
-
-/**
- * Derives project name from package name.
- * For scoped packages (@org/name), returns the name part.
- */
-function deriveProjectName(packageName: string): string {
-  if (packageName.startsWith("@")) {
-    const parts = packageName.split("/");
-    if (parts.length > 1 && parts[1]) {
-      return parts[1];
-    }
-  }
-  return packageName;
-}
-
-/**
- * Resolves package name from options or directory name.
- */
-function resolvePackageName(
-  options: InitOptions,
-  resolvedTargetDir: string
-): string {
-  return options.name ?? basename(resolvedTargetDir);
-}
-
-/**
- * Resolves binary name from options or project name.
- */
-function resolveBinName(options: InitOptions, projectName: string): string {
-  return options.bin ?? deriveProjectName(projectName);
-}
-
-/**
- * Resolves template name from options or defaults to "basic".
- */
-function resolveTemplateName(options: InitOptions): string {
-  return options.template ?? "basic";
-}
-
-function resolveAuthor(): string {
-  const fromEnv =
-    process.env["GIT_AUTHOR_NAME"] ??
-    process.env["GIT_COMMITTER_NAME"] ??
-    process.env["AUTHOR"] ??
-    process.env["USER"] ??
-    process.env["USERNAME"];
-
-  if (fromEnv) {
-    return fromEnv;
-  }
-
-  try {
-    const result = Bun.spawnSync(["git", "config", "--get", "user.name"], {
-      stdout: "pipe",
-      stderr: "ignore",
-    });
-    if (result.exitCode === 0) {
-      const value = result.stdout.toString().trim();
-      return value.length > 0 ? value : "";
-    }
-  } catch {
-    // Ignore git lookup errors and fall back to empty string
-  }
-
-  return "";
-}
-
-function resolveYear(): string {
-  return String(new Date().getFullYear());
-}
-
-/**
- * Resolves which tooling blocks to add.
- * Defaults to scaffolding unless --no-tooling is specified.
- */
-function resolveBlocks(options: InitOptions): string[] | undefined {
-  // If --no-tooling specified, skip entirely
-  if (options.noTooling) {
-    return undefined;
-  }
-
-  // If --with specified, parse and use those
-  if (options.with) {
-    const blocks = options.with
-      .split(",")
-      .map((b) => b.trim())
-      .filter(Boolean);
-    return blocks.length > 0 ? blocks : undefined;
-  }
-
-  // Default to scaffolding
-  return ["scaffolding"];
-}
-
-/**
- * Recursively copies template files to the target directory.
- */
-function copyTemplateFiles(
-  templateDir: string,
-  targetDir: string,
-  values: PlaceholderValues,
-  force: boolean,
-  allowOverwrite = false
-): Result<void, InitError> {
-  try {
-    // Ensure target directory exists
-    if (!existsSync(targetDir)) {
-      mkdirSync(targetDir, { recursive: true });
-    }
-
-    const entries = readdirSync(templateDir);
-
-    for (const entry of entries) {
-      const sourcePath = join(templateDir, entry);
-      const stat = statSync(sourcePath);
-
-      if (stat.isDirectory()) {
-        // Recursively copy directories
-        const targetSubDir = join(targetDir, entry);
-        const result = copyTemplateFiles(
-          sourcePath,
-          targetSubDir,
-          values,
-          force,
-          allowOverwrite
-        );
-        if (result.isErr()) {
-          return result;
-        }
-      } else if (stat.isFile()) {
-        // Process and copy files
-        const outputFilename = getOutputFilename(entry);
-        const targetPath = join(targetDir, outputFilename);
-
-        // Check if file exists and force is not set
-        if (existsSync(targetPath) && !force && !allowOverwrite) {
-          return Result.err(
-            new InitError(
-              `File '${targetPath}' already exists. Use --force to overwrite.`
-            )
-          );
-        }
-
-        // Handle binary files separately to avoid corruption
-        if (isBinaryFile(outputFilename)) {
-          // Copy binary files as raw buffers without modification
-          const buffer = readFileSync(sourcePath);
-          writeFileSync(targetPath, buffer);
-        } else {
-          // Read and process template content for text files
-          const content = readFileSync(sourcePath, "utf-8");
-          const processedContent = replacePlaceholders(content, values);
-
-          // Write the processed content
-          writeFileSync(targetPath, processedContent, "utf-8");
-        }
-      }
-    }
-
-    return Result.ok(undefined);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return Result.err(
-      new InitError(`Failed to copy template files: ${message}`)
-    );
-  }
-}
-
-// =============================================================================
-// Local Dependency Rewrites
-// =============================================================================
-
-const DEPENDENCY_SECTIONS = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
-
-function rewriteLocalDependencies(targetDir: string): Result<void, InitError> {
-  const packageJsonPath = join(targetDir, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return Result.ok(undefined);
-  }
-
-  try {
-    const content = readFileSync(packageJsonPath, "utf-8");
-    const parsed = JSON.parse(content) as Record<string, unknown>;
-    let updated = false;
-
-    for (const section of DEPENDENCY_SECTIONS) {
-      const deps = parsed[section];
-      if (!deps || typeof deps !== "object" || Array.isArray(deps)) {
-        continue;
-      }
-
-      const entries = deps as Record<string, unknown>;
-      for (const [name, version] of Object.entries(entries)) {
-        if (
-          typeof version === "string" &&
-          name.startsWith("@outfitter/") &&
-          version !== "workspace:*"
-        ) {
-          entries[name] = "workspace:*";
-          updated = true;
-        }
-      }
-    }
-
-    if (updated) {
-      writeFileSync(
-        packageJsonPath,
-        `${JSON.stringify(parsed, null, 2)}\n`,
-        "utf-8"
-      );
-    }
-
-    return Result.ok(undefined);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return Result.err(
-      new InitError(`Failed to update local dependencies: ${message}`)
-    );
-  }
-}
-
-/**
- * Injects shared devDependencies and scripts into the project's package.json.
- *
- * Template-specific values take precedence over shared defaults.
- */
-function injectSharedConfig(targetDir: string): Result<void, InitError> {
-  const packageJsonPath = join(targetDir, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return Result.ok(undefined);
-  }
-
-  try {
-    const content = readFileSync(packageJsonPath, "utf-8");
-    const parsed = JSON.parse(content) as Record<string, unknown>;
-
-    // Merge shared devDependencies (template-specific ones take precedence)
-    const existingDevDeps =
-      (parsed["devDependencies"] as Record<string, unknown>) ?? {};
-    parsed["devDependencies"] = { ...SHARED_DEV_DEPS, ...existingDevDeps };
-
-    // Merge shared scripts (template-specific ones take precedence)
-    const existingScripts =
-      (parsed["scripts"] as Record<string, unknown>) ?? {};
-    parsed["scripts"] = { ...SHARED_SCRIPTS, ...existingScripts };
-
-    writeFileSync(
-      packageJsonPath,
-      `${JSON.stringify(parsed, null, 2)}\n`,
-      "utf-8"
-    );
-
-    return Result.ok(undefined);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return Result.err(
-      new InitError(`Failed to inject shared config: ${message}`)
-    );
-  }
+  return {
+    values: {
+      name: deriveProjectName(input.packageName),
+      projectName: deriveProjectName(input.packageName),
+      packageName: input.packageName,
+      binName: resolvedBinName,
+      version: "0.1.0",
+      description: "A new project created with Outfitter",
+      author: resolveAuthor(),
+      year: resolveYear(),
+    },
+    changes: [
+      {
+        type: "copy-template",
+        template: target.templateDir,
+        targetDir: projectDir,
+        overlayBaseTemplate: true,
+      },
+      { type: "inject-shared-config" },
+      ...(input.local
+        ? ([{ type: "rewrite-local-dependencies", mode: "workspace" }] as const)
+        : []),
+      ...(blocks.length > 0 ? ([{ type: "add-blocks", blocks }] as const) : []),
+    ],
+  };
 }
 
 // =============================================================================
 // Public API
 // =============================================================================
 
-/**
- * Runs the init command programmatically.
- *
- * @param options - Init options
- * @returns Result indicating success or failure
- *
- * @example
- * ```typescript
- * const result = await runInit({
- *   targetDir: "./my-project",
- *   name: "my-project",
- *   template: "basic",
- *   force: false,
- *   blocks: "scaffolding", // Optional: add tooling blocks
- * });
- *
- * if (result.isOk()) {
- *   console.log("Project initialized successfully!");
- *   if (result.value.blocksAdded) {
- *     console.log(`Added ${result.value.blocksAdded.created.length} tooling files`);
- *   }
- * } else {
- *   console.error("Failed:", result.error.message);
- * }
- * ```
- */
 export async function runInit(
-  options: InitOptions
+  options: InitOptions,
+  presetOverride?: InitPresetId
 ): Promise<Result<InitResult, InitError>> {
-  const { targetDir, force } = options;
-
-  // Resolve target directory
-  const resolvedTargetDir = resolve(targetDir);
-
-  // Check for existing package.json (indicates existing project)
-  if (hasPackageJson(resolvedTargetDir) && !force) {
-    return Result.err(
-      new InitError(
-        `Directory '${resolvedTargetDir}' already has a package.json. ` +
-          `Use --force to overwrite, or use 'outfitter add' to add tooling to an existing project.`
-      )
-    );
+  const inputResult = await resolveInitInput(options, presetOverride);
+  if (inputResult.isErr()) {
+    return inputResult;
   }
 
-  // Determine template
-  const templateName = resolveTemplateName(options);
+  const input = inputResult.value;
 
-  // Validate template exists
-  const templateResult = validateTemplate(templateName);
-  if (templateResult.isErr()) {
-    return templateResult;
+  const targetResult = getInitTarget(input.preset);
+  if (targetResult.isErr()) {
+    return Result.err(new InitError(targetResult.error.message));
   }
-  const templatePath = templateResult.value;
+  const target = targetResult.value;
 
-  // Determine package name and binary name
-  const packageName = resolvePackageName(options, resolvedTargetDir);
-  const projectName = deriveProjectName(packageName);
-  const binName = resolveBinName(options, projectName);
+  const dryRun = Boolean(options.dryRun);
+  const collector = dryRun ? new OperationCollector() : undefined;
 
-  const author = resolveAuthor();
-  const year = resolveYear();
+  const projectDir =
+    input.structure === "workspace"
+      ? join(
+          input.rootDir,
+          target.placement,
+          deriveProjectName(input.packageName)
+        )
+      : input.rootDir;
 
-  // Prepare placeholder values
-  const values: PlaceholderValues = {
-    name: projectName,
-    projectName,
-    packageName,
-    binName,
-    version: "0.1.0",
-    description: "A new project created with Outfitter",
-    author,
-    year,
-  };
-
-  // Ensure target directory exists
-  try {
-    if (!existsSync(resolvedTargetDir)) {
-      mkdirSync(resolvedTargetDir, { recursive: true });
+  if (input.structure === "single") {
+    if (existsSync(join(input.rootDir, "package.json")) && !options.force) {
+      return Result.err(
+        new InitError(
+          `Directory '${input.rootDir}' already has a package.json. ` +
+            `Use --force to overwrite, or use 'outfitter add' for existing projects.`
+        )
+      );
     }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return Result.err(
-      new InitError(`Failed to create target directory: ${message}`)
-    );
-  }
-
-  // Two-layer template copy: first _base/, then template-specific
-  const templatesDir = getTemplatesDir();
-  const basePath = join(templatesDir, "_base");
-
-  // Layer 1: Copy shared base (if exists)
-  if (existsSync(basePath)) {
-    const baseResult = copyTemplateFiles(
-      basePath,
-      resolvedTargetDir,
-      values,
-      force
-    );
-    if (baseResult.isErr()) {
-      return baseResult;
-    }
-  }
-
-  // Layer 2: Overlay template-specific files
-  const copyResult = copyTemplateFiles(
-    templatePath,
-    resolvedTargetDir,
-    values,
-    force,
-    true
-  );
-  if (copyResult.isErr()) {
-    return copyResult;
-  }
-
-  // Inject shared devDependencies and scripts
-  const injectResult = injectSharedConfig(resolvedTargetDir);
-  if (injectResult.isErr()) {
-    return injectResult;
-  }
-
-  if (options.local) {
-    const rewriteResult = rewriteLocalDependencies(resolvedTargetDir);
-    if (rewriteResult.isErr()) {
-      return rewriteResult;
-    }
-  }
-
-  // Resolve and add registry blocks
-  const blocks = resolveBlocks(options);
-  let blocksAdded: AddBlockResult | undefined;
-
-  if (blocks && blocks.length > 0) {
-    // Merge results from all blocks
-    const mergedResult: AddBlockResult = {
-      created: [],
-      skipped: [],
-      overwritten: [],
-      dependencies: {},
-      devDependencies: {},
-    };
-
-    for (const blockName of blocks) {
-      const addResult = await runAdd({
-        block: blockName,
-        force,
-        dryRun: false,
-        cwd: resolvedTargetDir,
-      });
-
-      if (addResult.isErr()) {
-        // Wrap add errors as init errors for consistent error handling
+  } else {
+    const workspaceName = input.workspaceName ?? basename(input.rootDir);
+    const workspacePackageJsonPath = join(input.rootDir, "package.json");
+    if (dryRun) {
+      if (existsSync(workspacePackageJsonPath) && !options.force) {
         return Result.err(
           new InitError(
-            `Failed to add block '${blockName}': ${addResult.error.message}`
+            `Directory '${input.rootDir}' already has a package.json. Use --force to overwrite.`
           )
         );
       }
 
-      const blockResult = addResult.value;
-      mergedResult.created.push(...blockResult.created);
-      mergedResult.skipped.push(...blockResult.skipped);
-      mergedResult.overwritten.push(...blockResult.overwritten);
-      Object.assign(mergedResult.dependencies, blockResult.dependencies);
-      Object.assign(mergedResult.devDependencies, blockResult.devDependencies);
-    }
+      collector?.add({
+        type: "dir-create",
+        path: join(input.rootDir, "apps"),
+      });
+      collector?.add({
+        type: "dir-create",
+        path: join(input.rootDir, "packages"),
+      });
+      collector?.add(
+        existsSync(workspacePackageJsonPath)
+          ? {
+              type: "file-overwrite",
+              path: workspacePackageJsonPath,
+              source: "generated",
+            }
+          : {
+              type: "file-create",
+              path: workspacePackageJsonPath,
+              source: "generated",
+            }
+      );
 
-    blocksAdded = mergedResult;
+      const gitignorePath = join(input.rootDir, ".gitignore");
+      if (options.force || !existsSync(gitignorePath)) {
+        collector?.add(
+          existsSync(gitignorePath)
+            ? {
+                type: "file-overwrite",
+                path: gitignorePath,
+                source: "generated",
+              }
+            : {
+                type: "file-create",
+                path: gitignorePath,
+                source: "generated",
+              }
+        );
+      }
+    } else {
+      const workspaceResult = scaffoldWorkspaceRoot(
+        input.rootDir,
+        workspaceName,
+        options.force
+      );
+      if (workspaceResult.isErr()) {
+        return Result.err(new InitError(workspaceResult.error.message));
+      }
+    }
   }
 
-  return Result.ok({ blocksAdded });
+  const resolvedBinName =
+    input.binName ?? deriveBinName(deriveProjectName(input.packageName));
+
+  const plan = buildInitPlan(target, input, projectDir, resolvedBinName);
+
+  const executeResult = await executePlan(plan, {
+    force: options.force,
+    ...(collector ? { collector } : {}),
+  });
+
+  if (executeResult.isErr()) {
+    return Result.err(toInitError(executeResult.error));
+  }
+
+  const postScaffoldResult = await runPostScaffold(
+    {
+      rootDir: input.rootDir,
+      projectDir,
+      origin: "init",
+      target: input.preset,
+      structure: input.structure,
+      skipInstall: Boolean(options.skipInstall),
+      skipGit: Boolean(options.skipGit),
+      skipCommit: Boolean(options.skipCommit),
+      dryRun,
+      installTimeoutMs: options.installTimeout ?? 60_000,
+    },
+    collector
+  );
+  if (postScaffoldResult.isErr()) {
+    return Result.err(new InitError("Post-scaffold step failed"));
+  }
+
+  const result: InitResult = {
+    structure: input.structure,
+    rootDir: input.rootDir,
+    projectDir,
+    preset: input.preset,
+    packageName: input.packageName,
+    blocksAdded: executeResult.value.blocksAdded,
+    postScaffold: postScaffoldResult.value,
+    ...(collector ? { dryRunPlan: collector.toJSON() } : {}),
+  };
+
+  return Result.ok(result);
 }
 
-/**
- * Prints the results of the init command.
- */
 export async function printInitResults(
-  targetDir: string,
   result: InitResult,
   options?: { mode?: OutputMode }
 ): Promise<void> {
   const mode = options?.mode;
+
+  if (result.dryRunPlan) {
+    if (mode === "json" || mode === "jsonl") {
+      await output(
+        {
+          rootDir: result.rootDir,
+          projectDir: result.projectDir,
+          structure: result.structure,
+          preset: result.preset,
+          packageName: result.packageName,
+          ...result.dryRunPlan,
+        },
+        { mode }
+      );
+      return;
+    }
+
+    const collector = new OperationCollector();
+    for (const op of result.dryRunPlan.operations) {
+      collector.add(op as never);
+    }
+    await renderOperationPlan(collector, { rootDir: result.rootDir });
+    return;
+  }
+
   if (mode === "json" || mode === "jsonl") {
     await output(
       {
-        targetDir: resolve(targetDir),
+        structure: result.structure,
+        rootDir: result.rootDir,
+        projectDir: result.projectDir,
+        preset: result.preset,
+        packageName: result.packageName,
         blocksAdded: result.blocksAdded ?? null,
-        nextSteps: ["bun install", "bun run dev"],
+        postScaffold: result.postScaffold,
+        nextSteps: result.postScaffold.nextSteps,
       },
       { mode }
     );
@@ -697,8 +634,14 @@ export async function printInitResults(
   }
 
   const lines: string[] = [
-    `Project initialized successfully in ${resolve(targetDir)}`,
+    `Project initialized successfully in ${result.rootDir}`,
+    `Structure: ${result.structure}`,
+    `Preset: ${result.preset}`,
   ];
+
+  if (result.structure === "workspace") {
+    lines.push(`Workspace project path: ${result.projectDir}`);
+  }
 
   if (result.blocksAdded) {
     const { created, skipped, dependencies, devDependencies } =
@@ -731,39 +674,54 @@ export async function printInitResults(
     }
   }
 
-  lines.push("", "Next steps:", "  bun install", "  bun run dev");
+  if (result.postScaffold.installResult === "failed") {
+    lines.push(
+      "",
+      `Warning: bun install failed: ${result.postScaffold.installError ?? "unknown"}`
+    );
+  }
+  if (result.postScaffold.gitInitResult === "failed") {
+    lines.push(
+      "",
+      `Warning: git setup failed: ${result.postScaffold.gitError ?? "unknown"}`
+    );
+  }
+
+  lines.push("", "Next steps:");
+  for (const step of result.postScaffold.nextSteps) {
+    lines.push(`  ${step}`);
+  }
 
   await output(lines);
 }
 
-/**
- * Registers the init command with the CLI program.
- *
- * @param program - Commander program instance
- *
- * @example
- * ```typescript
- * import { Command } from "commander";
- * import { initCommand } from "./commands/init.js";
- *
- * const program = new Command();
- * initCommand(program);
- * ```
- */
+// =============================================================================
+// Commander wiring
+// =============================================================================
+
 export function initCommand(program: Command): void {
   const init = program
     .command("init")
-    .description("Scaffold a new Outfitter project");
+    .description("Create a new Outfitter project");
 
   interface InitCommandFlags {
     name?: string;
     bin?: string;
+    preset?: InitPresetId;
     template?: string;
-    force?: boolean;
+    structure?: InitStructure;
+    workspaceName?: string;
     local?: boolean;
     workspace?: boolean;
+    force?: boolean;
     with?: string;
     noTooling?: boolean;
+    yes?: boolean;
+    dryRun?: boolean;
+    skipInstall?: boolean;
+    skipGit?: boolean;
+    skipCommit?: boolean;
+    installTimeout?: number;
     json?: boolean;
     opts?: () => InitCommandFlags;
   }
@@ -781,20 +739,6 @@ export function initCommand(program: Command): void {
   const resolveLocal = (flags: InitCommandFlags): boolean =>
     Boolean(flags.local || flags.workspace);
 
-  const withCommonOptions = (command: Command): Command =>
-    command
-      .option("-n, --name <name>", "Package name (defaults to directory name)")
-      .option("-b, --bin <name>", "Binary name (defaults to project name)")
-      .option("-f, --force", "Overwrite existing files", false)
-      .option("--local", "Use workspace:* for @outfitter dependencies", false)
-      .option("--workspace", "Alias for --local", false)
-      .option(
-        "--with <blocks>",
-        "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
-      )
-      .option("--no-tooling", "Skip tooling setup")
-      .option("--json", "Output as JSON", false);
-
   const resolveOutputMode = (
     flags: InitCommandFlags
   ): OutputMode | undefined => {
@@ -805,10 +749,30 @@ export function initCommand(program: Command): void {
     return undefined;
   };
 
+  const withCommonOptions = (command: Command): Command =>
+    command
+      .option("-n, --name <name>", "Package name (defaults to directory name)")
+      .option("-b, --bin <name>", "Binary name (defaults to project name)")
+      .option("-p, --preset <preset>", "Preset to use (minimal|cli|mcp|daemon)")
+      .option("-s, --structure <mode>", "Project structure (single|workspace)")
+      .option("--workspace-name <name>", "Workspace root package name")
+      .option("-f, --force", "Overwrite existing files", false)
+      .option("--local", "Use workspace:* for @outfitter dependencies")
+      .option("--workspace", "Alias for --local")
+      .option("--with <blocks>", "Comma-separated tooling blocks to add")
+      .option("--no-tooling", "Skip default tooling blocks")
+      .option("-y, --yes", "Skip prompts and use defaults", false)
+      .option("--dry-run", "Preview changes without writing files", false)
+      .option("--skip-install", "Skip bun install", false)
+      .option("--skip-git", "Skip git init and initial commit", false)
+      .option("--skip-commit", "Skip initial commit only", false)
+      .option("--install-timeout <ms>", "bun install timeout in ms")
+      .option("--json", "Output as JSON", false);
+
   withCommonOptions(
     init
       .argument("[directory]")
-      .option("-t, --template <template>", "Template to use")
+      .option("-t, --template <template>", "Template to use (deprecated)")
   ).action(
     async (
       directory: string | undefined,
@@ -819,29 +783,40 @@ export function initCommand(program: Command): void {
       const resolvedFlags = resolveFlags(flags, command);
       const mode = resolveOutputMode(resolvedFlags);
       const outputOptions = mode ? { mode } : undefined;
-      const local = resolveLocal(resolvedFlags);
 
       const result = await runInit({
         targetDir,
         name: resolvedFlags.name,
+        bin: resolvedFlags.bin,
+        preset: resolvedFlags.preset,
         template: resolvedFlags.template,
-        local,
+        structure: resolvedFlags.structure,
+        workspaceName: resolvedFlags.workspaceName,
+        local: resolveLocal(resolvedFlags),
         force: resolvedFlags.force ?? false,
         with: resolvedFlags.with,
         noTooling: resolvedFlags.noTooling,
-        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
+        yes: resolvedFlags.yes,
+        dryRun: Boolean(resolvedFlags.dryRun),
+        skipInstall: Boolean(resolvedFlags.skipInstall),
+        skipGit: Boolean(resolvedFlags.skipGit),
+        skipCommit: Boolean(resolvedFlags.skipCommit),
+        ...(resolvedFlags.installTimeout !== undefined
+          ? { installTimeout: resolvedFlags.installTimeout }
+          : {}),
       });
 
       if (result.isErr()) {
         exitWithError(result.error, outputOptions);
+        return;
       }
 
-      await printInitResults(targetDir, result.value, outputOptions);
+      await printInitResults(result.value, outputOptions);
     }
   );
 
   withCommonOptions(
-    init.command("cli [directory]").description("Scaffold a new CLI project")
+    init.command("cli [directory]").description("Create a new CLI project")
   ).action(
     async (
       directory: string | undefined,
@@ -852,29 +827,41 @@ export function initCommand(program: Command): void {
       const resolvedFlags = resolveFlags(flags, command);
       const mode = resolveOutputMode(resolvedFlags);
       const outputOptions = mode ? { mode } : undefined;
-      const local = resolveLocal(resolvedFlags);
 
-      const result = await runInit({
-        targetDir,
-        name: resolvedFlags.name,
-        template: "cli",
-        local,
-        force: resolvedFlags.force ?? false,
-        with: resolvedFlags.with,
-        noTooling: resolvedFlags.noTooling,
-        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-      });
+      const result = await runInit(
+        {
+          targetDir,
+          name: resolvedFlags.name,
+          bin: resolvedFlags.bin,
+          structure: resolvedFlags.structure,
+          workspaceName: resolvedFlags.workspaceName,
+          local: resolveLocal(resolvedFlags),
+          force: resolvedFlags.force ?? false,
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          yes: resolvedFlags.yes,
+          dryRun: Boolean(resolvedFlags.dryRun),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          skipGit: Boolean(resolvedFlags.skipGit),
+          skipCommit: Boolean(resolvedFlags.skipCommit),
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
+            : {}),
+        },
+        "cli"
+      );
 
       if (result.isErr()) {
         exitWithError(result.error, outputOptions);
+        return;
       }
 
-      await printInitResults(targetDir, result.value, outputOptions);
+      await printInitResults(result.value, outputOptions);
     }
   );
 
   withCommonOptions(
-    init.command("mcp [directory]").description("Scaffold a new MCP server")
+    init.command("mcp [directory]").description("Create a new MCP server")
   ).action(
     async (
       directory: string | undefined,
@@ -885,31 +872,43 @@ export function initCommand(program: Command): void {
       const resolvedFlags = resolveFlags(flags, command);
       const mode = resolveOutputMode(resolvedFlags);
       const outputOptions = mode ? { mode } : undefined;
-      const local = resolveLocal(resolvedFlags);
 
-      const result = await runInit({
-        targetDir,
-        name: resolvedFlags.name,
-        template: "mcp",
-        local,
-        force: resolvedFlags.force ?? false,
-        with: resolvedFlags.with,
-        noTooling: resolvedFlags.noTooling,
-        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-      });
+      const result = await runInit(
+        {
+          targetDir,
+          name: resolvedFlags.name,
+          bin: resolvedFlags.bin,
+          structure: resolvedFlags.structure,
+          workspaceName: resolvedFlags.workspaceName,
+          local: resolveLocal(resolvedFlags),
+          force: resolvedFlags.force ?? false,
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          yes: resolvedFlags.yes,
+          dryRun: Boolean(resolvedFlags.dryRun),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          skipGit: Boolean(resolvedFlags.skipGit),
+          skipCommit: Boolean(resolvedFlags.skipCommit),
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
+            : {}),
+        },
+        "mcp"
+      );
 
       if (result.isErr()) {
         exitWithError(result.error, outputOptions);
+        return;
       }
 
-      await printInitResults(targetDir, result.value, outputOptions);
+      await printInitResults(result.value, outputOptions);
     }
   );
 
   withCommonOptions(
     init
       .command("daemon [directory]")
-      .description("Scaffold a new daemon project")
+      .description("Create a new daemon project")
   ).action(
     async (
       directory: string | undefined,
@@ -920,24 +919,36 @@ export function initCommand(program: Command): void {
       const resolvedFlags = resolveFlags(flags, command);
       const mode = resolveOutputMode(resolvedFlags);
       const outputOptions = mode ? { mode } : undefined;
-      const local = resolveLocal(resolvedFlags);
 
-      const result = await runInit({
-        targetDir,
-        name: resolvedFlags.name,
-        template: "daemon",
-        local,
-        force: resolvedFlags.force ?? false,
-        with: resolvedFlags.with,
-        noTooling: resolvedFlags.noTooling,
-        ...(resolvedFlags.bin !== undefined ? { bin: resolvedFlags.bin } : {}),
-      });
+      const result = await runInit(
+        {
+          targetDir,
+          name: resolvedFlags.name,
+          bin: resolvedFlags.bin,
+          structure: resolvedFlags.structure,
+          workspaceName: resolvedFlags.workspaceName,
+          local: resolveLocal(resolvedFlags),
+          force: resolvedFlags.force ?? false,
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          yes: resolvedFlags.yes,
+          dryRun: Boolean(resolvedFlags.dryRun),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          skipGit: Boolean(resolvedFlags.skipGit),
+          skipCommit: Boolean(resolvedFlags.skipCommit),
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
+            : {}),
+        },
+        "daemon"
+      );
 
       if (result.isErr()) {
         exitWithError(result.error, outputOptions);
+        return;
       }
 
-      await printInitResults(targetDir, result.value, outputOptions);
+      await printInitResults(result.value, outputOptions);
     }
   );
 }
