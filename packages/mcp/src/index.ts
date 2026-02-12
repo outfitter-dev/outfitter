@@ -77,6 +77,8 @@ export {
   connectStdio,
   createSdkServer,
   type McpToolResponse,
+  wrapToolError,
+  wrapToolResult,
 } from "./transport.js";
 // Types
 export {

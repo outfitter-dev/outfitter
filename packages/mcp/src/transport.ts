@@ -70,7 +70,15 @@ function serializeError(error: unknown): Record<string, unknown> {
   };
 }
 
-function wrapToolResult(value: unknown): McpToolResponse {
+/**
+ * Wrap a handler success value into an MCP CallToolResult.
+ *
+ * If the value is already a valid McpToolResponse (has a `content` array),
+ * it is returned as-is. Otherwise it is wrapped in a text content block.
+ * Plain objects are also attached as `structuredContent` for SDK clients
+ * that support structured output.
+ */
+export function wrapToolResult(value: unknown): McpToolResponse {
   if (isMcpToolResponse(value)) {
     return value;
   }
@@ -91,7 +99,13 @@ function wrapToolResult(value: unknown): McpToolResponse {
   };
 }
 
-function wrapToolError(error: unknown): McpToolResponse {
+/**
+ * Wrap an error into an MCP CallToolResult with `isError: true`.
+ *
+ * Serializes the error (preserving `_tag`, `message`, `code`, `context` if
+ * present) and wraps it as a text content block.
+ */
+export function wrapToolError(error: unknown): McpToolResponse {
   return {
     content: [
       {
