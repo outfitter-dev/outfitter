@@ -533,6 +533,6 @@ Run `outfitter update --guide` for version-specific migration instructions, or c
 
 ## Related Packages
 
-- [@outfitter/contracts](../../../packages/contracts/README.md) — Result types and error taxonomy
-- [@outfitter/logging](../../../packages/logging/README.md) — Structured logging
-- [@outfitter/config](../../../packages/config/README.md) — Configuration loading
+- [@outfitter/contracts](../contracts/README.md) — Result types and error taxonomy
+- [@outfitter/logging](../logging/README.md) — Structured logging
+- [@outfitter/config](../config/README.md) — Configuration loading

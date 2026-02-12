@@ -187,7 +187,7 @@ function resolveOptions(
 
   if (!isPathInsideWorkspace(workspaceRoot, outputRoot)) {
     return Result.err(
-      ValidationError.fromMessage("outputDir must resolve inside workspace", {
+      DocsCoreError.validation("outputDir must resolve inside workspace", {
         outputRoot,
       })
     );
@@ -195,7 +195,7 @@ function resolveOptions(
 
   if (pathsOverlap(outputRoot, packagesRoot)) {
     return Result.err(
-      ValidationError.fromMessage(
+      DocsCoreError.validation(
         "outputDir must not overlap packages directory",
         {
           outputRoot,
@@ -475,7 +475,6 @@ async function buildExpectedOutput(
         discoveredPackage.packageDirName,
         relativeFromPackageRoot
       );
-
       collectedFiles.push({
         sourceAbsolutePath,
         destinationAbsolutePath,

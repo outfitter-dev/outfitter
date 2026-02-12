@@ -26,31 +26,31 @@ Stability labels indicate API maturity:
 
 ### Foundation (Stable)
 
-- [@outfitter/contracts](./packages/contracts/README.md) — Result/Error patterns, handler contract
-- [@outfitter/types](./packages/types/README.md) — Optional branded types, type utilities
+- [@outfitter/contracts](./packages/contracts/) — Result/Error patterns, handler contract
+- [@outfitter/types](./packages/types/) — Optional branded types, type utilities
 
 Adoption note: `@outfitter/types` is not a default dependency. Add it when you
 have concrete branded ID or shared utility adoption points.
 
 ### Runtime (Active)
 
-- [@outfitter/cli](./packages/cli/README.md) — CLI framework with output modes, terminal rendering
-- [@outfitter/config](./packages/config/README.md) — XDG-compliant configuration
-- [@outfitter/logging](./packages/logging/README.md) — Structured logging with redaction
-- [@outfitter/file-ops](./packages/file-ops/README.md) — Path security, atomic writes
-- [@outfitter/state](./packages/state/README.md) — Pagination cursors, state management
-- [@outfitter/mcp](./packages/mcp/README.md) — MCP server framework with typed tools
-- [@outfitter/index](./packages/index/README.md) — SQLite FTS5 full-text search
-- [@outfitter/daemon](./packages/daemon/README.md) — Daemon lifecycle, IPC, health checks
+- [@outfitter/cli](./packages/cli/) — CLI framework with output modes, terminal rendering
+- [@outfitter/config](./packages/config/) — XDG-compliant configuration
+- [@outfitter/logging](./packages/logging/) — Structured logging with redaction
+- [@outfitter/file-ops](./packages/file-ops/) — Path security, atomic writes
+- [@outfitter/state](./packages/state/) — Pagination cursors, state management
+- [@outfitter/mcp](./packages/mcp/) — MCP server framework with typed tools
+- [@outfitter/index](./packages/index/) — SQLite FTS5 full-text search
+- [@outfitter/daemon](./packages/daemon/) — Daemon lifecycle, IPC, health checks
 
 ### Tooling (Early)
 
 - [outfitter](../apps/outfitter/README.md) — Umbrella CLI for scaffolding
-- [@outfitter/docs-core](./packages/docs-core/README.md) — Core docs assembly and freshness checks
-- [@outfitter/docs](./packages/docs/README.md) — Docs CLI and host adapter for product CLIs
-- [@outfitter/testing](./packages/testing/README.md) — Test harnesses for CLI and MCP
-- [@outfitter/tooling](./packages/tooling/README.md) — Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
-- [@outfitter/kit](./packages/kit/README.md) — Foundation facade over contracts/types
+- [@outfitter/docs-core](./packages/docs-core/) — Core docs assembly and freshness checks
+- [@outfitter/docs](./packages/docs/) — Docs CLI and host adapter for product CLIs
+- [@outfitter/testing](./packages/testing/) — Test harnesses for CLI and MCP
+- [@outfitter/tooling](./packages/tooling/) — Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
+- [@outfitter/kit](./packages/kit/) — Foundation facade over contracts/types
 
 ## Quick Links
 

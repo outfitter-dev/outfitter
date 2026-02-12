@@ -288,5 +288,5 @@ Common error scenarios:
 
 ## Related Packages
 
-- [@outfitter/contracts](../../../packages/contracts/README.md) — Result types and StorageError
-- [@outfitter/file-ops](../../../packages/file-ops/README.md) — Path utilities and workspace detection
+- [@outfitter/contracts](../contracts/README.md) — Result types and StorageError
+- [@outfitter/file-ops](../file-ops/README.md) — Path utilities and workspace detection

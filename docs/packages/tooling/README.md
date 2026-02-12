@@ -163,9 +163,9 @@ Available blocks:
 
 ## Related
 
-- [@outfitter/contracts](../../../packages/contracts/README.md) — Result types and error patterns
-- [@outfitter/cli](../../../packages/cli/README.md) — CLI framework
-- [@outfitter/kit](../../../packages/kit/README.md) — Version coordination
+- [@outfitter/contracts](../contracts/README.md) — Result types and error patterns
+- [@outfitter/cli](../cli/README.md) — CLI framework
+- [@outfitter/kit](../kit/README.md) — Version coordination
 
 ## License
 

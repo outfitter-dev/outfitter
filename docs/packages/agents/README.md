@@ -270,5 +270,5 @@ bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ qui
 
 ## Related Packages
 
-- [@outfitter/cli](../../../packages/cli/README.md) — CLI framework for building tools
-- [@outfitter/config](../../../packages/config/README.md) — XDG-compliant configuration
+- [@outfitter/cli](../cli/README.md) — CLI framework for building tools
+- [@outfitter/config](../config/README.md) — XDG-compliant configuration

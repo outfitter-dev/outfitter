@@ -27,6 +27,7 @@ async function createWorkspaceFixture(): Promise<string> {
       "# Alpha",
       "",
       "See [patterns](../../docs/PATTERNS.md).",
+      "See [beta](../beta/README.md).",
       "",
       "External [site](https://example.com).",
       "",
@@ -168,6 +169,39 @@ describe("syncPackageDocs", () => {
         "outputDir must resolve inside workspace"
       );
     }
+  });
+
+  it("rewrites links to mirrored package docs", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const betaPkgRoot = join(workspaceRoot, "packages", "beta");
+    await mkdir(betaPkgRoot, { recursive: true });
+    await writeFile(
+      join(betaPkgRoot, "package.json"),
+      JSON.stringify({ name: "@acme/beta", version: "0.0.1" })
+    );
+    await writeFile(join(betaPkgRoot, "README.md"), "# Beta\n");
+
+    const result = await syncPackageDocs({ workspaceRoot });
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      throw new Error(`expected success: ${result.error.message}`);
+    }
+
+    expect(result.value.packageNames).toEqual(["alpha", "beta"]);
+
+    const alphaReadmePath = join(
+      workspaceRoot,
+      "docs",
+      "packages",
+      "alpha",
+      "README.md"
+    );
+    const alphaReadme = await readFile(alphaReadmePath, "utf8");
+
+    expect(alphaReadme).toContain("[beta](../beta/README.md)");
+    expect(alphaReadme).not.toContain("../../../packages/beta/README.md");
   });
 
   it("removes stale generated files on sync", async () => {

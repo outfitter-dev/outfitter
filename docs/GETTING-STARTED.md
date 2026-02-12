@@ -424,7 +424,7 @@ The scaffolded projects include sensible defaults. If you're setting up manually
 - **[Patterns](./PATTERNS.md)** — Learn the conventions for handlers, errors, and validation
 - **[Architecture](./ARCHITECTURE.md)** — Understand how packages fit together
 - **Package READMEs** — Deep dive into specific packages:
-  - [@outfitter/cli](../packages/cli/README.md) — Full CLI API reference
-  - [@outfitter/contracts](../packages/contracts/README.md) — Result types and errors
-  - [@outfitter/config](../packages/config/README.md) — Configuration loading
-  - [@outfitter/daemon](../packages/daemon/README.md) — Daemon lifecycle
+  - [@outfitter/cli](./packages/cli/) — Full CLI API reference
+  - [@outfitter/contracts](./packages/contracts/) — Result types and errors
+  - [@outfitter/config](./packages/config/) — Configuration loading
+  - [@outfitter/daemon](./packages/daemon/) — Daemon lifecycle
