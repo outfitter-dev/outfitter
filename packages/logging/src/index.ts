@@ -432,6 +432,18 @@ export interface ConsoleSinkOptions {
    * - `false`: Never use colors
    */
   colors?: boolean;
+
+  /**
+   * Custom formatter for log output.
+   * When provided, overrides the default pretty formatter.
+   * Use `createJsonFormatter()` for structured output.
+   *
+   * @example
+   * ```typescript
+   * const sink = createConsoleSink({ formatter: createJsonFormatter() });
+   * ```
+   */
+  formatter?: Formatter;
 }
 
 /**
@@ -1326,7 +1338,8 @@ export function createConsoleSink(options?: ConsoleSinkOptions): Sink {
   const useColors =
     options?.colors ??
     (typeof process !== "undefined" ? Boolean(process.stdout?.isTTY) : false);
-  const formatter = createPrettyFormatter({ colors: useColors });
+  const formatter =
+    options?.formatter ?? createPrettyFormatter({ colors: useColors });
 
   const sink: Sink = {
     formatter,

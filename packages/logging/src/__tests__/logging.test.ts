@@ -900,6 +900,26 @@ describe("Sinks", () => {
     expect(output).toContain("\u001b["); // Contains ANSI escape sequences
   });
 
+  it("Console sink accepts custom formatter", () => {
+    const { createConsoleSink } = require("../index.js");
+    const customFormatter: Formatter = {
+      format(record: LogRecord): string {
+        return `CUSTOM|${record.level}|${record.message}`;
+      },
+    };
+    const consoleSink = createConsoleSink({ formatter: customFormatter });
+
+    const logger = createLogger({
+      name: "test",
+      sinks: [consoleSink],
+    });
+
+    logger.info("formatted");
+
+    const output = infoOutput.join("");
+    expect(output).toBe("CUSTOM|info|formatted");
+  });
+
   it("Console sink works when process is unavailable", () => {
     const { createConsoleSink } = require("../index.js");
     const originalProcess = globalThis.process;
