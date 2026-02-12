@@ -345,6 +345,25 @@ export class ValidationError extends ValidationErrorBase {
     });
   }
 
+  /**
+   * Create a freeform ValidationError without a specific field.
+   *
+   * Use when the validation failure applies to the input as a whole
+   * rather than a single field (e.g., "Invalid pipeline configuration").
+   *
+   * @param message - Human-readable validation error message
+   * @param context - Optional structured context for debugging
+   */
+  static fromMessage(
+    message: string,
+    context?: Record<string, unknown>
+  ): ValidationError {
+    return new ValidationError({
+      message,
+      ...(context != null && { context }),
+    });
+  }
+
   exitCode(): number {
     return getExitCode(this.category);
   }

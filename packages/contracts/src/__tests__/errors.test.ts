@@ -671,6 +671,32 @@ describe("static create() methods", () => {
     expect(error.context).toEqual({ min: 0, max: 150 });
   });
 
+  it("ValidationError.fromMessage() creates freeform error without field", () => {
+    const error = ValidationError.fromMessage("Invalid pipeline configuration");
+    expect(error._tag).toBe("ValidationError");
+    expect(error.category).toBe("validation");
+    expect(error.message).toBe("Invalid pipeline configuration");
+    expect(error.field).toBeUndefined();
+  });
+
+  it("ValidationError.fromMessage() preserves context", () => {
+    const error = ValidationError.fromMessage("Config invalid", {
+      path: "/etc/app.toml",
+    });
+    expect(error.context).toEqual({ path: "/etc/app.toml" });
+  });
+
+  it("ValidationError.fromMessage() has correct exit and status codes", () => {
+    const error = ValidationError.fromMessage("Bad input");
+    expect(error.exitCode()).toBe(1);
+    expect(error.statusCode()).toBe(400);
+  });
+
+  it("ValidationError.fromMessage() omits context when not provided", () => {
+    const error = ValidationError.fromMessage("Bad input");
+    expect(error.context).toBeUndefined();
+  });
+
   it("NotFoundError.create() generates message from type and id", () => {
     const error = NotFoundError.create("PR", "outfitter#123");
     expect(error.message).toBe("PR not found: outfitter#123");
