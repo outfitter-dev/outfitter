@@ -21,16 +21,14 @@
 				"default": "./dist/index.js"
 			}
 		},
-		"./registry": {
+		"./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
+		"./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc",
+		"./biome": "./biome.json",
+		"./biome.json": "./biome.json",
+		"./cli/check": {
 			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./cli/init": {
-			"import": {
-				"types": "./dist/cli/init.d.ts",
-				"default": "./dist/cli/init.js"
+				"types": "./dist/cli/check.d.ts",
+				"default": "./dist/cli/check.js"
 			}
 		},
 		"./cli/fix": {
@@ -39,23 +37,25 @@
 				"default": "./dist/cli/fix.js"
 			}
 		},
-		"./cli/check": {
+		"./cli/init": {
 			"import": {
-				"types": "./dist/cli/check.d.ts",
-				"default": "./dist/cli/check.js"
+				"types": "./dist/cli/init.d.ts",
+				"default": "./dist/cli/init.js"
 			}
 		},
-		"./package.json": "./package.json",
-		"./biome": "./biome.json",
-		"./biome.json": "./biome.json",
-		"./tsconfig": "./tsconfig.preset.json",
-		"./tsconfig.preset.json": "./tsconfig.preset.json",
-		"./tsconfig-bun": "./tsconfig.preset.bun.json",
-		"./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
 		"./lefthook": "./lefthook.yml",
 		"./lefthook.yml": "./lefthook.yml",
-		"./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
-		"./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc"
+		"./package.json": "./package.json",
+		"./registry": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		},
+		"./tsconfig": "./tsconfig.preset.json",
+		"./tsconfig-bun": "./tsconfig.preset.bun.json",
+		"./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+		"./tsconfig.preset.json": "./tsconfig.preset.json"
 	},
 	"bin": {
 		"tooling": "./dist/cli/index.js"
@@ -64,7 +64,8 @@
 	"scripts": {
 		"build:registry": "bun run src/registry/build.ts",
 		"sync:exports": "bun run scripts/sync-exports.ts",
-		"prebuild": "bun run build:registry && bun run sync:exports",
+		"sync:exports:check": "bun run scripts/sync-exports.ts --check",
+		"prebuild": "bun run build:registry && bun run sync:exports:check",
 		"build": "bunup --filter @outfitter/tooling",
 		"prepack": "bun run sync:exports",
 		"lint": "biome lint ./src",

@@ -17,6 +17,12 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const CONFIG_EXTENSIONS = /\.(json|jsonc|yml|yaml|toml)$/;
+const CHECK_FLAG = "--check";
+
+type PackageJsonLike = {
+	files?: string[];
+	exports?: Record<string, unknown>;
+};
 
 export function shortAlias(filename: string): string {
 	// Strip extension
@@ -34,41 +40,80 @@ export function shortAlias(filename: string): string {
 	return base;
 }
 
-if (import.meta.main) {
-	const pkgPath = join(import.meta.dirname, "../package.json");
-	const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
-	const configFiles = (pkg.files as string[]).filter(
-		(f: string) => CONFIG_EXTENSIONS.test(f) && f !== "package.json",
+function configFilesFrom(files: string[] | undefined): string[] {
+	return (files ?? []).filter(
+		(file) => CONFIG_EXTENSIONS.test(file) && file !== "package.json",
 	);
+}
 
-	// Separate JS/code exports from config exports
-	const exports: Record<string, unknown> = {};
+export function sortExports(
+	exportsMap: Record<string, unknown>,
+): Record<string, unknown> {
+	return Object.fromEntries(
+		Object.entries(exportsMap).sort(([left], [right]) =>
+			left.localeCompare(right),
+		),
+	);
+}
+
+export function buildSyncedExports(
+	pkg: PackageJsonLike,
+): Record<string, unknown> {
+	const configFiles = configFilesFrom(pkg.files);
 	const configPaths = new Set(
-		configFiles.flatMap((f: string) => [`./${f}`, `./${shortAlias(f)}`]),
+		configFiles.flatMap((file) => [`./${file}`, `./${shortAlias(file)}`]),
 	);
 
-	for (const [key, value] of Object.entries(
-		pkg.exports as Record<string, unknown>,
-	)) {
+	const reconciledExports: Record<string, unknown> = {};
+	const currentExports = isRecord(pkg.exports) ? pkg.exports : {};
+
+	for (const [key, value] of Object.entries(currentExports)) {
 		if (!configPaths.has(key)) {
-			exports[key] = value;
+			reconciledExports[key] = value;
 		}
 	}
 
-	// Generate config exports (full path + short alias)
 	for (const file of configFiles) {
 		const alias = shortAlias(file);
-		exports[`./${alias}`] = `./${file}`;
+		reconciledExports[`./${alias}`] = `./${file}`;
 		if (alias !== file) {
-			exports[`./${file}`] = `./${file}`;
+			reconciledExports[`./${file}`] = `./${file}`;
 		}
 	}
 
-	pkg.exports = exports;
+	return sortExports(reconciledExports);
+}
+
+if (import.meta.main) {
+	const isCheckMode = Bun.argv.includes(CHECK_FLAG);
+	const pkgPath = join(import.meta.dirname, "../package.json");
+	const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as PackageJsonLike;
+	const currentExports = isRecord(pkg.exports) ? pkg.exports : {};
+	const nextExports = buildSyncedExports(pkg);
+	const configFiles = configFilesFrom(pkg.files);
+
+	if (JSON.stringify(currentExports) === JSON.stringify(nextExports)) {
+		console.log(
+			`[sync-exports] exports are up to date (${configFiles.length} config files)`,
+		);
+		process.exit(0);
+	}
+
+	if (isCheckMode) {
+		console.error(
+			"[sync-exports] exports are out of sync. Run: bun run --filter @outfitter/tooling sync:exports",
+		);
+		process.exit(1);
+	}
+
+	pkg.exports = nextExports;
 	writeFileSync(pkgPath, `${JSON.stringify(pkg, null, "\t")}\n`);
 
 	console.log(
-		`[sync-exports] ${configFiles.length} config files → ${configPaths.size} exports`,
+		`[sync-exports] wrote ${Object.keys(nextExports).length} exports (${configFiles.length} config files)`,
 	);
 }
