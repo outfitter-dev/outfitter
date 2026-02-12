@@ -108,4 +108,45 @@ describe("resolveLogLevel()", () => {
     // Test profile has logLevel: null → falls through to "info"
     expect(resolveLogLevel()).toBe("info");
   });
+
+  it("accepts string input and maps to LogLevel", () => {
+    delete process.env["OUTFITTER_ENV"];
+    delete process.env["OUTFITTER_LOG_LEVEL"];
+
+    expect(resolveLogLevel("debug")).toBe("debug");
+    expect(resolveLogLevel("warning")).toBe("warn");
+    expect(resolveLogLevel("critical")).toBe("fatal");
+  });
+
+  it("falls through on invalid string input", () => {
+    delete process.env["OUTFITTER_ENV"];
+    delete process.env["OUTFITTER_LOG_LEVEL"];
+
+    // Invalid string falls through to environment profile → default
+    expect(resolveLogLevel("garbage")).toBe("info");
+  });
+
+  it("returns default when process is unavailable (edge runtime)", () => {
+    const originalProcess = globalThis.process;
+    // @ts-expect-error - simulate edge runtime without process global
+    globalThis.process = undefined;
+
+    try {
+      expect(resolveLogLevel()).toBe("info");
+      expect(resolveLogLevel("debug")).toBe("debug");
+    } finally {
+      // @ts-expect-error - restoring process global
+      globalThis.process = originalProcess;
+    }
+  });
+
+  it("rejects prototype-inherited keys like constructor", () => {
+    delete process.env["OUTFITTER_ENV"];
+    delete process.env["OUTFITTER_LOG_LEVEL"];
+
+    // "constructor" exists on Object.prototype but is not a valid LogLevel
+    expect(resolveLogLevel("constructor")).toBe("info");
+    expect(resolveLogLevel("toString")).toBe("info");
+    expect(resolveLogLevel("__proto__")).toBe("info");
+  });
 });
