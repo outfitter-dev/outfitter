@@ -16,6 +16,12 @@
         "default": "./dist/index.js"
       }
     },
+    "./foundation": {
+      "import": {
+        "types": "./dist/foundation/index.d.ts",
+        "default": "./dist/foundation/index.js"
+      }
+    },
     "./foundation/contracts": {
       "import": {
         "types": "./dist/foundation/contracts.d.ts",
@@ -26,12 +32,6 @@
       "import": {
         "types": "./dist/foundation/types.d.ts",
         "default": "./dist/foundation/types.js"
-      }
-    },
-    "./foundation": {
-      "import": {
-        "types": "./dist/foundation/index.d.ts",
-        "default": "./dist/foundation/index.js"
       }
     },
     "./package.json": "./package.json"

@@ -15,19 +15,19 @@
         "default": "./dist/index.js"
       }
     },
-    "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
-      }
-    },
+    "./package.json": "./package.json",
     "./server": {
       "import": {
         "types": "./dist/server.d.ts",
         "default": "./dist/server.js"
       }
     },
-    "./package.json": "./package.json"
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    }
   },
   "sideEffects": false,
   "scripts": {

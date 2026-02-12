@@ -9,16 +9,10 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./validation": {
+    ".": {
       "import": {
-        "types": "./dist/validation.d.ts",
-        "default": "./dist/validation.js"
-      }
-    },
-    "./result": {
-      "import": {
-        "types": "./dist/result/index.d.ts",
-        "default": "./dist/result/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./actions": {
@@ -27,34 +21,10 @@
         "default": "./dist/actions.js"
       }
     },
-    "./redactor": {
+    "./adapters": {
       "import": {
-        "types": "./dist/redactor.d.ts",
-        "default": "./dist/redactor.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./handler": {
-      "import": {
-        "types": "./dist/handler.d.ts",
-        "default": "./dist/handler.js"
-      }
-    },
-    "./recovery": {
-      "import": {
-        "types": "./dist/recovery.d.ts",
-        "default": "./dist/recovery.js"
-      }
-    },
-    "./logging": {
-      "import": {
-        "types": "./dist/logging.d.ts",
-        "default": "./dist/logging.js"
+        "types": "./dist/adapters.d.ts",
+        "default": "./dist/adapters.js"
       }
     },
     "./assert": {
@@ -63,40 +33,10 @@
         "default": "./dist/assert/index.js"
       }
     },
-    "./result/utilities": {
+    "./capabilities": {
       "import": {
-        "types": "./dist/result/utilities.d.ts",
-        "default": "./dist/result/utilities.js"
-      }
-    },
-    "./adapters": {
-      "import": {
-        "types": "./dist/adapters.d.ts",
-        "default": "./dist/adapters.js"
-      }
-    },
-    "./envelope": {
-      "import": {
-        "types": "./dist/envelope.d.ts",
-        "default": "./dist/envelope.js"
-      }
-    },
-    "./resilience": {
-      "import": {
-        "types": "./dist/resilience.d.ts",
-        "default": "./dist/resilience.js"
-      }
-    },
-    "./serialization": {
-      "import": {
-        "types": "./dist/serialization.d.ts",
-        "default": "./dist/serialization.js"
-      }
-    },
-    "./errors": {
-      "import": {
-        "types": "./dist/errors.d.ts",
-        "default": "./dist/errors.js"
+        "types": "./dist/capabilities.d.ts",
+        "default": "./dist/capabilities.js"
       }
     },
     "./context": {
@@ -105,13 +45,73 @@
         "default": "./dist/context.js"
       }
     },
-    "./capabilities": {
+    "./envelope": {
       "import": {
-        "types": "./dist/capabilities.d.ts",
-        "default": "./dist/capabilities.js"
+        "types": "./dist/envelope.d.ts",
+        "default": "./dist/envelope.js"
       }
     },
-    "./package.json": "./package.json"
+    "./errors": {
+      "import": {
+        "types": "./dist/errors.d.ts",
+        "default": "./dist/errors.js"
+      }
+    },
+    "./handler": {
+      "import": {
+        "types": "./dist/handler.d.ts",
+        "default": "./dist/handler.js"
+      }
+    },
+    "./logging": {
+      "import": {
+        "types": "./dist/logging.d.ts",
+        "default": "./dist/logging.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./recovery": {
+      "import": {
+        "types": "./dist/recovery.d.ts",
+        "default": "./dist/recovery.js"
+      }
+    },
+    "./redactor": {
+      "import": {
+        "types": "./dist/redactor.d.ts",
+        "default": "./dist/redactor.js"
+      }
+    },
+    "./resilience": {
+      "import": {
+        "types": "./dist/resilience.d.ts",
+        "default": "./dist/resilience.js"
+      }
+    },
+    "./result": {
+      "import": {
+        "types": "./dist/result/index.d.ts",
+        "default": "./dist/result/index.js"
+      }
+    },
+    "./result/utilities": {
+      "import": {
+        "types": "./dist/result/utilities.d.ts",
+        "default": "./dist/result/utilities.js"
+      }
+    },
+    "./serialization": {
+      "import": {
+        "types": "./dist/serialization.d.ts",
+        "default": "./dist/serialization.js"
+      }
+    },
+    "./validation": {
+      "import": {
+        "types": "./dist/validation.d.ts",
+        "default": "./dist/validation.js"
+      }
+    }
   },
   "sideEffects": false,
   "scripts": {

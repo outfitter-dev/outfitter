@@ -11,8 +11,8 @@
   "scripts": {
     "prebuild": "./scripts/prebuild.sh",
     "verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
-    "build": "bunup",
-    "build:local": "bunup && cd apps/outfitter && bun link",
+    "build": "bunup && bun scripts/normalize-exports.ts",
+    "build:local": "bunup && bun scripts/normalize-exports.ts && cd apps/outfitter && bun link",
     "build:turbo": "turbo run build",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

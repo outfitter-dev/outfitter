@@ -11,28 +11,28 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./init": {
-      "import": {
-        "types": "./dist/init.d.ts",
-        "default": "./dist/init.js"
-      }
-    },
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
     },
-    "./merge": {
-      "import": {
-        "types": "./dist/merge.d.ts",
-        "default": "./dist/merge.js"
-      }
-    },
     "./bootstrap": {
       "import": {
         "types": "./dist/bootstrap.d.ts",
         "default": "./dist/bootstrap.js"
+      }
+    },
+    "./init": {
+      "import": {
+        "types": "./dist/init.d.ts",
+        "default": "./dist/init.js"
+      }
+    },
+    "./merge": {
+      "import": {
+        "types": "./dist/merge.d.ts",
+        "default": "./dist/merge.js"
       }
     },
     "./package.json": "./package.json"

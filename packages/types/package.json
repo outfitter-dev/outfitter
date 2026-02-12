@@ -9,40 +9,10 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./deep": {
-      "import": {
-        "types": "./dist/deep.d.ts",
-        "default": "./dist/deep.js"
-      }
-    },
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      }
-    },
-    "./utilities": {
-      "import": {
-        "types": "./dist/utilities.d.ts",
-        "default": "./dist/utilities.js"
-      }
-    },
-    "./collections": {
-      "import": {
-        "types": "./dist/collections.d.ts",
-        "default": "./dist/collections.js"
-      }
-    },
-    "./short-id": {
-      "import": {
-        "types": "./dist/short-id.d.ts",
-        "default": "./dist/short-id.js"
-      }
-    },
-    "./hash-id": {
-      "import": {
-        "types": "./dist/hash-id.d.ts",
-        "default": "./dist/hash-id.js"
       }
     },
     "./branded": {
@@ -51,13 +21,43 @@
         "default": "./dist/branded.js"
       }
     },
+    "./collections": {
+      "import": {
+        "types": "./dist/collections.d.ts",
+        "default": "./dist/collections.js"
+      }
+    },
+    "./deep": {
+      "import": {
+        "types": "./dist/deep.d.ts",
+        "default": "./dist/deep.js"
+      }
+    },
     "./guards": {
       "import": {
         "types": "./dist/guards.d.ts",
         "default": "./dist/guards.js"
       }
     },
-    "./package.json": "./package.json"
+    "./hash-id": {
+      "import": {
+        "types": "./dist/hash-id.d.ts",
+        "default": "./dist/hash-id.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./short-id": {
+      "import": {
+        "types": "./dist/short-id.d.ts",
+        "default": "./dist/short-id.js"
+      }
+    },
+    "./utilities": {
+      "import": {
+        "types": "./dist/utilities.d.ts",
+        "default": "./dist/utilities.js"
+      }
+    }
   },
   "sideEffects": false,
   "scripts": {

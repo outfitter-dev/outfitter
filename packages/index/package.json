@@ -9,22 +9,10 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./migrations": {
-      "import": {
-        "types": "./dist/migrations.d.ts",
-        "default": "./dist/migrations.js"
-      }
-    },
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      }
-    },
-    "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
       }
     },
     "./fts5": {
@@ -33,13 +21,25 @@
         "default": "./dist/fts5.js"
       }
     },
+    "./migrations": {
+      "import": {
+        "types": "./dist/migrations.d.ts",
+        "default": "./dist/migrations.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    },
     "./version": {
       "import": {
         "types": "./dist/version.d.ts",
         "default": "./dist/version.js"
       }
-    },
-    "./package.json": "./package.json"
+    }
   },
   "sideEffects": false,
   "scripts": {

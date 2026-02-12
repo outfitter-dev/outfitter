@@ -9,12 +9,6 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./environment": {
-      "import": {
-        "types": "./dist/environment.d.ts",
-        "default": "./dist/environment.js"
-      }
-    },
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
@@ -25,6 +19,12 @@
       "import": {
         "types": "./dist/env.d.ts",
         "default": "./dist/env.js"
+      }
+    },
+    "./environment": {
+      "import": {
+        "types": "./dist/environment.d.ts",
+        "default": "./dist/environment.js"
       }
     },
     "./package.json": "./package.json"

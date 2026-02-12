@@ -10,34 +10,46 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./actions": {
+      "import": {
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
+      }
+    },
+    "./commands/add": {
+      "import": {
+        "types": "./dist/commands/add.d.ts",
+        "default": "./dist/commands/add.js"
+      }
+    },
     "./commands/check": {
       "import": {
         "types": "./dist/commands/check.d.ts",
         "default": "./dist/commands/check.js"
       }
     },
-    "./commands/update-workspace": {
+    "./commands/create": {
       "import": {
-        "types": "./dist/commands/update-workspace.d.ts",
-        "default": "./dist/commands/update-workspace.js"
-      }
-    },
-    "./commands/update": {
-      "import": {
-        "types": "./dist/commands/update.d.ts",
-        "default": "./dist/commands/update.js"
-      }
-    },
-    "./commands/demo/errors": {
-      "import": {
-        "types": "./dist/commands/demo/errors.d.ts",
-        "default": "./dist/commands/demo/errors.js"
+        "types": "./dist/commands/create.d.ts",
+        "default": "./dist/commands/create.js"
       }
     },
     "./commands/demo": {
       "import": {
         "types": "./dist/commands/demo.d.ts",
         "default": "./dist/commands/demo.js"
+      }
+    },
+    "./commands/demo/errors": {
+      "import": {
+        "types": "./dist/commands/demo/errors.d.ts",
+        "default": "./dist/commands/demo/errors.js"
       }
     },
     "./commands/doctor": {
@@ -52,22 +64,22 @@
         "default": "./dist/commands/init.js"
       }
     },
-    "./commands/shared-deps": {
-      "import": {
-        "types": "./dist/commands/shared-deps.d.ts",
-        "default": "./dist/commands/shared-deps.js"
-      }
-    },
     "./commands/migrate-kit": {
       "import": {
         "types": "./dist/commands/migrate-kit.d.ts",
         "default": "./dist/commands/migrate-kit.js"
       }
     },
-    "./commands/create": {
+    "./commands/shared-deps": {
       "import": {
-        "types": "./dist/commands/create.d.ts",
-        "default": "./dist/commands/create.js"
+        "types": "./dist/commands/shared-deps.d.ts",
+        "default": "./dist/commands/shared-deps.js"
+      }
+    },
+    "./commands/update": {
+      "import": {
+        "types": "./dist/commands/update.d.ts",
+        "default": "./dist/commands/update.js"
       }
     },
     "./commands/update-planner": {
@@ -76,40 +88,10 @@
         "default": "./dist/commands/update-planner.js"
       }
     },
-    "./commands/add": {
+    "./commands/update-workspace": {
       "import": {
-        "types": "./dist/commands/add.d.ts",
-        "default": "./dist/commands/add.js"
-      }
-    },
-    "./actions": {
-      "import": {
-        "types": "./dist/actions.d.ts",
-        "default": "./dist/actions.js"
-      }
-    },
-    "./manifest": {
-      "import": {
-        "types": "./dist/manifest.d.ts",
-        "default": "./dist/manifest.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./create/types": {
-      "import": {
-        "types": "./dist/create/types.d.ts",
-        "default": "./dist/create/types.js"
-      }
-    },
-    "./create/presets": {
-      "import": {
-        "types": "./dist/create/presets.d.ts",
-        "default": "./dist/create/presets.js"
+        "types": "./dist/commands/update-workspace.d.ts",
+        "default": "./dist/commands/update-workspace.js"
       }
     },
     "./create": {
@@ -122,6 +104,24 @@
       "import": {
         "types": "./dist/create/planner.d.ts",
         "default": "./dist/create/planner.js"
+      }
+    },
+    "./create/presets": {
+      "import": {
+        "types": "./dist/create/presets.d.ts",
+        "default": "./dist/create/presets.js"
+      }
+    },
+    "./create/types": {
+      "import": {
+        "types": "./dist/create/types.d.ts",
+        "default": "./dist/create/types.js"
+      }
+    },
+    "./manifest": {
+      "import": {
+        "types": "./dist/manifest.d.ts",
+        "default": "./dist/manifest.js"
       }
     },
     "./package.json": "./package.json"
