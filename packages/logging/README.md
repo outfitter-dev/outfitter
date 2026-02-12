@@ -193,7 +193,20 @@ const logger = createLogger({
   name: "app",
   sinks: [createConsoleSink()],
 });
+
+// Use JSON formatting instead of the default pretty formatter
+const jsonLogger = createLogger({
+  name: "app",
+  sinks: [createConsoleSink({ formatter: createJsonFormatter() })],
+});
 ```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `colors` | `boolean` | auto-detect | Enable ANSI colors |
+| `formatter` | `Formatter` | `createPrettyFormatter()` | Custom log formatter |
 
 ### File Sink
 
@@ -310,6 +323,8 @@ process.exit(0);
 
 Resolve the log level from environment configuration. Use this instead of hardcoding levels so your app responds to `OUTFITTER_ENV` and `OUTFITTER_LOG_LEVEL` automatically.
 
+Accepts `LogLevel` or a plain `string` — useful when forwarding CLI flags or MCP values without casting. Invalid strings are ignored and fall through to the next precedence level.
+
 **Precedence** (highest wins):
 1. `OUTFITTER_LOG_LEVEL` environment variable
 2. Explicit `level` parameter
@@ -328,9 +343,21 @@ const logger = createLogger({
 // With OUTFITTER_ENV=development → "debug"
 // With OUTFITTER_LOG_LEVEL=error → "error" (overrides everything)
 // With nothing set → "info"
+
+// Forward a CLI string without casting
+const level = flags.logLevel; // string from commander
+const logger2 = createLogger({
+  name: "cli",
+  level: resolveLogLevel(level),
+  sinks: [createConsoleSink()],
+});
 ```
 
 MCP-style level names are mapped automatically: `warning` to `warn`, `emergency`/`critical`/`alert` to `fatal`, `notice` to `info`.
+
+### Edge Runtime Compatibility
+
+`resolveLogLevel` and `createConsoleSink` are safe to use in environments where `process` is unavailable (V8 isolates, Cloudflare Workers, edge runtimes). Environment variable reads are guarded and environment profile resolution falls back gracefully to defaults.
 
 ## Logger Factory + BYO Backends
 
