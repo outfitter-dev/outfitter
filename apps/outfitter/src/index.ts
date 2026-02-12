@@ -9,16 +9,6 @@
 
 // Action registry
 export { outfitterActions } from "./actions.js";
-// Create command
-export {
-  CreateError,
-  type CreateOptions,
-  type CreateResult,
-  type CreateStructure,
-  createCommand,
-  printCreateResults,
-  runCreate,
-} from "./commands/create.js";
 // Doctor command
 export {
   type BunVersionCheck,
@@ -38,7 +28,11 @@ export {
 export {
   InitError,
   type InitOptions,
+  type InitPresetId,
+  type InitResult,
+  type InitStructure,
   initCommand,
+  printInitResults,
   runInit,
 } from "./commands/init.js";
 // Migrate kit command
@@ -50,6 +44,15 @@ export {
   printMigrateKitResults,
   runMigrateKit,
 } from "./commands/migrate-kit.js";
+// Scaffold command
+export {
+  printScaffoldResults,
+  runScaffold,
+  ScaffoldCommandError,
+  type ScaffoldCommandResult,
+  type ScaffoldOptions,
+  scaffoldCommand,
+} from "./commands/scaffold.js";
 
 // Create planner
 export {
@@ -63,3 +66,24 @@ export {
   getCreatePreset,
   planCreateProject,
 } from "./create/index.js";
+export type {
+  TargetCategory,
+  TargetDefinition,
+  TargetId,
+  TargetScope,
+  TargetStatus,
+} from "./targets/index.js";
+// Targets registry
+export {
+  getInitTarget,
+  getReadyTarget,
+  getScaffoldTarget,
+  getTarget,
+  INIT_TARGET_IDS,
+  listTargets,
+  READY_TARGET_IDS,
+  resolvePlacement,
+  SCAFFOLD_TARGET_IDS,
+  TARGET_IDS,
+  TARGET_REGISTRY,
+} from "./targets/index.js";

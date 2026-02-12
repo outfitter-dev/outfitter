@@ -9,13 +9,15 @@
 import { describe, expect, test } from "bun:test";
 import {
   CREATE_PRESET_IDS,
-  CreateError,
+  getInitTarget,
   InitError,
   initCommand,
   MigrateKitError,
   planCreateProject,
-  runCreate,
   runMigrateKit,
+  runScaffold,
+  scaffoldCommand,
+  TARGET_IDS,
 } from "../index.js";
 
 describe("outfitter public API", () => {
@@ -29,11 +31,9 @@ describe("outfitter public API", () => {
     expect(err.name).toBe("InitError");
   });
 
-  test("exports runCreate and CreateError", () => {
-    expect(typeof runCreate).toBe("function");
-    const err = new CreateError("test");
-    expect(err).toBeInstanceOf(Error);
-    expect(err.name).toBe("CreateError");
+  test("exports scaffold command API", () => {
+    expect(typeof scaffoldCommand).toBe("function");
+    expect(typeof runScaffold).toBe("function");
   });
 
   test("exports runMigrateKit and MigrateKitError", () => {
@@ -45,6 +45,13 @@ describe("outfitter public API", () => {
 
   test("exports create presets", () => {
     expect(CREATE_PRESET_IDS).toEqual(["basic", "cli", "daemon", "mcp"]);
+  });
+
+  test("exports target registry helpers", () => {
+    expect(TARGET_IDS).toContain("minimal");
+
+    const targetResult = getInitTarget("minimal");
+    expect(targetResult.isOk()).toBe(true);
   });
 
   test("exports planCreateProject", () => {
