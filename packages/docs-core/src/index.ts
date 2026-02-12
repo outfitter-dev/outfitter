@@ -295,6 +295,18 @@ function resolveLlmsOptions(
     );
   }
 
+  if (llmsPath === llmsFullPath) {
+    return Result.err(
+      DocsCoreError.validation(
+        "llmsFile and llmsFullFile must resolve to distinct paths",
+        {
+          llmsPath,
+          llmsFullPath,
+        }
+      )
+    );
+  }
+
   return Result.ok({
     llmsPath,
     llmsFullPath,

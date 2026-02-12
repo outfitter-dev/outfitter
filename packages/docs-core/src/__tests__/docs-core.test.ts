@@ -360,6 +360,24 @@ describe("syncLlmsDocs", () => {
       false
     );
   });
+
+  it("rejects colliding llms output paths", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncLlmsDocs({
+      workspaceRoot,
+      llmsFile: "docs/same-target.txt",
+      llmsFullFile: "docs/same-target.txt",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain(
+        "llmsFile and llmsFullFile must resolve to distinct paths"
+      );
+    }
+  });
 });
 
 describe("checkLlmsDocs", () => {
