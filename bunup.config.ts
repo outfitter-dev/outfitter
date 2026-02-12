@@ -98,6 +98,10 @@ export default defineWorkspace(
       root: "packages/config",
     },
     {
+      name: "@outfitter/docs-core",
+      root: "packages/docs-core",
+    },
+    {
       name: "@outfitter/cli",
       root: "packages/cli",
       // Exclude internal exports - consumers should use barrel exports (./render, ./demo)
