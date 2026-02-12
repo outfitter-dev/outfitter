@@ -48,6 +48,9 @@
     "@outfitter/logging": ">=0.3.0"
   },
   "devDependencies": {
+    "@outfitter/config": "workspace:*",
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/logging": "workspace:*",
     "@types/bun": "latest",
     "typescript": "^5.8.0"
   },

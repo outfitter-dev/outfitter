@@ -34,6 +34,8 @@
     "@outfitter/contracts": ">=0.2.0"
   },
   "devDependencies": {
+    "@outfitter/config": "workspace:*",
+    "@outfitter/contracts": "workspace:*",
     "@types/bun": "latest",
     "typescript": "^5.8.0"
   },
