@@ -527,6 +527,10 @@ Config location:
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Linux: `~/.config/claude/claude_desktop_config.json`
 
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
 ## Related Packages
 
 - [@outfitter/contracts](../contracts/README.md) — Result types and error taxonomy

@@ -465,6 +465,10 @@ Edge-runtime notes:
 | `PrettyFormatterOptions` | Options for human-readable formatter            |
 | `FileSinkOptions`        | Options for file sink configuration             |
 
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
 ## License
 
 MIT

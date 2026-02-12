@@ -40,10 +40,12 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@outfitter/config": "workspace:*",
-    "@outfitter/contracts": "workspace:*",
-    "@outfitter/logging": "workspace:*",
     "zod": "^4.3.5"
+  },
+  "peerDependencies": {
+    "@outfitter/config": ">=0.3.0",
+    "@outfitter/contracts": ">=0.2.0",
+    "@outfitter/logging": ">=0.3.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

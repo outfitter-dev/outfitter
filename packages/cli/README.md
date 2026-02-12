@@ -459,6 +459,10 @@ import type { CollectIdsOptions, ExpandFileOptions, ParseGlobOptions } from "@ou
 import type { PaginationState, CursorOptions } from "@outfitter/cli/pagination";
 ```
 
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
 ## License
 
 MIT
