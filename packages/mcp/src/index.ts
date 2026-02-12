@@ -82,6 +82,7 @@ export {
 } from "./transport.js";
 // Types
 export {
+  adaptHandler,
   type BlobResourceContent,
   type CompletionHandler,
   type CompletionRef,
@@ -106,6 +107,7 @@ export {
   type ResourceTemplateReadHandler,
   type SerializedTool,
   type TextResourceContent,
+  TOOL_ANNOTATIONS,
   type ToolAnnotations,
   type ToolDefinition,
 } from "./types.js";

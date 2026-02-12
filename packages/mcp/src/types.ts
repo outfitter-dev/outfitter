@@ -103,6 +103,58 @@ export interface ToolAnnotations {
   openWorldHint?: boolean;
 }
 
+/**
+ * Common annotation presets for MCP tools.
+ *
+ * Use these as a starting point and spread-override individual hints:
+ *
+ * ```typescript
+ * annotations: { ...TOOL_ANNOTATIONS.readOnly, openWorldHint: true }
+ * ```
+ *
+ * For multi-action tools (e.g., a single tool with read and write actions),
+ * use the most conservative union of hints — if any action is destructive,
+ * mark the whole tool as destructive. Per-action annotations are an MCP spec
+ * limitation; presets + spread cover most edge cases.
+ */
+export const TOOL_ANNOTATIONS = {
+  /** Read-only, safe to call repeatedly. */
+  readOnly: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  /** Creates or updates state, not destructive. */
+  write: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+  /** Idempotent write (PUT-like). */
+  writeIdempotent: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  /** Deletes or permanently modifies data. */
+  destructive: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  /** Interacts with external systems (APIs, network). */
+  openWorld: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+} as const satisfies Record<string, ToolAnnotations>;
+
 // ============================================================================
 // Tool Definition
 // ============================================================================
@@ -802,4 +854,34 @@ export interface McpHandlerContext extends HandlerContext {
 
   /** Progress reporter, present when client provides a progressToken */
   progress?: ProgressReporter;
+}
+
+// ============================================================================
+// Handler Adapter
+// ============================================================================
+
+/**
+ * Adapt a handler with a domain error type for use with MCP tools.
+ *
+ * MCP tool definitions constrain `TError extends OutfitterError`. When your
+ * handler returns domain-specific errors that extend `Error` but not
+ * `OutfitterError`, use this function instead of an unsafe cast:
+ *
+ * ```typescript
+ * import { adaptHandler } from "@outfitter/mcp";
+ *
+ * const tool = defineTool({
+ *   name: "my-tool",
+ *   inputSchema: z.object({ id: z.string() }),
+ *   handler: adaptHandler(myDomainHandler),
+ * });
+ * ```
+ */
+export function adaptHandler<TInput, TOutput, TError extends Error>(
+  handler: (
+    input: TInput,
+    ctx: HandlerContext
+  ) => Promise<Result<TOutput, TError>>
+): Handler<TInput, TOutput, OutfitterError> {
+  return handler as unknown as Handler<TInput, TOutput, OutfitterError>;
 }
