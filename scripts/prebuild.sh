@@ -48,7 +48,10 @@ generate_marketplace_manifest() {
 # Uses the docs-core package source entrypoint so prebuild can run before build.
 
 assemble_package_docs() {
-  bun "$ROOT_DIR/packages/docs-core/src/cli-sync.ts" --cwd "$ROOT_DIR"
+  (
+    cd "$ROOT_DIR/packages/docs-core"
+    bun src/cli-sync.ts --cwd "$ROOT_DIR"
+  )
 }
 
 # -----------------------------------------------------------------------------
