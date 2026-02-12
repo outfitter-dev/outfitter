@@ -66,6 +66,11 @@ interface ExpectedOutput {
   readonly files: ReadonlyMap<string, string>;
 }
 
+interface CollectedMarkdownFile {
+  readonly sourceAbsolutePath: string;
+  readonly destinationAbsolutePath: string;
+}
+
 const DEFAULT_PACKAGES_DIR = "packages";
 const DEFAULT_OUTPUT_DIR = "docs/packages";
 const DEFAULT_EXCLUDED_FILES = ["CHANGELOG.md"] as const;
@@ -87,6 +92,20 @@ function isPathInsideWorkspace(
 ): boolean {
   const rel = relative(workspaceRoot, absolutePath);
   return rel === "" || !(rel.startsWith("..") || isAbsolute(rel));
+}
+
+function isSamePathOrDescendant(
+  parentPath: string,
+  candidatePath: string
+): boolean {
+  const rel = relative(parentPath, candidatePath);
+  return rel === "" || !(rel.startsWith("..") || isAbsolute(rel));
+}
+
+function pathsOverlap(pathA: string, pathB: string): boolean {
+  return (
+    isSamePathOrDescendant(pathA, pathB) || isSamePathOrDescendant(pathB, pathA)
+  );
 }
 
 function normalizeExcludedNames(
@@ -126,6 +145,26 @@ function resolveOptions(
       ValidationError.fromMessage("packages directory does not exist", {
         packagesRoot,
       })
+    );
+  }
+
+  if (!isPathInsideWorkspace(workspaceRoot, outputRoot)) {
+    return Result.err(
+      ValidationError.fromMessage("outputDir must resolve inside workspace", {
+        outputRoot,
+      })
+    );
+  }
+
+  if (pathsOverlap(outputRoot, packagesRoot)) {
+    return Result.err(
+      ValidationError.fromMessage(
+        "outputDir must not overlap packages directory",
+        {
+          outputRoot,
+          packagesRoot,
+        }
+      )
     );
   }
 
@@ -305,7 +344,8 @@ function rewriteMarkdownLinkTarget(
   target: string,
   sourceAbsolutePath: string,
   destinationAbsolutePath: string,
-  workspaceRoot: string
+  workspaceRoot: string,
+  mirrorTargetBySourcePath: ReadonlyMap<string, string>
 ): string {
   const { pathPart, suffix, wrappedInAngles } = splitMarkdownTarget(target);
   if (!isRewritableRelativeTarget(pathPart)) {
@@ -322,8 +362,11 @@ function rewriteMarkdownLinkTarget(
     return target;
   }
 
+  const rewrittenAbsoluteTarget =
+    mirrorTargetBySourcePath.get(absoluteTarget) ?? absoluteTarget;
+
   let rewrittenPath = toPosixPath(
-    relative(dirname(destinationAbsolutePath), absoluteTarget)
+    relative(dirname(destinationAbsolutePath), rewrittenAbsoluteTarget)
   );
 
   if (rewrittenPath.length === 0) {
@@ -341,7 +384,8 @@ function rewriteMarkdownLinks(
   markdown: string,
   sourceAbsolutePath: string,
   destinationAbsolutePath: string,
-  workspaceRoot: string
+  workspaceRoot: string,
+  mirrorTargetBySourcePath: ReadonlyMap<string, string>
 ): string {
   return markdown.replace(
     /(!?\[[^\]]*]\()([^)]+)(\))/g,
@@ -350,7 +394,8 @@ function rewriteMarkdownLinks(
         target,
         sourceAbsolutePath,
         destinationAbsolutePath,
-        workspaceRoot
+        workspaceRoot,
+        mirrorTargetBySourcePath
       )}${suffix}`
   );
 }
@@ -362,6 +407,7 @@ async function buildExpectedOutput(
     options.packagesRoot
   );
   const packageNames: string[] = [];
+  const collectedFiles: CollectedMarkdownFile[] = [];
   const files = new Map<string, string>();
 
   for (const discoveredPackage of discoveredPackages) {
@@ -393,16 +439,40 @@ async function buildExpectedOutput(
         relativeFromPackageRoot
       );
 
-      const sourceContent = await readFile(sourceAbsolutePath, "utf8");
-      const rewrittenContent = rewriteMarkdownLinks(
-        sourceContent,
+      collectedFiles.push({
         sourceAbsolutePath,
         destinationAbsolutePath,
-        options.workspaceRoot
-      );
-
-      files.set(destinationAbsolutePath, rewrittenContent);
+      });
     }
+  }
+
+  const mirrorTargetBySourcePath = new Map<string, string>(
+    collectedFiles.map((file) => [
+      file.sourceAbsolutePath,
+      file.destinationAbsolutePath,
+    ])
+  );
+
+  const sortedCollectedFiles = [...collectedFiles].sort((a, b) =>
+    toPosixPath(a.destinationAbsolutePath).localeCompare(
+      toPosixPath(b.destinationAbsolutePath)
+    )
+  );
+
+  for (const collectedFile of sortedCollectedFiles) {
+    const sourceContent = await readFile(
+      collectedFile.sourceAbsolutePath,
+      "utf8"
+    );
+    const rewrittenContent = rewriteMarkdownLinks(
+      sourceContent,
+      collectedFile.sourceAbsolutePath,
+      collectedFile.destinationAbsolutePath,
+      options.workspaceRoot,
+      mirrorTargetBySourcePath
+    );
+
+    files.set(collectedFile.destinationAbsolutePath, rewrittenContent);
   }
 
   return {

@@ -104,6 +104,13 @@ describe("syncPackageDocs", () => {
       )
     ).toBe(true);
 
+    const alphaGuide = await readFile(
+      join(workspaceRoot, "docs", "packages", "alpha", "docs", "guide.md"),
+      "utf8"
+    );
+    expect(alphaGuide).toContain("Back to [README](../README.md).");
+    expect(alphaGuide).not.toContain("packages/alpha/README.md");
+
     expect(
       existsSync(
         join(workspaceRoot, "docs", "packages", "alpha", "CHANGELOG.md")
@@ -120,6 +127,47 @@ describe("syncPackageDocs", () => {
         join(workspaceRoot, "docs", "packages", "no-package-json", "README.md")
       )
     ).toBe(false);
+  });
+
+  it("rejects output directories that overlap package source roots", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const workspaceRootResult = await syncPackageDocs({
+      workspaceRoot,
+      outputDir: ".",
+    });
+    expect(workspaceRootResult.isErr()).toBe(true);
+
+    const packagesResult = await syncPackageDocs({
+      workspaceRoot,
+      outputDir: "packages",
+    });
+    expect(packagesResult.isErr()).toBe(true);
+
+    const outsideWorkspaceResult = await syncPackageDocs({
+      workspaceRoot,
+      outputDir: "..",
+    });
+    expect(outsideWorkspaceResult.isErr()).toBe(true);
+
+    if (workspaceRootResult.isErr()) {
+      expect(workspaceRootResult.error.message).toContain(
+        "outputDir must not overlap packages directory"
+      );
+    }
+
+    if (packagesResult.isErr()) {
+      expect(packagesResult.error.message).toContain(
+        "outputDir must not overlap packages directory"
+      );
+    }
+
+    if (outsideWorkspaceResult.isErr()) {
+      expect(outsideWorkspaceResult.error.message).toContain(
+        "outputDir must resolve inside workspace"
+      );
+    }
   });
 
   it("removes stale generated files on sync", async () => {
