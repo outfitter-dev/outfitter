@@ -14,7 +14,7 @@ The fastest way to start is with the `outfitter` CLI:
 
 ```bash
 # Scaffold a CLI project
-bunx outfitter create my-cli --preset cli --structure single --yes
+bunx outfitter init my-cli --preset cli --yes
 cd my-cli
 bun install
 bun run dev

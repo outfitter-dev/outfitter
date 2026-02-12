@@ -34,12 +34,6 @@
         "default": "./dist/commands/check.js"
       }
     },
-    "./commands/create": {
-      "import": {
-        "types": "./dist/commands/create.d.ts",
-        "default": "./dist/commands/create.js"
-      }
-    },
     "./commands/demo": {
       "import": {
         "types": "./dist/commands/demo.d.ts",
@@ -68,6 +62,12 @@
       "import": {
         "types": "./dist/commands/migrate-kit.d.ts",
         "default": "./dist/commands/migrate-kit.js"
+      }
+    },
+    "./commands/scaffold": {
+      "import": {
+        "types": "./dist/commands/scaffold.d.ts",
+        "default": "./dist/commands/scaffold.js"
       }
     },
     "./commands/shared-deps": {
@@ -118,13 +118,97 @@
         "default": "./dist/create/types.js"
       }
     },
+    "./engine": {
+      "import": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      }
+    },
+    "./engine/blocks": {
+      "import": {
+        "types": "./dist/engine/blocks.d.ts",
+        "default": "./dist/engine/blocks.js"
+      }
+    },
+    "./engine/collector": {
+      "import": {
+        "types": "./dist/engine/collector.d.ts",
+        "default": "./dist/engine/collector.js"
+      }
+    },
+    "./engine/config": {
+      "import": {
+        "types": "./dist/engine/config.d.ts",
+        "default": "./dist/engine/config.js"
+      }
+    },
+    "./engine/executor": {
+      "import": {
+        "types": "./dist/engine/executor.d.ts",
+        "default": "./dist/engine/executor.js"
+      }
+    },
+    "./engine/names": {
+      "import": {
+        "types": "./dist/engine/names.d.ts",
+        "default": "./dist/engine/names.js"
+      }
+    },
+    "./engine/post-scaffold": {
+      "import": {
+        "types": "./dist/engine/post-scaffold.d.ts",
+        "default": "./dist/engine/post-scaffold.js"
+      }
+    },
+    "./engine/render-plan": {
+      "import": {
+        "types": "./dist/engine/render-plan.d.ts",
+        "default": "./dist/engine/render-plan.js"
+      }
+    },
+    "./engine/template": {
+      "import": {
+        "types": "./dist/engine/template.d.ts",
+        "default": "./dist/engine/template.js"
+      }
+    },
+    "./engine/types": {
+      "import": {
+        "types": "./dist/engine/types.d.ts",
+        "default": "./dist/engine/types.js"
+      }
+    },
+    "./engine/workspace": {
+      "import": {
+        "types": "./dist/engine/workspace.d.ts",
+        "default": "./dist/engine/workspace.js"
+      }
+    },
     "./manifest": {
       "import": {
         "types": "./dist/manifest.d.ts",
         "default": "./dist/manifest.js"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./targets": {
+      "import": {
+        "types": "./dist/targets/index.d.ts",
+        "default": "./dist/targets/index.js"
+      }
+    },
+    "./targets/registry": {
+      "import": {
+        "types": "./dist/targets/registry.d.ts",
+        "default": "./dist/targets/registry.js"
+      }
+    },
+    "./targets/types": {
+      "import": {
+        "types": "./dist/targets/types.d.ts",
+        "default": "./dist/targets/types.js"
+      }
+    }
   },
   "bin": {
     "outfitter": "./dist/cli.js",
@@ -139,6 +223,7 @@
     "test:watch": "bun test --watch",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
+    "pretypecheck": "bun run --filter @outfitter/logging build && bun run --filter @outfitter/cli build",
     "typecheck": "tsc --noEmit",
     "sync:templates": "bun run ../../scripts/sync-templates.ts",
     "prepack": "bun run sync:templates",

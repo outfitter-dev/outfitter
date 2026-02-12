@@ -18,7 +18,7 @@ bunx outfitter --help
 
 ```bash
 # Scaffold a new CLI project with defaults
-bunx outfitter create my-cli --preset cli --structure single --yes
+bunx outfitter init my-cli --preset cli --yes
 cd my-cli
 bun install
 bun run dev
@@ -36,8 +36,8 @@ Global options:
 
 Top-level commands:
 
-- `create [directory]` - Interactive/new scaffolding flow (single package or workspace)
-- `init [directory]` - Template scaffolding with explicit flags
+- `init [directory]` - Create a new project from scratch (interactive or scripted)
+- `scaffold <target> [name]` - Add a new capability to an existing project
 - `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
 - `migrate kit [directory]` - Migrate foundation imports and dependencies to `@outfitter/kit`
 - `update` - Check installed `@outfitter/*` versions and optionally show migration guidance
@@ -46,38 +46,9 @@ Top-level commands:
 
 ## Command Reference
 
-### `create`
-
-Interactive/default scaffolding flow.
-
-```bash
-outfitter create [directory] [options]
-```
-
-Options:
-
-- `-n, --name <name>` - Package name
-- `-p, --preset <preset>` - `basic | cli | daemon | mcp`
-- `-s, --structure <structure>` - `single | workspace`
-- `--workspace-name <name>` - Workspace root package name
-- `--local` - Use `workspace:*` for `@outfitter/*` dependencies
-- `--workspace` - Alias for `--local`
-- `-f, --force` - Overwrite existing files
-- `--with <blocks>` - Add specific tooling blocks
-- `--no-tooling` - Skip default tooling blocks
-- `-y, --yes` - Skip prompts and use defaults
-
-Examples:
-
-```bash
-outfitter create my-cli --preset cli --structure single --yes
-outfitter create . --preset mcp --yes --no-tooling
-outfitter create my-workspace --structure workspace --workspace-name @acme/root
-```
-
 ### `init`
 
-Template-first scaffolding flow.
+Create a new project from scratch.
 
 ```bash
 outfitter init [directory] [options]
@@ -90,19 +61,53 @@ Options:
 
 - `-n, --name <name>` - Package name
 - `-b, --bin <name>` - Binary name
-- `-t, --template <template>` - Template (`basic`, `cli`, `mcp`, `daemon`)
+- `-p, --preset <preset>` - Preset (`minimal`, `cli`, `mcp`, `daemon`)
+- `-t, --template <template>` - Deprecated alias for `--preset`
+- `-s, --structure <mode>` - Project structure (`single` | `workspace`)
+- `--workspace-name <name>` - Workspace root package name
 - `--local` - Use `workspace:*` for `@outfitter/*` dependencies
 - `--workspace` - Alias for `--local`
 - `--with <blocks>` - Add specific tooling blocks
 - `--no-tooling` - Skip tooling setup
 - `-f, --force` - Overwrite existing files
+- `-y, --yes` - Skip prompts and use defaults
+- `--dry-run` - Preview changes without writing files
+- `--skip-install` - Skip `bun install`
+- `--skip-git` - Skip `git init` and initial commit
+- `--skip-commit` - Skip initial commit only
 
 Examples:
 
 ```bash
-outfitter init cli my-project
+outfitter init my-lib --preset minimal --yes
+outfitter init cli my-project --yes
+outfitter init my-workspace --preset mcp --structure workspace --workspace-name @acme/root
 outfitter init . --template basic --name my-lib
-outfitter init mcp . --name my-mcp --no-tooling
+```
+
+### `scaffold`
+
+Add a target capability into an existing project/workspace.
+
+```bash
+outfitter scaffold <target> [name] [options]
+```
+
+Options:
+
+- `-f, --force` - Overwrite existing files
+- `--skip-install` - Skip `bun install`
+- `--dry-run` - Preview changes without writing files
+- `--with <blocks>` - Add specific tooling blocks
+- `--no-tooling` - Skip default tooling blocks
+- `--local` - Use `workspace:*` for `@outfitter/*` dependencies
+
+Examples:
+
+```bash
+outfitter scaffold mcp
+outfitter scaffold lib shared-utils
+outfitter scaffold cli admin-console --with biome,lefthook
 ```
 
 ### `add`
@@ -194,13 +199,13 @@ Root exports:
 
 ```typescript
 import {
-  runCreate,
   runDoctor,
   runInit,
   runMigrateKit,
-  type CreateOptions,
+  runScaffold,
   type InitOptions,
   type MigrateKitOptions,
+  type ScaffoldOptions,
 } from "outfitter";
 ```
 
@@ -214,12 +219,11 @@ import { runUpdate } from "outfitter/commands/update";
 Example:
 
 ```typescript
-import { runCreate } from "outfitter";
+import { runInit } from "outfitter";
 
-const result = await runCreate({
+const result = await runInit({
   targetDir: "./my-app",
   preset: "cli",
-  structure: "single",
   force: false,
   yes: true,
 });
