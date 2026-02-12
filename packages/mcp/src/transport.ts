@@ -119,31 +119,22 @@ function toSdkError(error: {
  * Create an MCP SDK server from an Outfitter MCP server.
  */
 export function createSdkServer(server: McpServer): Server {
-  // Build capabilities dynamically based on registrations
+  // Advertise capabilities that this server implementation supports.
+  // Resources/prompts may start empty and be registered at runtime.
   const capabilities: Record<string, Record<string, unknown>> = {
     tools: { listChanged: true },
+    resources: { listChanged: true, subscribe: true },
+    prompts: { listChanged: true },
+    completions: {},
+    logging: {},
   };
-
-  if (
-    server.getResources().length > 0 ||
-    server.getResourceTemplates().length > 0
-  ) {
-    capabilities["resources"] = { listChanged: true, subscribe: true };
-  }
-
-  if (server.getPrompts().length > 0) {
-    capabilities["prompts"] = { listChanged: true };
-  }
-
-  capabilities["completions"] = {};
-  capabilities["logging"] = {};
 
   const sdkServer = new Server(
     { name: server.name, version: server.version },
     { capabilities }
   );
 
-  // Tool handlers
+  // Tool handlers (always registered — tools capability is always advertised)
   sdkServer.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: server.getTools(),
   }));
@@ -197,7 +188,7 @@ export function createSdkServer(server: McpServer): Server {
     return { contents: result.value };
   });
 
-  // Subscription handlers
+  // Subscription handlers (resource feature)
   sdkServer.setRequestHandler(
     SubscribeRequestSchema,
     // biome-ignore lint/suspicious/useAwait: protocol requires async
