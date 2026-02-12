@@ -30,6 +30,8 @@ export interface UpdateOptions {
   readonly cwd: string;
   /** Show migration guide */
   readonly guide?: boolean;
+  /** Filter migration guides to specific package names */
+  readonly guidePackages?: readonly string[];
   /** Apply non-breaking updates to package.json and run bun install */
   readonly apply?: boolean;
   /** Include breaking updates when --apply is used */
@@ -417,7 +419,7 @@ export async function runUpdate(
   // Query npm for latest versions in parallel
   const latestVersions = new Map<
     string,
-    { version: string; breaking: boolean }
+    { version: string; breaking?: boolean }
   >();
   const installedMap = new Map<string, string>();
   const npmFailures = new Set<string>();
@@ -427,8 +429,8 @@ export async function runUpdate(
       installedMap.set(pkg.name, pkg.version);
       const latest = await getLatestVersion(pkg.name);
       if (latest !== null) {
-        // npm doesn't tell us if it's breaking; the planner infers from semver
-        latestVersions.set(pkg.name, { version: latest, breaking: false });
+        // npm doesn't tell us if it's breaking; leave undefined so the planner infers from semver
+        latestVersions.set(pkg.name, { version: latest });
       } else {
         npmFailures.add(pkg.name);
       }
@@ -496,10 +498,20 @@ export async function runUpdate(
   }
 
   // Build structured migration guides when --guide is requested
-  const guidesData =
+  let guidesData =
     options.guide === true
       ? buildMigrationGuides(packages, findMigrationDocsDir(cwd))
       : undefined;
+
+  // Filter guides to specific packages when --guide packages are specified
+  if (
+    guidesData !== undefined &&
+    options.guidePackages !== undefined &&
+    options.guidePackages.length > 0
+  ) {
+    const filterSet = new Set(options.guidePackages);
+    guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
+  }
 
   return Result.ok({
     packages,

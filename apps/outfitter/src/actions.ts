@@ -675,6 +675,7 @@ const checkAction = defineAction({
 interface UpdateActionInput {
   cwd: string;
   guide: boolean;
+  guidePackages?: string[];
   apply: boolean;
   breaking: boolean;
   outputMode?: OutputMode;
@@ -683,6 +684,7 @@ interface UpdateActionInput {
 const updateInputSchema = z.object({
   cwd: z.string(),
   guide: z.boolean(),
+  guidePackages: z.array(z.string()).optional(),
   apply: z.boolean(),
   breaking: z.boolean(),
   outputMode: outputModeSchema,
@@ -694,13 +696,14 @@ const updateAction = defineAction({
   surfaces: ["cli"],
   input: updateInputSchema,
   cli: {
-    command: "update",
+    command: "update [packages...]",
     description:
       "Check for @outfitter/* package updates and migration guidance",
     options: [
       {
         flags: "--guide",
-        description: "Show migration instructions for available updates",
+        description:
+          "Show migration instructions for available updates. Pass package names to filter.",
         defaultValue: false,
       },
       {
@@ -725,9 +728,12 @@ const updateAction = defineAction({
         typeof context.flags["cwd"] === "string"
           ? resolve(process.cwd(), context.flags["cwd"])
           : process.cwd();
+      const guidePackages =
+        context.args.length > 0 ? (context.args as string[]) : undefined;
       return {
         cwd,
         guide: Boolean(context.flags["guide"]),
+        ...(guidePackages !== undefined ? { guidePackages } : {}),
         apply: Boolean(context.flags["apply"]),
         breaking: Boolean(context.flags["breaking"]),
         ...(outputMode ? { outputMode } : {}),
@@ -735,8 +741,11 @@ const updateAction = defineAction({
     },
   },
   handler: async (input) => {
-    const { outputMode, ...updateInput } = input;
-    const result = await runUpdate(updateInput);
+    const { outputMode, guidePackages, ...updateInput } = input;
+    const result = await runUpdate({
+      ...updateInput,
+      ...(guidePackages !== undefined ? { guidePackages } : {}),
+    });
 
     if (result.isErr()) {
       return Result.err(

@@ -70,18 +70,25 @@ function getMinor(version: string): number {
 /**
  * Determine whether a version bump is breaking.
  *
- * Rules:
- * - Major version increase is always breaking.
- * - For pre-1.0 packages (major === 0), a minor version increase is breaking
- *   (semver convention: 0.x minor bumps may contain breaking changes).
- * - If the `breaking` metadata flag is true, it's breaking.
- * - Otherwise, it's non-breaking.
+ * Rules (evaluated in order):
+ * - Explicit `true` flag: always breaking.
+ * - Explicit `false` flag: always non-breaking (overrides semver heuristics).
+ * - `undefined` flag: fall through to semver heuristics:
+ *   - Major version increase is always breaking.
+ *   - For pre-1.0 packages (major === 0), a minor version increase is breaking
+ *     (semver convention: 0.x minor bumps may contain breaking changes).
+ *   - Otherwise, non-breaking.
  */
 function isBreaking(
   currentVersion: string,
   latestVersion: string,
-  breakingFlag: boolean
+  breakingFlag?: boolean
 ): boolean {
+  // Explicit override takes precedence
+  if (breakingFlag === true) return true;
+  if (breakingFlag === false) return false;
+
+  // No explicit flag — apply semver heuristics
   const currentMajor = getMajor(currentVersion);
   const latestMajor = getMajor(latestVersion);
 
@@ -99,8 +106,7 @@ function isBreaking(
     }
   }
 
-  // Respect the explicit breaking flag from metadata
-  return breakingFlag;
+  return false;
 }
 
 /**
@@ -109,7 +115,7 @@ function isBreaking(
 function classify(
   currentVersion: string,
   latestVersion: string,
-  breakingFlag: boolean
+  breakingFlag?: boolean
 ): BumpClassification {
   // No update available
   if (Bun.semver.order(latestVersion, currentVersion) <= 0) {
@@ -141,7 +147,7 @@ function classify(
  */
 export function analyzeUpdates(
   installed: Map<string, string>,
-  latest: Map<string, { version: string; breaking: boolean }>,
+  latest: Map<string, { version: string; breaking?: boolean }>,
   migrationDocs?: Map<string, string>
 ): UpdatePlan {
   const packages: PackageUpdateAction[] = [];
@@ -151,7 +157,7 @@ export function analyzeUpdates(
 
     // If we have no latest info, treat as up-to-date (we can't determine otherwise)
     const latestVersion = latestInfo?.version ?? currentVersion;
-    const breakingFlag = latestInfo?.breaking ?? false;
+    const breakingFlag = latestInfo?.breaking;
 
     const classification = classify(
       currentVersion,

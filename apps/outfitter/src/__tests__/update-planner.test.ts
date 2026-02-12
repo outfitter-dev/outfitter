@@ -19,11 +19,11 @@ function installed(packages: Record<string, string>): Map<string, string> {
 }
 
 /**
- * Build the `latest` map from a record of name -> { version, breaking }.
+ * Build the `latest` map from a record of name -> { version, breaking? }.
  */
 function latest(
-  packages: Record<string, { version: string; breaking: boolean }>
-): Map<string, { version: string; breaking: boolean }> {
+  packages: Record<string, { version: string; breaking?: boolean }>
+): Map<string, { version: string; breaking?: boolean }> {
   return new Map(Object.entries(packages));
 }
 
@@ -148,10 +148,10 @@ describe("analyzeUpdates — minor bumps", () => {
     expect(plan.summary.upgradableBreaking).toBe(1);
   });
 
-  test("pre-1.0 minor bump is upgradableBreaking regardless of breaking field", () => {
+  test("pre-1.0 minor bump with no explicit flag uses semver heuristic (breaking)", () => {
     const plan = analyzeUpdates(
       installed({ "@outfitter/cli": "0.1.0" }),
-      latest({ "@outfitter/cli": { version: "0.2.0", breaking: false } })
+      latest({ "@outfitter/cli": { version: "0.2.0" } })
     );
 
     expect(plan.packages[0]?.classification).toBe("upgradableBreaking");
@@ -159,7 +159,17 @@ describe("analyzeUpdates — minor bumps", () => {
     expect(plan.summary.upgradableBreaking).toBe(1);
   });
 
-  test("pre-1.0 minor bump with breaking: true is also upgradableBreaking", () => {
+  test("pre-1.0 minor bump with breaking: false overrides semver to non-breaking", () => {
+    const plan = analyzeUpdates(
+      installed({ "@outfitter/cli": "0.1.0" }),
+      latest({ "@outfitter/cli": { version: "0.2.0", breaking: false } })
+    );
+
+    expect(plan.packages[0]?.classification).toBe("upgradableNonBreaking");
+    expect(plan.packages[0]?.breaking).toBe(false);
+  });
+
+  test("pre-1.0 minor bump with breaking: true is upgradableBreaking", () => {
     const plan = analyzeUpdates(
       installed({ "@outfitter/cli": "0.1.0" }),
       latest({ "@outfitter/cli": { version: "0.2.0", breaking: true } })
@@ -175,10 +185,10 @@ describe("analyzeUpdates — minor bumps", () => {
 // =============================================================================
 
 describe("analyzeUpdates — major bumps", () => {
-  test("major bump is classified as upgradableBreaking", () => {
+  test("major bump with no explicit flag uses semver heuristic (breaking)", () => {
     const plan = analyzeUpdates(
       installed({ "@outfitter/cli": "1.2.0" }),
-      latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } })
+      latest({ "@outfitter/cli": { version: "2.0.0" } })
     );
 
     expect(plan.packages[0]?.classification).toBe("upgradableBreaking");
@@ -186,10 +196,20 @@ describe("analyzeUpdates — major bumps", () => {
     expect(plan.summary.upgradableBreaking).toBe(1);
   });
 
-  test("major bump from 0.x to 1.x is upgradableBreaking", () => {
+  test("major bump with breaking: false overrides semver to non-breaking", () => {
+    const plan = analyzeUpdates(
+      installed({ "@outfitter/cli": "1.2.0" }),
+      latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } })
+    );
+
+    expect(plan.packages[0]?.classification).toBe("upgradableNonBreaking");
+    expect(plan.packages[0]?.breaking).toBe(false);
+  });
+
+  test("major bump from 0.x to 1.x with no flag is upgradableBreaking", () => {
     const plan = analyzeUpdates(
       installed({ "@outfitter/cli": "0.5.0" }),
-      latest({ "@outfitter/cli": { version: "1.0.0", breaking: false } })
+      latest({ "@outfitter/cli": { version: "1.0.0" } })
     );
 
     expect(plan.packages[0]?.classification).toBe("upgradableBreaking");
@@ -213,8 +233,8 @@ describe("analyzeUpdates — summary counts", () => {
       latest({
         "@outfitter/contracts": { version: "1.0.0", breaking: false }, // upToDate
         "@outfitter/cli": { version: "1.0.1", breaking: false }, // patch → nonBreaking
-        "@outfitter/types": { version: "0.2.0", breaking: false }, // pre-1.0 minor → breaking
-        "@outfitter/config": { version: "2.0.0", breaking: false }, // major → breaking
+        "@outfitter/types": { version: "0.2.0" }, // pre-1.0 minor, no flag → breaking via semver
+        "@outfitter/config": { version: "2.0.0" }, // major, no flag → breaking via semver
       })
     );
 
