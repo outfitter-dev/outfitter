@@ -434,9 +434,14 @@ Implementation is intentionally structured for Graphite stacked branches via
 Working approach:
 
 1. Land a linear sequence of clean, scoped commits in dependency order
-2. Ensure each commit maps to exactly one Linear issue (`OS-148` through `OS-153`)
-3. Keep commits self-contained and reversible (tests and docs included per slice)
-4. Split the sequence into stacked branches after commit series is complete
+2. Keep the planning/setup commit as the base commit at the bottom of the stack
+3. Ensure each subsequent commit maps to exactly one Linear issue (`OS-148` through `OS-153`)
+4. Keep commits self-contained and reversible (tests and docs included per slice)
+5. Split the sequence into stacked branches after commit series is complete
+
+Base commit below issue-mapped work:
+
+1. `chore(plans): add docs implementation plan and stack strategy` (planning baseline)
 
 Expected commit/issue order:
 
@@ -451,6 +456,14 @@ Branch naming convention for stack branches:
 
 - end each branch name with `-os-###`
 - example: `feat/docs-core/sync-check-os-148`
+
+Graphite commit workflow guidance:
+
+1. Use `gt modify --patch` while iterating to stage only the hunks that belong to the current issue slice.
+2. Use `gt modify -a` only when all current tracked changes belong to the same issue-mapped commit.
+3. Do not mix files from different issue slices in one `gt modify` commit.
+4. If accidental mixed staging happens, unstage and restage by hunk before committing.
+5. After finishing the linear sequence, run `gt split --by-commit` to materialize the stacked branches.
 
 ## Definition of Done (for OS-107)
 
