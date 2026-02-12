@@ -56,7 +56,6 @@ import {
   TaggedError,
   ValidationError,
 } from "@outfitter/contracts";
-import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
 import { parse as parseYaml } from "yaml";
 import type { ZodSchema } from "zod";
@@ -420,7 +419,7 @@ export function parseConfigFile(
 
       case "jsonc":
       case "json5": {
-        const parsed = JSON5.parse(content);
+        const parsed = Bun.JSON5.parse(content);
         return Result.ok(parsed as Record<string, unknown>);
       }
 

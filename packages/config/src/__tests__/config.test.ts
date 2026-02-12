@@ -550,6 +550,30 @@ server:
         expect(parsed.server.port).toBe(3000);
       }
     });
+
+    it("uses Bun.JSON5 parser for jsonc/json5 files", () => {
+      const originalParse = Bun.JSON5.parse;
+      const parseCalls: string[] = [];
+
+      Bun.JSON5.parse = ((input: string) => {
+        parseCalls.push(input);
+        return { mocked: true };
+      }) as typeof Bun.JSON5.parse;
+
+      try {
+        const jsoncResult = parseConfigFile(
+          '{ // comment\n"a": 1\n}',
+          "config.jsonc"
+        );
+        const json5Result = parseConfigFile('{"b": 2,}', "config.json5");
+
+        expect(jsoncResult.isOk()).toBe(true);
+        expect(json5Result.isOk()).toBe(true);
+        expect(parseCalls).toHaveLength(2);
+      } finally {
+        Bun.JSON5.parse = originalParse;
+      }
+    });
   });
 });
 

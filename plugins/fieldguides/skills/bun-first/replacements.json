@@ -582,6 +582,17 @@
       }
     },
     {
+      "id": "json5",
+      "name": "JSON5 Parsing",
+      "category": "utilities",
+      "bunApi": "Bun.JSON5.parse()",
+      "docs": "https://bun.sh/docs/api/utils",
+      "detectors": {
+        "packages": ["json5"],
+        "imports": ["json5"]
+      }
+    },
+    {
       "id": "inspect",
       "name": "Object Inspection",
       "category": "utilities",
@@ -864,10 +875,6 @@
     {
       "pattern": "p-map",
       "reason": "No native concurrent map API"
-    },
-    {
-      "pattern": "json5",
-      "reason": "No native JSON5 parsing - consider standard JSON"
     },
     {
       "pattern": "ini",

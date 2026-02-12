@@ -48,7 +48,6 @@
     "@biomejs/biome"
   ],
   "dependencies": {
-    "json5": "^2.2.3",
     "smol-toml": "^1.6.0",
     "yaml": "^2.8.2"
   }
