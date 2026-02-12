@@ -465,6 +465,13 @@ Graphite commit workflow guidance:
 4. If accidental mixed staging happens, unstage and restage by hunk before committing.
 5. After finishing the linear sequence, run `gt split --by-commit` to materialize the stacked branches.
 
+Command usage note:
+
+1. In this workflow, create commits with `gt modify -c -m "<message>"`.
+2. Combine with staging mode as needed:
+   - `gt modify --patch -c -m "<message>"` for selective hunk commits
+   - `gt modify -a -c -m "<message>"` when all tracked changes belong together
+
 ## Definition of Done (for OS-107)
 
 1. Package docs are centralized under `docs/packages/*` through the new docs pipeline.
