@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: __BUN_VERSION__
+      - uses: actions/setup-node@v4
+        with:
+          node-version: __NODE_VERSION__
+      - run: bun install --frozen-lockfile
+      - run: __CHECK_COMMAND__
+      - run: __BUILD_COMMAND__
+      - run: __TEST_COMMAND__

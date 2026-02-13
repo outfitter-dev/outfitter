@@ -5,6 +5,9 @@ Outfitter package docs index for LLM retrieval.
 ## agents
 - docs/packages/agents/README.md — @outfitter/agents
 
+## ci
+- docs/packages/ci/README.md — @outfitter/ci
+
 ## cli
 - docs/packages/cli/HARVEST_MAP.md — @outfitter/cli Harvest Map
 - docs/packages/cli/README.md — @outfitter/cli

@@ -108,6 +108,10 @@ export default defineWorkspace(
       },
     },
     {
+      name: "@outfitter/ci",
+      root: "packages/ci",
+    },
+    {
       name: "@outfitter/config",
       root: "packages/config",
     },

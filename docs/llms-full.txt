@@ -284,6 +284,22 @@ bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ qui
 - [@outfitter/config](../config/README.md) — XDG-compliant configuration
 
 ---
+path: docs/packages/ci/README.md
+package: ci
+title: @outfitter/ci
+---
+
+# @outfitter/ci
+
+CI/CD workflow templates and init tooling for Outfitter projects.
+
+## Usage
+
+```bash
+npx @outfitter/ci init
+```
+
+---
 path: docs/packages/cli/HARVEST_MAP.md
 package: cli
 title: @outfitter/cli Harvest Map

@@ -1,0 +1,28 @@
+name: Release
+on:
+  push:
+    branches: [__DEFAULT_BRANCH__]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: __BUN_VERSION__
+      - uses: actions/setup-node@v4
+        with:
+          node-version: __NODE_VERSION__
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - name: Create release pull request or publish
+        uses: changesets/action@v1
+        with:
+          version: bun run version-packages
+          publish: __PUBLISH_COMMAND__
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
