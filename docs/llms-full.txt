@@ -5147,12 +5147,12 @@ Import specific modules directly for smaller bundles:
 ```typescript
 // Just fixtures
 import { createFixture, withTempDir, withEnv } from "@outfitter/testing/fixtures";
+```
 
-// Just CLI harness
-import { createCliHarness } from "@outfitter/testing/cli-harness";
+All harness utilities are available from the main package export:
 
-// Just MCP harness
-import { createMcpHarness } from "@outfitter/testing/mcp-harness";
+```typescript
+import { createCliHarness, createMcpHarness } from "@outfitter/testing";
 ```
 
 ## API Reference

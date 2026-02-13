@@ -82,4 +82,13 @@ program
 		await runCheckCleanTree(options);
 	});
 
+program
+	.command("check-readme-imports")
+	.description("Validate README import examples match package exports")
+	.option("--json", "Output results as JSON")
+	.action(async (options: { json?: boolean }) => {
+		const { runCheckReadmeImports } = await import("./check-readme-imports.js");
+		await runCheckReadmeImports(options);
+	});
+
 program.parse();
