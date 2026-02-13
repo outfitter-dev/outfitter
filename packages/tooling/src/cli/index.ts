@@ -10,6 +10,7 @@
 import { Command } from "commander";
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
+import { runCheckExports } from "./check-exports.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
 import { runPrePush } from "./pre-push.js";
@@ -62,6 +63,14 @@ program
 	.option("-f, --force", "Skip strict verification entirely")
 	.action(async (options: { force?: boolean }) => {
 		await runPrePush(options);
+	});
+
+program
+	.command("check-exports")
+	.description("Validate package.json exports match source entry points")
+	.option("--json", "Output results as JSON")
+	.action(async (options: { json?: boolean }) => {
+		await runCheckExports(options);
 	});
 
 program.parse();
