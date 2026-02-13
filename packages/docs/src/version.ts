@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 const PACKAGE_ROOT = join(import.meta.dir, "..");
 
-export const VERSION = (() => {
+export const VERSION: string = (() => {
   try {
     const packageJson = JSON.parse(
       readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8")
