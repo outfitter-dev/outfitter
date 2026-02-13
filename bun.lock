@@ -62,14 +62,16 @@
         "commander": "^14.0.2",
       },
       "devDependencies": {
+        "@outfitter/config": "workspace:*",
+        "@outfitter/contracts": "workspace:*",
         "@types/bun": "^1.3.7",
         "@types/node": "^25.0.10",
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "@outfitter/config": ">=0.1.0",
-        "@outfitter/contracts": ">=0.1.0",
-        "@outfitter/types": ">=0.1.0",
+        "@outfitter/config": ">=0.3.0",
+        "@outfitter/contracts": ">=0.2.0",
+        "@outfitter/types": ">=0.2.0",
         "zod": "^4.3.5",
       },
     },
@@ -105,6 +107,17 @@
         "@outfitter/contracts": "workspace:*",
         "@outfitter/file-ops": "workspace:*",
         "@outfitter/logging": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.8.0",
+      },
+    },
+    "packages/docs-core": {
+      "name": "@outfitter/docs-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "@outfitter/contracts": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -154,12 +167,14 @@
         "@logtape/logtape": "^2.0.0",
       },
       "devDependencies": {
+        "@outfitter/config": "workspace:*",
+        "@outfitter/contracts": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.8.0",
       },
       "peerDependencies": {
-        "@outfitter/config": ">=0.1.0",
-        "@outfitter/contracts": ">=0.1.0",
+        "@outfitter/config": ">=0.3.0",
+        "@outfitter/contracts": ">=0.2.0",
       },
     },
     "packages/mcp": {
@@ -170,13 +185,16 @@
         "zod": "^4.3.5",
       },
       "devDependencies": {
+        "@outfitter/config": "workspace:*",
+        "@outfitter/contracts": "workspace:*",
+        "@outfitter/logging": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.8.0",
       },
       "peerDependencies": {
-        "@outfitter/config": ">=0.1.0",
-        "@outfitter/contracts": ">=0.1.0",
-        "@outfitter/logging": ">=0.1.0",
+        "@outfitter/config": ">=0.3.0",
+        "@outfitter/contracts": ">=0.2.0",
+        "@outfitter/logging": ">=0.3.0",
       },
     },
     "packages/state": {
@@ -374,6 +392,8 @@
     "@outfitter/contracts": ["@outfitter/contracts@workspace:packages/contracts"],
 
     "@outfitter/daemon": ["@outfitter/daemon@workspace:packages/daemon"],
+
+    "@outfitter/docs-core": ["@outfitter/docs-core@workspace:packages/docs-core"],
 
     "@outfitter/file-ops": ["@outfitter/file-ops@workspace:packages/file-ops"],
 
@@ -949,6 +969,8 @@
 
     "@outfitter/contracts/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
+    "@outfitter/docs-core/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
+
     "@outfitter/kit/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
     "@outfitter/logging/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
@@ -972,6 +994,8 @@
     "@outfitter/config/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/contracts/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
+
+    "@outfitter/docs-core/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/kit/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
