@@ -34,6 +34,7 @@ import {
 } from "./commands/migrate-kit.js";
 import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
 import { printUpdateResults, runUpdate } from "./commands/update.js";
+import { resolveStructuredOutputMode } from "./output-mode.js";
 
 interface InitFlags {
   readonly name?: string | undefined;
@@ -690,8 +691,9 @@ const listBlocksAction = defineAction({
       );
     }
 
-    if (input.outputMode === "json" || input.outputMode === "jsonl") {
-      await output({ blocks: result.value }, { mode: input.outputMode });
+    const structuredMode = resolveStructuredOutputMode(input.outputMode);
+    if (structuredMode) {
+      await output({ blocks: result.value }, { mode: structuredMode });
     } else {
       const lines = [
         "Available blocks:",

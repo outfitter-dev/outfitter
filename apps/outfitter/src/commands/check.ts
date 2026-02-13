@@ -18,6 +18,7 @@ import { Result } from "@outfitter/contracts";
 import type { FileEntry, Registry } from "@outfitter/tooling";
 import { RegistrySchema } from "@outfitter/tooling";
 import { readManifest } from "../manifest.js";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 
 // =============================================================================
 // Types
@@ -532,10 +533,10 @@ export async function printCheckResults(
   result: CheckResult,
   options?: { mode?: OutputMode; verbose?: boolean }
 ): Promise<void> {
-  const mode = options?.mode;
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
 
-  if (mode === "json" || mode === "jsonl") {
-    await output(result, { mode });
+  if (structuredMode) {
+    await output(result, { mode: structuredMode });
     return;
   }
 

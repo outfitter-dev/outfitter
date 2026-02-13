@@ -13,6 +13,7 @@ import { output } from "@outfitter/cli/output";
 import { createTheme } from "@outfitter/cli/render";
 import type { OutputMode } from "@outfitter/cli/types";
 import type { Command } from "commander";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 
 // =============================================================================
 // Types
@@ -348,9 +349,9 @@ export async function printDoctorResults(
   result: DoctorResult,
   options?: { mode?: OutputMode }
 ): Promise<void> {
-  const mode = options?.mode;
-  if (mode === "json" || mode === "jsonl") {
-    await output(result, { mode });
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
+  if (structuredMode) {
+    await output(result, { mode: structuredMode });
     return;
   }
 

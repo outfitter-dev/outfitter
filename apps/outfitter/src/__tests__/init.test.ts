@@ -41,6 +41,28 @@ function cleanupTempDir(dir: string): void {
   }
 }
 
+/**
+ * Captures stdout emitted while running a function.
+ */
+async function captureStdout(fn: () => void | Promise<void>): Promise<string> {
+  let stdout = "";
+  const originalWrite = process.stdout.write.bind(process.stdout);
+
+  process.stdout.write = ((chunk: string | Uint8Array): boolean => {
+    stdout +=
+      typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+    return true;
+  }) as typeof process.stdout.write;
+
+  try {
+    await fn();
+  } finally {
+    process.stdout.write = originalWrite;
+  }
+
+  return stdout;
+}
+
 // =============================================================================
 // Test Setup/Teardown
 // =============================================================================
@@ -480,6 +502,60 @@ describe("init command next steps", () => {
     expect(result.value.postScaffold.nextSteps[0]).toBe(
       `cd ${JSON.stringify(targetDir)}`
     );
+  });
+});
+
+describe("init command output modes", () => {
+  test("matches --json payload when OUTFITTER_JSON=1 is set", async () => {
+    const { runInit, printInitResults } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      preset: "minimal",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const explicitJsonOutput = await captureStdout(async () => {
+      await printInitResults(result.value, { mode: "json" });
+    });
+
+    const previousJson = process.env["OUTFITTER_JSON"];
+    const previousJsonl = process.env["OUTFITTER_JSONL"];
+    delete process.env["OUTFITTER_JSONL"];
+    process.env["OUTFITTER_JSON"] = "1";
+
+    let envJsonOutput = "";
+    try {
+      envJsonOutput = await captureStdout(async () => {
+        await printInitResults(result.value);
+      });
+    } finally {
+      if (previousJson === undefined) {
+        delete process.env["OUTFITTER_JSON"];
+      } else {
+        process.env["OUTFITTER_JSON"] = previousJson;
+      }
+
+      if (previousJsonl === undefined) {
+        delete process.env["OUTFITTER_JSONL"];
+      } else {
+        process.env["OUTFITTER_JSONL"] = previousJsonl;
+      }
+    }
+
+    const explicitPayload = JSON.parse(explicitJsonOutput.trim()) as unknown;
+    const envPayload = JSON.parse(envJsonOutput.trim()) as unknown;
+
+    expect(envPayload).toEqual(explicitPayload);
+    expect(Array.isArray(envPayload)).toBe(false);
   });
 });
 

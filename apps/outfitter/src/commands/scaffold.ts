@@ -38,6 +38,7 @@ import {
   detectWorkspaceRoot,
   scaffoldWorkspaceRoot,
 } from "../engine/workspace.js";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 import { getScaffoldTarget, type TargetDefinition } from "../targets/index.js";
 
 interface PackageJsonData {
@@ -672,10 +673,10 @@ export async function printScaffoldResults(
   result: ScaffoldCommandResult,
   options?: { readonly mode?: OutputMode }
 ): Promise<void> {
-  const mode = options?.mode;
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
 
   if (result.dryRunPlan) {
-    if (mode === "json" || mode === "jsonl") {
+    if (structuredMode) {
       await output(
         {
           target: result.target,
@@ -685,7 +686,7 @@ export async function printScaffoldResults(
           movedExisting: result.movedExisting ?? null,
           ...result.dryRunPlan,
         },
-        { mode }
+        { mode: structuredMode }
       );
       return;
     }
@@ -698,7 +699,7 @@ export async function printScaffoldResults(
     return;
   }
 
-  if (mode === "json" || mode === "jsonl") {
+  if (structuredMode) {
     await output(
       {
         target: result.target,
@@ -711,7 +712,7 @@ export async function printScaffoldResults(
         postScaffold: result.postScaffold,
         nextSteps: result.postScaffold.nextSteps,
       },
-      { mode }
+      { mode: structuredMode }
     );
     return;
   }

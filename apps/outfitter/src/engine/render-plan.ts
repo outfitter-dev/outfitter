@@ -1,22 +1,16 @@
 import { relative } from "node:path";
 import { output } from "@outfitter/cli/output";
 import type { OutputMode } from "@outfitter/cli/types";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { Operation, OperationCollector } from "./collector.js";
 
 export async function renderOperationPlan(
   collector: OperationCollector,
   options?: { readonly mode?: OutputMode; readonly rootDir?: string }
 ): Promise<void> {
-  let mode = options?.mode;
-  if (!mode) {
-    if (process.env["OUTFITTER_JSONL"] === "1") {
-      mode = "jsonl";
-    } else if (process.env["OUTFITTER_JSON"] === "1") {
-      mode = "json";
-    }
-  }
-  if (mode === "json" || mode === "jsonl") {
-    await output(collector.toJSON(), { mode });
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
+  if (structuredMode) {
+    await output(collector.toJSON(), { mode: structuredMode });
     return;
   }
 

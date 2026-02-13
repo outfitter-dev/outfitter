@@ -21,6 +21,7 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { Command } from "commander";
 import ts from "typescript";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 
 const FOUNDATION_IMPORT_MAP = {
   "@outfitter/contracts": "@outfitter/kit/foundation/contracts",
@@ -1008,9 +1009,9 @@ export async function printMigrateKitResults(
   result: MigrateKitResult,
   options?: { mode?: OutputMode }
 ): Promise<void> {
-  const mode = options?.mode;
-  if (mode === "json" || mode === "jsonl") {
-    await output(result, { mode });
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
+  if (structuredMode) {
+    await output(result, { mode: structuredMode });
     return;
   }
 

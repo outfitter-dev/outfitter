@@ -37,6 +37,7 @@ import {
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
 import { runPostScaffold } from "../engine/post-scaffold.js";
 import { renderOperationPlan } from "../engine/render-plan.js";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 import {
   getInitTarget,
   INIT_TARGET_IDS,
@@ -590,10 +591,10 @@ export async function printInitResults(
   result: InitResult,
   options?: { mode?: OutputMode }
 ): Promise<void> {
-  const mode = options?.mode;
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
 
   if (result.dryRunPlan) {
-    if (mode === "json" || mode === "jsonl") {
+    if (structuredMode) {
       await output(
         {
           rootDir: result.rootDir,
@@ -603,7 +604,7 @@ export async function printInitResults(
           packageName: result.packageName,
           ...result.dryRunPlan,
         },
-        { mode }
+        { mode: structuredMode }
       );
       return;
     }
@@ -616,7 +617,7 @@ export async function printInitResults(
     return;
   }
 
-  if (mode === "json" || mode === "jsonl") {
+  if (structuredMode) {
     await output(
       {
         structure: result.structure,
@@ -628,7 +629,7 @@ export async function printInitResults(
         postScaffold: result.postScaffold,
         nextSteps: result.postScaffold.nextSteps,
       },
-      { mode }
+      { mode: structuredMode }
     );
     return;
   }

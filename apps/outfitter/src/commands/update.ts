@@ -14,6 +14,7 @@ import { createTheme } from "@outfitter/cli/render";
 import type { OutputMode } from "@outfitter/cli/types";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 import { analyzeUpdates } from "./update-planner.js";
 import {
   applyUpdatesToWorkspace,
@@ -595,9 +596,9 @@ export async function printUpdateResults(
     breaking?: boolean;
   }
 ): Promise<void> {
-  const mode = options?.mode;
-  if (mode === "json" || mode === "jsonl") {
-    await output(result, { mode });
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
+  if (structuredMode) {
+    await output(result, { mode: structuredMode });
     return;
   }
 

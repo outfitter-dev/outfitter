@@ -22,6 +22,7 @@ import { Result } from "@outfitter/contracts";
 import type { AddBlockResult, Block, Registry } from "@outfitter/tooling";
 import { RegistrySchema } from "@outfitter/tooling";
 import { stampBlock } from "../manifest.js";
+import { resolveStructuredOutputMode } from "../output-mode.js";
 
 // =============================================================================
 // Types
@@ -407,8 +408,8 @@ export async function printAddResults(
   dryRun: boolean,
   options?: { mode?: OutputMode }
 ): Promise<void> {
-  const mode = options?.mode;
-  if (mode === "json" || mode === "jsonl") {
+  const structuredMode = resolveStructuredOutputMode(options?.mode);
+  if (structuredMode) {
     await output(
       {
         dryRun,
@@ -418,7 +419,7 @@ export async function printAddResults(
         dependencies: result.dependencies,
         devDependencies: result.devDependencies,
       },
-      { mode }
+      { mode: structuredMode }
     );
     return;
   }
