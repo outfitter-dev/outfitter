@@ -10,6 +10,7 @@
 import { Command } from "commander";
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
+import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
@@ -71,6 +72,14 @@ program
 	.option("--json", "Output results as JSON")
 	.action(async (options: { json?: boolean }) => {
 		await runCheckExports(options);
+	});
+
+program
+	.command("check-clean-tree")
+	.description("Assert working tree is clean (no modified or untracked files)")
+	.option("--paths <paths...>", "Limit check to specific paths")
+	.action(async (options: { paths?: string[] }) => {
+		await runCheckCleanTree(options);
 	});
 
 program.parse();
