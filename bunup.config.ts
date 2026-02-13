@@ -84,6 +84,13 @@ export default defineWorkspace(
     {
       name: "@outfitter/types",
       root: "packages/types",
+      // Prevent future internal utilities from leaking into the public API.
+      // All current source files are intentional exports.
+      config: {
+        exports: {
+          exclude: ["./internal", "./internal/*"],
+        },
+      },
     },
     {
       name: "@outfitter/agents",
@@ -92,6 +99,13 @@ export default defineWorkspace(
     {
       name: "@outfitter/contracts",
       root: "packages/contracts",
+      // Prevent future internal utilities from leaking into the public API.
+      // All current source files (including assert/ and result/) are intentional exports.
+      config: {
+        exports: {
+          exclude: ["./internal", "./internal/*"],
+        },
+      },
     },
     {
       name: "@outfitter/config",
@@ -146,9 +160,20 @@ export default defineWorkspace(
     {
       name: "@outfitter/tooling",
       root: "packages/tooling",
-      // Preserve static config file exports (not in src/)
+      // CLI scripts and internal registry modules are not public API.
+      // Public surface: ".", "./cli/check", "./cli/fix", "./cli/init", "./registry"
       config: {
         exports: {
+          exclude: [
+            "./cli/check-clean-tree",
+            "./cli/check-exports",
+            "./cli/check-readme-imports",
+            "./cli/pre-push",
+            "./cli/upgrade-bun",
+            "./registry/build",
+            "./registry/schema",
+            "./version",
+          ],
           customExports: {
             "./biome.json": "./biome.json",
             "./tsconfig.preset.json": "./tsconfig.preset.json",
@@ -161,6 +186,13 @@ export default defineWorkspace(
     {
       name: "outfitter",
       root: "apps/outfitter",
+      // Prevent internal utilities from leaking into the public API.
+      // Current exports cover all command, engine, and create subpaths.
+      config: {
+        exports: {
+          exclude: ["./internal/*", "./output-mode"],
+        },
+      },
     },
   ],
   {

@@ -48,8 +48,8 @@
 		"./package.json": "./package.json",
 		"./registry": {
 			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
+				"types": "./dist/registry/index.d.ts",
+				"default": "./dist/registry/index.js"
 			}
 		},
 		"./tsconfig": "./tsconfig.preset.json",
