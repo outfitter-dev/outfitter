@@ -107,6 +107,21 @@ describe("create planner", () => {
     }
   });
 
+  test("rejects packageName with empty scoped name segment", () => {
+    const result = planCreateProject({
+      name: "ignored-name",
+      packageName: "@outfitter/",
+      targetDir: "/tmp/invalid-scoped-slug",
+      preset: "mcp",
+      year: "2026",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.field).toBe("packageName");
+    }
+  });
+
   test("returns validation error for unknown preset input", () => {
     const result = planCreateProject({
       name: "valid-name",

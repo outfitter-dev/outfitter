@@ -1,4 +1,5 @@
 import { Result, ValidationError } from "@outfitter/contracts";
+import { deriveBinName, deriveProjectName } from "../engine/index.js";
 import { getCreatePreset } from "./presets.js";
 import type {
   CreatePlanChange,
@@ -8,23 +9,6 @@ import type {
 
 function derivePackageName(input: CreateProjectInput): string {
   return (input.packageName ?? input.name).trim();
-}
-
-function deriveProjectName(packageName: string): string {
-  if (!packageName.startsWith("@")) {
-    return packageName.trim();
-  }
-
-  const scopeSeparator = packageName.indexOf("/");
-  if (scopeSeparator < 0) {
-    return "";
-  }
-
-  return packageName.slice(scopeSeparator + 1).trim();
-}
-
-function deriveBinName(projectName: string): string {
-  return projectName.toLowerCase().replace(/\s+/g, "-");
 }
 
 export function planCreateProject(
@@ -46,6 +30,15 @@ export function planCreateProject(
       new ValidationError({
         message: "Target directory must not be empty",
         field: "targetDir",
+      })
+    );
+  }
+
+  if (packageName.startsWith("@") && !packageName.includes("/")) {
+    return Result.err(
+      new ValidationError({
+        message: "Could not derive a project name from package name",
+        field: "packageName",
       })
     );
   }
