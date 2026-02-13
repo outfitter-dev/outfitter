@@ -8,7 +8,7 @@ import { describe, expect, test } from "bun:test";
 import { outfitterActions } from "../actions.js";
 
 describe("outfitter action mapping", () => {
-  test("maps create --no-tooling to noTooling=true", () => {
+  test("create action maps CLI input to empty object (retired command)", () => {
     const action = outfitterActions.get("create");
     expect(action).toBeDefined();
     expect(action?.cli?.mapInput).toBeDefined();
@@ -17,69 +17,39 @@ describe("outfitter action mapping", () => {
       args: ["/tmp/demo"],
       flags: {
         noTooling: false,
+        local: true,
       },
-    }) as { noTooling?: boolean | undefined; targetDir: string };
+    }) as Record<string, unknown>;
 
-    expect(mapped.targetDir).toBe("/tmp/demo");
-    expect(mapped.noTooling).toBe(true);
+    expect(mapped).toEqual({});
   });
 
-  test("maps create --tooling to noTooling=false", () => {
+  test("create action returns a migration error message", async () => {
     const action = outfitterActions.get("create");
-    expect(action?.cli?.mapInput).toBeDefined();
+    expect(action?.handler).toBeDefined();
 
-    const originalArgv = [...process.argv];
-    process.argv = [...process.argv, "--tooling"];
-    let mapped: { noTooling?: boolean | undefined } | undefined;
-    try {
-      mapped = action?.cli?.mapInput?.({
-        args: ["/tmp/demo"],
-        flags: {
-          tooling: true,
-        },
-      }) as { noTooling?: boolean | undefined };
-    } finally {
-      process.argv = originalArgv;
+    const result = await action?.handler?.({} as never);
+    expect(result?.isErr()).toBe(true);
+
+    if (result?.isErr()) {
+      expect(result.error.message).toContain("removed");
+      expect(result.error.message).toContain("outfitter init");
     }
-
-    expect(mapped.noTooling).toBe(false);
   });
 
-  test("does not force create noTooling when flag omitted", () => {
-    const action = outfitterActions.get("create");
+  test("maps scaffold local/workspace aliases to local=true", () => {
+    const action = outfitterActions.get("scaffold");
     expect(action?.cli?.mapInput).toBeDefined();
 
     const mapped = action?.cli?.mapInput?.({
-      args: ["/tmp/demo"],
-      flags: {},
-    }) as { noTooling?: boolean | undefined };
-
-    expect(mapped.noTooling).toBeUndefined();
-  });
-
-  test("preserves create local as undefined when flag omitted", () => {
-    const action = outfitterActions.get("create");
-    expect(action?.cli?.mapInput).toBeDefined();
-
-    const mapped = action?.cli?.mapInput?.({
-      args: ["/tmp/demo"],
-      flags: {},
-    }) as { local?: boolean | undefined };
-
-    expect(mapped.local).toBeUndefined();
-  });
-
-  test("maps create local/workspace aliases to local=true", () => {
-    const action = outfitterActions.get("create");
-    expect(action?.cli?.mapInput).toBeDefined();
-
-    const mapped = action?.cli?.mapInput?.({
-      args: ["/tmp/demo"],
+      args: ["cli", "demo-tool"],
       flags: {
         workspace: true,
       },
-    }) as { local?: boolean | undefined };
+    }) as { local?: boolean | undefined; target: string; name?: string };
 
+    expect(mapped.target).toBe("cli");
+    expect(mapped.name).toBe("demo-tool");
     expect(mapped.local).toBe(true);
   });
 

@@ -24,11 +24,6 @@ import {
   runAdd,
 } from "./commands/add.js";
 import { printCheckResults, runCheck } from "./commands/check.js";
-import {
-  type CreateOptions,
-  printCreateResults,
-  runCreate,
-} from "./commands/create.js";
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
@@ -37,33 +32,39 @@ import {
   printMigrateKitResults,
   runMigrateKit,
 } from "./commands/migrate-kit.js";
+import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
 import { printUpdateResults, runUpdate } from "./commands/update.js";
 
 interface InitFlags {
   readonly name?: string | undefined;
   readonly bin?: unknown;
-  readonly template?: unknown;
-  readonly force?: unknown;
-  readonly local?: unknown;
-  readonly workspace?: unknown;
-  readonly with?: unknown;
-  readonly noTooling?: unknown;
-  readonly tooling?: unknown;
-  readonly json?: unknown;
-}
-
-interface CreateFlags {
-  readonly name?: unknown;
   readonly preset?: unknown;
+  readonly template?: unknown;
   readonly structure?: unknown;
   readonly workspaceName?: unknown;
-  readonly workspace?: unknown;
-  readonly local?: unknown;
   readonly force?: unknown;
+  readonly local?: unknown;
+  readonly workspace?: unknown;
   readonly with?: unknown;
   readonly noTooling?: unknown;
   readonly tooling?: unknown;
   readonly yes?: unknown;
+  readonly dryRun?: unknown;
+  readonly skipInstall?: unknown;
+  readonly skipGit?: unknown;
+  readonly skipCommit?: unknown;
+  readonly installTimeout?: unknown;
+  readonly json?: unknown;
+}
+
+interface ScaffoldFlags {
+  readonly force?: unknown;
+  readonly skipInstall?: unknown;
+  readonly dryRun?: unknown;
+  readonly with?: unknown;
+  readonly noTooling?: unknown;
+  readonly local?: unknown;
+  readonly installTimeout?: unknown;
 }
 
 interface MigrateFlags {
@@ -80,22 +81,8 @@ const initInputSchema = z.object({
   targetDir: z.string(),
   name: z.string().optional(),
   bin: z.string().optional(),
+  preset: z.enum(["minimal", "cli", "mcp", "daemon"]).optional(),
   template: z.string().optional(),
-  local: z.boolean().optional(),
-  force: z.boolean(),
-  with: z.string().optional(),
-  noTooling: z.boolean().optional(),
-  outputMode: outputModeSchema,
-}) as z.ZodType<InitActionInput>;
-
-interface CreateActionInput extends CreateOptions {
-  outputMode?: OutputMode;
-}
-
-const createInputSchema = z.object({
-  targetDir: z.string(),
-  name: z.string().optional(),
-  preset: z.enum(["basic", "cli", "daemon", "mcp"]).optional(),
   structure: z.enum(["single", "workspace"]).optional(),
   workspaceName: z.string().optional(),
   local: z.boolean().optional(),
@@ -103,8 +90,41 @@ const createInputSchema = z.object({
   with: z.string().optional(),
   noTooling: z.boolean().optional(),
   yes: z.boolean().optional(),
+  dryRun: z.boolean().optional(),
+  skipInstall: z.boolean().optional(),
+  skipGit: z.boolean().optional(),
+  skipCommit: z.boolean().optional(),
+  installTimeout: z.number().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<CreateActionInput>;
+}) as z.ZodType<InitActionInput>;
+
+interface ScaffoldActionInput {
+  target: string;
+  name?: string | undefined;
+  force: boolean;
+  skipInstall: boolean;
+  dryRun: boolean;
+  with?: string | undefined;
+  noTooling?: boolean | undefined;
+  local?: boolean | undefined;
+  installTimeout?: number | undefined;
+  cwd: string;
+  outputMode?: OutputMode;
+}
+
+const scaffoldInputSchema = z.object({
+  target: z.string(),
+  name: z.string().optional(),
+  force: z.boolean(),
+  skipInstall: z.boolean(),
+  dryRun: z.boolean(),
+  with: z.string().optional(),
+  noTooling: z.boolean().optional(),
+  local: z.boolean().optional(),
+  installTimeout: z.number().optional(),
+  cwd: z.string(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<ScaffoldActionInput>;
 
 interface MigrateKitActionInput {
   targetDir: string;
@@ -173,59 +193,94 @@ function resolveLocalFlag(flags: {
 
 function resolveInitOptions(
   context: ActionCliInputContext,
-  templateOverride?: string
+  presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
 ): InitActionInput {
   const flags = context.flags as InitFlags;
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
-  const template = templateOverride ?? resolveStringFlag(flags.template);
+  const preset =
+    presetOverride ??
+    (resolveStringFlag(flags.preset) as
+      | "minimal"
+      | "cli"
+      | "mcp"
+      | "daemon"
+      | undefined);
+  const template = resolveStringFlag(flags.template);
+  const structure = resolveStringFlag(flags.structure) as
+    | "single"
+    | "workspace"
+    | undefined;
+  const workspaceName = resolveStringFlag(flags.workspaceName);
   const local = resolveLocalFlag(flags);
   const force = Boolean(flags.force);
   const withBlocks = resolveStringFlag(flags.with);
   const noTooling = resolveNoToolingFlag(flags);
+  const yes = Boolean(flags.yes);
+  const dryRun = Boolean(flags.dryRun ?? context.flags["dry-run"]);
+  const skipInstall = Boolean(
+    flags.skipInstall ?? context.flags["skip-install"]
+  );
+  const skipGit = Boolean(flags.skipGit ?? context.flags["skip-git"]);
+  const skipCommit = Boolean(flags.skipCommit ?? context.flags["skip-commit"]);
+  const installTimeoutValue = flags.installTimeout;
+  let installTimeout: number | undefined;
+  if (typeof installTimeoutValue === "string") {
+    installTimeout = Number.parseInt(installTimeoutValue, 10);
+  } else if (typeof installTimeoutValue === "number") {
+    installTimeout = installTimeoutValue;
+  }
   const outputMode = resolveOutputMode(context.flags);
 
   return {
     targetDir,
     name,
-    template,
+    ...(preset ? { preset } : {}),
+    ...(template ? { template } : {}),
+    ...(structure ? { structure } : {}),
+    ...(workspaceName ? { workspaceName } : {}),
     force,
     ...(local !== undefined ? { local } : {}),
     ...(withBlocks ? { with: withBlocks } : {}),
     ...(noTooling !== undefined ? { noTooling } : {}),
     ...(bin ? { bin } : {}),
+    ...(yes ? { yes } : {}),
+    ...(dryRun ? { dryRun } : {}),
+    ...(skipInstall ? { skipInstall } : {}),
+    ...(skipGit ? { skipGit } : {}),
+    ...(skipCommit ? { skipCommit } : {}),
+    ...(installTimeout !== undefined ? { installTimeout } : {}),
     ...(outputMode ? { outputMode } : {}),
   };
 }
 
-function resolveCreateOptions(
+function resolveScaffoldOptions(
   context: ActionCliInputContext
-): CreateActionInput {
-  const flags = context.flags as CreateFlags;
+): ScaffoldActionInput {
+  const flags = context.flags as ScaffoldFlags;
   const outputMode = resolveOutputMode(context.flags);
   const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
+  const installTimeoutValue = flags.installTimeout;
+  let installTimeout: number | undefined;
+  if (typeof installTimeoutValue === "string") {
+    installTimeout = Number.parseInt(installTimeoutValue, 10);
+  } else if (typeof installTimeoutValue === "number") {
+    installTimeout = installTimeoutValue;
+  }
 
   return {
-    targetDir: context.args[0] ?? process.cwd(),
-    name: resolveStringFlag(flags.name),
-    preset: resolveStringFlag(flags.preset) as
-      | "basic"
-      | "cli"
-      | "daemon"
-      | "mcp"
-      | undefined,
-    structure: resolveStringFlag(flags.structure) as
-      | "single"
-      | "workspace"
-      | undefined,
-    workspaceName: resolveStringFlag(flags.workspaceName),
+    target: String(context.args[0] ?? ""),
+    name: resolveStringFlag(context.args[1]),
     force: Boolean(flags.force),
+    skipInstall: Boolean(flags.skipInstall ?? context.flags["skip-install"]),
+    dryRun: Boolean(flags.dryRun ?? context.flags["dry-run"]),
     ...(local !== undefined ? { local } : {}),
     with: resolveStringFlag(flags.with),
     ...(noTooling !== undefined ? { noTooling } : {}),
-    yes: Boolean(flags.yes),
+    ...(installTimeout !== undefined ? { installTimeout } : {}),
+    cwd: process.cwd(),
     ...(outputMode ? { outputMode } : {}),
   };
 }
@@ -278,19 +333,67 @@ const commonInitOptions: ActionCliOption[] = [
 
 const templateOption: ActionCliOption = {
   flags: "-t, --template <template>",
-  description: "Template to use",
+  description: "Template to use (deprecated, use --preset)",
 };
 
 function createInitAction(options: {
   readonly id: string;
   readonly description: string;
   readonly command: string;
-  readonly templateOverride?: string;
+  readonly presetOverride?: "minimal" | "cli" | "mcp" | "daemon";
+  readonly includePresetOption?: boolean;
   readonly includeTemplateOption?: boolean;
 }) {
-  const initOptions = options.includeTemplateOption
-    ? [...commonInitOptions, templateOption]
-    : commonInitOptions;
+  const presetOption: ActionCliOption = {
+    flags: "-p, --preset <preset>",
+    description: "Preset to use (minimal, cli, mcp, daemon)",
+  };
+
+  const initOptions: ActionCliOption[] = [...commonInitOptions];
+  initOptions.push({
+    flags: "-s, --structure <mode>",
+    description: "Project structure (single|workspace)",
+  });
+  initOptions.push({
+    flags: "--workspace-name <name>",
+    description: "Workspace root package name",
+  });
+  initOptions.push({
+    flags: "-y, --yes",
+    description: "Skip prompts and use defaults for missing values",
+    defaultValue: false,
+  });
+  initOptions.push({
+    flags: "--dry-run",
+    description: "Preview changes without writing files",
+    defaultValue: false,
+  });
+  initOptions.push({
+    flags: "--skip-install",
+    description: "Skip bun install",
+    defaultValue: false,
+  });
+  initOptions.push({
+    flags: "--skip-git",
+    description: "Skip git init and initial commit",
+    defaultValue: false,
+  });
+  initOptions.push({
+    flags: "--skip-commit",
+    description: "Skip initial commit only",
+    defaultValue: false,
+  });
+  initOptions.push({
+    flags: "--install-timeout <ms>",
+    description: "bun install timeout in milliseconds",
+  });
+
+  if (options.includePresetOption) {
+    initOptions.push(presetOption);
+  }
+  if (options.includeTemplateOption) {
+    initOptions.push(templateOption);
+  }
 
   return defineAction({
     id: options.id,
@@ -303,7 +406,7 @@ function createInitAction(options: {
       description: options.description,
       options: initOptions,
       mapInput: (context) =>
-        resolveInitOptions(context, options.templateOverride),
+        resolveInitOptions(context, options.presetOverride),
     },
     handler: async (input) => {
       const { outputMode, ...initInput } = input;
@@ -318,51 +421,67 @@ function createInitAction(options: {
         );
       }
 
-      await printInitResults(initInput.targetDir, result.value, outputOptions);
+      await printInitResults(result.value, outputOptions);
 
-      return Result.ok({ ok: true });
+      return Result.ok(result.value);
     },
   });
 }
 
 const createAction = defineAction({
   id: "create",
-  description:
-    "Interactive scaffolding flow for Outfitter projects (single package or workspace)",
+  description: "Removed - use 'outfitter init' instead",
   surfaces: ["cli"],
-  input: createInputSchema,
+  input: z.object({}).passthrough(),
   cli: {
     command: "create [directory]",
+    description: "Removed - use 'outfitter init' instead",
+    options: [],
+    mapInput: () => ({}),
+  },
+  handler: async () =>
+    Result.err(
+      new InternalError({
+        message: [
+          "The 'create' command has been removed.",
+          "",
+          "Use 'outfitter init' instead. It supports everything 'create' did:",
+          "",
+          "  Interactive mode:    outfitter init my-project",
+          "  With preset:         outfitter init my-project --preset cli",
+          "  Skip prompts:        outfitter init my-project --preset cli --yes",
+          "  Workspace:           outfitter init my-project --preset cli --structure workspace",
+          "",
+          "See 'outfitter init --help' for full options.",
+        ].join("\\n"),
+        context: { action: "create" },
+      })
+    ),
+});
+
+const scaffoldAction = defineAction({
+  id: "scaffold",
+  description: "Add a capability to an existing project",
+  surfaces: ["cli"],
+  input: scaffoldInputSchema,
+  cli: {
+    command: "scaffold <target> [name]",
     description:
-      "Interactive scaffolding flow for Outfitter projects (single package or workspace)",
+      "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
     options: [
-      {
-        flags: "-n, --name <name>",
-        description: "Package name",
-      },
-      {
-        flags: "-p, --preset <preset>",
-        description: "Preset to scaffold (basic, cli, daemon, mcp)",
-      },
-      {
-        flags: "-s, --structure <structure>",
-        description: "Project structure (single|workspace)",
-      },
-      {
-        flags: "--workspace-name <name>",
-        description: "Workspace root package name",
-      },
-      {
-        flags: "--local",
-        description: "Use workspace:* for @outfitter dependencies",
-      },
-      {
-        flags: "--workspace",
-        description: "Alias for --local",
-      },
       {
         flags: "-f, --force",
         description: "Overwrite existing files",
+        defaultValue: false,
+      },
+      {
+        flags: "--skip-install",
+        description: "Skip bun install",
+        defaultValue: false,
+      },
+      {
+        flags: "--dry-run",
+        description: "Preview changes without executing",
         defaultValue: false,
       },
       {
@@ -374,28 +493,31 @@ const createAction = defineAction({
         description: "Skip default tooling blocks",
       },
       {
-        flags: "-y, --yes",
-        description: "Skip prompts and use defaults for missing values",
-        defaultValue: false,
+        flags: "--local",
+        description: "Use workspace:* for @outfitter dependencies",
+      },
+      {
+        flags: "--install-timeout <ms>",
+        description: "bun install timeout in milliseconds",
       },
     ],
-    mapInput: resolveCreateOptions,
+    mapInput: resolveScaffoldOptions,
   },
   handler: async (input) => {
-    const { outputMode, ...createInput } = input;
+    const { outputMode, ...scaffoldInput } = input;
     const outputOptions = outputMode ? { mode: outputMode } : undefined;
-    const result = await runCreate(createInput);
+    const result = await runScaffold(scaffoldInput);
 
     if (result.isErr()) {
       return Result.err(
         new InternalError({
           message: result.error.message,
-          context: { action: "create" },
+          context: { action: "scaffold" },
         })
       );
     }
 
-    await printCreateResults(result.value, outputOptions);
+    await printScaffoldResults(result.value, outputOptions);
     return Result.ok(result.value);
   },
 });
@@ -808,36 +930,38 @@ const migrateKitAction = defineAction({
 
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
+  .add(scaffoldAction)
   .add(
     createInitAction({
       id: "init",
-      description: "Scaffold a new Outfitter project",
+      description: "Create a new Outfitter project",
       command: "[directory]",
+      includePresetOption: true,
       includeTemplateOption: true,
     })
   )
   .add(
     createInitAction({
       id: "init.cli",
-      description: "Scaffold a new CLI project",
+      description: "Create a new CLI project",
       command: "cli [directory]",
-      templateOverride: "cli",
+      presetOverride: "cli",
     })
   )
   .add(
     createInitAction({
       id: "init.mcp",
-      description: "Scaffold a new MCP server",
+      description: "Create a new MCP server",
       command: "mcp [directory]",
-      templateOverride: "mcp",
+      presetOverride: "mcp",
     })
   )
   .add(
     createInitAction({
       id: "init.daemon",
-      description: "Scaffold a new daemon project",
+      description: "Create a new daemon project",
       command: "daemon [directory]",
-      templateOverride: "daemon",
+      presetOverride: "daemon",
     })
   )
   .add(demoAction)
