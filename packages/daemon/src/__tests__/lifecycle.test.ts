@@ -412,8 +412,8 @@ describe("Error Cases", () => {
   });
 
   it("returns PID_ERROR when PID file cannot be written", async () => {
-    // Use an invalid path that cannot be created
-    const pidFile = "/nonexistent/path/that/cannot/exist/daemon.pid";
+    // Use /proc/1/ which is read-only even for root
+    const pidFile = "/proc/1/daemon.pid";
     const daemon = createDaemon({
       ...createTestOptions(pidFile),
       // Override to prevent mkdir from succeeding
