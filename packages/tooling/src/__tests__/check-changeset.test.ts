@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	checkChangesetRequired,
+	getChangedChangesetFiles,
 	getChangedPackagePaths,
 } from "../cli/check-changeset.js";
 
@@ -52,6 +53,43 @@ describe("getChangedPackagePaths", () => {
 	test("handles deeply nested src paths", () => {
 		const files = ["packages/daemon/src/ipc/health/check.ts"];
 		expect(getChangedPackagePaths(files)).toEqual(["daemon"]);
+	});
+});
+
+describe("getChangedChangesetFiles", () => {
+	test("extracts changeset files from diff paths", () => {
+		const files = [
+			"packages/cli/src/index.ts",
+			".changeset/happy-turtle.md",
+			".changeset/brave-fox.md",
+		];
+		expect(getChangedChangesetFiles(files)).toEqual([
+			"brave-fox.md",
+			"happy-turtle.md",
+		]);
+	});
+
+	test("excludes README.md", () => {
+		const files = [".changeset/README.md", ".changeset/happy-turtle.md"];
+		expect(getChangedChangesetFiles(files)).toEqual(["happy-turtle.md"]);
+	});
+
+	test("ignores non-.changeset paths", () => {
+		const files = [
+			"packages/cli/src/index.ts",
+			"apps/outfitter/src/main.ts",
+			"README.md",
+		];
+		expect(getChangedChangesetFiles(files)).toEqual([]);
+	});
+
+	test("ignores nested .changeset paths", () => {
+		const files = [".changeset/nested/deep.md"];
+		expect(getChangedChangesetFiles(files)).toEqual([]);
+	});
+
+	test("returns empty array for empty input", () => {
+		expect(getChangedChangesetFiles([])).toEqual([]);
 	});
 });
 

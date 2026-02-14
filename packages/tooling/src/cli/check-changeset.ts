@@ -8,9 +8,6 @@
  * @packageDocumentation
  */
 
-import { readdirSync } from "node:fs";
-import { resolve } from "node:path";
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -49,25 +46,27 @@ export function getChangedPackagePaths(files: string[]): string[] {
 }
 
 /**
- * List changeset markdown files in the `.changeset/` directory.
+ * Extract changeset filenames from changed file paths.
  *
- * Excludes README.md and config.json which are not changeset entries.
+ * Only considers files matching `.changeset/*.md`, excluding README.md.
+ * This checks the git diff rather than disk, ensuring only changesets added
+ * in the current PR are counted.
  *
- * @param changesetDir - Absolute path to the `.changeset/` directory
+ * @param files - List of changed file paths relative to repo root
  * @returns Array of changeset filenames (e.g. `["happy-turtle.md"]`)
  */
-export function findChangesetFiles(changesetDir: string): string[] {
-	try {
-		const entries = readdirSync(changesetDir);
-		return entries.filter(
-			(entry) =>
-				entry.endsWith(".md") &&
-				entry !== "README.md" &&
-				entry !== "config.json",
-		);
-	} catch {
-		return [];
+export function getChangedChangesetFiles(files: string[]): string[] {
+	const pattern = /^\.changeset\/([^/]+\.md)$/;
+	const results: string[] = [];
+
+	for (const file of files) {
+		const match = pattern.exec(file);
+		if (match?.[1] && match[1] !== "README.md") {
+			results.push(match[1]);
+		}
 	}
+
+	return results.sort();
 }
 
 /**
@@ -179,8 +178,7 @@ export async function runCheckChangeset(
 		process.exit(0);
 	}
 
-	const changesetDir = resolve(cwd, ".changeset");
-	const changesetFiles = findChangesetFiles(changesetDir);
+	const changesetFiles = getChangedChangesetFiles(changedFiles);
 	const check = checkChangesetRequired(changedPackages, changesetFiles);
 
 	if (check.ok) {
