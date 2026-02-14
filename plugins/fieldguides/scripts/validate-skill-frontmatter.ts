@@ -23,13 +23,10 @@ import {
   extractFrontmatter,
   isAllowedToolsCommaSeparated,
   isDescriptionQuoted,
-  NAME_PATTERN,
-  RESERVED_WORDS,
+  loadSkillSpec,
 } from "./_shared.ts";
 
-const MAX_LINES = 500;
-const MAX_DESCRIPTION_LENGTH = 1024;
-const MIN_DESCRIPTION_LENGTH = 10;
+const spec = loadSkillSpec();
 
 /**
  * Result of skill frontmatter validation.
@@ -66,29 +63,9 @@ interface SkillFrontmatter {
   [key: string]: unknown;
 }
 
-// Base spec fields (cross-platform)
-const BASE_FIELDS = new Set([
-  "name",
-  "description",
-  "version",
-  "license",
-  "compatibility",
-  "metadata",
-]);
-
-// Claude-specific extension fields
-const CLAUDE_FIELDS = new Set([
-  "allowed-tools",
-  "user-invocable",
-  "disable-model-invocation",
-  "context",
-  "agent",
-  "model",
-  "hooks",
-  "argument-hint",
-]);
-
-// isDescriptionQuoted, isAllowedToolsCommaSeparated, extractFrontmatter imported from _shared.ts
+// Field sets from spec (single source of truth)
+const BASE_FIELDS = spec.baseFields;
+const CLAUDE_FIELDS = spec.claudeFields;
 
 /**
  * Checks if a file path indicates Claude Code context.
@@ -156,15 +133,12 @@ function validate(content: string, filePath: string): ValidationResult {
     return result;
   }
 
-  // Required fields
-  if (!frontmatter.name) {
-    result.valid = false;
-    result.errors.push("Missing required field: name");
-  }
-
-  if (!frontmatter.description) {
-    result.valid = false;
-    result.errors.push("Missing required field: description");
+  // Required fields (from spec)
+  for (const field of spec.requiredFields) {
+    if (!frontmatter[field]) {
+      result.valid = false;
+      result.errors.push(`Missing required field: ${field}`);
+    }
   }
 
   // Name validation
@@ -172,23 +146,23 @@ function validate(content: string, filePath: string): ValidationResult {
     const name = frontmatter.name;
 
     // Pattern check
-    if (!NAME_PATTERN.test(name)) {
+    if (!spec.namePattern.test(name)) {
       result.valid = false;
       result.errors.push(
-        `Invalid name format: '${name}'. Must be lowercase, numbers, hyphens only. Pattern: ${NAME_PATTERN}`
+        `Invalid name format: '${name}'. Must be lowercase, numbers, hyphens only. Pattern: ${spec.namePattern}`
       );
     }
 
     // Length check
-    if (name.length < 2 || name.length > 64) {
+    if (name.length < spec.nameMinLength || name.length > spec.nameMaxLength) {
       result.valid = false;
       result.errors.push(
-        `Name length must be 2-64 characters. Got: ${name.length}`
+        `Name length must be ${spec.nameMinLength}-${spec.nameMaxLength} characters. Got: ${name.length}`
       );
     }
 
     // Reserved words
-    for (const reserved of RESERVED_WORDS) {
+    for (const reserved of spec.reservedWords) {
       if (name.toLowerCase().includes(reserved)) {
         result.valid = false;
         result.errors.push(
@@ -212,17 +186,17 @@ function validate(content: string, filePath: string): ValidationResult {
   if (frontmatter.description) {
     const desc = frontmatter.description;
 
-    if (desc.length < MIN_DESCRIPTION_LENGTH) {
+    if (desc.length < spec.minDescriptionLength) {
       result.valid = false;
       result.errors.push(
-        `Description too short: ${desc.length} chars. Minimum: ${MIN_DESCRIPTION_LENGTH}`
+        `Description too short: ${desc.length} chars. Minimum: ${spec.minDescriptionLength}`
       );
     }
 
-    if (desc.length > MAX_DESCRIPTION_LENGTH) {
+    if (desc.length > spec.maxDescriptionLength) {
       result.valid = false;
       result.errors.push(
-        `Description too long: ${desc.length} chars. Maximum: ${MAX_DESCRIPTION_LENGTH}`
+        `Description too long: ${desc.length} chars. Maximum: ${spec.maxDescriptionLength}`
       );
     }
 
@@ -273,18 +247,22 @@ function validate(content: string, filePath: string): ValidationResult {
   }
 
   // Line count warning
-  if (lineCount > MAX_LINES) {
+  if (lineCount > spec.maxLines) {
     result.warnings.push(
-      `SKILL.md has ${lineCount} lines (recommended max: ${MAX_LINES}). Consider moving details to references/.`
+      `SKILL.md has ${lineCount} lines (recommended max: ${spec.maxLines}). Consider moving details to references/.`
     );
   }
 
-  // Claude context recommendations
+  // Claude context recommendations (from spec)
   const isClaudeContext = detectClaudeContext(filePath);
-  if (isClaudeContext && !frontmatter["allowed-tools"]) {
-    result.warnings.push(
-      "Claude context detected. Consider adding 'allowed-tools' for tool permissions."
-    );
+  if (isClaudeContext) {
+    for (const field of spec.claudeRecommendedFields) {
+      if (!frontmatter[field]) {
+        result.warnings.push(
+          `Claude context detected. Consider adding '${field}' for tool permissions.`
+        );
+      }
+    }
   }
 
   return result;

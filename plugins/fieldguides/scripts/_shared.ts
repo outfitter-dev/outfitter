@@ -3,7 +3,11 @@
  *
  * Shared utilities for plugin/skill validation and scaffolding scripts.
  * Extracts common patterns: ANSI colors, name validation, frontmatter parsing.
+ * Constants are loaded from plugins/skill-spec.json (single source of truth).
  */
+
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // ── ANSI Colors ──────────────────────────────────────────────────────────────
 
@@ -45,10 +49,60 @@ export function printHeader(title: string): void {
   console.log(`${BLUE}╚════════════════════════════════════════════╝${NC}`);
 }
 
+// ── Skill Spec Loader ────────────────────────────────────────────────────────
+
+/** Typed constants extracted from skill-spec.json */
+export interface SkillSpec {
+  namePattern: RegExp;
+  nameMinLength: number;
+  nameMaxLength: number;
+  reservedWords: string[];
+  minDescriptionLength: number;
+  maxDescriptionLength: number;
+  maxLines: number;
+  baseFields: Set<string>;
+  claudeFields: Set<string>;
+  requiredFields: string[];
+  claudeRecommendedFields: string[];
+}
+
+let cachedSpec: SkillSpec | null = null;
+
+/**
+ * Loads plugins/skill-spec.json and extracts typed constants.
+ * Cached after first call — safe to call repeatedly.
+ */
+export function loadSkillSpec(): SkillSpec {
+  if (cachedSpec) return cachedSpec;
+
+  const specPath = resolve(import.meta.dir, "../../skill-spec.json");
+  const raw = JSON.parse(readFileSync(specPath, "utf-8"));
+
+  cachedSpec = {
+    namePattern: new RegExp(raw.properties.name.pattern),
+    nameMinLength: raw.properties.name.minLength,
+    nameMaxLength: raw.properties.name.maxLength,
+    reservedWords: raw.validation.rules["name-reserved"].reserved,
+    minDescriptionLength: raw.properties.description.minLength,
+    maxDescriptionLength: raw.properties.description.maxLength,
+    maxLines: raw.validation.warnings["line-count"].max,
+    baseFields: new Set(Object.keys(raw.properties)),
+    claudeFields: new Set(
+      Object.keys(raw.definitions["claude-extensions"].properties)
+    ),
+    requiredFields: raw.required,
+    claudeRecommendedFields:
+      raw.validation.warnings["claude-recommended"].fields,
+  };
+
+  return cachedSpec;
+}
+
 // ── Name Validation ──────────────────────────────────────────────────────────
 
-export const NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-export const RESERVED_WORDS = ["anthropic", "claude"];
+const spec = loadSkillSpec();
+export const NAME_PATTERN = spec.namePattern;
+export const RESERVED_WORDS = spec.reservedWords;
 
 /**
  * Validates a plugin or skill name against the naming spec.
