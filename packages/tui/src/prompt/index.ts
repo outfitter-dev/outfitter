@@ -12,7 +12,7 @@
  *   promptConfirm,
  *   promptGroup,
  *   validators,
- * } from "@outfitter/cli/prompt";
+ * } from "@outfitter/tui/prompt";
  *
  * // Single prompt
  * const name = await promptText({

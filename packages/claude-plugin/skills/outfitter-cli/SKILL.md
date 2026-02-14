@@ -241,7 +241,7 @@ if (isPiped()) {
 ## Progress Indicators
 
 ```typescript
-import { createSpinner, createProgressBar } from "@outfitter/cli/render";
+import { createSpinner, createProgressBar } from "@outfitter/tui/render";
 
 // Spinner
 const spinner = createSpinner("Loading...");

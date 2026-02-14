@@ -13,7 +13,7 @@
  *   renderTree,
  *   BORDERS,
  *   getBorderCharacters,
- * } from "@outfitter/cli/preset/full";
+ * } from "@outfitter/tui/preset/full";
  *
  * const theme = createTheme();
  * console.log(renderTree({ src: { lib: null }, tests: null }));

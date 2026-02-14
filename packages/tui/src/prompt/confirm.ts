@@ -20,7 +20,7 @@ import {
  *
  * @example
  * ```typescript
- * import { promptConfirm } from "@outfitter/cli/prompt";
+ * import { promptConfirm } from "@outfitter/tui/prompt";
  *
  * const result = await promptConfirm({
  *   message: "Are you sure you want to continue?",

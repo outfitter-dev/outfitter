@@ -29,7 +29,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderTree } from "@outfitter/cli/tree";');
+    lines.push('import { renderTree } from "@outfitter/tui/tree";');
     lines.push("");
   }
 

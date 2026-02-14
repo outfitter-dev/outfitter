@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { renderTree } from "@outfitter/cli/tree";
+ * import { renderTree } from "@outfitter/tui/tree";
  *
  * const tree = {
  *   src: {

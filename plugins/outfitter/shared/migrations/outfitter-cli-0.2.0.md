@@ -71,7 +71,7 @@ Mode is auto-detected:
 Select and multi-select prompts now accept a `pageSize` option to control visible items:
 
 ```typescript
-import { promptSelect, promptMultiSelect } from "@outfitter/cli/prompt";
+import { promptSelect, promptMultiSelect } from "@outfitter/tui/prompt";
 
 const choice = await promptSelect({
   message: "Pick a template",
@@ -114,7 +114,7 @@ New theme semantic colors:
 Severity-level indicator function for compliance and diagnostic output:
 
 ```typescript
-import { getSeverityIndicator } from "@outfitter/cli/render";
+import { getSeverityIndicator } from "@outfitter/tui/render";
 
 getSeverityIndicator("minor");    // "◇"
 getSeverityIndicator("moderate"); // "◆"

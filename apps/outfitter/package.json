@@ -46,6 +46,12 @@
         "default": "./dist/commands/demo/errors.js"
       }
     },
+    "./commands/demo/registry": {
+      "import": {
+        "types": "./dist/commands/demo/registry.d.ts",
+        "default": "./dist/commands/demo/registry.js"
+      }
+    },
     "./commands/doctor": {
       "import": {
         "types": "./dist/commands/doctor.d.ts",

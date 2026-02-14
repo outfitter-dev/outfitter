@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { renderList, type ListStyle, type ListOptions } from "@outfitter/cli/list";
+ * import { renderList, type ListStyle, type ListOptions } from "@outfitter/tui/list";
  *
  * // Bullet list
  * console.log(renderList(["Item 1", "Item 2"]));

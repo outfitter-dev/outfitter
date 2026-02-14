@@ -20,7 +20,7 @@ import {
 } from "./demo/registry.js";
 
 // Import app-specific sections to register them
-// Note: Primitive demos (colors, table, etc.) are now provided by @outfitter/cli/demo
+// Note: Primitive demos (colors, table, etc.) are provided by @outfitter/tui/demo
 import "./demo/errors.js";
 
 // =============================================================================
@@ -279,7 +279,7 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
     clearInterval(timer);
     stream.write(ANSI.showCursor);
     writeLine("");
-    writeLine(theme.muted("Use createSpinner() from @outfitter/cli/streaming"));
+    writeLine(theme.muted("Use createSpinner() from @outfitter/tui/streaming"));
     writeLine("");
     process.exit(0);
   };

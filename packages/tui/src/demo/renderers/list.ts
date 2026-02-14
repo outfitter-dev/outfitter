@@ -27,7 +27,7 @@ export function renderListDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderList } from "@outfitter/cli/render";');
+    lines.push('import { renderList } from "@outfitter/tui/render";');
     lines.push("");
   }
 

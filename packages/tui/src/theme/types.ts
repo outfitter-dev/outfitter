@@ -161,7 +161,7 @@ export interface ThemeSpacing {
  *
  * @example
  * ```typescript
- * import { defaultTheme, roundedTheme, createVisualTheme } from "@outfitter/cli/theme";
+ * import { defaultTheme, roundedTheme, createVisualTheme } from "@outfitter/tui/theme";
  *
  * // Use a preset
  * const box = renderBox("Hello", { theme: roundedTheme });

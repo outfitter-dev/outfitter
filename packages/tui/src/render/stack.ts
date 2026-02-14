@@ -37,7 +37,7 @@ export type DelimiterName = keyof typeof DELIMITERS;
  *
  * @example
  * ```typescript
- * import { DELIMITERS, getDelimiter } from "@outfitter/cli/render/stack";
+ * import { DELIMITERS, getDelimiter } from "@outfitter/tui/render/stack";
  *
  * // Access directly
  * console.log(DELIMITERS.bullet.unicode); // "•"

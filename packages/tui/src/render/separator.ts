@@ -40,7 +40,7 @@ export interface SeparatorOptions {
  *
  * @example
  * ```typescript
- * import { renderSeparator } from "@outfitter/cli/render";
+ * import { renderSeparator } from "@outfitter/tui/render";
  *
  * console.log(renderSeparator());
  * // ────────────────────────────────────────

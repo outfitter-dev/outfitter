@@ -27,7 +27,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderTable } from "@outfitter/cli/render";');
+    lines.push('import { renderTable } from "@outfitter/tui/render";');
     lines.push("");
     lines.push("renderTable([");
     lines.push('  { id: 1, name: "Alice", status: "Active" },');

@@ -24,7 +24,7 @@ export type PromptStep<T> = () => PromptResult<T>;
  *
  * @example
  * ```typescript
- * import { promptGroup, promptText, promptSelect } from "@outfitter/cli/prompt";
+ * import { promptGroup, promptText, promptSelect } from "@outfitter/tui/prompt";
  *
  * const result = await promptGroup({
  *   name: () => promptText({ message: "Name:" }),

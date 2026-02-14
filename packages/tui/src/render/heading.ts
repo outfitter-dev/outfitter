@@ -137,7 +137,7 @@ function getTextWidth(text: string): number {
  *
  * @example
  * ```typescript
- * import { renderHeading } from "@outfitter/cli/render";
+ * import { renderHeading } from "@outfitter/tui/render";
  *
  * console.log(renderHeading("Theme Colors"));
  * // THEME COLORS

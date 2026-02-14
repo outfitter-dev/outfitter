@@ -24,7 +24,7 @@ export function renderProgressDemo(config: DemoConfig, _theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderProgress } from "@outfitter/cli/render";');
+    lines.push('import { renderProgress } from "@outfitter/tui/render";');
     lines.push("");
   }
 

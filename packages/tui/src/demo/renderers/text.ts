@@ -31,7 +31,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { getStringWidth } from "@outfitter/cli/render";');
+    lines.push('import { getStringWidth } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -60,7 +60,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { wrapText } from "@outfitter/cli/render";');
+    lines.push('import { wrapText } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -86,7 +86,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { truncateText } from "@outfitter/cli/render";');
+    lines.push('import { truncateText } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -110,7 +110,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { padText } from "@outfitter/cli/render";');
+    lines.push('import { padText } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -128,7 +128,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { pluralize } from "@outfitter/cli/render";');
+    lines.push('import { pluralize } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -156,7 +156,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { slugify } from "@outfitter/cli/render";');
+    lines.push('import { slugify } from "@outfitter/tui/render";');
     lines.push("");
   }
 

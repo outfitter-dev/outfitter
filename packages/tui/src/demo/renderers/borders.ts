@@ -27,7 +27,7 @@ export function renderBordersDemo(config: DemoConfig, theme: Theme): string {
 
   if (showCode) {
     lines.push(
-      'import { BORDERS, getBorderCharacters } from "@outfitter/cli/render";'
+      'import { BORDERS, getBorderCharacters } from "@outfitter/tui/render";'
     );
     lines.push("");
   }

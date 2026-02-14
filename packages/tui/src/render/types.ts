@@ -15,7 +15,7 @@
  *
  * @example
  * ```typescript
- * import { resolveWidth } from "@outfitter/cli/render";
+ * import { resolveWidth } from "@outfitter/tui/render";
  *
  * resolveWidth("full");        // → terminal width (e.g., 120)
  * resolveWidth(50);            // → 50
@@ -34,7 +34,7 @@ export type WidthMode = "text" | "full" | "container" | number | `${number}%`;
  *
  * @example
  * ```typescript
- * import { createLayoutContext, resolveWidth } from "@outfitter/cli/render";
+ * import { createLayoutContext, resolveWidth } from "@outfitter/tui/render";
  *
  * const outerCtx = createLayoutContext({ width: 80, padding: 1 });
  * // outerCtx.width = 76 (80 - 4 overhead)

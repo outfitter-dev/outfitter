@@ -14,7 +14,7 @@
  *   renderTable,
  *   renderList,
  *   renderBox,
- * } from "@outfitter/cli/preset/standard";
+ * } from "@outfitter/tui/preset/standard";
  *
  * const theme = createTheme();
  * console.log(theme.success("Done!"));

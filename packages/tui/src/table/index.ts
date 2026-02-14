@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { renderTable, type TableOptions } from "@outfitter/cli/table";
+ * import { renderTable, type TableOptions } from "@outfitter/tui/table";
  *
  * const table = renderTable(
  *   [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }],

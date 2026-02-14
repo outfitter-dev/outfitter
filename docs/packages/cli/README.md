@@ -278,10 +278,10 @@ if (result.isOk()) {
 
 #### `confirmDestructive(options)`
 
-Prompt for confirmation before destructive operations. Respects `--yes` flag for non-interactive mode.
+> **Moved to `@outfitter/tui`** -- This function is now exported from `@outfitter/tui/confirm`. Update your imports accordingly.
 
 ```typescript
-import { confirmDestructive } from "@outfitter/cli/input";
+import { confirmDestructive } from "@outfitter/tui/confirm";
 
 const result = await confirmDestructive({
   message: "Delete 5 notes?",

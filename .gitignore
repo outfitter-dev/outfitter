@@ -42,3 +42,6 @@ yarn-error.log*
 .scratch/
 tmp/
 temp/
+
+# Agent memory
+**/.claude/agent-memory/

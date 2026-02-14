@@ -47,7 +47,7 @@ export interface StreamWriter {
  *
  * @example
  * ```typescript
- * import { createStreamWriter } from "@outfitter/cli/streaming";
+ * import { createStreamWriter } from "@outfitter/tui/streaming";
  *
  * const writer = createStreamWriter();
  *

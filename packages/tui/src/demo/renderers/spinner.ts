@@ -32,7 +32,7 @@ export function renderSpinnerDemo(config: DemoConfig, theme: Theme): string {
 
   if (showCode) {
     lines.push(
-      'import { renderSpinner, SPINNERS } from "@outfitter/cli/render";'
+      'import { renderSpinner, SPINNERS } from "@outfitter/tui/render";'
     );
     lines.push("");
   }

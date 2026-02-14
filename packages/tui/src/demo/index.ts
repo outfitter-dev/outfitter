@@ -8,7 +8,7 @@
  *
  * @example
  * ```typescript
- * import { renderDemo, renderAllDemos } from "@outfitter/cli/demo";
+ * import { renderDemo, renderAllDemos } from "@outfitter/tui/demo";
  *
  * // Render a single primitive demo
  * console.log(renderDemo("colors"));
@@ -155,7 +155,7 @@ export { getPrimitiveIds } from "./registry.js";
  * ```typescript
  * const meta = getPrimitive("colors");
  * console.log(meta.name); // "Colors"
- * console.log(meta.importExample); // 'import { createTheme } from "@outfitter/cli/render";'
+ * console.log(meta.importExample); // 'import { createTheme } from "@outfitter/tui/render";'
  * ```
  */
 export function getPrimitive(id: PrimitiveId): PrimitiveMeta {
