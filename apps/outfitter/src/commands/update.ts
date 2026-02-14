@@ -607,7 +607,7 @@ export async function printUpdateResults(
 
   if (result.packages.length === 0) {
     lines.push("No @outfitter/* packages found in package.json.");
-    await output(lines);
+    await output(lines, { mode: "human" });
     return;
   }
 
@@ -781,5 +781,5 @@ export async function printUpdateResults(
     }
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }

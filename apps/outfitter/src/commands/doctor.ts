@@ -423,7 +423,7 @@ export async function printDoctorResults(
     );
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }
 
 /**
