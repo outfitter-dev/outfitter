@@ -49,5 +49,8 @@ Outfitter package docs index for LLM retrieval.
 ## tooling
 - docs/packages/tooling/README.md — @outfitter/tooling
 
+## tui
+- docs/packages/tui/README.md — @outfitter/tui
+
 ## types
 - docs/packages/types/README.md — @outfitter/types
