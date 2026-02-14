@@ -1,5 +1,11 @@
 # @outfitter/tooling
 
+## 0.2.3
+
+### Patch Changes
+
+- a1ae604: Add `check-changeset` CI gate that fails when PRs touch package source without a changeset.
+
 ## 0.2.2
 
 ### Patch Changes
