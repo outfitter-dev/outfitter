@@ -136,6 +136,16 @@ export default defineWorkspace(
     {
       name: "@outfitter/cli",
       root: "packages/cli",
+      // Exclude internal exports
+      config: {
+        exports: {
+          exclude: ["./colors/colors"],
+        },
+      },
+    },
+    {
+      name: "@outfitter/tui",
+      root: "packages/tui",
       // Exclude internal exports - consumers should use barrel exports (./render, ./demo)
       config: {
         exports: {
