@@ -11,6 +11,7 @@ import { Command } from "commander";
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
 import { runCheckBunupRegistry } from "./check-bunup-registry.js";
+import { runCheckChangeset } from "./check-changeset.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
 import { runFix } from "./fix.js";
@@ -74,6 +75,14 @@ program
 	)
 	.action(async () => {
 		await runCheckBunupRegistry();
+	});
+
+program
+	.command("check-changeset")
+	.description("Validate PRs touching package source include a changeset")
+	.option("-s, --skip", "Skip changeset check")
+	.action(async (options: { skip?: boolean }) => {
+		await runCheckChangeset(options);
 	});
 
 program
