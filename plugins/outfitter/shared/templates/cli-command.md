@@ -164,7 +164,7 @@ cli.program.addCommand(userCommand);
 ### Interactive Prompts
 
 ```typescript
-import { promptConfirm, promptText, promptSelect } from "@outfitter/cli/prompt";
+import { promptConfirm, promptText, promptSelect } from "@outfitter/tui/prompt";
 
 export const deleteCommand = command("delete")
   .argument("<id>", "Resource ID")

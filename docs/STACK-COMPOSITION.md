@@ -19,7 +19,7 @@ import {
   createHStack, createVStack,
   boxify, unbox,
   DELIMITERS, DEFAULT_STACK_THEME,
-} from "@outfitter/cli/render/stack";
+} from "@outfitter/tui/render/stack";
 ```
 
 ---
@@ -527,6 +527,6 @@ console.log(boxed.output);
 
 ## Related Documentation
 
-- [Box Rendering](../packages/cli/src/render/box.ts) — Box primitives and options
+- [Box Rendering](../packages/tui/src/render/box.ts) — Box primitives and options
 - [PATTERNS.md](./PATTERNS.md) — Handler patterns and conventions
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — Package structure and dependencies

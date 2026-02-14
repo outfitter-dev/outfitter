@@ -17,24 +17,24 @@ import { buildCliCommands } from "@outfitter/cli/actions";
 import { readStdin, collectIds, isPiped } from "@outfitter/cli/input";
 import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
 
-// Rendering
-import { renderTable, renderList, renderBox, renderTree } from "@outfitter/cli/render";
-import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/cli/render";
-import { parseDateRange, formatRelative } from "@outfitter/cli/render";
+// Rendering (from @outfitter/tui)
+import { renderTable, renderList, renderBox, renderTree } from "@outfitter/tui/render";
+import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/tui/render";
+import { parseDateRange, formatRelative } from "@outfitter/tui/render";
 
-// Streaming (in-place terminal updates)
-import { createSpinner, createStreamWriter } from "@outfitter/cli/streaming";
+// Streaming (in-place terminal updates, from @outfitter/tui)
+import { createSpinner, createStreamWriter } from "@outfitter/tui/streaming";
 
-// Theming
-import { createTheme, createTokens } from "@outfitter/cli/theme";
-import { defaultTheme } from "@outfitter/cli/theme/presets/default";
+// Theming (from @outfitter/tui)
+import { createTheme, createTokens } from "@outfitter/tui/theme";
+import { defaultTheme } from "@outfitter/tui/theme/presets/default";
 
-// Prompts
-import { text, confirm, select } from "@outfitter/cli/prompt";
+// Prompts (from @outfitter/tui)
+import { text, confirm, select } from "@outfitter/tui/prompt";
 
-// Presets (bundle common imports)
-import { renderTable, renderList, renderBox } from "@outfitter/cli/preset/standard";
-import { renderTree } from "@outfitter/cli/preset/full"; // standard + tree
+// Presets (bundle common imports, from @outfitter/tui)
+import { renderTable, renderList, renderBox } from "@outfitter/tui/preset/standard";
+import { renderTree } from "@outfitter/tui/preset/full"; // standard + tree
 ```
 
 ### Subpath Summary
@@ -47,13 +47,13 @@ import { renderTree } from "@outfitter/cli/preset/full"; // standard + tree
 | `@outfitter/cli/output` | `output`, `exitWithError`, `resolveVerbose` |
 | `@outfitter/cli/input` | `readStdin`, `collectIds`, `isPiped`, `expandFileArg` |
 | `@outfitter/cli/pagination` | `loadCursor`, `saveCursor`, `clearCursor` |
-| `@outfitter/cli/render` | Tables, lists, boxes, trees, formatting, text utilities |
-| `@outfitter/cli/streaming` | `createSpinner`, `createStreamWriter`, ANSI sequences |
-| `@outfitter/cli/theme` | `createTheme`, `createTokens`, theme context |
-| `@outfitter/cli/theme/presets` | `default`, `rounded`, `bold`, `minimal` |
-| `@outfitter/cli/prompt` | `text`, `confirm`, `select`, `group` |
-| `@outfitter/cli/preset/standard` | Table + list + box rendering |
-| `@outfitter/cli/preset/full` | Standard + tree rendering |
+| `@outfitter/tui/render` | Tables, lists, boxes, trees, formatting, text utilities |
+| `@outfitter/tui/streaming` | `createSpinner`, `createStreamWriter`, ANSI sequences |
+| `@outfitter/tui/theme` | `createVisualTheme`, `createThemedContext`, theme context |
+| `@outfitter/tui/theme/presets` | `default`, `rounded`, `bold`, `minimal` |
+| `@outfitter/tui/prompt` | `promptText`, `promptConfirm`, `promptSelect`, `promptGroup` |
+| `@outfitter/tui/preset/standard` | Table + list + box rendering |
+| `@outfitter/tui/preset/full` | Standard + tree rendering |
 | `@outfitter/cli/terminal` | Terminal detection utilities |
 
 ## Creating a CLI
@@ -331,10 +331,10 @@ if (isPiped()) {
 
 ## Streaming
 
-Interactive terminal updates via `@outfitter/cli/streaming`:
+Interactive terminal updates via `@outfitter/tui/streaming`:
 
 ```typescript
-import { createSpinner, createStreamWriter } from "@outfitter/cli/streaming";
+import { createSpinner, createStreamWriter } from "@outfitter/tui/streaming";
 
 // Spinner for async operations
 const spinner = createSpinner("Loading...");
@@ -352,12 +352,12 @@ writer.persist();
 
 ## Rendering
 
-Pure rendering functions from `@outfitter/cli/render`. All return strings — no side effects.
+Pure rendering functions from `@outfitter/tui/render`. All return strings — no side effects.
 
 ### Tables
 
 ```typescript
-import { renderTable } from "@outfitter/cli/render";
+import { renderTable } from "@outfitter/tui/render";
 
 const output = renderTable(data, {
   columns: ["name", "status", "updated"],
@@ -368,7 +368,7 @@ const output = renderTable(data, {
 ### Formatting Utilities
 
 ```typescript
-import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/cli/render";
+import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/tui/render";
 
 formatDuration(1500);       // "1.5s"
 formatDuration(65000);      // "1m 5s"
@@ -388,7 +388,7 @@ slugify("Café Résumé");     // "cafe-resume"
 ### Date Parsing
 
 ```typescript
-import { parseDateRange, formatRelative } from "@outfitter/cli/render";
+import { parseDateRange, formatRelative } from "@outfitter/tui/render";
 
 const range = parseDateRange("last 7 days");
 // { start: Date, end: Date }
