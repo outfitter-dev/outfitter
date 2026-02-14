@@ -15,10 +15,34 @@
         "default": "./dist/index.js"
       }
     },
+    "./cli-harness": {
+      "import": {
+        "types": "./dist/cli-harness.d.ts",
+        "default": "./dist/cli-harness.js"
+      }
+    },
+    "./cli-helpers": {
+      "import": {
+        "types": "./dist/cli-helpers.d.ts",
+        "default": "./dist/cli-helpers.js"
+      }
+    },
     "./fixtures": {
       "import": {
         "types": "./dist/fixtures.d.ts",
         "default": "./dist/fixtures.js"
+      }
+    },
+    "./mcp-harness": {
+      "import": {
+        "types": "./dist/mcp-harness.d.ts",
+        "default": "./dist/mcp-harness.js"
+      }
+    },
+    "./mock-factories": {
+      "import": {
+        "types": "./dist/mock-factories.d.ts",
+        "default": "./dist/mock-factories.js"
       }
     },
     "./package.json": "./package.json"

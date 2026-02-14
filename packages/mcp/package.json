@@ -15,11 +15,41 @@
         "default": "./dist/index.js"
       }
     },
+    "./actions": {
+      "import": {
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
+      }
+    },
+    "./core-tools": {
+      "import": {
+        "types": "./dist/core-tools.d.ts",
+        "default": "./dist/core-tools.js"
+      }
+    },
+    "./logging": {
+      "import": {
+        "types": "./dist/logging.d.ts",
+        "default": "./dist/logging.js"
+      }
+    },
     "./package.json": "./package.json",
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
     "./server": {
       "import": {
         "types": "./dist/server.d.ts",
         "default": "./dist/server.js"
+      }
+    },
+    "./transport": {
+      "import": {
+        "types": "./dist/transport.d.ts",
+        "default": "./dist/transport.js"
       }
     },
     "./types": {

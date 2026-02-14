@@ -150,12 +150,36 @@ export default defineWorkspace(
       },
     },
     {
+      name: "@outfitter/daemon",
+      root: "packages/daemon",
+    },
+    {
+      name: "@outfitter/file-ops",
+      root: "packages/file-ops",
+    },
+    {
       name: "@outfitter/index",
       root: "packages/index",
     },
     {
       name: "@outfitter/kit",
       root: "packages/kit",
+    },
+    {
+      name: "@outfitter/logging",
+      root: "packages/logging",
+    },
+    {
+      name: "@outfitter/mcp",
+      root: "packages/mcp",
+    },
+    {
+      name: "@outfitter/state",
+      root: "packages/state",
+    },
+    {
+      name: "@outfitter/testing",
+      root: "packages/testing",
     },
     {
       name: "@outfitter/tooling",

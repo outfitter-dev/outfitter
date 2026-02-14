@@ -15,7 +15,49 @@
         "default": "./dist/index.js"
       }
     },
-    "./package.json": "./package.json"
+    "./errors": {
+      "import": {
+        "types": "./dist/errors.d.ts",
+        "default": "./dist/errors.js"
+      }
+    },
+    "./health": {
+      "import": {
+        "types": "./dist/health.d.ts",
+        "default": "./dist/health.js"
+      }
+    },
+    "./ipc": {
+      "import": {
+        "types": "./dist/ipc.d.ts",
+        "default": "./dist/ipc.js"
+      }
+    },
+    "./lifecycle": {
+      "import": {
+        "types": "./dist/lifecycle.d.ts",
+        "default": "./dist/lifecycle.js"
+      }
+    },
+    "./locking": {
+      "import": {
+        "types": "./dist/locking.d.ts",
+        "default": "./dist/locking.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./platform": {
+      "import": {
+        "types": "./dist/platform.d.ts",
+        "default": "./dist/platform.js"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    }
   },
   "sideEffects": false,
   "scripts": {
