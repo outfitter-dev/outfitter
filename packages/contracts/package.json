@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/contracts",
   "description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "files": [
     "dist"

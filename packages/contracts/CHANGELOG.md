@@ -1,5 +1,14 @@
 # @outfitter/contracts
 
+## 0.3.0
+
+### Minor Changes
+
+- d683522: Add `ValidationError.fromMessage()` and improve error factory documentation.
+
+  - **feat**: `ValidationError.fromMessage(message, context?)` for freeform validation errors (#335)
+  - **docs**: Error factory quick-reference table and casing behavior documentation (#336)
+
 ## 0.2.0
 
 ### Minor Changes
