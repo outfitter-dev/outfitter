@@ -36,7 +36,7 @@ export interface IndicatorSet {
  *
  * @example
  * ```typescript
- * import { INDICATORS, getIndicator } from "@outfitter/cli/render";
+ * import { INDICATORS, getIndicator } from "@outfitter/tui/render";
  *
  * // Access directly
  * console.log(INDICATORS.status.success.unicode); // "✔"

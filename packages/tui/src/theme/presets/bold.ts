@@ -22,7 +22,7 @@ import { defaultTheme } from "./default.js";
  *
  * @example
  * ```typescript
- * import { boldTheme } from "@outfitter/cli/theme/presets";
+ * import { boldTheme } from "@outfitter/tui/theme/presets";
  *
  * // Use bold styling
  * const box = renderBox("Hello", { border: boldTheme.border });

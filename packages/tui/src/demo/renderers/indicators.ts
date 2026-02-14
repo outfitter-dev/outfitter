@@ -32,7 +32,7 @@ export function renderIndicatorsDemo(
 
   if (showCode) {
     lines.push(
-      'import { getIndicator, getProgressIndicator, INDICATORS } from "@outfitter/cli/render";'
+      'import { getIndicator, getProgressIndicator, INDICATORS } from "@outfitter/tui/render";'
     );
     lines.push("");
   }

@@ -112,7 +112,7 @@ describe("@outfitter/cli (root)", () => {
   // -------------------------------------------------------------------------
   // SHOULD NOT export: Input utilities (use @outfitter/cli/input)
   // -------------------------------------------------------------------------
-  it("does NOT export input utilities (use @outfitter/cli/input)", async () => {
+  it("does NOT export input utilities (use @outfitter/cli/input or @outfitter/tui/confirm)", async () => {
     const mod = (await import("../index.js")) as Record<string, unknown>;
     expect(mod.parseFilter).toBeUndefined();
     expect(mod.parseRange).toBeUndefined();

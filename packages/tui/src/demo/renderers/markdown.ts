@@ -25,7 +25,7 @@ export function renderMarkdownDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderMarkdown } from "@outfitter/cli/render";');
+    lines.push('import { renderMarkdown } from "@outfitter/tui/render";');
     lines.push("");
   }
 

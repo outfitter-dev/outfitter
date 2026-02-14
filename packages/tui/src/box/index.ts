@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { renderBox, type BoxOptions, type BoxAlign } from "@outfitter/cli/box";
+ * import { renderBox, type BoxOptions, type BoxAlign } from "@outfitter/tui/box";
  *
  * // Simple box
  * console.log(renderBox("Hello, world!"));

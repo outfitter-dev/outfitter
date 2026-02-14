@@ -22,7 +22,7 @@ import type { VisualTheme } from "../types.js";
  *
  * @example
  * ```typescript
- * import { defaultTheme } from "@outfitter/cli/theme/presets";
+ * import { defaultTheme } from "@outfitter/tui/theme/presets";
  *
  * // Use default styling
  * const box = renderBox("Hello", { border: defaultTheme.border });

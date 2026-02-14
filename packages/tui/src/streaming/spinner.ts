@@ -62,7 +62,7 @@ export interface Spinner {
  *
  * @example
  * ```typescript
- * import { createSpinner } from "@outfitter/cli/streaming";
+ * import { createSpinner } from "@outfitter/tui/streaming";
  *
  * const spinner = createSpinner("Installing dependencies");
  * spinner.start();

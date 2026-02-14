@@ -22,7 +22,7 @@ import { defaultTheme } from "./default.js";
  *
  * @example
  * ```typescript
- * import { roundedTheme } from "@outfitter/cli/theme/presets";
+ * import { roundedTheme } from "@outfitter/tui/theme/presets";
  *
  * // Use rounded styling
  * const box = renderBox("Hello", { border: roundedTheme.border });

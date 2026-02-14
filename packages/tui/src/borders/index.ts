@@ -11,7 +11,7 @@
  *   drawHorizontalLine,
  *   type BorderStyle,
  *   type BorderCharacters,
- * } from "@outfitter/cli/borders";
+ * } from "@outfitter/tui/borders";
  *
  * // Get rounded border characters
  * const chars = getBorderCharacters("rounded");

@@ -50,7 +50,7 @@ export function resolveGlyph(glyph: GlyphPair, forceUnicode?: boolean): string {
  *
  * @example
  * ```typescript
- * import { defaultTheme, resolveStateMarker } from "@outfitter/cli/theme";
+ * import { defaultTheme, resolveStateMarker } from "@outfitter/tui/theme";
  *
  * // Resolve success marker (indicator-type)
  * resolveStateMarker(defaultTheme, "success", true);  // "✔"

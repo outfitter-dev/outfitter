@@ -14,7 +14,7 @@ export type Validator = (value: string) => string | undefined;
  *
  * @example
  * ```typescript
- * import { validators } from "@outfitter/cli/prompt";
+ * import { validators } from "@outfitter/tui/prompt";
  *
  * const validate = validators.compose(
  *   validators.required(),

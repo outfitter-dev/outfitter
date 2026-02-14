@@ -21,7 +21,7 @@ import {
  *
  * @example
  * ```typescript
- * import { promptSelect } from "@outfitter/cli/prompt";
+ * import { promptSelect } from "@outfitter/tui/prompt";
  *
  * const result = await promptSelect({
  *   message: "Pick a color:",
@@ -80,7 +80,7 @@ export async function promptSelect<T>(
  *
  * @example
  * ```typescript
- * import { promptMultiSelect } from "@outfitter/cli/prompt";
+ * import { promptMultiSelect } from "@outfitter/tui/prompt";
  *
  * const result = await promptMultiSelect({
  *   message: "Select toppings:",

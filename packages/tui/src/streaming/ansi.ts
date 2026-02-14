@@ -9,7 +9,7 @@
  *
  * @example
  * ```typescript
- * import { ANSI } from "@outfitter/cli/streaming";
+ * import { ANSI } from "@outfitter/tui/streaming";
  *
  * // Move cursor up 2 lines and clear
  * process.stdout.write(ANSI.cursorUp(2) + ANSI.clearLine);

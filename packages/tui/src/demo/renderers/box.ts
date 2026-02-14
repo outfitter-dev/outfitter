@@ -27,7 +27,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { renderBox } from "@outfitter/cli/render";');
+    lines.push('import { renderBox } from "@outfitter/tui/render";');
     lines.push("");
   }
 

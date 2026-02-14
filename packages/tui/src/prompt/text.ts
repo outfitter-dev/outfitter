@@ -21,7 +21,7 @@ import {
  *
  * @example
  * ```typescript
- * import { promptText } from "@outfitter/cli/prompt";
+ * import { promptText } from "@outfitter/tui/prompt";
  *
  * const result = await promptText({
  *   message: "What is your name?",
@@ -68,7 +68,7 @@ export async function promptText(
  *
  * @example
  * ```typescript
- * import { promptPassword } from "@outfitter/cli/prompt";
+ * import { promptPassword } from "@outfitter/tui/prompt";
  *
  * const result = await promptPassword({
  *   message: "Enter your password:",

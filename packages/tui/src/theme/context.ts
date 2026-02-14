@@ -18,7 +18,7 @@ import type { VisualTheme } from "./types.js";
  *
  * @example
  * ```typescript
- * import { createThemedContext, roundedTheme } from "@outfitter/cli/theme";
+ * import { createThemedContext, roundedTheme } from "@outfitter/tui/theme";
  *
  * // Create root context with theme
  * const ctx = createThemedContext({ theme: roundedTheme, width: 80 });

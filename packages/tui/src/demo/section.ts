@@ -47,7 +47,7 @@ export interface SubsectionOptions {
  *
  * @example
  * ```typescript
- * import { demoSection } from "@outfitter/cli/demo";
+ * import { demoSection } from "@outfitter/tui/demo";
  *
  * console.log(demoSection("Theme Colors"));
  * // Theme Colors
@@ -73,7 +73,7 @@ export function demoSection(title: string, options?: SectionOptions): string {
  *
  * @example
  * ```typescript
- * import { demoSubsection } from "@outfitter/cli/demo";
+ * import { demoSubsection } from "@outfitter/tui/demo";
  *
  * console.log(demoSubsection("Status"));
  * // Status
@@ -102,10 +102,10 @@ export function demoSubsection(
  *
  * @example
  * ```typescript
- * import { codeBlock } from "@outfitter/cli/demo";
+ * import { codeBlock } from "@outfitter/tui/demo";
  *
  * const code = codeBlock([
- *   'import { renderBox } from "@outfitter/cli/render";',
+ *   'import { renderBox } from "@outfitter/tui/render";',
  *   "",
  *   'renderBox("Hello")',
  * ], true);
@@ -129,7 +129,7 @@ export function codeBlock(lines: string[], show = true): string[] {
  *
  * @example
  * ```typescript
- * import { description } from "@outfitter/cli/demo";
+ * import { description } from "@outfitter/tui/demo";
  *
  * const desc = description(
  *   "Control padding per side with an object.",
@@ -154,7 +154,7 @@ export function description(text: string, theme: Theme, show = true): string[] {
  *
  * @example
  * ```typescript
- * import { demoSection, demoContent } from "@outfitter/cli/demo";
+ * import { demoSection, demoContent } from "@outfitter/tui/demo";
  *
  * const output = demoContent([
  *   demoSection("Colors"),

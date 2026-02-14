@@ -35,7 +35,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { createTheme } from "@outfitter/cli/render";');
+    lines.push('import { createTheme } from "@outfitter/tui/render";');
     lines.push("const theme = createTheme();");
     lines.push("");
   }
@@ -75,7 +75,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { applyColor } from "@outfitter/cli/render";');
+    lines.push('import { applyColor } from "@outfitter/tui/render";');
     lines.push("");
   }
 
@@ -103,7 +103,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   lines.push("");
 
   if (showCode) {
-    lines.push('import { createTokens, ANSI } from "@outfitter/cli/render";');
+    lines.push('import { createTokens, ANSI } from "@outfitter/tui/render";');
     lines.push("const t = createTokens();");
     lines.push("");
   }

@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createSpinner, createStreamWriter, ANSI } from "@outfitter/cli/streaming";
+ * import { createSpinner, createStreamWriter, ANSI } from "@outfitter/tui/streaming";
  *
  * // Spinner for async operations
  * const spinner = createSpinner("Loading...");

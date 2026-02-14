@@ -289,71 +289,71 @@ export const PRIMITIVE_META: Record<PrimitiveId, PrimitiveMeta> = {
     id: "colors",
     name: "Colors",
     description: "Semantic color theme with ANSI support",
-    importExample: 'import { createTheme } from "@outfitter/cli/render";',
+    importExample: 'import { createTheme } from "@outfitter/tui/render";',
   },
   borders: {
     id: "borders",
     name: "Borders",
     description: "Box-drawing character sets",
     importExample:
-      'import { BORDERS, getBorderCharacters } from "@outfitter/cli/render";',
+      'import { BORDERS, getBorderCharacters } from "@outfitter/tui/render";',
   },
   spinner: {
     id: "spinner",
     name: "Spinner",
     description: "Animated spinners for async operations",
     importExample:
-      'import { renderSpinner, SPINNERS } from "@outfitter/cli/render";',
+      'import { renderSpinner, SPINNERS } from "@outfitter/tui/render";',
   },
   list: {
     id: "list",
     name: "List",
     description: "Bullet, numbered, and checkbox lists",
-    importExample: 'import { renderList } from "@outfitter/cli/render";',
+    importExample: 'import { renderList } from "@outfitter/tui/render";',
   },
   box: {
     id: "box",
     name: "Box",
     description: "Bordered panels with optional titles",
-    importExample: 'import { renderBox } from "@outfitter/cli/render";',
+    importExample: 'import { renderBox } from "@outfitter/tui/render";',
   },
   table: {
     id: "table",
     name: "Table",
     description: "Unicode tables with multiple border styles",
-    importExample: 'import { renderTable } from "@outfitter/cli/render";',
+    importExample: 'import { renderTable } from "@outfitter/tui/render";',
   },
   progress: {
     id: "progress",
     name: "Progress",
     description: "Progress bars with filled/empty segments",
-    importExample: 'import { renderProgress } from "@outfitter/cli/render";',
+    importExample: 'import { renderProgress } from "@outfitter/tui/render";',
   },
   tree: {
     id: "tree",
     name: "Tree",
     description: "Hierarchical tree rendering",
-    importExample: 'import { renderTree } from "@outfitter/cli/render";',
+    importExample: 'import { renderTree } from "@outfitter/tui/render";',
   },
   text: {
     id: "text",
     name: "Text",
     description: "Text utilities (width, wrap, truncate, pad)",
     importExample:
-      'import { getStringWidth, wrapText, truncateText, padText } from "@outfitter/cli/render";',
+      'import { getStringWidth, wrapText, truncateText, padText } from "@outfitter/tui/render";',
   },
   markdown: {
     id: "markdown",
     name: "Markdown",
     description: "Markdown to terminal ANSI rendering",
-    importExample: 'import { renderMarkdown } from "@outfitter/cli/render";',
+    importExample: 'import { renderMarkdown } from "@outfitter/tui/render";',
   },
   indicators: {
     id: "indicators",
     name: "Indicators",
     description: "Status symbols, selection markers, and progress indicators",
     importExample:
-      'import { getIndicator, INDICATORS } from "@outfitter/cli/render";',
+      'import { getIndicator, INDICATORS } from "@outfitter/tui/render";',
   },
 };
 

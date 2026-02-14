@@ -24,7 +24,7 @@ import { defaultTheme } from "./default.js";
  *
  * @example
  * ```typescript
- * import { minimalTheme } from "@outfitter/cli/theme/presets";
+ * import { minimalTheme } from "@outfitter/tui/theme/presets";
  *
  * // Use ASCII-safe styling
  * const box = renderBox("Hello", { border: minimalTheme.border });

@@ -12,7 +12,7 @@
  *   createVisualTheme,
  *   createThemedContext,
  *   resolveGlyph,
- * } from "@outfitter/cli/theme";
+ * } from "@outfitter/tui/theme";
  *
  * // Use a preset theme
  * const box = renderBox("Hello", { theme: roundedTheme });

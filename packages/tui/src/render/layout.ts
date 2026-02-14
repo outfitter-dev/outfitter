@@ -21,7 +21,7 @@ import type { LayoutContext, WidthMode } from "./types.js";
  *
  * @example
  * ```typescript
- * import { getTerminalWidth } from "@outfitter/cli/render";
+ * import { getTerminalWidth } from "@outfitter/tui/render";
  *
  * const width = getTerminalWidth();
  * console.log(`Terminal is ${width} columns wide`);
@@ -42,7 +42,7 @@ export function getTerminalWidth(): number {
  *
  * @example
  * ```typescript
- * import { getBoxOverhead } from "@outfitter/cli/render";
+ * import { getBoxOverhead } from "@outfitter/tui/render";
  *
  * const overhead = getBoxOverhead({ padding: 1, border: "single" });
  * // { horizontal: 4, vertical: 2 }
@@ -76,7 +76,7 @@ export function getBoxOverhead(options: BoxOptions): {
  *
  * @example
  * ```typescript
- * import { getContentWidth, createBox, renderProgress } from "@outfitter/cli/render";
+ * import { getContentWidth, createBox, renderProgress } from "@outfitter/tui/render";
  *
  * const boxOpts = { width: 40, padding: 1, border: "single" };
  * const available = getContentWidth(boxOpts); // → 36
@@ -114,7 +114,7 @@ export function getContentWidth(options: BoxOptions): number {
  *
  * @example
  * ```typescript
- * import { resolveWidth, createLayoutContext } from "@outfitter/cli/render";
+ * import { resolveWidth, createLayoutContext } from "@outfitter/tui/render";
  *
  * resolveWidth("full");           // → 120 (terminal width)
  * resolveWidth(50);               // → 50
@@ -168,7 +168,7 @@ export function resolveWidth(mode: WidthMode, ctx?: LayoutContext): number {
  *
  * @example
  * ```typescript
- * import { createLayoutContext, resolveWidth, createBox } from "@outfitter/cli/render";
+ * import { createLayoutContext, resolveWidth, createBox } from "@outfitter/tui/render";
  *
  * // Outer container
  * const outerOpts = { width: 80, padding: 1 };
@@ -273,8 +273,8 @@ function createFilledArray(length: number, value: string): string[] {
  *
  * @example
  * ```typescript
- * import { joinHorizontal } from "@outfitter/cli/render";
- * import { renderBox } from "@outfitter/cli/render";
+ * import { joinHorizontal } from "@outfitter/tui/render";
+ * import { renderBox } from "@outfitter/tui/render";
  *
  * const left = renderBox({ content: "Left", borderStyle: "single" });
  * const right = renderBox({ content: "Right", borderStyle: "single" });
@@ -362,7 +362,7 @@ export function joinHorizontal(
  *
  * @example
  * ```typescript
- * import { joinVertical, renderHeading, renderSeparator } from "@outfitter/cli/render";
+ * import { joinVertical, renderHeading, renderSeparator } from "@outfitter/tui/render";
  *
  * const heading = renderHeading("Section Title");
  * const separator = renderSeparator({ width: 20 });
