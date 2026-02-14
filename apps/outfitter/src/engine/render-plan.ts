@@ -131,5 +131,5 @@ export async function renderOperationPlan(
   lines.push(
     `Total operations: ${Object.values(summary).reduce((a, b) => a + b, 0)}`
   );
-  await output(lines);
+  await output(lines, { mode: "human" });
 }

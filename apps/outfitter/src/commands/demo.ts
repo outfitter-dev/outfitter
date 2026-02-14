@@ -10,6 +10,7 @@
 import { isCancel, select } from "@clack/prompts";
 import { output } from "@outfitter/cli/output";
 import { isInteractive } from "@outfitter/cli/terminal";
+import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme, renderTable, SPINNERS } from "@outfitter/tui/render";
 import { ANSI } from "@outfitter/tui/streaming";
 import {
@@ -295,8 +296,11 @@ async function runAnimatedSpinnerDemo(): Promise<void> {
 /**
  * Outputs demo results.
  */
-export async function printDemoResults(result: DemoResult): Promise<void> {
+export async function printDemoResults(
+  result: DemoResult,
+  options?: { mode?: OutputMode }
+): Promise<void> {
   if (result.output) {
-    await output(result.output, { mode: "human" });
+    await output(result.output, { mode: options?.mode ?? "human" });
   }
 }

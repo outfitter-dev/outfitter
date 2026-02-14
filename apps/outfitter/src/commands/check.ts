@@ -609,5 +609,5 @@ export async function printCheckResults(
     );
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }

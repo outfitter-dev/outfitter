@@ -740,7 +740,7 @@ export async function printScaffoldResults(
     lines.push(`  ${step}`);
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }
 
 export function scaffoldCommand(program: Command): void {

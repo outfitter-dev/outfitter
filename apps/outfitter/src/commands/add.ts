@@ -466,7 +466,7 @@ export async function printAddResults(
     }
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }
 
 /**

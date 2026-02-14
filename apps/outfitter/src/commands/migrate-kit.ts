@@ -1019,7 +1019,7 @@ export async function printMigrateKitResults(
 
   if (result.changedFiles.length === 0) {
     lines.push("No kit migration changes needed.");
-    await output(lines);
+    await output(lines, { mode: "human" });
     return;
   }
 
@@ -1044,7 +1044,7 @@ export async function printMigrateKitResults(
     }
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }
 
 /**

@@ -6,7 +6,6 @@
 
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli/output";
-import type { OutputMode } from "@outfitter/cli/types";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -34,7 +33,11 @@ import {
 } from "./commands/migrate-kit.js";
 import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
 import { printUpdateResults, runUpdate } from "./commands/update.js";
-import { resolveStructuredOutputMode } from "./output-mode.js";
+import {
+  type CliOutputMode,
+  resolveOutputModeFromContext,
+  resolveStructuredOutputMode,
+} from "./output-mode.js";
 
 interface InitFlags {
   readonly name?: string | undefined;
@@ -74,9 +77,9 @@ interface MigrateFlags {
 }
 
 interface InitActionInput extends InitOptions {
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
-const outputModeSchema = z.enum(["human", "json", "jsonl"]).optional();
+const outputModeSchema = z.enum(["human", "json", "jsonl"]).default("human");
 
 const initInputSchema = z.object({
   targetDir: z.string(),
@@ -110,7 +113,7 @@ interface ScaffoldActionInput {
   local?: boolean | undefined;
   installTimeout?: number | undefined;
   cwd: string;
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
 
 const scaffoldInputSchema = z.object({
@@ -130,7 +133,7 @@ const scaffoldInputSchema = z.object({
 interface MigrateKitActionInput {
   targetDir: string;
   dryRun: boolean;
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
 
 const migrateKitInputSchema = z.object({
@@ -141,7 +144,7 @@ const migrateKitInputSchema = z.object({
 
 interface DoctorActionInput {
   cwd: string;
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
 const doctorInputSchema = z.object({
   cwd: z.string(),
@@ -150,16 +153,6 @@ const doctorInputSchema = z.object({
 
 function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
-}
-
-function resolveOutputMode(
-  flags: Record<string, unknown>
-): OutputMode | undefined {
-  if (flags["json"]) {
-    process.env["OUTFITTER_JSON"] = "1";
-    return "json";
-  }
-  return undefined;
 }
 
 function resolveNoToolingFlag(flags: {
@@ -232,7 +225,7 @@ function resolveInitOptions(
   } else if (typeof installTimeoutValue === "number") {
     installTimeout = installTimeoutValue;
   }
-  const outputMode = resolveOutputMode(context.flags);
+  const outputMode = resolveOutputModeFromContext(context.flags);
 
   return {
     targetDir,
@@ -252,7 +245,7 @@ function resolveInitOptions(
     ...(skipGit ? { skipGit } : {}),
     ...(skipCommit ? { skipCommit } : {}),
     ...(installTimeout !== undefined ? { installTimeout } : {}),
-    ...(outputMode ? { outputMode } : {}),
+    outputMode,
   };
 }
 
@@ -260,7 +253,7 @@ function resolveScaffoldOptions(
   context: ActionCliInputContext
 ): ScaffoldActionInput {
   const flags = context.flags as ScaffoldFlags;
-  const outputMode = resolveOutputMode(context.flags);
+  const outputMode = resolveOutputModeFromContext(context.flags);
   const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
   const installTimeoutValue = flags.installTimeout;
@@ -282,7 +275,7 @@ function resolveScaffoldOptions(
     ...(noTooling !== undefined ? { noTooling } : {}),
     ...(installTimeout !== undefined ? { installTimeout } : {}),
     cwd: process.cwd(),
-    ...(outputMode ? { outputMode } : {}),
+    outputMode,
   };
 }
 
@@ -290,12 +283,12 @@ function resolveMigrateKitOptions(
   context: ActionCliInputContext
 ): MigrateKitActionInput {
   const flags = context.flags as MigrateFlags;
-  const outputMode = resolveOutputMode(context.flags);
+  const outputMode = resolveOutputModeFromContext(context.flags);
 
   return {
     targetDir: context.args[0] ?? process.cwd(),
     dryRun: Boolean(flags.dryRun || context.flags["dry-run"]),
-    ...(outputMode ? { outputMode } : {}),
+    outputMode,
   };
 }
 
@@ -411,7 +404,6 @@ function createInitAction(options: {
     },
     handler: async (input) => {
       const { outputMode, ...initInput } = input;
-      const outputOptions = outputMode ? { mode: outputMode } : undefined;
       const result = await runInit(initInput);
       if (result.isErr()) {
         return Result.err(
@@ -422,7 +414,7 @@ function createInitAction(options: {
         );
       }
 
-      await printInitResults(result.value, outputOptions);
+      await printInitResults(result.value, { mode: outputMode });
 
       return Result.ok(result.value);
     },
@@ -506,7 +498,6 @@ const scaffoldAction = defineAction({
   },
   handler: async (input) => {
     const { outputMode, ...scaffoldInput } = input;
-    const outputOptions = outputMode ? { mode: outputMode } : undefined;
     const result = await runScaffold(scaffoldInput);
 
     if (result.isErr()) {
@@ -518,7 +509,7 @@ const scaffoldAction = defineAction({
       );
     }
 
-    await printScaffoldResults(result.value, outputOptions);
+    await printScaffoldResults(result.value, { mode: outputMode });
     return Result.ok(result.value);
   },
 });
@@ -527,6 +518,7 @@ const demoInputSchema = z.object({
   section: z.string().optional(),
   list: z.boolean().optional(),
   animate: z.boolean().optional(),
+  outputMode: outputModeSchema,
 });
 
 const demoAction = defineAction({
@@ -550,18 +542,19 @@ const demoAction = defineAction({
       },
     ],
     mapInput: (context) => {
-      // Consume --json so it's not silently ignored
-      resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       return {
         section: context.args[0] as string | undefined,
         list: Boolean(context.flags["list"]),
         animate: Boolean(context.flags["animate"]),
+        outputMode,
       };
     },
   },
   handler: async (input) => {
-    const result = await runDemo(input);
-    await printDemoResults(result);
+    const { outputMode, ...demoInput } = input;
+    const result = await runDemo(demoInput);
+    await printDemoResults(result, { mode: outputMode });
 
     if (result.exitCode !== 0) {
       process.exit(result.exitCode);
@@ -580,18 +573,17 @@ const doctorAction = defineAction({
     command: "doctor",
     description: "Validate environment and dependencies",
     mapInput: (context) => {
-      const outputMode = resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       return {
         cwd: process.cwd(),
-        ...(outputMode ? { outputMode } : {}),
+        outputMode,
       };
     },
   },
   handler: async (input) => {
     const { outputMode, ...doctorInput } = input;
-    const outputOptions = outputMode ? { mode: outputMode } : undefined;
     const result = await runDoctor(doctorInput);
-    await printDoctorResults(result, outputOptions);
+    await printDoctorResults(result, { mode: outputMode });
 
     if (result.exitCode !== 0) {
       process.exit(result.exitCode);
@@ -607,7 +599,7 @@ const addInputSchema = z.object({
   dryRun: z.boolean(),
   cwd: z.string().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<AddInput & { outputMode?: OutputMode }>;
+}) as z.ZodType<AddInput & { outputMode: CliOutputMode }>;
 
 const addAction = defineAction({
   id: "add",
@@ -632,19 +624,18 @@ const addAction = defineAction({
       },
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       return {
         block: context.args[0] as string,
         force: Boolean(context.flags["force"]),
         dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
         cwd: process.cwd(),
-        ...(outputMode ? { outputMode } : {}),
+        outputMode,
       };
     },
   },
   handler: async (input) => {
     const { outputMode, ...addInput } = input;
-    const outputOptions = outputMode ? { mode: outputMode } : undefined;
     const result = await runAdd(addInput);
 
     if (result.isErr()) {
@@ -656,7 +647,7 @@ const addAction = defineAction({
       );
     }
 
-    await printAddResults(result.value, addInput.dryRun, outputOptions);
+    await printAddResults(result.value, addInput.dryRun, { mode: outputMode });
     return Result.ok(result.value);
   },
 });
@@ -666,16 +657,16 @@ const listBlocksAction = defineAction({
   description: "List available blocks",
   surfaces: ["cli"],
   input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
-    outputMode?: OutputMode;
+    outputMode: CliOutputMode;
   }>,
   cli: {
     group: "add",
     command: "list",
     description: "List available blocks",
     mapInput: (context) => {
-      const outputMode = resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       return {
-        ...(outputMode ? { outputMode } : {}),
+        outputMode,
       };
     },
   },
@@ -699,7 +690,7 @@ const listBlocksAction = defineAction({
         "Available blocks:",
         ...result.value.map((block) => `  - ${block}`),
       ];
-      await output(lines);
+      await output(lines, { mode: "human" });
     }
 
     return Result.ok({ blocks: result.value });
@@ -711,7 +702,7 @@ interface CheckActionInput {
   verbose: boolean;
   block?: string;
   ci: boolean;
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
 
 const checkInputSchema = z.object({
@@ -753,7 +744,7 @@ const checkAction = defineAction({
       },
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       const cwd =
         typeof context.flags["cwd"] === "string"
           ? resolve(process.cwd(), context.flags["cwd"])
@@ -764,7 +755,7 @@ const checkAction = defineAction({
         verbose: Boolean(context.flags["verbose"]),
         ...(block !== undefined ? { block } : {}),
         ci: Boolean(context.flags["ci"]),
-        ...(outputMode ? { outputMode } : {}),
+        outputMode,
       };
     },
   },
@@ -783,7 +774,7 @@ const checkAction = defineAction({
     }
 
     await printCheckResults(result.value, {
-      ...(effectiveMode ? { mode: effectiveMode } : {}),
+      mode: effectiveMode,
       verbose: checkInput.verbose,
     });
 
@@ -802,7 +793,7 @@ interface UpdateActionInput {
   guidePackages?: string[];
   apply: boolean;
   breaking: boolean;
-  outputMode?: OutputMode;
+  outputMode: CliOutputMode;
 }
 
 const updateInputSchema = z.object({
@@ -847,7 +838,7 @@ const updateAction = defineAction({
       },
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputMode(context.flags);
+      const outputMode = resolveOutputModeFromContext(context.flags);
       const cwd =
         typeof context.flags["cwd"] === "string"
           ? resolve(process.cwd(), context.flags["cwd"])
@@ -860,7 +851,7 @@ const updateAction = defineAction({
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         apply: Boolean(context.flags["apply"]),
         breaking: Boolean(context.flags["breaking"]),
-        ...(outputMode ? { outputMode } : {}),
+        outputMode,
       };
     },
   },
@@ -881,7 +872,7 @@ const updateAction = defineAction({
     }
 
     await printUpdateResults(result.value, {
-      ...(outputMode ? { mode: outputMode } : {}),
+      mode: outputMode,
       guide: updateInput.guide,
       cwd: updateInput.cwd,
       applied: updateInput.apply ? result.value.applied : undefined,
@@ -913,7 +904,6 @@ const migrateKitAction = defineAction({
   },
   handler: async (input) => {
     const { outputMode, ...migrateInput } = input;
-    const outputOptions = outputMode ? { mode: outputMode } : undefined;
     const result = await runMigrateKit(migrateInput);
 
     if (result.isErr()) {
@@ -925,7 +915,7 @@ const migrateKitAction = defineAction({
       );
     }
 
-    await printMigrateKitResults(result.value, outputOptions);
+    await printMigrateKitResults(result.value, { mode: outputMode });
     return Result.ok(result.value);
   },
 });

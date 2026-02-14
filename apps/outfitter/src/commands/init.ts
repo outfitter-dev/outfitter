@@ -693,7 +693,7 @@ export async function printInitResults(
     lines.push(`  ${step}`);
   }
 
-  await output(lines);
+  await output(lines, { mode: "human" });
 }
 
 // =============================================================================
