@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { Theme } from "../../render/colors.js";
+import type { Theme } from "@outfitter/cli/colors";
 import {
   getIndicator,
   getProgressIndicator,

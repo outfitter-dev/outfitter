@@ -10,8 +10,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { output } from "@outfitter/cli/output";
-import { createTheme } from "@outfitter/cli/render";
 import type { OutputMode } from "@outfitter/cli/types";
+import { createTheme } from "@outfitter/tui/render";
 import type { Command } from "commander";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 

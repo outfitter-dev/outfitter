@@ -1,14 +1,7 @@
 /**
  * @outfitter/cli - CLI primitives for AI-agent-ready tooling
  *
- * Root export contains minimal essentials: colors and output.
- *
- * For rendering primitives:
- * - @outfitter/cli/table
- * - @outfitter/cli/list
- * - @outfitter/cli/box
- * - @outfitter/cli/tree
- * - @outfitter/cli/borders
+ * Root export contains minimal essentials: colors, text utilities, and output.
  *
  * For CLI building:
  * - @outfitter/cli/command
@@ -16,9 +9,10 @@
  * - @outfitter/cli/input
  * - @outfitter/cli/pagination
  *
- * Or use presets:
- * - @outfitter/cli/preset/standard
- * - @outfitter/cli/preset/full
+ * For terminal detection:
+ * - @outfitter/cli/terminal
+ *
+ * For rendering and TUI components, use @outfitter/tui.
  *
  * @packageDocumentation
  */

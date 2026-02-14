@@ -11,11 +11,8 @@ import {
   createTokens,
   resolveTokenColorEnabled,
   type Theme,
-} from "../../render/colors.js";
-import {
-  hasNoColorEnv,
-  resolveForceColorEnv,
-} from "../../terminal/detection.js";
+} from "@outfitter/cli/colors";
+import { hasNoColorEnv, resolveForceColorEnv } from "@outfitter/cli/terminal";
 import { getThemeMethodsByCategory } from "../registry.js";
 import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";

@@ -9,15 +9,15 @@
 
 import { isCancel, select } from "@clack/prompts";
 import { output } from "@outfitter/cli/output";
-import { createTheme, renderTable, SPINNERS } from "@outfitter/cli/render";
-import { ANSI } from "@outfitter/cli/streaming";
 import { isInteractive } from "@outfitter/cli/terminal";
+import { createTheme, renderTable, SPINNERS } from "@outfitter/tui/render";
+import { ANSI } from "@outfitter/tui/streaming";
 import {
   getSectionIds,
   getSections,
   runAllSections,
   runSection,
-} from "./demo/index.js";
+} from "./demo/registry.js";
 
 // Import app-specific sections to register them
 // Note: Primitive demos (colors, table, etc.) are now provided by @outfitter/cli/demo

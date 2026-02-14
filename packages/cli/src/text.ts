@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { ANSI } from "./colors.js";
+import { ANSI } from "./colors/colors.js";
 
 // ============================================================================
 // Constants

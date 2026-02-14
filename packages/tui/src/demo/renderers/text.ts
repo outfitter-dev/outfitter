@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { Theme } from "../../render/colors.js";
+import type { Theme } from "@outfitter/cli/colors";
 import {
   getStringWidth,
   padText,
@@ -12,7 +12,7 @@ import {
   slugify,
   truncateText,
   wrapText,
-} from "../../render/text.js";
+} from "@outfitter/cli/text";
 import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 

@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
+import { getStringWidth, truncateText, wrapText } from "@outfitter/cli/text";
 import { type BorderStyle, getBorderCharacters } from "./borders.js";
-import { getStringWidth, truncateText, wrapText } from "./text.js";
 
 // ============================================================================
 // Types

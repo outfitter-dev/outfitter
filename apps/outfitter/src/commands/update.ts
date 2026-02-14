@@ -10,10 +10,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { output } from "@outfitter/cli/output";
-import { createTheme } from "@outfitter/cli/render";
 import type { OutputMode } from "@outfitter/cli/types";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
+import { createTheme } from "@outfitter/tui/render";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import { analyzeUpdates } from "./update-planner.js";
 import {

@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { Theme } from "../../render/colors.js";
+import type { Theme } from "@outfitter/cli/colors";
 import { renderProgress } from "../../render/progress.js";
 import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";

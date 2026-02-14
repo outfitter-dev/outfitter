@@ -12,7 +12,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   collectIds,
-  confirmDestructive,
   expandFileArg,
   normalizeId,
   parseFilter,
@@ -21,18 +20,10 @@ import {
   parseRange,
   parseSortSpec,
 } from "../input.js";
-import {
-  cancelSymbol,
-  confirmMock,
-  queueConfirmResponse,
-  resetClackMocks,
-} from "./clack-mock.js";
 
 // =============================================================================
 // Test Utilities
 // =============================================================================
-
-// clack prompt mocks are provided by ./clack-mock.ts
 
 /**
  * Creates a temporary directory for test fixtures.
@@ -93,7 +84,6 @@ beforeEach(() => {
 
 afterEach(() => {
   process.env = originalEnv;
-  resetClackMocks();
   Object.defineProperty(process.stdout, "isTTY", {
     value: originalIsTTY,
     writable: true,
@@ -796,130 +786,5 @@ describe("normalizeId()", () => {
   test("handles empty string", () => {
     const result = normalizeId("", { minLength: 1 });
     expect(result.isErr()).toBe(true);
-  });
-});
-
-// =============================================================================
-// confirmDestructive() Tests - 6 tests
-// =============================================================================
-
-describe("confirmDestructive()", () => {
-  function setInteractiveTerminal(): void {
-    process.env.TERM = "xterm-256color";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-  }
-
-  test("returns Ok(true) when bypassFlag is true", async () => {
-    const result = await confirmDestructive({
-      message: "Delete 5 items?",
-      bypassFlag: true,
-    });
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toBe(true);
-    }
-    expect(confirmMock).not.toHaveBeenCalled();
-  });
-
-  test("returns Ok(true) when user confirms (mock)", async () => {
-    setInteractiveTerminal();
-    queueConfirmResponse(true);
-
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-    });
-
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toBe(true);
-    }
-  });
-
-  test("returns Err(CancelledError) when user declines", async () => {
-    setInteractiveTerminal();
-    queueConfirmResponse(false);
-
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-    });
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("cancelled");
-    }
-  });
-
-  test("returns Err(CancelledError) when prompt is cancelled", async () => {
-    setInteractiveTerminal();
-    queueConfirmResponse(cancelSymbol);
-
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-    });
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("cancelled");
-    }
-  });
-
-  test("includes itemCount in prompt", async () => {
-    setInteractiveTerminal();
-    queueConfirmResponse(true);
-
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-      itemCount: 10,
-    });
-
-    expect(result.isOk()).toBe(true);
-    expect(confirmMock).toHaveBeenCalledTimes(1);
-    const call = confirmMock.mock.calls[0]?.[0];
-    expect(call?.message).toContain("(10 items)");
-  });
-
-  test("handles non-TTY (returns Err)", async () => {
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: false,
-      writable: true,
-      configurable: true,
-    });
-
-    // Non-TTY should return Err since we can't prompt
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-    });
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("non-interactive mode");
-    }
-  });
-
-  test("respects TERM=dumb", async () => {
-    process.env.TERM = "dumb";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-
-    // TERM=dumb should be treated like non-TTY and return Err
-    const result = await confirmDestructive({
-      message: "Delete items?",
-      bypassFlag: false,
-    });
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("non-interactive mode");
-    }
   });
 });

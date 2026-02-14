@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { Theme } from "../../render/colors.js";
+import type { Theme } from "@outfitter/cli/colors";
 import { renderTable } from "../../render/table.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
 import { demoSection } from "../section.js";

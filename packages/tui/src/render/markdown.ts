@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
-import { supportsColor } from "../terminal/detection.js";
-import { ANSI } from "./colors.js";
+import { ANSI } from "@outfitter/cli/colors";
+import { supportsColor } from "@outfitter/cli/terminal";
 
 /**
  * Renders markdown to terminal with ANSI styling.
