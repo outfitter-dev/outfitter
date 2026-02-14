@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "prebuild": "./scripts/prebuild.sh",
-    "verify:ci": "bun run typecheck && bun run check && bun run check-bunup-registry && bun run docs:check:ci && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run test",
+    "verify:ci": "bun run typecheck && bun run check && bun run check-changeset && bun run check-bunup-registry && bun run docs:check:ci && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run test",
+    "check-changeset": "bun run packages/tooling/src/cli/index.ts check-changeset",
     "check-bunup-registry": "bun run packages/tooling/src/cli/index.ts check-bunup-registry",
     "check-exports": "bun run packages/tooling/src/cli/index.ts check-exports",
     "check-readme-imports": "bun run packages/tooling/src/cli/index.ts check-readme-imports",
