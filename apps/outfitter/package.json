@@ -232,6 +232,7 @@
   "dependencies": {
     "@clack/prompts": "^0.10.0",
     "@outfitter/cli": "workspace:*",
+    "@outfitter/tui": "workspace:*",
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@outfitter/docs": "workspace:*",

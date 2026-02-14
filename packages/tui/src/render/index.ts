@@ -6,8 +6,30 @@
  * @packageDocumentation
  */
 
-// Visual Theme System
 // biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
+export {
+  ANSI,
+  applyColor,
+  type ColorName,
+  createTheme,
+  createTokens,
+  resolveTokenColorEnabled,
+  type Theme,
+  type TokenOptions,
+  type Tokens,
+} from "@outfitter/cli/colors";
+// Text formatting (re-exported from @outfitter/cli/text)
+export {
+  ANSI_REGEX,
+  getStringWidth,
+  padText,
+  pluralize,
+  slugify,
+  stripAnsi,
+  truncateText,
+  wrapText,
+} from "@outfitter/cli/text";
+// Visual Theme System
 export {
   boldTheme,
   type CreateVisualThemeOptions,
@@ -54,17 +76,6 @@ export {
   normalizePadding,
   renderBox,
 } from "./box.js";
-export {
-  ANSI,
-  applyColor,
-  type ColorName,
-  createTheme,
-  createTokens,
-  resolveTokenColorEnabled,
-  type Theme,
-  type TokenOptions,
-  type Tokens,
-} from "./colors.js";
 // Date range parsing
 export {
   type DateRange,
@@ -186,17 +197,6 @@ export {
 } from "./stack.js";
 // Table rendering
 export { renderTable, type TableOptions } from "./table.js";
-// Text formatting
-export {
-  ANSI_REGEX,
-  getStringWidth,
-  padText,
-  pluralize,
-  slugify,
-  stripAnsi,
-  truncateText,
-  wrapText,
-} from "./text.js";
 // Tree rendering
 export {
   renderTree,

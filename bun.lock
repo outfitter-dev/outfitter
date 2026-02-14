@@ -33,6 +33,7 @@
         "@outfitter/docs": "workspace:*",
         "@outfitter/logging": "workspace:*",
         "@outfitter/tooling": "workspace:*",
+        "@outfitter/tui": "workspace:*",
         "commander": "^14.0.2",
         "typescript": "^5.9.3",
         "zod": "^4.3.5",

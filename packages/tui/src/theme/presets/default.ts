@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
+import { ANSI } from "@outfitter/cli/colors";
 import { BORDERS } from "../../render/borders.js";
-import { ANSI } from "../../render/colors.js";
 import type { VisualTheme } from "../types.js";
 
 /**

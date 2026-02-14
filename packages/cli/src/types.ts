@@ -232,20 +232,6 @@ export interface NormalizeIdOptions {
 }
 
 /**
- * Options for confirmDestructive().
- */
-export interface ConfirmDestructiveOptions {
-  /** Message to display to the user */
-  readonly message: string;
-
-  /** Whether to bypass confirmation (e.g., --yes flag) */
-  readonly bypassFlag?: boolean;
-
-  /** Number of items affected (shown in confirmation) */
-  readonly itemCount?: number;
-}
-
-/**
  * Numeric or date range parsed from CLI input.
  */
 export type Range = NumericRange | DateRange;

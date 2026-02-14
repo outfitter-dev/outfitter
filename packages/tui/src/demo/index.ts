@@ -23,7 +23,7 @@
  * ```
  */
 
-import { createTheme } from "../render/colors.js";
+import { createTheme } from "@outfitter/cli/colors";
 import {
   getPrimitiveIds,
   getPrimitiveMeta,

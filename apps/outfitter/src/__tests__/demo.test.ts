@@ -13,7 +13,7 @@ import {
   registerSection,
   runAllSections,
   runSection,
-} from "../commands/demo/index.js";
+} from "../commands/demo/registry.js";
 
 // =============================================================================
 // Test Utilities

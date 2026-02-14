@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { Theme } from "../../render/colors.js";
+import type { Theme } from "@outfitter/cli/colors";
 import { renderList } from "../../render/list.js";
 import { getListStyles, LIST_STYLE_META } from "../registry.js";
 import { demoSection } from "../section.js";

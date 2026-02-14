@@ -17,7 +17,7 @@ import {
   applyColor,
   createTheme,
   createTokens,
-} from "../render/index.js";
+} from "../colors/index.js";
 import { supportsColor } from "../terminal/index.js";
 
 // ============================================================================

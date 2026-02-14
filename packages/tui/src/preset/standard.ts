@@ -27,13 +27,13 @@
  */
 
 // biome-ignore lint/performance/noBarrelFile: intentional preset aggregation
-export { type BoxOptions, renderBox } from "../box/index.js";
 export {
   ANSI,
   createTheme,
   type Theme,
   type Tokens,
-} from "../colors/index.js";
+} from "@outfitter/cli/colors";
+export { type BoxOptions, renderBox } from "../box/index.js";
 
 export {
   type ListOptions,

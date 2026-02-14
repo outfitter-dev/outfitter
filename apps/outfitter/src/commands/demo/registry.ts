@@ -13,7 +13,7 @@ import {
   type PrimitiveId,
   renderAllDemos,
   renderDemo,
-} from "@outfitter/cli/demo";
+} from "@outfitter/tui/demo";
 
 /**
  * A demo section that can be executed.
@@ -29,7 +29,7 @@ export interface DemoSection {
 
 /**
  * Registry of app-specific demo sections.
- * These are sections not covered by @outfitter/cli/demo.
+ * These are sections not covered by @outfitter/tui/demo.
  */
 const appSections: DemoSection[] = [];
 

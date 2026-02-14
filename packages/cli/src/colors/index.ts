@@ -26,4 +26,4 @@ export {
   type Theme,
   type TokenOptions,
   type Tokens,
-} from "../render/colors.js";
+} from "./colors.js";

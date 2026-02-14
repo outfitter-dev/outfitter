@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
+import type { Theme } from "@outfitter/cli/colors";
 import { BORDERS, drawHorizontalLine } from "../../render/borders.js";
-import type { Theme } from "../../render/colors.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
 import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";

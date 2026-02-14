@@ -6,12 +6,12 @@
  * @packageDocumentation
  */
 
+import { getStringWidth, padText, truncateText } from "@outfitter/cli/text";
 import {
   type BorderCharacters,
   type BorderStyle,
   getBorderCharacters,
 } from "./borders.js";
-import { getStringWidth, padText, truncateText } from "./text.js";
 
 /**
  * Configuration options for {@link renderTable}.
