@@ -33,6 +33,12 @@
         "default": "./dist/command.js"
       }
     },
+    "./completion": {
+      "import": {
+        "types": "./dist/completion.d.ts",
+        "default": "./dist/completion.js"
+      }
+    },
     "./flags": {
       "import": {
         "types": "./dist/flags.d.ts",
@@ -58,6 +64,12 @@
         "default": "./dist/pagination.js"
       }
     },
+    "./query": {
+      "import": {
+        "types": "./dist/query.d.ts",
+        "default": "./dist/query.js"
+      }
+    },
     "./terminal": {
       "import": {
         "types": "./dist/terminal/index.d.ts",
@@ -80,12 +92,6 @@
       "import": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
-      }
-    },
-    "./query": {
-      "import": {
-        "types": "./dist/query.d.ts",
-        "default": "./dist/query.js"
       }
     },
     "./verbs": {
