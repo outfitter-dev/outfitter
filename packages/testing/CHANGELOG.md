@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [d683522]
+- Updated dependencies [d683522]
+  - @outfitter/contracts@0.3.0
+  - @outfitter/mcp@0.4.0
+
 ## 0.2.1
 
 ### Patch Changes

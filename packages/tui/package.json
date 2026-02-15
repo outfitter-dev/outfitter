@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/tui",
   "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "files": [
     "dist"

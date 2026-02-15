@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- 839b4e1: Extract TUI modules to `@outfitter/tui` package.
+
+  - **breaking**: Removed subpath exports: `./render`, `./table`, `./list`, `./box`, `./tree`, `./borders`, `./theme`, `./streaming`, `./prompt`, `./confirm`, `./preset`, `./demo`
+  - **breaking**: `confirmDestructive()` moved from `@outfitter/cli/input` to `@outfitter/tui/confirm`
+  - Colors (`./colors`), text utilities (`./text`), and terminal detection (`./terminal`) remain in `@outfitter/cli`
+  - Install `@outfitter/tui` and update imports for moved modules
+
+### Patch Changes
+
+- d683522: Fix `--json` flag bridging to `OUTFITTER_JSON` environment variable.
+
+  - **fix**: `createCLI()` now bridges `--json` (global or subcommand) into `OUTFITTER_JSON` via preAction/postAction hooks, eliminating manual `optsWithGlobals()` detection in commands (#340)
+  - **chore**: Convert cross-package deps to peerDependencies (#344)
+
 ## 0.3.0
 
 ### Minor Changes

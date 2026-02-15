@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- d683522: Replace `json5` dependency with Bun-native `Bun.JSON5` parser (#346).
+- Updated dependencies [d683522]
+  - @outfitter/contracts@0.3.0
+  - @outfitter/types@0.2.1
+
 ## 0.3.0
 
 ### Minor Changes

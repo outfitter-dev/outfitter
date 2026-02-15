@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Outfitter plugin ecosystem for AI-assisted development",
-    "version": "2.0.1"
+    "version": "1.5.0"
   },
   "repository": "https://github.com/outfitter-dev/outfitter",
   "plugins": [
