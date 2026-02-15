@@ -6,6 +6,7 @@
 
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
+import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -720,6 +721,15 @@ const checkInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<CheckActionInput>;
 
+const checkVerbose = verbosePreset();
+const checkCwd = cwdPreset();
+const checkVerboseOptions: ActionCliOption[] = checkVerbose.options.map(
+  (option) =>
+    option.flags === "-v, --verbose"
+      ? { ...option, description: "Show diffs for drifted files" }
+      : option
+);
+
 const checkAction = defineAction({
   id: "check",
   description:
@@ -731,11 +741,7 @@ const checkAction = defineAction({
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
-      {
-        flags: "-v, --verbose",
-        description: "Show diffs for drifted files",
-        defaultValue: false,
-      },
+      ...checkVerboseOptions,
       {
         flags: "-b, --block <name>",
         description: "Check a specific block only",
@@ -745,21 +751,17 @@ const checkAction = defineAction({
         description: "Machine-oriented output for CI",
         defaultValue: false,
       },
-      {
-        flags: "--cwd <path>",
-        description: "Working directory (defaults to current directory)",
-      },
+      ...checkCwd.options,
     ],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const cwd =
-        typeof context.flags["cwd"] === "string"
-          ? resolve(process.cwd(), context.flags["cwd"])
-          : process.cwd();
+      const { verbose } = checkVerbose.resolve(context.flags);
+      const { cwd: rawCwd } = checkCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
       const block = resolveStringFlag(context.flags["block"]);
       return {
         cwd,
-        verbose: Boolean(context.flags["verbose"]),
+        verbose,
         ...(block !== undefined ? { block } : {}),
         ci: Boolean(context.flags["ci"]),
         outputMode,

@@ -157,7 +157,7 @@ describe("init command file creation", () => {
     );
     expect(packageJson.scripts["clean:artifacts"]).toBe("rm -rf dist .turbo");
     expect(packageJson.dependencies["@outfitter/kit"]).toBe("^0.1.0-rc.0");
-    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.1.0-rc.0");
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.4.0");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0-rc.0");
     expect(packageJson.dependencies["@outfitter/contracts"]).toBeUndefined();
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
