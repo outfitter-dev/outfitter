@@ -115,12 +115,6 @@ export default defineWorkspace(
       name: "@outfitter/docs-core",
       root: "packages/docs-core",
       // Keep the package surface limited to the library entrypoint.
-      // cli-sync is an internal script used by repo tooling.
-      config: {
-        exports: {
-          exclude: ["./cli-sync"],
-        },
-      },
     },
     {
       name: "@outfitter/docs",
@@ -200,6 +194,7 @@ export default defineWorkspace(
         exports: {
           exclude: [
             "./cli/check-bunup-registry",
+            "./cli/check-boundary-invocations",
             "./cli/check-changeset",
             "./cli/check-clean-tree",
             "./cli/check-exports",
