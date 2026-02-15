@@ -230,6 +230,15 @@ export default defineWorkspace(
         },
       },
     },
+    {
+      name: "outfitter-cli-demo",
+      root: "apps/cli-demo",
+      config: {
+        exports: {
+          exclude: ["./internal/*"],
+        },
+      },
+    },
   ],
   {
     // Entry points: all source files except tests

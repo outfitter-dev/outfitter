@@ -23,7 +23,7 @@ import {
   runAdd,
 } from "./commands/add.js";
 import { printCheckResults, runCheck } from "./commands/check.js";
-import { printDemoResults, runDemo } from "./commands/demo.js";
+import { runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { printInitResults, runInit } from "./commands/init.js";
@@ -523,12 +523,12 @@ const demoInputSchema = z.object({
 
 const demoAction = defineAction({
   id: "demo",
-  description: "Showcase @outfitter/cli rendering capabilities",
+  description: "Run the CLI demo app",
   surfaces: ["cli"],
   input: demoInputSchema,
   cli: {
     command: "demo [section]",
-    description: "Showcase @outfitter/cli rendering capabilities",
+    description: "Run the CLI demo app",
     options: [
       {
         flags: "-l, --list",
@@ -553,14 +553,21 @@ const demoAction = defineAction({
   },
   handler: async (input) => {
     const { outputMode, ...demoInput } = input;
-    const result = await runDemo(demoInput);
-    await printDemoResults(result, { mode: outputMode });
-
-    if (result.exitCode !== 0) {
-      process.exit(result.exitCode);
+    try {
+      const result = await runDemo({ ...demoInput, outputMode });
+      if (result.exitCode !== 0) {
+        process.exit(result.exitCode);
+      }
+      return Result.ok(result);
+    } catch (error) {
+      return Result.err(
+        new InternalError({
+          message:
+            error instanceof Error ? error.message : "Failed to run demo",
+          context: { action: "demo" },
+        })
+      );
     }
-
-    return Result.ok(result);
   },
 });
 
