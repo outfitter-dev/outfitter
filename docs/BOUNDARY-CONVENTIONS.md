@@ -18,7 +18,7 @@ Use this document as the source of truth when introducing or migrating commands.
 
 - Own user-facing command orchestration.
 - Wire package APIs into coherent command surfaces.
-- Host compatibility aliases and migration messaging.
+- Host canonical command entrypoints.
 
 ### Root scripts call canonical surfaces
 
@@ -106,8 +106,6 @@ issue and time-boxed removal plan.
 
 - Demo command hosting moved to `apps/cli-demo`.
 - `outfitter demo` remains a compatibility bridge to `outfitter-demo`.
-- Compatibility aliases remain available: `outfitter-showcase`,
-  `cli-showcase`.
 
 ### Tooling command shape
 
@@ -115,14 +113,6 @@ issue and time-boxed removal plan.
   - `repo check readme`
   - `repo check registry`
   - `repo check tree`
-- Legacy long-form aliases are still accepted for migration.
-
-### Alias lifecycle policy
-
-- Keep compatibility aliases until a dedicated removal issue lands with:
-  - replacement command mapping,
-  - changelog entry,
-  - and at least one minor release worth of notice.
 
 ## CI and Hook Enforcement
 
@@ -151,7 +141,8 @@ Pre-push runs the same sequence through `bunx @outfitter/tooling pre-push`.
 
 Current state:
 
-- `outfitter docs <sync|check|export>` remains as compatibility behavior.
+- `outfitter docs` is intentionally unused while docs maintenance flows
+  remain under `outfitter repo ...`.
 
 Intended state (`OS-190`):
 

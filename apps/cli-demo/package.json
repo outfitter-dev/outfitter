@@ -44,9 +44,7 @@
   },
   "bin": {
     "outfitter-demo": "./dist/cli.js",
-    "cli-demo": "./dist/cli.js",
-    "outfitter-showcase": "./dist/cli.js",
-    "cli-showcase": "./dist/cli.js"
+    "cli-demo": "./dist/cli.js"
   },
   "sideEffects": false,
   "scripts": {

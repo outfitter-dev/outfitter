@@ -35,9 +35,6 @@ bun run apps/outfitter/src/cli.ts repo check docs --cwd .
 bun run apps/outfitter/src/cli.ts repo export docs --target llms --cwd .
 ```
 
-Compatibility note: `outfitter docs <sync|check|export>` still works today, but
-new scripts should prefer `outfitter repo ...`.
-
 ## License
 
 MIT

@@ -264,6 +264,17 @@ bun add @outfitter/kit
 
 New here? Start with [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md).
 
+## Command Canon
+
+Use canonical command forms when referencing repo maintenance workflows:
+
+- `outfitter repo check <docs|exports|readme|registry|changeset|tree|boundary-invocations>`
+- `outfitter repo sync docs`
+- `outfitter repo export docs`
+
+Do not use removed legacy aliases such as `outfitter docs <sync|check|export>`,
+`outfitter repo docs-sync`, or `outfitter repo check-exports`.
+
 ## The Rules
 
 ### Do

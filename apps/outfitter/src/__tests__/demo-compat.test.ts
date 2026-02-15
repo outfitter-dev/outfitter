@@ -2,7 +2,7 @@
  * Compatibility tests for `outfitter demo`.
  *
  * Verifies the command forwards to the dedicated demo app while preserving
- * the legacy entrypoint.
+ * the `outfitter demo` bridge entrypoint.
  *
  * @packageDocumentation
  */
@@ -107,8 +107,6 @@ describe("demo compatibility bridge", () => {
     expect(result.exitCode).toBe(0);
     expect(spawnCalls[0]?.[0]).toBe("outfitter-demo");
     expect(spawnCalls[1]?.[0]).toBe("cli-demo");
-    expect(spawnCalls[2]?.[0]).toBe("outfitter-showcase");
-    expect(spawnCalls[3]?.[0]).toBe("cli-showcase");
     expect(
       spawnCalls.some(
         (cmd) => cmd[0] === process.execPath && cmd[1]?.includes("/cli-demo/")
@@ -165,12 +163,5 @@ describe("demo compatibility bridge", () => {
         outputMode: "text",
       })
     ).rejects.toThrow("cli-demo --help");
-
-    await expect(
-      runDemo({
-        section: "colors",
-        outputMode: "text",
-      })
-    ).rejects.toThrow("outfitter-showcase --help");
   });
 });

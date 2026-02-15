@@ -236,8 +236,6 @@ export async function runDemo(options: DemoOptions): Promise<DemoResult> {
   const commandCandidates: string[][] = [
     ["outfitter-demo", ...args],
     ["cli-demo", ...args],
-    ["outfitter-showcase", ...args],
-    ["cli-showcase", ...args],
     ...(await localDemoCmds(args)),
     embeddedDemoCmd(args),
   ];
@@ -256,8 +254,6 @@ export async function runDemo(options: DemoOptions): Promise<DemoResult> {
       "Run one of:",
       "  outfitter-demo --help",
       "  cli-demo --help",
-      "  outfitter-showcase --help (compatibility alias)",
-      "  cli-showcase --help (compatibility alias)",
       "",
       "In this monorepo, you can also run:",
       "  bun run apps/cli-demo/src/cli.ts --help",
