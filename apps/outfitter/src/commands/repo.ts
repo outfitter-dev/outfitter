@@ -27,9 +27,12 @@ const require = createRequire(import.meta.url);
 export type RepoCheckSubject =
   | "docs"
   | "exports"
+  | "readme"
   | "readme-imports"
+  | "registry"
   | "bunup-registry"
   | "changeset"
+  | "tree"
   | "clean-tree"
   | "boundary-invocations";
 
@@ -280,8 +283,11 @@ function addToolingCheckSubcommands(
     });
 
   command
-    .command("readme-imports")
-    .description("Validate README import examples match package exports")
+    .command("readme")
+    .alias("readme-imports")
+    .description(
+      "Validate README import examples match package exports (alias: readme-imports)"
+    )
     .option("--json", "Output results as JSON")
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
@@ -299,9 +305,10 @@ function addToolingCheckSubcommands(
     });
 
   command
-    .command("bunup-registry")
+    .command("registry")
+    .alias("bunup-registry")
     .description(
-      "Validate packages with bunup --filter are registered in bunup.config.ts"
+      "Validate packages with bunup --filter are registered in bunup.config.ts (alias: bunup-registry)"
     )
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { cwd?: string }) => {
@@ -333,9 +340,10 @@ function addToolingCheckSubcommands(
     });
 
   command
-    .command("clean-tree")
+    .command("tree")
+    .alias("clean-tree")
     .description(
-      "Assert working tree is clean (no modified or untracked files)"
+      "Assert working tree is clean (no modified or untracked files) (alias: clean-tree)"
     )
     .option("--paths <paths...>", "Limit check to specific paths")
     .option("--cwd <path>", "Workspace root to operate in")
@@ -505,7 +513,7 @@ function addLegacyAliasCommands(
 
   command
     .command("check-readme-imports")
-    .description("Legacy alias for `outfitter repo check readme-imports`")
+    .description("Legacy alias for `outfitter repo check readme`")
     .option("--json", "Output results as JSON")
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
@@ -524,7 +532,7 @@ function addLegacyAliasCommands(
 
   command
     .command("check-bunup-registry")
-    .description("Legacy alias for `outfitter repo check bunup-registry`")
+    .description("Legacy alias for `outfitter repo check registry`")
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { cwd?: string }) => {
       const code = await options.runToolingCommand({
@@ -556,7 +564,7 @@ function addLegacyAliasCommands(
 
   command
     .command("check-clean-tree")
-    .description("Legacy alias for `outfitter repo check clean-tree`")
+    .description("Legacy alias for `outfitter repo check tree`")
     .option("--paths <paths...>", "Limit check to specific paths")
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { paths?: string[]; cwd?: string }) => {
