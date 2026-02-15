@@ -1,0 +1,90 @@
+{
+  "name": "outfitter-cli-demo",
+  "description": "CLI demo app for @outfitter/cli and @outfitter/tui primitives",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./commands/demo": {
+      "import": {
+        "types": "./dist/commands/demo.d.ts",
+        "default": "./dist/commands/demo.js"
+      }
+    },
+    "./commands/demo/errors": {
+      "import": {
+        "types": "./dist/commands/demo/errors.d.ts",
+        "default": "./dist/commands/demo/errors.js"
+      }
+    },
+    "./commands/demo/registry": {
+      "import": {
+        "types": "./dist/commands/demo/registry.d.ts",
+        "default": "./dist/commands/demo/registry.js"
+      }
+    },
+    "./output-mode": {
+      "import": {
+        "types": "./dist/output-mode.d.ts",
+        "default": "./dist/output-mode.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "outfitter-demo": "./dist/cli.js",
+    "cli-demo": "./dist/cli.js",
+    "outfitter-showcase": "./dist/cli.js",
+    "cli-showcase": "./dist/cli.js"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "bunup --filter outfitter-cli-demo",
+    "dev": "bun run src/cli.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "pretypecheck": "bun run --filter @outfitter/tui build && bun run --filter @outfitter/cli build",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.0",
+    "@outfitter/cli": "workspace:*",
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/tui": "workspace:*",
+    "commander": "^14.0.2",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.7",
+    "@types/node": "^25.0.10"
+  },
+  "engines": {
+    "bun": ">=1.3.7"
+  },
+  "keywords": [
+    "outfitter",
+    "cli",
+    "demo",
+    "tui"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "apps/cli-demo"
+  }
+}
