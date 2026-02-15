@@ -45,12 +45,12 @@ generate_marketplace_manifest() {
 # -----------------------------------------------------------------------------
 # Assemble package docs
 # -----------------------------------------------------------------------------
-# Uses the docs-core package source entrypoint so prebuild can run before build.
+# Uses canonical repo command surface with source-first module resolution.
 
 assemble_package_docs() {
   (
-    cd "$ROOT_DIR/packages/docs-core"
-    bun src/cli-sync.ts --cwd "$ROOT_DIR"
+    cd "$ROOT_DIR"
+    bun run apps/outfitter/src/cli.ts repo sync docs --cwd "$ROOT_DIR"
   )
 }
 

@@ -30,8 +30,8 @@ describe("detectBoundaryViolation", () => {
 	test("flags cd packages/* then run src command", () => {
 		const violation = detectBoundaryViolation({
 			file: "package.json",
-			scriptName: "docs:sync:core",
-			command: "cd packages/docs-core && bun src/cli-sync.ts --cwd ../..",
+			scriptName: "docs:sync",
+			command: "cd packages/docs && bun src/cli.ts docs sync --cwd ../..",
 		});
 
 		expect(violation?.rule).toBe("cd-package-then-runs-src");
@@ -71,8 +71,8 @@ describe("findBoundaryViolations", () => {
 			{
 				file: "package.json",
 				scripts: {
-					"docs:sync:core":
-						"cd packages/docs-core && bun src/cli-sync.ts --cwd ../..",
+					"docs:sync":
+						"cd packages/docs && bun src/cli.ts docs sync --cwd ../..",
 					"check-readme-imports":
 						"bun run packages/tooling/src/cli/index.ts check-readme-imports",
 				},
@@ -81,7 +81,7 @@ describe("findBoundaryViolations", () => {
 
 		expect(violations).toHaveLength(2);
 		expect(violations[0]?.scriptName).toBe("check-readme-imports");
-		expect(violations[1]?.scriptName).toBe("docs:sync:core");
+		expect(violations[1]?.scriptName).toBe("docs:sync");
 	});
 });
 
