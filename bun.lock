@@ -20,7 +20,7 @@
     },
     "apps/cli-demo": {
       "name": "outfitter-cli-demo",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "outfitter-demo": "./dist/cli.js",
         "cli-demo": "./dist/cli.js",
@@ -42,7 +42,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -79,7 +79,7 @@
     },
     "packages/cli": {
       "name": "@outfitter/cli",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@clack/prompts": "^0.11.0",
         "better-result": "^2.5.1",
@@ -101,7 +101,7 @@
     },
     "packages/config": {
       "name": "@outfitter/config",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -114,7 +114,7 @@
     },
     "packages/contracts": {
       "name": "@outfitter/contracts",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "better-result": "^2.5.0",
         "zod": "^4.3.5",
@@ -126,7 +126,7 @@
     },
     "packages/daemon": {
       "name": "@outfitter/daemon",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/file-ops": "workspace:*",
@@ -139,7 +139,7 @@
     },
     "packages/docs": {
       "name": "@outfitter/docs",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "outfitter-docs": "./dist/cli.js",
       },
@@ -154,7 +154,7 @@
     },
     "packages/docs-core": {
       "name": "@outfitter/docs-core",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "better-result": "^2.5.0",
       },
@@ -165,7 +165,7 @@
     },
     "packages/file-ops": {
       "name": "@outfitter/file-ops",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -177,7 +177,7 @@
     },
     "packages/index": {
       "name": "@outfitter/index",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/file-ops": "workspace:*",
@@ -189,7 +189,7 @@
     },
     "packages/kit": {
       "name": "@outfitter/kit",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -201,7 +201,7 @@
     },
     "packages/logging": {
       "name": "@outfitter/logging",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@logtape/logtape": "^2.0.0",
       },
@@ -218,7 +218,7 @@
     },
     "packages/mcp": {
       "name": "@outfitter/mcp",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.12.1",
         "zod": "^4.3.5",
@@ -238,7 +238,7 @@
     },
     "packages/state": {
       "name": "@outfitter/state",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -250,7 +250,7 @@
     },
     "packages/testing": {
       "name": "@outfitter/testing",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/mcp": "workspace:*",
@@ -263,7 +263,7 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
@@ -289,7 +289,7 @@
     },
     "packages/tui": {
       "name": "@outfitter/tui",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@clack/prompts": "^0.11.0",
         "better-result": "^2.5.1",
@@ -310,7 +310,7 @@
     },
     "packages/types": {
       "name": "@outfitter/types",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "better-result": "^2.5.0",

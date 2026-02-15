@@ -9,6 +9,8 @@ import type {
   ColorFlags,
   ColorMode,
   ComposedPreset,
+  ExecutionFlags,
+  ExecutionPresetConfig,
   FlagPreset,
   FlagPresetConfig,
   InteractionFlags,
@@ -16,6 +18,8 @@ import type {
   PaginationPresetConfig,
   ProjectionFlags,
   StrictFlags,
+  TimeWindowFlags,
+  TimeWindowPresetConfig,
 } from "./types.js";
 
 /**
@@ -400,6 +404,172 @@ export function projectionPreset(): FlagPreset<ProjectionFlags> {
   });
 }
 
+// =============================================================================
+// Duration Parsing
+// =============================================================================
+
+const DURATION_SUFFIXES: Record<string, number> = {
+  w: 7 * 24 * 60 * 60 * 1000,
+  d: 24 * 60 * 60 * 1000,
+  h: 60 * 60 * 1000,
+  m: 60 * 1000,
+};
+
+/**
+ * Parse a date string or relative duration into a Date.
+ * Supports ISO 8601 dates and relative durations (7d, 24h, 30m, 2w).
+ * Returns `undefined` for invalid or unparseable input.
+ */
+function parseDate(
+  value: unknown,
+  nowMs: number = Date.now()
+): Date | undefined {
+  if (typeof value !== "string" || value === "") return undefined;
+
+  // Try relative duration first (e.g., "7d", "24h", "30m", "2w")
+  const durationMatch = value.match(/^(\d+(?:\.\d+)?)(w|d|h|m)$/);
+  if (durationMatch) {
+    const amount = Number(durationMatch[1]);
+    const suffix = durationMatch[2];
+    const multiplier = suffix ? DURATION_SUFFIXES[suffix] : undefined;
+    if (amount > 0 && multiplier !== undefined) {
+      return new Date(nowMs - amount * multiplier);
+    }
+    return undefined;
+  }
+
+  // Try ISO 8601 date
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date;
+}
+
+function sanitizePositiveInteger(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
+
+/**
+ * Time-window flag preset.
+ *
+ * Adds: `--since <date>`, `--until <date>`
+ * Resolves: `{ since: Date | undefined, until: Date | undefined }`
+ *
+ * Accepts ISO 8601 dates (`2024-01-15`) or relative durations
+ * (`7d`, `24h`, `30m`, `2w`). Durations are past-relative
+ * (subtracted from now).
+ *
+ * Returns `undefined` for unparseable values (does not throw).
+ * When `config.maxRange` is set and both bounds are provided,
+ * ranges above the limit are treated as invalid.
+ */
+export function timeWindowPreset(
+  config?: TimeWindowPresetConfig
+): FlagPreset<TimeWindowFlags> {
+  return createPreset({
+    id: "timeWindow",
+    options: [
+      {
+        flags: "--since <date>",
+        description: "Start of time window (ISO date or duration: 7d, 24h, 2w)",
+      },
+      {
+        flags: "--until <date>",
+        description: "End of time window (ISO date or duration: 7d, 24h, 2w)",
+      },
+    ],
+    resolve: (flags) => {
+      const now = Date.now();
+      const since = parseDate(flags["since"], now);
+      const until = parseDate(flags["until"], now);
+
+      if (
+        since &&
+        until &&
+        typeof config?.maxRange === "number" &&
+        Number.isFinite(config.maxRange) &&
+        config.maxRange > 0
+      ) {
+        const range = Math.abs(until.getTime() - since.getTime());
+        if (range > config.maxRange) {
+          return {
+            since: undefined,
+            until: undefined,
+          };
+        }
+      }
+
+      return { since, until };
+    },
+  });
+}
+
+/**
+ * Execution flag preset.
+ *
+ * Adds: `--timeout <ms>`, `--retries <n>`, `--offline`
+ * Resolves: `{ timeout: number | undefined, retries: number, offline: boolean }`
+ *
+ * Timeout is parsed as a positive integer in milliseconds.
+ * Retries are parsed as a non-negative integer, clamped to maxRetries.
+ */
+export function executionPreset(
+  config?: ExecutionPresetConfig
+): FlagPreset<ExecutionFlags> {
+  const defaultTimeout = config?.defaultTimeout;
+  const defaultRetries = config?.defaultRetries ?? 0;
+  const maxRetries = config?.maxRetries ?? 10;
+
+  return createPreset({
+    id: "execution",
+    options: [
+      {
+        flags: "--timeout <ms>",
+        description: "Timeout in milliseconds",
+      },
+      {
+        flags: "--retries <n>",
+        description: `Number of retries (default: ${defaultRetries}, max: ${maxRetries})`,
+      },
+      {
+        flags: "--offline",
+        description: "Operate in offline mode",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => {
+      // Timeout: positive integer or undefined
+      let timeout = defaultTimeout;
+      const rawTimeout = flags["timeout"];
+      if (rawTimeout !== undefined) {
+        const parsed = Number(rawTimeout);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          timeout = Math.floor(parsed);
+        } else {
+          timeout = undefined;
+        }
+      }
+
+      // Retries: non-negative integer, clamped to maxRetries
+      let retries = defaultRetries;
+      const rawRetries = flags["retries"];
+      if (rawRetries !== undefined) {
+        const parsed = Number(rawRetries);
+        if (Number.isFinite(parsed) && parsed >= 0) {
+          retries = Math.min(Math.floor(parsed), maxRetries);
+        }
+      }
+
+      return {
+        timeout,
+        retries,
+        offline: Boolean(flags["offline"]),
+      };
+    },
+  });
+}
+
 /**
  * Pagination flag preset.
  *
@@ -463,6 +633,8 @@ export type {
   ColorFlags,
   ColorMode,
   ComposedPreset,
+  ExecutionFlags,
+  ExecutionPresetConfig,
   FlagPreset,
   FlagPresetConfig,
   InteractionFlags,
@@ -470,4 +642,6 @@ export type {
   PaginationPresetConfig,
   ProjectionFlags,
   StrictFlags,
+  TimeWindowFlags,
+  TimeWindowPresetConfig,
 } from "./types.js";
