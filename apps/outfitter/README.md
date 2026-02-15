@@ -177,6 +177,12 @@ Legacy long-form aliases remain available during migration:
 - `outfitter repo check-clean-tree` -> `outfitter repo check tree`
 - `outfitter repo check-boundary-invocations` -> `outfitter repo check boundary-invocations`
 
+Migration policy:
+
+- Legacy aliases stay available until a dedicated removal issue lands with
+  replacement mapping and changelog notice.
+- New scripts and docs should only use canonical `outfitter repo ...` forms.
+
 ### `migrate kit`
 
 Codemod for kit-first foundation adoption.
@@ -252,6 +258,21 @@ outfitter docs export
 ```
 
 Prefer `outfitter repo ...` for new usage.
+
+Direction (`OS-190`): plain `outfitter docs` will become user-facing docs
+discovery/help, while repo-maintenance docs workflows stay under
+`outfitter repo ...`.
+
+## Command Conventions
+
+Canonical boundary and command conventions are documented in
+[`docs/BOUNDARY-CONVENTIONS.md`](../../docs/BOUNDARY-CONVENTIONS.md).
+
+Quick model status:
+
+- `init`, `add`, `check`: implemented user-facing verbs
+- `setup`, `fix`, user-facing `docs`: planned convergence verbs
+- `repo check|sync|export`: canonical maintenance namespace
 
 ## Programmatic API
 

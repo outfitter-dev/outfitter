@@ -7,6 +7,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | Document | Description |
 |----------|-------------|
 | [Architecture](./ARCHITECTURE.md) | Package tiers, dependency graph, design decisions |
+| [Boundary and Command Conventions](./BOUNDARY-CONVENTIONS.md) | Canonical `apps/*` vs `packages/*` rules, command model, migration aliases |
 | [Getting Started](./GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
 | [Patterns](./PATTERNS.md) | Handlers, Result types, error taxonomy, validation |
 | [Stack Composition](./STACK-COMPOSITION.md) | Composable hstack/vstack primitives for CLI layouts |
