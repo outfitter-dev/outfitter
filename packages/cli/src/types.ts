@@ -201,6 +201,20 @@ export type StrictFlags = {
 };
 
 /**
+ * Color mode for CLI output.
+ */
+export type ColorMode = "auto" | "always" | "never";
+
+/**
+ * Resolved color flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type ColorFlags = {
+  /** Color output mode */
+  readonly color: ColorMode;
+};
+
+/**
  * Resolved pagination flags from CLI input.
  */
 // biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
