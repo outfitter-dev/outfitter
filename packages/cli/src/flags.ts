@@ -5,7 +5,13 @@
  */
 
 import type { ActionCliOption } from "@outfitter/contracts";
-import type { ComposedPreset, FlagPreset, FlagPresetConfig } from "./types.js";
+import type {
+  ComposedPreset,
+  FlagPreset,
+  FlagPresetConfig,
+  PaginationFlags,
+  PaginationPresetConfig,
+} from "./types.js";
 
 /**
  * Create a typed flag preset.
@@ -223,4 +229,69 @@ export function forcePreset(): FlagPreset<{ force: boolean }> {
   });
 }
 
-export type { ComposedPreset, FlagPreset, FlagPresetConfig } from "./types.js";
+/**
+ * Pagination flag preset.
+ *
+ * Adds: `-l, --limit <n>`, `--next`, `--reset`
+ * Resolves: `{ limit: number, next: boolean, reset: boolean }`
+ *
+ * Limit is parsed as an integer, clamped to maxLimit, and defaults
+ * to defaultLimit on invalid input. Mutual exclusivity of --next
+ * and --reset is a handler concern (not enforced here).
+ *
+ * Integrates with loadCursor/saveCursor/clearCursor from
+ * `@outfitter/cli/pagination`.
+ */
+export function paginationPreset(
+  config?: PaginationPresetConfig
+): FlagPreset<PaginationFlags> {
+  const maxLimit = sanitizePositiveInteger(config?.maxLimit, 100);
+  const defaultLimit = Math.min(
+    sanitizePositiveInteger(config?.defaultLimit, 20),
+    maxLimit
+  );
+
+  return createPreset({
+    id: "pagination",
+    options: [
+      {
+        flags: "-l, --limit <n>",
+        description: `Maximum number of results (default: ${defaultLimit}, max: ${maxLimit})`,
+      },
+      {
+        flags: "--next",
+        description: "Continue from last position",
+        defaultValue: false,
+      },
+      {
+        flags: "--reset",
+        description: "Clear saved cursor and start fresh",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => {
+      let limit = defaultLimit;
+      const rawLimit = flags["limit"];
+      if (rawLimit !== undefined) {
+        const parsed = Number(rawLimit);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          limit = Math.min(Math.floor(parsed), maxLimit);
+        }
+      }
+
+      return {
+        limit,
+        next: Boolean(flags["next"]),
+        reset: Boolean(flags["reset"]),
+      };
+    },
+  });
+}
+
+export type {
+  ComposedPreset,
+  FlagPreset,
+  FlagPresetConfig,
+  PaginationFlags,
+  PaginationPresetConfig,
+} from "./types.js";
