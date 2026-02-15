@@ -9,6 +9,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   CREATE_PRESET_IDS,
+  createRepoCommand,
   getInitTarget,
   InitError,
   initCommand,
@@ -63,5 +64,9 @@ describe("outfitter public API", () => {
     });
 
     expect(result.isOk()).toBe(true);
+  });
+
+  test("exports createRepoCommand", () => {
+    expect(typeof createRepoCommand).toBe("function");
   });
 });

@@ -18,6 +18,7 @@ import { createContext, generateRequestId } from "@outfitter/contracts";
 import { createDocsCommand } from "@outfitter/docs";
 import { createOutfitterLoggerFactory } from "@outfitter/logging";
 import { outfitterActions } from "./actions.js";
+import { createRepoCommand } from "./commands/repo.js";
 
 // =============================================================================
 // CLI Setup
@@ -69,6 +70,8 @@ function createProgram() {
     cli.register(command);
   }
 
+  cli.register(createRepoCommand());
+  // Compatibility command. Canonical surface is `outfitter repo ...`.
   cli.register(createDocsCommand());
 
   return cli;
