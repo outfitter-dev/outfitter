@@ -15,9 +15,9 @@ import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
 import { exitWithError } from "@outfitter/cli/output";
 import { createContext, generateRequestId } from "@outfitter/contracts";
-import { createDocsCommand } from "@outfitter/docs";
 import { createOutfitterLoggerFactory } from "@outfitter/logging";
 import { outfitterActions } from "./actions.js";
+import { loadDocsModule } from "./commands/docs-module-loader.js";
 import { createRepoCommand } from "./commands/repo.js";
 
 // =============================================================================
@@ -29,7 +29,7 @@ import { createRepoCommand } from "./commands/repo.js";
  *
  * @returns Configured Commander program
  */
-function createProgram() {
+async function createProgram() {
   const cliVersion = readCliVersion();
   const loggerFactory = createOutfitterLoggerFactory();
   const logger = loggerFactory.createLogger({
@@ -72,7 +72,15 @@ function createProgram() {
 
   cli.register(createRepoCommand());
   // Compatibility command. Canonical surface is `outfitter repo ...`.
-  cli.register(createDocsCommand());
+  try {
+    const docsModule = await loadDocsModule();
+    cli.register(docsModule.createDocsCommand());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.warn("Skipping docs compatibility command registration", {
+      reason: message,
+    });
+  }
 
   return cli;
 }
@@ -106,7 +114,7 @@ function readCliVersion(): string {
  * Main entry point for the CLI.
  */
 async function main(): Promise<void> {
-  const cli = createProgram();
+  const cli = await createProgram();
   await cli.parse();
 }
 
