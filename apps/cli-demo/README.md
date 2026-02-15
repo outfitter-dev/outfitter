@@ -14,8 +14,6 @@ Installed binary names:
 
 - `outfitter-demo`
 - `cli-demo`
-- `outfitter-showcase` (compatibility alias)
-- `cli-showcase` (compatibility alias)
 
 ## Command
 

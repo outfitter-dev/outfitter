@@ -85,6 +85,7 @@ Developer-facing tools built on the runtime.
 | [Getting Started](docs/GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
 | [Patterns](docs/PATTERNS.md) | Understand handlers, Result types, error taxonomy |
 | [Architecture](docs/ARCHITECTURE.md) | How packages fit together |
+| [Boundary Conventions](docs/BOUNDARY-CONVENTIONS.md) | Canonical command model and `apps/*` vs `packages/*` boundaries |
 | [Migration](docs/MIGRATION.md) | Adopting Outfitter or upgrading versions |
 
 ## Development

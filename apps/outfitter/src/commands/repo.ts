@@ -26,12 +26,9 @@ export type RepoCheckSubject =
   | "docs"
   | "exports"
   | "readme"
-  | "readme-imports"
   | "registry"
-  | "bunup-registry"
   | "changeset"
   | "tree"
-  | "clean-tree"
   | "boundary-invocations";
 
 export interface RepoCommandIo {
@@ -306,10 +303,7 @@ function addToolingCheckSubcommands(
 
   command
     .command("readme")
-    .alias("readme-imports")
-    .description(
-      "Validate README import examples match package exports (alias: readme-imports)"
-    )
+    .description("Validate README import examples match package exports")
     .option("--json", "Output results as JSON")
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
@@ -328,9 +322,8 @@ function addToolingCheckSubcommands(
 
   command
     .command("registry")
-    .alias("bunup-registry")
     .description(
-      "Validate packages with bunup --filter are registered in bunup.config.ts (alias: bunup-registry)"
+      "Validate packages with bunup --filter are registered in bunup.config.ts"
     )
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { cwd?: string }) => {
@@ -363,9 +356,8 @@ function addToolingCheckSubcommands(
 
   command
     .command("tree")
-    .alias("clean-tree")
     .description(
-      "Assert working tree is clean (no modified or untracked files) (alias: clean-tree)"
+      "Assert working tree is clean (no modified or untracked files)"
     )
     .option("--paths <paths...>", "Limit check to specific paths")
     .option("--cwd <path>", "Workspace root to operate in")
@@ -391,224 +383,6 @@ function addToolingCheckSubcommands(
     .option("--cwd <path>", "Workspace root to operate in")
     .action(async (cmdOptions: { cwd?: string }) => {
       const code = await runToolingCommand({
-        command: "check-boundary-invocations",
-        args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-}
-
-function addLegacyAliasCommands(
-  command: Command,
-  options: {
-    readonly io: Required<RepoCommandIo>;
-    readonly runDocsCheck: (
-      opts: ExecuteCheckCommandOptions,
-      io: Required<RepoCommandIo>
-    ) => Promise<number>;
-    readonly runDocsSync: (
-      opts: ExecuteSyncCommandOptions,
-      io: Required<RepoCommandIo>
-    ) => Promise<number>;
-    readonly runDocsExport: (
-      opts: ExecuteExportCommandOptions,
-      io: Required<RepoCommandIo>
-    ) => Promise<number>;
-    readonly runToolingCommand: (
-      input: RepoToolingInvocation
-    ) => Promise<number>;
-  }
-): void {
-  command
-    .command("docs-check")
-    .description("Legacy alias for `outfitter repo check docs`")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsCheck(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
-
-  command
-    .command("docs-sync")
-    .description("Legacy alias for `outfitter repo sync docs`")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsSync(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
-
-  command
-    .command("docs-export")
-    .description("Legacy alias for `outfitter repo export docs`")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .option("--llms-file <path>", "llms.txt output path relative to workspace")
-    .option(
-      "--llms-full-file <path>",
-      "llms-full.txt output path relative to workspace"
-    )
-    .option(
-      "--target <target>",
-      "Export target: packages, llms, llms-full, all",
-      "all"
-    )
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        llmsFile?: string;
-        llmsFullFile?: string;
-        mdxMode?: "strict" | "lossy";
-        outputDir?: string;
-        packagesDir?: string;
-        target?: string;
-      }) => {
-        const code = await options.runDocsExport(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
-
-  command
-    .command("check-exports")
-    .description("Legacy alias for `outfitter repo check exports`")
-    .option("--json", "Output results as JSON")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.json) {
-        args.push("--json");
-      }
-
-      const code = await options.runToolingCommand({
-        command: "check-exports",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("check-readme-imports")
-    .description("Legacy alias for `outfitter repo check readme`")
-    .option("--json", "Output results as JSON")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.json) {
-        args.push("--json");
-      }
-
-      const code = await options.runToolingCommand({
-        command: "check-readme-imports",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("check-bunup-registry")
-    .description("Legacy alias for `outfitter repo check registry`")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { cwd?: string }) => {
-      const code = await options.runToolingCommand({
-        command: "check-bunup-registry",
-        args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("check-changeset")
-    .description("Legacy alias for `outfitter repo check changeset`")
-    .option("-s, --skip", "Skip changeset check")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { skip?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.skip) {
-        args.push("--skip");
-      }
-
-      const code = await options.runToolingCommand({
-        command: "check-changeset",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("check-clean-tree")
-    .description("Legacy alias for `outfitter repo check tree`")
-    .option("--paths <paths...>", "Limit check to specific paths")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { paths?: string[]; cwd?: string }) => {
-      const args: string[] = [];
-      if (Array.isArray(cmdOptions.paths) && cmdOptions.paths.length > 0) {
-        args.push("--paths", ...cmdOptions.paths);
-      }
-
-      const code = await options.runToolingCommand({
-        command: "check-clean-tree",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("check-boundary-invocations")
-    .description("Legacy alias for `outfitter repo check boundary-invocations`")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { cwd?: string }) => {
-      const code = await options.runToolingCommand({
         command: "check-boundary-invocations",
         args: [],
         cwd: resolveCwdOption(cmdOptions.cwd),
@@ -643,13 +417,6 @@ export function createRepoCommand(options?: CreateRepoCommandOptions): Command {
     .command("export")
     .description("Export repository artifacts by subject");
   addDocsExportSubcommand(exportCommand, { io, runDocsExport });
-  addLegacyAliasCommands(command, {
-    io,
-    runDocsCheck,
-    runDocsSync,
-    runDocsExport,
-    runToolingCommand,
-  });
 
   return command;
 }

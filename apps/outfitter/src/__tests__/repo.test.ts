@@ -154,55 +154,42 @@ describe("createRepoCommand", () => {
     });
   });
 
-  test("supports legacy alias `repo check-exports`", async () => {
+  test("does not register removed top-level legacy alias commands", () => {
     const command = createTestCommand();
+    const topLevelNames = command.commands.map((subcommand) =>
+      subcommand.name()
+    );
 
-    await command.parseAsync(["node", "repo", "check-exports", "--json"], {
-      from: "node",
-    });
-
-    expect(toolingCalls).toHaveLength(1);
-    expect(toolingCalls[0]).toEqual({
-      command: "check-exports",
-      args: ["--json"],
-      cwd: process.cwd(),
-    });
+    expect(topLevelNames).not.toContain("docs-check");
+    expect(topLevelNames).not.toContain("docs-sync");
+    expect(topLevelNames).not.toContain("docs-export");
+    expect(topLevelNames).not.toContain("check-exports");
+    expect(topLevelNames).not.toContain("check-readme-imports");
+    expect(topLevelNames).not.toContain("check-bunup-registry");
+    expect(topLevelNames).not.toContain("check-changeset");
+    expect(topLevelNames).not.toContain("check-clean-tree");
+    expect(topLevelNames).not.toContain("check-boundary-invocations");
   });
 
-  test("supports subject aliases `readme-imports`, `bunup-registry`, and `clean-tree`", async () => {
+  test("does not register removed subject aliases", () => {
     const command = createTestCommand();
-
-    await command.parseAsync(
-      ["node", "repo", "check", "readme-imports", "--json"],
-      {
-        from: "node",
-      }
+    const checkCommand = command.commands.find(
+      (subcommand) => subcommand.name() === "check"
     );
-    await command.parseAsync(["node", "repo", "check", "bunup-registry"], {
-      from: "node",
-    });
-    await command.parseAsync(
-      ["node", "repo", "check", "clean-tree", "--paths", "docs"],
-      {
-        from: "node",
-      }
+    const checkSubcommands = checkCommand?.commands ?? [];
+
+    const readmeCommand = checkSubcommands.find(
+      (subcommand) => subcommand.name() === "readme"
+    );
+    const registryCommand = checkSubcommands.find(
+      (subcommand) => subcommand.name() === "registry"
+    );
+    const treeCommand = checkSubcommands.find(
+      (subcommand) => subcommand.name() === "tree"
     );
 
-    expect(toolingCalls).toHaveLength(3);
-    expect(toolingCalls[0]).toEqual({
-      command: "check-readme-imports",
-      args: ["--json"],
-      cwd: process.cwd(),
-    });
-    expect(toolingCalls[1]).toEqual({
-      command: "check-bunup-registry",
-      args: [],
-      cwd: process.cwd(),
-    });
-    expect(toolingCalls[2]).toEqual({
-      command: "check-clean-tree",
-      args: ["--paths", "docs"],
-      cwd: process.cwd(),
-    });
+    expect(readmeCommand?.aliases()).toEqual([]);
+    expect(registryCommand?.aliases()).toEqual([]);
+    expect(treeCommand?.aliases()).toEqual([]);
   });
 });

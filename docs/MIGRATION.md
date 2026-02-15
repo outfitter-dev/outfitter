@@ -244,6 +244,24 @@ const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
 2. Respects `XDG_*_HOME` environment variables
 3. Paths are user-configurable and predictable
 
+## Boundary and Command Migration
+
+For command-surface and boundary rules, use
+[Boundary and Command Conventions](./BOUNDARY-CONVENTIONS.md) as the source of
+truth.
+
+Key migration points:
+
+- Docs workflows now route through `outfitter repo <action> docs` for monorepo
+  maintenance.
+- `@outfitter/docs-core` is library-only; runnable docs command behavior lives
+  in `@outfitter/docs` and host CLIs.
+- Demo command hosting moved to `apps/cli-demo`; `outfitter demo` remains a
+  compatibility bridge.
+- Legacy long-form repo command aliases remain available during transition, but
+  new scripts should use short canonical subjects (`readme`, `registry`,
+  `tree`).
+
 ## Version Upgrades
 
 The `outfitter update` command detects installed `@outfitter/*` packages, queries npm for the latest versions, and classifies updates as breaking or non-breaking. It supports workspace-aware scanning for monorepos.

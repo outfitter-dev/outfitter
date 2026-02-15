@@ -165,18 +165,6 @@ outfitter repo check exports --json
 outfitter repo check readme
 ```
 
-Legacy long-form aliases remain available during migration:
-
-- `outfitter repo docs-sync` -> `outfitter repo sync docs`
-- `outfitter repo docs-check` -> `outfitter repo check docs`
-- `outfitter repo docs-export` -> `outfitter repo export docs`
-- `outfitter repo check-exports` -> `outfitter repo check exports`
-- `outfitter repo check-readme-imports` -> `outfitter repo check readme`
-- `outfitter repo check-bunup-registry` -> `outfitter repo check registry`
-- `outfitter repo check-changeset` -> `outfitter repo check changeset`
-- `outfitter repo check-clean-tree` -> `outfitter repo check tree`
-- `outfitter repo check-boundary-invocations` -> `outfitter repo check boundary-invocations`
-
 ### `migrate kit`
 
 Codemod for kit-first foundation adoption.
@@ -239,19 +227,17 @@ Options:
 - `-a, --animate` - Run animated spinner demo
 
 Use `outfitter-demo` (or `cli-demo`) directly for the dedicated demo app.
-Compatibility aliases: `outfitter-showcase`, `cli-showcase`.
 
-### `docs` (compatibility)
+## Command Conventions
 
-Legacy docs-maintenance command is still available:
+Canonical boundary and command conventions are documented in
+[`docs/BOUNDARY-CONVENTIONS.md`](../../docs/BOUNDARY-CONVENTIONS.md).
 
-```bash
-outfitter docs sync
-outfitter docs check
-outfitter docs export
-```
+Quick model status:
 
-Prefer `outfitter repo ...` for new usage.
+- `init`, `add`, `check`: implemented user-facing verbs
+- `setup`, `fix`, user-facing `docs`: planned convergence verbs
+- `repo check|sync|export`: canonical maintenance namespace
 
 ## Programmatic API
 

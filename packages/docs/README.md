@@ -25,6 +25,16 @@ bunx @outfitter/docs docs check
 bunx @outfitter/docs docs export --target llms
 ```
 
+## Monorepo Canonical Routing
+
+Inside this monorepo, maintenance workflows are routed through `outfitter repo`:
+
+```bash
+bun run apps/outfitter/src/cli.ts repo sync docs --cwd .
+bun run apps/outfitter/src/cli.ts repo check docs --cwd .
+bun run apps/outfitter/src/cli.ts repo export docs --target llms --cwd .
+```
+
 ## License
 
 MIT

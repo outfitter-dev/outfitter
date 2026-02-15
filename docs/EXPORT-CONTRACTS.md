@@ -6,12 +6,14 @@ This document covers the tooling that keeps export surfaces intentional.
 
 ## How It Works
 
-The pipeline has four components:
+The pipeline has five components:
 
 1. **bunup** builds from source and auto-generates `package.json#exports`
 2. **`exports.exclude`** in `bunup.config.ts` constrains what bunup publishes
 3. **`check-exports`** validates that source files and `package.json` are in sync
 4. **`check-readme-imports`** validates that README examples reference real exports
+5. **`check-boundary-invocations`** validates root/apps scripts do not execute
+   `packages/*/src/*` directly
 
 ### Export Exclusions
 
@@ -42,7 +44,8 @@ Common exclusion patterns:
 The `verify:ci` script runs the full pipeline:
 
 ```
-typecheck -> check -> docs:check:ci -> check-exports -> check-readme-imports -> build -> check-clean-tree -> test
+typecheck -> check -> docs:check:ci -> check-exports -> check-readme-imports
+-> build -> check-clean-tree -> check-boundary-invocations -> test
 ```
 
 This same pipeline runs locally via pre-push hook (`bunx @outfitter/tooling pre-push`) and in CI. Local and CI are always in parity.
@@ -53,7 +56,8 @@ The key sequence for export integrity:
 2. `check-readme-imports` validates README examples reference real exports (pre-build)
 3. `build` regenerates `package.json#exports` from source
 4. `check-clean-tree` fails if the build changed any tracked files (stale exports)
-5. Tests confirm runtime behavior matches the declared surface
+5. `check-boundary-invocations` enforces command boundary policy
+6. Tests confirm runtime behavior matches the declared surface
 
 ## Common Workflows
 
@@ -94,7 +98,23 @@ import { internal } from "@outfitter/contracts/internal/helpers";
 
 ## Commands Reference
 
-All commands live in `@outfitter/tooling` and run from the repo root.
+Canonical monorepo invocation uses `outfitter repo check <subject>`:
+
+```bash
+bun run apps/outfitter/src/cli.ts repo check exports --cwd .
+bun run apps/outfitter/src/cli.ts repo check readme --cwd .
+bun run apps/outfitter/src/cli.ts repo check tree --cwd .
+bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
+```
+
+Standalone package-bin invocation via `@outfitter/tooling` remains supported:
+
+```bash
+bunx @outfitter/tooling check-exports
+bunx @outfitter/tooling check-readme-imports
+bunx @outfitter/tooling check-clean-tree
+bunx @outfitter/tooling check-boundary-invocations
+```
 
 ### check-exports
 
@@ -146,12 +166,30 @@ Exit codes: `0` = all valid, `1` = invalid imports found.
 
 Import examples are contractual by default. To mark a code block as non-contractual, place `<!-- non-contractual -->` on the line before the opening fence.
 
+### check-boundary-invocations
+
+Validates that root/app scripts do not execute `packages/*/src/*` directly.
+
+```bash
+# Canonical monorepo command
+bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
+
+# Package bin alternative
+bunx @outfitter/tooling check-boundary-invocations
+```
+
+Exit codes: `0` = no violations, `1` = one or more boundary violations.
+
+When this fails, replace direct source execution with canonical command
+surfaces (`outfitter repo ...` or package bins).
+
 ## Agent Guidance
 
 Agents running check/fix loops should follow this sequence:
 
 ```
 check-exports -> build (if drift) -> check-clean-tree -> check-readme-imports
+-> check-boundary-invocations
 ```
 
 - Use `--json` for machine-parseable output
@@ -162,3 +200,5 @@ check-exports -> build (if drift) -> check-clean-tree -> check-readme-imports
 
 - [Architecture](./ARCHITECTURE.md) -- Package tiers and dependency graph
 - [Patterns](./PATTERNS.md) -- Handler contract, Result types
+- [Boundary and Command Conventions](./BOUNDARY-CONVENTIONS.md) -- Canonical
+  invocation and migration policy

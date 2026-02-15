@@ -87,6 +87,17 @@ bunx @outfitter/tooling pre-push
 bunx @outfitter/tooling pre-push --force
 ```
 
+### `tooling check-boundary-invocations`
+
+Validate that root/app scripts do not execute `packages/*/src/*` directly.
+
+```bash
+bunx @outfitter/tooling check-boundary-invocations
+```
+
+When this fails, replace direct source execution with canonical command surfaces
+(`outfitter repo ...` in monorepo scripts, or package bins for standalone use).
+
 ## Configuration Presets
 
 ### Biome
@@ -150,6 +161,18 @@ Available blocks:
 - `markdownlint` — Markdown linting configuration
 - `bootstrap` — Project bootstrap script
 - `scaffolding` — Full starter kit (combines all above)
+
+## Monorepo Command Mapping
+
+Within this monorepo, maintenance checks are routed via `outfitter repo`:
+
+```bash
+bun run apps/outfitter/src/cli.ts repo check exports --cwd .
+bun run apps/outfitter/src/cli.ts repo check readme --cwd .
+bun run apps/outfitter/src/cli.ts repo check registry --cwd .
+bun run apps/outfitter/src/cli.ts repo check tree --cwd .
+bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
+```
 
 ## Exports
 
