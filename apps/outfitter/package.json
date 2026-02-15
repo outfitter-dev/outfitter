@@ -40,6 +40,12 @@
         "default": "./dist/commands/demo.js"
       }
     },
+    "./commands/docs-module-loader": {
+      "import": {
+        "types": "./dist/commands/docs-module-loader.d.ts",
+        "default": "./dist/commands/docs-module-loader.js"
+      }
+    },
     "./commands/doctor": {
       "import": {
         "types": "./dist/commands/doctor.d.ts",
@@ -56,6 +62,12 @@
       "import": {
         "types": "./dist/commands/migrate-kit.d.ts",
         "default": "./dist/commands/migrate-kit.js"
+      }
+    },
+    "./commands/repo": {
+      "import": {
+        "types": "./dist/commands/repo.d.ts",
+        "default": "./dist/commands/repo.js"
       }
     },
     "./commands/scaffold": {
