@@ -12,15 +12,13 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
+import { Command } from "commander";
 import {
   type ExecuteCheckCommandOptions,
   type ExecuteExportCommandOptions,
   type ExecuteSyncCommandOptions,
-  executeCheckCommand,
-  executeExportCommand,
-  executeSyncCommand,
-} from "@outfitter/docs";
-import { Command } from "commander";
+  loadDocsModule,
+} from "./docs-module-loader.js";
 
 const require = createRequire(import.meta.url);
 
@@ -108,6 +106,30 @@ function resolveToolingCliEntrypoint(): string {
   throw new Error(
     "Unable to resolve @outfitter/tooling CLI entrypoint (expected dist/cli/index.js or src/cli/index.ts)."
   );
+}
+
+async function runDocsCheckDefault(
+  options: ExecuteCheckCommandOptions,
+  io: Required<RepoCommandIo>
+): Promise<number> {
+  const docsModule = await loadDocsModule();
+  return await docsModule.executeCheckCommand(options, io);
+}
+
+async function runDocsSyncDefault(
+  options: ExecuteSyncCommandOptions,
+  io: Required<RepoCommandIo>
+): Promise<number> {
+  const docsModule = await loadDocsModule();
+  return await docsModule.executeSyncCommand(options, io);
+}
+
+async function runDocsExportDefault(
+  options: ExecuteExportCommandOptions,
+  io: Required<RepoCommandIo>
+): Promise<number> {
+  const docsModule = await loadDocsModule();
+  return await docsModule.executeExportCommand(options, io);
 }
 
 async function runToolingCommandDefault(
@@ -597,9 +619,9 @@ function addLegacyAliasCommands(
 
 export function createRepoCommand(options?: CreateRepoCommandOptions): Command {
   const io = getIo(options);
-  const runDocsCheck = options?.runDocsCheck ?? executeCheckCommand;
-  const runDocsSync = options?.runDocsSync ?? executeSyncCommand;
-  const runDocsExport = options?.runDocsExport ?? executeExportCommand;
+  const runDocsCheck = options?.runDocsCheck ?? runDocsCheckDefault;
+  const runDocsSync = options?.runDocsSync ?? runDocsSyncDefault;
+  const runDocsExport = options?.runDocsExport ?? runDocsExportDefault;
   const runToolingCommand =
     options?.runToolingCommand ?? runToolingCommandDefault;
 
