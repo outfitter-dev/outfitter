@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [a1ae604]
+- Updated dependencies [d683522]
+- Updated dependencies [839b4e1]
+- Updated dependencies [d683522]
+- Updated dependencies [d683522]
+- Updated dependencies [d683522]
+- Updated dependencies [573c6d3]
+- Updated dependencies [839b4e1]
+  - @outfitter/tooling@0.2.3
+  - @outfitter/cli@0.4.0
+  - @outfitter/config@0.3.1
+  - @outfitter/contracts@0.3.0
+  - @outfitter/logging@0.4.0
+  - @outfitter/docs@0.1.1
+  - @outfitter/tui@0.2.0
+
 ## 0.2.2
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/docs-core",
   "description": "Core docs assembly and freshness checks for Outfitter projects",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "files": [
     "dist"
