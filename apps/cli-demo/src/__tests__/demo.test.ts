@@ -1,5 +1,5 @@
 /**
- * Tests for `outfitter demo` command.
+ * Tests for demo command.
  *
  * @packageDocumentation
  */

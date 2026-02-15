@@ -1,7 +1,7 @@
 /**
  * Demo section registry.
  *
- * Integrates @outfitter/cli/demo primitives with app-specific sections.
+ * Integrates @outfitter/tui demo primitives with app-specific sections.
  *
  * @packageDocumentation
  */
