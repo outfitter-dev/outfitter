@@ -10,6 +10,7 @@
 import { Command } from "commander";
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
+import { runCheckBoundaryInvocations } from "./check-boundary-invocations.js";
 import { runCheckBunupRegistry } from "./check-bunup-registry.js";
 import { runCheckChangeset } from "./check-changeset.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
@@ -108,6 +109,15 @@ program
 	.action(async (options: { json?: boolean }) => {
 		const { runCheckReadmeImports } = await import("./check-readme-imports.js");
 		await runCheckReadmeImports(options);
+	});
+
+program
+	.command("check-boundary-invocations")
+	.description(
+		"Validate root/app scripts do not execute packages/*/src entrypoints directly",
+	)
+	.action(async () => {
+		await runCheckBoundaryInvocations();
 	});
 
 program.parse();

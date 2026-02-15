@@ -90,11 +90,43 @@ describe("createRepoCommand", () => {
     });
   });
 
-  test("routes `repo check clean-tree` with --paths to tooling", async () => {
+  test("routes `repo check readme` to tooling check-readme-imports", async () => {
     const command = createTestCommand();
 
     await command.parseAsync(
-      ["node", "repo", "check", "clean-tree", "--paths", "docs", "packages"],
+      ["node", "repo", "check", "readme", "--json", "--cwd", "repo-root"],
+      { from: "node" }
+    );
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-readme-imports",
+      args: ["--json"],
+      cwd: resolve(process.cwd(), "repo-root"),
+    });
+  });
+
+  test("routes `repo check registry` to tooling check-bunup-registry", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "registry", "--cwd", "repo-root"],
+      { from: "node" }
+    );
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-bunup-registry",
+      args: [],
+      cwd: resolve(process.cwd(), "repo-root"),
+    });
+  });
+
+  test("routes `repo check tree` with --paths to tooling", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "tree", "--paths", "docs", "packages"],
       { from: "node" }
     );
 
@@ -102,6 +134,74 @@ describe("createRepoCommand", () => {
     expect(toolingCalls[0]).toEqual({
       command: "check-clean-tree",
       args: ["--paths", "docs", "packages"],
+      cwd: process.cwd(),
+    });
+  });
+
+  test("routes `repo check boundary-invocations` to tooling", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "boundary-invocations", "--cwd", "repo-root"],
+      { from: "node" }
+    );
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-boundary-invocations",
+      args: [],
+      cwd: resolve(process.cwd(), "repo-root"),
+    });
+  });
+
+  test("supports legacy alias `repo check-exports`", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(["node", "repo", "check-exports", "--json"], {
+      from: "node",
+    });
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-exports",
+      args: ["--json"],
+      cwd: process.cwd(),
+    });
+  });
+
+  test("supports subject aliases `readme-imports`, `bunup-registry`, and `clean-tree`", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "readme-imports", "--json"],
+      {
+        from: "node",
+      }
+    );
+    await command.parseAsync(["node", "repo", "check", "bunup-registry"], {
+      from: "node",
+    });
+    await command.parseAsync(
+      ["node", "repo", "check", "clean-tree", "--paths", "docs"],
+      {
+        from: "node",
+      }
+    );
+
+    expect(toolingCalls).toHaveLength(3);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-readme-imports",
+      args: ["--json"],
+      cwd: process.cwd(),
+    });
+    expect(toolingCalls[1]).toEqual({
+      command: "check-bunup-registry",
+      args: [],
+      cwd: process.cwd(),
+    });
+    expect(toolingCalls[2]).toEqual({
+      command: "check-clean-tree",
+      args: ["--paths", "docs"],
       cwd: process.cwd(),
     });
   });
