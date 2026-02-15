@@ -105,4 +105,35 @@ describe("createRepoCommand", () => {
       cwd: process.cwd(),
     });
   });
+
+  test("routes `repo check boundary-invocations` to tooling", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "boundary-invocations", "--cwd", "repo-root"],
+      { from: "node" }
+    );
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-boundary-invocations",
+      args: [],
+      cwd: resolve(process.cwd(), "repo-root"),
+    });
+  });
+
+  test("supports legacy alias `repo check-exports`", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(["node", "repo", "check-exports", "--json"], {
+      from: "node",
+    });
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-exports",
+      args: ["--json"],
+      cwd: process.cwd(),
+    });
+  });
 });

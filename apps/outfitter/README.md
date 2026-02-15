@@ -153,6 +153,7 @@ Current subjects:
 - `check bunup-registry` - Validate bunup workspace registration
 - `check changeset` - Validate required changesets for package changes
 - `check clean-tree` - Assert no modified/untracked files
+- `check boundary-invocations` - Disallow direct `packages/*/src` execution from root/app scripts
 
 Examples:
 
@@ -163,6 +164,18 @@ outfitter repo export docs --target llms
 outfitter repo check exports --json
 outfitter repo check readme-imports
 ```
+
+Legacy long-form aliases remain available during migration:
+
+- `outfitter repo docs-sync` -> `outfitter repo sync docs`
+- `outfitter repo docs-check` -> `outfitter repo check docs`
+- `outfitter repo docs-export` -> `outfitter repo export docs`
+- `outfitter repo check-exports` -> `outfitter repo check exports`
+- `outfitter repo check-readme-imports` -> `outfitter repo check readme-imports`
+- `outfitter repo check-bunup-registry` -> `outfitter repo check bunup-registry`
+- `outfitter repo check-changeset` -> `outfitter repo check changeset`
+- `outfitter repo check-clean-tree` -> `outfitter repo check clean-tree`
+- `outfitter repo check-boundary-invocations` -> `outfitter repo check boundary-invocations`
 
 ### `migrate kit`
 
