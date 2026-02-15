@@ -44,6 +44,14 @@ export {
   printMigrateKitResults,
   runMigrateKit,
 } from "./commands/migrate-kit.js";
+// Repo maintenance command
+export {
+  type CreateRepoCommandOptions,
+  createRepoCommand,
+  type RepoCheckSubject,
+  type RepoCommandIo,
+  type RepoToolingInvocation,
+} from "./commands/repo.js";
 // Scaffold command
 export {
   printScaffoldResults,

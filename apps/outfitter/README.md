@@ -39,10 +39,11 @@ Top-level commands:
 - `init [directory]` - Create a new project from scratch (interactive or scripted)
 - `scaffold <target> [name]` - Add a new capability to an existing project
 - `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
+- `repo <action> <subject>` - Repository maintenance namespace (`check|sync|export`)
 - `migrate kit [directory]` - Migrate foundation imports and dependencies to `@outfitter/kit`
 - `update` - Check installed `@outfitter/*` versions and optionally show migration guidance
 - `doctor` - Validate local environment and project dependencies
-- `demo [section]` - Showcase `@outfitter/cli` rendering
+- `demo [section]` - Forward to the dedicated demo CLI (`outfitter-demo`)
 
 ## Command Reference
 
@@ -132,6 +133,37 @@ outfitter add biome --dry-run
 outfitter add list
 ```
 
+### `repo`
+
+Canonical namespace for repository maintenance workflows.
+
+```bash
+outfitter repo check <subject> [options]
+outfitter repo sync <subject> [options]
+outfitter repo export <subject> [options]
+```
+
+Current subjects:
+
+- `check docs` - Validate generated package docs are up to date
+- `sync docs` - Generate package docs into `docs/packages`
+- `export docs` - Export package and LLM docs artifacts
+- `check exports` - Validate package export maps
+- `check readme-imports` - Validate README import examples
+- `check bunup-registry` - Validate bunup workspace registration
+- `check changeset` - Validate required changesets for package changes
+- `check clean-tree` - Assert no modified/untracked files
+
+Examples:
+
+```bash
+outfitter repo check docs --cwd .
+outfitter repo sync docs --cwd .
+outfitter repo export docs --target llms
+outfitter repo check exports --json
+outfitter repo check readme-imports
+```
+
 ### `migrate kit`
 
 Codemod for kit-first foundation adoption.
@@ -182,7 +214,7 @@ outfitter doctor
 
 ### `demo`
 
-Showcase CLI rendering primitives.
+Compatibility bridge to the dedicated demo CLI.
 
 ```bash
 outfitter demo [section] [options]
@@ -192,6 +224,21 @@ Options:
 
 - `-l, --list` - List available sections
 - `-a, --animate` - Run animated spinner demo
+
+Use `outfitter-demo` (or `cli-demo`) directly for the dedicated demo app.
+Compatibility aliases: `outfitter-showcase`, `cli-showcase`.
+
+### `docs` (compatibility)
+
+Legacy docs-maintenance command is still available:
+
+```bash
+outfitter docs sync
+outfitter docs check
+outfitter docs export
+```
+
+Prefer `outfitter repo ...` for new usage.
 
 ## Programmatic API
 
@@ -243,6 +290,7 @@ if (result.isErr()) {
 - `@outfitter/contracts` - Result and error contracts
 - `@outfitter/mcp` - MCP server framework
 - `@outfitter/tooling` - Tooling presets and verification CLI
+- `outfitter-cli-demo` - Dedicated CLI/TUI demo app
 
 ## License
 
