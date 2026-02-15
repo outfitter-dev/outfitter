@@ -15,6 +15,12 @@
         "default": "./dist/index.js"
       }
     },
+    "./docs-core-loader": {
+      "import": {
+        "types": "./dist/docs-core-loader.d.ts",
+        "default": "./dist/docs-core-loader.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {

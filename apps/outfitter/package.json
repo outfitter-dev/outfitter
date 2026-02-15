@@ -40,6 +40,12 @@
         "default": "./dist/commands/demo.js"
       }
     },
+    "./commands/docs-module-loader": {
+      "import": {
+        "types": "./dist/commands/docs-module-loader.d.ts",
+        "default": "./dist/commands/docs-module-loader.js"
+      }
+    },
     "./commands/doctor": {
       "import": {
         "types": "./dist/commands/doctor.d.ts",
