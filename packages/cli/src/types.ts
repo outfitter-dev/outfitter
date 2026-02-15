@@ -127,6 +127,41 @@ export interface CommandBuilder {
 }
 
 // =============================================================================
+// Verb Convention Types
+// =============================================================================
+
+/**
+ * A family of related command verbs with a primary name and aliases.
+ */
+export interface VerbFamily {
+  /** Primary verb name */
+  readonly primary: string;
+
+  /** Alternative names for this verb */
+  readonly aliases: readonly string[];
+
+  /** Description of what this verb family does */
+  readonly description: string;
+}
+
+/**
+ * Configuration for resolving a verb family with project-level overrides.
+ */
+export interface VerbConfig {
+  /** Override the primary verb (e.g., "edit" instead of "modify") */
+  readonly primary?: string;
+
+  /** Whether to include aliases (default: true) */
+  readonly aliases?: boolean;
+
+  /** Additional aliases beyond defaults */
+  readonly extraAliases?: readonly string[];
+
+  /** Aliases to exclude */
+  readonly excludeAliases?: readonly string[];
+}
+
+// =============================================================================
 // Flag Preset Types
 // =============================================================================
 

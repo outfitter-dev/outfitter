@@ -81,6 +81,12 @@
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
       }
+    },
+    "./verbs": {
+      "import": {
+        "types": "./dist/verbs.d.ts",
+        "default": "./dist/verbs.js"
+      }
     }
   },
   "sideEffects": false,
