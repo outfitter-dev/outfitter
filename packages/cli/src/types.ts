@@ -180,6 +180,27 @@ export interface PaginationPresetConfig {
 }
 
 /**
+ * Resolved interaction flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type InteractionFlags = {
+  /** Whether interactive prompts are allowed */
+  readonly interactive: boolean;
+
+  /** Whether to auto-confirm prompts */
+  readonly yes: boolean;
+};
+
+/**
+ * Resolved strict mode flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type StrictFlags = {
+  /** Whether strict mode is enabled */
+  readonly strict: boolean;
+};
+
+/**
  * Resolved pagination flags from CLI input.
  */
 // biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
