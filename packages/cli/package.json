@@ -82,6 +82,12 @@
         "default": "./dist/types.js"
       }
     },
+    "./query": {
+      "import": {
+        "types": "./dist/query.d.ts",
+        "default": "./dist/query.js"
+      }
+    },
     "./verbs": {
       "import": {
         "types": "./dist/verbs.d.ts",
