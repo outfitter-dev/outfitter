@@ -166,6 +166,8 @@ export {
   orElse,
   unwrapOrElse,
 } from "./result/index.js";
+// Schema utilities
+export { type JsonSchema, zodToJsonSchema } from "./schema.js";
 // Serialization utilities
 export {
   deserializeError,
