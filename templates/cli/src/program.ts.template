@@ -2,7 +2,8 @@
  * {{projectName}} - CLI program definition
  */
 
-import { createCLI, command } from "@outfitter/cli";
+import { command, createCLI } from "@outfitter/cli/command";
+import { verbosePreset } from "@outfitter/cli/flags";
 import { createLogger } from "@outfitter/logging";
 
 const logger = createLogger({ name: "{{binName}}" });
@@ -13,11 +14,18 @@ export const program = createCLI({
 	description: "{{description}}",
 });
 
+const verbose = verbosePreset();
+
 program.register(
 	command("hello [name]")
 		.description("Say hello")
-		.action(async ({ args }) => {
+		.preset(verbose)
+		.action<{ verbose: boolean }>(async ({ args, flags }) => {
+			const { verbose: isVerbose } = verbose.resolve(flags);
 			const name = args[0] ?? "World";
-			logger.info`Hello, ${name}!`;
+			logger.info(`Hello, ${name}!`);
+			if (isVerbose) {
+				logger.debug("Running in verbose mode");
+			}
 		}),
 );
