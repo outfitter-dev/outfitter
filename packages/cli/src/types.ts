@@ -201,6 +201,55 @@ export type StrictFlags = {
 };
 
 /**
+ * Resolved time-window flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type TimeWindowFlags = {
+  /** Start of time window */
+  readonly since: Date | undefined;
+
+  /** End of time window */
+  readonly until: Date | undefined;
+};
+
+/**
+ * Configuration for the time-window flag preset.
+ */
+export interface TimeWindowPresetConfig {
+  /** Maximum range in milliseconds between since and until (optional guard) */
+  readonly maxRange?: number;
+}
+
+/**
+ * Resolved execution flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type ExecutionFlags = {
+  /** Timeout in milliseconds (undefined = no timeout) */
+  readonly timeout: number | undefined;
+
+  /** Number of retries */
+  readonly retries: number;
+
+  /** Whether to operate in offline mode */
+  readonly offline: boolean;
+};
+
+/**
+ * Configuration for the execution flag preset.
+ */
+export interface ExecutionPresetConfig {
+  /** Default timeout in milliseconds (default: undefined) */
+  readonly defaultTimeout?: number;
+
+  /** Default number of retries (default: 0) */
+  readonly defaultRetries?: number;
+
+  /** Maximum number of retries (default: 10) */
+  readonly maxRetries?: number;
+}
+
+/**
  * Resolved projection flags from CLI input.
  */
 // biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
