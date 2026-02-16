@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- 26f51bb: Add `schema` command for machine-readable CLI introspection. Auto-registered by `buildCliCommands()` — opt out with `schema: false`.
+- 1c70a3e: Add markdown reference doc generation from action manifests. `formatManifestMarkdown()` converts manifests to readable markdown with surface-aware rendering — MCP shows JSON Schema parameters and deferred loading annotations, CLI shows flag syntax, defaults, and aliases. CLI gains `schema docs` subcommand for writing `MCP_REFERENCE.md` or `CLI_REFERENCE.md` to disk.
+
 ## 0.4.1
 
 ### Patch Changes
