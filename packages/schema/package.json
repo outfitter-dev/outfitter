@@ -1,0 +1,67 @@
+{
+  "name": "@outfitter/schema",
+  "description": "Schema introspection, surface map generation, and drift detection for Outfitter",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./manifest": {
+      "import": {
+        "types": "./dist/manifest.d.ts",
+        "default": "./dist/manifest.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "cd ../.. && bunup --filter @outfitter/schema",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.7",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.3.7"
+  },
+  "keywords": [
+    "outfitter",
+    "schema",
+    "manifest",
+    "surface-map",
+    "introspection",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/schema"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

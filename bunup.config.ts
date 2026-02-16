@@ -178,6 +178,10 @@ export default defineWorkspace(
       root: "packages/mcp",
     },
     {
+      name: "@outfitter/schema",
+      root: "packages/schema",
+    },
+    {
       name: "@outfitter/state",
       root: "packages/state",
     },

@@ -20,7 +20,7 @@
     },
     "apps/cli-demo": {
       "name": "outfitter-cli-demo",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "bin": {
         "outfitter-demo": "./dist/cli.js",
         "cli-demo": "./dist/cli.js",
@@ -42,7 +42,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -79,7 +79,7 @@
     },
     "packages/cli": {
       "name": "@outfitter/cli",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "dependencies": {
         "@clack/prompts": "^0.11.0",
         "better-result": "^2.5.1",
@@ -234,6 +234,21 @@
         "@outfitter/config": ">=0.3.0",
         "@outfitter/contracts": ">=0.2.0",
         "@outfitter/logging": ">=0.3.0",
+      },
+    },
+    "packages/schema": {
+      "name": "@outfitter/schema",
+      "version": "0.1.0",
+      "dependencies": {
+        "@outfitter/contracts": "workspace:*",
+        "@outfitter/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.7",
+        "typescript": "^5.9.3",
+      },
+      "peerDependencies": {
+        "zod": "^4.3.5",
       },
     },
     "packages/state": {
@@ -466,6 +481,8 @@
     "@outfitter/logging": ["@outfitter/logging@workspace:packages/logging"],
 
     "@outfitter/mcp": ["@outfitter/mcp@workspace:packages/mcp"],
+
+    "@outfitter/schema": ["@outfitter/schema@workspace:packages/schema"],
 
     "@outfitter/state": ["@outfitter/state@workspace:packages/state"],
 
@@ -1045,6 +1062,8 @@
 
     "@outfitter/mcp/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
+    "@outfitter/schema/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
+
     "@outfitter/tooling/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
     "@outfitter/tooling/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
@@ -1078,6 +1097,8 @@
     "@outfitter/logging/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/mcp/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
+
+    "@outfitter/schema/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/tooling/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
