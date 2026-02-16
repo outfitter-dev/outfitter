@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { Operation, OperationCollector } from "./collector.js";

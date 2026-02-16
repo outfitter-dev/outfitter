@@ -54,7 +54,7 @@
     "test:watch": "bun test --watch",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
-    "pretypecheck": "bun run --filter @outfitter/tui build && bun run --filter @outfitter/cli build",
+    "pretypecheck": "(test -f ../../packages/tui/dist/index.d.ts || bun run --filter @outfitter/tui build) && (test -f ../../packages/cli/dist/output.d.ts || bun run --filter @outfitter/cli build)",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

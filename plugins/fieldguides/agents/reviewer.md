@@ -6,7 +6,7 @@ model: inherit
 color: orange
 skills:
   - code-review
-memory: project
+memory: user
 ---
 
 # Reviewer

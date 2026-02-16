@@ -5,7 +5,7 @@ skills:
   - outfitter-voice
   - outfitter-styleguide
 tools: Read, Write, Edit, Glob, Grep, Skill, WebSearch, WebFetch
-memory: project
+memory: user
 ---
 
 # Comms

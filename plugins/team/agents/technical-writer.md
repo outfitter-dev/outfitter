@@ -5,7 +5,7 @@ skills:
   - outfitter-styleguide
   - outfitter-documentation
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
-memory: project
+memory: user
 ---
 
 # Technical Writer

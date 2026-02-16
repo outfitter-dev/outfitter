@@ -18,7 +18,7 @@ import {
   select,
   text,
 } from "@clack/prompts";
-import { exitWithError, output } from "@outfitter/cli/output";
+import { exitWithError, output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";

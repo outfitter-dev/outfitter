@@ -7,7 +7,7 @@ color: blue
 skills:
   - research
   - codebase-analysis
-memory: project
+memory: user
 ---
 
 # Analyst

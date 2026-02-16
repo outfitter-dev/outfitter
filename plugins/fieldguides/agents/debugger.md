@@ -8,7 +8,7 @@ skills:
   - debugging
   - codebase-analysis
   - find-root-causes
-memory: project
+memory: user
 ---
 
 # Debugger

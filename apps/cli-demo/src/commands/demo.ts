@@ -8,7 +8,7 @@
  */
 
 import { isCancel, select } from "@clack/prompts";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import { isInteractive } from "@outfitter/cli/terminal";
 import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme, renderTable, SPINNERS } from "@outfitter/tui/render";

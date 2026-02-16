@@ -7,7 +7,7 @@ color: blue
 skills:
   - tdd-fieldguide
   - typescript-fieldguide
-memory: project
+memory: user
 ---
 
 # Engineer

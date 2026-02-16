@@ -16,7 +16,7 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult, Block, Registry } from "@outfitter/tooling";
