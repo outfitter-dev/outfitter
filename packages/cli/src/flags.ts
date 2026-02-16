@@ -9,8 +9,10 @@ import type {
   ComposedPreset,
   FlagPreset,
   FlagPresetConfig,
+  InteractionFlags,
   PaginationFlags,
   PaginationPresetConfig,
+  StrictFlags,
 } from "./types.js";
 
 /**
@@ -230,6 +232,72 @@ export function forcePreset(): FlagPreset<{ force: boolean }> {
 }
 
 /**
+ * Interaction mode flag preset.
+ *
+ * Adds: `--non-interactive`, `--no-input`, `-y, --yes`
+ * Resolves: `{ interactive: boolean, yes: boolean }`
+ *
+ * `interactive` defaults to `true` and is set to `false` when
+ * `--non-interactive` or `--no-input` is passed. The two flags
+ * are synonyms for user convenience.
+ */
+export function interactionPreset(): FlagPreset<InteractionFlags> {
+  return createPreset({
+    id: "interaction",
+    options: [
+      {
+        flags: "--non-interactive",
+        description: "Disable interactive prompts",
+        defaultValue: false,
+      },
+      {
+        flags: "--no-input",
+        description: "Disable interactive prompts (alias)",
+      },
+      {
+        flags: "-y, --yes",
+        description: "Auto-confirm prompts",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => {
+      const nonInteractive =
+        flags["input"] === false ||
+        Boolean(flags["nonInteractive"]) ||
+        Boolean(flags["non-interactive"]) ||
+        Boolean(flags["noInput"]) ||
+        Boolean(flags["no-input"]);
+      return {
+        interactive: !nonInteractive,
+        yes: Boolean(flags["yes"]),
+      };
+    },
+  });
+}
+
+/**
+ * Strict mode flag preset.
+ *
+ * Adds: `--strict`
+ * Resolves: `{ strict: boolean }`
+ */
+export function strictPreset(): FlagPreset<StrictFlags> {
+  return createPreset({
+    id: "strict",
+    options: [
+      {
+        flags: "--strict",
+        description: "Enable strict mode (treat warnings as errors)",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => ({
+      strict: Boolean(flags["strict"]),
+    }),
+  });
+}
+
+/**
  * Pagination flag preset.
  *
  * Adds: `-l, --limit <n>`, `--next`, `--reset`
@@ -292,6 +360,8 @@ export type {
   ComposedPreset,
   FlagPreset,
   FlagPresetConfig,
+  InteractionFlags,
   PaginationFlags,
   PaginationPresetConfig,
+  StrictFlags,
 } from "./types.js";
