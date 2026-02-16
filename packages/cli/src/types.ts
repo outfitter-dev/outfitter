@@ -168,6 +168,32 @@ export interface FlagPresetConfig<TResolved extends Record<string, unknown>> {
 export type ComposedPreset<TResolved extends Record<string, unknown>> =
   FlagPreset<TResolved>;
 
+/**
+ * Configuration for the pagination flag preset.
+ */
+export interface PaginationPresetConfig {
+  /** Default limit when not specified (default: 20) */
+  readonly defaultLimit?: number;
+
+  /** Maximum allowed limit (default: 100) */
+  readonly maxLimit?: number;
+}
+
+/**
+ * Resolved pagination flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type PaginationFlags = {
+  /** Number of results to return */
+  readonly limit: number;
+
+  /** Continue from last position */
+  readonly next: boolean;
+
+  /** Clear saved cursor and start fresh */
+  readonly reset: boolean;
+};
+
 // =============================================================================
 // Output Types
 // =============================================================================
