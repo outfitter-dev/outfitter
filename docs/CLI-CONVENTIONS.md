@@ -198,6 +198,105 @@ interface ActionManifestEntry {
 }
 ```
 
+### Surface Map Generation
+
+Surface maps extend the manifest with envelope metadata for build-time generation and drift detection. The underlying types and logic live in `@outfitter/schema`; the CLI provides Commander subcommands.
+
+#### Enabling Surface Subcommands
+
+Pass `surface` options to enable `generate` and `diff` subcommands:
+
+```typescript
+const commands = buildCliCommands(registry, {
+  schema: { programName: "mycli", surface: {} },
+});
+```
+
+Or with custom paths:
+
+```typescript
+const commands = buildCliCommands(registry, {
+  schema: {
+    programName: "mycli",
+    surface: { cwd: "/path/to/project", outputDir: ".outfitter" },
+  },
+});
+```
+
+#### Command Tree
+
+```bash
+mycli schema                          # show all (backward compat)
+mycli schema init                     # show detail (backward compat)
+mycli schema show [action]            # explicit show subcommand
+mycli schema generate                 # write .outfitter/surface.json
+mycli schema generate --dry-run       # print without writing
+mycli schema generate --snapshot v1   # write .outfitter/snapshots/v1.json
+mycli schema diff                     # compare runtime vs committed
+mycli schema diff --output json       # structured diff as JSON
+```
+
+#### Surface Map Shape
+
+```typescript
+interface SurfaceMap extends ActionManifest {
+  readonly $schema: string;       // "https://outfitter.dev/surface/v1"
+  readonly generator: "runtime" | "build";
+}
+```
+
+#### CI Usage
+
+Add drift detection to CI pipelines:
+
+```bash
+# Check for drift against committed surface.json (exits 1 on changes)
+mycli schema diff
+```
+
+To bootstrap the baseline surface map (run once, then commit):
+
+```bash
+mycli schema generate
+git add .outfitter/surface.json
+```
+
+Example GitHub Actions step:
+
+```yaml
+- name: Check schema drift
+  run: |
+    mycli schema diff
+```
+
+The diff compares the committed `.outfitter/surface.json` against the current runtime registry. It ignores volatile fields (`generatedAt`) and reports added, removed, and modified actions.
+
+#### Programmatic Usage
+
+```typescript
+import {
+  generateSurfaceMap,
+  writeSurfaceMap,
+  readSurfaceMap,
+  diffSurfaceMaps,
+} from "@outfitter/schema";
+
+// Generate and write
+const surfaceMap = generateSurfaceMap(registry, { generator: "build" });
+await writeSurfaceMap(surfaceMap, ".outfitter/surface.json");
+
+// Read and diff
+const committed = await readSurfaceMap(".outfitter/surface.json");
+const current = generateSurfaceMap(registry, { generator: "runtime" });
+const diff = diffSurfaceMaps(committed, current);
+
+if (diff.hasChanges) {
+  console.log("Added:", diff.added);
+  console.log("Removed:", diff.removed);
+  console.log("Modified:", diff.modified);
+}
+```
+
 ### Standalone Usage
 
 Use the module directly without auto-registration:
