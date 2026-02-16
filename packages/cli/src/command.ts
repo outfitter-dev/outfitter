@@ -12,6 +12,7 @@ import type {
   CommandAction,
   CommandBuilder,
   CommandFlags,
+  FlagPreset,
 } from "./types.js";
 
 export type {
@@ -21,6 +22,7 @@ export type {
   CommandBuilder,
   CommandConfig,
   CommandFlags,
+  FlagPreset,
 } from "./types.js";
 
 function parseCommandSignature(signature: string): {
@@ -89,6 +91,25 @@ class CommandBuilderImpl implements CommandBuilder {
 
   alias(alias: string): this {
     this.command.alias(alias);
+    return this;
+  }
+
+  preset(preset: FlagPreset<Record<string, unknown>>): this {
+    for (const opt of preset.options) {
+      if (opt.required) {
+        this.command.requiredOption(
+          opt.flags,
+          opt.description,
+          opt.defaultValue as string | boolean | string[] | undefined
+        );
+      } else {
+        this.command.option(
+          opt.flags,
+          opt.description,
+          opt.defaultValue as string | boolean | string[] | undefined
+        );
+      }
+    }
     return this;
   }
 

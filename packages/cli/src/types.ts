@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import type { ActionCliOption } from "@outfitter/contracts";
 import type { Command } from "commander";
 
 // =============================================================================
@@ -113,6 +114,9 @@ export interface CommandBuilder {
   /** Add command aliases */
   alias(alias: string): this;
 
+  /** Apply a flag preset (adds its options to the command) */
+  preset(preset: FlagPreset<Record<string, unknown>>): this;
+
   /** Set the action handler */
   action<TFlags extends CommandFlags = CommandFlags>(
     handler: CommandAction<TFlags>
@@ -121,6 +125,48 @@ export interface CommandBuilder {
   /** Build the underlying Commander command */
   build(): Command;
 }
+
+// =============================================================================
+// Flag Preset Types
+// =============================================================================
+
+/**
+ * A composable set of CLI flags with typed resolution.
+ *
+ * Presets bundle flag definitions with a resolver that coerces
+ * raw Commander output into typed values.
+ */
+export interface FlagPreset<TResolved extends Record<string, unknown>> {
+  /** Unique identifier for deduplication in composePresets */
+  readonly id: string;
+
+  /** Commander option definitions */
+  readonly options: readonly ActionCliOption[];
+
+  /** Resolve raw Commander flags into typed values */
+  readonly resolve: (flags: Record<string, unknown>) => TResolved;
+}
+
+/**
+ * Configuration for creating a flag preset.
+ */
+export interface FlagPresetConfig<TResolved extends Record<string, unknown>> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Commander option definitions */
+  readonly options: readonly ActionCliOption[];
+
+  /** Resolve raw Commander flags into typed values */
+  readonly resolve: (flags: Record<string, unknown>) => TResolved;
+}
+
+/**
+ * Result of composing multiple presets together.
+ * Options are deduplicated by preset id (first wins).
+ */
+export type ComposedPreset<TResolved extends Record<string, unknown>> =
+  FlagPreset<TResolved>;
 
 // =============================================================================
 // Output Types

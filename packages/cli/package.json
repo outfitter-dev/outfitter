@@ -33,6 +33,12 @@
         "default": "./dist/command.js"
       }
     },
+    "./flags": {
+      "import": {
+        "types": "./dist/flags.d.ts",
+        "default": "./dist/flags.js"
+      }
+    },
     "./input": {
       "import": {
         "types": "./dist/input.d.ts",
