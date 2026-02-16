@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- 2395095: Fix TypeScript subpath export typing resolution for `@outfitter/cli/output` and related entry points in workspace typechecks.
+
 ## 0.4.0
 
 ### Minor Changes

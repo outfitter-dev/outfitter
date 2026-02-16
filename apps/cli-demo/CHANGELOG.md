@@ -1,5 +1,13 @@
 # outfitter-cli-demo
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [2395095]
+  - @outfitter/cli@0.4.1
+  - @outfitter/tui@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
