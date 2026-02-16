@@ -9,6 +9,7 @@ import {
   validateInput,
 } from "@outfitter/contracts";
 import { Command } from "commander";
+import { createSchemaCommand, type SchemaCommandOptions } from "./schema.js";
 
 export interface BuildCliCommandsOptions {
   readonly createContext?: (input: {
@@ -17,6 +18,7 @@ export interface BuildCliCommandsOptions {
     flags: Record<string, unknown>;
   }) => HandlerContext;
   readonly includeSurfaces?: readonly ActionSurface[];
+  readonly schema?: boolean | SchemaCommandOptions;
 }
 
 type ActionSource = ActionRegistry | readonly AnyActionSpec[];
@@ -253,6 +255,15 @@ export function buildCliCommands(
     }
 
     commands.push(groupCommand);
+  }
+
+  if (options.schema !== false) {
+    const hasSchemaCommand = commands.some((cmd) => cmd.name() === "schema");
+    if (!hasSchemaCommand) {
+      const schemaOptions =
+        typeof options.schema === "object" ? options.schema : undefined;
+      commands.push(createSchemaCommand(source, schemaOptions));
+    }
   }
 
   return commands;
