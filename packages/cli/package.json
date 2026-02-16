@@ -70,6 +70,12 @@
         "default": "./dist/query.js"
       }
     },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
     "./terminal": {
       "import": {
         "types": "./dist/terminal/index.d.ts",
