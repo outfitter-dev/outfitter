@@ -6,6 +6,8 @@
 
 import type { ActionCliOption } from "@outfitter/contracts";
 import type {
+  ColorFlags,
+  ColorMode,
   ComposedPreset,
   FlagPreset,
   FlagPresetConfig,
@@ -297,6 +299,52 @@ export function strictPreset(): FlagPreset<StrictFlags> {
   });
 }
 
+const COLOR_MODES = new Set<ColorMode>(["auto", "always", "never"]);
+
+/**
+ * Color mode flag preset.
+ *
+ * Adds: `--color [mode]`, `--no-color`
+ * Resolves: `{ color: "auto" | "always" | "never" }`
+ *
+ * Commander's `--no-color` negation sets `flags["color"]` to `false`,
+ * which resolves to `"never"`. Invalid values default to `"auto"`.
+ *
+ * This preset resolves the user's *intent*. Consumers should compose
+ * with terminal detection (`supportsColor()`, `resolveColorEnv()`)
+ * to determine actual color output behavior.
+ */
+export function colorPreset(): FlagPreset<ColorFlags> {
+  return createPreset({
+    id: "color",
+    options: [
+      {
+        flags: "--color [mode]",
+        description: "Color output mode (auto, always, never)",
+        defaultValue: "auto",
+      },
+      {
+        flags: "--no-color",
+        description: "Disable color output",
+      },
+    ],
+    resolve: (flags) => {
+      const raw = flags["color"];
+
+      // Commander sets false for --no-color
+      if (raw === false) return { color: "never" };
+      // Commander sets true for bare --color when mode is optional.
+      if (raw === true) return { color: "always" };
+
+      if (typeof raw === "string" && COLOR_MODES.has(raw as ColorMode)) {
+        return { color: raw as ColorMode };
+      }
+
+      return { color: "auto" };
+    },
+  });
+}
+
 /**
  * Pagination flag preset.
  *
@@ -357,6 +405,8 @@ export function paginationPreset(
 }
 
 export type {
+  ColorFlags,
+  ColorMode,
   ComposedPreset,
   FlagPreset,
   FlagPresetConfig,
