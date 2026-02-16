@@ -8,7 +8,7 @@
  */
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import {
   type ActionManifest,
   type ActionSource,
@@ -87,4 +87,24 @@ export async function writeSurfaceMap(
 export async function readSurfaceMap(inputPath: string): Promise<SurfaceMap> {
   const content = await readFile(inputPath, "utf-8");
   return JSON.parse(content) as SurfaceMap;
+}
+
+// =============================================================================
+// Path Helpers
+// =============================================================================
+
+/**
+ * Resolve the file path for a named snapshot.
+ *
+ * @param cwd - Project root directory
+ * @param outputDir - Output directory name (e.g., ".outfitter")
+ * @param version - Snapshot version label
+ * @returns Absolute path to the snapshot file
+ */
+export function resolveSnapshotPath(
+  cwd: string,
+  outputDir: string,
+  version: string
+): string {
+  return join(cwd, outputDir, "snapshots", `${version}.json`);
 }

@@ -29,6 +29,7 @@ export {
   type GenerateSurfaceMapOptions,
   generateSurfaceMap,
   readSurfaceMap,
+  resolveSnapshotPath,
   type SurfaceMap,
   writeSurfaceMap,
 } from "./surface.js";

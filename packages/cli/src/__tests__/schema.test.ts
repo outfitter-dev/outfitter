@@ -343,4 +343,23 @@ describe("createSchemaCommand", () => {
 
     expect(options).toContain("--output");
   });
+
+  it("diff subcommand has --against option", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const diffCmd = cmd.commands.find((c) => c.name() === "diff");
+    const options = diffCmd?.options.map((o) => o.long) ?? [];
+
+    expect(options).toContain("--against");
+  });
+
+  it("diff subcommand has --from and --to options", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const diffCmd = cmd.commands.find((c) => c.name() === "diff");
+    const options = diffCmd?.options.map((o) => o.long) ?? [];
+
+    expect(options).toContain("--from");
+    expect(options).toContain("--to");
+  });
 });

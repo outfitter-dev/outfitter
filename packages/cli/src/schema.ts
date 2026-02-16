@@ -19,6 +19,7 @@ import {
   generateManifest,
   generateSurfaceMap,
   readSurfaceMap,
+  resolveSnapshotPath,
   writeSurfaceMap,
 } from "@outfitter/schema";
 import { Command } from "commander";
@@ -343,58 +344,146 @@ export function createSchemaCommand(
     const diffCmd = new Command("diff")
       .description("Compare runtime schema against committed surface map")
       .option("--output <mode>", "Output mode (human, json)", "human")
-      .action(async (diffOptions: { output?: string }) => {
-        const surfacePath = join(cwd, outputDir, "surface.json");
+      .option("--against <version>", "Compare runtime against a named snapshot")
+      .option("--from <version>", "Base snapshot for snapshot-to-snapshot diff")
+      .option("--to <version>", "Target snapshot for snapshot-to-snapshot diff")
+      .action(
+        async (diffOptions: {
+          output?: string;
+          against?: string;
+          from?: string;
+          to?: string;
+        }) => {
+          let left: Awaited<ReturnType<typeof readSurfaceMap>>;
+          let right: Awaited<ReturnType<typeof readSurfaceMap>>;
 
-        let committed: Awaited<ReturnType<typeof readSurfaceMap>>;
-        try {
-          committed = await readSurfaceMap(surfacePath);
-        } catch {
-          process.stderr.write(`No committed surface map at ${surfacePath}\n`);
-          process.stderr.write("Run 'schema generate' first.\n");
-          process.exitCode = 1;
-          return;
-        }
-
-        const current = generateSurfaceMap(source, {
-          generator: "runtime",
-        });
-        const result = diffSurfaceMaps(committed, current);
-
-        if (diffOptions.output === "json") {
-          process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-        } else {
-          if (!result.hasChanges) {
-            process.stdout.write("No schema drift detected.\n");
+          if (
+            (diffOptions.from && !diffOptions.to) ||
+            (!diffOptions.from && diffOptions.to)
+          ) {
+            process.stderr.write(
+              "Both --from and --to are required for snapshot-to-snapshot diff.\n"
+            );
+            process.exitCode = 1;
             return;
           }
 
-          const lines: string[] = [];
-          lines.push("Schema drift detected:\n");
+          if (diffOptions.from && diffOptions.to) {
+            // Snapshot-to-snapshot: --from v1 --to v2
+            const fromPath = resolveSnapshotPath(
+              cwd,
+              outputDir,
+              diffOptions.from
+            );
+            const toPath = resolveSnapshotPath(cwd, outputDir, diffOptions.to);
 
-          if (result.added.length > 0) {
-            lines.push("  Added:");
-            for (const entry of result.added) {
-              lines.push(`    + ${entry.id}`);
+            try {
+              left = await readSurfaceMap(fromPath);
+            } catch (err) {
+              if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+                process.stderr.write(`No snapshot at ${fromPath}\n`);
+              } else {
+                process.stderr.write(
+                  `Failed to read snapshot at ${fromPath}: ${err instanceof Error ? err.message : String(err)}\n`
+                );
+              }
+              process.exitCode = 1;
+              return;
             }
+
+            try {
+              right = await readSurfaceMap(toPath);
+            } catch (err) {
+              if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+                process.stderr.write(`No snapshot at ${toPath}\n`);
+              } else {
+                process.stderr.write(
+                  `Failed to read snapshot at ${toPath}: ${err instanceof Error ? err.message : String(err)}\n`
+                );
+              }
+              process.exitCode = 1;
+              return;
+            }
+          } else if (diffOptions.against) {
+            // Snapshot-to-runtime: --against v1
+            const snapshotPath = resolveSnapshotPath(
+              cwd,
+              outputDir,
+              diffOptions.against
+            );
+
+            try {
+              left = await readSurfaceMap(snapshotPath);
+            } catch (err) {
+              if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+                process.stderr.write(`No snapshot at ${snapshotPath}\n`);
+              } else {
+                process.stderr.write(
+                  `Failed to read snapshot at ${snapshotPath}: ${err instanceof Error ? err.message : String(err)}\n`
+                );
+              }
+              process.exitCode = 1;
+              return;
+            }
+
+            right = generateSurfaceMap(source, { generator: "runtime" });
+          } else {
+            // Default: committed surface.json vs runtime
+            const surfacePath = join(cwd, outputDir, "surface.json");
+
+            try {
+              left = await readSurfaceMap(surfacePath);
+            } catch (err) {
+              if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+                process.stderr.write(
+                  `No committed surface map at ${surfacePath}\n`
+                );
+                process.stderr.write("Run 'schema generate' first.\n");
+              } else {
+                process.stderr.write(
+                  `Failed to read surface map at ${surfacePath}: ${err instanceof Error ? err.message : String(err)}\n`
+                );
+              }
+              process.exitCode = 1;
+              return;
+            }
+
+            right = generateSurfaceMap(source, { generator: "runtime" });
           }
 
-          if (result.removed.length > 0) {
-            lines.push("  Removed:");
-            for (const entry of result.removed) {
-              lines.push(`    - ${entry.id}`);
-            }
-          }
+          const result = diffSurfaceMaps(left, right);
 
-          if (result.modified.length > 0) {
-            lines.push("  Modified:");
-            for (const entry of result.modified) {
-              lines.push(`    ~ ${entry.id} (${entry.changes.join(", ")})`);
+          if (diffOptions.output === "json") {
+            process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+          } else {
+            if (!result.hasChanges) {
+              process.stdout.write("No schema drift detected.\n");
+              return;
             }
-          }
 
-          process.stdout.write(`${lines.join("\n")}\n`);
-        }
+            const lines: string[] = [];
+            lines.push("Schema drift detected:\n");
+
+            if (result.added.length > 0) {
+              lines.push("  Added:");
+              for (const entry of result.added) {
+                lines.push(`    + ${entry.id}`);
+              }
+            }
+
+            if (result.removed.length > 0) {
+              lines.push("  Removed:");
+              for (const entry of result.removed) {
+                lines.push(`    - ${entry.id}`);
+              }
+            }
+
+            if (result.modified.length > 0) {
+              lines.push("  Modified:");
+              for (const entry of result.modified) {
+                lines.push(`    ~ ${entry.id} (${entry.changes.join(", ")})`);
+              }
+            }
 
             if (result.metadataChanges.length > 0) {
               lines.push("  Metadata:");
@@ -403,10 +492,14 @@ export function createSchemaCommand(
               }
             }
 
-        if (result.hasChanges) {
-          process.exitCode = 1;
+            process.stdout.write(`${lines.join("\n")}\n`);
+          }
+
+          if (result.hasChanges) {
+            process.exitCode = 1;
+          }
         }
-      });
+      );
     cmd.addCommand(diffCmd);
   }
 
