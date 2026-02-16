@@ -70,7 +70,7 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 
 **Runtime (Active)** — Evolving based on usage:
 
-- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors
+- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors, [flag conventions](./docs/CLI-CONVENTIONS.md)
 - `@outfitter/mcp` — MCP server framework with typed tools and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
 - `@outfitter/logging` — Structured logging via logtape
@@ -249,4 +249,5 @@ For package-impacting changes:
 
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — How packages fit together
 - [docs/PATTERNS.md](./docs/PATTERNS.md) — Handler contract, Result types, error taxonomy
+- [docs/CLI-CONVENTIONS.md](./docs/CLI-CONVENTIONS.md) — CLI flag presets, verb conventions, queryability
 - [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md) — Tutorials
