@@ -14,6 +14,7 @@ import type {
   InteractionFlags,
   PaginationFlags,
   PaginationPresetConfig,
+  ProjectionFlags,
   StrictFlags,
 } from "./types.js";
 
@@ -346,6 +347,60 @@ export function colorPreset(): FlagPreset<ColorFlags> {
 }
 
 /**
+ * Parse a comma-separated string into a trimmed, non-empty string array.
+ * Returns `undefined` if the input is not a string or produces no entries.
+ */
+function parseCommaSeparated(value: unknown): string[] | undefined {
+  if (typeof value !== "string") return undefined;
+  const items = value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return items.length > 0 ? items : undefined;
+}
+
+/**
+ * Projection flag preset.
+ *
+ * Adds: `--fields <fields>`, `--exclude-fields <fields>`, `--count`
+ * Resolves: `{ fields: string[] | undefined, excludeFields: string[] | undefined, count: boolean }`
+ *
+ * Fields are parsed as comma-separated strings with whitespace trimming.
+ * `undefined` when not provided (not empty array) to distinguish
+ * "not specified" from "empty".
+ *
+ * Conflict between `--fields` and `--exclude-fields` is a handler
+ * concern (documented, not enforced).
+ */
+export function projectionPreset(): FlagPreset<ProjectionFlags> {
+  return createPreset({
+    id: "projection",
+    options: [
+      {
+        flags: "--fields <fields>",
+        description: "Comma-separated list of fields to include",
+      },
+      {
+        flags: "--exclude-fields <fields>",
+        description: "Comma-separated list of fields to exclude",
+      },
+      {
+        flags: "--count",
+        description: "Output only the count of results",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => ({
+      fields: parseCommaSeparated(flags["fields"]),
+      excludeFields: parseCommaSeparated(
+        flags["excludeFields"] ?? flags["exclude-fields"]
+      ),
+      count: Boolean(flags["count"]),
+    }),
+  });
+}
+
+/**
  * Pagination flag preset.
  *
  * Adds: `-l, --limit <n>`, `--next`, `--reset`
@@ -413,5 +468,6 @@ export type {
   InteractionFlags,
   PaginationFlags,
   PaginationPresetConfig,
+  ProjectionFlags,
   StrictFlags,
 } from "./types.js";

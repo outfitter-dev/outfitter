@@ -201,6 +201,21 @@ export type StrictFlags = {
 };
 
 /**
+ * Resolved projection flags from CLI input.
+ */
+// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type ProjectionFlags = {
+  /** Fields to include (undefined = all) */
+  readonly fields: string[] | undefined;
+
+  /** Fields to exclude (undefined = none) */
+  readonly excludeFields: string[] | undefined;
+
+  /** Whether to output only the count of results */
+  readonly count: boolean;
+};
+
+/**
  * Color mode for CLI output.
  */
 export type ColorMode = "auto" | "always" | "never";
