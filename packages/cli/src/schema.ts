@@ -8,13 +8,15 @@
  * @packageDocumentation
  */
 
-import { join } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import type { ActionSurface } from "@outfitter/contracts";
 import {
   type ActionManifest,
   type ActionManifestEntry,
   type ActionSource,
   diffSurfaceMaps,
+  formatManifestMarkdown,
   type GenerateManifestOptions,
   generateManifest,
   generateSurfaceMap,
@@ -501,6 +503,51 @@ export function createSchemaCommand(
         }
       );
     cmd.addCommand(diffCmd);
+
+    // docs subcommand
+    const docsCmd = new Command("docs")
+      .description("Generate markdown reference documentation")
+      .option("--surface <name>", "Which surface to document (cli, mcp)", "mcp")
+      .option(
+        "--output-dir <dir>",
+        "Directory to write the reference doc",
+        "docs/reference"
+      )
+      .option("--dry-run", "Print to stdout instead of writing to disk")
+      .action(
+        async (docsOptions: {
+          surface?: string;
+          outputDir?: string;
+          dryRun?: boolean;
+        }) => {
+          const surface = (docsOptions.surface ?? "mcp") as ActionSurface;
+          if (surface !== "mcp" && surface !== "cli") {
+            process.stderr.write(
+              `Unsupported surface for docs: "${surface}". Use "mcp" or "cli".\n`
+            );
+            process.exitCode = 1;
+            return;
+          }
+          const manifest = generateManifest(source, { surface });
+          const markdown = formatManifestMarkdown(manifest, { surface });
+
+          if (docsOptions.dryRun) {
+            process.stdout.write(markdown);
+            return;
+          }
+
+          const outDir = docsOptions.outputDir ?? "docs/reference";
+          const outputPath = join(
+            cwd,
+            outDir,
+            `${surface.toUpperCase()}_REFERENCE.md`
+          );
+          await mkdir(dirname(outputPath), { recursive: true });
+          await writeFile(outputPath, markdown, "utf-8");
+          process.stdout.write(`Reference written to ${outputPath}\n`);
+        }
+      );
+    cmd.addCommand(docsCmd);
   }
 
   return cmd;

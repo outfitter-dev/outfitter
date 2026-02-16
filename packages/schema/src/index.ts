@@ -24,6 +24,10 @@ export {
   type ManifestCliSpec,
   type ManifestMcpSpec,
 } from "./manifest.js";
+export {
+  formatManifestMarkdown,
+  type MarkdownFormatOptions,
+} from "./markdown.js";
 
 export {
   type GenerateSurfaceMapOptions,
