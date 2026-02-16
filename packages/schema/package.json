@@ -27,6 +27,12 @@
         "default": "./dist/manifest.js"
       }
     },
+    "./markdown": {
+      "import": {
+        "types": "./dist/markdown.d.ts",
+        "default": "./dist/markdown.js"
+      }
+    },
     "./package.json": "./package.json",
     "./surface": {
       "import": {

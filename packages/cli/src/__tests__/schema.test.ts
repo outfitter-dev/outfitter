@@ -306,16 +306,17 @@ describe("createSchemaCommand", () => {
     expect(subcommands).toContain("show");
   });
 
-  it("does not have generate/diff without surface option", () => {
+  it("does not have generate/diff/docs without surface option", () => {
     const registry = createTestRegistry();
     const cmd = createSchemaCommand(registry);
     const subcommands = cmd.commands.map((c) => c.name());
 
     expect(subcommands).not.toContain("generate");
     expect(subcommands).not.toContain("diff");
+    expect(subcommands).not.toContain("docs");
   });
 
-  it("has generate and diff subcommands with surface option", () => {
+  it("has generate, diff, and docs subcommands with surface option", () => {
     const registry = createTestRegistry();
     const cmd = createSchemaCommand(registry, { surface: {} });
     const subcommands = cmd.commands.map((c) => c.name());
@@ -323,6 +324,7 @@ describe("createSchemaCommand", () => {
     expect(subcommands).toContain("show");
     expect(subcommands).toContain("generate");
     expect(subcommands).toContain("diff");
+    expect(subcommands).toContain("docs");
   });
 
   it("generate subcommand has --dry-run and --snapshot options", () => {
@@ -361,5 +363,16 @@ describe("createSchemaCommand", () => {
 
     expect(options).toContain("--from");
     expect(options).toContain("--to");
+  });
+
+  it("docs subcommand has --surface, --output-dir, and --dry-run options", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const docsCmd = cmd.commands.find((c) => c.name() === "docs");
+    const options = docsCmd?.options.map((o) => o.long) ?? [];
+
+    expect(options).toContain("--surface");
+    expect(options).toContain("--output-dir");
+    expect(options).toContain("--dry-run");
   });
 });
