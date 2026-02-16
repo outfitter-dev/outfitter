@@ -66,12 +66,14 @@ export function formatManifestMarkdown(
     )
   );
 
-  // Sort actions alphabetically by display name
-  const sorted = [...manifest.actions].sort((a, b) => {
-    const nameA = displayName(a, surface);
-    const nameB = displayName(b, surface);
-    return nameA.localeCompare(nameB);
-  });
+  // Filter to actions that support the selected surface, then sort alphabetically
+  const sorted = manifest.actions
+    .filter((action) => action.surfaces.includes(surface))
+    .sort((a, b) => {
+      const nameA = displayName(a, surface);
+      const nameB = displayName(b, surface);
+      return nameA.localeCompare(nameB);
+    });
 
   if (sorted.length === 0) {
     sections.push("_No tools registered._");
@@ -248,6 +250,10 @@ function formatType(schema: JsonSchema): string {
 
   if (schema.anyOf) {
     return schema.anyOf.map(formatType).join(" \\| ");
+  }
+
+  if (schema.oneOf) {
+    return schema.oneOf.map(formatType).join(" \\| ");
   }
 
   if (schema.type === "array") {

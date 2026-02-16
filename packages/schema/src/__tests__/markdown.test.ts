@@ -492,6 +492,32 @@ describe("formatManifestMarkdown", () => {
     expect(output).toContain("_No parameters._");
   });
 
+  it("handles oneOf types (discriminated unions)", () => {
+    const manifest = createMinimalManifest({
+      actions: [
+        {
+          id: "tool",
+          surfaces: ["mcp"],
+          input: {
+            type: "object",
+            properties: {
+              value: {
+                oneOf: [{ type: "string" }, { type: "number" }],
+                description: "A union type",
+              },
+            },
+          },
+          mcp: { tool: "tool", description: "A tool" },
+        },
+      ],
+    });
+    const output = formatManifestMarkdown(manifest);
+
+    expect(output).toContain("string");
+    expect(output).toContain("number");
+    expect(output).not.toContain("unknown");
+  });
+
   it("handles anyOf types (nullable/union)", () => {
     const manifest = createMinimalManifest({
       actions: [
@@ -642,5 +668,45 @@ describe("formatManifestMarkdown (CLI surface)", () => {
     expect(output).toContain("# MCP Tools Reference");
     expect(output).toContain("## doctor");
     expect(output).toContain("| Property | Type | Required | Description |");
+  });
+
+  it("filters actions by selected surface", () => {
+    const manifest = createMinimalManifest({
+      surfaces: ["cli", "mcp"],
+      actions: [
+        {
+          id: "both",
+          description: "Available on both surfaces",
+          surfaces: ["cli", "mcp"],
+          input: { type: "object", properties: {} },
+          cli: { command: "both", description: "Both" },
+          mcp: { tool: "both", description: "Both" },
+        },
+        {
+          id: "cli-only",
+          description: "Only on CLI",
+          surfaces: ["cli"],
+          input: { type: "object", properties: {} },
+          cli: { command: "cli-only", description: "CLI only" },
+        },
+        {
+          id: "mcp-only",
+          description: "Only on MCP",
+          surfaces: ["mcp"],
+          input: { type: "object", properties: {} },
+          mcp: { tool: "mcp-only", description: "MCP only" },
+        },
+      ],
+    });
+
+    const cliOutput = formatManifestMarkdown(manifest, { surface: "cli" });
+    expect(cliOutput).toContain("## both");
+    expect(cliOutput).toContain("## cli-only");
+    expect(cliOutput).not.toContain("mcp-only");
+
+    const mcpOutput = formatManifestMarkdown(manifest, { surface: "mcp" });
+    expect(mcpOutput).toContain("## both");
+    expect(mcpOutput).toContain("## mcp-only");
+    expect(mcpOutput).not.toContain("cli-only");
   });
 });
