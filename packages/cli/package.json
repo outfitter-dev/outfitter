@@ -125,12 +125,14 @@
   "peerDependencies": {
     "@outfitter/config": ">=0.3.0",
     "@outfitter/contracts": ">=0.2.0",
+    "@outfitter/schema": ">=0.1.0",
     "@outfitter/types": ">=0.2.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/schema": "workspace:*",
     "@types/bun": "^1.3.7",
     "@types/node": "^25.0.10",
     "typescript": "^5.9.3"
