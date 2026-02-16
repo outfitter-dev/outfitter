@@ -8,6 +8,12 @@
  */
 
 export {
+  type DiffEntry,
+  diffSurfaceMaps,
+  type ModifiedEntry,
+  type SurfaceMapDiff,
+} from "./diff.js";
+export {
   type ActionManifest,
   type ActionManifestEntry,
   type ActionSource,
@@ -18,3 +24,11 @@ export {
   type ManifestCliSpec,
   type ManifestMcpSpec,
 } from "./manifest.js";
+
+export {
+  type GenerateSurfaceMapOptions,
+  generateSurfaceMap,
+  readSurfaceMap,
+  type SurfaceMap,
+  writeSurfaceMap,
+} from "./surface.js";
