@@ -135,6 +135,90 @@ cli.register(createCompletionCommand({ programName: "mycli" }));
 // mycli completion bash | zsh | fish
 ```
 
+## Schema Introspection (`@outfitter/cli/schema`)
+
+Machine-readable introspection so agents can discover CLI capabilities without scraping `--help`.
+
+### Auto-Registration
+
+`buildCliCommands()` appends a `schema` command automatically:
+
+```typescript
+import { buildCliCommands } from "@outfitter/cli/actions";
+
+const commands = buildCliCommands(registry);
+// Includes all action commands + `schema` at the end
+```
+
+Opt out with `schema: false`:
+
+```typescript
+const commands = buildCliCommands(registry, { schema: false });
+```
+
+Pass options to the schema command:
+
+```typescript
+const commands = buildCliCommands(registry, {
+  schema: { programName: "mycli" },
+});
+```
+
+### Usage
+
+```bash
+mycli schema                        # Human-readable summary
+mycli schema --output json          # Machine-readable JSON manifest
+mycli schema --output json --pretty # Pretty-printed JSON
+mycli schema --surface cli          # Filter by surface
+mycli schema init                   # Detail view for a single action
+```
+
+### Manifest Shape
+
+```typescript
+interface ActionManifest {
+  version: string;              // Manifest format version ("1.0.0")
+  generatedAt: string;          // ISO 8601 timestamp
+  surfaces: ActionSurface[];    // Surfaces present in registry
+  actions: ActionManifestEntry[];
+  errors: Record<ErrorCategory, { exit: number; http: number }>;
+  outputModes: string[];        // ["human", "json", "jsonl", "tree", "table"]
+}
+
+interface ActionManifestEntry {
+  id: string;
+  description?: string;
+  surfaces: ActionSurface[];
+  input: JsonSchema;            // Zod → JSON Schema conversion
+  output?: JsonSchema;
+  cli?: { group?; command?; description?; aliases?; options? };
+  mcp?: { tool?; description?; deferLoading? };
+  api?: { method?; path?; tags? };
+}
+```
+
+### Standalone Usage
+
+Use the module directly without auto-registration:
+
+```typescript
+import {
+  generateManifest,
+  formatManifestHuman,
+  createSchemaCommand,
+} from "@outfitter/cli/schema";
+
+// Generate manifest programmatically
+const manifest = generateManifest(registry, { surface: "cli" });
+
+// Format for terminal
+const output = formatManifestHuman(manifest, "mycli");
+
+// Create a standalone Commander command
+const schemaCmd = createSchemaCommand(registry, { programName: "mycli" });
+```
+
 ## Action Registry Adoption
 
 Presets integrate with `defineAction()` by spreading options and using `resolve()` in `mapInput`:
