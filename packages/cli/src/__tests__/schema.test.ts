@@ -297,4 +297,50 @@ describe("createSchemaCommand", () => {
 
     expect(options).toContain("--pretty");
   });
+
+  it("has show subcommand", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry);
+    const subcommands = cmd.commands.map((c) => c.name());
+
+    expect(subcommands).toContain("show");
+  });
+
+  it("does not have generate/diff without surface option", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry);
+    const subcommands = cmd.commands.map((c) => c.name());
+
+    expect(subcommands).not.toContain("generate");
+    expect(subcommands).not.toContain("diff");
+  });
+
+  it("has generate and diff subcommands with surface option", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const subcommands = cmd.commands.map((c) => c.name());
+
+    expect(subcommands).toContain("show");
+    expect(subcommands).toContain("generate");
+    expect(subcommands).toContain("diff");
+  });
+
+  it("generate subcommand has --dry-run and --snapshot options", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const generateCmd = cmd.commands.find((c) => c.name() === "generate");
+    const options = generateCmd?.options.map((o) => o.long) ?? [];
+
+    expect(options).toContain("--dry-run");
+    expect(options).toContain("--snapshot");
+  });
+
+  it("diff subcommand has --output option", () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry, { surface: {} });
+    const diffCmd = cmd.commands.find((c) => c.name() === "diff");
+    const options = diffCmd?.options.map((o) => o.long) ?? [];
+
+    expect(options).toContain("--output");
+  });
 });

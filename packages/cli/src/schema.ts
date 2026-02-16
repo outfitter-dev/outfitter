@@ -1,200 +1,51 @@
 /**
  * Schema introspection for CLI commands.
  *
- * Generates machine-readable manifests from the ActionRegistry,
- * enabling agents to discover CLI capabilities without scraping --help.
+ * Provides Commander integration and human-readable formatting on top of
+ * `@outfitter/schema` manifest generation. Surface map subcommands
+ * (generate, diff) are opt-in via `SchemaCommandOptions.surface`.
  *
  * @packageDocumentation
  */
 
+import { join } from "node:path";
+import type { ActionSurface } from "@outfitter/contracts";
 import {
-  ACTION_SURFACES,
-  type ActionRegistry,
-  type ActionSurface,
-  type AnyActionSpec,
-  DEFAULT_REGISTRY_SURFACES,
-  type ErrorCategory,
-  exitCodeMap,
-  type JsonSchema,
-  statusCodeMap,
-  zodToJsonSchema,
-} from "@outfitter/contracts";
+  type ActionManifest,
+  type ActionManifestEntry,
+  type ActionSource,
+  diffSurfaceMaps,
+  type GenerateManifestOptions,
+  generateManifest,
+  generateSurfaceMap,
+  readSurfaceMap,
+  writeSurfaceMap,
+} from "@outfitter/schema";
 import { Command } from "commander";
+
+// Re-export manifest types for backward compatibility
+export type {
+  ActionManifest,
+  ActionManifestEntry,
+  ActionSource,
+  GenerateManifestOptions,
+} from "@outfitter/schema";
+
+// biome-ignore lint/performance/noBarrelFile: not a barrel — re-exports for backward compat alongside local exports
+export { generateManifest } from "@outfitter/schema";
 
 // =============================================================================
 // Types
 // =============================================================================
 
-export interface ActionManifest {
-  readonly version: string;
-  readonly generatedAt: string;
-  readonly surfaces: ActionSurface[];
-  readonly actions: ActionManifestEntry[];
-  readonly errors: Record<ErrorCategory, { exit: number; http: number }>;
-  readonly outputModes: string[];
-}
-
-export interface ActionManifestEntry {
-  readonly id: string;
-  readonly description?: string | undefined;
-  readonly surfaces: ActionSurface[];
-  readonly input: JsonSchema;
-  readonly output?: JsonSchema | undefined;
-  readonly cli?: ManifestCliSpec | undefined;
-  readonly mcp?: ManifestMcpSpec | undefined;
-  readonly api?: ManifestApiSpec | undefined;
-}
-
-interface ManifestCliSpec {
-  readonly group?: string | undefined;
-  readonly command?: string | undefined;
-  readonly description?: string | undefined;
-  readonly aliases?: readonly string[] | undefined;
-  readonly options?: readonly ManifestCliOption[] | undefined;
-}
-
-interface ManifestCliOption {
-  readonly flags: string;
-  readonly description: string;
-  readonly defaultValue?: string | boolean | string[] | undefined;
-  readonly required?: boolean | undefined;
-}
-
-interface ManifestMcpSpec {
-  readonly tool?: string | undefined;
-  readonly description?: string | undefined;
-  readonly deferLoading?: boolean | undefined;
-}
-
-interface ManifestApiSpec {
-  readonly method?: string | undefined;
-  readonly path?: string | undefined;
-  readonly tags?: readonly string[] | undefined;
-}
-
-export interface GenerateManifestOptions {
-  readonly surface?: ActionSurface;
-  readonly version?: string;
+export interface SurfaceCommandOptions {
+  readonly cwd?: string;
+  readonly outputDir?: string;
 }
 
 export interface SchemaCommandOptions {
   readonly programName?: string;
-}
-
-// =============================================================================
-// Manifest Generation
-// =============================================================================
-
-type ActionSource = ActionRegistry | readonly AnyActionSpec[];
-
-function isActionRegistry(source: ActionSource): source is ActionRegistry {
-  return (
-    "list" in source && typeof (source as ActionRegistry).list === "function"
-  );
-}
-
-const OUTPUT_MODES = ["human", "json", "jsonl", "tree", "table"] as const;
-
-function buildErrorTaxonomy(): Record<
-  ErrorCategory,
-  { exit: number; http: number }
-> {
-  const taxonomy = {} as Record<ErrorCategory, { exit: number; http: number }>;
-  for (const category of Object.keys(exitCodeMap) as ErrorCategory[]) {
-    taxonomy[category] = {
-      exit: exitCodeMap[category],
-      http: statusCodeMap[category],
-    };
-  }
-  return taxonomy;
-}
-
-function actionToManifestEntry(action: AnyActionSpec): ActionManifestEntry {
-  const surfaces = [
-    ...(action.surfaces ?? DEFAULT_REGISTRY_SURFACES),
-  ] as ActionSurface[];
-
-  return {
-    id: action.id,
-    description: action.description,
-    surfaces,
-    input: zodToJsonSchema(action.input),
-    output: action.output ? zodToJsonSchema(action.output) : undefined,
-    cli: action.cli
-      ? {
-          group: action.cli.group,
-          command: action.cli.command,
-          description: action.cli.description,
-          aliases:
-            action.cli.aliases && action.cli.aliases.length > 0
-              ? action.cli.aliases
-              : undefined,
-          options:
-            action.cli.options && action.cli.options.length > 0
-              ? action.cli.options.map((o) => ({
-                  flags: o.flags,
-                  description: o.description,
-                  defaultValue: o.defaultValue,
-                  required: o.required,
-                }))
-              : undefined,
-        }
-      : undefined,
-    mcp: action.mcp
-      ? {
-          tool: action.mcp.tool,
-          description: action.mcp.description,
-          deferLoading: action.mcp.deferLoading,
-        }
-      : undefined,
-    api: action.api
-      ? {
-          method: action.api.method,
-          path: action.api.path,
-          tags: action.api.tags,
-        }
-      : undefined,
-  };
-}
-
-/**
- * Generate a manifest from an action registry or action array.
- *
- * @param source - ActionRegistry or array of ActionSpec
- * @param options - Filtering and version options
- * @returns The manifest object
- */
-export function generateManifest(
-  source: ActionSource,
-  options?: GenerateManifestOptions
-): ActionManifest {
-  let actions = isActionRegistry(source) ? source.list() : [...source];
-
-  if (options?.surface) {
-    const surface = options.surface;
-    actions = actions.filter((action) => {
-      const surfaces = action.surfaces ?? DEFAULT_REGISTRY_SURFACES;
-      return surfaces.includes(surface);
-    });
-  }
-
-  const surfaceSet = new Set<ActionSurface>();
-  for (const action of actions) {
-    for (const s of action.surfaces ?? DEFAULT_REGISTRY_SURFACES) {
-      if (ACTION_SURFACES.includes(s)) {
-        surfaceSet.add(s);
-      }
-    }
-  }
-
-  return {
-    version: options?.version ?? "1.0.0",
-    generatedAt: new Date().toISOString(),
-    surfaces: [...surfaceSet].sort(),
-    actions: actions.map(actionToManifestEntry),
-    errors: buildErrorTaxonomy(),
-    outputModes: [...OUTPUT_MODES],
-  };
+  readonly surface?: SurfaceCommandOptions;
 }
 
 // =============================================================================
@@ -344,11 +195,60 @@ function formatActionDetail(
 }
 
 // =============================================================================
+// Show Handler (shared by parent action and show subcommand)
+// =============================================================================
+
+function handleShow(
+  source: ActionSource,
+  programName: string | undefined,
+  parentCmd: Command,
+  actionArg: string | undefined,
+  cmdOptions: {
+    output?: string;
+    surface?: string;
+    pretty?: boolean;
+  }
+): void {
+  const manifestOptions: GenerateManifestOptions = {};
+
+  if (cmdOptions.surface) {
+    (manifestOptions as { surface?: ActionSurface }).surface =
+      cmdOptions.surface as ActionSurface;
+  }
+
+  const manifest = generateManifest(source, manifestOptions);
+
+  if (cmdOptions.output === "json") {
+    const indent = cmdOptions.pretty ? 2 : undefined;
+    if (actionArg) {
+      const entry = manifest.actions.find((a) => a.id === actionArg);
+      if (!entry) {
+        process.stderr.write(`Unknown action: ${actionArg}\n`);
+        process.exitCode = 1;
+        return;
+      }
+      process.stdout.write(`${JSON.stringify(entry, null, indent)}\n`);
+    } else {
+      process.stdout.write(`${JSON.stringify(manifest, null, indent)}\n`);
+    }
+    return;
+  }
+
+  // Human output
+  const resolvedName = programName ?? parentCmd.parent?.name() ?? undefined;
+  const output = formatManifestHuman(manifest, resolvedName, actionArg);
+  process.stdout.write(`${output}\n`);
+}
+
+// =============================================================================
 // Commander Command
 // =============================================================================
 
 /**
  * Create a `schema` command for CLI introspection.
+ *
+ * When `options.surface` is provided, adds `generate` and `diff` subcommands
+ * for surface map file I/O and drift detection.
  *
  * @param source - ActionRegistry or array of ActionSpec
  * @param options - Command configuration
@@ -373,28 +273,142 @@ export function createSchemaCommand(
           pretty?: boolean;
         }
       ) => {
-        const manifestOptions: GenerateManifestOptions = {};
+        handleShow(source, options?.programName, cmd, actionArg, cmdOptions);
+      }
+    );
 
-        if (cmdOptions.surface) {
-          (manifestOptions as { surface?: ActionSurface }).surface =
-            cmdOptions.surface as ActionSurface;
+  // Add show subcommand (explicit alias for parent behavior)
+  const showCmd = new Command("show")
+    .description("Show schema for all actions or a specific action")
+    .argument("[action]", "Show detail for a specific action")
+    .option("--output <mode>", "Output mode (human, json)", "human")
+    .option("--surface <name>", "Filter by surface (cli, mcp, api, server)")
+    .option("--pretty", "Pretty-print JSON output")
+    .action(
+      (
+        actionArg: string | undefined,
+        cmdOptions: {
+          output?: string;
+          surface?: string;
+          pretty?: boolean;
         }
+      ) => {
+        handleShow(source, options?.programName, cmd, actionArg, cmdOptions);
+      }
+    );
+  cmd.addCommand(showCmd);
 
-        const manifest = generateManifest(source, manifestOptions);
+  // Add surface subcommands only when surface options are provided
+  if (options?.surface) {
+    const surfaceOpts = options.surface;
+    const cwd = surfaceOpts.cwd ?? process.cwd();
+    const outputDir = surfaceOpts.outputDir ?? ".outfitter";
 
-        if (cmdOptions.output === "json") {
-          const indent = cmdOptions.pretty ? 2 : undefined;
-          process.stdout.write(`${JSON.stringify(manifest, null, indent)}\n`);
+    // generate subcommand
+    const generateCmd = new Command("generate")
+      .description("Generate surface map and write to disk")
+      .option("--dry-run", "Print surface map without writing to disk")
+      .option(
+        "--snapshot <version>",
+        "Write snapshot to .outfitter/snapshots/<version>.json"
+      )
+      .action(async (genOptions: { dryRun?: boolean; snapshot?: string }) => {
+        const surfaceMap = generateSurfaceMap(source, {
+          generator: "build",
+        });
+
+        if (genOptions.dryRun) {
+          process.stdout.write(`${JSON.stringify(surfaceMap, null, 2)}\n`);
           return;
         }
 
-        // Human output
-        const programName =
-          options?.programName ?? cmd.parent?.name() ?? undefined;
-        const output = formatManifestHuman(manifest, programName, actionArg);
-        process.stdout.write(`${output}\n`);
-      }
-    );
+        if (genOptions.snapshot) {
+          const snapshotPath = resolveSnapshotPath(
+            cwd,
+            outputDir,
+            genOptions.snapshot
+          );
+          await writeSurfaceMap(surfaceMap, snapshotPath);
+          process.stdout.write(`Snapshot written to ${snapshotPath}\n`);
+          return;
+        }
+
+        const outputPath = join(cwd, outputDir, "surface.json");
+        await writeSurfaceMap(surfaceMap, outputPath);
+        process.stdout.write(`Surface map written to ${outputPath}\n`);
+      });
+    cmd.addCommand(generateCmd);
+
+    // diff subcommand
+    const diffCmd = new Command("diff")
+      .description("Compare runtime schema against committed surface map")
+      .option("--output <mode>", "Output mode (human, json)", "human")
+      .action(async (diffOptions: { output?: string }) => {
+        const surfacePath = join(cwd, outputDir, "surface.json");
+
+        let committed: Awaited<ReturnType<typeof readSurfaceMap>>;
+        try {
+          committed = await readSurfaceMap(surfacePath);
+        } catch {
+          process.stderr.write(`No committed surface map at ${surfacePath}\n`);
+          process.stderr.write("Run 'schema generate' first.\n");
+          process.exitCode = 1;
+          return;
+        }
+
+        const current = generateSurfaceMap(source, {
+          generator: "runtime",
+        });
+        const result = diffSurfaceMaps(committed, current);
+
+        if (diffOptions.output === "json") {
+          process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        } else {
+          if (!result.hasChanges) {
+            process.stdout.write("No schema drift detected.\n");
+            return;
+          }
+
+          const lines: string[] = [];
+          lines.push("Schema drift detected:\n");
+
+          if (result.added.length > 0) {
+            lines.push("  Added:");
+            for (const entry of result.added) {
+              lines.push(`    + ${entry.id}`);
+            }
+          }
+
+          if (result.removed.length > 0) {
+            lines.push("  Removed:");
+            for (const entry of result.removed) {
+              lines.push(`    - ${entry.id}`);
+            }
+          }
+
+          if (result.modified.length > 0) {
+            lines.push("  Modified:");
+            for (const entry of result.modified) {
+              lines.push(`    ~ ${entry.id} (${entry.changes.join(", ")})`);
+            }
+          }
+
+          process.stdout.write(`${lines.join("\n")}\n`);
+        }
+
+            if (result.metadataChanges.length > 0) {
+              lines.push("  Metadata:");
+              for (const field of result.metadataChanges) {
+                lines.push(`    ~ ${field}`);
+              }
+            }
+
+        if (result.hasChanges) {
+          process.exitCode = 1;
+        }
+      });
+    cmd.addCommand(diffCmd);
+  }
 
   return cmd;
 }

@@ -15,13 +15,25 @@
         "default": "./dist/index.js"
       }
     },
+    "./diff": {
+      "import": {
+        "types": "./dist/diff.d.ts",
+        "default": "./dist/diff.js"
+      }
+    },
     "./manifest": {
       "import": {
         "types": "./dist/manifest.d.ts",
         "default": "./dist/manifest.js"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./surface": {
+      "import": {
+        "types": "./dist/surface.d.ts",
+        "default": "./dist/surface.js"
+      }
+    }
   },
   "sideEffects": false,
   "scripts": {
