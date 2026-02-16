@@ -16,7 +16,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { Command } from "commander";

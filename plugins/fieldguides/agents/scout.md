@@ -6,7 +6,7 @@ model: inherit
 color: blue
 skills:
   - check-status
-memory: project
+memory: user
 ---
 
 # Scout

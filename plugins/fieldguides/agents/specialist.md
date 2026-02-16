@@ -4,7 +4,7 @@ description: Use this agent when the task requires domain-specific expertise, in
 tools: Bash, BashOutput, Glob, Grep, KillShell, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, WebFetch, WebSearch
 model: inherit
 color: green
-memory: project
+memory: user
 ---
 
 # Specialist

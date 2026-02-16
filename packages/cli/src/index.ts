@@ -26,5 +26,5 @@ export {
 } from "./colors/index.js";
 
 // Output (stdout/stderr abstraction)
-export { output } from "./output.js";
+export { exitWithError, output } from "./output.js";
 export type { OutputMode } from "./types.js";

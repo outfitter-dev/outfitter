@@ -5,7 +5,7 @@
  */
 
 import { resolve } from "node:path";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import {
   type ActionCliInputContext,
   type ActionCliOption,

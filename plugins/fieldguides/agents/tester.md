@@ -6,7 +6,7 @@ model: inherit
 color: yellow
 skills:
   - prove-it-works
-memory: project
+memory: user
 ---
 
 # Tester

@@ -8,7 +8,7 @@
  */
 
 import { fileURLToPath } from "node:url";
-import { output } from "@outfitter/cli/output";
+import { output } from "@outfitter/cli";
 import {
   getPrimitiveIds,
   isPrimitiveId,

@@ -229,7 +229,7 @@
     "test:watch": "bun test --watch",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
-    "pretypecheck": "bun run --filter @outfitter/logging build && bun run --filter @outfitter/cli build",
+    "pretypecheck": "(test -f ../../packages/logging/dist/index.d.ts || bun run --filter @outfitter/logging build) && (test -f ../../packages/cli/dist/output.d.ts || bun run --filter @outfitter/cli build)",
     "typecheck": "tsc --noEmit",
     "sync:templates": "bun run ../../scripts/sync-templates.ts",
     "prepack": "bun run sync:templates",
