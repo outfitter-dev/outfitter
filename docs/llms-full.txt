@@ -1521,6 +1521,31 @@ if (flags.reset) {
 }
 ```
 
+## Conventions
+
+Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../CLI-CONVENTIONS.md) for the complete catalog.
+
+```typescript
+import { composePresets, verbosePreset, cwdPreset, forcePreset } from "@outfitter/cli/flags";
+import { outputModePreset } from "@outfitter/cli/query";
+
+const preset = composePresets(verbosePreset(), cwdPreset(), forcePreset());
+
+command("deploy")
+  .preset(preset)
+  .action(async ({ flags }) => {
+    const { verbose, cwd, force } = preset.resolve(flags);
+    // All typed, all composable
+  });
+```
+
+**Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`
+
+**Additional modules:**
+- `@outfitter/cli/verbs` — Standard verb families (`create`, `modify`, `remove`, `list`, `show`)
+- `@outfitter/cli/query` — Output mode and jq expression presets
+- `@outfitter/cli/completion` — Shell completion script generation
+
 ## Configuration
 
 ### Environment Variables
