@@ -126,6 +126,22 @@ applyVerb(builder, "list");
 // Adds alias "ls" to the command
 ```
 
+`resolveVerb` accepts a `VerbConfig` with additional options:
+
+```typescript
+// Disable all aliases
+resolveVerb("remove", { aliases: false });
+// { name: "remove", aliases: [] }
+
+// Add extra aliases
+resolveVerb("list", { extraAliases: ["all"] });
+// { name: "list", aliases: ["ls", "all"] }
+
+// Exclude specific aliases
+resolveVerb("modify", { excludeAliases: ["update"] });
+// { name: "modify", aliases: ["edit"] }
+```
+
 ## Shell Completion (`@outfitter/cli/completion`)
 
 ```typescript
@@ -133,6 +149,21 @@ import { createCompletionCommand } from "@outfitter/cli/completion";
 
 cli.register(createCompletionCommand({ programName: "mycli" }));
 // mycli completion bash | zsh | fish
+```
+
+Restrict supported shells via the `shells` option:
+
+```typescript
+createCompletionCommand({ programName: "mycli", shells: ["bash", "zsh"] });
+```
+
+For build-time generation without a Commander command, use `generateCompletion()` directly:
+
+```typescript
+import { generateCompletion } from "@outfitter/cli/completion";
+
+const script = generateCompletion("fish", "mycli");
+await Bun.write("completions/mycli.fish", script);
 ```
 
 ## Schema Introspection (`@outfitter/cli/schema`)
@@ -234,6 +265,8 @@ mycli schema generate --dry-run       # print without writing
 mycli schema generate --snapshot v1   # write .outfitter/snapshots/v1.json
 mycli schema diff                     # compare runtime vs committed
 mycli schema diff --output json       # structured diff as JSON
+mycli schema diff --against v1        # compare runtime vs named snapshot
+mycli schema diff --from v1 --to v2   # compare two snapshots
 ```
 
 #### Surface Map Shape
@@ -270,6 +303,16 @@ Example GitHub Actions step:
 ```
 
 The diff compares the committed `.outfitter/surface.json` against the current runtime registry. It ignores volatile fields (`generatedAt`) and reports added, removed, and modified actions.
+
+For cross-version comparison, use snapshots:
+
+```bash
+# Compare runtime against a specific release snapshot
+mycli schema diff --against v1.0.0
+
+# Compare two snapshots directly (no runtime involved)
+mycli schema diff --from v1.0.0 --to v2.0.0
+```
 
 #### Programmatic Usage
 
