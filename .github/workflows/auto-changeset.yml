@@ -27,6 +27,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          # RELEASE_PLEASE_TOKEN (PAT) is required so the changeset commit
+          # can trigger downstream workflows (CI, version-packages). The
+          # default github.token deliberately cannot do this to prevent
+          # recursive workflow runs. Fork-PR secret restrictions don't apply
+          # here because this job runs on the merge event in the base repo.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
       - name: Determine release type
