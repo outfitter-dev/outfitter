@@ -14,7 +14,8 @@ Validate skill files against formatting conventions. Catches preprocessing hazar
 
 1. Load the `/skillcheck` skill (runs preprocessing linter)
 2. Run the placeholder linter to find `[string]` patterns that should use `{ string }` convention
-3. Review findings and fix violations
+3. Run the fence linter to find bare code fences and nesting issues
+4. Review findings and fix violations
 
 ## Placeholder Linter
 
@@ -42,3 +43,25 @@ Instructional placeholders using brackets instead of braces:
 - GitHub admonitions: `[!NOTE]`, `[!WARNING]`
 - Code fences and HTML comments
 - All-caps tokens under 12 chars: `[REDACTED]`, `[TIME]`
+
+## Fence Linter
+
+Scan markdown files for code fence issues — bare fences without language specifiers and broken nesting:
+
+```bash
+bun plugins/fieldguides/scripts/lint-fences.ts ${ARGUMENTS:-plugins/}
+```
+
+### What it catches
+
+- **Bare fences**: Opening `` ``` `` without a language (suggests one based on content heuristics)
+- **Broken nesting**: Inner fence with same backtick count as outer fence (use ```` ```` ```` for outer)
+
+### Fix patterns
+
+| Issue | Fix |
+|-------|-----|
+| `` ``` `` with TypeScript content | `` ```typescript `` |
+| `` ``` `` with shell commands | `` ```bash `` |
+| `` ``` `` with plain text | `` ```text `` |
+| Inner `` ``` `` inside outer `` ``` `` | Use ```` ```` ```` for outer fence |
