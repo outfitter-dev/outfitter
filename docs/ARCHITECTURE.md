@@ -65,7 +65,7 @@ Packages are organized into tiers based on stability and dependency direction. H
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    TOOLING (Early)                      │
-│  outfitter CLI, docs/docs-core, tooling                  │
+│  outfitter CLI, docs/docs-core, tooling                 │
 ├─────────────────────────────────────────────────────────┤
 │                    RUNTIME (Active)                     │
 │  cli, config, logging, file-ops, state, schema, tui,   │
