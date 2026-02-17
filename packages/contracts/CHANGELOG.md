@@ -1,5 +1,11 @@
 # @outfitter/contracts
 
+## 0.4.0
+
+### Minor Changes
+
+- 13b36de: Move `zodToJsonSchema` from `@outfitter/mcp` to `@outfitter/contracts`. MCP re-exports for backward compatibility.
+
 ## 0.3.0
 
 ### Minor Changes

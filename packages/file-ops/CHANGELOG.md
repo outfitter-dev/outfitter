@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [13b36de]
+  - @outfitter/contracts@0.4.0
+  - @outfitter/types@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
