@@ -1,417 +1,120 @@
 # CLI Patterns
 
-Deep dive into @outfitter/cli patterns for building AI-agent-ready CLI tools with typed commands, output contracts, and rendering primitives.
+Patterns for `@outfitter/cli` with schema introspection, flag presets, output contracts, and `@outfitter/tui` rendering.
 
-## Module Structure
+## Package Roles
 
-The root export is minimal — colors and output only. Use subpath imports for everything else:
+- `@outfitter/cli`: command builder, output contract, input helpers, pagination, schema command wiring.
+- `@outfitter/tui`: visual rendering and interactive terminal UX (tables/lists/boxes/trees, themes, spinners, prompts).
+
+Use `@outfitter/cli` for transport behavior and machine-friendly output. Use `@outfitter/tui` when you need richer human terminal presentation.
+
+## Typical Imports
 
 ```typescript
-// Root: colors + output
-import { ANSI, createTheme, output } from "@outfitter/cli";
-import type { OutputMode, Theme, Tokens } from "@outfitter/cli";
-
-// CLI building
-import { createCLI, command } from "@outfitter/cli/command";
+import { output } from "@outfitter/cli";
+import { command, createCLI } from "@outfitter/cli/command";
 import { buildCliCommands } from "@outfitter/cli/actions";
-import { readStdin, collectIds, isPiped } from "@outfitter/cli/input";
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
+import { exitWithError, resolveVerbose } from "@outfitter/cli/output";
+import {
+  composePresets,
+  verbosePreset,
+  cwdPreset,
+  dryRunPreset,
+  forcePreset,
+  queryPreset,
+  outputPreset,
+  paginationPreset,
+} from "@outfitter/cli/flags";
 
-// Rendering (from @outfitter/tui)
-import { renderTable, renderList, renderBox, renderTree } from "@outfitter/tui/render";
-import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/tui/render";
-import { parseDateRange, formatRelative } from "@outfitter/tui/render";
-
-// Streaming (in-place terminal updates, from @outfitter/tui)
-import { createSpinner, createStreamWriter } from "@outfitter/tui/streaming";
-
-// Theming (from @outfitter/tui)
-import { createTheme, createTokens } from "@outfitter/tui/theme";
-import { defaultTheme } from "@outfitter/tui/theme/presets/default";
-
-// Prompts (from @outfitter/tui)
-import { text, confirm, select } from "@outfitter/tui/prompt";
-
-// Presets (bundle common imports, from @outfitter/tui)
-import { renderTable, renderList, renderBox } from "@outfitter/tui/preset/standard";
-import { renderTree } from "@outfitter/tui/preset/full"; // standard + tree
+import { renderTable, renderList } from "@outfitter/tui/render";
+import { createSpinner } from "@outfitter/tui/streaming";
 ```
 
-### Subpath Summary
+## `buildCliCommands()` + Auto Schema Command
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/cli` | `ANSI`, `createTheme`, `output`, `OutputMode` |
-| `@outfitter/cli/command` | `createCLI`, `command` builder |
-| `@outfitter/cli/actions` | `buildCliCommands` (action registry → Commander) |
-| `@outfitter/cli/output` | `output`, `exitWithError`, `resolveVerbose` |
-| `@outfitter/cli/input` | `readStdin`, `collectIds`, `isPiped`, `expandFileArg` |
-| `@outfitter/cli/pagination` | `loadCursor`, `saveCursor`, `clearCursor` |
-| `@outfitter/tui/render` | Tables, lists, boxes, trees, formatting, text utilities |
-| `@outfitter/tui/streaming` | `createSpinner`, `createStreamWriter`, ANSI sequences |
-| `@outfitter/tui/theme` | `createVisualTheme`, `createThemedContext`, theme context |
-| `@outfitter/tui/theme/presets` | `default`, `rounded`, `bold`, `minimal` |
-| `@outfitter/tui/prompt` | `promptText`, `promptConfirm`, `promptSelect`, `promptGroup` |
-| `@outfitter/tui/preset/standard` | Table + list + box rendering |
-| `@outfitter/tui/preset/full` | Standard + tree rendering |
-| `@outfitter/cli/terminal` | Terminal detection utilities |
-
-## Creating a CLI
+When you build commands from an action registry, pass `schema` options to auto-register `schema` subcommands:
 
 ```typescript
-import { createCLI, command } from "@outfitter/cli/command";
-import { output } from "@outfitter/cli";
-
-const cli = createCLI({
-  name: "myapp",
-  version: "1.0.0",
-  description: "My CLI application",
+const commands = buildCliCommands(registry, {
+  schema: {
+    programName: "mycli",
+    surface: { cwd: process.cwd(), outputDir: ".outfitter" },
+  },
 });
+```
 
-cli.register(
-  command("list")
-    .description("List items")
-    .action(async ({ flags }) => {
-      const items = await listItems();
-      await output(items, { mode: flags.json ? "json" : undefined });
-    })
+Generated capabilities include:
+
+- `mycli schema`
+- `mycli schema show [action]`
+- `mycli schema generate [--dry-run] [--snapshot <name>]`
+- `mycli schema diff [--against <name>] [--from <a> --to <b>]`
+
+This is the preferred path for surface-map generation and drift checks in CI.
+
+## Flag Preset Composition
+
+Compose shared option bundles instead of hand-writing flags per action.
+
+```typescript
+const shared = composePresets(
+  verbosePreset(),
+  cwdPreset(),
+  dryRunPreset(),
+  forcePreset(),
+  queryPreset(),
+  outputPreset(),
+  paginationPreset(),
 );
 
-await cli.parse();
+defineAction({
+  id: "users.list",
+  cli: {
+    options: [...shared.options],
+    mapInput: ({ flags }) => ({
+      ...shared.resolve(flags),
+    }),
+  },
+});
 ```
 
-### Global `--json` Flag
+Core presets to know:
 
-`createCLI()` automatically adds a `--json` flag to all commands. Access it via `flags.json` in your action handler:
+- `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`
+- `outputPreset` (output-mode controls)
+- `queryPreset` (selection/filter helpers)
+- `paginationPreset` (cursor and page-size controls)
+- `timeWindowPreset`, `executionPreset`, `strictPreset`, `projectionPreset`, `interactionPreset`, `colorPreset`
 
-```typescript
-.action(async ({ flags }) => {
-  // flags.json is boolean (false by default)
-  await output(data, { mode: flags.json ? "json" : undefined });
-})
-```
+## Output Modes and Queryability
 
-This flag interacts with the `output()` mode detection — see Output Modes below.
+`output()` defaults to human mode. Structured output is explicit.
 
-## Command Builder
-
-Type-safe command construction:
-
-```typescript
-import { command } from "@outfitter/cli/command";
-
-export const myCommand = command("my-command")
-  .description("What this command does")
-  .argument("<id>", "Required resource ID")
-  .argument("[name]", "Optional name")
-  .option("-l, --limit <n>", "Limit results", parseInt)
-  .option("-v, --verbose", "Enable verbose output")
-  .option("-t, --tags <tags...>", "Filter by tags")
-  .action(async ({ args, flags }) => {
-    // args.id: string
-    // args.name: string | undefined
-    // flags.limit: number | undefined
-    // flags.verbose: boolean
-    // flags.tags: string[] | undefined
-  })
-  .build();
-```
-
-## Output Modes
-
-### Automatic Detection
-
-```typescript
-import { output } from "@outfitter/cli";
-
-await output(data);  // Human by default
-```
-
-Default output is **always human**. Machine-readable output requires explicit opt-in via `--json` flag or `OUTFITTER_JSON=1` environment variable. This follows [clig.dev](https://clig.dev/) conventions.
-
-### Mode Priority
-
-1. Explicit `mode` option in code
-2. `OUTFITTER_JSONL=1` env var
-3. `OUTFITTER_JSON=1` env var
+Priority:
+1. explicit `mode` option
+2. `OUTFITTER_JSONL=1`
+3. `OUTFITTER_JSON=1`
 4. `OUTFITTER_JSON=0` forces human
-5. Default: **human** (regardless of TTY)
-
-### Forcing Modes
+5. default human
 
 ```typescript
-import { output } from "@outfitter/cli";
-
-// Force JSON
+await output(data); // human
 await output(data, { mode: "json" });
-
-// Pretty-print JSON
-await output(data, { mode: "json", pretty: true });
-
-// Force human
-await output(data, { mode: "human" });
-
-// JSONL for streaming
-for await (const item of items) {
-  await output(item, { mode: "jsonl" });
-}
-
-// Output to stderr
-await output(errorData, { stream: process.stderr });
+await output(data, { mode: "jsonl" });
 ```
 
-For custom formatting, transform data before calling `output()`:
+Use `exitWithError()` to keep error output and exit codes aligned to taxonomy.
 
-```typescript
-await output(formatTable(data));
-```
+## `@outfitter/tui` Usage Guidance
 
-## Verbose Resolution
+Prefer raw `output()` when:
+- response is primarily machine-consumed
+- automation and stable JSON contracts are the priority
 
-Environment-aware verbose mode via `resolveVerbose()`:
+Use `@outfitter/tui` when:
+- humans need dense visual summaries (tables/trees)
+- long-running operations benefit from spinners/stream updates
+- interactive prompts are needed
 
-```typescript
-import { resolveVerbose } from "@outfitter/cli/output";
-
-const isVerbose = resolveVerbose();        // Auto-resolve from environment
-const isVerbose = resolveVerbose(flags.verbose); // From CLI flag
-```
-
-**Precedence (highest wins):**
-
-1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
-2. Explicit `verbose` parameter (from CLI flag)
-3. `OUTFITTER_ENV` environment profile defaults
-4. `false` (default)
-
-### Environment Profiles
-
-| `OUTFITTER_ENV` | Default verbose |
-|-----------------|----------------|
-| `development` | `true` |
-| `production` | `false` |
-| `test` | `false` |
-
-## Error Handling
-
-### Exit with Error
-
-```typescript
-import { exitWithError } from "@outfitter/cli/output";
-
-const result = await handler(input, ctx);
-
-if (result.isErr()) {
-  exitWithError(result.error);  // Exit code from error category
-}
-```
-
-`exitWithError` formats the error based on the current output mode (human or JSON) and exits with the appropriate exit code. In JSON mode, errors are serialized to stderr as JSON objects.
-
-### Exit Code Mapping
-
-| Category | Exit Code |
-|----------|-----------|
-| validation | 1 |
-| not_found | 2 |
-| conflict | 3 |
-| permission | 4 |
-| timeout | 5 |
-| rate_limit | 6 |
-| network | 7 |
-| internal | 8 |
-| auth | 9 |
-| cancelled | 130 |
-
-## Pagination
-
-### Cursor State
-
-Cursors persist in XDG state directory:
-
-```
-$XDG_STATE_HOME/{toolName}/cursors/{command}/cursor.json
-```
-
-### Using Pagination
-
-```typescript
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
-
-const options = { command: "list", toolName: "myapp" };
-
-// Load previous cursor
-const state = loadCursor(options);
-
-// Fetch data with cursor
-const results = await listItems({
-  cursor: state?.cursor,
-  limit: 20,
-});
-
-// Save for --next
-if (results.hasMore) {
-  saveCursor(results.nextCursor, options);
-}
-
-// Clear on --reset
-if (flags.reset) {
-  clearCursor(options);
-}
-```
-
-### Cursor Expiration
-
-```typescript
-const state = loadCursor({
-  ...options,
-  maxAgeMs: 30 * 60 * 1000,  // 30 minutes
-});
-```
-
-### Pagination Command Pattern
-
-```typescript
-import { command } from "@outfitter/cli/command";
-import { output } from "@outfitter/cli";
-import { exitWithError } from "@outfitter/cli/output";
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
-
-export const listCommand = command("list")
-  .option("-n, --next", "Continue from previous position")
-  .option("--reset", "Reset pagination cursor")
-  .option("-l, --limit <n>", "Results per page", parseInt, 20)
-  .action(async ({ flags }) => {
-    const paginationOpts = { command: "list", toolName: "myapp" };
-
-    if (flags.reset) {
-      clearCursor(paginationOpts);
-      console.log("Cursor reset");
-      return;
-    }
-
-    const cursor = flags.next ? loadCursor(paginationOpts)?.cursor : undefined;
-    const result = await listHandler({ cursor, limit: flags.limit }, ctx);
-
-    if (result.isErr()) {
-      exitWithError(result.error);
-    }
-
-    await output(result.value.items, { mode: flags.json ? "json" : undefined });
-
-    if (result.value.nextCursor) {
-      saveCursor(result.value.nextCursor, paginationOpts);
-      console.log("\nUse --next for more results");
-    }
-  })
-  .build();
-```
-
-## Input Parsing
-
-### Stdin Reading
-
-```typescript
-import { readStdin } from "@outfitter/cli/input";
-
-const input = await readStdin();  // Returns string or null if no stdin
-```
-
-### Piped Detection
-
-```typescript
-import { isPiped } from "@outfitter/cli/input";
-
-if (isPiped()) {
-  const data = await readStdin();
-} else {
-  // Interactive mode
-}
-```
-
-## Streaming
-
-Interactive terminal updates via `@outfitter/tui/streaming`:
-
-```typescript
-import { createSpinner, createStreamWriter } from "@outfitter/tui/streaming";
-
-// Spinner for async operations
-const spinner = createSpinner("Loading...");
-spinner.start();
-await doWork();
-spinner.succeed("Done!");
-
-// Stream writer for in-place updates
-const writer = createStreamWriter();
-writer.write("Progress: 0%");
-writer.update("Progress: 50%");
-writer.update("Progress: 100%");
-writer.persist();
-```
-
-## Rendering
-
-Pure rendering functions from `@outfitter/tui/render`. All return strings — no side effects.
-
-### Tables
-
-```typescript
-import { renderTable } from "@outfitter/tui/render";
-
-const output = renderTable(data, {
-  columns: ["name", "status", "updated"],
-  headers: { name: "Name", status: "Status", updated: "Last Updated" },
-});
-```
-
-### Formatting Utilities
-
-```typescript
-import { formatDuration, formatBytes, pluralize, slugify } from "@outfitter/tui/render";
-
-formatDuration(1500);       // "1.5s"
-formatDuration(65000);      // "1m 5s"
-formatDuration(3661000);    // "1h 1m 1s"
-
-formatBytes(1024);          // "1 KB"
-formatBytes(1048576);       // "1 MB"
-
-pluralize(1, "file");       // "1 file"
-pluralize(5, "file");       // "5 files"
-pluralize(2, "person", "people");  // "2 people"
-
-slugify("Hello World");     // "hello-world"
-slugify("Café Résumé");     // "cafe-resume"
-```
-
-### Date Parsing
-
-```typescript
-import { parseDateRange, formatRelative } from "@outfitter/tui/render";
-
-const range = parseDateRange("last 7 days");
-// { start: Date, end: Date }
-
-const range2 = parseDateRange("2026-01-01..2026-01-31");
-// { start: Date, end: Date }
-
-formatRelative(new Date("2026-02-09")); // "yesterday"
-
-// Supported formats:
-// - "last N days/weeks/months"
-// - "today", "yesterday", "this week", "this month"
-// - "YYYY-MM-DD..YYYY-MM-DD" (range)
-// - "YYYY-MM-DD" (single day)
-```
-
-## Best Practices
-
-1. **Handler first** — Business logic in handler, CLI is thin adapter
-2. **Output modes** — Support both human and JSON; use `--json` flag
-3. **Exit codes** — Use `exitWithError` for consistent exit codes from error categories
-4. **Human default** — Never assume JSON output; always default to human
-5. **Pagination** — Use cursor state for `--next` functionality
-6. **Stdin support** — Handle piped input via `readStdin()` and `isPiped()`
-7. **Subpath imports** — Import from specific subpaths, not the root (except `output` and `ANSI`)
-8. **Verbose resolution** — Use `resolveVerbose()` for environment-aware verbosity
+Keep handler logic transport-agnostic; format in CLI adapters only.

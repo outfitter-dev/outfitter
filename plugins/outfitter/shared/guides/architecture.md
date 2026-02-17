@@ -107,18 +107,20 @@ Add based on needs:
 ├── @outfitter/logging       # Structured logging
 ├── @outfitter/file-ops      # Secure file operations
 ├── @outfitter/state         # Pagination state
-└── @outfitter/index         # Full-text search (FTS5)
+├── @outfitter/index         # Full-text search (FTS5)
+├── @outfitter/schema        # Manifest + surface map generation
+└── @outfitter/tui           # Rich terminal rendering primitives
 
 Dev dependencies:
 ├── @outfitter/testing       # Test harnesses
-├── @outfitter/tooling       # Biome, TypeScript, Lefthook presets
-└── @outfitter/kit         # Version coordination
+└── @outfitter/tooling       # Biome, TypeScript, Lefthook presets
 ```
 
 **Selection rules**:
 - All projects need `@outfitter/contracts` — this is non-negotiable
 - CLI apps get `@outfitter/cli` (includes terminal UI, colors, output modes)
-- MCP servers get `@outfitter/mcp` (includes Zod-to-MCP tool wiring)
+- MCP servers get `@outfitter/mcp` (includes typed tool wiring)
+- Schema introspection and drift detection use `@outfitter/schema` + `@outfitter/contracts`
 - File operations need both `@outfitter/config` (XDG paths) and `@outfitter/file-ops` (safety)
 - Everything needs logging — add `@outfitter/logging`
 
@@ -145,6 +147,18 @@ interface HandlerContext {
 - Parent handler → child handler (passed explicitly)
 - Logger gets child scopes for nested operations
 - requestId stays consistent for tracing
+
+
+## Schema Introspection Architecture
+
+For agent interoperability and CLI/MCP parity tracking, treat schema artifacts as first-class outputs:
+
+1. Generate manifests from your registry (`generateManifest`)
+2. Emit markdown for docs (`formatManifestMarkdown`)
+3. Generate committed surface maps (`generateSurfaceMap` + `writeSurfaceMap`)
+4. Enforce drift checks in CI (`diffSurfaceMaps`)
+
+`zodToJsonSchema()` is provided by `@outfitter/contracts` and should be the single conversion utility used across CLI, MCP, and schema docs paths.
 
 ## Output Templates
 
