@@ -87,6 +87,18 @@ describe("lint-relative-paths", () => {
       expect(result).toHaveLength(1);
       expect(result[0]!.line).toBe(2);
     });
+
+    test("still scans paths on lines with inline comments", () => {
+      const content = "[guide](../skills/foo/SKILL.md) <!-- note -->";
+      const result = findings(content);
+      expect(result).toHaveLength(1);
+      expect(result[0]!.path).toBe("../skills/foo/SKILL.md");
+    });
+
+    test("ignores paths that are only inside inline comments", () => {
+      const content = "Some text <!-- ../hidden/path.md --> here";
+      expect(findings(content)).toHaveLength(0);
+    });
   });
 
   describe("inline code and bare paths", () => {

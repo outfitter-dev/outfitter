@@ -63,7 +63,7 @@ export function scanRelativePaths(
   let fenceCount = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i] as string;
+    let line = lines[i] as string;
     const trimmed = line.trim();
 
     // Track YAML frontmatter (only at start of file)
@@ -81,8 +81,17 @@ export function scanRelativePaths(
     if (inFrontmatter) continue;
     if (!frontmatterDone && i > 0) frontmatterDone = true;
 
-    // Track HTML comments
-    if (!inCodeFence && line.includes("<!--")) inComment = true;
+    // Track HTML comments — strip inline comments but skip multi-line blocks
+    if (!inCodeFence && line.includes("<!--")) {
+      if (line.includes("-->")) {
+        // Inline comment: strip it but keep scanning the rest of the line
+        line = line.replace(/<!--.*?-->/g, "");
+        if (!line.trim()) continue;
+      } else {
+        inComment = true;
+        continue;
+      }
+    }
     if (inComment) {
       if (line.includes("-->")) inComment = false;
       continue;
