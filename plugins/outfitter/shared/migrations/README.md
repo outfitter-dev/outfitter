@@ -19,7 +19,7 @@ Examples:
 Migration docs are applied sequentially by version (semver ascending). Within a version, packages are ordered by dependency tier:
 
 1. **Foundation**: contracts, types
-2. **Runtime**: cli, mcp, config, logging, file-ops, state, index, daemon, testing
+2. **Runtime**: cli, mcp, config, logging, file-ops, state, index, schema, tui, daemon, testing
 3. **Tooling**: outfitter (umbrella CLI)
 
 ## Template
@@ -68,6 +68,7 @@ When releasing a new version:
 
 The migration set currently includes:
 
-- Foundation updates through `@outfitter/contracts` `0.2.1` (planned release)
-- Runtime updates through `@outfitter/cli`, `@outfitter/config`,
-  `@outfitter/logging`, and `@outfitter/mcp` `0.3.0`
+- Foundation updates through `@outfitter/contracts` `0.2.1`
+- Runtime updates through `@outfitter/cli` `0.4.1`, `@outfitter/mcp` `0.4.0`, `@outfitter/logging` `0.4.0`
+- New package docs for `@outfitter/schema` `0.1.0` and `@outfitter/tui` `0.2.0`
+- Patch-range docs for `@outfitter/config`, `@outfitter/daemon`, `@outfitter/file-ops`, `@outfitter/index`, `@outfitter/state`, `@outfitter/testing`, and `@outfitter/tooling`

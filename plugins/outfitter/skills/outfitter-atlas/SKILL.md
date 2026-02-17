@@ -1,7 +1,7 @@
 ---
 name: outfitter-atlas
 version: 0.2.1
-description: "Generates patterns, templates, and guides for @outfitter/* packages. Covers transport-agnostic handler systems, Result types, error taxonomy, and package APIs. Use when working with @outfitter/*, Result types, Handler contract, error taxonomy, or when Result, Handler, ValidationError, NotFoundError, OutfitterError, or package names like contracts, cli, mcp, daemon, config, logging are mentioned."
+description: "Generates patterns, templates, and guides for @outfitter/* packages. Covers transport-agnostic handler systems, Result types, error taxonomy, and package APIs. Use when working with @outfitter/*, Result types, Handler contract, error taxonomy, or when Result, Handler, ValidationError, NotFoundError, OutfitterError, or package names like contracts, cli, mcp, schema, tui, daemon, config, logging are mentioned."
 ---
 
 # Outfitter Atlas
@@ -103,8 +103,8 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 ┌─────────────────────────────────────────────────────────────────┐
 │                        RUNTIME TIER                              │
 │  @outfitter/cli    @outfitter/mcp    @outfitter/daemon          │
-│  @outfitter/config @outfitter/logging @outfitter/file-ops       │
-│  @outfitter/state  @outfitter/index                             │
+│  @outfitter/config @outfitter/logging @outfitter/file-ops @outfitter/tui │
+│  @outfitter/state  @outfitter/index   @outfitter/schema          │
 └─────────────────────────────────────────────────────────────────┘
                               ▲
 ┌─────────────────────────────────────────────────────────────────┐
@@ -129,6 +129,8 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 | `@outfitter/file-ops` | Atomic writes, locking, secure paths | File operations that matter |
 | `@outfitter/state` | Pagination, cursor state | Paginated data |
 | `@outfitter/index` | SQLite FTS5, WAL mode, BM25 ranking | Full-text search indexing |
+| `@outfitter/schema` | Schema introspection, surface maps, drift detection | CLI/MCP parity docs and CI drift checks |
+| `@outfitter/tui` | Terminal UI rendering primitives and prompts | Rich terminal UX (tables, trees, prompts, streaming) |
 | `@outfitter/testing` | Test harnesses, fixtures | Testing (always) |
 | `@outfitter/tooling` | Biome, TypeScript, Lefthook presets | Project setup (dev dependency) |
 | `@outfitter/kit` | Foundation facade (re-exports contracts + types) | Single import for core types |
@@ -229,6 +231,7 @@ When you need the details, not just the overview.
 | **Logging** | Structured logging, redaction | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md) |
 | **Testing** | Harnesses, fixtures, mocks | [patterns/testing.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/testing.md) |
 | **Converting Code** | Migrating to the stack | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
+| **Schema Introspection** | Manifest generation, surface maps, drift detection | [patterns/schema.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/schema.md) |
 
 ## Templates: Just Add Code
 

@@ -4650,7 +4650,7 @@ await writeSurfaceMap(surface, path);
 ### 3) Detect schema drift in CI
 
 ```typescript
-import { readSurfaceMap } from "@outfitter/schema/surface";
+import { generateSurfaceMap, readSurfaceMap } from "@outfitter/schema/surface";
 import { diffSurfaceMaps } from "@outfitter/schema/diff";
 
 const committed = await readSurfaceMap(".outfitter/snapshots/v1.0.0.json");
