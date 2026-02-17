@@ -1,10 +1,10 @@
 ---
 package: "@outfitter/schema"
-version: 0.1.0
+version: 0.2.0
 breaking: false
 ---
 
-# @outfitter/schema → 0.1.0
+# @outfitter/schema → 0.2.0
 
 ## New APIs
 

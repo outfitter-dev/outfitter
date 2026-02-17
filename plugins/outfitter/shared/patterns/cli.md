@@ -22,10 +22,9 @@ import {
   cwdPreset,
   dryRunPreset,
   forcePreset,
-  queryPreset,
-  outputPreset,
   paginationPreset,
 } from "@outfitter/cli/flags";
+import { outputModePreset, jqPreset } from "@outfitter/cli/query";
 
 import { renderTable, renderList } from "@outfitter/tui/render";
 import { createSpinner } from "@outfitter/tui/streaming";
