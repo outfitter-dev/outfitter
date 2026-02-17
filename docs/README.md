@@ -21,6 +21,7 @@ Each package has detailed API documentation. The generated mirror lives under
 `docs/packages/*` and can be refreshed with `bun run docs:sync`.
 
 Stability labels indicate API maturity:
+
 - **Stable** — APIs locked, breaking changes rare
 - **Active** — APIs evolving based on usage
 - **Early** — APIs will change, not production-ready
@@ -43,15 +44,21 @@ have concrete branded ID or shared utility adoption points.
 - [@outfitter/mcp](./packages/mcp/) — MCP server framework with typed tools
 - [@outfitter/index](./packages/index/) — SQLite FTS5 full-text search
 - [@outfitter/daemon](./packages/daemon/) — Daemon lifecycle, IPC, health checks
+- [@outfitter/schema](./packages/schema/) — Schema introspection, surface maps, and drift detection
+- [@outfitter/tui](./packages/tui/) — Terminal UI primitives, themes, prompts, and streaming
+- [@outfitter/testing](./packages/testing/) — Test harnesses for CLI and MCP
 
 ### Tooling (Early)
 
 - [outfitter](../apps/outfitter/README.md) — Umbrella CLI for scaffolding
 - [@outfitter/docs-core](./packages/docs-core/) — Core docs assembly and freshness checks
 - [@outfitter/docs](./packages/docs/) — Docs CLI and host adapter for product CLIs
-- [@outfitter/testing](./packages/testing/) — Test harnesses for CLI and MCP
 - [@outfitter/tooling](./packages/tooling/) — Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
 - [@outfitter/kit](./packages/kit/) — Foundation facade over contracts/types
+
+### Deprecated
+
+- [@outfitter/agents](./packages/agents/) — Deprecated. Use `npx outfitter add scaffolding` instead.
 
 ## Quick Links
 

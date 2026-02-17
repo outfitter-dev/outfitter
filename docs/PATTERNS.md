@@ -339,6 +339,54 @@ if (ctx.signal?.aborted) {
 controller.abort();
 ```
 
+## Schema Introspection Patterns
+
+Use `@outfitter/schema` when you need transport-agnostic action discovery, docs generation, or CI drift checks.
+
+### Generate machine-readable manifests
+
+```typescript
+import { generateManifest } from "@outfitter/schema/manifest";
+
+const manifest = generateManifest(registry, {
+  version: "1.0.0",
+  surface: "mcp",
+});
+```
+
+### Convert contracts to JSON Schema
+
+For direct schema conversion, use `zodToJsonSchema()` from `@outfitter/contracts`:
+
+```typescript
+import { zodToJsonSchema } from "@outfitter/contracts";
+import { z } from "zod";
+
+const Input = z.object({
+  id: z.string(),
+  verbose: z.boolean().optional(),
+});
+
+const inputSchema = zodToJsonSchema(Input);
+```
+
+### Drift detection workflow
+
+```typescript
+import { diffSurfaceMaps } from "@outfitter/schema/diff";
+import { generateSurfaceMap, readSurfaceMap } from "@outfitter/schema/surface";
+
+const committed = await readSurfaceMap(".outfitter/snapshots/v1.0.0.json");
+const current = generateSurfaceMap(registry, { version: "1.0.0" });
+const diff = diffSurfaceMaps(committed, current);
+
+if (diff.hasChanges) {
+  process.exit(1);
+}
+```
+
+For CLI-specific schema publication and command conventions, see [CLI Conventions](./CLI-CONVENTIONS.md).
+
 ## Output Modes
 
 CLI output defaults to human-readable text. Machine-readable formats are opt-in.
