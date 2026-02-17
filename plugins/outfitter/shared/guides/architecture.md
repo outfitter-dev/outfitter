@@ -310,7 +310,7 @@ export const createUser: Handler<
 
 ## Related Patterns
 
-- [Handler Contract](../patterns/handler.md) — Full handler pattern reference
-- [Error Taxonomy](../patterns/errors.md) — All 10 categories with examples
-- [CLI Patterns](../patterns/cli.md) — Wiring handlers to CLI commands
-- [MCP Patterns](../patterns/mcp.md) — Wiring handlers to MCP tools
+- [Handler Contract](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) — Full handler pattern reference
+- [Error Taxonomy](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) — All 10 categories with examples
+- [CLI Patterns](${CLAUDE_PLUGIN_ROOT}/shared/patterns/cli.md) — Wiring handlers to CLI commands
+- [MCP Patterns](${CLAUDE_PLUGIN_ROOT}/shared/patterns/mcp.md) — Wiring handlers to MCP tools

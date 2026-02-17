@@ -15,7 +15,8 @@ Validate skill files against formatting conventions. Catches preprocessing hazar
 1. Load the `/skillcheck` skill (runs preprocessing linter)
 2. Run the placeholder linter to find `[string]` patterns that should use `{ string }` convention
 3. Run the fence linter to find bare code fences and nesting issues
-4. Review findings and fix violations
+4. Run the relative paths linter to find `../` references that should use `${CLAUDE_PLUGIN_ROOT}`
+5. Review findings and fix violations
 
 ## Placeholder Linter
 
@@ -65,3 +66,24 @@ bun plugins/fieldguides/scripts/lint-fences.ts ${ARGUMENTS:-plugins/}
 | `` ``` `` with shell commands | `` ```bash `` |
 | `` ``` `` with plain text | `` ```text `` |
 | Inner `` ``` `` inside outer `` ``` `` | Use ```` ```` ```` for outer fence |
+
+## Relative Paths Linter
+
+Scan markdown files for `../` path references that should use `${CLAUDE_PLUGIN_ROOT}`:
+
+```bash
+bun plugins/fieldguides/scripts/lint-relative-paths.ts ${ARGUMENTS:-plugins/}
+```
+
+### What it catches
+
+- **Markdown links**: `[text](../other-skill/SKILL.md)` with relative targets
+- **Bare paths**: `../SECURITY.md` references in prose
+
+### Fix patterns
+
+| Issue | Fix |
+|-------|-----|
+| `[link](../skill-name/SKILL.md)` | `[link](${CLAUDE_PLUGIN_ROOT}/skills/skill-name/SKILL.md)` |
+| `[link](../patterns/handler.md)` | `[link](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md)` |
+| `../EXTERNAL.md` (outside plugin) | Remove link or reference by name |

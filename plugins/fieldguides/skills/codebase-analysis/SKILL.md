@@ -249,7 +249,7 @@ NEVER:
 <references>
 
 Core methodology:
-- [confidence.md](../pathfinding/references/confidence.md) — confidence calibration (shared with pathfinding)
+- [confidence.md](${CLAUDE_PLUGIN_ROOT}/skills/pathfinding/references/confidence.md) — confidence calibration (shared with pathfinding)
 
 Micro-skills (load as needed):
 - `find-patterns` — extracting and validating patterns
