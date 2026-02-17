@@ -106,6 +106,24 @@ describe("lint-fences", () => {
     });
   });
 
+  describe("indentation handling", () => {
+    test("ignores fences indented 4+ spaces (indented code blocks)", () => {
+      const content = "    ```\n    some code\n    ```";
+      expect(findings(content)).toHaveLength(0);
+    });
+
+    test("recognizes fences with 0-3 spaces of indentation", () => {
+      const result0 = findings("```\ncode\n```");
+      expect(result0).toHaveLength(1);
+
+      const result1 = findings(" ```\ncode\n ```");
+      expect(result1).toHaveLength(1);
+
+      const result3 = findings("   ```\ncode\n   ```");
+      expect(result3).toHaveLength(1);
+    });
+  });
+
   describe("tilde fences", () => {
     test("handles tilde fences", () => {
       const content = "~~~typescript\ncode\n~~~";

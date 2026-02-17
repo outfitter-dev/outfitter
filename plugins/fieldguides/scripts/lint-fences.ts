@@ -40,8 +40,10 @@ export interface ScanResult {
 
 // ── Fence parsing ───────────────────────────────────────────────────────────
 
-/** Match an opening or closing code fence: 3+ backticks or 3+ tildes */
-const FENCE_RE = /^(\s*)((`{3,})|~{3,})(.*)$/;
+/** Match an opening or closing code fence: 3+ backticks or 3+ tildes.
+ *  Per CommonMark spec, fences allow 0-3 spaces of indentation only;
+ *  4+ spaces is an indented code block, not a fence. */
+const FENCE_RE = /^( {0,3})((`{3,})|~{3,})(.*)$/;
 
 function parseFenceLine(line: string): {
   indent: string;
