@@ -40,6 +40,9 @@ Outfitter package docs index for LLM retrieval.
 ## mcp
 - docs/packages/mcp/README.md — @outfitter/mcp
 
+## schema
+- docs/packages/schema/README.md — @outfitter/schema
+
 ## state
 - docs/packages/state/README.md — @outfitter/state
 
