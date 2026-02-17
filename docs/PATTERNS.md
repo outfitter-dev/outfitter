@@ -12,7 +12,11 @@ The handler contract is the core abstraction. Handlers are pure functions that:
 ### Signature
 
 ```typescript
-type Handler<TInput, TOutput, TError extends OutfitterError> = (
+type Handler<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+> = (
   input: TInput,
   ctx: HandlerContext
 ) => Promise<Result<TOutput, TError>>;
