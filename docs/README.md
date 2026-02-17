@@ -54,7 +54,6 @@ have concrete branded ID or shared utility adoption points.
 - [@outfitter/docs-core](./packages/docs-core/) — Core docs assembly and freshness checks
 - [@outfitter/docs](./packages/docs/) — Docs CLI and host adapter for product CLIs
 - [@outfitter/tooling](./packages/tooling/) — Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
-- [@outfitter/kit](./packages/kit/) — Foundation facade over contracts/types
 
 ### Deprecated
 

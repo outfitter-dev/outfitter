@@ -182,7 +182,6 @@ outfitter/stack/
 │   ├── index/               # SQLite FTS5 indexing
 │   ├── logging/             # Structured logging
 │   ├── mcp/                 # MCP server framework
-│   ├── kit/                 # Foundation facade over contracts/types
 │   ├── schema/              # Schema introspection and surface maps
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
