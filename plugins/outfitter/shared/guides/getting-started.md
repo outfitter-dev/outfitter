@@ -133,6 +133,6 @@ export const greetTool = defineTool({
 
 ## Next Steps
 
-- Read [patterns/handler.md](../patterns/handler.md) for handler deep-dive
-- Read [patterns/errors.md](../patterns/errors.md) for error taxonomy
-- Browse [templates/](../templates/) for copy-paste starter code
+- Read [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) for handler deep-dive
+- Read [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) for error taxonomy
+- Browse [templates/](${CLAUDE_PLUGIN_ROOT}/shared/templates/) for copy-paste starter code

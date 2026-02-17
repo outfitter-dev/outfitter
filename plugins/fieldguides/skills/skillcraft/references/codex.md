@@ -1,6 +1,6 @@
 # Codex CLI Implementation
 
-Codex CLI-specific implementation details for Agent Skills. For cross-platform concepts, see the main [SKILL.md](../SKILL.md).
+Codex CLI-specific implementation details for Agent Skills. For cross-platform concepts, see the main [SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/skillcraft/SKILL.md).
 
 ## Discovery Paths
 
