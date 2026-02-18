@@ -730,117 +730,141 @@ export async function runUpgrade(
   options: UpgradeOptions
 ): Promise<Result<UpgradeResult, OutfitterError>> {
   const cwd = resolve(options.cwd);
-  const migrationsDir = findMigrationDocsDir(cwd);
-  // For breaking classification overrides, only use project-discoverable docs.
-  // Passing `cwd` as `binaryDir` disables the dev-mode fallback to repo-root docs.
-  const migrationFlagsDir = findMigrationDocsDir(cwd, cwd);
+  const startedAt = new Date();
+  let workspaceRoot: string | null = null;
+  const emptyResult: UpgradeResult = {
+    packages: [],
+    total: 0,
+    updatesAvailable: 0,
+    hasBreaking: false,
+    applied: false,
+    appliedPackages: [],
+    skippedBreaking: [],
+  };
 
-  // Workspace-aware scanning: detect workspace root and collect all manifests
-  const scanResult = getInstalledPackagesFromWorkspace(cwd);
-  if (scanResult.isErr()) return scanResult;
-
-  const scan = scanResult.value;
-  const installed = scan.packages;
-
-  // Determine the effective root for install (workspace root or cwd)
-  const installRoot = scan.workspaceRoot ?? cwd;
-  const codemodTargetDir = scan.workspaceRoot ?? cwd;
-
-  if (installed.length === 0) {
-    return Result.ok({
-      packages: [],
-      total: 0,
-      updatesAvailable: 0,
-      hasBreaking: false,
-      applied: false,
-      appliedPackages: [],
-      skippedBreaking: [],
+  const writeReport = (
+    status: UpgradeReportStatus,
+    result: UpgradeResult,
+    error?: OutfitterError
+  ): void => {
+    writeUpgradeReportSafely(cwd, result, {
+      status,
+      startedAt,
+      workspaceRoot,
+      options,
+      ...(error !== undefined ? { error } : {}),
     });
-  }
+  };
 
-  // Query npm for latest versions in parallel
-  const latestVersions = new Map<
-    string,
-    { version: string; breaking?: boolean }
-  >();
-  const installedMap = new Map<string, string>();
-  const npmFailures = new Set<string>();
+  try {
+    const migrationsDir = findMigrationDocsDir(cwd);
+    // For breaking classification overrides, only use project-discoverable docs.
+    // Passing `cwd` as `binaryDir` disables the dev-mode fallback to repo-root docs.
+    const migrationFlagsDir = findMigrationDocsDir(cwd, cwd);
 
-  await Promise.all(
-    installed.map(async (pkg) => {
-      installedMap.set(pkg.name, pkg.version);
-      const latest = await getLatestVersion(pkg.name);
-      if (latest !== null) {
-        // npm doesn't tell us if it's breaking. When local migration docs include
-        // an explicit breaking flag for this exact target version, prefer it.
-        const shortName = pkg.name.replace("@outfitter/", "");
-        const docBreaking =
-          migrationFlagsDir !== null
-            ? readMigrationBreakingFlag(migrationFlagsDir, shortName, latest)
-            : undefined;
-        latestVersions.set(pkg.name, {
-          version: latest,
-          ...(docBreaking !== undefined ? { breaking: docBreaking } : {}),
-        });
-      } else {
-        npmFailures.add(pkg.name);
-      }
-    })
-  );
+    // Workspace-aware scanning: detect workspace root and collect all manifests
+    const scanResult = getInstalledPackagesFromWorkspace(cwd);
+    if (scanResult.isErr()) {
+      writeReport("failed", emptyResult, scanResult.error);
+      return scanResult;
+    }
 
-  // Use the pure planner for analysis
-  const plan = analyzeUpgrades(installedMap, latestVersions);
+    const scan = scanResult.value;
+    workspaceRoot = scan.workspaceRoot;
+    const installed = scan.packages;
 
-  // Map planner output back to the existing PackageVersionInfo shape
-  const packages: PackageVersionInfo[] = plan.packages.map((action) => ({
-    name: action.name,
-    current: action.currentVersion,
-    latest: npmFailures.has(action.name) ? null : action.latestVersion,
-    updateAvailable:
-      action.classification === "upgradableNonBreaking" ||
-      action.classification === "upgradableBreaking",
-    breaking: action.breaking,
-  }));
+    // Determine the effective root for install (workspace root or cwd)
+    const installRoot = scan.workspaceRoot ?? cwd;
+    const codemodTargetDir = scan.workspaceRoot ?? cwd;
 
-  const updatesAvailable = packages.filter((p) => p.updateAvailable).length;
-  const hasBreaking = packages.some((p) => p.breaking);
+    if (installed.length === 0) {
+      writeReport("no_updates", emptyResult);
+      return Result.ok(emptyResult);
+    }
 
-  // Identify non-breaking upgradable and breaking-skipped packages
-  const nonBreakingUpgradable = plan.packages.filter(
-    (a) => a.classification === "upgradableNonBreaking"
-  );
-  const breakingUpgradable = plan.packages.filter(
-    (a) => a.classification === "upgradableBreaking"
-  );
+    // Query npm for latest versions in parallel
+    const latestVersions = new Map<
+      string,
+      { version: string; breaking?: boolean }
+    >();
+    const installedMap = new Map<string, string>();
+    const npmFailures = new Set<string>();
 
-  // When --all is set, include breaking updates in the apply set
-  const includeBreaking = options.all === true;
-  const packagesToApply = includeBreaking
-    ? [...nonBreakingUpgradable, ...breakingUpgradable]
-    : nonBreakingUpgradable;
-  const skippedBreaking: string[] = includeBreaking
-    ? []
-    : breakingUpgradable.map((a) => a.name);
+    await Promise.all(
+      installed.map(async (pkg) => {
+        installedMap.set(pkg.name, pkg.version);
+        const latest = await getLatestVersion(pkg.name);
+        if (latest !== null) {
+          // npm doesn't tell us if it's breaking. When local migration docs include
+          // an explicit breaking flag for this exact target version, prefer it.
+          const shortName = pkg.name.replace("@outfitter/", "");
+          const docBreaking =
+            migrationFlagsDir !== null
+              ? readMigrationBreakingFlag(migrationFlagsDir, shortName, latest)
+              : undefined;
+          latestVersions.set(pkg.name, {
+            version: latest,
+            ...(docBreaking !== undefined ? { breaking: docBreaking } : {}),
+          });
+        } else {
+          npmFailures.add(pkg.name);
+        }
+      })
+    );
 
-  // Build structured migration guides when --guide is requested
-  let guidesData =
-    options.guide === true
-      ? buildMigrationGuides(packages, migrationsDir)
-      : undefined;
+    // Use the pure planner for analysis
+    const plan = analyzeUpgrades(installedMap, latestVersions);
 
-  // Filter guides to specific packages when --guide packages are specified
-  if (
-    guidesData !== undefined &&
-    options.guidePackages !== undefined &&
-    options.guidePackages.length > 0
-  ) {
-    const filterSet = new Set(options.guidePackages);
-    guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
-  }
+    // Map planner output back to the existing PackageVersionInfo shape
+    const packages: PackageVersionInfo[] = plan.packages.map((action) => ({
+      name: action.name,
+      current: action.currentVersion,
+      latest: npmFailures.has(action.name) ? null : action.latestVersion,
+      updateAvailable:
+        action.classification === "upgradableNonBreaking" ||
+        action.classification === "upgradableBreaking",
+      breaking: action.breaking,
+    }));
 
-  // --dry-run: return report without mutation
-  if (options.dryRun) {
-    const result: UpgradeResult = {
+    const updatesAvailable = packages.filter((p) => p.updateAvailable).length;
+    const hasBreaking = packages.some((p) => p.breaking);
+
+    // Identify non-breaking upgradable and breaking-skipped packages
+    const nonBreakingUpgradable = plan.packages.filter(
+      (a) => a.classification === "upgradableNonBreaking"
+    );
+    const breakingUpgradable = plan.packages.filter(
+      (a) => a.classification === "upgradableBreaking"
+    );
+
+    // When --all is set, include breaking updates in the apply set
+    const includeBreaking = options.all === true;
+    const packagesToApply = includeBreaking
+      ? [...nonBreakingUpgradable, ...breakingUpgradable]
+      : nonBreakingUpgradable;
+    const skippedBreaking: string[] = includeBreaking
+      ? []
+      : breakingUpgradable.map((a) => a.name);
+
+    // Build structured migration guides when --guide is requested
+    let guidesData =
+      options.guide === true
+        ? buildMigrationGuides(packages, migrationsDir)
+        : undefined;
+
+    // Filter guides to specific packages when --guide packages are specified
+    if (
+      guidesData !== undefined &&
+      options.guidePackages !== undefined &&
+      options.guidePackages.length > 0
+    ) {
+      const filterSet = new Set(options.guidePackages);
+      guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
+    }
+
+    const buildResult = (
+      overrides: Partial<UpgradeResult> = {}
+    ): UpgradeResult => ({
       packages,
       total: packages.length,
       updatesAvailable,
@@ -849,154 +873,153 @@ export async function runUpgrade(
       appliedPackages: [],
       skippedBreaking,
       ...(guidesData !== undefined ? { guides: guidesData } : {}),
-    };
-    writeUpgradeReport(cwd, result);
-    return Result.ok(result);
-  }
-
-  // No updates to apply — return early
-  if (packagesToApply.length === 0) {
-    const result: UpgradeResult = {
-      packages,
-      total: packages.length,
-      updatesAvailable,
-      hasBreaking,
-      applied: false,
-      appliedPackages: [],
-      skippedBreaking,
-      ...(guidesData !== undefined ? { guides: guidesData } : {}),
-    };
-    writeUpgradeReport(cwd, result);
-    return Result.ok(result);
-  }
-
-  // Interactive confirmation (unless --yes or --non-interactive)
-  if (options.yes !== true && options.interactive !== false) {
-    const { confirmDestructive } = await import("@outfitter/tui/confirm");
-    const confirmed = await confirmDestructive({
-      message: `Apply ${packagesToApply.length} upgrade(s)?`,
-      itemCount: packagesToApply.length,
-      bypassFlag: false,
+      ...overrides,
     });
 
-    if (confirmed.isErr()) {
-      // User cancelled or non-TTY — return report without mutation
-      const result: UpgradeResult = {
-        packages,
-        total: packages.length,
-        updatesAvailable,
-        hasBreaking,
-        applied: false,
-        appliedPackages: [],
-        skippedBreaking,
-        ...(guidesData !== undefined ? { guides: guidesData } : {}),
-      };
-      writeUpgradeReport(cwd, result);
+    // --dry-run: return report without mutation
+    if (options.dryRun) {
+      const result = buildResult();
+      writeReport("dry_run", result);
       return Result.ok(result);
     }
-  } else if (options.interactive === false && options.yes !== true) {
-    // Non-interactive without --yes: skip mutation (same as dry-run)
-    const result: UpgradeResult = {
-      packages,
-      total: packages.length,
-      updatesAvailable,
-      hasBreaking,
-      applied: false,
-      appliedPackages: [],
-      skippedBreaking,
-      ...(guidesData !== undefined ? { guides: guidesData } : {}),
-    };
-    writeUpgradeReport(cwd, result);
-    return Result.ok(result);
-  }
 
-  let applied = false;
-  const appliedPackages: string[] = [];
-
-  // Apply upgrades
-  if (packagesToApply.length > 0) {
-    if (scan.workspaceRoot !== null) {
-      // Workspace mode: update all manifests in one pass, then install once at root
-      const applyResult = await applyUpdatesToWorkspace(
-        scan.manifestPaths,
-        scan.manifestsByPackage,
-        packagesToApply
-      );
-      if (applyResult.isErr()) return applyResult;
-
-      const installResult = await runInstall(installRoot);
-      if (installResult.isErr()) return installResult;
-    } else {
-      // Single-package mode: applyUpdates handles both write and install
-      const applyResult = await applyUpdates(cwd, packagesToApply);
-      if (applyResult.isErr()) return applyResult;
+    // No updates to apply — return early
+    if (packagesToApply.length === 0) {
+      const result = buildResult();
+      writeReport("no_updates", result);
+      return Result.ok(result);
     }
 
-    applied = true;
-    appliedPackages.push(...packagesToApply.map((a) => a.name));
-  }
+    // Interactive confirmation (unless --yes or --non-interactive)
+    if (options.yes !== true && options.interactive !== false) {
+      const { confirmDestructive } = await import("@outfitter/tui/confirm");
+      const confirmed = await confirmDestructive({
+        message: `Apply ${packagesToApply.length} upgrade(s)?`,
+        itemCount: packagesToApply.length,
+        bypassFlag: false,
+      });
 
-  // Run codemods for applied packages (unless --no-codemods)
-  const codemodTargetDir = scan.workspaceRoot ?? cwd;
-  let codemodSummary: CodemodSummary | undefined;
-  if (applied && options.noCodemods !== true && migrationsDir !== null) {
-    const codemodsDir = findCodemodsDir(cwd);
-    if (codemodsDir !== null) {
-      const allChangedFiles: string[] = [];
-      const allErrors: string[] = [];
-      let codemodCount = 0;
+      if (confirmed.isErr()) {
+        // User cancelled or non-TTY — return report without mutation
+        const result = buildResult();
+        writeReport("cancelled", result);
+        return Result.ok(result);
+      }
+    } else if (options.interactive === false && options.yes !== true) {
+      // Non-interactive without --yes: skip mutation (same as dry-run)
+      const result = buildResult();
+      writeReport("skipped_non_interactive", result);
+      return Result.ok(result);
+    }
 
-      for (const pkg of packagesToApply) {
-        const shortName = pkg.name.replace("@outfitter/", "");
-        const codemods = discoverCodemods(
-          migrationsDir,
-          codemodsDir,
-          shortName,
-          installedMap.get(pkg.name) ?? "0.0.0",
-          pkg.latestVersion
+    let applied = false;
+    const appliedPackages: string[] = [];
+
+    // Apply upgrades
+    if (packagesToApply.length > 0) {
+      if (scan.workspaceRoot !== null) {
+        // Workspace mode: update all manifests in one pass, then install once at root
+        const applyResult = await applyUpdatesToWorkspace(
+          scan.manifestPaths,
+          scan.manifestsByPackage,
+          packagesToApply
         );
+        if (applyResult.isErr()) {
+          const failureResult = buildResult();
+          writeReport("failed", failureResult, applyResult.error);
+          return applyResult;
+        }
 
-        for (const codemod of codemods) {
-          const codemodResult = await runCodemod(
-            codemod.absolutePath,
-            codemodTargetDir,
-            false
-          );
-          codemodCount++;
-
-          if (codemodResult.isOk()) {
-            allChangedFiles.push(...codemodResult.value.changedFiles);
-            allErrors.push(...codemodResult.value.errors);
-          } else {
-            allErrors.push(codemodResult.error.message);
-          }
+        const installResult = await runInstall(installRoot);
+        if (installResult.isErr()) {
+          const failureResult = buildResult();
+          writeReport("failed", failureResult, installResult.error);
+          return installResult;
+        }
+      } else {
+        // Single-package mode: applyUpdates handles both write and install
+        const applyResult = await applyUpdates(cwd, packagesToApply);
+        if (applyResult.isErr()) {
+          const failureResult = buildResult();
+          writeReport("failed", failureResult, applyResult.error);
+          return applyResult;
         }
       }
 
-      if (codemodCount > 0) {
-        codemodSummary = {
-          codemodCount,
-          changedFiles: allChangedFiles,
-          errors: allErrors,
-        };
+      applied = true;
+      appliedPackages.push(...packagesToApply.map((a) => a.name));
+    }
+
+    // Run codemods for applied packages (unless --no-codemods)
+    const codemodTargetDir = scan.workspaceRoot ?? cwd;
+    let codemodSummary: CodemodSummary | undefined;
+    if (applied && options.noCodemods !== true && migrationsDir !== null) {
+      const codemodsDir = findCodemodsDir(cwd);
+      if (codemodsDir !== null) {
+        const allChangedFiles: string[] = [];
+        const allErrors: string[] = [];
+        let codemodCount = 0;
+
+        for (const pkg of packagesToApply) {
+          const shortName = pkg.name.replace("@outfitter/", "");
+          const codemods = discoverCodemods(
+            migrationsDir,
+            codemodsDir,
+            shortName,
+            installedMap.get(pkg.name) ?? "0.0.0",
+            pkg.latestVersion
+          );
+
+          for (const codemod of codemods) {
+            const codemodResult = await runCodemod(
+              codemod.absolutePath,
+              codemodTargetDir,
+              false
+            );
+            codemodCount++;
+
+            if (codemodResult.isOk()) {
+              allChangedFiles.push(...codemodResult.value.changedFiles);
+              allErrors.push(...codemodResult.value.errors);
+            } else {
+              allErrors.push(codemodResult.error.message);
+            }
+          }
+        }
+
+        if (codemodCount > 0) {
+          codemodSummary = {
+            codemodCount,
+            changedFiles: allChangedFiles,
+            errors: allErrors,
+          };
+        }
       }
     }
+
+    const finalResult = buildResult({
+      applied,
+      appliedPackages,
+      ...(codemodSummary !== undefined ? { codemods: codemodSummary } : {}),
+    });
+
+    writeReport("applied", finalResult);
+    return Result.ok(finalResult);
+  } catch (error) {
+    const normalizedError: OutfitterError =
+      error &&
+      typeof error === "object" &&
+      "category" in error &&
+      "message" in error
+        ? (error as OutfitterError)
+        : InternalError.create("Unexpected error in outfitter upgrade", {
+            cwd,
+            error: error instanceof Error ? error.message : String(error),
+          });
+
+    writeReport("failed", emptyResult, normalizedError);
+    return Result.err(normalizedError);
   }
-
-  const finalResult: UpgradeResult = {
-    packages,
-    total: packages.length,
-    updatesAvailable,
-    hasBreaking,
-    applied,
-    appliedPackages,
-    skippedBreaking,
-    ...(guidesData !== undefined ? { guides: guidesData } : {}),
-    ...(codemodSummary !== undefined ? { codemods: codemodSummary } : {}),
-  };
-
-  writeUpgradeReport(cwd, finalResult);
-  return Result.ok(finalResult);
 }
 
 /**
@@ -1220,10 +1243,34 @@ export async function printUpgradeResults(
 // Upgrade Report
 // =============================================================================
 
+export type UpgradeReportStatus =
+  | "dry_run"
+  | "no_updates"
+  | "cancelled"
+  | "skipped_non_interactive"
+  | "applied"
+  | "failed";
+
+/** Snapshot of effective flags for this upgrade run. */
+export interface UpgradeReportFlags {
+  readonly dryRun: boolean;
+  readonly yes: boolean;
+  readonly interactive: boolean;
+  readonly all: boolean;
+  readonly noCodemods: boolean;
+  readonly outputMode: OutputMode | null;
+}
+
 /** Machine-readable upgrade report written to `.outfitter/reports/upgrade.json`. */
 export interface UpgradeReport {
   readonly $schema: "https://outfitter.dev/reports/upgrade/v1";
+  readonly status: UpgradeReportStatus;
   readonly checkedAt: string;
+  readonly startedAt: string;
+  readonly finishedAt: string;
+  readonly cwd: string;
+  readonly workspaceRoot: string | null;
+  readonly flags: UpgradeReportFlags;
   readonly applied: boolean;
   readonly summary: {
     readonly total: number;
@@ -1236,6 +1283,19 @@ export interface UpgradeReport {
     readonly breaking: readonly string[];
   };
   readonly codemods?: CodemodSummary;
+  readonly error?: {
+    readonly message: string;
+    readonly category: string;
+    readonly context?: Record<string, unknown>;
+  };
+}
+
+interface WriteUpgradeReportMeta {
+  readonly status: UpgradeReportStatus;
+  readonly startedAt: Date;
+  readonly workspaceRoot: string | null;
+  readonly options: UpgradeOptions;
+  readonly error?: OutfitterError;
 }
 
 /**
@@ -1243,13 +1303,38 @@ export interface UpgradeReport {
  *
  * Creates the directory if it doesn't exist. Always represents the latest check state.
  */
-function writeUpgradeReport(cwd: string, result: UpgradeResult): void {
+function writeUpgradeReport(
+  cwd: string,
+  result: UpgradeResult,
+  meta: WriteUpgradeReportMeta
+): void {
   const reportsDir = join(cwd, ".outfitter", "reports");
   mkdirSync(reportsDir, { recursive: true });
+  const finishedAtIso = new Date().toISOString();
+  const errorContext =
+    meta.error !== undefined &&
+    "context" in meta.error &&
+    meta.error.context !== undefined &&
+    typeof meta.error.context === "object"
+      ? (meta.error.context as Record<string, unknown>)
+      : undefined;
 
   const report: UpgradeReport = {
     $schema: "https://outfitter.dev/reports/upgrade/v1",
-    checkedAt: new Date().toISOString(),
+    status: meta.status,
+    checkedAt: finishedAtIso,
+    startedAt: meta.startedAt.toISOString(),
+    finishedAt: finishedAtIso,
+    cwd,
+    workspaceRoot: meta.workspaceRoot,
+    flags: {
+      dryRun: meta.options.dryRun === true,
+      yes: meta.options.yes === true,
+      interactive: meta.options.interactive !== false,
+      all: meta.options.all === true,
+      noCodemods: meta.options.noCodemods === true,
+      outputMode: meta.options.outputMode ?? null,
+    },
     applied: result.applied,
     summary: {
       total: result.total,
@@ -1262,10 +1347,39 @@ function writeUpgradeReport(cwd: string, result: UpgradeResult): void {
       breaking: result.skippedBreaking,
     },
     ...(result.codemods !== undefined ? { codemods: result.codemods } : {}),
+    ...(meta.error !== undefined
+      ? {
+          error: {
+            message: meta.error.message,
+            category: meta.error.category,
+            ...(errorContext !== undefined ? { context: errorContext } : {}),
+          },
+        }
+      : {}),
   };
 
   writeFileSync(
     join(reportsDir, "upgrade.json"),
     JSON.stringify(report, null, 2)
   );
+}
+
+/**
+ * Best-effort report writer.
+ *
+ * Report I/O failures should not change the primary command result.
+ */
+function writeUpgradeReportSafely(
+  cwd: string,
+  result: UpgradeResult,
+  meta: WriteUpgradeReportMeta
+): void {
+  try {
+    writeUpgradeReport(cwd, result, meta);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    process.stderr.write(
+      `[outfitter upgrade] Failed to write report: ${reason}\n`
+    );
+  }
 }

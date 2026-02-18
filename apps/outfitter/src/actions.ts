@@ -898,6 +898,7 @@ const upgradeAction = defineAction({
     const { outputMode, guidePackages, ...upgradeInput } = input;
     const result = await runUpgrade({
       ...upgradeInput,
+      outputMode,
       ...(guidePackages !== undefined ? { guidePackages } : {}),
     });
 
