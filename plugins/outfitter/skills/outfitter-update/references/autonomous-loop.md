@@ -143,20 +143,6 @@ When tests are green:
 2. Run the compliance scan
 3. Address any findings related to the updated packages
 
-## Monorepo Workflow
-
-For workspaces:
-
-```bash
-# Scan all workspaces
-outfitter update --workspace --json
-
-# Apply across all workspaces
-outfitter update --workspace --apply --json
-```
-
-The CLI handles workspace detection and applies updates to each `package.json` that uses @outfitter/* packages.
-
 ## Rollback
 
 If the update cannot be completed:

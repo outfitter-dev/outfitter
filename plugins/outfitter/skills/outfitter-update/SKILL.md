@@ -45,17 +45,18 @@ detect → apply → codemod → migrate → test → fix → repeat
 3. Run `outfitter update --apply` (or `--apply --breaking` if breaking changes are expected)
 4. CLI bumps deps, installs, discovers codemods, runs them automatically
 5. Parse `codemods` summary from output — check `errors` array
-6. For each `guide` in the output with `changes`:
+6. Run `outfitter update --guide --json` to fetch structured migration guides
+7. For each `guide` in the guide output with `changes`:
    - Skip changes where `change.codemod` exists (already handled)
    - Apply remaining changes using the structured metadata (see Decision Framework)
-7. Run `bun test` (or `bun run test` from repo root)
-8. If tests fail:
+8. Run `bun test` (or `bun run test` from repo root)
+9. If tests fail:
    a. Read failure output
    b. Cross-reference with migration doc guidance (`outfitter update --guide`)
    c. Fix the issue
    d. Re-run tests
    e. If still failing after 3 attempts, escalate to user
-9. When green: load `outfitter-check` skill for compliance verification
+10. When green: load `outfitter-check` skill for compliance verification
 
 ## CLI Reference
 
@@ -78,10 +79,6 @@ outfitter update --apply --breaking
 
 # Apply without running codemods
 outfitter update --apply --no-codemods
-
-# Monorepo workspace scanning
-outfitter update --workspace
-outfitter update --workspace --apply
 ```
 
 ### JSON Output Shape
@@ -128,8 +125,8 @@ See `references/structured-changes.md` for full type definitions and parsing exa
 When updating multiple packages, follow the tier order:
 
 1. **Foundation**: contracts, types
-2. **Runtime**: cli, mcp, config, logging, file-ops, state, index, daemon, schema, tui, testing
-3. **Tooling**: outfitter (umbrella CLI)
+2. **Runtime**: cli, mcp, config, logging, file-ops, state, index, daemon, schema, tui
+3. **Tooling**: testing, outfitter (umbrella CLI)
 
 Update lower tiers first — runtime packages depend on foundation changes.
 
