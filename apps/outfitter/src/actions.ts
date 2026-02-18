@@ -802,6 +802,7 @@ interface UpdateActionInput {
   guidePackages?: string[];
   apply: boolean;
   breaking: boolean;
+  noCodemods: boolean;
   outputMode: CliOutputMode;
 }
 
@@ -811,6 +812,7 @@ const updateInputSchema = z.object({
   guidePackages: z.array(z.string()).optional(),
   apply: z.boolean(),
   breaking: z.boolean(),
+  noCodemods: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<UpdateActionInput>;
 
@@ -842,6 +844,11 @@ const updateAction = defineAction({
         defaultValue: false,
       },
       {
+        flags: "--no-codemods",
+        description: "Skip automatic codemod execution during --apply",
+        defaultValue: false,
+      },
+      {
         flags: "--cwd <path>",
         description: "Working directory (defaults to current directory)",
       },
@@ -860,6 +867,9 @@ const updateAction = defineAction({
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         apply: Boolean(context.flags["apply"]),
         breaking: Boolean(context.flags["breaking"]),
+        noCodemods: Boolean(
+          context.flags["no-codemods"] ?? context.flags["noCodemods"]
+        ),
         outputMode,
       };
     },

@@ -15,6 +15,11 @@ import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
 import { createTheme } from "@outfitter/tui/render";
 import { resolveStructuredOutputMode } from "../output-mode.js";
+import {
+  discoverCodemods,
+  findCodemodsDir,
+  runCodemod,
+} from "./update-codemods.js";
 import { analyzeUpdates } from "./update-planner.js";
 import {
   applyUpdatesToWorkspace,
@@ -37,6 +42,8 @@ export interface UpdateOptions {
   readonly apply?: boolean;
   /** Include breaking updates when --apply is used */
   readonly breaking?: boolean;
+  /** Skip automatic codemod execution during --apply */
+  readonly noCodemods?: boolean;
   /** Output mode */
   readonly outputMode?: OutputMode;
 }
@@ -105,6 +112,16 @@ export interface MigrationGuide {
   readonly changes?: readonly MigrationChange[];
 }
 
+/** Summary of codemods executed during --apply. */
+export interface CodemodSummary {
+  /** Number of codemods executed */
+  readonly codemodCount: number;
+  /** Total files changed across all codemods */
+  readonly changedFiles: readonly string[];
+  /** Errors encountered during codemod execution */
+  readonly errors: readonly string[];
+}
+
 export interface UpdateResult {
   /** Package version info */
   readonly packages: PackageVersionInfo[];
@@ -122,6 +139,8 @@ export interface UpdateResult {
   readonly skippedBreaking: string[];
   /** Structured migration guides (populated when --guide is used) */
   readonly guides?: readonly MigrationGuide[];
+  /** Codemod execution summary (populated when --apply runs codemods) */
+  readonly codemods?: CodemodSummary;
 }
 
 // =============================================================================
@@ -820,6 +839,52 @@ export async function runUpdate(
     appliedPackages.push(...packagesToApply.map((a) => a.name));
   }
 
+  // Run codemods for applied packages (unless --no-codemods)
+  let codemodSummary: CodemodSummary | undefined;
+  if (applied && options.noCodemods !== true && migrationsDir !== null) {
+    const codemodsDir = findCodemodsDir(cwd);
+    if (codemodsDir !== null) {
+      const allChangedFiles: string[] = [];
+      const allErrors: string[] = [];
+      let codemodCount = 0;
+
+      for (const pkg of packagesToApply) {
+        const shortName = pkg.name.replace("@outfitter/", "");
+        const codemods = discoverCodemods(
+          migrationsDir,
+          codemodsDir,
+          shortName,
+          installedMap.get(pkg.name) ?? "0.0.0",
+          pkg.latestVersion
+        );
+
+        for (const codemod of codemods) {
+          const codemodResult = await runCodemod(
+            codemod.absolutePath,
+            codemodTargetDir,
+            false
+          );
+          codemodCount++;
+
+          if (codemodResult.isOk()) {
+            allChangedFiles.push(...codemodResult.value.changedFiles);
+            allErrors.push(...codemodResult.value.errors);
+          } else {
+            allErrors.push(codemodResult.error.message);
+          }
+        }
+      }
+
+      if (codemodCount > 0) {
+        codemodSummary = {
+          codemodCount,
+          changedFiles: allChangedFiles,
+          errors: allErrors,
+        };
+      }
+    }
+  }
+
   // Build structured migration guides when --guide is requested
   let guidesData =
     options.guide === true
@@ -845,6 +910,7 @@ export async function runUpdate(
     appliedPackages,
     skippedBreaking,
     ...(guidesData !== undefined ? { guides: guidesData } : {}),
+    ...(codemodSummary !== undefined ? { codemods: codemodSummary } : {}),
   });
 }
 
