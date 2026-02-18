@@ -514,4 +514,38 @@ describe("printUpdateResults human output with guides", () => {
     // The structured guides section should NOT appear without --guide
     expect(captured).not.toContain("Update import paths");
   });
+
+  test("shows codemod execution summary when codemods were run", async () => {
+    const result: UpdateResult = {
+      packages: [
+        {
+          name: "@outfitter/contracts",
+          current: "0.1.0",
+          latest: "0.1.1",
+          updateAvailable: true,
+          breaking: false,
+        },
+      ],
+      total: 1,
+      updatesAvailable: 1,
+      hasBreaking: false,
+      applied: true,
+      appliedPackages: ["@outfitter/contracts"],
+      skippedBreaking: [],
+      codemods: {
+        codemodCount: 2,
+        changedFiles: ["src/a.ts", "src/b.ts", "src/a.ts"],
+        errors: ["Could not parse src/c.ts"],
+      },
+    };
+
+    const captured = await captureOutput(result, { applied: true });
+
+    expect(captured).toContain("Ran 2 codemod(s).");
+    expect(captured).toContain("Codemods changed 2 file(s):");
+    expect(captured).toContain("src/a.ts");
+    expect(captured).toContain("src/b.ts");
+    expect(captured).toContain("Codemod errors (1):");
+    expect(captured).toContain("Could not parse src/c.ts");
+  });
 });

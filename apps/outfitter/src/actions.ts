@@ -186,6 +186,20 @@ function resolveLocalFlag(flags: {
   return undefined;
 }
 
+function resolveNoCodemodsFlag(flags: Record<string, unknown>): boolean {
+  const kebab = flags["no-codemods"];
+  if (typeof kebab === "boolean") return kebab;
+
+  const camel = flags["noCodemods"];
+  if (typeof camel === "boolean") return camel;
+
+  // Commander may expose a positive flag name for --no-* options.
+  const positive = flags["codemods"];
+  if (typeof positive === "boolean") return !positive;
+
+  return false;
+}
+
 function resolveInitOptions(
   context: ActionCliInputContext,
   presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
@@ -802,6 +816,7 @@ interface UpdateActionInput {
   guidePackages?: string[];
   apply: boolean;
   breaking: boolean;
+  noCodemods: boolean;
   outputMode: CliOutputMode;
 }
 
@@ -811,6 +826,7 @@ const updateInputSchema = z.object({
   guidePackages: z.array(z.string()).optional(),
   apply: z.boolean(),
   breaking: z.boolean(),
+  noCodemods: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<UpdateActionInput>;
 
@@ -842,6 +858,11 @@ const updateAction = defineAction({
         defaultValue: false,
       },
       {
+        flags: "--no-codemods",
+        description: "Skip automatic codemod execution during --apply",
+        defaultValue: false,
+      },
+      {
         flags: "--cwd <path>",
         description: "Working directory (defaults to current directory)",
       },
@@ -860,6 +881,7 @@ const updateAction = defineAction({
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         apply: Boolean(context.flags["apply"]),
         breaking: Boolean(context.flags["breaking"]),
+        noCodemods: resolveNoCodemodsFlag(context.flags),
         outputMode,
       };
     },
