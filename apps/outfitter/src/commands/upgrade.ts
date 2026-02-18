@@ -337,8 +337,6 @@ const VALID_CHANGE_TYPES = new Set<MigrationChangeType>([
   "added",
 ]);
 
-const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
-
 /**
  * Parse a YAML value, stripping optional surrounding quotes.
  */
@@ -951,7 +949,6 @@ export async function runUpgrade(
     }
 
     // Run codemods for applied packages (unless --no-codemods)
-    const codemodTargetDir = scan.workspaceRoot ?? cwd;
     let codemodSummary: CodemodSummary | undefined;
     if (applied && options.noCodemods !== true && migrationsDir !== null) {
       const codemodsDir = findCodemodsDir(cwd);

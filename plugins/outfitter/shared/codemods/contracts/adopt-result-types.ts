@@ -149,10 +149,24 @@ function countChar(line: string, char: string): number {
   return count;
 }
 
+const CONTROL_FLOW_START_REGEX =
+  /^\s*(if|for|while|switch|catch|else|try|do)\b/;
+const CLASS_METHOD_START_REGEX =
+  /^\s*(?:(?:public|private|protected|static|readonly|override|abstract|async)\s+)*(?:get\s+|set\s+)?\*?[A-Za-z_$][\w$]*\s*\([^)]*\)\s*(?::\s*[^={]+)?\s*\{/;
+const COMPUTED_METHOD_START_REGEX =
+  /^\s*(?:(?:public|private|protected|static|readonly|override|abstract|async)\s+)*(?:get\s+|set\s+)?\[[^\]]+\]\s*\([^)]*\)\s*(?::\s*[^={]+)?\s*\{/;
+
 function isFunctionStartLine(line: string): boolean {
-  if (!line.includes("{")) return false;
-  if (line.includes("=>")) return true;
-  return /\bfunction\b/.test(line);
+  const trimmed = line.trim();
+  if (!trimmed.includes("{")) return false;
+  if (trimmed.startsWith("//")) return false;
+  if (trimmed.includes("=>")) return true;
+  if (/\bfunction\b/.test(trimmed)) return true;
+  if (CONTROL_FLOW_START_REGEX.test(trimmed)) return false;
+  return (
+    CLASS_METHOD_START_REGEX.test(trimmed) ||
+    COMPUTED_METHOD_START_REGEX.test(trimmed)
+  );
 }
 
 function findFunctionScopes(lines: string[]): FunctionScope[] {
@@ -228,31 +242,36 @@ function transformReturns(content: string): string {
   const lines = content.split("\n");
   const scopes = findFunctionScopes(lines);
   const result: string[] = [];
+  let i = 0;
 
-  for (let i = 0; i < lines.length; i++) {
+  while (i < lines.length) {
     const line = lines[i] ?? "";
 
     // Skip lines that already use Result
     if (line.includes("Result.ok(") || line.includes("Result.err(")) {
       result.push(line);
+      i++;
       continue;
     }
 
     // Skip bare returns (return; or return with nothing)
     if (/^\s*return\s*;?\s*$/.test(line)) {
       result.push(line);
+      i++;
       continue;
     }
 
     // Skip import/export return-like lines
     if (/^\s*(import|export)\s/.test(line)) {
       result.push(line);
+      i++;
       continue;
     }
 
     const innermostScope = getInnermostScope(scopes, i);
     if (!innermostScope?.hasResultErr) {
       result.push(line);
+      i++;
       continue;
     }
 
@@ -266,14 +285,66 @@ function transformReturns(content: string): string {
       // Don't wrap if value is already a Result call
       if (value.startsWith("Result.")) {
         result.push(line);
+        i++;
         continue;
       }
 
       result.push(`${indent}return Result.ok(${value});${trailing}`);
+      i++;
       continue;
     }
 
-    result.push(line);
+    // Handle multiline returns:
+    // return (
+    //   value
+    // );
+    const multilineStart = line.match(/^(\s*)return\s+(.+)$/);
+    if (!multilineStart) {
+      result.push(line);
+      i++;
+      continue;
+    }
+
+    const indent = multilineStart[1] ?? "";
+    const firstLineValue = multilineStart[2] ?? "";
+    if (firstLineValue.startsWith("Result.")) {
+      result.push(line);
+      i++;
+      continue;
+    }
+
+    const blockLines: string[] = [firstLineValue];
+    let endLine = i;
+    let hasTerminator = /;\s*$/.test(line);
+
+    while (!hasTerminator && endLine + 1 < lines.length) {
+      endLine += 1;
+      const nextLine = lines[endLine] ?? "";
+      blockLines.push(nextLine);
+      hasTerminator = /;\s*$/.test(nextLine);
+    }
+
+    if (!hasTerminator) {
+      result.push(line);
+      i++;
+      continue;
+    }
+
+    const lastLineIndex = blockLines.length - 1;
+    const lastLine = blockLines[lastLineIndex] ?? "";
+    const terminalMatch = lastLine.match(/^(.*);(\s*)$/);
+    if (!terminalMatch) {
+      result.push(...lines.slice(i, endLine + 1));
+      i = endLine + 1;
+      continue;
+    }
+
+    blockLines[lastLineIndex] = terminalMatch[1] ?? "";
+    const trailing = terminalMatch[2] ?? "";
+    const value = blockLines.join("\n");
+
+    result.push(`${indent}return Result.ok(${value});${trailing}`);
+    i = endLine + 1;
   }
 
   return result.join("\n");
@@ -285,30 +356,26 @@ function transformReturns(content: string): string {
 function ensureImports(content: string, needsInternalError: boolean): string {
   // Find existing value import from @outfitter/contracts
   const contractsImportMatch = content.match(
-    /^(import\s+\{[^}]*\}\s+from\s+["']@outfitter\/contracts["'];?)$/m
+    /^import\s+\{([\s\S]*?)\}\s+from\s+["']@outfitter\/contracts["'];?/m
   );
 
   if (contractsImportMatch) {
-    const importLine = contractsImportMatch[1] ?? "";
-    const specifierMatch = importLine.match(/\{([^}]*)\}/);
-    if (specifierMatch) {
-      const specifiers =
-        specifierMatch[1]
-          ?.split(",")
-          .map((s) => s.trim())
-          .filter(Boolean) ?? [];
+    const specifiers =
+      contractsImportMatch[1]
+        ?.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean) ?? [];
 
-      if (!specifiers.includes("Result")) {
-        specifiers.push("Result");
-      }
-      if (needsInternalError && !specifiers.includes("InternalError")) {
-        specifiers.push("InternalError");
-      }
-
-      specifiers.sort();
-      const newImport = `import { ${specifiers.join(", ")} } from "@outfitter/contracts";`;
-      return content.replace(contractsImportMatch[0], newImport);
+    if (!specifiers.includes("Result")) {
+      specifiers.push("Result");
     }
+    if (needsInternalError && !specifiers.includes("InternalError")) {
+      specifiers.push("InternalError");
+    }
+
+    specifiers.sort();
+    const newImport = `import { ${specifiers.join(", ")} } from "@outfitter/contracts";`;
+    return content.replace(contractsImportMatch[0], newImport);
   }
 
   // No existing import — add one at the top (after any existing imports)
@@ -360,13 +427,7 @@ export async function transform(
     }
 
     // Skip files that don't have throw statements
-    if (!content.includes("throw new ")) {
-      continue;
-    }
-
-    // Skip files already fully using Result types (no throws at all)
-    const hasThrow = /throw\s+new\s+/.test(content);
-    if (!hasThrow) {
+    if (!/throw\s+new\s+/.test(content)) {
       continue;
     }
 

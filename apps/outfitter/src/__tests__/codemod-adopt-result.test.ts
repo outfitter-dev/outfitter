@@ -319,6 +319,61 @@ export function getUser(id: string) {
     expect(updated).toContain("return id.trim();");
     expect(updated).not.toContain("return Result.ok(id.trim())");
   });
+
+  test("wraps returns in class methods and accessors", async () => {
+    writeTarget(
+      "handler.ts",
+      `export class UserService {
+  parse(input: string) {
+    if (!input) {
+      throw new Error("Input required");
+    }
+    return input.trim();
+  }
+
+  get value() {
+    if (!this._value) {
+      throw new Error("Missing value");
+    }
+    return this._value;
+  }
+
+  private _value = "ok";
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("handler.ts");
+    expect(updated).toContain("return Result.ok(input.trim());");
+    expect(updated).toContain("return Result.ok(this._value);");
+  });
+
+  test("wraps multiline return expressions", async () => {
+    writeTarget(
+      "handler.ts",
+      `export function buildMessage(id: string) {
+  if (!id) {
+    throw new Error("ID required");
+  }
+  return (
+    "id:" +
+    id
+  );
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("handler.ts");
+    expect(updated).toContain("return Result.ok(");
+    expect(updated).toContain('"id:" +');
+    expect(updated).not.toContain("  return (\n");
+  });
 });
 
 // =============================================================================
@@ -398,6 +453,34 @@ export function fail(input: string) {
       'import type { Result } from "@outfitter/contracts";'
     );
     expect(updated).toContain("return Result.ok(input);");
+  });
+
+  test("adds Result to multiline @outfitter/contracts imports", async () => {
+    writeTarget(
+      "handler.ts",
+      `import {
+  ValidationError,
+} from "@outfitter/contracts";
+
+export function fail(input: string) {
+  if (!input) {
+    throw new ValidationError({ message: "bad" });
+  }
+  return input;
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("handler.ts");
+    expect(updated).toContain("Result");
+    expect(updated).toContain("ValidationError");
+    const importLines = updated
+      .split("\n")
+      .filter((line) => line.includes("@outfitter/contracts"));
+    expect(importLines).toHaveLength(1);
   });
 });
 
