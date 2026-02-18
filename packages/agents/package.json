@@ -40,7 +40,8 @@
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/agents",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
     "@outfitter/contracts": "workspace:*"

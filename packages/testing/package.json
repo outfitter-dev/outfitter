@@ -54,7 +54,8 @@
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
     "@outfitter/contracts": "workspace:*",

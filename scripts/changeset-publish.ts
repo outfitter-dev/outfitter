@@ -30,6 +30,12 @@ interface WorkspacePackage {
   packageJson: PackageJson;
 }
 
+interface WorkspaceRangeReference {
+  dependency: string;
+  range: string;
+  section: keyof PackageJson;
+}
+
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const PACKAGES_DIR = join(ROOT, "packages");
 const APPS_DIR = join(ROOT, "apps");
@@ -134,6 +140,57 @@ function rewriteWorkspaceRanges(
   return changed;
 }
 
+function findWorkspaceRangeReferences(
+  pkg: WorkspacePackage
+): WorkspaceRangeReference[] {
+  const sections: (keyof PackageJson)[] = [
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ];
+  const references: WorkspaceRangeReference[] = [];
+
+  for (const section of sections) {
+    const deps = pkg.packageJson[section];
+    if (!deps) continue;
+    for (const [dependency, range] of Object.entries(deps)) {
+      if (typeof range === "string" && range.startsWith("workspace:")) {
+        references.push({ dependency, range, section });
+      }
+    }
+  }
+
+  return references;
+}
+
+function assertNoWorkspaceRanges(packages: WorkspacePackage[]): void {
+  const issues = packages.flatMap((pkg) =>
+    findWorkspaceRangeReferences(pkg).map((reference) => ({
+      packageName: pkg.name,
+      path: pkg.path,
+      ...reference,
+    }))
+  );
+  if (issues.length === 0) {
+    return;
+  }
+
+  const details = issues
+    .map(
+      (issue) =>
+        `- ${issue.packageName} (${issue.section}) ${issue.dependency}: ${issue.range}`
+    )
+    .join("\n");
+
+  throw new Error(
+    [
+      "Workspace protocol ranges remain after publish manifest rewrite.",
+      details,
+    ].join("\n")
+  );
+}
+
 function writePackageJson(
   path: string,
   pkg: PackageJson,
@@ -165,6 +222,7 @@ function main(): void {
     }
   }
   console.log(`Transformed workspace refs in ${transformedCount} packages`);
+  assertNoWorkspaceRanges(workspacePackages);
 
   try {
     // Let changeset handle the actual publishing

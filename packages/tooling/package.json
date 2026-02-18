@@ -72,7 +72,8 @@
 		"lint:fix": "biome lint --write ./src",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist registry"
+		"clean": "rm -rf dist registry",
+		"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
 	},
 	"dependencies": {
 		"commander": "^14.0.2",

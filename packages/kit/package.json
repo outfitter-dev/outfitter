@@ -45,7 +45,8 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "sync:migrations": "bun run ../../scripts/sync-migrations.ts",
-    "prepack": "bun run sync:migrations"
+    "prepack": "bun run sync:migrations",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
