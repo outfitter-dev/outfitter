@@ -129,17 +129,109 @@ function transformMultilineThrows(content: string): string {
   return result;
 }
 
+interface FunctionScope {
+  readonly startLine: number;
+  readonly endLine: number;
+  readonly hasResultErr: boolean;
+}
+
+interface OpenFunctionScope {
+  readonly startLine: number;
+  readonly depthBeforeBody: number;
+  hasResultErr: boolean;
+}
+
+function countChar(line: string, char: string): number {
+  let count = 0;
+  for (const c of line) {
+    if (c === char) count++;
+  }
+  return count;
+}
+
+function isFunctionStartLine(line: string): boolean {
+  if (!line.includes("{")) return false;
+  if (line.includes("=>")) return true;
+  return /\bfunction\b/.test(line);
+}
+
+function findFunctionScopes(lines: string[]): FunctionScope[] {
+  const scopes: FunctionScope[] = [];
+  const openScopes: OpenFunctionScope[] = [];
+  let braceDepth = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+
+    if (isFunctionStartLine(line)) {
+      openScopes.push({
+        startLine: i,
+        depthBeforeBody: braceDepth,
+        hasResultErr: false,
+      });
+    }
+
+    if (line.includes("Result.err(")) {
+      const innermostScope = openScopes.at(-1);
+      if (innermostScope) {
+        innermostScope.hasResultErr = true;
+      }
+    }
+
+    braceDepth += countChar(line, "{");
+    braceDepth -= countChar(line, "}");
+
+    while (openScopes.length > 0) {
+      const scope = openScopes.at(-1);
+      if (!scope || braceDepth > scope.depthBeforeBody) {
+        break;
+      }
+      openScopes.pop();
+      scopes.push({
+        startLine: scope.startLine,
+        endLine: i,
+        hasResultErr: scope.hasResultErr,
+      });
+    }
+  }
+
+  return scopes;
+}
+
+function getInnermostScope(
+  scopes: readonly FunctionScope[],
+  lineIndex: number
+): FunctionScope | undefined {
+  let best: FunctionScope | undefined;
+  for (const scope of scopes) {
+    if (lineIndex < scope.startLine || lineIndex > scope.endLine) continue;
+    if (!best) {
+      best = scope;
+      continue;
+    }
+    const bestWidth = best.endLine - best.startLine;
+    const scopeWidth = scope.endLine - scope.startLine;
+    if (scopeWidth < bestWidth) {
+      best = scope;
+    }
+  }
+  return best;
+}
+
 /**
  * Transform `return value` to `return Result.ok(value)` for non-void returns
- * in files that now contain `Result.err`.
+ * in function bodies that contain `Result.err`.
  */
 function transformReturns(content: string): string {
   if (!content.includes("Result.err(")) return content;
 
   const lines = content.split("\n");
+  const scopes = findFunctionScopes(lines);
   const result: string[] = [];
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+
     // Skip lines that already use Result
     if (line.includes("Result.ok(") || line.includes("Result.err(")) {
       result.push(line);
@@ -154,6 +246,12 @@ function transformReturns(content: string): string {
 
     // Skip import/export return-like lines
     if (/^\s*(import|export)\s/.test(line)) {
+      result.push(line);
+      continue;
+    }
+
+    const innermostScope = getInnermostScope(scopes, i);
+    if (!innermostScope?.hasResultErr) {
       result.push(line);
       continue;
     }
@@ -185,22 +283,7 @@ function transformReturns(content: string): string {
  * Ensure the file has `Result` and `InternalError` imports from @outfitter/contracts.
  */
 function ensureImports(content: string, needsInternalError: boolean): string {
-  const hasResultImport = /\bResult\b/.test(
-    content
-      .split("\n")
-      .find(
-        (l) => l.includes("@outfitter/contracts") && l.includes("import")
-      ) ?? ""
-  );
-  const hasInternalErrorImport = /\bInternalError\b/.test(
-    content
-      .split("\n")
-      .find(
-        (l) => l.includes("@outfitter/contracts") && l.includes("import")
-      ) ?? ""
-  );
-
-  // Find existing @outfitter/contracts import
+  // Find existing value import from @outfitter/contracts
   const contractsImportMatch = content.match(
     /^(import\s+\{[^}]*\}\s+from\s+["']@outfitter\/contracts["'];?)$/m
   );
@@ -215,14 +298,10 @@ function ensureImports(content: string, needsInternalError: boolean): string {
           .map((s) => s.trim())
           .filter(Boolean) ?? [];
 
-      if (!(hasResultImport || specifiers.includes("Result"))) {
+      if (!specifiers.includes("Result")) {
         specifiers.push("Result");
       }
-      if (
-        needsInternalError &&
-        !hasInternalErrorImport &&
-        !specifiers.includes("InternalError")
-      ) {
+      if (needsInternalError && !specifiers.includes("InternalError")) {
         specifiers.push("InternalError");
       }
 
@@ -296,6 +375,9 @@ export async function transform(
 
     // Phase 1: Transform multiline throws first
     updated = transformMultilineThrows(updated);
+    if (updated.includes("InternalError.create(")) {
+      needsInternalError = true;
+    }
 
     // Phase 2: Transform single-line throws
     const lines = updated.split("\n");

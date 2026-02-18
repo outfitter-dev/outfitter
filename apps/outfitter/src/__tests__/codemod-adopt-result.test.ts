@@ -293,6 +293,32 @@ export function getUser(id: string) {
     expect(updated).toContain("return;");
     expect(updated).not.toContain("return Result.ok(;)");
   });
+
+  test("does not wrap returns in nested callback functions", async () => {
+    writeTarget(
+      "handler.ts",
+      `export function collect(ids: string[]) {
+  if (ids.length === 0) {
+    throw new Error("No ids");
+  }
+
+  const mapped = ids.map((id) => {
+    return id.trim();
+  });
+
+  return mapped;
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("handler.ts");
+    expect(updated).toContain("return Result.ok(mapped);");
+    expect(updated).toContain("return id.trim();");
+    expect(updated).not.toContain("return Result.ok(id.trim())");
+  });
 });
 
 // =============================================================================
@@ -344,6 +370,34 @@ export function fail(input: string) {
       .split("\n")
       .filter((l) => l.includes("@outfitter/contracts"));
     expect(importLines.length).toBeLessThanOrEqual(1);
+  });
+
+  test("adds value Result import when only type Result import exists", async () => {
+    writeTarget(
+      "handler.ts",
+      `import type { Result } from "@outfitter/contracts";
+import { ValidationError } from "@outfitter/contracts";
+
+export function fail(input: string) {
+  if (!input) {
+    throw new ValidationError({ message: "bad" });
+  }
+  return input;
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("handler.ts");
+    expect(updated).toContain(
+      'import { Result, ValidationError } from "@outfitter/contracts";'
+    );
+    expect(updated).toContain(
+      'import type { Result } from "@outfitter/contracts";'
+    );
+    expect(updated).toContain("return Result.ok(input);");
   });
 });
 
@@ -424,5 +478,8 @@ describe("edge cases", () => {
     const updated = readTarget("handler.ts");
     expect(updated).not.toContain("throw new Error");
     expect(updated).toContain("Result.err(InternalError.create(");
+    expect(updated).toContain(
+      'import { InternalError, Result } from "@outfitter/contracts";'
+    );
   });
 });
