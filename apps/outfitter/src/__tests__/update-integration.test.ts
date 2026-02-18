@@ -414,6 +414,156 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
     expect(installCalls).toHaveLength(1);
     expect(installCalls[0]?.cwd).toBe(resolve(tempDir));
   });
+
+  test("apply from nested cwd runs codemods against the workspace root", async () => {
+    writeJson(join(tempDir, "package.json"), {
+      name: "monorepo",
+      workspaces: ["packages/*"],
+    });
+
+    writeJson(join(tempDir, "packages", "pkg-a", "package.json"), {
+      name: "pkg-a",
+      version: "1.0.0",
+      dependencies: { "@outfitter/cli": "^0.1.0" },
+    });
+
+    writeJson(join(tempDir, "packages", "pkg-b", "package.json"), {
+      name: "pkg-b",
+      version: "1.0.0",
+      dependencies: { "@outfitter/cli": "^0.1.0" },
+    });
+
+    const targetFile = join(tempDir, "packages", "pkg-b", "src", "feature.ts");
+    mkdirSync(join(targetFile, ".."), { recursive: true });
+    writeFileSync(targetFile, 'export const marker = "legacy-token";\n');
+
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
+    const codemodsDir = join(tempDir, "plugins/outfitter/shared/codemods/cli");
+    mkdirSync(migrationsDir, { recursive: true });
+    mkdirSync(codemodsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-cli-0.1.5.md"),
+      `---
+package: "@outfitter/cli"
+version: 0.1.5
+breaking: false
+changes:
+  - type: moved
+    from: "legacy-token"
+    to: "new-token"
+    codemod: "cli/test-codemod.ts"
+---
+
+# Migration`
+    );
+
+    writeFileSync(
+      join(codemodsDir, "test-codemod.ts"),
+      `export async function transform(options) {
+  const { readFileSync, writeFileSync } = require("node:fs");
+  const { join } = require("node:path");
+  const changedFiles = [];
+  const glob = new Bun.Glob("**/*.ts");
+  for (const entry of glob.scanSync({ cwd: options.targetDir })) {
+    const absPath = join(options.targetDir, entry);
+    const content = readFileSync(absPath, "utf-8");
+    if (!content.includes("legacy-token")) continue;
+    const updated = content.replaceAll("legacy-token", "new-token");
+    if (!options.dryRun) writeFileSync(absPath, updated);
+    changedFiles.push(entry);
+  }
+  return { changedFiles, skippedFiles: [], errors: [] };
+}`
+    );
+
+    mockNpmAndInstall({
+      "@outfitter/cli": "0.1.5",
+    });
+
+    const nestedCwd = join(tempDir, "packages", "pkg-a");
+    const result = await runUpdate({ cwd: nestedCwd, apply: true });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.codemods?.codemodCount).toBe(1);
+    expect(result.value.codemods?.changedFiles).toContain(
+      "packages/pkg-b/src/feature.ts"
+    );
+
+    const updated = readFileSync(targetFile, "utf-8");
+    expect(updated).toContain("new-token");
+    expect(updated).not.toContain("legacy-token");
+  });
+
+  test("apply with noCodemods skips codemod execution", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/cli": "^0.1.0",
+    });
+
+    const targetFile = join(tempDir, "src", "feature.ts");
+    mkdirSync(join(targetFile, ".."), { recursive: true });
+    writeFileSync(targetFile, 'export const marker = "legacy-token";\n');
+
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
+    const codemodsDir = join(tempDir, "plugins/outfitter/shared/codemods/cli");
+    mkdirSync(migrationsDir, { recursive: true });
+    mkdirSync(codemodsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-cli-0.1.5.md"),
+      `---
+package: "@outfitter/cli"
+version: 0.1.5
+breaking: false
+changes:
+  - type: moved
+    from: "legacy-token"
+    to: "new-token"
+    codemod: "cli/test-codemod.ts"
+---
+
+# Migration`
+    );
+
+    writeFileSync(
+      join(codemodsDir, "test-codemod.ts"),
+      `export async function transform(options) {
+  const { readFileSync, writeFileSync } = require("node:fs");
+  const { join } = require("node:path");
+  const file = join(options.targetDir, "src/feature.ts");
+  const content = readFileSync(file, "utf-8");
+  if (!options.dryRun) {
+    writeFileSync(file, content.replaceAll("legacy-token", "new-token"));
+  }
+  return { changedFiles: ["src/feature.ts"], skippedFiles: [], errors: [] };
+}`
+    );
+
+    mockNpmAndInstall({
+      "@outfitter/cli": "0.1.5",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      apply: true,
+      noCodemods: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.codemods).toBeUndefined();
+
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/cli"]).toBe("^0.1.5");
+
+    const unchanged = readFileSync(targetFile, "utf-8");
+    expect(unchanged).toContain("legacy-token");
+    expect(unchanged).not.toContain("new-token");
+  });
 });
 
 // =============================================================================

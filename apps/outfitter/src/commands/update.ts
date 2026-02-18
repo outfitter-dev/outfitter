@@ -27,6 +27,8 @@ import {
   runInstall,
 } from "./update-workspace.js";
 
+const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -262,7 +264,7 @@ export function readMigrationDocs(
       continue;
     }
     // Strip frontmatter
-    const body = content.replace(/^---\n[\s\S]*?\n---\n*/, "").trim();
+    const body = content.replace(FRONTMATTER_BLOCK_REGEX, "").trim();
     if (body) {
       docs.push({ version: docVersion, content: body });
     }
@@ -736,6 +738,7 @@ export async function runUpdate(
 
   // Determine the effective root for install (workspace root or cwd)
   const installRoot = scan.workspaceRoot ?? cwd;
+  const codemodTargetDir = scan.workspaceRoot ?? cwd;
 
   if (installed.length === 0) {
     return Result.ok({

@@ -324,6 +324,22 @@ describe("readMigrationDocs", () => {
     expect(docs[0]).not.toContain("---");
     expect(docs[0]).toContain("Clean content here");
   });
+
+  test("strips frontmatter from docs using CRLF newlines", () => {
+    const migrationsDir = join(tempDir, "migrations");
+    mkdirSync(migrationsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-logging-0.2.0.md"),
+      `---\r\npackage: "@outfitter/logging"\r\nversion: 0.2.0\r\nbreaking: false\r\n---\r\n\r\nCRLF content\r\n`
+    );
+
+    const docs = readMigrationDocs(migrationsDir, "logging", "0.1.0", "0.2.0");
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0]).toBe("CRLF content");
+    expect(docs[0]).not.toContain("---");
+  });
 });
 
 // =============================================================================
