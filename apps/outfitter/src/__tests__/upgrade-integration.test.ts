@@ -1122,6 +1122,31 @@ describe("integration: upgrade report artifact", () => {
     expect(error["category"]).toBe("internal");
   });
 
+  test("writes cancelled status when interactive prompt is declined (non-TTY)", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.1.5",
+    });
+
+    // Neither --yes nor --non-interactive → triggers confirmDestructive(),
+    // which returns Err(CancelledError) in a non-TTY test environment.
+    const result = await runUpgrade({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value.applied).toBe(false);
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("cancelled");
+    expect(report["applied"]).toBe(false);
+    const summary = report["summary"] as Record<string, unknown>;
+    expect(summary["available"]).toBe(1);
+    expect(summary["applied"]).toBe(0);
+  });
+
   test("report write failures warn but do not change command result", async () => {
     writePackageJson(tempDir, {
       zod: "^3.0.0",
