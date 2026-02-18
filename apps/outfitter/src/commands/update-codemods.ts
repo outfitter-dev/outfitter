@@ -61,8 +61,8 @@ export function findCodemodsDir(
   cwd: string,
   binaryDir?: string
 ): string | null {
-  for (const relative of CODEMOD_PATHS) {
-    const dir = join(cwd, relative);
+  for (const relativePath of CODEMOD_PATHS) {
+    const dir = join(cwd, relativePath);
     if (existsSync(dir)) return dir;
   }
 
@@ -73,16 +73,16 @@ export function findCodemodsDir(
     if (parent === current) break;
     current = parent;
 
-    for (const relative of CODEMOD_PATHS) {
-      const dir = join(current, relative);
+    for (const relativePath of CODEMOD_PATHS) {
+      const dir = join(current, relativePath);
       if (existsSync(dir)) return dir;
     }
   }
 
   const resolvedBinaryDir =
     binaryDir ?? resolve(import.meta.dir, "../../../..");
-  for (const relative of CODEMOD_PATHS) {
-    const dir = join(resolvedBinaryDir, relative);
+  for (const relativePath of CODEMOD_PATHS) {
+    const dir = join(resolvedBinaryDir, relativePath);
     if (existsSync(dir)) return dir;
   }
 
@@ -108,12 +108,19 @@ export function discoverCodemods(
   toVersion: string
 ): DiscoveredCodemod[] {
   const resolvedCodemodsDir = resolve(codemodsDir);
-  const docs = readMigrationDocsWithMetadata(
-    migrationsDir,
-    shortName,
-    fromVersion,
-    toVersion
-  );
+  const docs: ReturnType<typeof readMigrationDocsWithMetadata> = (() => {
+    try {
+      return readMigrationDocsWithMetadata(
+        migrationsDir,
+        shortName,
+        fromVersion,
+        toVersion
+      );
+    } catch {
+      // Treat unreadable migration docs as "no codemods discovered".
+      return [];
+    }
+  })();
 
   const seen = new Set<string>();
   const codemods: DiscoveredCodemod[] = [];
@@ -199,10 +206,17 @@ export async function runCodemod(
 
   const transform = mod["transform"] as (
     options: CodemodOptions
-  ) => Promise<CodemodResult>;
+  ) => Promise<unknown>;
 
   try {
     const result = await transform({ targetDir, dryRun });
+    if (!isCodemodResult(result)) {
+      return Result.err(
+        InternalError.create("Codemod returned invalid result shape", {
+          codemodPath,
+        })
+      );
+    }
     return Result.ok(result);
   } catch (error) {
     return Result.err(
@@ -212,4 +226,20 @@ export async function runCodemod(
       })
     );
   }
+}
+
+function isCodemodResult(value: unknown): value is CodemodResult {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    isStringArray(candidate["changedFiles"]) &&
+    isStringArray(candidate["skippedFiles"]) &&
+    isStringArray(candidate["errors"])
+  );
+}
+
+function isStringArray(value: unknown): value is readonly string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 }

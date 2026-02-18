@@ -269,6 +269,21 @@ changes:
 
     expect(codemods).toHaveLength(0);
   });
+
+  test("returns empty array when migrations directory cannot be read", () => {
+    const codemodsDir = join(tempDir, "codemods");
+    mkdirSync(codemodsDir, { recursive: true });
+
+    const codemods = discoverCodemods(
+      join(tempDir, "missing-migrations"),
+      codemodsDir,
+      "cli",
+      "0.3.0",
+      "0.4.0"
+    );
+
+    expect(codemods).toEqual([]);
+  });
 });
 
 // =============================================================================
@@ -370,6 +385,29 @@ export async function transform(options) {
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
       expect(result.error.message).toContain("no transform export");
+    }
+  });
+
+  test("returns error when codemod transform result shape is invalid", async () => {
+    const codemodsDir = join(tempDir, "codemods");
+    mkdirSync(codemodsDir, { recursive: true });
+
+    writeFileSync(
+      join(codemodsDir, "invalid-result.ts"),
+      `export async function transform() {
+  return { changedFiles: "src/index.ts", skippedFiles: [], errors: [] };
+}`
+    );
+
+    const result = await runCodemod(
+      join(codemodsDir, "invalid-result.ts"),
+      tempDir,
+      false
+    );
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("invalid result shape");
     }
   });
 });
