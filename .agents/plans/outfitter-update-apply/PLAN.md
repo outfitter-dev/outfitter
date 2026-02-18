@@ -1,4 +1,4 @@
-# OS-74: `outfitter update --apply` Implementation Stack
+# OS-74: `outfitter upgrade --apply` Implementation Stack
 
 **Issue**: `OS-74`
 **Status**: Proposed
@@ -6,25 +6,25 @@
 
 ## Why This Stack Exists
 
-`outfitter update` currently checks versions and can show migration guidance, but it does not
+`outfitter upgrade` currently checks versions and can show migration guidance, but it does not
 apply dependency updates. This creates a mismatch between what users expect from an update command
 and what the command actually does.
 
-This stack turns `outfitter update` into a safe, monorepo-aware updater while preserving
+This stack turns `outfitter upgrade` into a safe, monorepo-aware updater while preserving
 read-only behavior as the default path.
 
 ## User-Facing Target
 
 ```bash
 # Read-only checks (existing)
-outfitter update
-outfitter update --guide
+outfitter upgrade
+outfitter upgrade --guide
 
 # New behavior (to implement)
-outfitter update --apply
-outfitter update --apply --breaking
-outfitter update --json
-outfitter update --apply --json
+outfitter upgrade --apply
+outfitter upgrade --apply --breaking
+outfitter upgrade --json
+outfitter upgrade --apply --json
 ```
 
 ## Proposed Branch Stack
@@ -108,8 +108,8 @@ outfitter update --apply --json
 
 ## Completion Criteria
 
-- `outfitter update --apply` updates non-breaking deps in all relevant manifests.
-- `outfitter update --apply --breaking` includes breaking updates with guidance.
+- `outfitter upgrade --apply` updates non-breaking deps in all relevant manifests.
+- `outfitter upgrade --apply --breaking` includes breaking updates with guidance.
 - Monorepo scan is deterministic and tested.
 - JSON output includes structured migration details usable by agents.
 - Docs and examples match runtime behavior.

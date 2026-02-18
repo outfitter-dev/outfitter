@@ -1,5 +1,5 @@
 /**
- * Integration tests for codemod execution with outfitter update.
+ * Integration tests for codemod execution with outfitter upgrade.
  *
  * Tests the full flow: discover codemods from migration docs,
  * execute them against target code, and verify transformations.
@@ -17,7 +17,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { discoverCodemods, runCodemod } from "../commands/update-codemods.js";
+import { discoverCodemods, runCodemod } from "../commands/upgrade-codemods.js";
 
 // =============================================================================
 // Test Utilities

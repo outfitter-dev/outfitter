@@ -1,5 +1,5 @@
 /**
- * Workspace-aware scanning for `outfitter update`.
+ * Workspace-aware scanning for `outfitter upgrade`.
  *
  * Detects monorepo workspace roots, collects all package.json manifests
  * matching workspace patterns, and extracts @outfitter/* dependencies

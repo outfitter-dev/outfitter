@@ -1,5 +1,5 @@
 /**
- * Tests for workspace-aware scanning in `outfitter update`.
+ * Tests for workspace-aware scanning in `outfitter upgrade`.
  *
  * Validates workspace root detection, manifest collection,
  * cross-workspace dependency deduplication, and multi-manifest apply.
@@ -17,12 +17,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { runUpdate } from "../commands/update.js";
+import { runUpgrade } from "../commands/upgrade.js";
 import {
   collectWorkspaceManifests,
   detectWorkspaceRoot,
   getInstalledPackagesFromWorkspace,
-} from "../commands/update-workspace.js";
+} from "../commands/upgrade-workspace.js";
 
 // =============================================================================
 // Test Utilities
@@ -390,7 +390,7 @@ describe("getInstalledPackagesFromWorkspace", () => {
 });
 
 // =============================================================================
-// runUpdate with workspace awareness (--apply)
+// runUpgrade with workspace awareness (--yes)
 // =============================================================================
 
 // Track Bun.spawn calls for verification
@@ -443,7 +443,7 @@ function mockNpmAndInstall(versionMap: Record<string, string>): void {
   Object.assign(Bun, { spawn: mockSpawn });
 }
 
-describe("runUpdate with workspace --apply", () => {
+describe("runUpgrade with workspace --yes", () => {
   beforeEach(() => {
     spawnCalls = [];
   });
@@ -452,7 +452,7 @@ describe("runUpdate with workspace --apply", () => {
     mock.restore();
   });
 
-  test("updates all manifests in a workspace when --apply is used", async () => {
+  test("updates all manifests in a workspace when --yes is used", async () => {
     writeJson(join(tempDir, "package.json"), {
       name: "monorepo",
       workspaces: ["packages/*"],
@@ -474,7 +474,7 @@ describe("runUpdate with workspace --apply", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -521,7 +521,7 @@ describe("runUpdate with workspace --apply", () => {
       "@outfitter/testing": "0.1.2",
     });
 
-    await runUpdate({ cwd: tempDir, apply: true });
+    await runUpgrade({ cwd: tempDir, yes: true });
 
     const installCalls = spawnCalls.filter(
       (c) => c.cmd[0] === "bun" && c.cmd[1] === "install"
@@ -542,7 +542,7 @@ describe("runUpdate with workspace --apply", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -585,7 +585,7 @@ describe("runUpdate with workspace --apply", () => {
     });
 
     // Run from nested package directory
-    const result = await runUpdate({ cwd: nestedDir, apply: true });
+    const result = await runUpgrade({ cwd: nestedDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -622,8 +622,8 @@ describe("runUpdate with workspace --apply", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    // No --apply
-    const result = await runUpdate({ cwd: tempDir });
+    // No --yes
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;

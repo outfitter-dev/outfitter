@@ -1,6 +1,6 @@
 # Structured Changes Reference
 
-Type definitions and parsing examples for `outfitter update --json` output.
+Type definitions and parsing examples for `outfitter upgrade --json` output.
 
 ## Type Definitions
 
@@ -112,7 +112,7 @@ interface UpdateResult {
 ### Version Check
 
 ```bash
-outfitter update --json
+outfitter upgrade --json
 ```
 
 ```json
@@ -145,7 +145,7 @@ outfitter update --json
 ### After Apply with Codemods
 
 ```bash
-outfitter update --apply --breaking --json
+outfitter upgrade --all --yes --json
 ```
 
 ```json
@@ -168,7 +168,7 @@ outfitter update --apply --breaking --json
 ### Guide with Structured Changes
 
 ```bash
-outfitter update --guide --json
+outfitter upgrade --guide --json
 ```
 
 ```json
@@ -225,4 +225,4 @@ function categorizeChanges(guide: MigrationGuide) {
 }
 ```
 
-The `automated` changes are handled by the CLI's codemod runner during `--apply`. Focus agent effort on the `manual` changes.
+The `automated` changes are handled by the CLI's codemod runner during upgrade. Focus agent effort on the `manual` changes.

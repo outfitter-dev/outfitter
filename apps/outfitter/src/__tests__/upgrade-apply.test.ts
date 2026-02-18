@@ -1,5 +1,5 @@
 /**
- * Tests for `outfitter update --apply` behavior.
+ * Tests for `outfitter upgrade --yes` (auto-confirm) behavior.
  *
  * These tests mock `getLatestVersion` (npm queries) and `Bun.spawn` (bun install)
  * to verify the apply logic without hitting the network.
@@ -17,7 +17,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runUpdate } from "../commands/update.js";
+import { runUpgrade } from "../commands/upgrade.js";
 
 // =============================================================================
 // Test Utilities
@@ -141,10 +141,10 @@ function mockNpmAndInstall(versionMap: Record<string, string>): void {
 }
 
 // =============================================================================
-// --apply with non-breaking updates
+// --yes with non-breaking updates
 // =============================================================================
 
-describe("update --apply with non-breaking updates", () => {
+describe("upgrade --yes with non-breaking updates", () => {
   test("writes correct versions to package.json", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -156,7 +156,7 @@ describe("update --apply with non-breaking updates", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -180,7 +180,7 @@ describe("update --apply with non-breaking updates", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -196,7 +196,7 @@ describe("update --apply with non-breaking updates", () => {
       "@outfitter/testing": "0.1.2",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -210,10 +210,10 @@ describe("update --apply with non-breaking updates", () => {
 });
 
 // =============================================================================
-// --apply runs bun install
+// --yes runs bun install
 // =============================================================================
 
-describe("update --apply runs bun install", () => {
+describe("upgrade --yes runs bun install", () => {
   test("invokes bun install after writing package.json", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -223,7 +223,7 @@ describe("update --apply runs bun install", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
 
@@ -246,7 +246,7 @@ describe("update --apply runs bun install", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    await runUpdate({ cwd: tempDir, apply: true });
+    await runUpgrade({ cwd: tempDir, yes: true });
 
     const installCalls = spawnCalls.filter(
       (c) => c.cmd[0] === "bun" && c.cmd[1] === "install"
@@ -256,10 +256,10 @@ describe("update --apply runs bun install", () => {
 });
 
 // =============================================================================
-// --apply skips breaking updates
+// --yes skips breaking updates
 // =============================================================================
 
-describe("update --apply skips breaking updates", () => {
+describe("upgrade --yes skips breaking updates", () => {
   test("skips breaking updates and reports them", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -273,7 +273,7 @@ describe("update --apply skips breaking updates", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -299,7 +299,7 @@ describe("update --apply skips breaking updates", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -323,7 +323,7 @@ describe("update --apply skips breaking updates", () => {
       "@outfitter/contracts": "2.0.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -334,10 +334,10 @@ describe("update --apply skips breaking updates", () => {
 });
 
 // =============================================================================
-// --apply with nothing to update
+// --yes with nothing to update
 // =============================================================================
 
-describe("update --apply with no updates available", () => {
+describe("upgrade --yes with no updates available", () => {
   test("does nothing when all packages are up to date", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.5",
@@ -347,7 +347,7 @@ describe("update --apply with no updates available", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -368,7 +368,7 @@ describe("update --apply with no updates available", () => {
 
     mockNpmAndInstall({});
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -379,10 +379,10 @@ describe("update --apply with no updates available", () => {
 });
 
 // =============================================================================
-// Without --apply, behavior is unchanged (read-only)
+// Without --yes, behavior is unchanged (read-only)
 // =============================================================================
 
-describe("update without --apply is read-only", () => {
+describe("upgrade without --yes is read-only", () => {
   test("does not modify package.json", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -392,7 +392,7 @@ describe("update without --apply is read-only", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -414,7 +414,7 @@ describe("update without --apply is read-only", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    await runUpdate({ cwd: tempDir });
+    await runUpgrade({ cwd: tempDir });
 
     const installCalls = spawnCalls.filter(
       (c) => c.cmd[0] === "bun" && c.cmd[1] === "install"
@@ -431,7 +431,7 @@ describe("update without --apply is read-only", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -440,7 +440,7 @@ describe("update without --apply is read-only", () => {
     expect(result.value.packages[0]?.updateAvailable).toBe(true);
   });
 
-  test("result includes skippedBreaking even without --apply", async () => {
+  test("result includes skippedBreaking even without --yes", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
     });
@@ -449,7 +449,7 @@ describe("update without --apply is read-only", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -459,10 +459,10 @@ describe("update without --apply is read-only", () => {
 });
 
 // =============================================================================
-// --apply --breaking applies all updates
+// --yes --all applies all updates
 // =============================================================================
 
-describe("update --apply --breaking applies all updates", () => {
+describe("upgrade --yes --all applies all updates", () => {
   test("applies both non-breaking and breaking updates", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -476,10 +476,10 @@ describe("update --apply --breaking applies all updates", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
-      breaking: true,
+      yes: true,
+      all: true,
     });
 
     expect(result.isOk()).toBe(true);
@@ -506,10 +506,10 @@ describe("update --apply --breaking applies all updates", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
-      breaking: true,
+      yes: true,
+      all: true,
     });
 
     expect(result.isOk()).toBe(true);
@@ -524,7 +524,7 @@ describe("update --apply --breaking applies all updates", () => {
     expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^0.2.0");
   });
 
-  test("applies major version bumps when --breaking is set", async () => {
+  test("applies major version bumps when --all is set", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^1.0.0",
     });
@@ -534,10 +534,10 @@ describe("update --apply --breaking applies all updates", () => {
       "@outfitter/contracts": "2.0.0",
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
-      breaking: true,
+      yes: true,
+      all: true,
     });
 
     expect(result.isOk()).toBe(true);
@@ -551,7 +551,7 @@ describe("update --apply --breaking applies all updates", () => {
     expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^2.0.0");
   });
 
-  test("pre-1.0 minor bumps are applied when --breaking is used", async () => {
+  test("pre-1.0 minor bumps are applied when --all is used", async () => {
     writePackageJson(tempDir, {
       "@outfitter/cli": "^0.3.0",
     });
@@ -561,10 +561,10 @@ describe("update --apply --breaking applies all updates", () => {
       "@outfitter/cli": "0.4.0",
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
-      breaking: true,
+      yes: true,
+      all: true,
     });
 
     expect(result.isOk()).toBe(true);
@@ -579,11 +579,11 @@ describe("update --apply --breaking applies all updates", () => {
 });
 
 // =============================================================================
-// --apply without --breaking still skips breaking (existing behavior)
+// --yes without --all still skips breaking (existing behavior)
 // =============================================================================
 
-describe("update --apply without --breaking preserves existing behavior", () => {
-  test("skips breaking updates without --breaking flag", async () => {
+describe("upgrade --yes without --all preserves existing behavior", () => {
+  test("skips breaking updates without --all", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
       "@outfitter/cli": "^0.1.0",
@@ -594,7 +594,7 @@ describe("update --apply without --breaking preserves existing behavior", () => 
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -612,11 +612,11 @@ describe("update --apply without --breaking preserves existing behavior", () => 
 });
 
 // =============================================================================
-// --breaking without --apply is a no-op
+// --all without --yes is a no-op
 // =============================================================================
 
-describe("update --breaking without --apply is a no-op", () => {
-  test("does not apply any updates when --breaking is set without --apply", async () => {
+describe("upgrade --all without --yes is a no-op", () => {
+  test("does not apply any updates when --all is set without --yes", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
     });
@@ -625,7 +625,7 @@ describe("update --breaking without --apply is a no-op", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, breaking: true });
+    const result = await runUpgrade({ cwd: tempDir, all: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -653,7 +653,7 @@ describe("update --breaking without --apply is a no-op", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, breaking: true });
+    const result = await runUpgrade({ cwd: tempDir, all: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;

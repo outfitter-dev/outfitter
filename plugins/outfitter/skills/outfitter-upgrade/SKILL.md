@@ -1,20 +1,20 @@
 ---
-name: outfitter-update
+name: outfitter-upgrade
 version: 2.0.0
-description: "Manages @outfitter/* package updates — handles version detection, dependency bumps, mechanical codemods, and test verification. Use when updating dependencies, migrating breaking changes, or running outfitter update."
+description: "Manages @outfitter/* package upgrades — handles version detection, dependency bumps, mechanical codemods, and test verification. Use when upgrading dependencies, migrating breaking changes, or running outfitter upgrade."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, AskUserQuestion
 related-skills: outfitter-atlas, outfitter-check, outfitter-start, tdd-fieldguide
 ---
 
-# Outfitter Update
+# Outfitter Upgrade
 
-Update @outfitter/* packages with structured migration — from version detection through codemod execution to test verification.
+Upgrade @outfitter/* packages with structured migration — from version detection through codemod execution to test verification.
 
 ## Steps
 
-1. **Detect** — Run `outfitter update --json` to discover installed versions and available updates.
+1. **Detect** — Run `outfitter upgrade --json` to discover installed versions and available updates.
 2. **Decide** — Present findings. Choose interactive or autonomous mode based on scope.
-3. **Apply** — Run `outfitter update --apply` to bump deps, install, and run mechanical codemods.
+3. **Apply** — Run `outfitter upgrade` to bump deps, install, and run mechanical codemods (interactive prompt by default; use `--yes` to skip).
 4. **Migrate** — For remaining changes not covered by codemods, apply code transforms manually using structured change metadata.
 5. **Verify** — Run tests. If failures, diagnose using migration docs as context, fix, re-verify.
 6. **Confirm** — Load `outfitter-check` for final compliance scan.
@@ -40,19 +40,19 @@ detect → apply → codemod → migrate → test → fix → repeat
 
 ### Step-by-step
 
-1. Run `outfitter update --json` to get structured output
+1. Run `outfitter upgrade --json` to get structured output
 2. Parse the `packages` array for updates, check `hasBreaking`
-3. Run `outfitter update --apply` (or `--apply --breaking` if breaking changes are expected)
+3. Run `outfitter upgrade --yes` (or `--all --yes` if breaking changes are expected)
 4. CLI bumps deps, installs, discovers codemods, runs them automatically
 5. Parse `codemods` summary from output — check `errors` array
-6. Run `outfitter update --guide --json` to fetch structured migration guides
+6. Run `outfitter upgrade --guide --json` to fetch structured migration guides
 7. For each `guide` in the guide output with `changes`:
    - Skip changes where `change.codemod` exists (already handled)
    - Apply remaining changes using the structured metadata (see Decision Framework)
 8. Run `bun test` (or `bun run test` from repo root)
 9. If tests fail:
    a. Read failure output
-   b. Cross-reference with migration doc guidance (`outfitter update --guide`)
+   b. Cross-reference with migration doc guidance (`outfitter upgrade --guide`)
    c. Fix the issue
    d. Re-run tests
    e. If still failing after 3 attempts, escalate to user
@@ -62,23 +62,29 @@ detect → apply → codemod → migrate → test → fix → repeat
 
 ```bash
 # Check installed versions
-outfitter update
+outfitter upgrade
 
 # JSON output for programmatic parsing
-outfitter update --json
+outfitter upgrade --json
 
 # Show migration instructions
-outfitter update --guide
-outfitter update --guide @outfitter/cli    # specific package
+outfitter upgrade --guide
+outfitter upgrade --guide @outfitter/cli    # specific package
 
-# Apply updates (bump deps + install + run codemods)
-outfitter update --apply
+# Upgrade with interactive prompt (default)
+outfitter upgrade
 
-# Apply including breaking changes
-outfitter update --apply --breaking
+# Upgrade non-interactively (skip prompts)
+outfitter upgrade --yes
 
-# Apply without running codemods
-outfitter update --apply --no-codemods
+# Include breaking changes
+outfitter upgrade --all
+
+# Preview without making changes
+outfitter upgrade --dry-run
+
+# Upgrade without running codemods
+outfitter upgrade --no-codemods
 ```
 
 ### JSON Output Shape
@@ -156,7 +162,7 @@ changes:
 ---
 ```
 
-Changes with a `codemod` field are handled automatically by `--apply`. The remaining changes need manual migration.
+Changes with a `codemod` field are handled automatically during upgrade. The remaining changes need manual migration.
 
 ## Codemods
 
@@ -170,13 +176,13 @@ codemods/
     adopt-result-types.ts
 ```
 
-Each exports a `transform(options)` function. The CLI discovers and runs them automatically during `--apply`. Agents should not run codemods directly — let the CLI handle it.
+Each exports a `transform(options)` function. The CLI discovers and runs them automatically during upgrade. Agents should not run codemods directly — let the CLI handle it.
 
 ## Error Recovery
 
 | Failure | Recovery |
 |---------|----------|
-| `--apply` fails on install | Check network, verify package exists on npm |
+| Upgrade fails on install | Check network, verify package exists on npm |
 | Codemod reports errors | Read the `errors` array, fix manually, re-run |
 | Tests fail after migration | Read failure, cross-reference migration doc, fix code |
 | 3+ test fix attempts fail | Escalate to user with evidence |

@@ -1,4 +1,4 @@
-# Autonomous Update Loop
+# Autonomous Upgrade Loop
 
 Detailed reference for agent-driven autonomous package migration.
 
@@ -13,7 +13,7 @@ Detailed reference for agent-driven autonomous package migration.
 ### Phase 1: Discovery
 
 ```bash
-outfitter update --json
+outfitter upgrade --json
 ```
 
 Parse the JSON output to build an update plan:
@@ -35,7 +35,7 @@ const safe = result.packages.filter(p => !p.breaking && p.updateAvailable);
 
 ```bash
 # Apply non-breaking updates first
-outfitter update --apply --json
+outfitter upgrade --yes --json
 ```
 
 This bumps versions in `package.json`, runs `bun install`, and executes any mechanical codemods. The `--json` flag returns structured results:
@@ -58,17 +58,17 @@ This bumps versions in `package.json`, runs `bun install`, and executes any mech
 If breaking changes exist and the agent has enough context:
 
 ```bash
-outfitter update --apply --breaking --json
+outfitter upgrade --all --yes --json
 ```
 
 This includes breaking packages in the update. Codemods run automatically for any changes that have codemod scripts.
 
 ### Phase 4: Manual Migration
 
-After `--apply`, check the guides for remaining changes:
+After upgrading, check the guides for remaining changes:
 
 ```bash
-outfitter update --guide --json
+outfitter upgrade --guide --json
 ```
 
 For each guide with a `changes` array, process changes that don't have a `codemod` field:
@@ -77,7 +77,7 @@ For each guide with a `changes` array, process changes that don't have a `codemo
 for each guide in result.guides:
   for each change in guide.changes:
     if change.codemod exists:
-      skip (already handled by --apply)
+      skip (already handled by upgrade)
     else:
       apply change manually based on change.type
 ```
@@ -126,7 +126,7 @@ If tests fail:
 
 1. Read the failure output carefully
 2. Identify which package's migration caused the failure
-3. Re-read the migration guide for that package: `outfitter update --guide @outfitter/<pkg>`
+3. Re-read the migration guide for that package: `outfitter upgrade --guide @outfitter/<pkg>`
 4. Apply the fix
 5. Re-run tests
 

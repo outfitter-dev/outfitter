@@ -18,7 +18,7 @@ Skills and workflows for working with @outfitter/* packages. Patterns, templates
 |-------|---------|
 | `outfitter-atlas` | Complete guide: patterns, templates, architecture, package reference |
 | `outfitter-start` | Start with Outfitter — scaffold new projects or adopt existing codebases |
-| `outfitter-update` | Update @outfitter/* packages with migration guidance |
+| `outfitter-upgrade` | Upgrade @outfitter/* packages with migration guidance |
 | `outfitter-check` | Verify Stack compliance with severity-ranked reports |
 | `outfitter-issue` | Report issues to outfitter-dev/outfitter |
 | `debug-outfitter` | Systematic debugging with investigation reports |

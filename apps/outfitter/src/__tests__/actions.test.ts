@@ -88,8 +88,8 @@ describe("outfitter action mapping", () => {
     expect(mapped.with).toBe("claude,biome");
   });
 
-  test("maps update --no-codemods across commander flag shapes", () => {
-    const action = outfitterActions.get("update");
+  test("maps upgrade --no-codemods across commander flag shapes", () => {
+    const action = outfitterActions.get("upgrade");
     expect(action?.cli?.mapInput).toBeDefined();
 
     const mappedKebab = action?.cli?.mapInput?.({

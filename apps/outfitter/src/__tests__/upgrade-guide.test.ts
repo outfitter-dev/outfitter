@@ -1,7 +1,7 @@
 /**
- * Tests for `outfitter update --guide` structured migration guidance.
+ * Tests for `outfitter upgrade --guide` structured migration guidance.
  *
- * Tests the MigrationGuide type, guide population in UpdateResult,
+ * Tests the MigrationGuide type, guide population in UpgradeResult,
  * and formatted output for both human and JSON modes.
  *
  * @packageDocumentation
@@ -14,9 +14,9 @@ import { join } from "node:path";
 import {
   buildMigrationGuides,
   type MigrationGuide,
-  printUpdateResults,
-  type UpdateResult,
-} from "../commands/update.js";
+  printUpgradeResults,
+  type UpgradeResult,
+} from "../commands/upgrade.js";
 
 // =============================================================================
 // Test Utilities
@@ -49,11 +49,11 @@ function writeMigrationDoc(
 }
 
 /**
- * Capture stdout output from printUpdateResults.
+ * Capture stdout output from printUpgradeResults.
  */
 async function captureOutput(
-  result: UpdateResult,
-  options?: Parameters<typeof printUpdateResults>[1]
+  result: UpgradeResult,
+  options?: Parameters<typeof printUpgradeResults>[1]
 ): Promise<string> {
   const chunks: string[] = [];
   const mockStream = {
@@ -75,7 +75,7 @@ async function captureOutput(
   });
 
   try {
-    await printUpdateResults(result, options);
+    await printUpgradeResults(result, options);
   } finally {
     Object.defineProperty(process, "stdout", {
       value: origStdout,
@@ -140,7 +140,7 @@ describe("MigrationGuide type", () => {
 
 describe("buildMigrationGuides", () => {
   test("returns empty array when no packages have updates", () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/contracts",
@@ -292,12 +292,12 @@ describe("buildMigrationGuides", () => {
 });
 
 // =============================================================================
-// UpdateResult.guides Field
+// UpgradeResult.guides Field
 // =============================================================================
 
-describe("UpdateResult.guides field", () => {
+describe("UpgradeResult.guides field", () => {
   test("guides is included when populated", () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [],
       total: 0,
       updatesAvailable: 0,
@@ -321,7 +321,7 @@ describe("UpdateResult.guides field", () => {
   });
 
   test("result works without guides field (backwards compatible)", () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [],
       total: 0,
       updatesAvailable: 0,
@@ -339,9 +339,9 @@ describe("UpdateResult.guides field", () => {
 // JSON Output with Guides
 // =============================================================================
 
-describe("printUpdateResults JSON output with guides", () => {
+describe("printUpgradeResults JSON output with guides", () => {
   test("includes guides in JSON output when present", async () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/contracts",
@@ -378,7 +378,7 @@ describe("printUpdateResults JSON output with guides", () => {
   });
 
   test("omits guides from JSON output when not present", async () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/contracts",
@@ -407,9 +407,9 @@ describe("printUpdateResults JSON output with guides", () => {
 // Human Output with Guides
 // =============================================================================
 
-describe("printUpdateResults human output with guides", () => {
+describe("printUpgradeResults human output with guides", () => {
   test("displays migration guide section when guide option is set", async () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/contracts",
@@ -447,7 +447,7 @@ describe("printUpdateResults human output with guides", () => {
   });
 
   test("shows 'no steps' message for guides without steps", async () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/cli",
@@ -482,7 +482,7 @@ describe("printUpdateResults human output with guides", () => {
   });
 
   test("does not show guide section when guide option is not set", async () => {
-    const result: UpdateResult = {
+    const result: UpgradeResult = {
       packages: [
         {
           name: "@outfitter/contracts",

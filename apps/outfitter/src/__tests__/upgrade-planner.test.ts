@@ -1,11 +1,11 @@
 /**
- * Tests for the pure `analyzeUpdates()` planner extracted from the update command.
+ * Tests for the pure `analyzeUpgrades()` planner extracted from the upgrade command.
  *
  * @packageDocumentation
  */
 
 import { describe, expect, test } from "bun:test";
-import { analyzeUpdates } from "../commands/update-planner.js";
+import { analyzeUpgrades } from "../commands/upgrade-planner.js";
 
 // =============================================================================
 // Helper
@@ -31,9 +31,9 @@ function latest(
 // Empty / trivial inputs
 // =============================================================================
 
-describe("analyzeUpdates — empty inputs", () => {
+describe("analyzeUpgrades — empty inputs", () => {
   test("empty installed map produces empty plan", () => {
-    const plan = analyzeUpdates(new Map(), new Map());
+    const plan = analyzeUpgrades(new Map(), new Map());
 
     expect(plan.packages).toEqual([]);
     expect(plan.summary).toEqual({
@@ -45,7 +45,7 @@ describe("analyzeUpdates — empty inputs", () => {
   });
 
   test("installed packages with no matching latest entries produce upToDate (no latest info)", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       new Map()
     );
@@ -61,9 +61,9 @@ describe("analyzeUpdates — empty inputs", () => {
 // Up-to-date classification
 // =============================================================================
 
-describe("analyzeUpdates — upToDate", () => {
+describe("analyzeUpgrades — upToDate", () => {
   test("all packages at latest version are classified upToDate", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({
         "@outfitter/cli": "1.2.0",
         "@outfitter/contracts": "2.0.0",
@@ -86,7 +86,7 @@ describe("analyzeUpdates — upToDate", () => {
   });
 
   test("installed version newer than latest is classified upToDate", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "2.0.0" }),
       latest({ "@outfitter/cli": { version: "1.5.0", breaking: false } })
     );
@@ -99,9 +99,9 @@ describe("analyzeUpdates — upToDate", () => {
 // Patch bump (non-breaking)
 // =============================================================================
 
-describe("analyzeUpdates — patch bumps", () => {
+describe("analyzeUpgrades — patch bumps", () => {
   test("patch bump is classified as upgradableNonBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.0" }),
       latest({ "@outfitter/cli": { version: "1.2.1", breaking: false } })
     );
@@ -112,7 +112,7 @@ describe("analyzeUpdates — patch bumps", () => {
   });
 
   test("pre-1.0 patch bump is classified as upgradableNonBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "0.1.0" }),
       latest({ "@outfitter/cli": { version: "0.1.1", breaking: false } })
     );
@@ -126,9 +126,9 @@ describe("analyzeUpdates — patch bumps", () => {
 // Minor bump (non-breaking for stable, breaking for pre-1.0)
 // =============================================================================
 
-describe("analyzeUpdates — minor bumps", () => {
+describe("analyzeUpgrades — minor bumps", () => {
   test("minor bump with breaking: false on stable package is upgradableNonBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.0" }),
       latest({ "@outfitter/cli": { version: "1.3.0", breaking: false } })
     );
@@ -138,7 +138,7 @@ describe("analyzeUpdates — minor bumps", () => {
   });
 
   test("minor bump with breaking: true is upgradableBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.0" }),
       latest({ "@outfitter/cli": { version: "1.3.0", breaking: true } })
     );
@@ -149,7 +149,7 @@ describe("analyzeUpdates — minor bumps", () => {
   });
 
   test("pre-1.0 minor bump with no explicit flag uses semver heuristic (breaking)", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "0.1.0" }),
       latest({ "@outfitter/cli": { version: "0.2.0" } })
     );
@@ -160,7 +160,7 @@ describe("analyzeUpdates — minor bumps", () => {
   });
 
   test("pre-1.0 minor bump with breaking: false overrides semver to non-breaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "0.1.0" }),
       latest({ "@outfitter/cli": { version: "0.2.0", breaking: false } })
     );
@@ -170,7 +170,7 @@ describe("analyzeUpdates — minor bumps", () => {
   });
 
   test("pre-1.0 minor bump with breaking: true is upgradableBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "0.1.0" }),
       latest({ "@outfitter/cli": { version: "0.2.0", breaking: true } })
     );
@@ -184,9 +184,9 @@ describe("analyzeUpdates — minor bumps", () => {
 // Major bump (always breaking)
 // =============================================================================
 
-describe("analyzeUpdates — major bumps", () => {
+describe("analyzeUpgrades — major bumps", () => {
   test("major bump with no explicit flag uses semver heuristic (breaking)", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.0" }),
       latest({ "@outfitter/cli": { version: "2.0.0" } })
     );
@@ -197,7 +197,7 @@ describe("analyzeUpdates — major bumps", () => {
   });
 
   test("major bump with breaking: false overrides semver to non-breaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.0" }),
       latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } })
     );
@@ -207,7 +207,7 @@ describe("analyzeUpdates — major bumps", () => {
   });
 
   test("major bump from 0.x to 1.x with no flag is upgradableBreaking", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "0.5.0" }),
       latest({ "@outfitter/cli": { version: "1.0.0" } })
     );
@@ -221,9 +221,9 @@ describe("analyzeUpdates — major bumps", () => {
 // Summary counts
 // =============================================================================
 
-describe("analyzeUpdates — summary counts", () => {
+describe("analyzeUpgrades — summary counts", () => {
   test("summary counts match classification results", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({
         "@outfitter/contracts": "1.0.0",
         "@outfitter/cli": "1.0.0",
@@ -250,13 +250,13 @@ describe("analyzeUpdates — summary counts", () => {
 // Migration docs
 // =============================================================================
 
-describe("analyzeUpdates — migration docs", () => {
+describe("analyzeUpgrades — migration docs", () => {
   test("migration doc path is attached when provided", () => {
     const migrations = new Map([
       ["@outfitter/cli", "/docs/migrations/cli-2.0.0.md"],
     ]);
 
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } }),
       migrations
@@ -268,7 +268,7 @@ describe("analyzeUpdates — migration docs", () => {
   });
 
   test("migrationDoc is undefined when no migration docs provided", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } })
     );
@@ -281,7 +281,7 @@ describe("analyzeUpdates — migration docs", () => {
       ["@outfitter/other", "/docs/migrations/other-1.0.0.md"],
     ]);
 
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       latest({ "@outfitter/cli": { version: "2.0.0", breaking: false } }),
       migrations
@@ -295,7 +295,7 @@ describe("analyzeUpdates — migration docs", () => {
 // Determinism and ordering
 // =============================================================================
 
-describe("analyzeUpdates — determinism", () => {
+describe("analyzeUpgrades — determinism", () => {
   test("output is deterministic for same inputs", () => {
     const inst = installed({
       "@outfitter/cli": "1.0.0",
@@ -308,14 +308,14 @@ describe("analyzeUpdates — determinism", () => {
       "@outfitter/types": { version: "0.6.0", breaking: false },
     });
 
-    const plan1 = analyzeUpdates(inst, lat);
-    const plan2 = analyzeUpdates(inst, lat);
+    const plan1 = analyzeUpgrades(inst, lat);
+    const plan2 = analyzeUpgrades(inst, lat);
 
     expect(plan1).toEqual(plan2);
   });
 
   test("packages are sorted by name for stable output", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({
         "@outfitter/types": "1.0.0",
         "@outfitter/cli": "1.0.0",
@@ -337,9 +337,9 @@ describe("analyzeUpdates — determinism", () => {
 // Version field correctness
 // =============================================================================
 
-describe("analyzeUpdates — version fields", () => {
+describe("analyzeUpgrades — version fields", () => {
   test("currentVersion and latestVersion are set correctly", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.2.3" }),
       latest({ "@outfitter/cli": { version: "1.3.0", breaking: false } })
     );
@@ -351,7 +351,7 @@ describe("analyzeUpdates — version fields", () => {
   });
 
   test("latestVersion matches currentVersion when up to date", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       latest({ "@outfitter/cli": { version: "1.0.0", breaking: false } })
     );
@@ -361,7 +361,7 @@ describe("analyzeUpdates — version fields", () => {
   });
 
   test("latestVersion equals currentVersion when no latest info available", () => {
-    const plan = analyzeUpdates(
+    const plan = analyzeUpgrades(
       installed({ "@outfitter/cli": "1.0.0" }),
       new Map()
     );
