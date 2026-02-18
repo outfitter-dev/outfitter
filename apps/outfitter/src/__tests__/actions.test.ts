@@ -87,4 +87,33 @@ describe("outfitter action mapping", () => {
     expect(mapped.noTooling).toBe(false);
     expect(mapped.with).toBe("claude,biome");
   });
+
+  test("maps update --no-codemods across commander flag shapes", () => {
+    const action = outfitterActions.get("update");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mappedKebab = action?.cli?.mapInput?.({
+      args: [],
+      flags: { "no-codemods": true },
+    }) as { noCodemods: boolean };
+    expect(mappedKebab.noCodemods).toBe(true);
+
+    const mappedCamel = action?.cli?.mapInput?.({
+      args: [],
+      flags: { noCodemods: true },
+    }) as { noCodemods: boolean };
+    expect(mappedCamel.noCodemods).toBe(true);
+
+    const mappedPositive = action?.cli?.mapInput?.({
+      args: [],
+      flags: { codemods: false },
+    }) as { noCodemods: boolean };
+    expect(mappedPositive.noCodemods).toBe(true);
+
+    const mappedDefault = action?.cli?.mapInput?.({
+      args: [],
+      flags: {},
+    }) as { noCodemods: boolean };
+    expect(mappedDefault.noCodemods).toBe(false);
+  });
 });

@@ -840,6 +840,7 @@ export async function runUpdate(
   }
 
   // Run codemods for applied packages (unless --no-codemods)
+  const codemodTargetDir = scan.workspaceRoot ?? cwd;
   let codemodSummary: CodemodSummary | undefined;
   if (applied && options.noCodemods !== true && migrationsDir !== null) {
     const codemodsDir = findCodemodsDir(cwd);
@@ -1041,6 +1042,33 @@ export async function printUpdateResults(
         "Use 'outfitter update --apply --breaking' to include breaking updates."
       )
     );
+    lines.push("");
+  }
+
+  if (result.codemods !== undefined) {
+    const uniqueChangedFiles = [
+      ...new Set(result.codemods.changedFiles),
+    ].sort();
+    lines.push(theme.info(`Ran ${result.codemods.codemodCount} codemod(s).`));
+
+    if (uniqueChangedFiles.length > 0) {
+      lines.push(
+        theme.success(`Codemods changed ${uniqueChangedFiles.length} file(s):`)
+      );
+      for (const file of uniqueChangedFiles) {
+        lines.push(`  - ${file}`);
+      }
+    }
+
+    if (result.codemods.errors.length > 0) {
+      lines.push(
+        theme.error(`Codemod errors (${result.codemods.errors.length}):`)
+      );
+      for (const error of result.codemods.errors) {
+        lines.push(`  - ${error}`);
+      }
+    }
+
     lines.push("");
   }
 

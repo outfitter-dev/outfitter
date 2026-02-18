@@ -186,6 +186,20 @@ function resolveLocalFlag(flags: {
   return undefined;
 }
 
+function resolveNoCodemodsFlag(flags: Record<string, unknown>): boolean {
+  const kebab = flags["no-codemods"];
+  if (typeof kebab === "boolean") return kebab;
+
+  const camel = flags["noCodemods"];
+  if (typeof camel === "boolean") return camel;
+
+  // Commander may expose a positive flag name for --no-* options.
+  const positive = flags["codemods"];
+  if (typeof positive === "boolean") return !positive;
+
+  return false;
+}
+
 function resolveInitOptions(
   context: ActionCliInputContext,
   presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
@@ -867,9 +881,7 @@ const updateAction = defineAction({
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         apply: Boolean(context.flags["apply"]),
         breaking: Boolean(context.flags["breaking"]),
-        noCodemods: Boolean(
-          context.flags["no-codemods"] ?? context.flags["noCodemods"]
-        ),
+        noCodemods: resolveNoCodemodsFlag(context.flags),
         outputMode,
       };
     },

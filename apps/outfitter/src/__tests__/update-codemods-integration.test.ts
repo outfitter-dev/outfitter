@@ -167,6 +167,31 @@ import { confirmDestructive } from "@outfitter/cli/input";
     }
   });
 
+  test("does not rewrite plain string literals outside import statements", async () => {
+    const targetDir = join(tempDir, "project");
+    mkdirSync(join(targetDir, "src"), { recursive: true });
+
+    const source = `const docsRef = "@outfitter/cli/render";
+const message = "replace @outfitter/cli/streaming manually";
+`;
+    writeFileSync(join(targetDir, "src/notes.ts"), source);
+
+    const codemodPath = join(
+      import.meta.dir,
+      "../../../../plugins/outfitter/shared/codemods/cli/0.4.0-move-tui-imports.ts"
+    );
+
+    const result = await runCodemod(codemodPath, targetDir, false);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.changedFiles).toHaveLength(0);
+    }
+
+    const updated = readFileSync(join(targetDir, "src/notes.ts"), "utf-8");
+    expect(updated).toBe(source);
+  });
+
   test("skips node_modules and dist directories", async () => {
     const targetDir = join(tempDir, "project");
     mkdirSync(join(targetDir, "src"), { recursive: true });

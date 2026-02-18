@@ -31,6 +31,14 @@ const IMPORT_REWRITES: ReadonlyArray<{ from: string; to: string }> = [
   { from: "@outfitter/cli/input", to: "@outfitter/tui/confirm" },
 ];
 
+const IMPORT_SPECIFIER_PATTERNS = [
+  /(import\s+(?:type\s+)?[\s\S]*?\bfrom\s*["'])([^"']+)(["'])/g,
+  /(export\s+[\s\S]*?\bfrom\s*["'])([^"']+)(["'])/g,
+  /(import\s*["'])([^"']+)(["'])/g,
+  /(import\s*\(\s*["'])([^"']+)(["']\s*\))/g,
+  /(require\s*\(\s*["'])([^"']+)(["']\s*\))/g,
+] as const;
+
 const SOURCE_EXTENSIONS = new Set([
   ".ts",
   ".tsx",
@@ -72,6 +80,37 @@ function collectSourceFiles(dir: string): string[] {
   return files;
 }
 
+function rewriteModuleSpecifier(specifier: string): string {
+  for (const rewrite of IMPORT_REWRITES) {
+    if (specifier === rewrite.from) {
+      return rewrite.to;
+    }
+  }
+  return specifier;
+}
+
+function rewriteImportSpecifiers(content: string): string {
+  let updated = content;
+
+  for (const pattern of IMPORT_SPECIFIER_PATTERNS) {
+    updated = updated.replace(pattern, (full, prefix, specifier, suffix) => {
+      if (
+        typeof prefix !== "string" ||
+        typeof specifier !== "string" ||
+        typeof suffix !== "string"
+      ) {
+        return full;
+      }
+
+      const rewritten = rewriteModuleSpecifier(specifier);
+      if (rewritten === specifier) return full;
+      return `${prefix}${rewritten}${suffix}`;
+    });
+  }
+
+  return updated;
+}
+
 export async function transform(
   options: CodemodOptions
 ): Promise<CodemodResult> {
@@ -106,11 +145,7 @@ export async function transform(
       continue;
     }
 
-    // Apply all rewrites
-    let updated = content;
-    for (const rewrite of IMPORT_REWRITES) {
-      updated = updated.replaceAll(rewrite.from, rewrite.to);
-    }
+    const updated = rewriteImportSpecifiers(content);
 
     if (updated === content) {
       skippedFiles.push(relPath);
