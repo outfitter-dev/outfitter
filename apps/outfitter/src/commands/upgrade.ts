@@ -1,5 +1,5 @@
 /**
- * `outfitter update` - Detect installed @outfitter/* versions and show available updates.
+ * `outfitter upgrade` - Detect installed @outfitter/* versions and show available updates.
  *
  * Reads package.json, queries npm for latest versions, and optionally
  * shows migration guidance from the kit plugin's migration docs.
@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
@@ -19,13 +19,13 @@ import {
   discoverCodemods,
   findCodemodsDir,
   runCodemod,
-} from "./update-codemods.js";
-import { analyzeUpdates } from "./update-planner.js";
+} from "./upgrade-codemods.js";
+import { analyzeUpgrades } from "./upgrade-planner.js";
 import {
   applyUpdatesToWorkspace,
   getInstalledPackagesFromWorkspace,
   runInstall,
-} from "./update-workspace.js";
+} from "./upgrade-workspace.js";
 
 const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
 
@@ -33,18 +33,22 @@ const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
 // Types
 // =============================================================================
 
-export interface UpdateOptions {
+export interface UpgradeOptions {
   /** Working directory (defaults to cwd) */
   readonly cwd: string;
   /** Show migration guide */
   readonly guide?: boolean;
   /** Filter migration guides to specific package names */
   readonly guidePackages?: readonly string[];
-  /** Apply non-breaking updates to package.json and run bun install */
-  readonly apply?: boolean;
-  /** Include breaking updates when --apply is used */
-  readonly breaking?: boolean;
-  /** Skip automatic codemod execution during --apply */
+  /** Preview only — no mutations, no prompt */
+  readonly dryRun?: boolean;
+  /** Auto-confirm without prompting */
+  readonly yes?: boolean;
+  /** Whether interactive prompts are enabled (false in CI) */
+  readonly interactive?: boolean;
+  /** Include breaking changes in the upgrade */
+  readonly all?: boolean;
+  /** Skip automatic codemod execution during upgrade */
   readonly noCodemods?: boolean;
   /** Output mode */
   readonly outputMode?: OutputMode;
@@ -124,7 +128,7 @@ export interface CodemodSummary {
   readonly errors: readonly string[];
 }
 
-export interface UpdateResult {
+export interface UpgradeResult {
   /** Package version info */
   readonly packages: PackageVersionInfo[];
   /** Total packages checked */
@@ -715,14 +719,16 @@ async function applyUpdates(
 // =============================================================================
 
 /**
- * Run the update command — detect installed versions and query npm for latest.
+ * Run the upgrade command — detect installed versions and query npm for latest.
  *
- * When `apply` is true, writes updated version ranges to `package.json`
- * for non-breaking upgrades only, then runs `bun install`.
+ * Default flow: scan → classify → prompt → apply.
+ * `--dry-run` returns a report without mutation.
+ * `--all` includes breaking changes.
+ * `--yes` or `--non-interactive` bypasses the prompt.
  */
-export async function runUpdate(
-  options: UpdateOptions
-): Promise<Result<UpdateResult, OutfitterError>> {
+export async function runUpgrade(
+  options: UpgradeOptions
+): Promise<Result<UpgradeResult, OutfitterError>> {
   const cwd = resolve(options.cwd);
   const migrationsDir = findMigrationDocsDir(cwd);
   // For breaking classification overrides, only use project-discoverable docs.
@@ -783,7 +789,7 @@ export async function runUpdate(
   );
 
   // Use the pure planner for analysis
-  const plan = analyzeUpdates(installedMap, latestVersions);
+  const plan = analyzeUpgrades(installedMap, latestVersions);
 
   // Map planner output back to the existing PackageVersionInfo shape
   const packages: PackageVersionInfo[] = plan.packages.map((action) => ({
@@ -807,8 +813,8 @@ export async function runUpdate(
     (a) => a.classification === "upgradableBreaking"
   );
 
-  // When --breaking is set with --apply, include breaking updates in the apply set
-  const includeBreaking = options.apply === true && options.breaking === true;
+  // When --all is set, include breaking updates in the apply set
+  const includeBreaking = options.all === true;
   const packagesToApply = includeBreaking
     ? [...nonBreakingUpgradable, ...breakingUpgradable]
     : nonBreakingUpgradable;
@@ -816,11 +822,99 @@ export async function runUpdate(
     ? []
     : breakingUpgradable.map((a) => a.name);
 
+  // Build structured migration guides when --guide is requested
+  let guidesData =
+    options.guide === true
+      ? buildMigrationGuides(packages, migrationsDir)
+      : undefined;
+
+  // Filter guides to specific packages when --guide packages are specified
+  if (
+    guidesData !== undefined &&
+    options.guidePackages !== undefined &&
+    options.guidePackages.length > 0
+  ) {
+    const filterSet = new Set(options.guidePackages);
+    guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
+  }
+
+  // --dry-run: return report without mutation
+  if (options.dryRun) {
+    const result: UpgradeResult = {
+      packages,
+      total: packages.length,
+      updatesAvailable,
+      hasBreaking,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking,
+      ...(guidesData !== undefined ? { guides: guidesData } : {}),
+    };
+    writeUpgradeReport(cwd, result);
+    return Result.ok(result);
+  }
+
+  // No updates to apply — return early
+  if (packagesToApply.length === 0) {
+    const result: UpgradeResult = {
+      packages,
+      total: packages.length,
+      updatesAvailable,
+      hasBreaking,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking,
+      ...(guidesData !== undefined ? { guides: guidesData } : {}),
+    };
+    writeUpgradeReport(cwd, result);
+    return Result.ok(result);
+  }
+
+  // Interactive confirmation (unless --yes or --non-interactive)
+  if (options.yes !== true && options.interactive !== false) {
+    const { confirmDestructive } = await import("@outfitter/tui/confirm");
+    const confirmed = await confirmDestructive({
+      message: `Apply ${packagesToApply.length} upgrade(s)?`,
+      itemCount: packagesToApply.length,
+      bypassFlag: false,
+    });
+
+    if (confirmed.isErr()) {
+      // User cancelled or non-TTY — return report without mutation
+      const result: UpgradeResult = {
+        packages,
+        total: packages.length,
+        updatesAvailable,
+        hasBreaking,
+        applied: false,
+        appliedPackages: [],
+        skippedBreaking,
+        ...(guidesData !== undefined ? { guides: guidesData } : {}),
+      };
+      writeUpgradeReport(cwd, result);
+      return Result.ok(result);
+    }
+  } else if (options.interactive === false && options.yes !== true) {
+    // Non-interactive without --yes: skip mutation (same as dry-run)
+    const result: UpgradeResult = {
+      packages,
+      total: packages.length,
+      updatesAvailable,
+      hasBreaking,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking,
+      ...(guidesData !== undefined ? { guides: guidesData } : {}),
+    };
+    writeUpgradeReport(cwd, result);
+    return Result.ok(result);
+  }
+
   let applied = false;
   const appliedPackages: string[] = [];
 
-  // Apply updates if --apply is set and there are packages to update
-  if (options.apply && packagesToApply.length > 0) {
+  // Apply upgrades
+  if (packagesToApply.length > 0) {
     if (scan.workspaceRoot !== null) {
       // Workspace mode: update all manifests in one pass, then install once at root
       const applyResult = await applyUpdatesToWorkspace(
@@ -889,23 +983,7 @@ export async function runUpdate(
     }
   }
 
-  // Build structured migration guides when --guide is requested
-  let guidesData =
-    options.guide === true
-      ? buildMigrationGuides(packages, migrationsDir)
-      : undefined;
-
-  // Filter guides to specific packages when --guide packages are specified
-  if (
-    guidesData !== undefined &&
-    options.guidePackages !== undefined &&
-    options.guidePackages.length > 0
-  ) {
-    const filterSet = new Set(options.guidePackages);
-    guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
-  }
-
-  return Result.ok({
+  const finalResult: UpgradeResult = {
     packages,
     total: packages.length,
     updatesAvailable,
@@ -915,20 +993,23 @@ export async function runUpdate(
     skippedBreaking,
     ...(guidesData !== undefined ? { guides: guidesData } : {}),
     ...(codemodSummary !== undefined ? { codemods: codemodSummary } : {}),
-  });
+  };
+
+  writeUpgradeReport(cwd, finalResult);
+  return Result.ok(finalResult);
 }
 
 /**
- * Format and output update results.
+ * Format and output upgrade results.
  */
-export async function printUpdateResults(
-  result: UpdateResult,
+export async function printUpgradeResults(
+  result: UpgradeResult,
   options?: {
     mode?: OutputMode;
     guide?: boolean;
     cwd?: string;
-    applied?: boolean | undefined;
-    breaking?: boolean;
+    dryRun?: boolean;
+    all?: boolean;
   }
 ): Promise<void> {
   const structuredMode = resolveStructuredOutputMode(options?.mode);
@@ -938,7 +1019,7 @@ export async function printUpdateResults(
   }
 
   const theme = createTheme();
-  const lines: string[] = ["", "Outfitter Update", "", "=".repeat(60)];
+  const lines: string[] = ["", "Outfitter Upgrade", "", "=".repeat(60)];
 
   if (result.packages.length === 0) {
     lines.push("No @outfitter/* packages found in package.json.");
@@ -988,7 +1069,7 @@ export async function printUpdateResults(
     if (nonBreakingApplied.length > 0) {
       lines.push(
         theme.success(
-          `Applied ${nonBreakingApplied.length} non-breaking update(s):`
+          `Applied ${nonBreakingApplied.length} non-breaking upgrade(s):`
         )
       );
       for (const name of nonBreakingApplied) {
@@ -999,7 +1080,7 @@ export async function printUpdateResults(
 
     if (breakingApplied.length > 0) {
       lines.push(
-        theme.error(`Applied ${breakingApplied.length} breaking update(s):`)
+        theme.error(`Applied ${breakingApplied.length} breaking upgrade(s):`)
       );
       for (const name of breakingApplied) {
         const pkg = result.packages.find((p) => p.name === name);
@@ -1007,44 +1088,31 @@ export async function printUpdateResults(
       }
       lines.push(
         "",
-        theme.muted("Review migration guides: 'outfitter update --guide'")
+        theme.muted("Review migration guides: 'outfitter upgrade --guide'")
       );
       lines.push("");
     }
-  } else if (options?.applied !== undefined && options.applied === false) {
-    // --apply was passed but nothing was applied
-    if (result.updatesAvailable === 0) {
-      lines.push(
-        theme.success("All packages are up to date. Nothing to apply.")
-      );
-    } else if (
-      result.appliedPackages.length === 0 &&
-      result.skippedBreaking.length > 0
-    ) {
-      lines.push(
-        theme.muted(
-          "No non-breaking updates to apply. All available updates contain breaking changes."
-        )
-      );
-    }
   }
 
-  // Warn about skipped breaking updates
-  if (result.skippedBreaking.length > 0 && result.applied) {
-    lines.push(
-      theme.error(
-        `Skipped ${result.skippedBreaking.length} breaking update(s):`
-      )
-    );
-    for (const name of result.skippedBreaking) {
-      lines.push(`  - ${name}`);
+  // Excluded breaking section (when --all is NOT used and breaking changes exist)
+  if (result.skippedBreaking.length > 0 && options?.all !== true) {
+    if (result.applied) {
+      lines.push(
+        theme.error(
+          `Skipped ${result.skippedBreaking.length} breaking upgrade(s):`
+        )
+      );
+    } else {
+      lines.push("  Excluded (breaking):");
     }
-    lines.push(
-      "",
-      theme.muted(
-        "Use 'outfitter update --apply --breaking' to include breaking updates."
-      )
-    );
+    for (const name of result.skippedBreaking) {
+      const pkg = result.packages.find((p) => p.name === name);
+      const codemodHint = pkg?.breaking ? "(migration guide)" : "";
+      lines.push(
+        `    ${name.padEnd(24)} ${(pkg?.current ?? "").padEnd(8)} -> ${(pkg?.latest ?? "").padEnd(8)} ${codemodHint}`.trimEnd()
+      );
+    }
+    lines.push("", theme.muted("  Use --all to include breaking changes"));
     lines.push("");
   }
 
@@ -1076,10 +1144,12 @@ export async function printUpdateResults(
   }
 
   if (!result.applied) {
-    if (result.updatesAvailable > 0) {
+    if (options?.dryRun) {
+      lines.push(theme.muted("Dry run — no changes applied."));
+    } else if (result.updatesAvailable > 0) {
       lines.push(
         theme.muted(
-          "Run 'outfitter update --guide' for migration instructions."
+          "Run 'outfitter upgrade --guide' for migration instructions."
         )
       );
     } else {
@@ -1144,4 +1214,58 @@ export async function printUpdateResults(
   }
 
   await output(lines, { mode: "human" });
+}
+
+// =============================================================================
+// Upgrade Report
+// =============================================================================
+
+/** Machine-readable upgrade report written to `.outfitter/reports/upgrade.json`. */
+export interface UpgradeReport {
+  readonly $schema: "https://outfitter.dev/reports/upgrade/v1";
+  readonly checkedAt: string;
+  readonly applied: boolean;
+  readonly summary: {
+    readonly total: number;
+    readonly available: number;
+    readonly breaking: number;
+    readonly applied: number;
+  };
+  readonly packages: readonly PackageVersionInfo[];
+  readonly excluded: {
+    readonly breaking: readonly string[];
+  };
+  readonly codemods?: CodemodSummary;
+}
+
+/**
+ * Write a machine-readable upgrade report to `.outfitter/reports/upgrade.json`.
+ *
+ * Creates the directory if it doesn't exist. Always represents the latest check state.
+ */
+function writeUpgradeReport(cwd: string, result: UpgradeResult): void {
+  const reportsDir = join(cwd, ".outfitter", "reports");
+  mkdirSync(reportsDir, { recursive: true });
+
+  const report: UpgradeReport = {
+    $schema: "https://outfitter.dev/reports/upgrade/v1",
+    checkedAt: new Date().toISOString(),
+    applied: result.applied,
+    summary: {
+      total: result.total,
+      available: result.updatesAvailable,
+      breaking: result.packages.filter((p) => p.breaking).length,
+      applied: result.appliedPackages.length,
+    },
+    packages: result.packages,
+    excluded: {
+      breaking: result.skippedBreaking,
+    },
+    ...(result.codemods !== undefined ? { codemods: result.codemods } : {}),
+  };
+
+  writeFileSync(
+    join(reportsDir, "upgrade.json"),
+    JSON.stringify(report, null, 2)
+  );
 }

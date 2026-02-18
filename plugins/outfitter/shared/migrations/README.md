@@ -1,6 +1,6 @@
 # Migration Docs
 
-Versioned migration guides for `@outfitter/*` packages. Used by the `outfitter-check` skill and `outfitter update` CLI command to compose upgrade guidance.
+Versioned migration guides for `@outfitter/*` packages. Used by the `outfitter-check` skill and `outfitter upgrade` CLI command to compose upgrade guidance.
 
 ## Naming Convention
 
@@ -62,7 +62,7 @@ changes:
 
 ### Changes Array
 
-Each entry in `changes` describes one machine-actionable change. Used by `outfitter update --apply` to discover and run codemods.
+Each entry in `changes` describes one machine-actionable change. Used by `outfitter upgrade` to discover and run codemods.
 
 | Field | Type | Description |
 |-------|------|-------------|

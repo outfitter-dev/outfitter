@@ -13,7 +13,7 @@ import {
   discoverCodemods,
   findCodemodsDir,
   runCodemod,
-} from "../commands/update-codemods.js";
+} from "../commands/upgrade-codemods.js";
 
 // =============================================================================
 // Test Utilities

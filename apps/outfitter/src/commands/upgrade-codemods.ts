@@ -1,5 +1,5 @@
 /**
- * Codemod discovery and execution for `outfitter update`.
+ * Codemod discovery and execution for `outfitter upgrade`.
  *
  * Codemods are TypeScript scripts that export a `transform` function.
  * They are referenced from migration doc frontmatter via the `codemod` field
@@ -12,7 +12,7 @@ import { existsSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
-import { readMigrationDocsWithMetadata } from "./update.js";
+import { readMigrationDocsWithMetadata } from "./upgrade.js";
 
 // =============================================================================
 // Types

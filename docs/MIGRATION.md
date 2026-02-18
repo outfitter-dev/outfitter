@@ -264,12 +264,12 @@ Key migration points:
 
 ## Version Upgrades
 
-The `outfitter update` command detects installed `@outfitter/*` packages, queries npm for the latest versions, and classifies updates as breaking or non-breaking. It supports workspace-aware scanning for monorepos.
+The `outfitter upgrade` command detects installed `@outfitter/*` packages, queries npm for the latest versions, and classifies updates as breaking or non-breaking. It supports workspace-aware scanning for monorepos.
 
 ### Check Available Updates
 
 ```bash
-outfitter update
+outfitter upgrade
 ```
 
 Shows a table of installed packages with their current and available versions, plus breaking change classification. Pre-1.0 packages follow semver convention: minor bumps (e.g., 0.1.0 to 0.2.0) are treated as breaking.
@@ -277,22 +277,28 @@ Shows a table of installed packages with their current and available versions, p
 ### Apply Updates
 
 ```bash
-# Apply non-breaking updates only (safe default)
-outfitter update --apply
+# Upgrade with interactive prompt (default)
+outfitter upgrade
 
-# Also apply breaking updates
-outfitter update --apply --breaking
+# Upgrade non-interactively (skip prompts)
+outfitter upgrade --yes
+
+# Include breaking changes
+outfitter upgrade --all
+
+# Preview without making changes
+outfitter upgrade --dry-run
 ```
 
-`--apply` writes updated version ranges to `package.json` (preserving `^`, `~`, or `>=` prefixes) and runs `bun install`. Breaking updates are skipped unless `--breaking` is also set. In a monorepo workspace, all manifests are updated and `bun install` runs once at the workspace root.
+The upgrade command writes updated version ranges to `package.json` (preserving `^`, `~`, or `>=` prefixes) and runs `bun install`. Breaking updates are skipped unless `--all` is also set. In a monorepo workspace, all manifests are updated and `bun install` runs once at the workspace root.
 
 ### Migration Guides
 
 ```bash
-outfitter update --guide
+outfitter upgrade --guide
 ```
 
-`--guide` returns structured migration guidance for each package with an available update. Migration steps are sourced from `plugins/outfitter/shared/migrations/` for versions between the installed and target release. Can be combined with `--apply` to both apply updates and view guidance in one pass.
+`--guide` returns structured migration guidance for each package with an available update. Migration steps are sourced from `plugins/outfitter/shared/migrations/` for versions between the installed and target release.
 
 ### 0.2.x to 0.3.0 (Runtime Packages)
 

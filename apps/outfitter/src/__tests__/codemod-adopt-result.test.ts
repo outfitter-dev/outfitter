@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runCodemod } from "../commands/update-codemods.js";
+import { runCodemod } from "../commands/upgrade-codemods.js";
 
 // =============================================================================
 // Test Utilities

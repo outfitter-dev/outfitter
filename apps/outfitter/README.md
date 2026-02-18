@@ -184,25 +184,28 @@ outfitter migrate kit --dry-run
 outfitter migrate kit .
 ```
 
-### `update`
+### `upgrade`
 
 Check installed `@outfitter/*` packages against npm versions.
 
 ```bash
-outfitter update [options]
+outfitter upgrade [options]
 ```
 
 Options:
 
 - `--guide` - Include composed migration guidance
+- `--all` - Include breaking changes
+- `--dry-run` - Preview without making changes
+- `--yes` - Skip interactive prompts
 - `--cwd <path>` - Working directory to inspect
 
 Examples:
 
 ```bash
-outfitter update
-outfitter update --guide
-outfitter update --json --cwd .
+outfitter upgrade
+outfitter upgrade --guide
+outfitter upgrade --json --cwd .
 ```
 
 ### `doctor`

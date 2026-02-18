@@ -6,7 +6,12 @@
 
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
-import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import {
+  cwdPreset,
+  dryRunPreset,
+  interactionPreset,
+  verbosePreset,
+} from "@outfitter/cli/flags";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -33,7 +38,7 @@ import {
   runMigrateKit,
 } from "./commands/migrate-kit.js";
 import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
-import { printUpdateResults, runUpdate } from "./commands/update.js";
+import { printUpgradeResults, runUpgrade } from "./commands/upgrade.js";
 import {
   type CliOutputMode,
   resolveOutputModeFromContext,
@@ -810,86 +815,89 @@ const checkAction = defineAction({
   },
 });
 
-interface UpdateActionInput {
+interface UpgradeActionInput {
   cwd: string;
   guide: boolean;
   guidePackages?: string[];
-  apply: boolean;
-  breaking: boolean;
+  dryRun: boolean;
+  yes: boolean;
+  interactive: boolean;
+  all: boolean;
   noCodemods: boolean;
   outputMode: CliOutputMode;
 }
 
-const updateInputSchema = z.object({
+const upgradeInputSchema = z.object({
   cwd: z.string(),
   guide: z.boolean(),
   guidePackages: z.array(z.string()).optional(),
-  apply: z.boolean(),
-  breaking: z.boolean(),
+  dryRun: z.boolean(),
+  yes: z.boolean(),
+  interactive: z.boolean(),
+  all: z.boolean(),
   noCodemods: z.boolean(),
   outputMode: outputModeSchema,
-}) as z.ZodType<UpdateActionInput>;
+}) as z.ZodType<UpgradeActionInput>;
 
-const updateAction = defineAction({
-  id: "update",
+const upgradeCwd = cwdPreset();
+const upgradeDryRun = dryRunPreset();
+const upgradeInteraction = interactionPreset();
+
+const upgradeAction = defineAction({
+  id: "upgrade",
   description: "Check for @outfitter/* package updates and migration guidance",
   surfaces: ["cli"],
-  input: updateInputSchema,
+  input: upgradeInputSchema,
   cli: {
-    command: "update [packages...]",
+    command: "upgrade [packages...]",
     description:
       "Check for @outfitter/* package updates and migration guidance",
     options: [
+      ...upgradeCwd.options,
+      ...upgradeDryRun.options,
+      ...upgradeInteraction.options,
+      {
+        flags: "--all",
+        description: "Include breaking changes in the upgrade",
+        defaultValue: false,
+      },
+      {
+        flags: "--no-codemods",
+        description: "Skip automatic codemod execution during upgrade",
+        defaultValue: false,
+      },
       {
         flags: "--guide",
         description:
           "Show migration instructions for available updates. Pass package names to filter.",
         defaultValue: false,
       },
-      {
-        flags: "--apply",
-        description:
-          "Apply non-breaking updates to package.json and run bun install",
-        defaultValue: false,
-      },
-      {
-        flags: "--breaking",
-        description: "Include breaking updates when used with --apply",
-        defaultValue: false,
-      },
-      {
-        flags: "--no-codemods",
-        description: "Skip automatic codemod execution during --apply",
-        defaultValue: false,
-      },
-      {
-        flags: "--cwd <path>",
-        description: "Working directory (defaults to current directory)",
-      },
     ],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const cwd =
-        typeof context.flags["cwd"] === "string"
-          ? resolve(process.cwd(), context.flags["cwd"])
-          : process.cwd();
+      const { cwd: rawCwd } = upgradeCwd.resolve(context.flags);
+      const { dryRun } = upgradeDryRun.resolve(context.flags);
+      const { interactive, yes } = upgradeInteraction.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
       const guidePackages =
         context.args.length > 0 ? (context.args as string[]) : undefined;
       return {
         cwd,
         guide: Boolean(context.flags["guide"]),
         ...(guidePackages !== undefined ? { guidePackages } : {}),
-        apply: Boolean(context.flags["apply"]),
-        breaking: Boolean(context.flags["breaking"]),
+        dryRun,
+        yes,
+        interactive,
+        all: Boolean(context.flags["all"]),
         noCodemods: resolveNoCodemodsFlag(context.flags),
         outputMode,
       };
     },
   },
   handler: async (input) => {
-    const { outputMode, guidePackages, ...updateInput } = input;
-    const result = await runUpdate({
-      ...updateInput,
+    const { outputMode, guidePackages, ...upgradeInput } = input;
+    const result = await runUpgrade({
+      ...upgradeInput,
       ...(guidePackages !== undefined ? { guidePackages } : {}),
     });
 
@@ -897,17 +905,17 @@ const updateAction = defineAction({
       return Result.err(
         new InternalError({
           message: result.error.message,
-          context: { action: "update" },
+          context: { action: "upgrade" },
         })
       );
     }
 
-    await printUpdateResults(result.value, {
+    await printUpgradeResults(result.value, {
       mode: outputMode,
-      guide: updateInput.guide,
-      cwd: updateInput.cwd,
-      applied: updateInput.apply ? result.value.applied : undefined,
-      breaking: updateInput.breaking,
+      guide: upgradeInput.guide,
+      cwd: upgradeInput.cwd,
+      dryRun: upgradeInput.dryRun,
+      all: upgradeInput.all,
     });
 
     return Result.ok(result.value);
@@ -993,4 +1001,4 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(listBlocksAction)
   .add(checkAction)
   .add(migrateKitAction)
-  .add(updateAction);
+  .add(upgradeAction);

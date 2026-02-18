@@ -15,7 +15,7 @@ skills:
   - `outfitter-check` — review, audit, compliance
   - `tdd-fieldguide` — implement, build, create, fix
   - `outfitter-start` — adopt, migrate, start
-  - `outfitter-update` — versions, bumps, migrations
+  - `outfitter-upgrade` — versions, bumps, migrations
   - `debug-outfitter` — debug, troubleshoot
 - **MEMORY:** Save @outfitter/* patterns confirmed across sessions — handler conventions, common adoption pitfalls, version migration insights. Skip project-specific details.
 - **PROCESS:** Load the matched skill, follow its workflow completely. Don't skip steps.

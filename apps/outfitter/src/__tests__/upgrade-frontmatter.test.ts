@@ -14,7 +14,7 @@ import { join } from "node:path";
 import {
   parseMigrationFrontmatter,
   readMigrationDocsWithMetadata,
-} from "../commands/update.js";
+} from "../commands/upgrade.js";
 
 // =============================================================================
 // Test Utilities
@@ -428,7 +428,7 @@ changes:
 
 describe("MigrationGuide includes changes from frontmatter", () => {
   test("buildMigrationGuides populates changes from frontmatter", async () => {
-    const { buildMigrationGuides } = await import("../commands/update.js");
+    const { buildMigrationGuides } = await import("../commands/upgrade.js");
 
     const migrationsDir = join(tempDir, "migrations");
     mkdirSync(migrationsDir, { recursive: true });
@@ -469,7 +469,7 @@ changes:
   });
 
   test("buildMigrationGuides returns no changes for docs without changes array", async () => {
-    const { buildMigrationGuides } = await import("../commands/update.js");
+    const { buildMigrationGuides } = await import("../commands/upgrade.js");
 
     const migrationsDir = join(tempDir, "migrations");
     mkdirSync(migrationsDir, { recursive: true });

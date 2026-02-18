@@ -69,7 +69,7 @@
 
 **Migration guide:**
 
-{Composed migration docs from `outfitter update --guide` output, or "All packages up to date."}
+{Composed migration docs from `outfitter upgrade --guide` output, or "All packages up to date."}
 
 ## Recommendations
 

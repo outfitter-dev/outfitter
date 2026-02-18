@@ -1,6 +1,6 @@
 # Codemods
 
-Executable TypeScript codemods for `@outfitter/*` package migrations. Referenced from migration doc frontmatter via the `codemod` field and executed by `outfitter update --apply`.
+Executable TypeScript codemods for `@outfitter/*` package migrations. Referenced from migration doc frontmatter via the `codemod` field and executed by `outfitter upgrade`.
 
 ## Format
 

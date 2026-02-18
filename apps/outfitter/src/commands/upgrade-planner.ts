@@ -1,5 +1,5 @@
 /**
- * Pure, deterministic planner for the `outfitter update` command.
+ * Pure, deterministic planner for the `outfitter upgrade` command.
  *
  * Classifies each installed package into one of four bump categories
  * based on the installed version, the latest available version, and
@@ -23,7 +23,7 @@ export type BumpClassification =
   | "blocked";
 
 /** Describes the planned action for a single package. */
-export interface PackageUpdateAction {
+export interface PackageUpgradeAction {
   /** Full package name (e.g. "@outfitter/cli") */
   readonly name: string;
   /** Currently installed version */
@@ -39,9 +39,9 @@ export interface PackageUpdateAction {
 }
 
 /** The complete update plan with per-package actions and aggregate summary. */
-export interface UpdatePlan {
+export interface UpgradePlan {
   /** Per-package update actions, sorted by name for deterministic output. */
-  readonly packages: PackageUpdateAction[];
+  readonly packages: PackageUpgradeAction[];
   /** Aggregate counts by classification. */
   readonly summary: {
     readonly upToDate: number;
@@ -145,12 +145,12 @@ function classify(
  * @param migrationDocs - Optional map of package name to migration doc path.
  * @returns A deterministic update plan with per-package actions and summary.
  */
-export function analyzeUpdates(
+export function analyzeUpgrades(
   installed: Map<string, string>,
   latest: Map<string, { version: string; breaking?: boolean }>,
   migrationDocs?: Map<string, string>
-): UpdatePlan {
-  const packages: PackageUpdateAction[] = [];
+): UpgradePlan {
+  const packages: PackageUpgradeAction[] = [];
 
   for (const [name, currentVersion] of installed) {
     const latestInfo = latest.get(name);
