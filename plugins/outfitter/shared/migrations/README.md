@@ -29,6 +29,11 @@ Migration docs are applied sequentially by version (semver ascending). Within a 
 package: @outfitter/<name>
 version: 0.2.0
 breaking: false
+changes:
+  - type: renamed
+    from: "@outfitter/<name>/old-path"
+    to: "@outfitter/<name>/new-path"
+    codemod: "<name>/0.2.0-description.ts"
 ---
 
 # @outfitter/<name> → 0.2.0
@@ -53,6 +58,23 @@ breaking: false
 | `package` | string | Full package name (`@outfitter/contracts`) |
 | `version` | string | Target version |
 | `breaking` | boolean | Whether this version has breaking changes |
+| `changes` | array | Structured change entries (optional, see below) |
+
+### Changes Array
+
+Each entry in `changes` describes one machine-actionable change. Used by `outfitter update --apply` to discover and run codemods.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | One of: `renamed`, `removed`, `signature-changed`, `moved`, `deprecated`, `added` |
+| `from` | string | Previous import path, export name, or identifier |
+| `to` | string | New import path, export name, or identifier |
+| `path` | string | Package path where the export lives |
+| `export` | string | Exported symbol name |
+| `detail` | string | Human-readable migration note |
+| `codemod` | string | Path to codemod script relative to `shared/codemods/` |
+
+All fields except `type` are optional. Include what's relevant for each change.
 
 ## Adding New Migration Docs
 
