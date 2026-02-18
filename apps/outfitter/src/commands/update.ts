@@ -312,6 +312,8 @@ const VALID_CHANGE_TYPES = new Set<MigrationChangeType>([
   "added",
 ]);
 
+const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
+
 /**
  * Parse a YAML value, stripping optional surrounding quotes.
  */
@@ -539,21 +541,15 @@ export function buildMigrationGuides(
 
     if (migrationsDir !== null) {
       const shortName = pkg.name.replace("@outfitter/", "");
-      const docs = readMigrationDocs(
-        migrationsDir,
-        shortName,
-        pkg.current,
-        pkg.latest
-      );
-      steps = docs;
-
-      // Collect structured changes from all migration docs in range
       const metaDocs = readMigrationDocsWithMetadata(
         migrationsDir,
         shortName,
         pkg.current,
         pkg.latest
       );
+      steps = metaDocs.map((doc) => doc.body);
+
+      // Collect structured changes from all migration docs in range.
       const changes: MigrationChange[] = [];
       for (const doc of metaDocs) {
         if (doc.frontmatter.changes) {
