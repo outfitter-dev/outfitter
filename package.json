@@ -10,8 +10,9 @@
   ],
   "scripts": {
     "prebuild": "./scripts/prebuild.sh",
-    "verify:ci": "bun run typecheck && bun run check && bun run check-changeset && bun run check-bunup-registry && bun run docs:check:ci && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run check-boundary-invocations && bun run test",
+    "verify:ci": "bun run typecheck && bun run check && bun run check-publish-guardrails && bun run check-changeset && bun run check-bunup-registry && bun run docs:check:ci && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run check-boundary-invocations && bun run test",
     "check-changeset": "bun run apps/outfitter/src/commands/repo.ts check changeset --cwd .",
+    "check-publish-guardrails": "bun run scripts/check-publish-guardrails.ts",
     "check-bunup-registry": "bun run apps/outfitter/src/commands/repo.ts check registry --cwd .",
     "check-exports": "bun run apps/outfitter/src/commands/repo.ts check exports --cwd .",
     "check-readme-imports": "bun run apps/outfitter/src/commands/repo.ts check readme --cwd .",

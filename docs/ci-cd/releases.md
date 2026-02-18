@@ -14,6 +14,12 @@ ranges internally, and direct publish can leak unresolved workspace ranges to np
 Always publish through the release pipeline (`release.yml` / `bun run release`), which rewrites
 workspace ranges to concrete versions before publishing.
 
+CI additionally enforces this guardrail by requiring every public package to define:
+
+```json
+"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
+```
+
 ## How It Works
 
 ```
