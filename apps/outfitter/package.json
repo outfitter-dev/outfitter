@@ -88,6 +88,12 @@
         "default": "./dist/commands/update.js"
       }
     },
+    "./commands/update-codemods": {
+      "import": {
+        "types": "./dist/commands/update-codemods.d.ts",
+        "default": "./dist/commands/update-codemods.js"
+      }
+    },
     "./commands/update-planner": {
       "import": {
         "types": "./dist/commands/update-planner.d.ts",
