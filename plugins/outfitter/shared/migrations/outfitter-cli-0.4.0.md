@@ -2,6 +2,19 @@
 package: "@outfitter/cli"
 version: 0.4.0
 breaking: true
+changes:
+  - type: moved
+    from: "@outfitter/cli/render"
+    to: "@outfitter/tui/render"
+    codemod: "cli/0.4.0-move-tui-imports.ts"
+  - type: moved
+    from: "@outfitter/cli/streaming"
+    to: "@outfitter/tui/streaming"
+    codemod: "cli/0.4.0-move-tui-imports.ts"
+  - type: moved
+    from: "@outfitter/cli/input"
+    to: "@outfitter/tui/confirm"
+    codemod: "cli/0.4.0-move-tui-imports.ts"
 ---
 
 # @outfitter/cli → 0.4.0

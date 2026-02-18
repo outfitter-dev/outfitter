@@ -54,6 +54,42 @@ export interface PackageVersionInfo {
   readonly breaking: boolean;
 }
 
+/** Classification of a change within a migration. */
+export type MigrationChangeType =
+  | "renamed"
+  | "removed"
+  | "signature-changed"
+  | "moved"
+  | "deprecated"
+  | "added";
+
+/** A single structured change entry from migration frontmatter. */
+export interface MigrationChange {
+  readonly type: MigrationChangeType;
+  readonly from?: string;
+  readonly to?: string;
+  readonly path?: string;
+  readonly export?: string;
+  readonly detail?: string;
+  /** Path to codemod script relative to the codemods directory. */
+  readonly codemod?: string;
+}
+
+/** Parsed frontmatter from a migration doc. */
+export interface MigrationFrontmatter {
+  readonly package: string;
+  readonly version: string;
+  readonly breaking: boolean;
+  readonly changes?: readonly MigrationChange[];
+}
+
+/** A migration doc with parsed frontmatter and body content. */
+export interface MigrationDocWithMetadata {
+  readonly frontmatter: MigrationFrontmatter;
+  readonly body: string;
+  readonly version: string;
+}
+
 export interface MigrationGuide {
   /** The @outfitter/* package name */
   readonly packageName: string;
@@ -65,6 +101,8 @@ export interface MigrationGuide {
   readonly breaking: boolean;
   /** Migration step strings (empty if no guide exists) */
   readonly steps: readonly string[];
+  /** Structured changes from migration frontmatter, if available */
+  readonly changes?: readonly MigrationChange[];
 }
 
 export interface UpdateResult {
@@ -262,6 +300,220 @@ export function readMigrationBreakingFlag(
 }
 
 // =============================================================================
+// Structured Frontmatter Parsing
+// =============================================================================
+
+const VALID_CHANGE_TYPES = new Set<MigrationChangeType>([
+  "renamed",
+  "removed",
+  "signature-changed",
+  "moved",
+  "deprecated",
+  "added",
+]);
+
+const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
+
+/**
+ * Parse a YAML value, stripping optional surrounding quotes.
+ */
+function parseYamlValue(raw: string): string {
+  const trimmed = raw.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+/**
+ * Parse the full frontmatter from a migration doc, including the `changes` array.
+ *
+ * Returns `null` if the content has no valid frontmatter or is missing
+ * required fields (`package`, `version`, `breaking`).
+ */
+export function parseMigrationFrontmatter(
+  content: string
+): MigrationFrontmatter | null {
+  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!fmMatch?.[1]) return null;
+
+  const fmBlock = fmMatch[1];
+  const lines = fmBlock.split(/\r?\n/);
+
+  // Parse top-level scalar fields
+  let pkg: string | undefined;
+  let version: string | undefined;
+  let breaking: boolean | undefined;
+
+  // Track where the changes array starts
+  let changesStartIdx = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line === undefined) continue;
+    const trimmed = line.trimStart();
+
+    if (trimmed.startsWith("package:")) {
+      pkg = parseYamlValue(trimmed.slice("package:".length));
+    } else if (trimmed.startsWith("version:")) {
+      version = parseYamlValue(trimmed.slice("version:".length));
+    } else if (trimmed.startsWith("breaking:")) {
+      const val = parseYamlValue(trimmed.slice("breaking:".length));
+      if (val === "true") breaking = true;
+      else if (val === "false") breaking = false;
+    } else if (trimmed.startsWith("changes:")) {
+      changesStartIdx = i + 1;
+    }
+  }
+
+  if (pkg === undefined || version === undefined || breaking === undefined) {
+    return null;
+  }
+
+  // Parse changes array if present
+  let changes: MigrationChange[] | undefined;
+  if (changesStartIdx >= 0) {
+    changes = parseChangesArray(lines, changesStartIdx);
+  }
+
+  return {
+    package: pkg,
+    version,
+    breaking,
+    ...(changes !== undefined ? { changes } : {}),
+  };
+}
+
+/**
+ * Parse the YAML `changes` array from frontmatter lines starting at `startIdx`.
+ *
+ * Each item begins with `  - type: ...` and may have additional key/value pairs
+ * indented under it.
+ */
+function parseChangesArray(
+  lines: string[],
+  startIdx: number
+): MigrationChange[] {
+  const changes: MigrationChange[] = [];
+  let current: Record<string, string> | null = null;
+
+  for (let i = startIdx; i < lines.length; i++) {
+    const line = lines[i];
+    if (line === undefined) continue;
+
+    // New list item: starts with "  - "
+    if (/^\s+-\s+/.test(line)) {
+      if (current !== null) {
+        const change = buildChange(current);
+        if (change) changes.push(change);
+      }
+      current = {};
+      // Parse the key/value on the same line as the dash
+      const afterDash = line.replace(/^\s+-\s+/, "");
+      const colonIdx = afterDash.indexOf(":");
+      if (colonIdx >= 0) {
+        const key = afterDash.slice(0, colonIdx).trim();
+        const val = parseYamlValue(afterDash.slice(colonIdx + 1));
+        current[key] = val;
+      }
+    } else if (current !== null && /^\s{4,}\S/.test(line)) {
+      // Continuation line for current item (indented further)
+      const trimmed = line.trim();
+      const colonIdx = trimmed.indexOf(":");
+      if (colonIdx >= 0) {
+        const key = trimmed.slice(0, colonIdx).trim();
+        const val = parseYamlValue(trimmed.slice(colonIdx + 1));
+        current[key] = val;
+      }
+    } else if (/^\S/.test(line)) {
+      // Non-indented line means we've left the changes block
+      break;
+    }
+  }
+
+  // Flush last item
+  if (current !== null) {
+    const change = buildChange(current);
+    if (change) changes.push(change);
+  }
+
+  return changes;
+}
+
+/**
+ * Build a MigrationChange from a parsed key/value map.
+ */
+function buildChange(raw: Record<string, string>): MigrationChange | null {
+  const type = raw["type"];
+  if (!(type && VALID_CHANGE_TYPES.has(type as MigrationChangeType))) {
+    return null;
+  }
+
+  return {
+    type: type as MigrationChangeType,
+    ...(raw["from"] ? { from: raw["from"] } : {}),
+    ...(raw["to"] ? { to: raw["to"] } : {}),
+    ...(raw["path"] ? { path: raw["path"] } : {}),
+    ...(raw["export"] ? { export: raw["export"] } : {}),
+    ...(raw["detail"] ? { detail: raw["detail"] } : {}),
+    ...(raw["codemod"] ? { codemod: raw["codemod"] } : {}),
+  };
+}
+
+/**
+ * Read all migration docs for a package between two versions,
+ * returning parsed frontmatter alongside the body content.
+ *
+ * Like `readMigrationDocs` but returns structured metadata instead of
+ * plain strings. Used by the codemod infrastructure to discover
+ * machine-actionable changes.
+ */
+export function readMigrationDocsWithMetadata(
+  migrationsDir: string,
+  shortName: string,
+  fromVersion: string,
+  toVersion: string
+): MigrationDocWithMetadata[] {
+  const glob = new Bun.Glob(`outfitter-${shortName}-*.md`);
+  const versionPattern = new RegExp(
+    `^outfitter-${shortName}-(\\d+\\.\\d+\\.\\d+)\\.md$`
+  );
+
+  const docs: MigrationDocWithMetadata[] = [];
+
+  for (const entry of glob.scanSync({ cwd: migrationsDir })) {
+    const match = entry.match(versionPattern);
+    if (!match?.[1]) continue;
+
+    const docVersion = match[1];
+
+    if (Bun.semver.order(docVersion, fromVersion) <= 0) continue;
+    if (Bun.semver.order(docVersion, toVersion) > 0) continue;
+
+    const filePath = join(migrationsDir, entry);
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch {
+      continue;
+    }
+
+    const frontmatter = parseMigrationFrontmatter(content);
+    if (!frontmatter) continue;
+
+    const body = content.replace(FRONTMATTER_BLOCK_REGEX, "").trim();
+    docs.push({ frontmatter, body, version: docVersion });
+  }
+
+  docs.sort((a, b) => Bun.semver.order(a.version, b.version));
+
+  return docs;
+}
+
+// =============================================================================
 // Migration Guide Builder
 // =============================================================================
 
@@ -285,16 +537,28 @@ export function buildMigrationGuides(
     if (!pkg.updateAvailable || pkg.latest === null) continue;
 
     let steps: string[] = [];
+    let allChanges: MigrationChange[] | undefined;
 
     if (migrationsDir !== null) {
       const shortName = pkg.name.replace("@outfitter/", "");
-      const docs = readMigrationDocs(
+      const metaDocs = readMigrationDocsWithMetadata(
         migrationsDir,
         shortName,
         pkg.current,
         pkg.latest
       );
-      steps = docs;
+      steps = metaDocs.map((doc) => doc.body);
+
+      // Collect structured changes from all migration docs in range.
+      const changes: MigrationChange[] = [];
+      for (const doc of metaDocs) {
+        if (doc.frontmatter.changes) {
+          changes.push(...doc.frontmatter.changes);
+        }
+      }
+      if (changes.length > 0) {
+        allChanges = changes;
+      }
     }
 
     guides.push({
@@ -303,6 +567,7 @@ export function buildMigrationGuides(
       toVersion: pkg.latest,
       breaking: pkg.breaking,
       steps,
+      ...(allChanges !== undefined ? { changes: allChanges } : {}),
     });
   }
 
