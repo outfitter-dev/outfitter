@@ -8,9 +8,6 @@ export const REQUIRED_PREPUBLISH_ONLY =
 interface PackageJson {
   name?: string;
   private?: boolean;
-  publishConfig?: {
-    access?: string;
-  };
   scripts?: Record<string, string>;
 }
 
@@ -61,9 +58,7 @@ function listWorkspacePackageManifests(): WorkspacePackageManifest[] {
 }
 
 function isPublishablePackage(manifest: PackageJson): boolean {
-  return (
-    manifest.private !== true && manifest.publishConfig?.access === "public"
-  );
+  return manifest.private !== true;
 }
 
 export function findPublishGuardrailViolations(
@@ -119,7 +114,7 @@ function run(): void {
       `[publish-guardrails] found ${violations.length} publish guardrail violation(s)`,
       details,
       "",
-      "Every public package must set scripts.prepublishOnly to run check-publish-manifest.",
+      "Every non-private package must set scripts.prepublishOnly to run check-publish-manifest.",
     ].join("\n")
   );
   process.exit(1);

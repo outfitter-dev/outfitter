@@ -6,7 +6,7 @@ import {
 } from "./check-publish-guardrails";
 
 describe("findPublishGuardrailViolations", () => {
-  test("ignores non-publishable packages", () => {
+  test("ignores private packages", () => {
     const packages: WorkspacePackageManifest[] = [
       {
         path: "packages/private/package.json",
@@ -16,12 +16,10 @@ describe("findPublishGuardrailViolations", () => {
         },
       },
       {
-        path: "packages/local-only/package.json",
+        path: "packages/private-with-publish-config/package.json",
         manifest: {
-          name: "@outfitter/local-only",
-          scripts: {
-            prepublishOnly: "echo ok",
-          },
+          name: "@outfitter/private-with-publish-config",
+          private: true,
         },
       },
     ];
@@ -29,13 +27,12 @@ describe("findPublishGuardrailViolations", () => {
     expect(findPublishGuardrailViolations(packages)).toEqual([]);
   });
 
-  test("flags publishable package without prepublishOnly guard", () => {
+  test("flags non-private package without prepublishOnly guard", () => {
     const packages: WorkspacePackageManifest[] = [
       {
         path: "packages/schema/package.json",
         manifest: {
           name: "@outfitter/schema",
-          publishConfig: { access: "public" },
           scripts: {},
         },
       },
@@ -51,13 +48,12 @@ describe("findPublishGuardrailViolations", () => {
     ]);
   });
 
-  test("flags publishable package with the wrong guard command", () => {
+  test("flags non-private package with the wrong guard command", () => {
     const packages: WorkspacePackageManifest[] = [
       {
         path: "packages/schema/package.json",
         manifest: {
           name: "@outfitter/schema",
-          publishConfig: { access: "public" },
           scripts: {
             prepublishOnly: "echo nope",
           },
@@ -75,13 +71,12 @@ describe("findPublishGuardrailViolations", () => {
     ]);
   });
 
-  test("accepts publishable package with required guard command", () => {
+  test("accepts non-private package with required guard command", () => {
     const packages: WorkspacePackageManifest[] = [
       {
         path: "packages/schema/package.json",
         manifest: {
           name: "@outfitter/schema",
-          publishConfig: { access: "public" },
           scripts: {
             prepublishOnly: REQUIRED_PREPUBLISH_ONLY,
           },

@@ -239,6 +239,7 @@
     "typecheck": "tsc --noEmit",
     "sync:templates": "bun run ../../scripts/sync-templates.ts",
     "prepack": "bun run sync:templates",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

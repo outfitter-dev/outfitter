@@ -23,6 +23,12 @@ interface PackageJson {
   optionalDependencies?: Record<string, string>;
 }
 
+type DependencySection =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "optionalDependencies";
+
 interface WorkspacePackage {
   name: string;
   version: string;
@@ -33,12 +39,18 @@ interface WorkspacePackage {
 interface WorkspaceRangeReference {
   dependency: string;
   range: string;
-  section: keyof PackageJson;
+  section: DependencySection;
 }
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const PACKAGES_DIR = join(ROOT, "packages");
 const APPS_DIR = join(ROOT, "apps");
+const DEPENDENCY_SECTIONS: DependencySection[] = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+];
 
 function run(command: string, args: string[], cwd = ROOT): void {
   console.log(`$ ${command} ${args.join(" ")}`);
@@ -118,14 +130,8 @@ function rewriteWorkspaceRanges(
   versionMap: Map<string, string>
 ): boolean {
   let changed = false;
-  const sections: (keyof PackageJson)[] = [
-    "dependencies",
-    "devDependencies",
-    "peerDependencies",
-    "optionalDependencies",
-  ];
 
-  for (const section of sections) {
+  for (const section of DEPENDENCY_SECTIONS) {
     const deps = pkg.packageJson[section];
     if (!deps) continue;
     for (const [depName, range] of Object.entries(deps)) {
@@ -143,15 +149,9 @@ function rewriteWorkspaceRanges(
 function findWorkspaceRangeReferences(
   pkg: WorkspacePackage
 ): WorkspaceRangeReference[] {
-  const sections: (keyof PackageJson)[] = [
-    "dependencies",
-    "devDependencies",
-    "peerDependencies",
-    "optionalDependencies",
-  ];
   const references: WorkspaceRangeReference[] = [];
 
-  for (const section of sections) {
+  for (const section of DEPENDENCY_SECTIONS) {
     const deps = pkg.packageJson[section];
     if (!deps) continue;
     for (const [dependency, range] of Object.entries(deps)) {
