@@ -49,3 +49,6 @@ temp/
 
 # Agent memory
 **/.claude/agent-memory/
+
+# Local Claude worktrees
+.claude/worktrees/
