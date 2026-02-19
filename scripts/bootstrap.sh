@@ -10,16 +10,39 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+BUN_VERSION_FILE="$REPO_ROOT/.bun-version"
+
+if [[ ! -f "$BUN_VERSION_FILE" ]]; then
+  echo "Error: Missing .bun-version at $BUN_VERSION_FILE" >&2
+  exit 1
+fi
+
+PINNED_BUN_VERSION="$(tr -d '[:space:]' < "$BUN_VERSION_FILE")"
+
+if [[ -z "$PINNED_BUN_VERSION" ]]; then
+  echo "Error: .bun-version is empty" >&2
+  exit 1
+fi
+
 # -----------------------------------------------------------------------------
 # Fast path — exit immediately if all tools and deps are present
 # -----------------------------------------------------------------------------
 if [[ "${1:-}" != "--force" ]]; then
   all_present=true
-  command -v bun &>/dev/null || all_present=false
+
+  if command -v bun &>/dev/null; then
+    installed_bun_version="$(bun --version)"
+    [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]] || all_present=false
+  else
+    all_present=false
+  fi
+
   command -v gh &>/dev/null || all_present=false
   command -v gt &>/dev/null || all_present=false
   command -v markdownlint-cli2 &>/dev/null || all_present=false
-  [[ -d "node_modules" ]] || all_present=false
+  [[ -d "$REPO_ROOT/node_modules" ]] || all_present=false
 
   if $all_present; then
     exit 0  # All good, nothing to do
@@ -67,16 +90,39 @@ install_homebrew() {
 # Bun
 # -----------------------------------------------------------------------------
 install_bun() {
+  local installed_bun_version=""
+
   if has bun; then
-    success "Bun already installed ($(bun --version))"
-  else
-    info "Installing Bun..."
-    curl -fsSL https://bun.sh/install | bash
-    # Source the updated profile
-    export BUN_INSTALL="$HOME/.bun"
-    export PATH="$BUN_INSTALL/bin:$PATH"
-    success "Bun installed ($(bun --version))"
+    installed_bun_version="$(bun --version)"
   fi
+
+  if [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]]; then
+    success "Bun already installed ($installed_bun_version)"
+    return
+  fi
+
+  if [[ -n "$installed_bun_version" ]]; then
+    info "Updating Bun from $installed_bun_version to $PINNED_BUN_VERSION..."
+  else
+    info "Installing Bun $PINNED_BUN_VERSION..."
+  fi
+
+  curl -fsSL https://bun.sh/install | bash -s -- "bun-v$PINNED_BUN_VERSION"
+
+  # Source the updated profile
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+  hash -r
+
+  local resolved_bun_version
+  resolved_bun_version="$(bun --version)"
+
+  if [[ "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
+    error "Expected Bun $PINNED_BUN_VERSION but found $resolved_bun_version after install"
+    exit 1
+  fi
+
+  success "Bun ready ($resolved_bun_version)"
 }
 
 # -----------------------------------------------------------------------------
@@ -162,7 +208,10 @@ check_auth() {
 # -----------------------------------------------------------------------------
 install_deps() {
   info "Installing project dependencies..."
-  bun install
+  (
+    cd "$REPO_ROOT"
+    bun install
+  )
   success "Dependencies installed"
 }
 
@@ -171,7 +220,7 @@ install_deps() {
 # -----------------------------------------------------------------------------
 main() {
   echo ""
-  echo -e "${BLUE}Outfitter Kit Bootstrap${NC}"
+  echo -e "${BLUE}Outfitter Bootstrap${NC}"
   echo "────────────────────────"
   echo ""
 
