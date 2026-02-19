@@ -9,7 +9,7 @@
 
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Result, ValidationError } from "@outfitter/contracts";
 import type {
@@ -151,15 +151,77 @@ function summarizeResult(result: TsDocCheckResult): TsDocCheckResult {
 }
 
 /**
+ * Emit type-discriminated JSONL lines for progressive consumption.
+ *
+ * Line order: meta -> summary -> package (per pkg) -> declaration (per decl).
+ * When `summary` is true, declaration lines are suppressed.
+ */
+function emitJsonlLines(result: TsDocCheckResult, summary: boolean): unknown[] {
+  const lines: unknown[] = [];
+
+  lines.push({ type: "meta", version: "1.0.0", ok: result.ok });
+  lines.push({ type: "summary", ...result.summary });
+
+  const sortedPackages = [...result.packages].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  for (const pkg of sortedPackages) {
+    lines.push({
+      type: "package",
+      name: pkg.name,
+      percentage: pkg.percentage,
+      documented: pkg.documented,
+      partial: pkg.partial,
+      undocumented: pkg.undocumented,
+      total: pkg.total,
+    });
+  }
+
+  if (!summary) {
+    for (const pkg of sortedPackages) {
+      for (const decl of pkg.declarations) {
+        lines.push({
+          type: "declaration",
+          package: pkg.name,
+          name: decl.name,
+          kind: decl.kind,
+          level: decl.level,
+          file: relative(pkg.path, decl.file),
+          line: decl.line,
+        });
+      }
+    }
+  }
+
+  return lines;
+}
+
+/** Ensure each emitted JSONL record is a single compact line of valid JSON. */
+function normalizeJsonlRecord(text: string): string {
+  try {
+    return JSON.stringify(JSON.parse(text));
+  } catch {
+    return JSON.stringify(text);
+  }
+}
+
+/**
  * Apply a jq expression to JSON data using the system `jq` binary.
  *
  * @param data - Data to filter
  * @param expr - jq expression
+ * @param options - jq output controls
  * @returns Filtered output string, or the original JSON if jq fails
  */
-async function applyJq(data: unknown, expr: string): Promise<string> {
+async function applyJq(
+  data: unknown,
+  expr: string,
+  options?: { compact?: boolean }
+): Promise<string> {
   const json = JSON.stringify(data);
-  const proc = Bun.spawn(["jq", expr], {
+  const args = ["jq", ...(options?.compact ? ["-c"] : []), expr];
+  const proc = Bun.spawn(args, {
     stdin: new Response(json),
     stdout: "pipe",
     stderr: "pipe",
@@ -173,7 +235,9 @@ async function applyJq(data: unknown, expr: string): Promise<string> {
 
   if (exitCode !== 0) {
     process.stderr.write(`jq error: ${stderr.trim()}\n`);
-    return `${JSON.stringify(data, null, 2)}\n`;
+    return options?.compact
+      ? `${JSON.stringify(data)}\n`
+      : `${JSON.stringify(data, null, 2)}\n`;
   }
 
   return stdout;
@@ -264,10 +328,29 @@ export async function runCheckTsdoc(
       ? summarizeResult(filteredResult)
       : filteredResult;
 
-    if (input.jq) {
+    if (input.outputMode === "jsonl") {
+      const lines = emitJsonlLines(filteredResult, input.summary);
+
+      if (input.jq) {
+        for (const line of lines) {
+          const filtered = await applyJq(line, input.jq, { compact: true });
+          for (const rawLine of filtered.split(/\r?\n/)) {
+            const trimmed = rawLine.trim();
+            if (!trimmed) {
+              continue;
+            }
+            process.stdout.write(`${normalizeJsonlRecord(trimmed)}\n`);
+          }
+        }
+      } else {
+        for (const line of lines) {
+          process.stdout.write(`${JSON.stringify(line)}\n`);
+        }
+      }
+    } else if (input.jq) {
       const filtered = await applyJq(outputData, input.jq);
       process.stdout.write(filtered);
-    } else if (input.outputMode === "json" || input.outputMode === "jsonl") {
+    } else if (input.outputMode === "json") {
       process.stdout.write(`${JSON.stringify(outputData, null, 2)}\n`);
     } else {
       tooling.printCheckTsdocHuman(outputData, {
