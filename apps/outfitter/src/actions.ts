@@ -23,7 +23,9 @@ import {
   defineAction,
   InternalError,
   Result,
+  ValidationError,
 } from "@outfitter/contracts";
+import type { TsDocCheckResult } from "@outfitter/tooling";
 import { z } from "zod";
 import {
   type AddInput,
@@ -793,9 +795,13 @@ const checkTsdocOutputSchema = z.object({
     total: z.number(),
     percentage: z.number(),
   }),
-});
+}) as z.ZodType<TsDocCheckResult>;
 
-const checkTsdocAction = defineAction({
+const checkTsdocAction = defineAction<
+  CheckTsDocActionInput,
+  TsDocCheckResult,
+  ValidationError | InternalError
+>({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
@@ -839,6 +845,10 @@ const checkTsdocAction = defineAction({
     const result = await runCheckTsdoc(input);
 
     if (result.isErr()) {
+      if (result.error instanceof ValidationError) {
+        return Result.err(result.error);
+      }
+
       return Result.err(
         new InternalError({
           message: result.error.message,

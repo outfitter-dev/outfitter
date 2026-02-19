@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import ts from "typescript";
 import {
 	analyzeCheckTsdoc,
@@ -561,9 +564,14 @@ describe("Zod schemas", () => {
 
 describe("analyzeCheckTsdoc", () => {
 	test("returns null when no packages found", () => {
-		// With no paths and no packages/*/src/index.ts in cwd, returns null
-		const result = analyzeCheckTsdoc({ paths: [] });
-		expect(result).toBeNull();
+		const emptyDir = mkdtempSync(join(tmpdir(), "outfitter-check-tsdoc-"));
+		try {
+			// With no paths and no packages/*/src/index.ts in cwd, returns null.
+			const result = analyzeCheckTsdoc({ cwd: emptyDir, paths: [] });
+			expect(result).toBeNull();
+		} finally {
+			rmSync(emptyDir, { recursive: true, force: true });
+		}
 	});
 
 	test("returns TsDocCheckResult with packages and summary for explicit paths", () => {
@@ -578,6 +586,19 @@ describe("analyzeCheckTsdoc", () => {
 		expect(result.summary).toBeDefined();
 		expect(typeof result.summary.percentage).toBe("number");
 		expect(typeof result.summary.total).toBe("number");
+	});
+
+	test("respects cwd when resolving relative paths", () => {
+		const repoRoot = resolve(import.meta.dir, "../../../..");
+		const result = analyzeCheckTsdoc({
+			cwd: repoRoot,
+			paths: ["packages/tooling"],
+		});
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		expect(result.packages).toHaveLength(1);
+		expect(result.packages[0]?.name).toBe("@outfitter/tooling");
 	});
 
 	test("result conforms to tsDocCheckResultSchema", () => {

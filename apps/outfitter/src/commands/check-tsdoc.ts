@@ -1,19 +1,21 @@
 /**
  * `outfitter check tsdoc` - Check TSDoc coverage on exported declarations.
  *
- * Delegates to the pure analysis function in `@outfitter/tooling` and
- * handles output formatting.
+ * Delegates to the pure analysis function in `@outfitter/tooling`.
+ * Resolves source entrypoints in monorepo dev to avoid requiring a build step.
  *
  * @packageDocumentation
  */
 
-import { Result } from "@outfitter/contracts";
-import {
-  analyzeCheckTsdoc,
-  printCheckTsdocHuman,
-  type TsDocCheckResult,
-} from "@outfitter/tooling";
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { Result, ValidationError } from "@outfitter/contracts";
+import type { TsDocCheckResult } from "@outfitter/tooling";
 import type { CliOutputMode } from "../output-mode.js";
+
+const require = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,6 +29,47 @@ export interface CheckTsDocInput {
   readonly outputMode: CliOutputMode;
 }
 
+type ToolingCheckTsdocModule = Pick<
+  typeof import("@outfitter/tooling"),
+  "analyzeCheckTsdoc" | "printCheckTsdocHuman"
+>;
+
+let toolingCheckTsdocModule: Promise<ToolingCheckTsdocModule> | undefined;
+
+/**
+ * Resolve the `@outfitter/tooling` entrypoint.
+ *
+ * Prefers source in monorepo development to avoid requiring dist builds.
+ */
+function resolveToolingEntrypoint(): string {
+  const packageJsonPath = require.resolve("@outfitter/tooling/package.json");
+  const packageRoot = dirname(packageJsonPath);
+
+  const srcEntrypoint = join(packageRoot, "src", "index.ts");
+  if (existsSync(srcEntrypoint)) {
+    return srcEntrypoint;
+  }
+
+  const distEntrypoint = join(packageRoot, "dist", "index.js");
+  if (existsSync(distEntrypoint)) {
+    return distEntrypoint;
+  }
+
+  throw new Error(
+    "Unable to resolve @outfitter/tooling entrypoint (expected src/index.ts or dist/index.js)."
+  );
+}
+
+function loadToolingCheckTsdocModule(): Promise<ToolingCheckTsdocModule> {
+  if (!toolingCheckTsdocModule) {
+    toolingCheckTsdocModule = import(
+      pathToFileURL(resolveToolingEntrypoint()).href
+    ) as Promise<ToolingCheckTsdocModule>;
+  }
+
+  return toolingCheckTsdocModule;
+}
+
 // ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
@@ -37,28 +80,39 @@ export interface CheckTsDocInput {
  * @param input - Validated action input
  * @returns Result containing the coverage analysis
  */
-export function runCheckTsdoc(
+export async function runCheckTsdoc(
   input: CheckTsDocInput
-): Result<TsDocCheckResult, Error> {
-  const result = analyzeCheckTsdoc({
-    strict: input.strict,
-    minCoverage: input.minCoverage,
-  });
-
-  if (!result) {
-    return Result.err(
-      new Error("No packages found with src/index.ts entry points.")
-    );
-  }
-
-  if (input.outputMode === "json" || input.outputMode === "jsonl") {
-    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-  } else {
-    printCheckTsdocHuman(result, {
+): Promise<Result<TsDocCheckResult, Error>> {
+  try {
+    const tooling = await loadToolingCheckTsdocModule();
+    const result = tooling.analyzeCheckTsdoc({
       strict: input.strict,
       minCoverage: input.minCoverage,
+      cwd: input.cwd,
     });
-  }
 
-  return Result.ok(result);
+    if (!result) {
+      return Result.err(
+        ValidationError.fromMessage(
+          "No packages found with src/index.ts entry points.",
+          { cwd: input.cwd }
+        )
+      );
+    }
+
+    if (input.outputMode === "json" || input.outputMode === "jsonl") {
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    } else {
+      tooling.printCheckTsdocHuman(result, {
+        strict: input.strict,
+        minCoverage: input.minCoverage,
+      });
+    }
+
+    return Result.ok(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to run check-tsdoc";
+    return Result.err(new Error(message));
+  }
 }

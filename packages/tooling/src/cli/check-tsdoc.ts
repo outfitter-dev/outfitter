@@ -110,6 +110,7 @@ export interface CheckTsDocOptions {
 	readonly strict?: boolean | undefined;
 	readonly json?: boolean | undefined;
 	readonly minCoverage?: number | undefined;
+	readonly cwd?: string | undefined;
 	readonly paths?: readonly string[] | undefined;
 }
 
@@ -454,11 +455,14 @@ function collectReExportedSourceFiles(
 }
 
 /** Analyze a single package entry point, returning coverage data. */
-function analyzePackage(pkg: {
-	name: string;
-	path: string;
-	entryPoint: string;
-}): PackageCoverage {
+function analyzePackage(
+	pkg: {
+		name: string;
+		path: string;
+		entryPoint: string;
+	},
+	workspaceCwd: string,
+): PackageCoverage {
 	// Validate entry point exists
 	try {
 		require("node:fs").accessSync(pkg.entryPoint);
@@ -480,7 +484,7 @@ function analyzePackage(pkg: {
 	try {
 		require("node:fs").accessSync(tsconfigPath);
 	} catch {
-		tsconfigPath = resolve(process.cwd(), "tsconfig.json");
+		tsconfigPath = resolve(workspaceCwd, "tsconfig.json");
 	}
 
 	const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
@@ -550,7 +554,7 @@ function analyzePackage(pkg: {
 export function analyzeCheckTsdoc(
 	options: CheckTsDocOptions = {},
 ): TsDocCheckResult | null {
-	const cwd = process.cwd();
+	const cwd = options.cwd ? resolve(options.cwd) : process.cwd();
 	const minCoverage = options.minCoverage ?? 0;
 
 	// Discover or use provided paths
@@ -587,7 +591,7 @@ export function analyzeCheckTsdoc(
 	// Analyze each package
 	const packageResults: PackageCoverage[] = [];
 	for (const pkg of packages) {
-		packageResults.push(analyzePackage(pkg));
+		packageResults.push(analyzePackage(pkg, cwd));
 	}
 
 	// Aggregate summary
