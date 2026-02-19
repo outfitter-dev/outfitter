@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import { exitWithError } from "@outfitter/cli";
 import { createCLI } from "@outfitter/cli/command";
 import type { Command } from "commander";
+import { applyDemoRootFlags, resolveDemoRootFlags } from "./cli-root-flags.js";
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { resolveOutputModeFromContext } from "./output-mode.js";
 
@@ -28,11 +29,8 @@ function createProgram() {
   });
 
   // Root command: `outfitter-demo [section]`
-  cli.program
+  applyDemoRootFlags(cli.program)
     .argument("[section]", "Section to run (or 'all')")
-    .option("-l, --list", "List available demo sections", false)
-    .option("-a, --animate", "Run animated demo (spinners only)", false)
-    .option("--jsonl", "Output as JSONL", false)
     .action(async (...args: unknown[]) => {
       const command = args.at(-1) as Command;
       const section =
@@ -41,12 +39,13 @@ function createProgram() {
         string,
         unknown
       >;
+      const rootFlags = resolveDemoRootFlags(flags);
       const outputMode = resolveOutputModeFromContext(flags);
 
       const result = await runDemo({
         section,
-        list: Boolean(flags["list"]),
-        animate: Boolean(flags["animate"]),
+        list: rootFlags.list,
+        animate: rootFlags.animate,
       });
 
       await printDemoResults(result, { mode: outputMode });
