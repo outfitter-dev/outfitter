@@ -32,6 +32,7 @@ import {
   runAdd,
 } from "./commands/add.js";
 import { printCheckResults, runCheck } from "./commands/check.js";
+import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
@@ -721,7 +722,7 @@ const checkAction = defineAction({
   surfaces: ["cli"],
   input: checkInputSchema,
   cli: {
-    command: "check",
+    group: "check",
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
@@ -774,6 +775,79 @@ const checkAction = defineAction({
     // Exit code 1 if any blocks drifted or missing
     if (result.value.driftedCount > 0 || result.value.missingCount > 0) {
       process.exit(1);
+    }
+
+    return Result.ok(result.value);
+  },
+});
+
+interface CheckTsDocActionInput {
+  strict: boolean;
+  minCoverage: number;
+  cwd: string;
+  outputMode: CliOutputMode;
+}
+
+const checkTsdocInputSchema = z.object({
+  strict: z.boolean(),
+  minCoverage: z.number(),
+  cwd: z.string(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<CheckTsDocActionInput>;
+
+const checkTsdocAction = defineAction({
+  id: "check.tsdoc",
+  description: "Check TSDoc coverage on exported declarations",
+  surfaces: ["cli"],
+  input: checkTsdocInputSchema,
+  cli: {
+    group: "check",
+    command: "tsdoc",
+    description: "Check TSDoc coverage on exported declarations",
+    options: [
+      {
+        flags: "--strict",
+        description: "Fail if coverage is below the minimum threshold",
+        defaultValue: false,
+      },
+      {
+        flags: "--min-coverage <percent>",
+        description: "Minimum coverage percentage (used with --strict)",
+      },
+    ],
+    mapInput: (context) => {
+      const outputMode = resolveOutputModeFromContext(context.flags);
+      const minCoverageRaw =
+        context.flags["minCoverage"] ?? context.flags["min-coverage"];
+      let minCoverage = 0;
+      if (typeof minCoverageRaw === "string") {
+        minCoverage = Number.parseInt(minCoverageRaw, 10);
+      } else if (typeof minCoverageRaw === "number") {
+        minCoverage = minCoverageRaw;
+      }
+
+      return {
+        strict: Boolean(context.flags["strict"]),
+        minCoverage,
+        cwd: process.cwd(),
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const result = await runCheckTsdoc(input);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.tsdoc" },
+        })
+      );
+    }
+
+    if (result.value.exitCode !== 0) {
+      process.exitCode = result.value.exitCode;
     }
 
     return Result.ok(result.value);
@@ -975,5 +1049,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(addAction)
   .add(listBlocksAction)
   .add(checkAction)
+  .add(checkTsdocAction)
   .add(migrateKitAction)
   .add(upgradeAction);
