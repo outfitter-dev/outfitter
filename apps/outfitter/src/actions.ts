@@ -6,9 +6,9 @@
 
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
+import { actionCliPresets } from "@outfitter/cli/actions";
 import {
   booleanFlagPreset,
-  composePresets,
   cwdPreset,
   dryRunPreset,
   interactionPreset,
@@ -851,7 +851,7 @@ const upgradeGuide = booleanFlagPreset({
   description:
     "Show migration instructions for available updates. Pass package names to filter.",
 });
-const upgradeFlags = composePresets(
+const upgradeFlags = actionCliPresets(
   upgradeCwd,
   upgradeDryRun,
   upgradeInteraction,
@@ -880,7 +880,7 @@ const upgradeAction = defineAction({
         all,
         noCodemods,
         guide,
-      } = upgradeFlags.resolve(context.flags);
+      } = upgradeFlags.resolve(context);
       const cwd = resolve(process.cwd(), rawCwd);
       const guidePackages =
         context.args.length > 0 ? (context.args as string[]) : undefined;
