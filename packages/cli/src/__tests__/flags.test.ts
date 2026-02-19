@@ -175,6 +175,25 @@ describe("custom flag builders", () => {
       expect(preset.resolve({ codemods: false })).toEqual({
         noCodemods: true,
       });
+
+      // Commander default: codemods=true when --no-codemods is NOT passed
+      expect(preset.resolve({ codemods: true })).toEqual({
+        noCodemods: false,
+      });
+    });
+
+    it("does not override Commander default for --no-* flags", () => {
+      const preset = booleanFlagPreset({
+        id: "noCodemods",
+        key: "noCodemods",
+        flags: "--no-codemods",
+        description: "Skip codemods",
+        negatedSources: ["codemods"],
+      });
+
+      // Option definition should not include defaultValue for --no-* flags
+      // so Commander preserves its natural default (codemods: true)
+      expect(preset.options[0]?.defaultValue).toBeUndefined();
     });
   });
 

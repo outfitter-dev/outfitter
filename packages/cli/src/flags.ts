@@ -169,13 +169,21 @@ export function booleanFlagPreset<TKey extends string>(
   const sources = resolveSourceKeys(config.key, config.sources);
   const defaultValue = config.defaultValue ?? false;
 
+  // For --no-* flags, Commander's natural default for the positive attribute
+  // is `true`. Overriding with `defaultValue: false` would make the flag a
+  // no-op (default=false, --no-X=false → indistinguishable). Only pass
+  // defaultValue to Commander when explicitly provided or for non-negated flags.
+  const isNegatedFlag = config.flags.includes("--no-");
+  const optionDefault =
+    isNegatedFlag && config.defaultValue === undefined ? {} : { defaultValue };
+
   return createPreset({
     id: config.id,
     options: [
       {
         flags: config.flags,
         description: config.description,
-        defaultValue,
+        ...optionDefault,
         ...(config.required === true ? { required: true } : {}),
       },
     ],
