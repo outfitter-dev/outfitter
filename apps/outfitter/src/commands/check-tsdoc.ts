@@ -47,9 +47,7 @@ export interface CheckTsDocInput {
  *
  * Matches `@outfitter/tooling` semantics where `partial` counts as half credit.
  */
-function calculateCoverage(
-  declarations: readonly DeclarationCoverage[]
-): {
+function calculateCoverage(declarations: readonly DeclarationCoverage[]): {
   documented: number;
   partial: number;
   undocumented: number;
@@ -67,9 +65,13 @@ function calculateCoverage(
     };
   }
 
-  const documented = declarations.filter((d) => d.level === "documented").length;
+  const documented = declarations.filter(
+    (d) => d.level === "documented"
+  ).length;
   const partial = declarations.filter((d) => d.level === "partial").length;
-  const undocumented = declarations.filter((d) => d.level === "undocumented").length;
+  const undocumented = declarations.filter(
+    (d) => d.level === "undocumented"
+  ).length;
 
   const score = documented + partial * 0.5;
   const percentage = Math.round((score / total) * 100);
@@ -113,12 +115,16 @@ function filterResult(
 
   if (options.level) {
     packages = packages.map((pkg) => {
-      const declarations = pkg.declarations.filter((d) => d.level === options.level);
+      const declarations = pkg.declarations.filter(
+        (d) => d.level === options.level
+      );
       return recalculateCounts(pkg, declarations);
     });
   }
 
-  const summary = calculateCoverage(packages.flatMap((pkg) => pkg.declarations));
+  const summary = calculateCoverage(
+    packages.flatMap((pkg) => pkg.declarations)
+  );
   const ok = options.strict ? summary.percentage >= options.minCoverage : true;
 
   return {
@@ -254,7 +260,9 @@ export async function runCheckTsdoc(
         })
       : rawResult;
 
-    const outputData = input.summary ? summarizeResult(filteredResult) : filteredResult;
+    const outputData = input.summary
+      ? summarizeResult(filteredResult)
+      : filteredResult;
 
     if (input.jq) {
       const filtered = await applyJq(outputData, input.jq);
