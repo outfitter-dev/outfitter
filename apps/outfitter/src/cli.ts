@@ -65,6 +65,7 @@ function createProgram() {
         logger: logger.child({ action: action.id, requestId }),
       });
     },
+    schema: { programName: "outfitter", surface: {} },
   })) {
     cli.register(command);
   }
