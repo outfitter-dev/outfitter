@@ -764,11 +764,43 @@ const checkTsdocInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<CheckTsDocActionInput>;
 
+const checkTsdocOutputSchema = z.object({
+  ok: z.boolean(),
+  packages: z.array(
+    z.object({
+      name: z.string(),
+      path: z.string(),
+      declarations: z.array(
+        z.object({
+          name: z.string(),
+          kind: z.string(),
+          level: z.enum(["documented", "partial", "undocumented"]),
+          file: z.string(),
+          line: z.number(),
+        })
+      ),
+      documented: z.number(),
+      partial: z.number(),
+      undocumented: z.number(),
+      total: z.number(),
+      percentage: z.number(),
+    })
+  ),
+  summary: z.object({
+    documented: z.number(),
+    partial: z.number(),
+    undocumented: z.number(),
+    total: z.number(),
+    percentage: z.number(),
+  }),
+});
+
 const checkTsdocAction = defineAction({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
   input: checkTsdocInputSchema,
+  output: checkTsdocOutputSchema,
   cli: {
     group: "check",
     command: "tsdoc",
@@ -815,8 +847,8 @@ const checkTsdocAction = defineAction({
       );
     }
 
-    if (result.value.exitCode !== 0) {
-      process.exitCode = result.value.exitCode;
+    if (!result.value.ok) {
+      process.exitCode = 1;
     }
 
     return Result.ok(result.value);
