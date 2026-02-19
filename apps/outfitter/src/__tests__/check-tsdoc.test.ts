@@ -63,6 +63,22 @@ describe("check-tsdoc action registration", () => {
     expect(summaryOption?.defaultValue).toBe(false);
   });
 
+  test("check.tsdoc action has --level flag", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const levelOption = action?.cli?.options?.find((o) =>
+      o.flags.includes("--level")
+    );
+    expect(levelOption).toBeDefined();
+  });
+
+  test("check.tsdoc action has --package flag", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const pkgOption = action?.cli?.options?.find((o) =>
+      o.flags.includes("--package")
+    );
+    expect(pkgOption).toBeDefined();
+  });
+
   test("existing check action is preserved with group structure", () => {
     const action = outfitterActions.get("check");
     expect(action).toBeDefined();
@@ -89,6 +105,8 @@ describe("check-tsdoc mapInput", () => {
       outputMode: string;
       jq: string | undefined;
       summary: boolean;
+      level: string | undefined;
+      packages: string[];
     };
 
     expect(mapped.strict).toBe(false);
@@ -97,6 +115,8 @@ describe("check-tsdoc mapInput", () => {
     expect(mapped.outputMode).toBe("human");
     expect(mapped.jq).toBeUndefined();
     expect(mapped.summary).toBe(false);
+    expect(mapped.level).toBeUndefined();
+    expect(mapped.packages).toEqual([]);
   });
 
   test("maps --strict flag", () => {
@@ -198,6 +218,46 @@ describe("check-tsdoc mapInput", () => {
     }) as { summary: boolean };
 
     expect(mapped.summary).toBe(true);
+  });
+
+  test("maps --level flag", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { level: "undocumented" },
+    }) as { level: string | undefined };
+
+    expect(mapped.level).toBe("undocumented");
+  });
+
+  test("ignores invalid --level value", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { level: "invalid" },
+    }) as { level: string | undefined };
+
+    expect(mapped.level).toBeUndefined();
+  });
+
+  test("maps --package flag as string", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { package: "@outfitter/contracts" },
+    }) as { packages: string[] };
+
+    expect(mapped.packages).toEqual(["@outfitter/contracts"]);
+  });
+
+  test("maps --package flag as array (repeatable)", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { package: ["@outfitter/cli", "@outfitter/contracts"] },
+    }) as { packages: string[] };
+
+    expect(mapped.packages).toEqual(["@outfitter/cli", "@outfitter/contracts"]);
   });
 
   test("invalid --output mode falls back to human", () => {

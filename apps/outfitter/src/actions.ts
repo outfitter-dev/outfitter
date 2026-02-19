@@ -760,6 +760,8 @@ interface CheckTsDocActionInput {
   outputMode: CliOutputMode;
   jq: string | undefined;
   summary: boolean;
+  level: "documented" | "partial" | "undocumented" | undefined;
+  packages: readonly string[];
 }
 
 const checkTsdocInputSchema = z.object({
@@ -769,6 +771,8 @@ const checkTsdocInputSchema = z.object({
   outputMode: outputModeSchema,
   jq: z.string().optional(),
   summary: z.boolean(),
+  level: z.enum(["documented", "partial", "undocumented"]).optional(),
+  packages: z.array(z.string()),
 }) as z.ZodType<CheckTsDocActionInput>;
 
 const checkTsdocOutputSchema = z.object({
@@ -835,6 +839,15 @@ const checkTsdocAction = defineAction<
           "Omit per-declaration detail for compact output (~2KB vs ~64KB)",
         defaultValue: false,
       },
+      {
+        flags: "--level <level>",
+        description:
+          "Filter declarations by coverage level (undocumented, partial, documented)",
+      },
+      {
+        flags: "--package <name>",
+        description: "Filter to specific package(s) by name (repeatable)",
+      },
       ...checkTsdocOutputMode.options,
       ...checkTsdocJq.options,
     ],
@@ -861,6 +874,23 @@ const checkTsdocAction = defineAction<
         minCoverage = minCoverageRaw;
       }
 
+      // Resolve --level flag
+      const levelRaw = context.flags["level"];
+      const validLevels = new Set(["documented", "partial", "undocumented"]);
+      const level =
+        typeof levelRaw === "string" && validLevels.has(levelRaw)
+          ? (levelRaw as "documented" | "partial" | "undocumented")
+          : undefined;
+
+      // Resolve --package flag (Commander collects repeatable into array)
+      const pkgRaw = context.flags["package"];
+      let packages: string[] = [];
+      if (Array.isArray(pkgRaw)) {
+        packages = pkgRaw.filter((v): v is string => typeof v === "string");
+      } else if (typeof pkgRaw === "string") {
+        packages = [pkgRaw];
+      }
+
       return {
         strict: Boolean(context.flags["strict"]),
         minCoverage,
@@ -868,6 +898,8 @@ const checkTsdocAction = defineAction<
         outputMode,
         jq,
         summary: Boolean(context.flags["summary"]),
+        level,
+        packages,
       };
     },
   },

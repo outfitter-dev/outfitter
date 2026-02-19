@@ -12,7 +12,12 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Result, ValidationError } from "@outfitter/contracts";
-import type { TsDocCheckResult } from "@outfitter/tooling";
+import type {
+  CoverageLevel,
+  DeclarationCoverage,
+  PackageCoverage,
+  TsDocCheckResult,
+} from "@outfitter/tooling";
 import type { CliOutputMode } from "../output-mode.js";
 
 const require = createRequire(import.meta.url);
@@ -29,11 +34,99 @@ export interface CheckTsDocInput {
   readonly outputMode: CliOutputMode;
   readonly jq: string | undefined;
   readonly summary: boolean;
+  readonly level: CoverageLevel | undefined;
+  readonly packages: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Calculate coverage statistics from declaration results.
+ *
+ * Matches `@outfitter/tooling` semantics where `partial` counts as half credit.
+ */
+function calculateCoverage(
+  declarations: readonly DeclarationCoverage[]
+): {
+  documented: number;
+  partial: number;
+  undocumented: number;
+  total: number;
+  percentage: number;
+} {
+  const total = declarations.length;
+  if (total === 0) {
+    return {
+      documented: 0,
+      partial: 0,
+      undocumented: 0,
+      total: 0,
+      percentage: 100,
+    };
+  }
+
+  const documented = declarations.filter((d) => d.level === "documented").length;
+  const partial = declarations.filter((d) => d.level === "partial").length;
+  const undocumented = declarations.filter((d) => d.level === "undocumented").length;
+
+  const score = documented + partial * 0.5;
+  const percentage = Math.round((score / total) * 100);
+
+  return { documented, partial, undocumented, total, percentage };
+}
+
+/** Recalculate count fields from a declarations array. */
+function recalculateCounts(
+  pkg: PackageCoverage,
+  declarations: readonly DeclarationCoverage[]
+): PackageCoverage {
+  const coverage = calculateCoverage(declarations);
+  return {
+    ...pkg,
+    declarations,
+    ...coverage,
+  };
+}
+
+/**
+ * Apply `--level` and `--package` filters and recompute aggregate fields.
+ *
+ * `ok` is recomputed from the filtered summary when strict mode is enabled.
+ */
+function filterResult(
+  result: TsDocCheckResult,
+  options: {
+    level: CoverageLevel | undefined;
+    packageNames: readonly string[];
+    strict: boolean;
+    minCoverage: number;
+  }
+): TsDocCheckResult {
+  let packages = [...result.packages];
+
+  if (options.packageNames.length > 0) {
+    const names = new Set(options.packageNames);
+    packages = packages.filter((pkg) => names.has(pkg.name));
+  }
+
+  if (options.level) {
+    packages = packages.map((pkg) => {
+      const declarations = pkg.declarations.filter((d) => d.level === options.level);
+      return recalculateCounts(pkg, declarations);
+    });
+  }
+
+  const summary = calculateCoverage(packages.flatMap((pkg) => pkg.declarations));
+  const ok = options.strict ? summary.percentage >= options.minCoverage : true;
+
+  return {
+    ok,
+    packages,
+    summary,
+  };
+}
 
 /**
  * Strip declaration detail for compact output while preserving schema shape.
@@ -136,13 +229,13 @@ export async function runCheckTsdoc(
 ): Promise<Result<TsDocCheckResult, Error>> {
   try {
     const tooling = await loadToolingCheckTsdocModule();
-    const result = tooling.analyzeCheckTsdoc({
+    const rawResult = tooling.analyzeCheckTsdoc({
       strict: input.strict,
       minCoverage: input.minCoverage,
       cwd: input.cwd,
     });
 
-    if (!result) {
+    if (!rawResult) {
       return Result.err(
         ValidationError.fromMessage(
           "No packages found with src/index.ts entry points.",
@@ -151,7 +244,17 @@ export async function runCheckTsdoc(
       );
     }
 
-    const outputData = input.summary ? summarizeResult(result) : result;
+    const hasFilters = input.level !== undefined || input.packages.length > 0;
+    const filteredResult = hasFilters
+      ? filterResult(rawResult, {
+          level: input.level,
+          packageNames: input.packages,
+          strict: input.strict,
+          minCoverage: input.minCoverage,
+        })
+      : rawResult;
+
+    const outputData = input.summary ? summarizeResult(filteredResult) : filteredResult;
 
     if (input.jq) {
       const filtered = await applyJq(outputData, input.jq);
