@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [4352c6d]
+  - @outfitter/cli@0.5.1
+  - @outfitter/tooling@0.2.4
+  - @outfitter/tui@0.2.0
+
 ## 0.2.5
 
 ### Patch Changes
