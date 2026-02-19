@@ -36,7 +36,7 @@ Use this when:
 
 All Linear MCP tools are deferred. You must load them before calling:
 
-```
+```text
 ToolSearch with query: "+linear create issue"
 ToolSearch with query: "+linear project"
 ```
@@ -49,7 +49,7 @@ When typed tools don't cover an operation, use `mcp__linear__linear` with `actio
 
 ### Project Status Updates
 
-The typed tools can update project metadata but cannot post **project status updates** — the timeline entries visible on a project's Updates tab.
+Typed tools (`save_status_update`) can post project status updates, but GraphQL gives more control over formatting and fields. Use GraphQL when you need custom health values or rich markdown bodies:
 
 ```json
 {
@@ -74,14 +74,16 @@ By name:
 }
 ```
 
-By team:
+By team (find projects associated with a team):
 
 ```json
 {
   "action": "graphql",
-  "graphql": "query { project(id: \"PROJECT_ID\") { id name state teams { nodes { id name key } } } }"
+  "graphql": "query { team(id: \"TEAM_ID\") { projects { nodes { id name state } } } }"
 }
 ```
+
+Use `action: "help"` on `mcp__linear__linear` to discover team IDs and keys.
 
 ### Listing Project Updates
 
@@ -156,7 +158,7 @@ List issues by label:
 
 ## Workflow: Choosing the Right Tool
 
-```
+```text
 Need to do X with Linear
     │
     ├── Is there a typed tool? (mcp__claude_ai_Linear__*)

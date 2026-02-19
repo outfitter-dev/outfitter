@@ -34,7 +34,7 @@ Why:
 
 Use backtick formatting for package names and technical terms:
 
-```
+```text
 Batteries-included CLI conventions for `@outfitter/cli`
 ```
 
@@ -157,7 +157,7 @@ Issues map 1:1 to pull requests. This is the fundamental sizing constraint.
 
 When work naturally sequences (each piece builds on the last), create stacked issues that mirror the PR stack:
 
-```
+```text
 Issue: Add base types for config        → PR 1 (foundation)
 Issue: Implement config loader          → PR 2 (stacked on PR 1)
 Issue: Add CLI flags for config options  → PR 3 (stacked on PR 2)
@@ -196,7 +196,7 @@ Consistent cross-referencing connects issues, PRs, and projects into a navigable
 
 When referencing Linear issues or projects from within Linear (descriptions, comments, updates), use bare URLs:
 
-```
+```text
 https://linear.app/outfitter/issue/OS-176/outfittercli-first-class-queryability
 https://linear.app/outfitter/project/batteries-included-cli-conventions-78e01e25016a
 ```
@@ -253,14 +253,14 @@ Post project updates for milestone completions, blockers, or significant progres
 | List/search | `mcp__claude_ai_Linear__list_issues`, `list_projects` |
 | Labels | `mcp__claude_ai_Linear__list_issue_labels`, `create_issue_label` |
 | Documents | `mcp__claude_ai_Linear__create_document`, `update_document` |
-| Project status updates | GraphQL via `mcp__linear__linear` (not available in typed tools) |
+| Project status updates | `save_status_update` or GraphQL for more control |
 | Comments with formatting | GraphQL `commentCreate` (the `comment` action breaks newlines) |
 
 ### Before calling any Linear tool
 
 Linear MCP tools are deferred. Load them first:
 
-```
+```text
 ToolSearch with query: "+linear <operation>"
 ```
 
