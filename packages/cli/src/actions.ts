@@ -59,7 +59,12 @@ export interface ActionCliPresetAdapter<
 function isInputContext(
   input: ActionCliInputContext | Record<string, unknown>
 ): input is ActionCliInputContext {
-  return "flags" in input && typeof input.flags === "object";
+  return (
+    "flags" in input &&
+    typeof input.flags === "object" &&
+    "args" in input &&
+    Array.isArray(input.args)
+  );
 }
 
 /**
