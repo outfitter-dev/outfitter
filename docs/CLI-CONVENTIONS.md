@@ -439,10 +439,10 @@ command("list")
 
 ## Guardrails and Exceptions
 
-Two CI guardrail tests enforce convention boundaries:
+Two guardrail tests (run as part of the test suite) enforce convention boundaries:
 
-- `apps/outfitter/src/__tests__/cli-convention-guardrails.test.ts`
-- `packages/cli/src/__tests__/preset-boundary-guardrails.test.ts`
+- `apps/outfitter/src/__tests__/cli-convention-guardrails.test.ts` — catches ad-hoc `--json` option definitions and manual `OUTFITTER_JSON` env bridges in command files. New command files are automatically scanned.
+- `packages/cli/src/__tests__/preset-boundary-guardrails.test.ts` — ensures only vetted preset exports exist in `@outfitter/cli/flags`, preventing unreviewed convention additions.
 
 If a command needs intentional divergence (for example, an adapter that must
 forward `--json` to another CLI), add the file to the test allowlist with a
