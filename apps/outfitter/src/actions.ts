@@ -305,11 +305,6 @@ const commonInitOptions: ActionCliOption[] = [
     description: "Binary name (defaults to project name)",
   },
   {
-    flags: "-f, --force",
-    description: "Overwrite existing files",
-    defaultValue: false,
-  },
-  {
     flags: "--local",
     description: "Use workspace:* for @outfitter dependencies",
   },
