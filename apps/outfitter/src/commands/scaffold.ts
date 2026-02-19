@@ -743,10 +743,10 @@ export async function printScaffoldResults(
   await output(lines, { mode: "human" });
 }
 
+/**
+ * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
+ */
 export function scaffoldCommand(program: Command): void {
-  /**
-   * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
-   */
   interface ScaffoldCommandFlags {
     force?: boolean;
     skipInstall?: boolean;

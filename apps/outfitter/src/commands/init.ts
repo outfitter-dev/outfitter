@@ -700,10 +700,10 @@ export async function printInitResults(
 // Commander wiring
 // =============================================================================
 
+/**
+ * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
+ */
 export function initCommand(program: Command): void {
-  /**
-   * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
-   */
   const init = program
     .command("init")
     .description("Create a new Outfitter project");
