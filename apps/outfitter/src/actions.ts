@@ -759,6 +759,7 @@ interface CheckTsDocActionInput {
   cwd: string;
   outputMode: CliOutputMode;
   jq: string | undefined;
+  summary: boolean;
 }
 
 const checkTsdocInputSchema = z.object({
@@ -767,6 +768,7 @@ const checkTsdocInputSchema = z.object({
   cwd: z.string(),
   outputMode: outputModeSchema,
   jq: z.string().optional(),
+  summary: z.boolean(),
 }) as z.ZodType<CheckTsDocActionInput>;
 
 const checkTsdocOutputSchema = z.object({
@@ -827,6 +829,12 @@ const checkTsdocAction = defineAction<
         flags: "--min-coverage <percent>",
         description: "Minimum coverage percentage (used with --strict)",
       },
+      {
+        flags: "--summary",
+        description:
+          "Omit per-declaration detail for compact output (~2KB vs ~64KB)",
+        defaultValue: false,
+      },
       ...checkTsdocOutputMode.options,
       ...checkTsdocJq.options,
     ],
@@ -859,6 +867,7 @@ const checkTsdocAction = defineAction<
         cwd: process.cwd(),
         outputMode,
         jq,
+        summary: Boolean(context.flags["summary"]),
       };
     },
   },

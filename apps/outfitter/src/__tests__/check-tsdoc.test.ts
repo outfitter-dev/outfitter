@@ -54,6 +54,15 @@ describe("check-tsdoc action registration", () => {
     expect(jqOption).toBeDefined();
   });
 
+  test("check.tsdoc action has --summary flag", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const summaryOption = action?.cli?.options?.find((o) =>
+      o.flags.includes("--summary")
+    );
+    expect(summaryOption).toBeDefined();
+    expect(summaryOption?.defaultValue).toBe(false);
+  });
+
   test("existing check action is preserved with group structure", () => {
     const action = outfitterActions.get("check");
     expect(action).toBeDefined();
@@ -79,6 +88,7 @@ describe("check-tsdoc mapInput", () => {
       cwd: string;
       outputMode: string;
       jq: string | undefined;
+      summary: boolean;
     };
 
     expect(mapped.strict).toBe(false);
@@ -86,6 +96,7 @@ describe("check-tsdoc mapInput", () => {
     expect(typeof mapped.cwd).toBe("string");
     expect(mapped.outputMode).toBe("human");
     expect(mapped.jq).toBeUndefined();
+    expect(mapped.summary).toBe(false);
   });
 
   test("maps --strict flag", () => {
@@ -177,6 +188,16 @@ describe("check-tsdoc mapInput", () => {
     }) as { jq: string | undefined };
 
     expect(mapped.jq).toBe(".summary.percentage");
+  });
+
+  test("maps --summary flag", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { summary: true },
+    }) as { summary: boolean };
+
+    expect(mapped.summary).toBe(true);
   });
 
   test("invalid --output mode falls back to human", () => {
