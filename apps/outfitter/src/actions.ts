@@ -7,6 +7,8 @@
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
 import {
+  booleanFlagPreset,
+  composePresets,
   cwdPreset,
   dryRunPreset,
   interactionPreset,
@@ -189,20 +191,6 @@ function resolveLocalFlag(flags: {
   }
 
   return undefined;
-}
-
-function resolveNoCodemodsFlag(flags: Record<string, unknown>): boolean {
-  const kebab = flags["no-codemods"];
-  if (typeof kebab === "boolean") return kebab;
-
-  const camel = flags["noCodemods"];
-  if (typeof camel === "boolean") return camel;
-
-  // Commander may expose a positive flag name for --no-* options.
-  const positive = flags["codemods"];
-  if (typeof positive === "boolean") return !positive;
-
-  return false;
 }
 
 function resolveInitOptions(
@@ -842,6 +830,35 @@ const upgradeInputSchema = z.object({
 const upgradeCwd = cwdPreset();
 const upgradeDryRun = dryRunPreset();
 const upgradeInteraction = interactionPreset();
+const upgradeAll = booleanFlagPreset({
+  id: "upgradeAll",
+  key: "all",
+  flags: "--all",
+  description: "Include breaking changes in the upgrade",
+});
+const upgradeNoCodemods = booleanFlagPreset({
+  id: "upgradeNoCodemods",
+  key: "noCodemods",
+  flags: "--no-codemods",
+  description: "Skip automatic codemod execution during upgrade",
+  sources: ["noCodemods", "no-codemods"],
+  negatedSources: ["codemods"],
+});
+const upgradeGuide = booleanFlagPreset({
+  id: "upgradeGuide",
+  key: "guide",
+  flags: "--guide",
+  description:
+    "Show migration instructions for available updates. Pass package names to filter.",
+});
+const upgradeFlags = composePresets(
+  upgradeCwd,
+  upgradeDryRun,
+  upgradeInteraction,
+  upgradeAll,
+  upgradeNoCodemods,
+  upgradeGuide
+);
 
 const upgradeAction = defineAction({
   id: "upgrade",
@@ -852,44 +869,30 @@ const upgradeAction = defineAction({
     command: "upgrade [packages...]",
     description:
       "Check for @outfitter/* package updates and migration guidance",
-    options: [
-      ...upgradeCwd.options,
-      ...upgradeDryRun.options,
-      ...upgradeInteraction.options,
-      {
-        flags: "--all",
-        description: "Include breaking changes in the upgrade",
-        defaultValue: false,
-      },
-      {
-        flags: "--no-codemods",
-        description: "Skip automatic codemod execution during upgrade",
-        defaultValue: false,
-      },
-      {
-        flags: "--guide",
-        description:
-          "Show migration instructions for available updates. Pass package names to filter.",
-        defaultValue: false,
-      },
-    ],
+    options: [...upgradeFlags.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const { cwd: rawCwd } = upgradeCwd.resolve(context.flags);
-      const { dryRun } = upgradeDryRun.resolve(context.flags);
-      const { interactive, yes } = upgradeInteraction.resolve(context.flags);
+      const {
+        cwd: rawCwd,
+        dryRun,
+        interactive,
+        yes,
+        all,
+        noCodemods,
+        guide,
+      } = upgradeFlags.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
       const guidePackages =
         context.args.length > 0 ? (context.args as string[]) : undefined;
       return {
         cwd,
-        guide: Boolean(context.flags["guide"]),
+        guide,
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         dryRun,
         yes,
         interactive,
-        all: Boolean(context.flags["all"]),
-        noCodemods: resolveNoCodemodsFlag(context.flags),
+        all,
+        noCodemods,
         outputMode,
       };
     },
