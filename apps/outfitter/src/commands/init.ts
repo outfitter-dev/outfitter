@@ -701,6 +701,9 @@ export async function printInitResults(
 // =============================================================================
 
 export function initCommand(program: Command): void {
+  /**
+   * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
+   */
   const init = program
     .command("init")
     .description("Create a new Outfitter project");
@@ -748,7 +751,6 @@ export function initCommand(program: Command): void {
     flags: InitCommandFlags
   ): OutputMode | undefined => {
     if (flags.json) {
-      process.env["OUTFITTER_JSON"] = "1";
       return "json";
     }
     return undefined;
@@ -771,8 +773,7 @@ export function initCommand(program: Command): void {
       .option("--skip-install", "Skip bun install", false)
       .option("--skip-git", "Skip git init and initial commit", false)
       .option("--skip-commit", "Skip initial commit only", false)
-      .option("--install-timeout <ms>", "bun install timeout in ms")
-      .option("--json", "Output as JSON", false);
+      .option("--install-timeout <ms>", "bun install timeout in ms");
 
   withCommonOptions(
     init

@@ -429,6 +429,8 @@ export async function printDoctorResults(
 /**
  * Registers the doctor command with the CLI program.
  *
+ * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
+ *
  * @param program - Commander program instance
  *
  * @example
@@ -444,15 +446,11 @@ export function doctorCommand(program: Command): void {
   program
     .command("doctor")
     .description("Validate environment and dependencies")
-    .option("--json", "Output as JSON", false)
     .action(async (_flags: { json?: boolean }, command: Command) => {
       const resolvedFlags = command.optsWithGlobals<{ json?: boolean }>();
       const outputOptions = resolvedFlags.json
         ? { mode: "json" as OutputMode }
         : undefined;
-      if (resolvedFlags.json) {
-        process.env["OUTFITTER_JSON"] = "1";
-      }
 
       const result = await runDoctor({ cwd: process.cwd() });
 

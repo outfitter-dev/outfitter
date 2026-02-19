@@ -744,6 +744,9 @@ export async function printScaffoldResults(
 }
 
 export function scaffoldCommand(program: Command): void {
+  /**
+   * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
+   */
   interface ScaffoldCommandFlags {
     force?: boolean;
     skipInstall?: boolean;
@@ -765,27 +768,30 @@ export function scaffoldCommand(program: Command): void {
     .option("--no-tooling", "Skip default tooling blocks")
     .option("--local", "Use workspace:* for @outfitter dependencies")
     .option("--install-timeout <ms>", "bun install timeout in ms")
-    .option("--json", "Output as JSON", false)
     .action(
       async (
         target: string,
         name: string | undefined,
-        flags: ScaffoldCommandFlags
+        _flags: ScaffoldCommandFlags,
+        command: Command
       ) => {
-        const mode: OutputMode | undefined = flags.json ? "json" : undefined;
+        const resolvedFlags = command.optsWithGlobals<ScaffoldCommandFlags>();
+        const mode: OutputMode | undefined = resolvedFlags.json
+          ? "json"
+          : undefined;
         const outputOptions = mode ? { mode } : undefined;
         const result = await runScaffold({
           target,
           name,
-          force: Boolean(flags.force),
-          skipInstall: Boolean(flags.skipInstall),
-          dryRun: Boolean(flags.dryRun),
-          with: flags.with,
-          noTooling: flags.noTooling,
-          local: flags.local,
+          force: Boolean(resolvedFlags.force),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          dryRun: Boolean(resolvedFlags.dryRun),
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          local: resolvedFlags.local,
           cwd: process.cwd(),
-          ...(flags.installTimeout !== undefined
-            ? { installTimeout: flags.installTimeout }
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
             : {}),
         });
 
