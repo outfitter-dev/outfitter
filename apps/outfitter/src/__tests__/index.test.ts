@@ -13,9 +13,7 @@ import {
   getInitTarget,
   InitError,
   initCommand,
-  MigrateKitError,
   planCreateProject,
-  runMigrateKit,
   runScaffold,
   scaffoldCommand,
   TARGET_IDS,
@@ -35,13 +33,6 @@ describe("outfitter public API", () => {
   test("exports scaffold command API", () => {
     expect(typeof scaffoldCommand).toBe("function");
     expect(typeof runScaffold).toBe("function");
-  });
-
-  test("exports runMigrateKit and MigrateKitError", () => {
-    expect(typeof runMigrateKit).toBe("function");
-    const err = new MigrateKitError("test");
-    expect(err).toBeInstanceOf(Error);
-    expect(err.name).toBe("MigrateKitError");
   });
 
   test("exports create presets", () => {

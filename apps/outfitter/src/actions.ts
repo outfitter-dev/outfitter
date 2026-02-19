@@ -37,10 +37,6 @@ import { runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { printInitResults, runInit } from "./commands/init.js";
-import {
-  printMigrateKitResults,
-  runMigrateKit,
-} from "./commands/migrate-kit.js";
 import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
 import { printUpgradeResults, runUpgrade } from "./commands/upgrade.js";
 import {
@@ -134,18 +130,6 @@ const scaffoldInputSchema = z.object({
   cwd: z.string(),
   outputMode: outputModeSchema,
 }) as z.ZodType<ScaffoldActionInput>;
-
-interface MigrateKitActionInput {
-  targetDir: string;
-  dryRun: boolean;
-  outputMode: CliOutputMode;
-}
-
-const migrateKitInputSchema = z.object({
-  targetDir: z.string(),
-  dryRun: z.boolean(),
-  outputMode: outputModeSchema,
-}) as z.ZodType<MigrateKitActionInput>;
 
 interface DoctorActionInput {
   cwd: string;
@@ -283,19 +267,6 @@ function resolveScaffoldOptions(
   };
 }
 
-function resolveMigrateKitOptions(
-  context: ActionCliInputContext
-): MigrateKitActionInput {
-  const { dryRun } = migrateKitSharedFlags.resolve(context);
-  const outputMode = resolveOutputModeFromContext(context.flags);
-
-  return {
-    targetDir: context.args[0] ?? process.cwd(),
-    dryRun,
-    outputMode,
-  };
-}
-
 const commonInitOptions: ActionCliOption[] = [
   {
     flags: "-n, --name <name>",
@@ -424,8 +395,6 @@ function createInitAction(options: {
 
 const scaffoldSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
 const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
-const migrateKitSharedFlags = actionCliPresets(dryRunPreset());
-
 const createAction = defineAction({
   id: "create",
   description: "Removed - use 'outfitter init' instead",
@@ -977,37 +946,6 @@ const upgradeAction = defineAction({
   },
 });
 
-const migrateKitAction = defineAction({
-  id: "migrate.kit",
-  description: "Migrate foundation imports and dependencies to @outfitter/kit",
-  surfaces: ["cli"],
-  input: migrateKitInputSchema,
-  cli: {
-    group: "migrate",
-    command: "kit [directory]",
-    description:
-      "Migrate foundation imports and dependencies to @outfitter/kit",
-    options: [...migrateKitSharedFlags.options],
-    mapInput: resolveMigrateKitOptions,
-  },
-  handler: async (input) => {
-    const { outputMode, ...migrateInput } = input;
-    const result = await runMigrateKit(migrateInput);
-
-    if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "migrate.kit" },
-        })
-      );
-    }
-
-    await printMigrateKitResults(result.value, { mode: outputMode });
-    return Result.ok(result.value);
-  },
-});
-
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(scaffoldAction)
@@ -1050,5 +988,4 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(listBlocksAction)
   .add(checkAction)
   .add(checkTsdocAction)
-  .add(migrateKitAction)
   .add(upgradeAction);

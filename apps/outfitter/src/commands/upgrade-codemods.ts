@@ -44,10 +44,7 @@ export interface DiscoveredCodemod {
 // =============================================================================
 
 /** Known relative locations for codemod scripts. */
-const CODEMOD_PATHS = [
-  "plugins/outfitter/shared/codemods",
-  "node_modules/@outfitter/kit/shared/codemods",
-];
+const CODEMOD_PATHS = ["plugins/outfitter/shared/codemods"];
 
 /**
  * Find the codemods directory, checking known locations.

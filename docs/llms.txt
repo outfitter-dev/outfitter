@@ -30,10 +30,6 @@ Outfitter package docs index for LLM retrieval.
 ## index
 - docs/packages/index/README.md — @outfitter/index
 
-## kit
-- docs/packages/kit/README.md — @outfitter/kit
-- docs/packages/kit/VERSIONS.md — Version Compatibility Matrix
-
 ## logging
 - docs/packages/logging/README.md — @outfitter/logging
 

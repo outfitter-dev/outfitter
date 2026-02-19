@@ -23,7 +23,7 @@
     },
     "apps/cli-demo": {
       "name": "outfitter-cli-demo",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "bin": {
         "outfitter-demo": "./dist/cli.js",
         "cli-demo": "./dist/cli.js",
@@ -45,7 +45,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -82,7 +82,7 @@
     },
     "packages/cli": {
       "name": "@outfitter/cli",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@clack/prompts": "^0.11.0",
         "better-result": "^2.5.1",
@@ -192,18 +192,6 @@
         "typescript": "^5.8.0",
       },
     },
-    "packages/kit": {
-      "name": "@outfitter/kit",
-      "version": "0.2.4",
-      "dependencies": {
-        "@outfitter/contracts": "workspace:*",
-        "@outfitter/types": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
-      },
-    },
     "packages/logging": {
       "name": "@outfitter/logging",
       "version": "0.4.0",
@@ -283,18 +271,18 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
       "dependencies": {
         "@outfitter/cli": "workspace:*",
         "commander": "^14.0.2",
+        "typescript": "^5.9.3",
         "zod": "^3.25.17",
       },
       "devDependencies": {
         "@types/bun": "^1.3.7",
-        "typescript": "^5.9.3",
         "yaml": "^2.8.2",
       },
       "peerDependencies": {
@@ -483,8 +471,6 @@
     "@outfitter/file-ops": ["@outfitter/file-ops@workspace:packages/file-ops"],
 
     "@outfitter/index": ["@outfitter/index@workspace:packages/index"],
-
-    "@outfitter/kit": ["@outfitter/kit@workspace:packages/kit"],
 
     "@outfitter/logging": ["@outfitter/logging@workspace:packages/logging"],
 
@@ -1102,8 +1088,6 @@
 
     "@outfitter/docs-core/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
-    "@outfitter/kit/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
-
     "@outfitter/logging/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
     "@outfitter/mcp/@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
@@ -1139,8 +1123,6 @@
     "@outfitter/docs-core/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/docs/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
-
-    "@outfitter/kit/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "@outfitter/logging/@types/bun/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 

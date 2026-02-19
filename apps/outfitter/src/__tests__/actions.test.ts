@@ -166,18 +166,4 @@ describe("outfitter action mapping", () => {
     expect(mapped.force).toBe(true);
     expect(mapped.dryRun).toBe(true);
   });
-
-  test("maps migrate.kit dryRun via preset adapter", () => {
-    const action = outfitterActions.get("migrate.kit");
-    expect(action?.cli?.mapInput).toBeDefined();
-
-    const mapped = action?.cli?.mapInput?.({
-      args: [],
-      flags: {
-        "dry-run": true,
-      },
-    }) as { dryRun: boolean };
-
-    expect(mapped.dryRun).toBe(true);
-  });
 });

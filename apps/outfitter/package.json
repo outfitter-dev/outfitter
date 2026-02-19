@@ -64,12 +64,6 @@
         "default": "./dist/commands/init.js"
       }
     },
-    "./commands/migrate-kit": {
-      "import": {
-        "types": "./dist/commands/migrate-kit.d.ts",
-        "default": "./dist/commands/migrate-kit.js"
-      }
-    },
     "./commands/repo": {
       "import": {
         "types": "./dist/commands/repo.d.ts",

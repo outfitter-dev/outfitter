@@ -110,7 +110,6 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 | `@outfitter/docs-core` | Core docs assembly and freshness checks for Outfitter projects |
 | `@outfitter/file-ops` | Workspace detection, secure path handling, and file locking for Outfitter |
 | `@outfitter/index` | SQLite FTS5 full-text search indexing for Outfitter |
-| `@outfitter/kit` | Foundation facade for Outfitter contracts and types |
 | `@outfitter/logging` | Structured logging via logtape with redaction support for Outfitter |
 | `@outfitter/mcp` | MCP server framework with typed tools for Outfitter |
 | `@outfitter/schema` | Schema introspection, surface map generation, and drift detection for Outfitter |
