@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import {
+  DOCS_COMMON_OPTION_FLAGS,
+  DOCS_EXPORT_OPTION_FLAGS,
+} from "@outfitter/docs";
+import {
   createRepoCommand,
   type RepoToolingInvocation,
 } from "../commands/repo.js";
@@ -191,5 +195,44 @@ describe("createRepoCommand", () => {
     expect(readmeCommand?.aliases()).toEqual([]);
     expect(registryCommand?.aliases()).toEqual([]);
     expect(treeCommand?.aliases()).toEqual([]);
+  });
+
+  test("reuses shared docs option bundle definitions", () => {
+    const command = createTestCommand();
+    const checkCommand = command.commands.find(
+      (subcommand) => subcommand.name() === "check"
+    );
+    const syncCommand = command.commands.find(
+      (subcommand) => subcommand.name() === "sync"
+    );
+    const exportCommand = command.commands.find(
+      (subcommand) => subcommand.name() === "export"
+    );
+
+    const checkDocs = checkCommand?.commands.find(
+      (subcommand) => subcommand.name() === "docs"
+    );
+    const syncDocs = syncCommand?.commands.find(
+      (subcommand) => subcommand.name() === "docs"
+    );
+    const exportDocs = exportCommand?.commands.find(
+      (subcommand) => subcommand.name() === "docs"
+    );
+
+    const commonFlags = [...DOCS_COMMON_OPTION_FLAGS];
+    const exportFlags = [
+      ...DOCS_COMMON_OPTION_FLAGS,
+      ...DOCS_EXPORT_OPTION_FLAGS,
+    ];
+
+    expect(checkDocs?.options.map((option) => option.flags)).toEqual(
+      commonFlags
+    );
+    expect(syncDocs?.options.map((option) => option.flags)).toEqual(
+      commonFlags
+    );
+    expect(exportDocs?.options.map((option) => option.flags)).toEqual(
+      exportFlags
+    );
   });
 });

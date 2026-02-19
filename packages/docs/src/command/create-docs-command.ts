@@ -2,6 +2,13 @@ import { Command } from "commander";
 import { executeCheckCommand } from "../commands/check.js";
 import { executeExportCommand } from "../commands/export.js";
 import { executeSyncCommand } from "../commands/sync.js";
+import {
+  type DocsCommonCliOptions,
+  type DocsExportCliOptions,
+  resolveDocsCliOptions,
+  withDocsCommonOptions,
+  withDocsExportOptions,
+} from "./docs-option-bundle.js";
 
 export interface CreateDocsCommandOptions {
   readonly commandName?: string;
@@ -29,81 +36,53 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
   const command = new Command(options?.commandName ?? "docs");
   command.description("Synchronize and verify package docs outputs");
 
-  command
-    .command("sync")
-    .description("Assemble package docs into docs/packages")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await executeSyncCommand(cmdOptions, io);
-        if (code !== 0) {
-          process.exitCode = code;
-        }
-      }
-    );
+  const syncCommand = withDocsCommonOptions(
+    command
+      .command("sync")
+      .description("Assemble package docs into docs/packages")
+  );
 
-  command
-    .command("check")
-    .description("Check whether assembled package docs are in sync")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await executeCheckCommand(cmdOptions, io);
-        if (code !== 0) {
-          process.exitCode = code;
-        }
-      }
+  syncCommand.action(async (cmdOptions: DocsCommonCliOptions) => {
+    const code = await executeSyncCommand(
+      resolveDocsCliOptions(cmdOptions),
+      io
     );
+    if (code !== 0) {
+      process.exitCode = code;
+    }
+  });
 
-  command
-    .command("export")
-    .description("Export docs artifacts for packages and LLM targets")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .option("--llms-file <path>", "llms.txt output path relative to workspace")
-    .option(
-      "--llms-full-file <path>",
-      "llms-full.txt output path relative to workspace"
-    )
-    .option(
-      "--target <target>",
-      "Export target: packages, llms, llms-full, all",
-      "all"
-    )
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        llmsFile?: string;
-        llmsFullFile?: string;
-        mdxMode?: "strict" | "lossy";
-        outputDir?: string;
-        packagesDir?: string;
-        target?: string;
-      }) => {
-        const code = await executeExportCommand(cmdOptions, io);
-        if (code !== 0) {
-          process.exitCode = code;
-        }
-      }
+  const checkCommand = withDocsCommonOptions(
+    command
+      .command("check")
+      .description("Check whether assembled package docs are in sync")
+  );
+
+  checkCommand.action(async (cmdOptions: DocsCommonCliOptions) => {
+    const code = await executeCheckCommand(
+      resolveDocsCliOptions(cmdOptions),
+      io
     );
+    if (code !== 0) {
+      process.exitCode = code;
+    }
+  });
+
+  const exportCommand = withDocsExportOptions(
+    command
+      .command("export")
+      .description("Export docs artifacts for packages and LLM targets")
+  );
+
+  exportCommand.action(async (cmdOptions: DocsExportCliOptions) => {
+    const code = await executeExportCommand(
+      resolveDocsCliOptions(cmdOptions),
+      io
+    );
+    if (code !== 0) {
+      process.exitCode = code;
+    }
+  });
 
   return command;
 }

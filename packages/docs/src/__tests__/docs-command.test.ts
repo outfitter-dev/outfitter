@@ -4,6 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Command } from "commander";
 import { createDocsCommand } from "../command/create-docs-command.js";
+import {
+  DOCS_COMMON_OPTION_FLAGS,
+  DOCS_EXPORT_OPTION_FLAGS,
+} from "../command/docs-option-bundle.js";
 import { executeCheckCommand } from "../commands/check.js";
 import { executeExportCommand } from "../commands/export.js";
 import { executeSyncCommand } from "../commands/sync.js";
@@ -134,5 +138,30 @@ describe("createDocsCommand", () => {
     );
 
     expect(subcommandNames).toEqual(["sync", "check", "export"]);
+  });
+
+  it("uses shared docs option bundles across subcommands", () => {
+    const command = createDocsCommand();
+    const sync = command.commands.find(
+      (subcommand) => subcommand.name() === "sync"
+    );
+    const check = command.commands.find(
+      (subcommand) => subcommand.name() === "check"
+    );
+    const exportCommand = command.commands.find(
+      (subcommand) => subcommand.name() === "export"
+    );
+
+    const commonFlags = [...DOCS_COMMON_OPTION_FLAGS];
+    const exportFlags = [
+      ...DOCS_COMMON_OPTION_FLAGS,
+      ...DOCS_EXPORT_OPTION_FLAGS,
+    ];
+
+    expect(sync?.options.map((option) => option.flags)).toEqual(commonFlags);
+    expect(check?.options.map((option) => option.flags)).toEqual(commonFlags);
+    expect(exportCommand?.options.map((option) => option.flags)).toEqual(
+      exportFlags
+    );
   });
 });

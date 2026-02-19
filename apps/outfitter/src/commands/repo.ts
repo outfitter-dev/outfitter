@@ -11,7 +11,14 @@
 
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
+import {
+  type DocsCommonCliOptions,
+  type DocsExportCliOptions,
+  resolveDocsCliOptions,
+  withDocsCommonOptions,
+  withDocsExportOptions,
+} from "@outfitter/docs";
 import { Command } from "commander";
 import {
   type ExecuteCheckCommandOptions,
@@ -77,13 +84,6 @@ function getIo(
     err:
       options?.io?.err ?? ((line: string) => process.stderr.write(`${line}\n`)),
   };
-}
-
-function resolveCwdOption(inputCwd: string | undefined): string {
-  if (typeof inputCwd !== "string" || inputCwd.length === 0) {
-    return process.cwd();
-  }
-  return resolve(process.cwd(), inputCwd);
 }
 
 function resolveToolingCliEntrypoint(): string {
@@ -161,32 +161,19 @@ function addDocsCheckSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsCheckCommand = command
     .command("docs")
-    .description("Check whether assembled package docs are in sync")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsCheck(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Check whether assembled package docs are in sync");
+
+  withDocsCommonOptions(docsCheckCommand).action(
+    async (cmdOptions: DocsCommonCliOptions) => {
+      const code = await options.runDocsCheck(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addDocsSyncSubcommand(
@@ -199,32 +186,19 @@ function addDocsSyncSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsSyncCommand = command
     .command("docs")
-    .description("Assemble package docs into docs/packages")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsSync(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Assemble package docs into docs/packages");
+
+  withDocsCommonOptions(docsSyncCommand).action(
+    async (cmdOptions: DocsCommonCliOptions) => {
+      const code = await options.runDocsSync(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addDocsExportSubcommand(
@@ -237,45 +211,19 @@ function addDocsExportSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsExportCommand = command
     .command("docs")
-    .description("Export docs artifacts for packages and LLM targets")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .option("--llms-file <path>", "llms.txt output path relative to workspace")
-    .option(
-      "--llms-full-file <path>",
-      "llms-full.txt output path relative to workspace"
-    )
-    .option(
-      "--target <target>",
-      "Export target: packages, llms, llms-full, all",
-      "all"
-    )
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        llmsFile?: string;
-        llmsFullFile?: string;
-        mdxMode?: "strict" | "lossy";
-        outputDir?: string;
-        packagesDir?: string;
-        target?: string;
-      }) => {
-        const code = await options.runDocsExport(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Export docs artifacts for packages and LLM targets");
+
+  withDocsExportOptions(docsExportCommand).action(
+    async (cmdOptions: DocsExportCliOptions) => {
+      const code = await options.runDocsExport(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addToolingCheckSubcommands(
@@ -296,7 +244,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-exports",
         args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
@@ -315,7 +263,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-readme-imports",
         args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
@@ -330,7 +278,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-bunup-registry",
         args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
@@ -349,7 +297,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-changeset",
         args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
@@ -370,7 +318,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-clean-tree",
         args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
@@ -385,7 +333,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-boundary-invocations",
         args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
       });
       applyExitCode(code);
     });
