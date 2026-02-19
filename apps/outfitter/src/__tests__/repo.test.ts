@@ -53,29 +53,93 @@ describe("createRepoCommand", () => {
     const command = createTestCommand();
 
     await command.parseAsync(
-      ["node", "repo", "check", "docs", "--cwd", "fixtures/workspace"],
+      [
+        "node",
+        "repo",
+        "check",
+        "docs",
+        "--cwd",
+        "fixtures/workspace",
+        "--packages-dir",
+        "custom-packages",
+        "--output-dir",
+        "custom-docs",
+        "--mdx-mode",
+        "lossy",
+      ],
       { from: "node" }
     );
 
     expect(capturedDocsCheckOptions).toBeDefined();
-    expect(capturedDocsCheckOptions?.cwd).toBe(
-      resolve(process.cwd(), "fixtures/workspace")
-    );
+    expect(capturedDocsCheckOptions).toEqual({
+      cwd: resolve(process.cwd(), "fixtures/workspace"),
+      packagesDir: "custom-packages",
+      outputDir: "custom-docs",
+      mdxMode: "lossy",
+    });
   });
 
   test("routes `repo sync docs` and `repo export docs`", async () => {
     const command = createTestCommand();
 
-    await command.parseAsync(["node", "repo", "sync", "docs"], {
-      from: "node",
-    });
     await command.parseAsync(
-      ["node", "repo", "export", "docs", "--target", "llms"],
+      [
+        "node",
+        "repo",
+        "sync",
+        "docs",
+        "--cwd",
+        "fixtures/workspace",
+        "--packages-dir",
+        "sync-packages",
+        "--output-dir",
+        "sync-docs",
+        "--mdx-mode",
+        "strict",
+      ],
+      {
+        from: "node",
+      }
+    );
+    await command.parseAsync(
+      [
+        "node",
+        "repo",
+        "export",
+        "docs",
+        "--cwd",
+        "fixtures/workspace",
+        "--packages-dir",
+        "export-packages",
+        "--output-dir",
+        "export-docs",
+        "--mdx-mode",
+        "lossy",
+        "--llms-file",
+        "custom-llms.txt",
+        "--llms-full-file",
+        "custom-llms-full.txt",
+        "--target",
+        "llms",
+      ],
       { from: "node" }
     );
 
-    expect(capturedDocsSyncOptions).toBeDefined();
-    expect(capturedDocsExportOptions?.target).toBe("llms");
+    expect(capturedDocsSyncOptions).toEqual({
+      cwd: resolve(process.cwd(), "fixtures/workspace"),
+      packagesDir: "sync-packages",
+      outputDir: "sync-docs",
+      mdxMode: "strict",
+    });
+    expect(capturedDocsExportOptions).toEqual({
+      cwd: resolve(process.cwd(), "fixtures/workspace"),
+      packagesDir: "export-packages",
+      outputDir: "export-docs",
+      mdxMode: "lossy",
+      llmsFile: "custom-llms.txt",
+      llmsFullFile: "custom-llms-full.txt",
+      target: "llms",
+    });
   });
 
   test("routes `repo check exports` to tooling check-exports", async () => {
@@ -139,6 +203,22 @@ describe("createRepoCommand", () => {
       command: "check-clean-tree",
       args: ["--paths", "docs", "packages"],
       cwd: process.cwd(),
+    });
+  });
+
+  test("routes `repo check changeset` with --skip to tooling", async () => {
+    const command = createTestCommand();
+
+    await command.parseAsync(
+      ["node", "repo", "check", "changeset", "--skip", "--cwd", "repo-root"],
+      { from: "node" }
+    );
+
+    expect(toolingCalls).toHaveLength(1);
+    expect(toolingCalls[0]).toEqual({
+      command: "check-changeset",
+      args: ["--skip"],
+      cwd: resolve(process.cwd(), "repo-root"),
     });
   });
 
