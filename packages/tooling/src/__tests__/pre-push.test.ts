@@ -3,6 +3,7 @@ import {
 	areFilesTestOnly,
 	canBypassRedPhaseByChangedFiles,
 	createVerificationPlan,
+	hasPackageSourceChanges,
 	isRedPhaseBranch,
 	isScaffoldBranch,
 	isTestOnlyPath,
@@ -145,6 +146,68 @@ describe("red-phase bypass safety", () => {
 				files: ["src/__tests__/service.test.ts", "src/service.ts"],
 				deterministic: true,
 				source: "baseRef",
+			}),
+		).toBe(false);
+	});
+});
+
+describe("hasPackageSourceChanges", () => {
+	test("returns true when changed files include package source files", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: ["packages/cli/src/index.ts", "README.md"],
+				deterministic: true,
+				source: "upstream",
+			}),
+		).toBe(true);
+	});
+
+	test("returns true for nested package source paths", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: ["packages/config/src/utils/helpers.ts"],
+				deterministic: true,
+				source: "baseRef",
+			}),
+		).toBe(true);
+	});
+
+	test("returns false when no package source files are changed", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: ["README.md", "package.json", ".github/workflows/ci.yml"],
+				deterministic: true,
+				source: "upstream",
+			}),
+		).toBe(false);
+	});
+
+	test("returns false for empty file list", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: [],
+				deterministic: false,
+				source: "undetermined",
+			}),
+		).toBe(false);
+	});
+
+	test("returns false for test files within packages", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: ["packages/cli/src/__tests__/cli.test.ts"],
+				deterministic: true,
+				source: "upstream",
+			}),
+		).toBe(true);
+	});
+
+	test("returns false for package files outside src", () => {
+		expect(
+			hasPackageSourceChanges({
+				files: ["packages/cli/package.json", "packages/cli/README.md"],
+				deterministic: true,
+				source: "upstream",
 			}),
 		).toBe(false);
 	});
