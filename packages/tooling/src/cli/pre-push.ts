@@ -10,7 +10,13 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import ts from "typescript";
+import {
+	analyzeSourceFile,
+	calculateCoverage,
+	type DeclarationCoverage,
+} from "./check-tsdoc.js";
 
 const COLORS = {
 	reset: "\x1b[0m",
@@ -106,6 +112,56 @@ export function canBypassRedPhaseByChangedFiles(
 	changedFiles: PushChangedFiles,
 ): boolean {
 	return changedFiles.deterministic && areFilesTestOnly(changedFiles.files);
+}
+
+/**
+ * Check whether any changed files are package source files.
+ *
+ * Matches files under "packages/PKGNAME/src/" (any depth).
+ */
+export function hasPackageSourceChanges(
+	changedFiles: PushChangedFiles,
+): boolean {
+	const packageSrcPattern = /^packages\/[^/]+\/src\//;
+	return changedFiles.files.some((f) => packageSrcPattern.test(f));
+}
+
+/**
+ * Print a one-line TSDoc coverage summary across all workspace packages.
+ *
+ * Discovers package entry points ("packages/STAR/src/index.ts"), analyzes
+ * TSDoc coverage, and outputs a single summary line. This is advisory
+ * only -- the result does not affect the exit code.
+ */
+async function printTsdocSummary(): Promise<void> {
+	const glob = new Bun.Glob("packages/*/src/index.ts");
+	const cwd = process.cwd();
+	const allDeclarations: DeclarationCoverage[] = [];
+
+	for (const entry of glob.scanSync({ cwd })) {
+		const filePath = resolve(cwd, entry);
+		const content = await Bun.file(filePath).text();
+		const sourceFile = ts.createSourceFile(
+			filePath,
+			content,
+			ts.ScriptTarget.Latest,
+			true,
+		);
+		allDeclarations.push(...analyzeSourceFile(sourceFile));
+	}
+
+	if (allDeclarations.length === 0) return;
+
+	const coverage = calculateCoverage(allDeclarations);
+	const parts: string[] = [];
+	if (coverage.documented > 0) parts.push(`${coverage.documented} documented`);
+	if (coverage.partial > 0) parts.push(`${coverage.partial} partial`);
+	if (coverage.undocumented > 0)
+		parts.push(`${coverage.undocumented} undocumented`);
+
+	log(
+		`${COLORS.blue}TSDoc${COLORS.reset}: ${coverage.percentage}% coverage (${parts.join(", ")} of ${coverage.total} total)`,
+	);
 }
 
 function resolveBaseRef(): string | undefined {
@@ -430,6 +486,16 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 		log("  - feature/tests");
 		log("  - feature_tests");
 		process.exit(1);
+	}
+
+	// TSDoc coverage summary (warning only, does not affect exit code)
+	const changedFiles = getChangedFilesForPush();
+	if (hasPackageSourceChanges(changedFiles)) {
+		try {
+			await printTsdocSummary();
+		} catch {
+			// Advisory only — never block push on TSDoc summary failure
+		}
 	}
 
 	log("");
