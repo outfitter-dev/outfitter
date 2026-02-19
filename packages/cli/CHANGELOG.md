@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+### Patch Changes
+
+- 4352c6d: Add generic custom flag builders (`booleanFlagPreset`, `enumFlagPreset`, `numberFlagPreset`, `stringListFlagPreset`) for command-local CLI flags, and dogfood them in `outfitter upgrade` action wiring.
+
 ## 0.5.0
 
 ### Minor Changes
