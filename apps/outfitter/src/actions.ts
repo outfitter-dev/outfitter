@@ -11,6 +11,7 @@ import {
   booleanFlagPreset,
   cwdPreset,
   dryRunPreset,
+  forcePreset,
   interactionPreset,
   verbosePreset,
 } from "@outfitter/cli/flags";
@@ -77,11 +78,6 @@ interface ScaffoldFlags {
   readonly noTooling?: unknown;
   readonly local?: unknown;
   readonly installTimeout?: unknown;
-}
-
-interface MigrateFlags {
-  readonly dryRun?: unknown;
-  readonly json?: unknown;
 }
 
 interface InitActionInput extends InitOptions {
@@ -198,6 +194,7 @@ function resolveInitOptions(
   presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
 ): InitActionInput {
   const flags = context.flags as InitFlags;
+  const { force, dryRun, yes } = initSharedFlags.resolve(context);
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
@@ -216,11 +213,8 @@ function resolveInitOptions(
     | undefined;
   const workspaceName = resolveStringFlag(flags.workspaceName);
   const local = resolveLocalFlag(flags);
-  const force = Boolean(flags.force);
   const withBlocks = resolveStringFlag(flags.with);
   const noTooling = resolveNoToolingFlag(flags);
-  const yes = Boolean(flags.yes);
-  const dryRun = Boolean(flags.dryRun ?? context.flags["dry-run"]);
   const skipInstall = Boolean(
     flags.skipInstall ?? context.flags["skip-install"]
   );
@@ -261,6 +255,7 @@ function resolveScaffoldOptions(
   context: ActionCliInputContext
 ): ScaffoldActionInput {
   const flags = context.flags as ScaffoldFlags;
+  const { force, dryRun } = scaffoldSharedFlags.resolve(context);
   const outputMode = resolveOutputModeFromContext(context.flags);
   const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
@@ -275,9 +270,9 @@ function resolveScaffoldOptions(
   return {
     target: String(context.args[0] ?? ""),
     name: resolveStringFlag(context.args[1]),
-    force: Boolean(flags.force),
+    force,
     skipInstall: Boolean(flags.skipInstall ?? context.flags["skip-install"]),
-    dryRun: Boolean(flags.dryRun ?? context.flags["dry-run"]),
+    dryRun,
     ...(local !== undefined ? { local } : {}),
     with: resolveStringFlag(flags.with),
     ...(noTooling !== undefined ? { noTooling } : {}),
@@ -290,12 +285,12 @@ function resolveScaffoldOptions(
 function resolveMigrateKitOptions(
   context: ActionCliInputContext
 ): MigrateKitActionInput {
-  const flags = context.flags as MigrateFlags;
+  const { dryRun } = migrateKitSharedFlags.resolve(context);
   const outputMode = resolveOutputModeFromContext(context.flags);
 
   return {
     targetDir: context.args[0] ?? process.cwd(),
-    dryRun: Boolean(flags.dryRun || context.flags["dry-run"]),
+    dryRun,
     outputMode,
   };
 }
@@ -308,11 +303,6 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "-b, --bin <name>",
     description: "Binary name (defaults to project name)",
-  },
-  {
-    flags: "-f, --force",
-    description: "Overwrite existing files",
-    defaultValue: false,
   },
   {
     flags: "--local",
@@ -338,6 +328,17 @@ const templateOption: ActionCliOption = {
   description: "Template to use (deprecated, use --preset)",
 };
 
+const initSharedFlags = actionCliPresets(
+  forcePreset(),
+  dryRunPreset(),
+  booleanFlagPreset({
+    id: "initYes",
+    key: "yes",
+    flags: "-y, --yes",
+    description: "Skip prompts and use defaults for missing values",
+  })
+);
+
 function createInitAction(options: {
   readonly id: string;
   readonly description: string;
@@ -352,6 +353,7 @@ function createInitAction(options: {
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
+  initOptions.push(...initSharedFlags.options);
   initOptions.push({
     flags: "-s, --structure <mode>",
     description: "Project structure (single|workspace)",
@@ -359,16 +361,6 @@ function createInitAction(options: {
   initOptions.push({
     flags: "--workspace-name <name>",
     description: "Workspace root package name",
-  });
-  initOptions.push({
-    flags: "-y, --yes",
-    description: "Skip prompts and use defaults for missing values",
-    defaultValue: false,
-  });
-  initOptions.push({
-    flags: "--dry-run",
-    description: "Preview changes without writing files",
-    defaultValue: false,
   });
   initOptions.push({
     flags: "--skip-install",
@@ -429,6 +421,10 @@ function createInitAction(options: {
   });
 }
 
+const scaffoldSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
+const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
+const migrateKitSharedFlags = actionCliPresets(dryRunPreset());
+
 const createAction = defineAction({
   id: "create",
   description: "Removed - use 'outfitter init' instead",
@@ -470,19 +466,10 @@ const scaffoldAction = defineAction({
     description:
       "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
     options: [
-      {
-        flags: "-f, --force",
-        description: "Overwrite existing files",
-        defaultValue: false,
-      },
+      ...scaffoldSharedFlags.options,
       {
         flags: "--skip-install",
         description: "Skip bun install",
-        defaultValue: false,
-      },
-      {
-        flags: "--dry-run",
-        description: "Preview changes without executing",
         defaultValue: false,
       },
       {
@@ -626,24 +613,14 @@ const addAction = defineAction({
     command: "<block>",
     description:
       "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
-    options: [
-      {
-        flags: "-f, --force",
-        description: "Overwrite existing files",
-        defaultValue: false,
-      },
-      {
-        flags: "--dry-run",
-        description: "Show what would be added without making changes",
-        defaultValue: false,
-      },
-    ],
+    options: [...addSharedFlags.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
+      const { force, dryRun } = addSharedFlags.resolve(context);
       return {
         block: context.args[0] as string,
-        force: Boolean(context.flags["force"]),
-        dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
+        force,
+        dryRun,
         cwd: process.cwd(),
         outputMode,
       };
@@ -936,13 +913,7 @@ const migrateKitAction = defineAction({
     command: "kit [directory]",
     description:
       "Migrate foundation imports and dependencies to @outfitter/kit",
-    options: [
-      {
-        flags: "--dry-run",
-        description: "Preview changes without writing files",
-        defaultValue: false,
-      },
-    ],
+    options: [...migrateKitSharedFlags.options],
     mapInput: resolveMigrateKitOptions,
   },
   handler: async (input) => {
