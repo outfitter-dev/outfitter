@@ -4,6 +4,7 @@ import {
 	extractImports,
 	isExportedSubpath,
 	parseSpecifier,
+	resolveJsonMode,
 } from "../cli/check-readme-imports.js";
 
 // ---------------------------------------------------------------------------
@@ -217,5 +218,22 @@ describe("isExportedSubpath", () => {
 
 	test("returns false for empty exports", () => {
 		expect(isExportedSubpath(".", {})).toBe(false);
+	});
+});
+
+describe("resolveJsonMode", () => {
+	test("uses explicit option when provided", () => {
+		process.env["OUTFITTER_JSON"] = "0";
+		expect(resolveJsonMode({ json: true })).toBe(true);
+		expect(resolveJsonMode({ json: false })).toBe(false);
+		process.env["OUTFITTER_JSON"] = undefined;
+	});
+
+	test("falls back to OUTFITTER_JSON env bridge", () => {
+		process.env["OUTFITTER_JSON"] = "1";
+		expect(resolveJsonMode()).toBe(true);
+		process.env["OUTFITTER_JSON"] = "0";
+		expect(resolveJsonMode()).toBe(false);
+		process.env["OUTFITTER_JSON"] = undefined;
 	});
 });

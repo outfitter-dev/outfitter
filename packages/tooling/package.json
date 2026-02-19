@@ -76,6 +76,7 @@
 		"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
 	},
 	"dependencies": {
+		"@outfitter/cli": "workspace:*",
 		"commander": "^14.0.2",
 		"zod": "^3.25.17"
 	},
