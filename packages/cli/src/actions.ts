@@ -1,5 +1,6 @@
 import {
   type ActionCliInputContext,
+  type ActionCliOption,
   type ActionRegistry,
   type ActionSurface,
   type AnyActionSpec,
@@ -9,7 +10,9 @@ import {
   validateInput,
 } from "@outfitter/contracts";
 import { Command } from "commander";
+import { composePresets } from "./flags.js";
 import { createSchemaCommand, type SchemaCommandOptions } from "./schema.js";
+import type { FlagPreset } from "./types.js";
 
 export interface BuildCliCommandsOptions {
   readonly createContext?: (input: {
@@ -24,6 +27,59 @@ export interface BuildCliCommandsOptions {
 type ActionSource = ActionRegistry | readonly AnyActionSpec[];
 
 const ARGUMENT_PREFIXES = ["<", "["];
+
+type ResolvedType<T> = T extends FlagPreset<infer R> ? R : never;
+type UnionToIntersection<U> = (
+  U extends unknown
+    ? (k: U) => void
+    : never
+) extends (k: infer I) => void
+  ? I
+  : never;
+
+type MergedPresetResult<
+  TPresets extends readonly FlagPreset<Record<string, unknown>>[],
+> =
+  UnionToIntersection<ResolvedType<TPresets[number]>> extends Record<
+    string,
+    unknown
+  >
+    ? UnionToIntersection<ResolvedType<TPresets[number]>>
+    : Record<string, unknown>;
+
+export interface ActionCliPresetAdapter<
+  TResolved extends Record<string, unknown>,
+> {
+  readonly options: readonly ActionCliOption[];
+  readonly resolve: (
+    input: ActionCliInputContext | Record<string, unknown>
+  ) => TResolved;
+}
+
+function isInputContext(
+  input: ActionCliInputContext | Record<string, unknown>
+): input is ActionCliInputContext {
+  return "flags" in input && typeof input.flags === "object";
+}
+
+/**
+ * Compose flag presets for action-spec CLI definitions.
+ *
+ * Returns an options array for `action.cli.options` and a typed `resolve()`
+ * that accepts either raw flags or full `ActionCliInputContext`.
+ */
+export function actionCliPresets<
+  TPresets extends readonly FlagPreset<Record<string, unknown>>[],
+>(...presets: TPresets): ActionCliPresetAdapter<MergedPresetResult<TPresets>> {
+  const composed = composePresets(...presets);
+  return {
+    options: composed.options,
+    resolve: (input) => {
+      const flags = isInputContext(input) ? input.flags : input;
+      return composed.resolve(flags) as MergedPresetResult<TPresets>;
+    },
+  };
+}
 
 function isArgumentToken(token: string | undefined): boolean {
   if (!token) {
