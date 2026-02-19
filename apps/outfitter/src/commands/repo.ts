@@ -244,7 +244,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-exports",
         args,
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
@@ -263,7 +263,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-readme-imports",
         args,
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
@@ -278,7 +278,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-bunup-registry",
         args: [],
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
@@ -297,7 +297,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-changeset",
         args,
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
@@ -318,7 +318,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-clean-tree",
         args,
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
@@ -333,7 +333,7 @@ function addToolingCheckSubcommands(
       const code = await runToolingCommand({
         command: "check-boundary-invocations",
         args: [],
-        cwd: resolveDocsCliOptions(cmdOptions).cwd ?? process.cwd(),
+        cwd: resolveDocsCliOptions(cmdOptions).cwd || process.cwd(),
       });
       applyExitCode(code);
     });
