@@ -1,10 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import {
+  booleanFlagPreset,
   composePresets,
   createPreset,
   cwdPreset,
   dryRunPreset,
+  enumFlagPreset,
   forcePreset,
+  numberFlagPreset,
+  stringListFlagPreset,
   verbosePreset,
 } from "../flags.js";
 
@@ -134,6 +138,121 @@ describe("built-in presets", () => {
     it("defines -f, --force option", () => {
       const preset = forcePreset();
       expect(preset.options[0]?.flags).toBe("-f, --force");
+    });
+  });
+});
+
+describe("custom flag builders", () => {
+  describe("booleanFlagPreset", () => {
+    it("resolves boolean value using default key source", () => {
+      const preset = booleanFlagPreset({
+        id: "guide",
+        key: "guide",
+        flags: "--guide",
+        description: "Show migration guidance",
+      });
+
+      expect(preset.resolve({})).toEqual({ guide: false });
+      expect(preset.resolve({ guide: true })).toEqual({ guide: true });
+    });
+
+    it("supports multiple sources and negated sources", () => {
+      const preset = booleanFlagPreset({
+        id: "noCodemods",
+        key: "noCodemods",
+        flags: "--no-codemods",
+        description: "Skip codemods",
+        sources: ["noCodemods", "no-codemods"],
+        negatedSources: ["codemods"],
+      });
+
+      expect(preset.resolve({ "no-codemods": true })).toEqual({
+        noCodemods: true,
+      });
+      expect(preset.resolve({ noCodemods: true })).toEqual({
+        noCodemods: true,
+      });
+      expect(preset.resolve({ codemods: false })).toEqual({
+        noCodemods: true,
+      });
+    });
+  });
+
+  describe("enumFlagPreset", () => {
+    it("resolves valid enum values and falls back to default", () => {
+      const preset = enumFlagPreset({
+        id: "outputMode",
+        key: "outputMode",
+        flags: "--output <mode>",
+        description: "Output mode",
+        values: ["human", "json", "jsonl"] as const,
+        defaultValue: "human",
+        sources: ["outputMode", "output"],
+      });
+
+      expect(preset.resolve({ output: "json" })).toEqual({
+        outputMode: "json",
+      });
+      expect(preset.resolve({ output: "invalid" })).toEqual({
+        outputMode: "human",
+      });
+      expect(preset.resolve({})).toEqual({ outputMode: "human" });
+    });
+  });
+
+  describe("numberFlagPreset", () => {
+    it("resolves number, clamps bounds, and defaults on invalid input", () => {
+      const preset = numberFlagPreset({
+        id: "retries",
+        key: "retries",
+        flags: "--retries <n>",
+        description: "Retry count",
+        defaultValue: 1,
+        min: 0,
+        max: 3,
+      });
+
+      expect(preset.resolve({ retries: "2" })).toEqual({ retries: 2 });
+      expect(preset.resolve({ retries: "10" })).toEqual({ retries: 3 });
+      expect(preset.resolve({ retries: "-5" })).toEqual({ retries: 0 });
+      expect(preset.resolve({ retries: "abc" })).toEqual({ retries: 1 });
+    });
+  });
+
+  describe("stringListFlagPreset", () => {
+    it("resolves lists from variadic arrays and comma-separated strings", () => {
+      const preset = stringListFlagPreset({
+        id: "paths",
+        key: "paths",
+        flags: "--paths <paths...>",
+        description: "Target paths",
+      });
+
+      expect(preset.resolve({ paths: ["apps", "packages"] })).toEqual({
+        paths: ["apps", "packages"],
+      });
+      expect(preset.resolve({ paths: "apps, packages,docs" })).toEqual({
+        paths: ["apps", "packages", "docs"],
+      });
+      expect(preset.resolve({})).toEqual({ paths: undefined });
+    });
+
+    it("supports dedupe and custom default values", () => {
+      const preset = stringListFlagPreset({
+        id: "blocks",
+        key: "blocks",
+        flags: "--blocks <name...>",
+        description: "Blocks",
+        dedupe: true,
+        defaultValue: [],
+      });
+
+      expect(
+        preset.resolve({ blocks: ["biome", "biome", "lefthook"] })
+      ).toEqual({
+        blocks: ["biome", "lefthook"],
+      });
+      expect(preset.resolve({})).toEqual({ blocks: [] });
     });
   });
 });
