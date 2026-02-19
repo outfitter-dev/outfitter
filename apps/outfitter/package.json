@@ -34,6 +34,12 @@
         "default": "./dist/commands/check.js"
       }
     },
+    "./commands/check-tsdoc": {
+      "import": {
+        "types": "./dist/commands/check-tsdoc.d.ts",
+        "default": "./dist/commands/check-tsdoc.js"
+      }
+    },
     "./commands/demo": {
       "import": {
         "types": "./dist/commands/demo.d.ts",

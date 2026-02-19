@@ -31,6 +31,12 @@
 				"default": "./dist/cli/check.js"
 			}
 		},
+		"./cli/check-tsdoc": {
+			"import": {
+				"types": "./dist/cli/check-tsdoc.d.ts",
+				"default": "./dist/cli/check-tsdoc.js"
+			}
+		},
 		"./cli/fix": {
 			"import": {
 				"types": "./dist/cli/fix.d.ts",
