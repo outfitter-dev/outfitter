@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { exitWithError } from "@outfitter/cli";
 import { createCLI } from "@outfitter/cli/command";
 import { Command } from "commander";
 import { VERSION } from "../version.js";
@@ -26,6 +27,13 @@ const cli = createCLI({
 	name: "tooling",
 	version: VERSION,
 	description: "Dev tooling configuration management for Outfitter projects",
+	onError: (error) => {
+		const err =
+			error instanceof Error
+				? error
+				: new Error("An unexpected error occurred");
+		exitWithError(err);
+	},
 });
 
 function register(command: Command): void {
