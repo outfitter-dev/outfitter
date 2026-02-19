@@ -9,6 +9,7 @@
 
 import { resolve } from "node:path";
 import ts from "typescript";
+import { type ZodType, z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -24,6 +25,15 @@ export interface DeclarationCoverage {
 	readonly level: CoverageLevel;
 	readonly file: string;
 	readonly line: number;
+}
+
+/** Coverage summary statistics. */
+export interface CoverageSummary {
+	readonly documented: number;
+	readonly partial: number;
+	readonly undocumented: number;
+	readonly total: number;
+	readonly percentage: number;
 }
 
 /** Per-package TSDoc coverage stats. */
@@ -42,14 +52,58 @@ export interface PackageCoverage {
 export interface TsDocCheckResult {
 	readonly ok: boolean;
 	readonly packages: readonly PackageCoverage[];
-	readonly summary: {
-		readonly documented: number;
-		readonly partial: number;
-		readonly undocumented: number;
-		readonly total: number;
-		readonly percentage: number;
-	};
+	readonly summary: CoverageSummary;
 }
+
+// ---------------------------------------------------------------------------
+// Zod schemas (for action output validation / schema introspection)
+// ---------------------------------------------------------------------------
+
+/** Zod schema for {@link CoverageLevel}. */
+export const coverageLevelSchema: ZodType<CoverageLevel> = z.enum([
+	"documented",
+	"partial",
+	"undocumented",
+]);
+
+/** Zod schema for {@link DeclarationCoverage}. */
+export const declarationCoverageSchema: ZodType<DeclarationCoverage> = z.object(
+	{
+		name: z.string(),
+		kind: z.string(),
+		level: coverageLevelSchema,
+		file: z.string(),
+		line: z.number(),
+	},
+);
+
+/** Zod schema for {@link CoverageSummary}. */
+export const coverageSummarySchema: ZodType<CoverageSummary> = z.object({
+	documented: z.number(),
+	partial: z.number(),
+	undocumented: z.number(),
+	total: z.number(),
+	percentage: z.number(),
+});
+
+/** Zod schema for {@link PackageCoverage}. */
+export const packageCoverageSchema: ZodType<PackageCoverage> = z.object({
+	name: z.string(),
+	path: z.string(),
+	declarations: z.array(declarationCoverageSchema),
+	documented: z.number(),
+	partial: z.number(),
+	undocumented: z.number(),
+	total: z.number(),
+	percentage: z.number(),
+});
+
+/** Zod schema for {@link TsDocCheckResult}. */
+export const tsDocCheckResultSchema: ZodType<TsDocCheckResult> = z.object({
+	ok: z.boolean(),
+	packages: z.array(packageCoverageSchema),
+	summary: coverageSummarySchema,
+});
 
 /** Options for the check-tsdoc command. */
 export interface CheckTsDocOptions {
@@ -480,18 +534,22 @@ function analyzePackage(pkg: {
 }
 
 // ---------------------------------------------------------------------------
-// Runner
+// Pure analysis
 // ---------------------------------------------------------------------------
 
 /**
- * Run check-tsdoc across workspace packages.
+ * Analyze TSDoc coverage across workspace packages.
  *
- * Discovers packages with `src/index.ts` entry points, analyzes TSDoc
- * coverage on exported declarations, and reports per-package statistics.
+ * Pure function that discovers packages, analyzes TSDoc coverage on exported
+ * declarations, and returns the aggregated result. Does not print output or
+ * call `process.exit()`.
+ *
+ * @param options - Analysis options (paths, strict mode, coverage threshold)
+ * @returns Aggregated coverage result across all packages, or `null` if no packages found
  */
-export async function runCheckTsdoc(
+export function analyzeCheckTsdoc(
 	options: CheckTsDocOptions = {},
-): Promise<void> {
+): TsDocCheckResult | null {
 	const cwd = process.cwd();
 	const minCoverage = options.minCoverage ?? 0;
 
@@ -523,8 +581,7 @@ export async function runCheckTsdoc(
 	}
 
 	if (packages.length === 0) {
-		process.stderr.write("No packages found with src/index.ts entry points.\n");
-		process.exit(1);
+		return null;
 	}
 
 	// Analyze each package
@@ -539,66 +596,111 @@ export async function runCheckTsdoc(
 
 	const ok = !options.strict || summary.percentage >= minCoverage;
 
-	const result: TsDocCheckResult = {
+	return {
 		ok,
 		packages: packageResults,
 		summary,
 	};
+}
 
-	// Output
+// ---------------------------------------------------------------------------
+// Human output
+// ---------------------------------------------------------------------------
+
+/**
+ * Print a TSDoc coverage result in human-readable format.
+ *
+ * Renders a bar chart per package with summary statistics. Writes to stdout/stderr.
+ *
+ * @param result - The coverage result to print
+ * @param options - Display options (strict mode, coverage threshold for warning)
+ */
+export function printCheckTsdocHuman(
+	result: TsDocCheckResult,
+	options?: { strict?: boolean | undefined; minCoverage?: number | undefined },
+): void {
+	process.stdout.write(
+		`\n${COLORS.bold}TSDoc Coverage Report${COLORS.reset}\n\n`,
+	);
+
+	for (const pkg of result.packages) {
+		const color =
+			pkg.percentage >= 80
+				? COLORS.green
+				: pkg.percentage >= 50
+					? COLORS.yellow
+					: COLORS.red;
+
+		process.stdout.write(
+			`  ${color}${pkg.percentage.toString().padStart(3)}%${COLORS.reset} ${bar(pkg.percentage)} ${pkg.name}\n`,
+		);
+
+		if (pkg.total > 0) {
+			const parts: string[] = [];
+			if (pkg.documented > 0)
+				parts.push(
+					`${COLORS.green}${pkg.documented} documented${COLORS.reset}`,
+				);
+			if (pkg.partial > 0)
+				parts.push(`${COLORS.yellow}${pkg.partial} partial${COLORS.reset}`);
+			if (pkg.undocumented > 0)
+				parts.push(
+					`${COLORS.red}${pkg.undocumented} undocumented${COLORS.reset}`,
+				);
+			process.stdout.write(
+				`       ${COLORS.dim}${pkg.total} declarations:${COLORS.reset} ${parts.join(", ")}\n`,
+			);
+		} else {
+			process.stdout.write(
+				`       ${COLORS.dim}no exported declarations${COLORS.reset}\n`,
+			);
+		}
+	}
+
+	const { summary } = result;
+	process.stdout.write(
+		`\n  ${COLORS.bold}Summary:${COLORS.reset} ${summary.percentage}% coverage (${summary.documented} documented, ${summary.partial} partial, ${summary.undocumented} undocumented of ${summary.total} total)\n`,
+	);
+
+	const minCoverage = options?.minCoverage ?? 0;
+	if (options?.strict && summary.percentage < minCoverage) {
+		process.stderr.write(
+			`\n  ${COLORS.red}Coverage ${summary.percentage}% is below minimum threshold of ${minCoverage}%${COLORS.reset}\n`,
+		);
+	}
+
+	process.stdout.write("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Runner
+// ---------------------------------------------------------------------------
+
+/**
+ * Run check-tsdoc across workspace packages.
+ *
+ * Discovers packages with `src/index.ts` entry points, analyzes TSDoc
+ * coverage on exported declarations, and reports per-package statistics.
+ * Calls `process.exit()` on completion.
+ */
+export async function runCheckTsdoc(
+	options: CheckTsDocOptions = {},
+): Promise<void> {
+	const result = analyzeCheckTsdoc(options);
+
+	if (!result) {
+		process.stderr.write("No packages found with src/index.ts entry points.\n");
+		process.exit(1);
+	}
+
 	if (resolveJsonMode(options)) {
 		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 	} else {
-		process.stdout.write(
-			`\n${COLORS.bold}TSDoc Coverage Report${COLORS.reset}\n\n`,
-		);
-
-		for (const pkg of packageResults) {
-			const color =
-				pkg.percentage >= 80
-					? COLORS.green
-					: pkg.percentage >= 50
-						? COLORS.yellow
-						: COLORS.red;
-
-			process.stdout.write(
-				`  ${color}${pkg.percentage.toString().padStart(3)}%${COLORS.reset} ${bar(pkg.percentage)} ${pkg.name}\n`,
-			);
-
-			if (pkg.total > 0) {
-				const parts: string[] = [];
-				if (pkg.documented > 0)
-					parts.push(
-						`${COLORS.green}${pkg.documented} documented${COLORS.reset}`,
-					);
-				if (pkg.partial > 0)
-					parts.push(`${COLORS.yellow}${pkg.partial} partial${COLORS.reset}`);
-				if (pkg.undocumented > 0)
-					parts.push(
-						`${COLORS.red}${pkg.undocumented} undocumented${COLORS.reset}`,
-					);
-				process.stdout.write(
-					`       ${COLORS.dim}${pkg.total} declarations:${COLORS.reset} ${parts.join(", ")}\n`,
-				);
-			} else {
-				process.stdout.write(
-					`       ${COLORS.dim}no exported declarations${COLORS.reset}\n`,
-				);
-			}
-		}
-
-		process.stdout.write(
-			`\n  ${COLORS.bold}Summary:${COLORS.reset} ${summary.percentage}% coverage (${summary.documented} documented, ${summary.partial} partial, ${summary.undocumented} undocumented of ${summary.total} total)\n`,
-		);
-
-		if (options.strict && summary.percentage < minCoverage) {
-			process.stderr.write(
-				`\n  ${COLORS.red}Coverage ${summary.percentage}% is below minimum threshold of ${minCoverage}%${COLORS.reset}\n`,
-			);
-		}
-
-		process.stdout.write("\n");
+		printCheckTsdocHuman(result, {
+			strict: options.strict,
+			minCoverage: options.minCoverage,
+		});
 	}
 
-	process.exit(ok ? 0 : 1);
+	process.exit(result.ok ? 0 : 1);
 }

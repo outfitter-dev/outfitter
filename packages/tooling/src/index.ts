@@ -30,6 +30,22 @@
  * @packageDocumentation
  */
 
+// Re-export check-tsdoc analysis functions and schemas
+export type {
+	CheckTsDocOptions,
+	CoverageLevel,
+	DeclarationCoverage,
+	PackageCoverage,
+	TsDocCheckResult,
+} from "./cli/check-tsdoc.js";
+export {
+	analyzeCheckTsdoc,
+	coverageLevelSchema,
+	declarationCoverageSchema,
+	packageCoverageSchema,
+	printCheckTsdocHuman,
+	tsDocCheckResultSchema,
+} from "./cli/check-tsdoc.js";
 // Re-export registry types for convenience
 export type {
 	AddBlockOptions,
