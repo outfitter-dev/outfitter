@@ -74,18 +74,25 @@ Every tool we build, every word we write, should respect the reader's time:
 
 ## The Expedition Layer
 
-The expedition metaphor gives Outfitter texture—but it's earned, not decorative. Use it when it clarifies; skip it when it obscures.
+The expedition layer is a brand aesthetic, not a prose checklist. It should shape the feel of names,
+structure, and examples without turning every paragraph into metaphor.
 
-### When It Works
+Use expedition language literally when it's part of the product (for example, a command, package, or
+feature name). Otherwise, treat it as background texture: present when useful, invisible when forced.
 
-| Metaphor | Use When |
-|----------|----------|
-| "Trail" / "Path" | Describing established patterns worth following |
-| "Terrain" | The technical environment or problem space |
-| "Gear" / "Provisions" | Tools, dependencies, configurations |
-| "Base camp" | Project setup, repository structure |
-| "Scout" | Research, exploration, proof-of-concept |
-| "Expedition" | A significant project or initiative |
+### Where It Shows Up Naturally
+
+| Layer | How to Apply It |
+|-------|-----------------|
+| Product terminology (literal) | Use exact expedition terms when they are official names (commands, packages, features, docs headings). |
+| Thematic vibe (atmospheric) | Let the outdoors/exploration feel influence framing and identity, but default to direct language in body copy. |
+| Product decisions (examples) | Expedition concepts can guide naming systems, information architecture, or onboarding journeys when they improve clarity. |
+
+### Practical Distinction
+
+- If the thing is literally named `scout`, write `scout`.
+- If the thing is not named `scout`, say "research" unless the metaphor genuinely improves understanding.
+- Prefer clarity first; theme is a multiplier, not the main payload.
 
 ### When to Skip It
 
