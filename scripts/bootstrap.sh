@@ -42,7 +42,7 @@ if [[ "${1:-}" != "--force" ]]; then
   command -v gh &>/dev/null || all_present=false
   command -v gt &>/dev/null || all_present=false
   command -v markdownlint-cli2 &>/dev/null || all_present=false
-  [[ -d "node_modules" ]] || all_present=false
+  [[ -d "$REPO_ROOT/node_modules" ]] || all_present=false
 
   if $all_present; then
     exit 0  # All good, nothing to do
@@ -114,7 +114,15 @@ install_bun() {
   export PATH="$BUN_INSTALL/bin:$PATH"
   hash -r
 
-  success "Bun ready ($(bun --version))"
+  local resolved_bun_version
+  resolved_bun_version="$(bun --version)"
+
+  if [[ "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
+    error "Expected Bun $PINNED_BUN_VERSION but found $resolved_bun_version after install"
+    exit 1
+  fi
+
+  success "Bun ready ($resolved_bun_version)"
 }
 
 # -----------------------------------------------------------------------------
@@ -200,7 +208,10 @@ check_auth() {
 # -----------------------------------------------------------------------------
 install_deps() {
   info "Installing project dependencies..."
-  bun install
+  (
+    cd "$REPO_ROOT"
+    bun install
+  )
   success "Dependencies installed"
 }
 
