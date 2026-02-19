@@ -8,6 +8,18 @@
 
 export type { CreateDocsCommandOptions } from "./command/create-docs-command.js";
 export { createDocsCommand } from "./command/create-docs-command.js";
+export type {
+  DocsCommonCliOptions,
+  DocsExportCliOptions,
+  DocsMdxMode,
+} from "./command/docs-option-bundle.js";
+export {
+  DOCS_COMMON_OPTION_FLAGS,
+  DOCS_EXPORT_OPTION_FLAGS,
+  resolveDocsCliOptions,
+  withDocsCommonOptions,
+  withDocsExportOptions,
+} from "./command/docs-option-bundle.js";
 export {
   type ExecuteCheckCommandOptions,
   executeCheckCommand,
