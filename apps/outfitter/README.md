@@ -40,7 +40,6 @@ Top-level commands:
 - `scaffold <target> [name]` - Add a new capability to an existing project
 - `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
 - `repo <action> <subject>` - Repository maintenance namespace (`check|sync|export`)
-- `migrate kit [directory]` - Migrate foundation imports and dependencies to `@outfitter/kit`
 - `update` - Check installed `@outfitter/*` versions and optionally show migration guidance
 - `doctor` - Validate local environment and project dependencies
 - `demo [section]` - Forward to the dedicated demo CLI (`outfitter-demo`)
@@ -165,25 +164,6 @@ outfitter repo check exports --json
 outfitter repo check readme
 ```
 
-### `migrate kit`
-
-Codemod for kit-first foundation adoption.
-
-```bash
-outfitter migrate kit [directory] [options]
-```
-
-Options:
-
-- `--dry-run` - Preview changes without writing files
-
-Examples:
-
-```bash
-outfitter migrate kit --dry-run
-outfitter migrate kit .
-```
-
 ### `upgrade`
 
 Check installed `@outfitter/*` packages against npm versions.
@@ -250,10 +230,8 @@ Root exports:
 import {
   runDoctor,
   runInit,
-  runMigrateKit,
   runScaffold,
   type InitOptions,
-  type MigrateKitOptions,
   type ScaffoldOptions,
 } from "outfitter";
 ```

@@ -2,20 +2,6 @@
 
 How to adopt Outfitter patterns in existing projects and upgrade between versions.
 
-## Adoption IA
-
-Before choosing an adoption path, review:
-
-- [Mixed Adoption IA](./ADOPTION-IA.md)
-- [Pilot Report: Kit-First Adoption](./PILOT-KIT-FIRST-ADOPTION.md)
-
-It defines the current three-state model (baseline foundation, baseline +
-transport, granular runtime adoption), a final recommendation, and explicit
-cross-workstream mapping for:
-
-- Logging slices: OS-78 .. OS-84
-- Kit/create/adoption slices: OS-85 .. OS-92
-
 ## Adopting Outfitter
 
 ### From Raw Commander.js to @outfitter/cli
@@ -331,7 +317,7 @@ to document:
 
 When upgrading Outfitter packages:
 
-- [ ] Update all `@outfitter/*` packages together (use `@outfitter/kit` for version coordination)
+- [ ] Update all `@outfitter/*` packages together
 - [ ] Run `bun install` to update lockfile
 - [ ] Run `bun run typecheck` to catch type errors
 - [ ] Run `bun run test` to verify functionality

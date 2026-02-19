@@ -2,7 +2,7 @@
  * `outfitter upgrade` - Detect installed @outfitter/* versions and show available updates.
  *
  * Reads package.json, queries npm for latest versions, and optionally
- * shows migration guidance from the kit plugin's migration docs.
+ * shows migration guidance from the outfitter plugin's migration docs.
  *
  * @packageDocumentation
  */
@@ -178,10 +178,7 @@ async function getLatestVersion(name: string): Promise<string | null> {
 // =============================================================================
 
 /** Known relative locations for migration docs. */
-const MIGRATION_DOC_PATHS = [
-  "plugins/outfitter/shared/migrations",
-  "node_modules/@outfitter/kit/shared/migrations",
-];
+const MIGRATION_DOC_PATHS = ["plugins/outfitter/shared/migrations"];
 
 /**
  * Find migration docs directory, checking known locations.

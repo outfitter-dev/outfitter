@@ -18,14 +18,6 @@ describe("extractBunupFilterName", () => {
 		).toBe("@outfitter/types");
 	});
 
-	test("returns package name with additional commands after", () => {
-		expect(
-			extractBunupFilterName(
-				"bun run sync:migrations && cd ../.. && bunup --filter @outfitter/kit",
-			),
-		).toBe("@outfitter/kit");
-	});
-
 	test("returns null for scripts without bunup --filter", () => {
 		expect(extractBunupFilterName("tsc --noEmit")).toBeNull();
 	});

@@ -501,12 +501,6 @@ async function buildPackageRecommendations(
       reason:
         "Install only when you have concrete branded-type or utility reuse needs",
     },
-    {
-      name: "@outfitter/kit",
-      purpose: "Version coordination across @outfitter/* packages",
-      recommendation: "optional",
-      reason: "Useful when managing many Outfitter packages in one project",
-    },
   ];
 
   return recommendations;

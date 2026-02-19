@@ -188,7 +188,6 @@ bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
 
 - [@outfitter/contracts](../contracts/README.md) — Result types and error patterns
 - [@outfitter/cli](../cli/README.md) — CLI framework
-- [@outfitter/kit](../kit/README.md) — Version coordination
 
 ## License
 

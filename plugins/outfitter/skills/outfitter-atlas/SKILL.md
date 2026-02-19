@@ -112,9 +112,6 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 │  @outfitter/contracts    @outfitter/types                       │
 └─────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────┐
-│  META: @outfitter/kit (foundation facade: re-exports contracts + types) │
-└─────────────────────────────────────────────────────────────────┘
 ```
 
 | Package | What It Does | Reach For When... |
@@ -133,7 +130,6 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 | `@outfitter/tui` | Terminal UI rendering primitives and prompts | Rich terminal UX (tables, trees, prompts, streaming) |
 | `@outfitter/testing` | Test harnesses, fixtures | Testing (always) |
 | `@outfitter/tooling` | Biome, TypeScript, Lefthook presets | Project setup (dev dependency) |
-| `@outfitter/kit` | Foundation facade (re-exports contracts + types) | Single import for core types |
 
 ## Trail Map: Designing a System
 
@@ -261,8 +257,6 @@ bun add @outfitter/index     # Full-text search
 # Dev dependencies
 bun add -D @outfitter/testing @outfitter/tooling
 
-# Foundation facade (optional — re-exports contracts + types)
-bun add @outfitter/kit
 ```
 
 New here? Start with [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md).
