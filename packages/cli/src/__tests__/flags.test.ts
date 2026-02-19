@@ -217,6 +217,37 @@ describe("custom flag builders", () => {
       expect(preset.resolve({ retries: "-5" })).toEqual({ retries: 0 });
       expect(preset.resolve({ retries: "abc" })).toEqual({ retries: 1 });
     });
+
+    it("falls back to default on empty string, null, and boolean inputs", () => {
+      const preset = numberFlagPreset({
+        id: "retries",
+        key: "retries",
+        flags: "--retries <n>",
+        description: "Retry count",
+        defaultValue: 1,
+        min: 0,
+        max: 3,
+      });
+
+      expect(preset.resolve({ retries: "" })).toEqual({ retries: 1 });
+      expect(preset.resolve({ retries: null })).toEqual({ retries: 1 });
+      expect(preset.resolve({ retries: true })).toEqual({ retries: 1 });
+      expect(preset.resolve({ retries: false })).toEqual({ retries: 1 });
+    });
+
+    it("respects integer: false for fractional values", () => {
+      const preset = numberFlagPreset({
+        id: "weight",
+        key: "weight",
+        flags: "--weight <n>",
+        description: "Weight",
+        defaultValue: 1.0,
+        integer: false,
+      });
+
+      expect(preset.resolve({ weight: "2.5" })).toEqual({ weight: 2.5 });
+      expect(preset.resolve({ weight: "0.1" })).toEqual({ weight: 0.1 });
+    });
   });
 
   describe("stringListFlagPreset", () => {

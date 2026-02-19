@@ -255,6 +255,9 @@ export function numberFlagPreset<TKey extends string>(
       let parsed: number | undefined;
       for (const source of sources) {
         const value = flags[source];
+        if (value === "" || value == null || typeof value === "boolean") {
+          continue;
+        }
         const numeric = Number(value);
         if (Number.isFinite(numeric)) {
           parsed = config.integer === false ? numeric : Math.floor(numeric);
