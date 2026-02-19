@@ -238,7 +238,7 @@ describe("resolveJsonMode", () => {
 		process.env["OUTFITTER_JSON"] = "0";
 		expect(resolveJsonMode({ json: true })).toBe(true);
 		expect(resolveJsonMode({ json: false })).toBe(false);
-		process.env["OUTFITTER_JSON"] = undefined;
+		delete process.env["OUTFITTER_JSON"];
 	});
 
 	test("falls back to OUTFITTER_JSON env bridge", () => {
@@ -246,6 +246,6 @@ describe("resolveJsonMode", () => {
 		expect(resolveJsonMode()).toBe(true);
 		process.env["OUTFITTER_JSON"] = "0";
 		expect(resolveJsonMode()).toBe(false);
-		process.env["OUTFITTER_JSON"] = undefined;
+		delete process.env["OUTFITTER_JSON"];
 	});
 });
