@@ -153,10 +153,7 @@ describe("runCheckTsdoc", () => {
 
   test("keeps JSONL output one-record-per-line when --jq is used", async () => {
     const workspace = createWorkspace(
-      [
-        "/** Doc. */",
-        "export function alpha(): void {}",
-      ].join("\n")
+      ["/** Doc. */", "export function alpha(): void {}"].join("\n")
     );
 
     try {
