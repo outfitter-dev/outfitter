@@ -436,3 +436,14 @@ command("list")
 - **No `--json` preset** — the global `--json` flag in `createCLI()` already handles this via `OUTFITTER_JSON` env bridge. `outputModePreset` is for commands needing the full `--output <mode>` convention.
 - **Presets resolve intent, not behavior** — `colorPreset()` resolves the user's intent (`"auto" | "always" | "never"`), consumers combine with `supportsColor()` from `@outfitter/cli/terminal/detection`.
 - **Conflict detection is a handler concern** — `--fields` vs `--exclude-fields`, `--next` vs `--reset` are not enforced at the preset level. Document conflicts, let handlers decide.
+
+## Guardrails and Exceptions
+
+Two CI guardrail tests enforce convention boundaries:
+
+- `apps/outfitter/src/__tests__/cli-convention-guardrails.test.ts`
+- `packages/cli/src/__tests__/preset-boundary-guardrails.test.ts`
+
+If a command needs intentional divergence (for example, an adapter that must
+forward `--json` to another CLI), add the file to the test allowlist with a
+short comment explaining why the exception is required.
