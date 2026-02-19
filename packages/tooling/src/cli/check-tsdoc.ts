@@ -356,12 +356,71 @@ function discoverPackages(
 	return packages.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/**
+ * Collect source files referenced by re-exports in a barrel file.
+ *
+ * For `export { ... } from "./foo"` and `export * from "./bar"`, resolves
+ * the module specifier to a source file in the program. Returns only files
+ * within the package (skips external modules).
+ */
+function collectReExportedSourceFiles(
+	sourceFile: ts.SourceFile,
+	program: ts.Program,
+	pkgPath: string,
+): ts.SourceFile[] {
+	const result: ts.SourceFile[] = [];
+	const seen = new Set<string>();
+
+	for (const statement of sourceFile.statements) {
+		if (!ts.isExportDeclaration(statement)) continue;
+		if (!statement.moduleSpecifier) continue;
+		if (!ts.isStringLiteral(statement.moduleSpecifier)) continue;
+
+		const specifier = statement.moduleSpecifier.text;
+		// Only follow relative imports (within the package)
+		if (!specifier.startsWith(".")) continue;
+
+		const resolvedModule = ts.resolveModuleName(
+			specifier,
+			sourceFile.fileName,
+			program.getCompilerOptions(),
+			ts.sys,
+		);
+		const resolvedFileName = resolvedModule.resolvedModule?.resolvedFileName;
+		if (!resolvedFileName) continue;
+		if (!resolvedFileName.startsWith(pkgPath)) continue;
+		if (seen.has(resolvedFileName)) continue;
+		seen.add(resolvedFileName);
+
+		const sf = program.getSourceFile(resolvedFileName);
+		if (sf) result.push(sf);
+	}
+
+	return result;
+}
+
 /** Analyze a single package entry point, returning coverage data. */
 function analyzePackage(pkg: {
 	name: string;
 	path: string;
 	entryPoint: string;
 }): PackageCoverage {
+	// Validate entry point exists
+	try {
+		require("node:fs").accessSync(pkg.entryPoint);
+	} catch {
+		return {
+			name: pkg.name,
+			path: pkg.path,
+			declarations: [],
+			documented: 0,
+			partial: 0,
+			undocumented: 0,
+			total: 0,
+			percentage: 0,
+		};
+	}
+
 	// Try to find a tsconfig for this package, fall back to root
 	let tsconfigPath = resolve(pkg.path, "tsconfig.json");
 	try {
@@ -393,11 +452,23 @@ function analyzePackage(pkg: {
 			partial: 0,
 			undocumented: 0,
 			total: 0,
-			percentage: 100,
+			percentage: 0,
 		};
 	}
 
+	// Analyze direct exports in the entry point
 	const declarations = analyzeSourceFile(sourceFile);
+
+	// Follow re-exports into their source files (barrel pattern)
+	const reExportedFiles = collectReExportedSourceFiles(
+		sourceFile,
+		program,
+		pkg.path,
+	);
+	for (const sf of reExportedFiles) {
+		declarations.push(...analyzeSourceFile(sf));
+	}
+
 	const stats = calculateCoverage(declarations);
 
 	return {
