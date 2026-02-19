@@ -18,6 +18,7 @@ import { runCheckBunupRegistry } from "./check-bunup-registry.js";
 import { runCheckChangeset } from "./check-changeset.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
+import { runCheckTsdoc } from "./check-tsdoc.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
 import { runPrePush } from "./pre-push.js";
@@ -113,6 +114,34 @@ register(
 		.action(async (options: { json?: boolean }) => {
 			await runCheckExports(options);
 		}),
+);
+
+register(
+	new Command("check-tsdoc")
+		.description("Check TSDoc coverage on exported declarations")
+		.argument("[paths...]", "Specific package paths to check")
+		.option("--strict", "Exit non-zero when coverage is below threshold")
+		.option("--json", "Output results as JSON")
+		.option("--min-coverage <percentage>", "Minimum coverage percentage", "0")
+		.action(
+			async (
+				paths: string[],
+				options: {
+					strict?: boolean;
+					json?: boolean;
+					minCoverage?: string;
+				},
+			) => {
+				await runCheckTsdoc({
+					paths: paths.length > 0 ? paths : undefined,
+					strict: options.strict,
+					json: options.json,
+					minCoverage: options.minCoverage
+						? Number.parseInt(options.minCoverage, 10)
+						: undefined,
+				});
+			},
+		),
 );
 
 register(
