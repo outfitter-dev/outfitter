@@ -197,6 +197,134 @@ export interface FlagPresetConfig<TResolved extends Record<string, unknown>> {
 }
 
 /**
+ * Configuration for creating a custom boolean flag preset.
+ */
+export interface BooleanFlagPresetConfig<TKey extends string> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolved output property name */
+  readonly key: TKey;
+
+  /** Commander option definition (e.g., "--force" or "--no-codemods") */
+  readonly flags: string;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Default resolved value (defaults to false) */
+  readonly defaultValue?: boolean;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
+
+  /** Positive keys that should be negated (e.g., "codemods" for --no-codemods) */
+  readonly negatedSources?: readonly string[];
+
+  /** Whether the option is required */
+  readonly required?: boolean;
+}
+
+/**
+ * Configuration for creating a custom enum flag preset.
+ */
+export interface EnumFlagPresetConfig<
+  TKey extends string,
+  TValue extends string,
+> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolved output property name */
+  readonly key: TKey;
+
+  /** Commander option definition */
+  readonly flags: string;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Allowed enum values */
+  readonly values: readonly TValue[];
+
+  /** Fallback value when input is missing or invalid */
+  readonly defaultValue: TValue;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
+
+  /** Whether the option is required */
+  readonly required?: boolean;
+}
+
+/**
+ * Configuration for creating a custom numeric flag preset.
+ */
+export interface NumberFlagPresetConfig<TKey extends string> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolved output property name */
+  readonly key: TKey;
+
+  /** Commander option definition */
+  readonly flags: string;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Fallback value when input is missing or invalid */
+  readonly defaultValue: number;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
+
+  /** Lower bound (inclusive) */
+  readonly min?: number;
+
+  /** Upper bound (inclusive) */
+  readonly max?: number;
+
+  /** Floor parsed values (defaults to true) */
+  readonly integer?: boolean;
+
+  /** Whether the option is required */
+  readonly required?: boolean;
+}
+
+/**
+ * Configuration for creating a custom string-list flag preset.
+ */
+export interface StringListFlagPresetConfig<TKey extends string> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolved output property name */
+  readonly key: TKey;
+
+  /** Commander option definition */
+  readonly flags: string;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
+
+  /** Fallback list when input is missing or invalid */
+  readonly defaultValue?: readonly string[];
+
+  /** Split string values by this separator (defaults to ",") */
+  readonly separator?: string;
+
+  /** Remove duplicate values while preserving order */
+  readonly dedupe?: boolean;
+
+  /** Whether the option is required */
+  readonly required?: boolean;
+}
+
+/**
  * Result of composing multiple presets together.
  * Options are deduplicated by preset id (first wins).
  */

@@ -1,5 +1,5 @@
 /**
- * Integration tests for `outfitter update` — exercises the full `runUpdate()` flow.
+ * Integration tests for `outfitter upgrade` — exercises the full `runUpgrade()` flow.
  *
  * These tests wire together workspace scanning, npm version querying (mocked),
  * semver analysis, apply logic, and migration guide generation to verify
@@ -18,7 +18,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { runUpdate } from "../commands/update.js";
+import { runUpgrade } from "../commands/upgrade.js";
 
 // =============================================================================
 // Test Utilities
@@ -69,6 +69,12 @@ function readPackageJson(dir: string): {
   devDependencies?: Record<string, string>;
 } {
   return JSON.parse(readFileSync(join(dir, "package.json"), "utf-8"));
+}
+
+function readUpgradeReport(dir: string): Record<string, unknown> {
+  return JSON.parse(
+    readFileSync(join(dir, ".outfitter", "reports", "upgrade.json"), "utf-8")
+  ) as Record<string, unknown>;
 }
 
 function writeMigrationDoc(
@@ -160,8 +166,8 @@ function mockNpmAndInstall(versionMap: Record<string, string>): void {
 // Full Flow — Result Shape Validation
 // =============================================================================
 
-describe("integration: full runUpdate() flow — result shape", () => {
-  test("returns well-formed UpdateResult with all expected fields", async () => {
+describe("integration: full runUpgrade() flow — result shape", () => {
+  test("returns well-formed UpgradeResult with all expected fields", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
       "@outfitter/cli": "^0.1.0",
@@ -174,7 +180,7 @@ describe("integration: full runUpdate() flow — result shape", () => {
       "@outfitter/config": "0.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -217,7 +223,7 @@ describe("integration: full runUpdate() flow — result shape", () => {
       "@outfitter/config": "0.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -247,7 +253,7 @@ describe("integration: full runUpdate() flow — result shape", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -268,7 +274,7 @@ describe("integration: full runUpdate() flow — result shape", () => {
 // =============================================================================
 
 describe("integration: apply flow with mocked Bun.spawn", () => {
-  test("runUpdate({ apply: true }) writes package.json and invokes bun install", async () => {
+  test("runUpgrade({ yes: true }) writes package.json and invokes bun install", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
       "@outfitter/cli": "^0.1.0",
@@ -279,7 +285,7 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -317,7 +323,7 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
       "@outfitter/config": "0.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -333,7 +339,7 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
     expect(pkg.dependencies?.["@outfitter/config"]).toBe("^0.1.0"); // unchanged
   });
 
-  test("apply --breaking includes breaking updates in the apply set", async () => {
+  test("apply --all includes breaking updates in the apply set", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
       "@outfitter/cli": "^0.1.0",
@@ -344,10 +350,10 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
       "@outfitter/cli": "0.1.3", // non-breaking
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
-      breaking: true,
+      yes: true,
+      all: true,
     });
 
     expect(result.isOk()).toBe(true);
@@ -390,7 +396,7 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
       "@outfitter/config": "0.1.2",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -413,6 +419,156 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
     );
     expect(installCalls).toHaveLength(1);
     expect(installCalls[0]?.cwd).toBe(resolve(tempDir));
+  });
+
+  test("apply from nested cwd runs codemods against the workspace root", async () => {
+    writeJson(join(tempDir, "package.json"), {
+      name: "monorepo",
+      workspaces: ["packages/*"],
+    });
+
+    writeJson(join(tempDir, "packages", "pkg-a", "package.json"), {
+      name: "pkg-a",
+      version: "1.0.0",
+      dependencies: { "@outfitter/cli": "^0.1.0" },
+    });
+
+    writeJson(join(tempDir, "packages", "pkg-b", "package.json"), {
+      name: "pkg-b",
+      version: "1.0.0",
+      dependencies: { "@outfitter/cli": "^0.1.0" },
+    });
+
+    const targetFile = join(tempDir, "packages", "pkg-b", "src", "feature.ts");
+    mkdirSync(join(targetFile, ".."), { recursive: true });
+    writeFileSync(targetFile, 'export const marker = "legacy-token";\n');
+
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
+    const codemodsDir = join(tempDir, "plugins/outfitter/shared/codemods/cli");
+    mkdirSync(migrationsDir, { recursive: true });
+    mkdirSync(codemodsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-cli-0.1.5.md"),
+      `---
+package: "@outfitter/cli"
+version: 0.1.5
+breaking: false
+changes:
+  - type: moved
+    from: "legacy-token"
+    to: "new-token"
+    codemod: "cli/test-codemod.ts"
+---
+
+# Migration`
+    );
+
+    writeFileSync(
+      join(codemodsDir, "test-codemod.ts"),
+      `export async function transform(options) {
+  const { readFileSync, writeFileSync } = require("node:fs");
+  const { join } = require("node:path");
+  const changedFiles = [];
+  const glob = new Bun.Glob("**/*.ts");
+  for (const entry of glob.scanSync({ cwd: options.targetDir })) {
+    const absPath = join(options.targetDir, entry);
+    const content = readFileSync(absPath, "utf-8");
+    if (!content.includes("legacy-token")) continue;
+    const updated = content.replaceAll("legacy-token", "new-token");
+    if (!options.dryRun) writeFileSync(absPath, updated);
+    changedFiles.push(entry);
+  }
+  return { changedFiles, skippedFiles: [], errors: [] };
+}`
+    );
+
+    mockNpmAndInstall({
+      "@outfitter/cli": "0.1.5",
+    });
+
+    const nestedCwd = join(tempDir, "packages", "pkg-a");
+    const result = await runUpgrade({ cwd: nestedCwd, yes: true });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.codemods?.codemodCount).toBe(1);
+    expect(result.value.codemods?.changedFiles).toContain(
+      "packages/pkg-b/src/feature.ts"
+    );
+
+    const updated = readFileSync(targetFile, "utf-8");
+    expect(updated).toContain("new-token");
+    expect(updated).not.toContain("legacy-token");
+  });
+
+  test("apply with noCodemods skips codemod execution", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/cli": "^0.1.0",
+    });
+
+    const targetFile = join(tempDir, "src", "feature.ts");
+    mkdirSync(join(targetFile, ".."), { recursive: true });
+    writeFileSync(targetFile, 'export const marker = "legacy-token";\n');
+
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
+    const codemodsDir = join(tempDir, "plugins/outfitter/shared/codemods/cli");
+    mkdirSync(migrationsDir, { recursive: true });
+    mkdirSync(codemodsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-cli-0.1.5.md"),
+      `---
+package: "@outfitter/cli"
+version: 0.1.5
+breaking: false
+changes:
+  - type: moved
+    from: "legacy-token"
+    to: "new-token"
+    codemod: "cli/test-codemod.ts"
+---
+
+# Migration`
+    );
+
+    writeFileSync(
+      join(codemodsDir, "test-codemod.ts"),
+      `export async function transform(options) {
+  const { readFileSync, writeFileSync } = require("node:fs");
+  const { join } = require("node:path");
+  const file = join(options.targetDir, "src/feature.ts");
+  const content = readFileSync(file, "utf-8");
+  if (!options.dryRun) {
+    writeFileSync(file, content.replaceAll("legacy-token", "new-token"));
+  }
+  return { changedFiles: ["src/feature.ts"], skippedFiles: [], errors: [] };
+}`
+    );
+
+    mockNpmAndInstall({
+      "@outfitter/cli": "0.1.5",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      yes: true,
+      noCodemods: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.codemods).toBeUndefined();
+
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/cli"]).toBe("^0.1.5");
+
+    const unchanged = readFileSync(targetFile, "utf-8");
+    expect(unchanged).toContain("legacy-token");
+    expect(unchanged).not.toContain("new-token");
   });
 });
 
@@ -440,7 +596,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/types": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -462,7 +618,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -485,7 +641,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -508,7 +664,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/contracts": "2.0.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -529,7 +685,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/contracts": "1.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -550,7 +706,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/cli": "1.0.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -574,7 +730,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
       "@outfitter/logging": "1.1.0", // non-breaking (stable minor)
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -609,7 +765,7 @@ describe("integration: breaking classification for pre-1.0 packages", () => {
 // Guide Output — structured migration guides
 // =============================================================================
 
-describe("integration: guide output via runUpdate({ guide: true })", () => {
+describe("integration: guide output via runUpgrade({ guide: true })", () => {
   test("returns migration guides when guide option is set", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -621,7 +777,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, guide: true });
+    const result = await runUpgrade({ cwd: tempDir, guide: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -658,7 +814,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, guide: true });
+    const result = await runUpgrade({ cwd: tempDir, guide: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -694,7 +850,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir, guide: true });
+    const result = await runUpgrade({ cwd: tempDir, guide: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -721,7 +877,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
       guide: true,
       guidePackages: ["@outfitter/contracts"],
@@ -744,7 +900,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/contracts": "0.2.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -761,7 +917,7 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/contracts": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir, guide: true });
+    const result = await runUpgrade({ cwd: tempDir, guide: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -781,9 +937,9 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
       "@outfitter/cli": "0.1.3", // non-breaking — applied
     });
 
-    const result = await runUpdate({
+    const result = await runUpgrade({
       cwd: tempDir,
-      apply: true,
+      yes: true,
       guide: true,
     });
 
@@ -807,6 +963,213 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
 });
 
 // =============================================================================
+// Upgrade Report
+// =============================================================================
+
+describe("integration: upgrade report artifact", () => {
+  test("writes dry_run status with effective flag metadata", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.1.5",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      dryRun: true,
+      yes: true,
+      interactive: false,
+      all: true,
+      noCodemods: true,
+      outputMode: "json",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("dry_run");
+    expect(report["applied"]).toBe(false);
+    expect(typeof report["startedAt"]).toBe("string");
+    expect(typeof report["finishedAt"]).toBe("string");
+    expect(report["cwd"]).toBe(resolve(tempDir));
+
+    const flags = report["flags"] as Record<string, unknown>;
+    expect(flags["dryRun"]).toBe(true);
+    expect(flags["yes"]).toBe(true);
+    expect(flags["interactive"]).toBe(false);
+    expect(flags["all"]).toBe(true);
+    expect(flags["noCodemods"]).toBe(true);
+    expect(flags["outputMode"]).toBe("json");
+  });
+
+  test("writes no_updates status when no @outfitter packages are found", async () => {
+    writePackageJson(tempDir, {
+      zod: "^3.0.0",
+    });
+
+    mockNpmAndInstall({});
+
+    const result = await runUpgrade({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("no_updates");
+    expect(report["applied"]).toBe(false);
+    const summary = report["summary"] as Record<string, unknown>;
+    expect(summary["total"]).toBe(0);
+    expect(summary["available"]).toBe(0);
+  });
+
+  test("writes skipped_non_interactive status when prompts are disabled without --yes", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.1.5",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      interactive: false,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value.applied).toBe(false);
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("skipped_non_interactive");
+  });
+
+  test("writes applied status for successful mutation runs", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.1.5",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      yes: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value.applied).toBe(true);
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("applied");
+    expect(report["applied"]).toBe(true);
+    const summary = report["summary"] as Record<string, unknown>;
+    expect(summary["applied"]).toBe(1);
+  });
+
+  test("writes failed status when upgrade execution errors", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    const failingSpawn = (
+      cmd: string[],
+      opts?: { cwd?: string; stdout?: string; stderr?: string }
+    ) => {
+      const cmdArray = Array.isArray(cmd) ? cmd : [cmd];
+
+      if (
+        cmdArray[0] === "npm" &&
+        cmdArray[1] === "view" &&
+        cmdArray[2] === "@outfitter/contracts" &&
+        cmdArray[3] === "version"
+      ) {
+        return {
+          stdout: new Response("0.1.5").body,
+          stderr: new Response("").body,
+          exited: Promise.resolve(0),
+        };
+      }
+
+      if (cmdArray[0] === "bun" && cmdArray[1] === "install") {
+        return {
+          stdout: new Response("").body,
+          stderr: new Response("install failed").body,
+          exited: Promise.resolve(1),
+        };
+      }
+
+      return originalSpawn(cmd, opts as Parameters<typeof Bun.spawn>[1]);
+    };
+
+    Object.assign(Bun, { spawn: failingSpawn });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      yes: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("failed");
+    const error = report["error"] as Record<string, unknown>;
+    expect(error["message"]).toBe("bun install failed");
+    expect(error["category"]).toBe("internal");
+  });
+
+  test("writes cancelled status when interactive prompt is declined (non-TTY)", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.1.5",
+    });
+
+    // Neither --yes nor --non-interactive → triggers confirmDestructive(),
+    // which returns Err(CancelledError) in a non-TTY test environment.
+    const result = await runUpgrade({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value.applied).toBe(false);
+
+    const report = readUpgradeReport(tempDir);
+    expect(report["status"]).toBe("cancelled");
+    expect(report["applied"]).toBe(false);
+    const summary = report["summary"] as Record<string, unknown>;
+    expect(summary["available"]).toBe(1);
+    expect(summary["applied"]).toBe(0);
+  });
+
+  test("report write failures warn but do not change command result", async () => {
+    writePackageJson(tempDir, {
+      zod: "^3.0.0",
+    });
+    mockNpmAndInstall({});
+
+    writeFileSync(join(tempDir, ".outfitter"), "conflicting file");
+
+    const originalStderrWrite = process.stderr.write;
+    const stderrSpy = mock(() => true);
+    Object.assign(process.stderr, { write: stderrSpy });
+
+    try {
+      const result = await runUpgrade({ cwd: tempDir });
+      expect(result.isOk()).toBe(true);
+      expect(stderrSpy).toHaveBeenCalled();
+    } finally {
+      Object.assign(process.stderr, { write: originalStderrWrite });
+    }
+  });
+});
+
+// =============================================================================
 // Edge Cases
 // =============================================================================
 
@@ -816,7 +1179,7 @@ describe("integration: edge cases", () => {
 
     mockNpmAndInstall({});
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -831,7 +1194,7 @@ describe("integration: edge cases", () => {
   test("no package.json returns an error result", async () => {
     mockNpmAndInstall({});
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
@@ -839,7 +1202,7 @@ describe("integration: edge cases", () => {
     }
   });
 
-  test("all packages up to date with --apply is a no-op", async () => {
+  test("all packages up to date with --yes is a no-op", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.5",
       "@outfitter/cli": "^0.1.3",
@@ -850,7 +1213,7 @@ describe("integration: edge cases", () => {
       "@outfitter/cli": "0.1.3",
     });
 
-    const result = await runUpdate({ cwd: tempDir, apply: true });
+    const result = await runUpgrade({ cwd: tempDir, yes: true });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
@@ -876,7 +1239,7 @@ describe("integration: edge cases", () => {
       "@outfitter/cli": "0.1.5",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;

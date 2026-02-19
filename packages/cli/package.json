@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/cli",
   "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "files": [
     "dist"
@@ -115,7 +115,8 @@
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",

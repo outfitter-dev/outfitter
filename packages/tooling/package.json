@@ -1,7 +1,7 @@
 {
 	"name": "@outfitter/tooling",
 	"description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"type": "module",
 	"files": [
 		"dist",
@@ -29,6 +29,12 @@
 			"import": {
 				"types": "./dist/cli/check.d.ts",
 				"default": "./dist/cli/check.js"
+			}
+		},
+		"./cli/check-tsdoc": {
+			"import": {
+				"types": "./dist/cli/check-tsdoc.d.ts",
+				"default": "./dist/cli/check-tsdoc.js"
 			}
 		},
 		"./cli/fix": {
@@ -72,15 +78,17 @@
 		"lint:fix": "biome lint --write ./src",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist registry"
+		"clean": "rm -rf dist registry",
+		"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
 	},
 	"dependencies": {
+		"@outfitter/cli": "workspace:*",
 		"commander": "^14.0.2",
+		"typescript": "^5.9.3",
 		"zod": "^3.25.17"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.3.7",
-		"typescript": "^5.9.3",
 		"yaml": "^2.8.2"
 	},
 	"peerDependencies": {

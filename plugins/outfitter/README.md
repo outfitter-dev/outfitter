@@ -18,7 +18,7 @@ Skills and workflows for working with @outfitter/* packages. Patterns, templates
 |-------|---------|
 | `outfitter-atlas` | Complete guide: patterns, templates, architecture, package reference |
 | `outfitter-start` | Start with Outfitter — scaffold new projects or adopt existing codebases |
-| `outfitter-update` | Update @outfitter/* packages with migration guidance |
+| `outfitter-upgrade` | Upgrade @outfitter/* packages with migration guidance |
 | `outfitter-check` | Verify Stack compliance with severity-ranked reports |
 | `outfitter-issue` | Report issues to outfitter-dev/outfitter |
 | `debug-outfitter` | Systematic debugging with investigation reports |
@@ -102,14 +102,23 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 | Package | Purpose |
 |---------|---------|
-| `@outfitter/contracts` | Result types, errors, Handler contract |
-| `@outfitter/cli` | CLI commands with output modes |
-| `@outfitter/mcp` | MCP server framework |
-| `@outfitter/config` | XDG-compliant configuration |
-| `@outfitter/logging` | Structured logging with redaction |
-| `@outfitter/daemon` | Background services with IPC |
-| `@outfitter/file-ops` | Secure paths, atomic writes |
-| `@outfitter/testing` | Test harnesses for CLI/MCP |
+| `@outfitter/cli` | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing |
+| `@outfitter/config` | XDG-compliant config loading with schema validation for Outfitter |
+| `@outfitter/contracts` | Result/Error patterns, error taxonomy, and handler contracts for Outfitter |
+| `@outfitter/daemon` | Daemon lifecycle, IPC, and health checks for Outfitter |
+| `@outfitter/docs` | CLI and host command adapter for Outfitter docs workflows |
+| `@outfitter/docs-core` | Core docs assembly and freshness checks for Outfitter projects |
+| `@outfitter/file-ops` | Workspace detection, secure path handling, and file locking for Outfitter |
+| `@outfitter/index` | SQLite FTS5 full-text search indexing for Outfitter |
+| `@outfitter/kit` | Foundation facade for Outfitter contracts and types |
+| `@outfitter/logging` | Structured logging via logtape with redaction support for Outfitter |
+| `@outfitter/mcp` | MCP server framework with typed tools for Outfitter |
+| `@outfitter/schema` | Schema introspection, surface map generation, and drift detection for Outfitter |
+| `@outfitter/state` | Pagination cursor persistence and state management for Outfitter |
+| `@outfitter/testing` | Test harnesses, fixtures, and utilities for Outfitter packages |
+| `@outfitter/tooling` | Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint) |
+| `@outfitter/tui` | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
+| `@outfitter/types` | Branded types, type guards, and type utilities for Outfitter |
 
 ## Links
 

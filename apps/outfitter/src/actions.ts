@@ -6,7 +6,15 @@
 
 import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
-import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import { actionCliPresets } from "@outfitter/cli/actions";
+import {
+  booleanFlagPreset,
+  cwdPreset,
+  dryRunPreset,
+  forcePreset,
+  interactionPreset,
+  verbosePreset,
+} from "@outfitter/cli/flags";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -24,6 +32,7 @@ import {
   runAdd,
 } from "./commands/add.js";
 import { printCheckResults, runCheck } from "./commands/check.js";
+import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
@@ -33,7 +42,7 @@ import {
   runMigrateKit,
 } from "./commands/migrate-kit.js";
 import { printScaffoldResults, runScaffold } from "./commands/scaffold.js";
-import { printUpdateResults, runUpdate } from "./commands/update.js";
+import { printUpgradeResults, runUpgrade } from "./commands/upgrade.js";
 import {
   type CliOutputMode,
   resolveOutputModeFromContext,
@@ -70,11 +79,6 @@ interface ScaffoldFlags {
   readonly noTooling?: unknown;
   readonly local?: unknown;
   readonly installTimeout?: unknown;
-}
-
-interface MigrateFlags {
-  readonly dryRun?: unknown;
-  readonly json?: unknown;
 }
 
 interface InitActionInput extends InitOptions {
@@ -191,6 +195,7 @@ function resolveInitOptions(
   presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
 ): InitActionInput {
   const flags = context.flags as InitFlags;
+  const { force, dryRun, yes } = initSharedFlags.resolve(context);
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
@@ -209,11 +214,8 @@ function resolveInitOptions(
     | undefined;
   const workspaceName = resolveStringFlag(flags.workspaceName);
   const local = resolveLocalFlag(flags);
-  const force = Boolean(flags.force);
   const withBlocks = resolveStringFlag(flags.with);
   const noTooling = resolveNoToolingFlag(flags);
-  const yes = Boolean(flags.yes);
-  const dryRun = Boolean(flags.dryRun ?? context.flags["dry-run"]);
   const skipInstall = Boolean(
     flags.skipInstall ?? context.flags["skip-install"]
   );
@@ -254,6 +256,7 @@ function resolveScaffoldOptions(
   context: ActionCliInputContext
 ): ScaffoldActionInput {
   const flags = context.flags as ScaffoldFlags;
+  const { force, dryRun } = scaffoldSharedFlags.resolve(context);
   const outputMode = resolveOutputModeFromContext(context.flags);
   const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
@@ -268,9 +271,9 @@ function resolveScaffoldOptions(
   return {
     target: String(context.args[0] ?? ""),
     name: resolveStringFlag(context.args[1]),
-    force: Boolean(flags.force),
+    force,
     skipInstall: Boolean(flags.skipInstall ?? context.flags["skip-install"]),
-    dryRun: Boolean(flags.dryRun ?? context.flags["dry-run"]),
+    dryRun,
     ...(local !== undefined ? { local } : {}),
     with: resolveStringFlag(flags.with),
     ...(noTooling !== undefined ? { noTooling } : {}),
@@ -283,12 +286,12 @@ function resolveScaffoldOptions(
 function resolveMigrateKitOptions(
   context: ActionCliInputContext
 ): MigrateKitActionInput {
-  const flags = context.flags as MigrateFlags;
+  const { dryRun } = migrateKitSharedFlags.resolve(context);
   const outputMode = resolveOutputModeFromContext(context.flags);
 
   return {
     targetDir: context.args[0] ?? process.cwd(),
-    dryRun: Boolean(flags.dryRun || context.flags["dry-run"]),
+    dryRun,
     outputMode,
   };
 }
@@ -301,11 +304,6 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "-b, --bin <name>",
     description: "Binary name (defaults to project name)",
-  },
-  {
-    flags: "-f, --force",
-    description: "Overwrite existing files",
-    defaultValue: false,
   },
   {
     flags: "--local",
@@ -331,6 +329,17 @@ const templateOption: ActionCliOption = {
   description: "Template to use (deprecated, use --preset)",
 };
 
+const initSharedFlags = actionCliPresets(
+  forcePreset(),
+  dryRunPreset(),
+  booleanFlagPreset({
+    id: "initYes",
+    key: "yes",
+    flags: "-y, --yes",
+    description: "Skip prompts and use defaults for missing values",
+  })
+);
+
 function createInitAction(options: {
   readonly id: string;
   readonly description: string;
@@ -345,6 +354,7 @@ function createInitAction(options: {
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
+  initOptions.push(...initSharedFlags.options);
   initOptions.push({
     flags: "-s, --structure <mode>",
     description: "Project structure (single|workspace)",
@@ -352,16 +362,6 @@ function createInitAction(options: {
   initOptions.push({
     flags: "--workspace-name <name>",
     description: "Workspace root package name",
-  });
-  initOptions.push({
-    flags: "-y, --yes",
-    description: "Skip prompts and use defaults for missing values",
-    defaultValue: false,
-  });
-  initOptions.push({
-    flags: "--dry-run",
-    description: "Preview changes without writing files",
-    defaultValue: false,
   });
   initOptions.push({
     flags: "--skip-install",
@@ -422,6 +422,10 @@ function createInitAction(options: {
   });
 }
 
+const scaffoldSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
+const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
+const migrateKitSharedFlags = actionCliPresets(dryRunPreset());
+
 const createAction = defineAction({
   id: "create",
   description: "Removed - use 'outfitter init' instead",
@@ -463,19 +467,10 @@ const scaffoldAction = defineAction({
     description:
       "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
     options: [
-      {
-        flags: "-f, --force",
-        description: "Overwrite existing files",
-        defaultValue: false,
-      },
+      ...scaffoldSharedFlags.options,
       {
         flags: "--skip-install",
         description: "Skip bun install",
-        defaultValue: false,
-      },
-      {
-        flags: "--dry-run",
-        description: "Preview changes without executing",
         defaultValue: false,
       },
       {
@@ -619,24 +614,14 @@ const addAction = defineAction({
     command: "<block>",
     description:
       "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
-    options: [
-      {
-        flags: "-f, --force",
-        description: "Overwrite existing files",
-        defaultValue: false,
-      },
-      {
-        flags: "--dry-run",
-        description: "Show what would be added without making changes",
-        defaultValue: false,
-      },
-    ],
+    options: [...addSharedFlags.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
+      const { force, dryRun } = addSharedFlags.resolve(context);
       return {
         block: context.args[0] as string,
-        force: Boolean(context.flags["force"]),
-        dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
+        force,
+        dryRun,
         cwd: process.cwd(),
         outputMode,
       };
@@ -737,7 +722,7 @@ const checkAction = defineAction({
   surfaces: ["cli"],
   input: checkInputSchema,
   cli: {
-    command: "check",
+    group: "check",
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
@@ -796,78 +781,178 @@ const checkAction = defineAction({
   },
 });
 
-interface UpdateActionInput {
+interface CheckTsDocActionInput {
+  strict: boolean;
+  minCoverage: number;
   cwd: string;
-  guide: boolean;
-  guidePackages?: string[];
-  apply: boolean;
-  breaking: boolean;
   outputMode: CliOutputMode;
 }
 
-const updateInputSchema = z.object({
+const checkTsdocInputSchema = z.object({
+  strict: z.boolean(),
+  minCoverage: z.number(),
   cwd: z.string(),
-  guide: z.boolean(),
-  guidePackages: z.array(z.string()).optional(),
-  apply: z.boolean(),
-  breaking: z.boolean(),
   outputMode: outputModeSchema,
-}) as z.ZodType<UpdateActionInput>;
+}) as z.ZodType<CheckTsDocActionInput>;
 
-const updateAction = defineAction({
-  id: "update",
-  description: "Check for @outfitter/* package updates and migration guidance",
+const checkTsdocAction = defineAction({
+  id: "check.tsdoc",
+  description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
-  input: updateInputSchema,
+  input: checkTsdocInputSchema,
   cli: {
-    command: "update [packages...]",
-    description:
-      "Check for @outfitter/* package updates and migration guidance",
+    group: "check",
+    command: "tsdoc",
+    description: "Check TSDoc coverage on exported declarations",
     options: [
       {
-        flags: "--guide",
-        description:
-          "Show migration instructions for available updates. Pass package names to filter.",
+        flags: "--strict",
+        description: "Fail if coverage is below the minimum threshold",
         defaultValue: false,
       },
       {
-        flags: "--apply",
-        description:
-          "Apply non-breaking updates to package.json and run bun install",
-        defaultValue: false,
-      },
-      {
-        flags: "--breaking",
-        description: "Include breaking updates when used with --apply",
-        defaultValue: false,
-      },
-      {
-        flags: "--cwd <path>",
-        description: "Working directory (defaults to current directory)",
+        flags: "--min-coverage <percent>",
+        description: "Minimum coverage percentage (used with --strict)",
       },
     ],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const cwd =
-        typeof context.flags["cwd"] === "string"
-          ? resolve(process.cwd(), context.flags["cwd"])
-          : process.cwd();
-      const guidePackages =
-        context.args.length > 0 ? (context.args as string[]) : undefined;
+      const minCoverageRaw =
+        context.flags["minCoverage"] ?? context.flags["min-coverage"];
+      let minCoverage = 0;
+      if (typeof minCoverageRaw === "string") {
+        minCoverage = Number.parseInt(minCoverageRaw, 10);
+      } else if (typeof minCoverageRaw === "number") {
+        minCoverage = minCoverageRaw;
+      }
+
       return {
-        cwd,
-        guide: Boolean(context.flags["guide"]),
-        ...(guidePackages !== undefined ? { guidePackages } : {}),
-        apply: Boolean(context.flags["apply"]),
-        breaking: Boolean(context.flags["breaking"]),
+        strict: Boolean(context.flags["strict"]),
+        minCoverage,
+        cwd: process.cwd(),
         outputMode,
       };
     },
   },
   handler: async (input) => {
-    const { outputMode, guidePackages, ...updateInput } = input;
-    const result = await runUpdate({
-      ...updateInput,
+    const result = await runCheckTsdoc(input);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.tsdoc" },
+        })
+      );
+    }
+
+    if (result.value.exitCode !== 0) {
+      process.exitCode = result.value.exitCode;
+    }
+
+    return Result.ok(result.value);
+  },
+});
+
+interface UpgradeActionInput {
+  cwd: string;
+  guide: boolean;
+  guidePackages?: string[];
+  dryRun: boolean;
+  yes: boolean;
+  interactive: boolean;
+  all: boolean;
+  noCodemods: boolean;
+  outputMode: CliOutputMode;
+}
+
+const upgradeInputSchema = z.object({
+  cwd: z.string(),
+  guide: z.boolean(),
+  guidePackages: z.array(z.string()).optional(),
+  dryRun: z.boolean(),
+  yes: z.boolean(),
+  interactive: z.boolean(),
+  all: z.boolean(),
+  noCodemods: z.boolean(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<UpgradeActionInput>;
+
+const upgradeCwd = cwdPreset();
+const upgradeDryRun = dryRunPreset();
+const upgradeInteraction = interactionPreset();
+const upgradeAll = booleanFlagPreset({
+  id: "upgradeAll",
+  key: "all",
+  flags: "--all",
+  description: "Include breaking changes in the upgrade",
+});
+const upgradeNoCodemods = booleanFlagPreset({
+  id: "upgradeNoCodemods",
+  key: "noCodemods",
+  flags: "--no-codemods",
+  description: "Skip automatic codemod execution during upgrade",
+  sources: ["noCodemods", "no-codemods"],
+  negatedSources: ["codemods"],
+});
+const upgradeGuide = booleanFlagPreset({
+  id: "upgradeGuide",
+  key: "guide",
+  flags: "--guide",
+  description:
+    "Show migration instructions for available updates. Pass package names to filter.",
+});
+const upgradeFlags = actionCliPresets(
+  upgradeCwd,
+  upgradeDryRun,
+  upgradeInteraction,
+  upgradeAll,
+  upgradeNoCodemods,
+  upgradeGuide
+);
+
+const upgradeAction = defineAction({
+  id: "upgrade",
+  description: "Check for @outfitter/* package updates and migration guidance",
+  surfaces: ["cli"],
+  input: upgradeInputSchema,
+  cli: {
+    command: "upgrade [packages...]",
+    description:
+      "Check for @outfitter/* package updates and migration guidance",
+    options: [...upgradeFlags.options],
+    mapInput: (context) => {
+      const outputMode = resolveOutputModeFromContext(context.flags);
+      const {
+        cwd: rawCwd,
+        dryRun,
+        interactive,
+        yes,
+        all,
+        noCodemods,
+        guide,
+      } = upgradeFlags.resolve(context);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const guidePackages =
+        context.args.length > 0 ? (context.args as string[]) : undefined;
+      return {
+        cwd,
+        guide,
+        ...(guidePackages !== undefined ? { guidePackages } : {}),
+        dryRun,
+        yes,
+        interactive,
+        all,
+        noCodemods,
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, guidePackages, ...upgradeInput } = input;
+    const result = await runUpgrade({
+      ...upgradeInput,
+      outputMode,
       ...(guidePackages !== undefined ? { guidePackages } : {}),
     });
 
@@ -875,17 +960,17 @@ const updateAction = defineAction({
       return Result.err(
         new InternalError({
           message: result.error.message,
-          context: { action: "update" },
+          context: { action: "upgrade" },
         })
       );
     }
 
-    await printUpdateResults(result.value, {
+    await printUpgradeResults(result.value, {
       mode: outputMode,
-      guide: updateInput.guide,
-      cwd: updateInput.cwd,
-      applied: updateInput.apply ? result.value.applied : undefined,
-      breaking: updateInput.breaking,
+      guide: upgradeInput.guide,
+      cwd: upgradeInput.cwd,
+      dryRun: upgradeInput.dryRun,
+      all: upgradeInput.all,
     });
 
     return Result.ok(result.value);
@@ -902,13 +987,7 @@ const migrateKitAction = defineAction({
     command: "kit [directory]",
     description:
       "Migrate foundation imports and dependencies to @outfitter/kit",
-    options: [
-      {
-        flags: "--dry-run",
-        description: "Preview changes without writing files",
-        defaultValue: false,
-      },
-    ],
+    options: [...migrateKitSharedFlags.options],
     mapInput: resolveMigrateKitOptions,
   },
   handler: async (input) => {
@@ -970,5 +1049,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(addAction)
   .add(listBlocksAction)
   .add(checkAction)
+  .add(checkTsdocAction)
   .add(migrateKitAction)
-  .add(updateAction);
+  .add(upgradeAction);

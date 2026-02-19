@@ -333,15 +333,15 @@ NEVER:
 Complements other outfitter skills:
 
 **Core Practices:**
-- [tdd-fieldguide/SKILL.md](../tdd-fieldguide/SKILL.md) - TDD methodology
-- [debugging/SKILL.md](../debugging/SKILL.md) - systematic debugging
-- [pathfinding/SKILL.md](../pathfinding/SKILL.md) - requirements clarification
+- [tdd-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/tdd-fieldguide/SKILL.md) - TDD methodology
+- [debugging/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/debugging/SKILL.md) - systematic debugging
+- [pathfinding/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/pathfinding/SKILL.md) - requirements clarification
 
 **Development Skills** (load for implementation patterns):
-- [typescript-fieldguide/SKILL.md](../typescript-fieldguide/SKILL.md) - TypeScript, Zod, modern features
-- [react-fieldguide/SKILL.md](../react-fieldguide/SKILL.md) - React 18-19, hooks typing
-- [hono-fieldguide/SKILL.md](../hono-fieldguide/SKILL.md) - Hono API framework
-- [bun-fieldguide/SKILL.md](../bun-fieldguide/SKILL.md) - Bun runtime, SQLite, testing
+- [typescript-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/typescript-fieldguide/SKILL.md) - TypeScript, Zod, modern features
+- [react-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/react-fieldguide/SKILL.md) - React 18-19, hooks typing
+- [hono-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/hono-fieldguide/SKILL.md) - Hono API framework
+- [bun-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/bun-fieldguide/SKILL.md) - Bun runtime, SQLite, testing
 
 **Detailed Patterns:**
 - [type-patterns.md](references/type-patterns.md) - language-agnostic type patterns

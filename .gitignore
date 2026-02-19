@@ -26,6 +26,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Generated API docs
+docs/api/
+
 # Logs
 *.log
 npm-debug.log*
@@ -42,6 +45,7 @@ yarn-error.log*
 .scratch/
 tmp/
 temp/
+.outfitter/reports/
 
 # Agent memory
 **/.claude/agent-memory/

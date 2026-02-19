@@ -1,5 +1,5 @@
 /**
- * Tests for `outfitter update` command.
+ * Tests for `outfitter upgrade` command.
  *
  * @packageDocumentation
  */
@@ -11,8 +11,8 @@ import { join } from "node:path";
 import {
   findMigrationDocsDir,
   readMigrationDocs,
-  runUpdate,
-} from "../commands/update.js";
+  runUpgrade,
+} from "../commands/upgrade.js";
 
 // =============================================================================
 // Test Utilities
@@ -67,11 +67,11 @@ afterEach(() => {
 // Version Detection Tests
 // =============================================================================
 
-describe("update command version detection", () => {
+describe("upgrade command version detection", () => {
   test("returns empty packages when no @outfitter deps found", async () => {
     writePackageJson(tempDir, { zod: "^3.0.0" });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -82,7 +82,7 @@ describe("update command version detection", () => {
   });
 
   test("returns error when no package.json exists", async () => {
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
@@ -96,7 +96,7 @@ describe("update command version detection", () => {
       zod: "^3.0.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -112,7 +112,7 @@ describe("update command version detection", () => {
       zod: "^3.0.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -126,7 +126,7 @@ describe("update command version detection", () => {
   test("detects packages from devDependencies", async () => {
     writePackageJson(tempDir, {}, { "@outfitter/testing": "^0.1.0" });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -140,7 +140,7 @@ describe("update command version detection", () => {
       "@outfitter/contracts": ">=0.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -153,13 +153,13 @@ describe("update command version detection", () => {
 // Output Structure Tests
 // =============================================================================
 
-describe("update command output structure", () => {
+describe("upgrade command output structure", () => {
   test("result has expected shape", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
     });
 
-    const result = await runUpdate({ cwd: tempDir });
+    const result = await runUpgrade({ cwd: tempDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -323,6 +323,22 @@ describe("readMigrationDocs", () => {
     expect(docs).toHaveLength(1);
     expect(docs[0]).not.toContain("---");
     expect(docs[0]).toContain("Clean content here");
+  });
+
+  test("strips frontmatter from docs using CRLF newlines", () => {
+    const migrationsDir = join(tempDir, "migrations");
+    mkdirSync(migrationsDir, { recursive: true });
+
+    writeFileSync(
+      join(migrationsDir, "outfitter-logging-0.2.0.md"),
+      `---\r\npackage: "@outfitter/logging"\r\nversion: 0.2.0\r\nbreaking: false\r\n---\r\n\r\nCRLF content\r\n`
+    );
+
+    const docs = readMigrationDocs(migrationsDir, "logging", "0.1.0", "0.2.0");
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0]).toBe("CRLF content");
+    expect(docs[0]).not.toContain("---");
   });
 });
 

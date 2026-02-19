@@ -65,11 +65,11 @@ Packages are organized into tiers based on stability and dependency direction. H
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    TOOLING (Early)                      │
-│  outfitter CLI, @outfitter/testing                      │
+│  outfitter CLI, docs/docs-core, tooling                 │
 ├─────────────────────────────────────────────────────────┤
 │                    RUNTIME (Active)                     │
-│  cli, config, logging, file-ops, state,                │
-│  mcp, index, daemon, agents                             │
+│  cli, config, logging, file-ops, state, schema, tui,   │
+│  mcp, index, daemon, testing                            │
 ├─────────────────────────────────────────────────────────┤
 │                   FOUNDATION (Stable)                   │
 │  @outfitter/contracts, @outfitter/types                 │
@@ -99,6 +99,9 @@ APIs evolving based on usage. These implement the core functionality.
 | `@outfitter/mcp` | MCP server framework with typed tools |
 | `@outfitter/index` | SQLite FTS5 indexing with WAL mode |
 | `@outfitter/daemon` | Daemon lifecycle, IPC, health checks |
+| `@outfitter/schema` | Schema introspection, surface map generation, drift detection, and markdown reference output (`/diff`, `/manifest`, `/markdown`, `/surface` subpaths) |
+| `@outfitter/tui` | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
+| `@outfitter/testing` | Test harnesses for CLI and MCP |
 
 ### Tooling Tier (Early)
 
@@ -107,14 +110,19 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 | Package | Purpose |
 |---------|---------|
 | `outfitter` | Umbrella CLI for scaffolding projects |
-| `@outfitter/testing` | Test harnesses for CLI and MCP |
-| `@outfitter/kit` | Foundation facade over contracts and types |
+| `@outfitter/docs-core` | Core docs assembly and freshness checks |
+| `@outfitter/docs` | Docs CLI and host adapter for product CLIs |
+| `@outfitter/tooling` | Dev tooling presets and CLI workflows |
 
 ### Adoption IA
 
 For mixed-adoption sequencing across logging and non-logging workstreams, see:
 
 - [Mixed Adoption IA](./ADOPTION-IA.md)
+
+### Deprecated Packages
+
+- `@outfitter/agents` is deprecated. Use `npx outfitter add scaffolding` instead.
 
 ## Dependency Graph
 
@@ -152,6 +160,8 @@ For mixed-adoption sequencing across logging and non-logging workstreams, see:
 - `config` and `file-ops` are shared by CLI, MCP, and daemon surfaces
 - `logging` is used throughout but kept optional via interface injection
 - `cli` includes terminal rendering via `/render` and `/terminal` subpaths
+- `schema` powers schema introspection, manifest generation, and drift detection
+- `tui` provides shared terminal UI primitives for rendering and prompts
 - `state` is shared for pagination across surfaces
 
 ## Directory Structure
@@ -163,7 +173,7 @@ outfitter/stack/
 │       ├── src/
 │       └── templates/       # Project scaffolding templates
 ├── packages/
-│   ├── agents/              # Agent scaffolding
+│   ├── agents/              # DEPRECATED: use `npx outfitter add scaffolding`
 │   ├── cli/                 # CLI framework
 │   ├── config/              # Configuration loading
 │   ├── contracts/           # Core contracts (foundation)
@@ -172,13 +182,14 @@ outfitter/stack/
 │   ├── index/               # SQLite FTS5 indexing
 │   ├── logging/             # Structured logging
 │   ├── mcp/                 # MCP server framework
-│   ├── kit/                 # Foundation facade over contracts/types
+│   ├── schema/              # Schema introspection and surface maps
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
+│   ├── tui/                 # Terminal UI rendering
 │   └── types/               # Type utilities
 ├── docs/                    # Documentation (you are here)
 ├── AGENTS.md                # AI agent instructions
-├── CLAUDE.md                # Claude Code entry point
+├── .claude/CLAUDE.md        # Claude Code entry point
 └── README.md                # Project overview
 ```
 
@@ -222,7 +233,7 @@ The `category` field provides automatic mapping to exit codes and HTTP status wi
 
 ### Why Handler Contract?
 
-The handler contract (`Handler<TInput, TOutput, TError>`) decouples business logic from transport concerns:
+The handler contract (`Handler<TInput, TOutput, TError extends OutfitterError = OutfitterError>`) decouples business logic from transport concerns:
 
 1. **Just call the function** — No mocking HTTP or CLI, handlers are pure functions
 2. **Write once** — Same handler powers CLI, MCP, and HTTP

@@ -6,6 +6,20 @@ This document describes how releases work in the Outfitter monorepo.
 
 We use [Changesets](https://github.com/changesets/changesets) for version management and npm publishing. The process is automated via GitHub Actions—you don't need to run any commands locally.
 
+## Important Guardrail
+
+Do not run `npm publish` directly from a package directory. This monorepo uses `workspace:*`
+ranges internally, and direct publish can leak unresolved workspace ranges to npm.
+
+Always publish through the release pipeline (`release.yml` / `bun run release`), which rewrites
+workspace ranges to concrete versions before publishing.
+
+CI additionally enforces this guardrail by requiring every public package to define:
+
+```json
+"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
+```
+
 ## How It Works
 
 ```

@@ -78,18 +78,28 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 - `@outfitter/state` — Pagination state, cursor persistence
 - `@outfitter/index` — SQLite FTS5 with WAL
 - `@outfitter/daemon` — Daemon lifecycle, IPC, health checks
-- `@outfitter/testing` — Test harnesses for MCP and CLI
+- `@outfitter/schema` — Schema introspection, surface maps, drift detection
+- `@outfitter/tui` — Terminal UI rendering (tables, lists, boxes, trees, spinners, themes, prompts, streaming)
 
 **Tooling (Early)** — APIs will change:
 
 - `outfitter` — Umbrella CLI for scaffolding
+- `@outfitter/testing` — Test harnesses for MCP and CLI
+
+**Deprecated**:
+
+- `@outfitter/agents` — Deprecated. Use `npx outfitter add scaffolding` instead
 
 ### Handler Contract
 
 All domain logic uses transport-agnostic handlers returning `Result<T, E>`:
 
 ```typescript
-type Handler<TInput, TOutput, TError> = (
+type Handler<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+> = (
   input: TInput,
   ctx: HandlerContext
 ) => Promise<Result<TOutput, TError>>;
@@ -178,11 +188,11 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 
 | Concern | Package |
 |---------|---------|
-| Result type | `better-result` |
-| Schema validation | `zod` (v4) |
-| CLI parsing | `commander` (v14+) |
-| Logging | `@logtape/logtape` |
-| MCP protocol | `@modelcontextprotocol/sdk` |
+| Result type | `better-result` (`^2.5.0`) |
+| Schema validation | `zod` (`^4.3.5`) |
+| CLI parsing | `commander` (`^14.0.2`) |
+| Logging | `@logtape/logtape` (`^2.0.0`) |
+| MCP protocol | `@modelcontextprotocol/sdk` (`^1.12.1`) |
 | Prompts | `@clack/prompts` |
 
 ## Code Style

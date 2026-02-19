@@ -188,17 +188,17 @@ rg "console\.(log|error|warn)|homedir\(\)" --type ts -g "!*.test.ts" -c | wc -l
 
 ## Step 5: Migration Guidance
 
-After the compliance scan, detect installed `@outfitter/*` versions and check for available migrations using the `outfitter update` command.
+After the compliance scan, detect installed `@outfitter/*` versions and check for available migrations using the `outfitter upgrade` command.
 
 ```bash
 # Check for available updates (human-readable)
-bunx outfitter update --guide --cwd .
+bunx outfitter upgrade --guide --cwd .
 ```
 
 For JSON output (version data only, does not include migration docs):
 
 ```bash
-bunx outfitter update --json --cwd .
+bunx outfitter upgrade --json --cwd .
 ```
 
 If updates are found, append a **Migration Guidance** section to the compliance report. If all packages are up to date, note that in the report.

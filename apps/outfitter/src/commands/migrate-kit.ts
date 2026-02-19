@@ -1049,6 +1049,8 @@ export async function printMigrateKitResults(
 
 /**
  * Register `migrate kit` command directly on Commander.
+ *
+ * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
  */
 export function migrateKitCommand(program: Command): void {
   interface CliFlags {
@@ -1073,24 +1075,27 @@ export function migrateKitCommand(program: Command): void {
       "Migrate foundation imports and dependencies to @outfitter/kit"
     )
     .option("--dry-run", "Preview changes without writing files", false)
-    .option("--json", "Output result as JSON", false)
-    .action(async (directory: string | undefined, flags: CliFlags) => {
-      if (flags.json) {
-        process.env["OUTFITTER_JSON"] = "1";
+    .action(
+      async (
+        directory: string | undefined,
+        _flags: CliFlags,
+        command: Command
+      ) => {
+        const resolvedFlags = command.optsWithGlobals<CliFlags>();
+
+        const result = await runMigrateKit({
+          ...(directory ? { targetDir: directory } : {}),
+          dryRun: Boolean(resolvedFlags.dryRun),
+        });
+
+        if (result.isErr()) {
+          throw result.error;
+        }
+
+        await printMigrateKitResults(
+          result.value,
+          resolvedFlags.json ? { mode: "json" } : undefined
+        );
       }
-
-      const result = await runMigrateKit({
-        ...(directory ? { targetDir: directory } : {}),
-        dryRun: Boolean(flags.dryRun),
-      });
-
-      if (result.isErr()) {
-        throw result.error;
-      }
-
-      await printMigrateKitResults(
-        result.value,
-        flags.json ? { mode: "json" } : undefined
-      );
-    });
+    );
 }

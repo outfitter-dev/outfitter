@@ -152,7 +152,7 @@ This plugin uses only standard Claude Code tools:
 | MCP | no | — |
 | Scripts | no | Instructions-only, no executable scripts |
 
-See [SECURITY.md](../SECURITY.md) for the full security model.
+See SECURITY.md in the repository root for the full security model.
 
 ## License
 

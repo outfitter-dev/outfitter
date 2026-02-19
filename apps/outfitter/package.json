@@ -1,7 +1,7 @@
 {
   "name": "outfitter",
   "description": "Outfitter umbrella CLI for scaffolding and project management",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "files": [
     "dist",
@@ -32,6 +32,12 @@
       "import": {
         "types": "./dist/commands/check.d.ts",
         "default": "./dist/commands/check.js"
+      }
+    },
+    "./commands/check-tsdoc": {
+      "import": {
+        "types": "./dist/commands/check-tsdoc.d.ts",
+        "default": "./dist/commands/check-tsdoc.js"
       }
     },
     "./commands/demo": {
@@ -82,22 +88,28 @@
         "default": "./dist/commands/shared-deps.js"
       }
     },
-    "./commands/update": {
+    "./commands/upgrade": {
       "import": {
-        "types": "./dist/commands/update.d.ts",
-        "default": "./dist/commands/update.js"
+        "types": "./dist/commands/upgrade.d.ts",
+        "default": "./dist/commands/upgrade.js"
       }
     },
-    "./commands/update-planner": {
+    "./commands/upgrade-codemods": {
       "import": {
-        "types": "./dist/commands/update-planner.d.ts",
-        "default": "./dist/commands/update-planner.js"
+        "types": "./dist/commands/upgrade-codemods.d.ts",
+        "default": "./dist/commands/upgrade-codemods.js"
       }
     },
-    "./commands/update-workspace": {
+    "./commands/upgrade-planner": {
       "import": {
-        "types": "./dist/commands/update-workspace.d.ts",
-        "default": "./dist/commands/update-workspace.js"
+        "types": "./dist/commands/upgrade-planner.d.ts",
+        "default": "./dist/commands/upgrade-planner.js"
+      }
+    },
+    "./commands/upgrade-workspace": {
+      "import": {
+        "types": "./dist/commands/upgrade-workspace.d.ts",
+        "default": "./dist/commands/upgrade-workspace.js"
       }
     },
     "./create": {
@@ -233,6 +245,7 @@
     "typecheck": "tsc --noEmit",
     "sync:templates": "bun run ../../scripts/sync-templates.ts",
     "prepack": "bun run sync:templates",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

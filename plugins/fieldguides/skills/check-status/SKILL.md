@@ -216,7 +216,7 @@ NEVER:
 4. Return periodically (track progress)
 
 **Cross-skill references**:
-- Failing CI -> [debugging](../debugging/SKILL.md)
+- Failing CI -> [debugging](${CLAUDE_PLUGIN_ROOT}/skills/debugging/SKILL.md)
 - Before planning -> use report for context
 - When blocked -> check dependencies
 

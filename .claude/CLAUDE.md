@@ -40,3 +40,5 @@ Check `TaskList` to find unblocked tasks ready for work.
 - [AGENTS.md](../AGENTS.md) — Full development guide
 - [docs/PATTERNS.md](../docs/PATTERNS.md) — Handler contract, Result types
 - [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) — Package relationships
+- [docs/CLI-CONVENTIONS.md](../docs/CLI-CONVENTIONS.md) — Flag presets and command conventions
+- [docs/GETTING-STARTED.md](../docs/GETTING-STARTED.md) — Setup and tutorials

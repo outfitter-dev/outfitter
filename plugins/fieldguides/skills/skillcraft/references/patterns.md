@@ -1,6 +1,6 @@
 # Advanced Skill Patterns
 
-Patterns from official Anthropic examples and production skills. These extend the core concepts in [SKILL.md](../SKILL.md) and [best-practices.md](./best-practices.md).
+Patterns from official Anthropic examples and production skills. These extend the core concepts in [SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/skillcraft/SKILL.md) and [best-practices.md](./best-practices.md).
 
 ## Table of Contents
 

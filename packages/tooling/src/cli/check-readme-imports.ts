@@ -179,6 +179,12 @@ export interface CheckReadmeImportsOptions {
 	readonly json?: boolean;
 }
 
+export function resolveJsonMode(
+	options: CheckReadmeImportsOptions = {},
+): boolean {
+	return options.json ?? process.env["OUTFITTER_JSON"] === "1";
+}
+
 /**
  * Run check-readme-imports across all workspace packages.
  *
@@ -281,7 +287,7 @@ export async function runCheckReadmeImports(
 	}
 
 	// Output
-	if (options.json) {
+	if (resolveJsonMode(options)) {
 		const output = {
 			ok: !hasInvalid,
 			files: results,

@@ -11,7 +11,20 @@
 
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
+import {
+  booleanFlagPreset,
+  composePresets,
+  cwdPreset,
+  stringListFlagPreset,
+} from "@outfitter/cli/flags";
+import {
+  type DocsCommonCliOptions,
+  type DocsExportCliOptions,
+  resolveDocsCliOptions,
+  withDocsCommonOptions,
+  withDocsExportOptions,
+} from "@outfitter/docs";
 import { Command } from "commander";
 import {
   type ExecuteCheckCommandOptions,
@@ -79,13 +92,6 @@ function getIo(
   };
 }
 
-function resolveCwdOption(inputCwd: string | undefined): string {
-  if (typeof inputCwd !== "string" || inputCwd.length === 0) {
-    return process.cwd();
-  }
-  return resolve(process.cwd(), inputCwd);
-}
-
 function resolveToolingCliEntrypoint(): string {
   const packageJsonPath = require.resolve("@outfitter/tooling/package.json");
   const packageRoot = dirname(packageJsonPath);
@@ -151,6 +157,26 @@ function applyExitCode(code: number): void {
   }
 }
 
+function applyPresetOptions(
+  command: Command,
+  preset: {
+    readonly options: readonly {
+      readonly flags: string;
+      readonly description: string;
+      readonly defaultValue?: unknown;
+    }[];
+  }
+): Command {
+  for (const option of preset.options) {
+    command.option(
+      option.flags,
+      option.description,
+      option.defaultValue as string | boolean | string[] | undefined
+    );
+  }
+  return command;
+}
+
 function addDocsCheckSubcommand(
   command: Command,
   options: {
@@ -161,32 +187,19 @@ function addDocsCheckSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsCheckCommand = command
     .command("docs")
-    .description("Check whether assembled package docs are in sync")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsCheck(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Check whether assembled package docs are in sync");
+
+  withDocsCommonOptions(docsCheckCommand).action(
+    async (cmdOptions: DocsCommonCliOptions) => {
+      const code = await options.runDocsCheck(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addDocsSyncSubcommand(
@@ -199,32 +212,19 @@ function addDocsSyncSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsSyncCommand = command
     .command("docs")
-    .description("Assemble package docs into docs/packages")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        mdxMode?: "strict" | "lossy";
-        packagesDir?: string;
-        outputDir?: string;
-      }) => {
-        const code = await options.runDocsSync(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Assemble package docs into docs/packages");
+
+  withDocsCommonOptions(docsSyncCommand).action(
+    async (cmdOptions: DocsCommonCliOptions) => {
+      const code = await options.runDocsSync(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addDocsExportSubcommand(
@@ -237,158 +237,140 @@ function addDocsExportSubcommand(
     ) => Promise<number>;
   }
 ): void {
-  command
+  const docsExportCommand = command
     .command("docs")
-    .description("Export docs artifacts for packages and LLM targets")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .option("--packages-dir <path>", "Packages directory relative to workspace")
-    .option("--output-dir <path>", "Output directory relative to workspace")
-    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
-    .option("--llms-file <path>", "llms.txt output path relative to workspace")
-    .option(
-      "--llms-full-file <path>",
-      "llms-full.txt output path relative to workspace"
-    )
-    .option(
-      "--target <target>",
-      "Export target: packages, llms, llms-full, all",
-      "all"
-    )
-    .action(
-      async (cmdOptions: {
-        cwd?: string;
-        llmsFile?: string;
-        llmsFullFile?: string;
-        mdxMode?: "strict" | "lossy";
-        outputDir?: string;
-        packagesDir?: string;
-        target?: string;
-      }) => {
-        const code = await options.runDocsExport(
-          {
-            ...cmdOptions,
-            ...(cmdOptions.cwd
-              ? { cwd: resolveCwdOption(cmdOptions.cwd) }
-              : {}),
-          },
-          options.io
-        );
-        applyExitCode(code);
-      }
-    );
+    .description("Export docs artifacts for packages and LLM targets");
+
+  withDocsExportOptions(docsExportCommand).action(
+    async (cmdOptions: DocsExportCliOptions) => {
+      const code = await options.runDocsExport(
+        resolveDocsCliOptions(cmdOptions),
+        options.io
+      );
+      applyExitCode(code);
+    }
+  );
 }
 
 function addToolingCheckSubcommands(
   command: Command,
   runToolingCommand: (input: RepoToolingInvocation) => Promise<number>
 ): void {
-  command
-    .command("exports")
-    .description("Validate package.json exports match source entry points")
-    .option("--json", "Output results as JSON")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.json) {
-        args.push("--json");
-      }
+  const cwdFlag = cwdPreset();
+  const jsonFlag = booleanFlagPreset({
+    id: "repo-check-json",
+    key: "json",
+    flags: "--json",
+    description: "Output results as JSON",
+  });
+  const skipFlag = booleanFlagPreset({
+    id: "repo-check-skip",
+    key: "skip",
+    flags: "-s, --skip",
+    description: "Skip changeset check",
+  });
+  const pathsFlag = stringListFlagPreset({
+    id: "repo-check-paths",
+    key: "paths",
+    flags: "--paths <paths...>",
+    description: "Limit check to specific paths",
+  });
+
+  const toolingWithCwd = composePresets(cwdFlag);
+  const toolingWithJsonAndCwd = composePresets(jsonFlag, cwdFlag);
+  const toolingWithSkipAndCwd = composePresets(skipFlag, cwdFlag);
+  const toolingWithPathsAndCwd = composePresets(pathsFlag, cwdFlag);
+
+  function registerToolingCheckSubcommand<
+    TResolved extends Record<string, unknown>,
+  >(config: {
+    readonly name: string;
+    readonly description: string;
+    readonly toolingCommand: RepoToolingInvocation["command"];
+    readonly preset: {
+      readonly options: readonly {
+        readonly flags: string;
+        readonly description: string;
+        readonly defaultValue?: unknown;
+      }[];
+      readonly resolve: (
+        flags: Record<string, unknown>
+      ) => TResolved & { cwd: string };
+    };
+    readonly buildArgs: (resolved: TResolved) => string[];
+  }): void {
+    const subcommand = command
+      .command(config.name)
+      .description(config.description);
+    applyPresetOptions(subcommand, config.preset);
+
+    subcommand.action(async (cmdOptions: Record<string, unknown>) => {
+      const resolved = config.preset.resolve(cmdOptions);
+      const cwd =
+        resolveDocsCliOptions({ cwd: resolved.cwd }).cwd || process.cwd();
 
       const code = await runToolingCommand({
-        command: "check-exports",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
+        command: config.toolingCommand,
+        args: config.buildArgs(resolved),
+        cwd,
       });
       applyExitCode(code);
     });
+  }
 
-  command
-    .command("readme")
-    .description("Validate README import examples match package exports")
-    .option("--json", "Output results as JSON")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { json?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.json) {
-        args.push("--json");
-      }
+  registerToolingCheckSubcommand({
+    name: "exports",
+    description: "Validate package.json exports match source entry points",
+    toolingCommand: "check-exports",
+    preset: toolingWithJsonAndCwd,
+    buildArgs: (resolved) => (resolved["json"] ? ["--json"] : []),
+  });
 
-      const code = await runToolingCommand({
-        command: "check-readme-imports",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
+  registerToolingCheckSubcommand({
+    name: "readme",
+    description: "Validate README import examples match package exports",
+    toolingCommand: "check-readme-imports",
+    preset: toolingWithJsonAndCwd,
+    buildArgs: (resolved) => (resolved["json"] ? ["--json"] : []),
+  });
 
-  command
-    .command("registry")
-    .description(
-      "Validate packages with bunup --filter are registered in bunup.config.ts"
-    )
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { cwd?: string }) => {
-      const code = await runToolingCommand({
-        command: "check-bunup-registry",
-        args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
+  registerToolingCheckSubcommand({
+    name: "registry",
+    description:
+      "Validate packages with bunup --filter are registered in bunup.config.ts",
+    toolingCommand: "check-bunup-registry",
+    preset: toolingWithCwd,
+    buildArgs: () => [],
+  });
 
-  command
-    .command("changeset")
-    .description("Validate PRs touching package source include a changeset")
-    .option("-s, --skip", "Skip changeset check")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { skip?: boolean; cwd?: string }) => {
-      const args: string[] = [];
-      if (cmdOptions.skip) {
-        args.push("--skip");
-      }
+  registerToolingCheckSubcommand({
+    name: "changeset",
+    description: "Validate PRs touching package source include a changeset",
+    toolingCommand: "check-changeset",
+    preset: toolingWithSkipAndCwd,
+    buildArgs: (resolved) => (resolved["skip"] ? ["--skip"] : []),
+  });
 
-      const code = await runToolingCommand({
-        command: "check-changeset",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
+  registerToolingCheckSubcommand({
+    name: "tree",
+    description:
+      "Assert working tree is clean (no modified or untracked files)",
+    toolingCommand: "check-clean-tree",
+    preset: toolingWithPathsAndCwd,
+    buildArgs: (resolved) =>
+      Array.isArray(resolved["paths"]) && resolved["paths"].length > 0
+        ? ["--paths", ...resolved["paths"]]
+        : [],
+  });
 
-  command
-    .command("tree")
-    .description(
-      "Assert working tree is clean (no modified or untracked files)"
-    )
-    .option("--paths <paths...>", "Limit check to specific paths")
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { paths?: string[]; cwd?: string }) => {
-      const args: string[] = [];
-      if (Array.isArray(cmdOptions.paths) && cmdOptions.paths.length > 0) {
-        args.push("--paths", ...cmdOptions.paths);
-      }
-
-      const code = await runToolingCommand({
-        command: "check-clean-tree",
-        args,
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
-
-  command
-    .command("boundary-invocations")
-    .description(
-      "Validate root/app scripts do not execute packages/*/src entrypoints directly"
-    )
-    .option("--cwd <path>", "Workspace root to operate in")
-    .action(async (cmdOptions: { cwd?: string }) => {
-      const code = await runToolingCommand({
-        command: "check-boundary-invocations",
-        args: [],
-        cwd: resolveCwdOption(cmdOptions.cwd),
-      });
-      applyExitCode(code);
-    });
+  registerToolingCheckSubcommand({
+    name: "boundary-invocations",
+    description:
+      "Validate root/app scripts do not execute packages/*/src entrypoints directly",
+    toolingCommand: "check-boundary-invocations",
+    preset: toolingWithCwd,
+    buildArgs: () => [],
+  });
 }
 
 export function createRepoCommand(options?: CreateRepoCommandOptions): Command {

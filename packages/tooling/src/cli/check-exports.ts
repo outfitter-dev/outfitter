@@ -328,6 +328,10 @@ export interface CheckExportsOptions {
 	readonly json?: boolean;
 }
 
+export function resolveJsonMode(options: CheckExportsOptions = {}): boolean {
+	return options.json ?? process.env["OUTFITTER_JSON"] === "1";
+}
+
 /**
  * Run check-exports across all workspace packages.
  *
@@ -389,7 +393,7 @@ export async function runCheckExports(
 		packages: results,
 	};
 
-	if (options.json) {
+	if (resolveJsonMode(options)) {
 		process.stdout.write(`${JSON.stringify(checkResult, null, 2)}\n`);
 	} else {
 		const drifted = results.filter((r) => r.status === "drift");

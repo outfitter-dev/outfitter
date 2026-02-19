@@ -87,4 +87,97 @@ describe("outfitter action mapping", () => {
     expect(mapped.noTooling).toBe(false);
     expect(mapped.with).toBe("claude,biome");
   });
+
+  test("maps upgrade --no-codemods across commander flag shapes", () => {
+    const action = outfitterActions.get("upgrade");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mappedKebab = action?.cli?.mapInput?.({
+      args: [],
+      flags: { "no-codemods": true },
+    }) as { noCodemods: boolean };
+    expect(mappedKebab.noCodemods).toBe(true);
+
+    const mappedCamel = action?.cli?.mapInput?.({
+      args: [],
+      flags: { noCodemods: true },
+    }) as { noCodemods: boolean };
+    expect(mappedCamel.noCodemods).toBe(true);
+
+    const mappedPositive = action?.cli?.mapInput?.({
+      args: [],
+      flags: { codemods: false },
+    }) as { noCodemods: boolean };
+    expect(mappedPositive.noCodemods).toBe(true);
+
+    const mappedDefault = action?.cli?.mapInput?.({
+      args: [],
+      flags: {},
+    }) as { noCodemods: boolean };
+    expect(mappedDefault.noCodemods).toBe(false);
+  });
+
+  test("maps init shared flags from preset adapters", () => {
+    const action = outfitterActions.get("init");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mapped = action?.cli?.mapInput?.({
+      args: ["/tmp/init"],
+      flags: {
+        force: true,
+        dryRun: true,
+        yes: true,
+      },
+    }) as { force: boolean; dryRun: boolean; yes: boolean };
+
+    expect(mapped.force).toBe(true);
+    expect(mapped.dryRun).toBe(true);
+    expect(mapped.yes).toBe(true);
+  });
+
+  test("maps scaffold shared force/dryRun flags via presets", () => {
+    const action = outfitterActions.get("scaffold");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mapped = action?.cli?.mapInput?.({
+      args: ["cli"],
+      flags: {
+        force: true,
+        "dry-run": true,
+      },
+    }) as { force: boolean; dryRun: boolean };
+
+    expect(mapped.force).toBe(true);
+    expect(mapped.dryRun).toBe(true);
+  });
+
+  test("maps add shared force/dryRun flags via presets", () => {
+    const action = outfitterActions.get("add");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mapped = action?.cli?.mapInput?.({
+      args: ["biome"],
+      flags: {
+        force: true,
+        dryRun: true,
+      },
+    }) as { force: boolean; dryRun: boolean };
+
+    expect(mapped.force).toBe(true);
+    expect(mapped.dryRun).toBe(true);
+  });
+
+  test("maps migrate.kit dryRun via preset adapter", () => {
+    const action = outfitterActions.get("migrate.kit");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: {
+        "dry-run": true,
+      },
+    }) as { dryRun: boolean };
+
+    expect(mapped.dryRun).toBe(true);
+  });
 });

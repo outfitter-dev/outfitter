@@ -1,9 +1,9 @@
 {
   "name": "outfitter-cli-demo",
   "description": "CLI demo app for @outfitter/cli and @outfitter/tui primitives",
-  "version": "0.1.3",
-  "private": true,
+  "version": "0.1.4",
   "type": "module",
+  "private": true,
   "files": [
     "dist"
   ],
@@ -14,6 +14,12 @@
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      }
+    },
+    "./cli-root-flags": {
+      "import": {
+        "types": "./dist/cli-root-flags.d.ts",
+        "default": "./dist/cli-root-flags.js"
       }
     },
     "./commands/demo": {

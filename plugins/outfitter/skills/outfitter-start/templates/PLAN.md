@@ -59,4 +59,4 @@ Then use `outfitter-check` for full compliance audit.
 
 - [outfitter-atlas](outfitter-atlas) — Patterns and templates
 - [outfitter-check](outfitter-check) — Compliance verification
-- [AGENTS.md](../../AGENTS.md) — Project development guide
+- AGENTS.md — Project development guide (see project root)
