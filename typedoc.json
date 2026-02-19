@@ -1,0 +1,35 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/cli",
+    "packages/config",
+    "packages/contracts",
+    "packages/daemon",
+    "packages/docs",
+    "packages/docs-core",
+    "packages/file-ops",
+    "packages/index",
+    "packages/logging",
+    "packages/mcp",
+    "packages/schema",
+    "packages/state",
+    "packages/testing",
+    "packages/tooling",
+    "packages/tui",
+    "packages/types"
+  ],
+  "out": "docs/api/html",
+  "name": "@outfitter/* API Reference",
+  "readme": "none",
+  "plugin": ["typedoc-plugin-coverage"],
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "skipErrorChecking": true,
+  "validation": {
+    "notExported": false,
+    "invalidLink": false,
+    "notDocumented": false
+  }
+}

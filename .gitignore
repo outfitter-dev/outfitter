@@ -26,6 +26,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Generated API docs
+docs/api/
+
 # Logs
 *.log
 npm-debug.log*
