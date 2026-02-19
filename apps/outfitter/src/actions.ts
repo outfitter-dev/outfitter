@@ -835,10 +835,15 @@ const checkTsdocAction = defineAction<
         context.flags
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
-      const outputMode =
-        typeof context.flags["output"] === "string"
-          ? presetOutputMode
-          : resolveOutputModeFromContext(context.flags);
+      let outputMode: CliOutputMode;
+      if (typeof context.flags["output"] === "string") {
+        outputMode =
+          presetOutputMode === "json" || presetOutputMode === "jsonl"
+            ? presetOutputMode
+            : "human";
+      } else {
+        outputMode = resolveOutputModeFromContext(context.flags);
+      }
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];
       let minCoverage = 0;
