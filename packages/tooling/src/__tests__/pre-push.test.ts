@@ -192,7 +192,7 @@ describe("hasPackageSourceChanges", () => {
 		).toBe(false);
 	});
 
-	test("returns false for test files within packages", () => {
+	test("returns true for test files within packages", () => {
 		expect(
 			hasPackageSourceChanges({
 				files: ["packages/cli/src/__tests__/cli.test.ts"],

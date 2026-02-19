@@ -491,7 +491,11 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 	// TSDoc coverage summary (warning only, does not affect exit code)
 	const changedFiles = getChangedFilesForPush();
 	if (hasPackageSourceChanges(changedFiles)) {
-		await printTsdocSummary();
+		try {
+			await printTsdocSummary();
+		} catch {
+			// Advisory only — never block push on TSDoc summary failure
+		}
 	}
 
 	log("");
