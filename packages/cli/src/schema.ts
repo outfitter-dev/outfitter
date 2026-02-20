@@ -105,13 +105,13 @@ function formatSummary(manifest: ActionManifest, programName?: string): string {
     lines.push(groupName);
 
     for (const action of groupActions) {
-      const commandPart = action.cli?.command ?? action.id;
+      const commandPart = action.cli?.command ?? "";
       const isBase =
         !commandPart ||
         commandPart.startsWith("[") ||
         commandPart.startsWith("<");
       const displayCommand = isBase
-        ? `  ${groupName} ${commandPart ?? ""}`.trimEnd()
+        ? `  ${groupName} ${commandPart}`.trimEnd()
         : `  ${groupName} ${commandPart}`;
       const desc = action.cli?.description ?? action.description ?? "";
       lines.push(padCommand(displayCommand, desc));
@@ -156,8 +156,10 @@ function formatActionDetail(
 
   if (entry.cli) {
     const group = entry.cli.group;
-    const commandPart = entry.cli.command ?? entry.id;
-    const fullCommand = group ? `${group} ${commandPart}` : commandPart;
+    const commandPart = entry.cli.command ?? (group ? "" : entry.id);
+    const fullCommand = group
+      ? `${group} ${commandPart}`.trimEnd()
+      : commandPart;
     lines.push(`  Command:  ${fullCommand}`);
   }
 

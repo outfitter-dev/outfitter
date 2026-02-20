@@ -539,6 +539,8 @@ const demoAction = defineAction({
   },
 });
 
+const doctorCwd = cwdPreset();
+
 const doctorAction = defineAction({
   id: "doctor",
   description: "Validate environment and dependencies",
@@ -547,10 +549,13 @@ const doctorAction = defineAction({
   cli: {
     command: "doctor",
     description: "Validate environment and dependencies",
+    options: [...doctorCwd.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
+      const { cwd: rawCwd } = doctorCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
       return {
-        cwd: process.cwd(),
+        cwd,
         outputMode,
       };
     },
@@ -576,6 +581,8 @@ const addInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<AddInput & { outputMode: CliOutputMode }>;
 
+const addCwd = cwdPreset();
+
 const addAction = defineAction({
   id: "add",
   description: "Add a block from the registry to your project",
@@ -586,15 +593,17 @@ const addAction = defineAction({
     command: "<block>",
     description:
       "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
-    options: [...addSharedFlags.options],
+    options: [...addSharedFlags.options, ...addCwd.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
       const { force, dryRun } = addSharedFlags.resolve(context);
+      const { cwd: rawCwd } = addCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
       return {
         block: context.args[0] as string,
         force,
         dryRun,
-        cwd: process.cwd(),
+        cwd,
         outputMode,
       };
     },
@@ -666,7 +675,6 @@ interface CheckActionInput {
   cwd: string;
   verbose: boolean;
   block?: string;
-  ci: boolean;
   outputMode: CliOutputMode;
 }
 
@@ -674,12 +682,12 @@ const checkInputSchema = z.object({
   cwd: z.string(),
   verbose: z.boolean(),
   block: z.string().optional(),
-  ci: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<CheckActionInput>;
 
 const checkVerbose = verbosePreset();
 const checkCwd = cwdPreset();
+const checkOutputMode = outputModePreset();
 const checkVerboseOptions: ActionCliOption[] = checkVerbose.options.map(
   (option) =>
     option.flags === "-v, --verbose"
@@ -695,6 +703,8 @@ const checkAction = defineAction({
   input: checkInputSchema,
   cli: {
     group: "check",
+    // No `command` — this IS the base "check" command. Omitting `command`
+    // prevents schema from rendering "check check".
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
@@ -705,13 +715,31 @@ const checkAction = defineAction({
       },
       {
         flags: "--ci",
-        description: "Machine-oriented output for CI",
+        description: "Deprecated: use --output json instead",
         defaultValue: false,
       },
+      ...checkOutputMode.options,
       ...checkCwd.options,
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { outputMode: presetOutputMode } = checkOutputMode.resolve(
+        context.flags
+      );
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        // Explicit --output should always win over env fallbacks.
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (context.flags["ci"]) {
+        // Deprecated --ci alias
+        outputMode = "json";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
       const { verbose } = checkVerbose.resolve(context.flags);
       const { cwd: rawCwd } = checkCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
@@ -720,14 +748,12 @@ const checkAction = defineAction({
         cwd,
         verbose,
         ...(block !== undefined ? { block } : {}),
-        ci: Boolean(context.flags["ci"]),
         outputMode,
       };
     },
   },
   handler: async (input) => {
-    const { outputMode, ci, ...checkInput } = input;
-    const effectiveMode = ci ? "json" : outputMode;
+    const { outputMode, ...checkInput } = input;
     const result = await runCheck(checkInput);
 
     if (result.isErr()) {
@@ -740,7 +766,7 @@ const checkAction = defineAction({
     }
 
     await printCheckResults(result.value, {
-      mode: effectiveMode,
+      mode: outputMode,
       verbose: checkInput.verbose,
     });
 
@@ -856,14 +882,17 @@ const checkTsdocAction = defineAction<
         context.flags
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
       let outputMode: CliOutputMode;
-      if (typeof context.flags["output"] === "string") {
-        outputMode =
-          presetOutputMode === "json" || presetOutputMode === "jsonl"
-            ? presetOutputMode
-            : "human";
+      if (explicitOutput) {
+        // Explicit --output should always win over env fallbacks.
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
       } else {
-        outputMode = resolveOutputModeFromContext(context.flags);
+        outputMode = "human";
       }
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];
