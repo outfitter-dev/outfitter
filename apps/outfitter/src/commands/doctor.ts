@@ -13,6 +13,7 @@ import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme } from "@outfitter/tui/render";
 import type { Command } from "commander";
+import { hasWorkspacesField } from "../engine/workspace.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
 // =============================================================================
@@ -115,6 +116,8 @@ export interface DoctorResult {
   readonly summary: DoctorSummary;
   /** Exit code (0 = all passed, 1 = some failed) */
   readonly exitCode: number;
+  /** Whether this is a workspace root (affects which checks apply) */
+  readonly isWorkspaceRoot?: boolean;
 }
 
 // =============================================================================
@@ -285,6 +288,17 @@ function checkDirectories(cwd: string): DirectoriesCheck {
   };
 }
 
+/** Check if the cwd is a workspace root (has workspaces field in package.json). */
+function isWorkspaceRoot(cwd: string): boolean {
+  try {
+    const content = readFileSync(join(cwd, "package.json"), "utf-8");
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+    return hasWorkspacesField(parsed);
+  } catch {
+    return false;
+  }
+}
+
 // =============================================================================
 // Public API
 // =============================================================================
@@ -308,6 +322,7 @@ function checkDirectories(cwd: string): DirectoriesCheck {
  */
 export function runDoctor(options: DoctorOptions): DoctorResult {
   const cwd = resolve(options.cwd);
+  const wsRoot = isWorkspaceRoot(cwd);
 
   // Run all checks
   const bunVersion = checkBunVersion();
@@ -316,14 +331,16 @@ export function runDoctor(options: DoctorOptions): DoctorResult {
   const configFiles = checkConfigFiles(cwd);
   const directories = checkDirectories(cwd);
 
-  // Calculate summary
-  const checkResults = [
-    bunVersion.passed,
-    packageJson.passed,
-    dependencies.passed,
-    configFiles.tsconfig,
-    directories.src,
-  ];
+  // Calculate summary — workspace roots don't require tsconfig.json or src/
+  const checkResults = wsRoot
+    ? [bunVersion.passed, packageJson.passed, dependencies.passed]
+    : [
+        bunVersion.passed,
+        packageJson.passed,
+        dependencies.passed,
+        configFiles.tsconfig,
+        directories.src,
+      ];
 
   const passed = checkResults.filter(Boolean).length;
   const failed = checkResults.length - passed;
@@ -339,6 +356,7 @@ export function runDoctor(options: DoctorOptions): DoctorResult {
     },
     summary: { passed, failed, total },
     exitCode: failed > 0 ? 1 : 0,
+    ...(wsRoot ? { isWorkspaceRoot: true } : {}),
   };
 }
 
@@ -395,17 +413,27 @@ export async function printDoctorResults(
     );
   }
 
-  // Config Files
-  const tsconfigIcon = result.checks.configFiles.tsconfig
-    ? theme.success("[PASS]")
-    : theme.warning("[WARN]");
-  lines.push(`${tsconfigIcon} tsconfig.json`);
+  // Config Files — skip at workspace root (not applicable)
+  if (result.isWorkspaceRoot) {
+    lines.push(`${theme.muted("[SKIP]")} tsconfig.json`);
+    lines.push(`       ${theme.muted("Not checked at workspace root")}`);
+  } else {
+    const tsconfigIcon = result.checks.configFiles.tsconfig
+      ? theme.success("[PASS]")
+      : theme.warning("[WARN]");
+    lines.push(`${tsconfigIcon} tsconfig.json`);
+  }
 
-  // Directories
-  const srcIcon = result.checks.directories.src
-    ? theme.success("[PASS]")
-    : theme.warning("[WARN]");
-  lines.push(`${srcIcon} src/ directory`);
+  // Directories — skip at workspace root (not applicable)
+  if (result.isWorkspaceRoot) {
+    lines.push(`${theme.muted("[SKIP]")} src/ directory`);
+    lines.push(`       ${theme.muted("Not checked at workspace root")}`);
+  } else {
+    const srcIcon = result.checks.directories.src
+      ? theme.success("[PASS]")
+      : theme.warning("[WARN]");
+    lines.push(`${srcIcon} src/ directory`);
+  }
 
   // Summary
   lines.push("", "=".repeat(50));

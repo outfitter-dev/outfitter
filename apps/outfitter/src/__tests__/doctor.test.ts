@@ -355,3 +355,92 @@ describe("doctor command result structure", () => {
     expect(result.checks).toHaveProperty("directories");
   });
 });
+
+// =============================================================================
+// Doctor Command Workspace Root Tests
+// =============================================================================
+
+describe("doctor command workspace root handling", () => {
+  test("excludes tsconfig and src from scoring at workspace root", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    // Workspace root: has workspaces field, no tsconfig or src/
+    const packageJson = {
+      name: "my-workspace",
+      version: "1.0.0",
+      workspaces: ["apps/*", "packages/*"],
+    };
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(packageJson, null, 2)
+    );
+    mkdirSync(join(tempDir, "node_modules"), { recursive: true });
+
+    const result = runDoctor({ cwd: tempDir });
+
+    // Workspace root: only bun, package.json, deps checked (3 total)
+    expect(result.isWorkspaceRoot).toBe(true);
+    expect(result.summary.total).toBe(3);
+    expect(result.exitCode).toBe(0);
+  });
+
+  test("non-workspace projects check tsconfig and src", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    const packageJson = {
+      name: "my-app",
+      version: "1.0.0",
+    };
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(packageJson, null, 2)
+    );
+
+    const result = runDoctor({ cwd: tempDir });
+
+    // Non-workspace: bun, package.json, deps, tsconfig, src checked (5 total)
+    expect(result.isWorkspaceRoot).toBeUndefined();
+    expect(result.summary.total).toBe(5);
+  });
+
+  test("null workspaces field is not treated as workspace root", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    const packageJson = {
+      name: "my-app",
+      version: "1.0.0",
+      workspaces: null,
+    };
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(packageJson, null, 2)
+    );
+
+    const result = runDoctor({ cwd: tempDir });
+
+    // workspaces: null should NOT be treated as workspace root
+    expect(result.isWorkspaceRoot).toBeUndefined();
+    expect(result.summary.total).toBe(5);
+  });
+
+  test("workspace root with object-style workspaces field", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    // npm workspaces can also be an object with packages key
+    const packageJson = {
+      name: "my-workspace",
+      version: "1.0.0",
+      workspaces: { packages: ["apps/*", "packages/*"] },
+    };
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(packageJson, null, 2)
+    );
+    mkdirSync(join(tempDir, "node_modules"), { recursive: true });
+
+    const result = runDoctor({ cwd: tempDir });
+
+    expect(result.isWorkspaceRoot).toBe(true);
+    expect(result.summary.total).toBe(3);
+  });
+});

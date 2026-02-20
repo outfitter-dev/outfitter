@@ -375,6 +375,22 @@ describe("runCheck", () => {
   });
 
   // =========================================================================
+  // Empty result at workspace root (no blocks detected)
+  // =========================================================================
+
+  test("empty directory with no manifest returns 0 blocks", async () => {
+    const result = await runCheck({ cwd: testDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.totalChecked).toBe(0);
+      expect(result.value.currentCount).toBe(0);
+      expect(result.value.driftedCount).toBe(0);
+      expect(result.value.missingCount).toBe(0);
+    }
+  });
+
+  // =========================================================================
   // String comparison for non-JSON files
   // =========================================================================
 
