@@ -3,6 +3,48 @@ import { dirname, join, resolve } from "node:path";
 import { Result } from "@outfitter/contracts";
 import { ScaffoldError } from "./types.js";
 
+export function buildWorkspaceRootReadme(workspaceName: string): string {
+  const workspaceScope = deriveWorkspaceScopeForExamples(workspaceName);
+
+  return `# ${workspaceName}
+
+## Structure
+
+\`\`\`
+${workspaceName}/
+├── apps/          # Runnable applications (CLI, MCP, daemon, API)
+├── packages/      # Shared libraries
+└── package.json   # Workspace root
+\`\`\`
+
+## Getting Started
+
+\`\`\`bash
+# Install all dependencies
+bun install
+
+# Build all packages
+bun run build
+
+# Run tests
+bun run test
+
+# Typecheck
+bun run typecheck
+\`\`\`
+
+## Adding Packages
+
+\`\`\`bash
+# Add a new app
+outfitter init --name ${workspaceScope}/my-app --preset cli
+
+# Add a shared library
+outfitter init --name ${workspaceScope}/my-lib --preset minimal
+\`\`\`
+`;
+}
+
 export function buildWorkspaceRootPackageJson(workspaceName: string): string {
   const workspacePackage = {
     name: workspaceName,
@@ -51,6 +93,15 @@ export function scaffoldWorkspaceRoot(
       buildWorkspaceRootPackageJson(workspaceName),
       "utf-8"
     );
+
+    const readmePath = join(rootDir, "README.md");
+    if (force || !existsSync(readmePath)) {
+      writeFileSync(
+        readmePath,
+        buildWorkspaceRootReadme(workspaceName),
+        "utf-8"
+      );
+    }
 
     const gitignorePath = join(rootDir, ".gitignore");
     if (force || !existsSync(gitignorePath)) {

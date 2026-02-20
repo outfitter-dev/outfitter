@@ -291,6 +291,25 @@ describe("init command placeholder replacement", () => {
 // =============================================================================
 
 describe("init command default behavior", () => {
+  test("sanitizes inferred package name from directory basename", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const projectDir = join(tempDir, "My Cool Project");
+    mkdirSync(projectDir, { recursive: true });
+
+    const result = await runInit({
+      targetDir: projectDir,
+      name: undefined,
+      preset: "minimal",
+      force: false,
+    });
+
+    expect(result.isOk()).toBe(true);
+    const packageJsonPath = join(projectDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.name).toBe("my-cool-project");
+  });
+
   test("uses directory name as project name when not specified", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -381,6 +400,51 @@ describe("init command local dependency rewriting", () => {
 // =============================================================================
 
 describe("init command workspace scaffolding", () => {
+  test("rejects path traversal in workspace project name", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "../escaped",
+      preset: "cli",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("Invalid package name");
+    }
+    expect(existsSync(join(tempDir, "apps", "escaped"))).toBe(false);
+  });
+
+  test("rejects absolute path style workspace project names", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "/tmp/outside-root",
+      preset: "cli",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("Invalid package name");
+    }
+  });
+
   test("scaffolds workspace root and places runnable preset under apps/", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -410,6 +474,14 @@ describe("init command workspace scaffolding", () => {
     expect(rootPackageJson.name).toBe("acme-workspace");
     expect(rootPackageJson.private).toBe(true);
     expect(rootPackageJson.workspaces).toEqual(["apps/*", "packages/*"]);
+
+    // Workspace root README
+    const readmePath = join(tempDir, "README.md");
+    expect(existsSync(readmePath)).toBe(true);
+    const readme = readFileSync(readmePath, "utf-8");
+    expect(readme).toContain("acme-workspace");
+    expect(readme).toContain("apps/");
+    expect(readme).toContain("packages/");
 
     const projectPackageJsonPath = join(
       tempDir,
@@ -618,6 +690,22 @@ describe("init command --force flag", () => {
 // =============================================================================
 
 describe("init command error handling", () => {
+  test("returns error for invalid explicit package name", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "App Space",
+      preset: "minimal",
+      force: false,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("Invalid package name");
+    }
+  });
+
   test("returns error for invalid template name", async () => {
     const { runInit } = await import("../commands/init.js");
 

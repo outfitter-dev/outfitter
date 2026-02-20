@@ -13,6 +13,7 @@ import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme } from "@outfitter/tui/render";
 import type { Command } from "commander";
+import { validatePackageName } from "../engine/index.js";
 import { hasWorkspacesField } from "../engine/workspace.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
@@ -186,10 +187,22 @@ function checkPackageJson(cwd: string): PackageJsonCheck {
       };
     }
 
+    const packageName = parsed["name"] as string;
+    const packageVersion = parsed["version"] as string;
+    const invalidPackageName = validatePackageName(packageName);
+    if (invalidPackageName) {
+      return {
+        passed: false,
+        name: packageName,
+        version: packageVersion,
+        error: `package.json has invalid package name '${packageName}': ${invalidPackageName}`,
+      };
+    }
+
     return {
       passed: true,
-      name: parsed["name"] as string,
-      version: parsed["version"] as string,
+      name: packageName,
+      version: packageVersion,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

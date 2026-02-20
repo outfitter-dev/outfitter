@@ -28,11 +28,15 @@ import {
   deriveBinName,
   deriveProjectName,
   executePlan,
+  isPathWithin,
   resolveAuthor,
   resolvePackageName,
   resolveYear,
   type ScaffoldPlan,
+  sanitizePackageName,
   scaffoldWorkspaceRoot,
+  validatePackageName,
+  validateProjectDirectoryName,
 } from "../engine/index.js";
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
 import { runPostScaffold } from "../engine/post-scaffold.js";
@@ -200,6 +204,7 @@ async function resolveInitInput(
 ): Promise<Result<ResolvedInitInput, InitError>> {
   const rootDir = resolve(options.targetDir);
   const defaultName = basename(rootDir);
+  const defaultPackageName = sanitizePackageName(defaultName) || defaultName;
   const presetFromFlagsResult = resolvePresetFromFlags(options);
   if (presetFromFlagsResult.isErr()) {
     return presetFromFlagsResult;
@@ -208,9 +213,26 @@ async function resolveInitInput(
 
   // Non-interactive path for explicit --yes or non-TTY contexts.
   if (options.yes || !process.stdout.isTTY) {
-    const packageName = resolvePackageName(rootDir, options.name).trim();
+    const packageNameRaw = resolvePackageName(rootDir, options.name).trim();
+    const packageName =
+      options.name === undefined
+        ? sanitizePackageName(packageNameRaw)
+        : packageNameRaw;
     if (packageName.length === 0) {
       return Result.err(new InitError("Project name must not be empty"));
+    }
+    const invalidPackageName = validatePackageName(packageName);
+    if (invalidPackageName) {
+      const suggested = sanitizePackageName(packageNameRaw);
+      const suggestion =
+        suggested.length > 0 && suggested !== packageNameRaw
+          ? ` Try '${suggested}'.`
+          : "";
+      return Result.err(
+        new InitError(
+          `Invalid package name '${packageNameRaw}': ${invalidPackageName}.${suggestion}`
+        )
+      );
     }
 
     const preset = presetOverride ?? presetFromFlags ?? "minimal";
@@ -218,8 +240,19 @@ async function resolveInitInput(
     const blocksOverride = parseBlocks(options.with);
     const workspaceName =
       structure === "workspace"
-        ? (options.workspaceName ?? defaultName).trim() || defaultName
+        ? (options.workspaceName ?? defaultPackageName).trim() ||
+          defaultPackageName
         : undefined;
+    if (workspaceName) {
+      const invalidWorkspaceName = validatePackageName(workspaceName);
+      if (invalidWorkspaceName) {
+        return Result.err(
+          new InitError(
+            `Invalid workspace package name '${workspaceName}': ${invalidWorkspaceName}`
+          )
+        );
+      }
+    }
 
     return Result.ok({
       rootDir,
@@ -240,8 +273,8 @@ async function resolveInitInput(
     options.name ??
     (await text({
       message: "Project package name",
-      placeholder: defaultName,
-      initialValue: defaultName,
+      placeholder: defaultPackageName,
+      initialValue: defaultPackageName,
       validate: (value) =>
         value.trim().length === 0 ? "Project name is required" : undefined,
     }));
@@ -353,8 +386,8 @@ async function resolveInitInput(
       options.workspaceName ??
       (await text({
         message: "Workspace package name",
-        placeholder: defaultName,
-        initialValue: defaultName,
+        placeholder: defaultPackageName,
+        initialValue: defaultPackageName,
         validate: (value) =>
           value.trim().length === 0 ? "Workspace name is required" : undefined,
       }));
@@ -372,6 +405,30 @@ async function resolveInitInput(
   const packageName = packageNameValue.trim();
   if (packageName.length === 0) {
     return Result.err(new InitError("Project name must not be empty"));
+  }
+  const invalidPackageName = validatePackageName(packageName);
+  if (invalidPackageName) {
+    const suggested = sanitizePackageName(packageName);
+    const suggestion =
+      suggested.length > 0 && suggested !== packageName
+        ? ` Try '${suggested}'.`
+        : "";
+    return Result.err(
+      new InitError(
+        `Invalid package name '${packageName}': ${invalidPackageName}.${suggestion}`
+      )
+    );
+  }
+
+  if (workspaceName) {
+    const invalidWorkspaceName = validatePackageName(workspaceName);
+    if (invalidWorkspaceName) {
+      return Result.err(
+        new InitError(
+          `Invalid workspace package name '${workspaceName}': ${invalidWorkspaceName}`
+        )
+      );
+    }
   }
 
   const blocksOverride = parseBlocks(options.with);
@@ -457,17 +514,36 @@ export async function runInit(
   }
   const target = targetResult.value;
 
+  const projectName = deriveProjectName(input.packageName);
+  if (input.structure === "workspace") {
+    const invalidProjectName = validateProjectDirectoryName(projectName);
+    if (invalidProjectName) {
+      return Result.err(
+        new InitError(
+          `Invalid workspace project name '${projectName}': ${invalidProjectName}`
+        )
+      );
+    }
+  }
+
   const dryRun = Boolean(options.dryRun);
   const collector = dryRun ? new OperationCollector() : undefined;
 
+  const projectBaseDir = resolve(input.rootDir, target.placement);
+  const resolvedProjectDir = resolve(projectBaseDir, projectName);
+  if (
+    input.structure === "workspace" &&
+    !isPathWithin(projectBaseDir, resolvedProjectDir)
+  ) {
+    return Result.err(
+      new InitError(
+        `Invalid workspace project name '${projectName}': path escapes '${projectBaseDir}'`
+      )
+    );
+  }
+
   const projectDir =
-    input.structure === "workspace"
-      ? join(
-          input.rootDir,
-          target.placement,
-          deriveProjectName(input.packageName)
-        )
-      : input.rootDir;
+    input.structure === "workspace" ? resolvedProjectDir : input.rootDir;
 
   if (input.structure === "single") {
     if (existsSync(join(input.rootDir, "package.json")) && !options.force) {

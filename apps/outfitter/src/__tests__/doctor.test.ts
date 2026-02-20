@@ -136,6 +136,20 @@ describe("doctor command package.json validation", () => {
 
     expect(result.checks.packageJson.passed).toBe(false);
   });
+
+  test("fails when package.json name is not a valid npm package name", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({ name: "App Space", version: "1.0.0" })
+    );
+
+    const result = await runDoctor({ cwd: tempDir });
+
+    expect(result.checks.packageJson.passed).toBe(false);
+    expect(result.checks.packageJson.error).toContain("invalid package name");
+  });
 });
 
 // =============================================================================

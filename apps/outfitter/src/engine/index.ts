@@ -5,9 +5,13 @@ export { executePlan } from "./executor.js";
 export {
   deriveBinName,
   deriveProjectName,
+  isPathWithin,
   resolveAuthor,
   resolvePackageName,
   resolveYear,
+  sanitizePackageName,
+  validatePackageName,
+  validateProjectDirectoryName,
 } from "./names.js";
 export {
   copyTemplateFiles,

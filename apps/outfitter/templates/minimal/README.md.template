@@ -1,0 +1,23 @@
+# {{projectName}}
+
+{{description}}
+
+## Installation
+
+```bash
+bun add {{packageName}}
+```
+
+## Development
+
+```bash
+# Install dependencies
+bun install
+
+# Run tests
+bun run test
+```
+
+## License
+
+MIT
