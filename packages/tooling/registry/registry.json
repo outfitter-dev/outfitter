@@ -26,7 +26,7 @@
 				}
 			],
 			"devDependencies": {
-				"ultracite": "^7.1.1"
+				"ultracite": "^7.2.3"
 			}
 		},
 		"lefthook": {
@@ -39,9 +39,9 @@
 				}
 			],
 			"devDependencies": {
-				"@outfitter/tooling": "^0.2.1",
-				"lefthook": "^2.0.16",
-				"ultracite": "^7.1.1"
+				"@outfitter/tooling": "^0.2.4",
+				"lefthook": "^2.1.1",
+				"ultracite": "^7.2.3"
 			}
 		},
 		"markdownlint": {

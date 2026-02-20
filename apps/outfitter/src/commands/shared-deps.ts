@@ -36,7 +36,7 @@ export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
   "@biomejs/biome": pickVersion(
     getDependencyVersions().external,
     "@biomejs/biome",
-    "^2.3.12"
+    "^2.4.4"
   ),
   "@outfitter/tooling": pickVersion(
     getDependencyVersions().internal,
@@ -46,13 +46,9 @@ export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
   "@types/bun": pickVersion(
     getDependencyVersions().external,
     "@types/bun",
-    "^1.3.7"
+    "^1.3.9"
   ),
-  lefthook: pickVersion(
-    getDependencyVersions().external,
-    "lefthook",
-    "^2.0.16"
-  ),
+  lefthook: pickVersion(getDependencyVersions().external, "lefthook", "^2.1.1"),
   typescript: pickVersion(
     getDependencyVersions().external,
     "typescript",
@@ -61,7 +57,7 @@ export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
   ultracite: pickVersion(
     getDependencyVersions().external,
     "ultracite",
-    "^7.1.1"
+    "^7.2.3"
   ),
 };
 

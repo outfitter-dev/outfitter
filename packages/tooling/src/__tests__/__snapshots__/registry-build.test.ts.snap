@@ -6,7 +6,7 @@ exports[`Registry Build Output generated registry output matches snapshot 1`] = 
     "biome": {
       "description": "Biome linter/formatter configuration via Ultracite",
       "devDependencies": {
-        "ultracite": "^7.1.1",
+        "ultracite": "^7.2.3",
       },
       "files": [
         {
@@ -575,9 +575,9 @@ main "$@"
     "lefthook": {
       "description": "Git hooks via Lefthook for pre-commit and pre-push",
       "devDependencies": {
-        "@outfitter/tooling": "^0.2.1",
-        "lefthook": "^2.0.16",
-        "ultracite": "^7.1.1",
+        "@outfitter/tooling": "^0.2.4",
+        "lefthook": "^2.1.1",
+        "ultracite": "^7.2.3",
       },
       "files": [
         {
