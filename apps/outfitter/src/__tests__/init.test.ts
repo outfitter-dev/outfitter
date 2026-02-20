@@ -157,9 +157,9 @@ describe("init command file creation", () => {
     );
     expect(packageJson.scripts["clean:artifacts"]).toBe("rm -rf dist .turbo");
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
-    expect(packageJson.dependencies["@outfitter/types"]).toBe("^0.2.2");
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
 
     const tsconfigPath = join(tempDir, "tsconfig.json");
@@ -175,8 +175,13 @@ describe("init command file creation", () => {
 
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
-    expect(programContent).toMatch(/await output\(`Hello, \$\{name\}!`\);/);
-    expect(programContent).not.toMatch(/logger\.info/);
+    expect(programContent).toMatch(/buildCliCommands/);
+    expect(programContent).toMatch(/createContext/);
+
+    const actionsPath = join(tempDir, "src", "actions.ts");
+    const actionsContent = readFileSync(actionsPath, "utf-8");
+    expect(actionsContent).toMatch(/defineAction/);
+    expect(actionsContent).toMatch(/createActionRegistry/);
   });
 
   test("creates src directory structure", async () => {
@@ -367,7 +372,6 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
       "workspace:*"
     );
-    expect(packageJson.dependencies["@outfitter/types"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
