@@ -609,5 +609,14 @@ export async function printCheckResults(
     );
   }
 
+  if (result.totalChecked === 0) {
+    lines.push("");
+    lines.push(
+      theme.muted(
+        "No blocks found. If this is a workspace root, run 'outfitter check' from an app or package directory."
+      )
+    );
+  }
+
   await output(lines, { mode: "human" });
 }
