@@ -293,6 +293,100 @@ describe("scaffold command", () => {
     ).toBe(true);
   });
 
+  test("uses template metadata to classify existing project kind during conversion", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "base-app",
+          version: "0.1.0",
+          type: "module",
+          outfitter: {
+            template: {
+              kind: "runnable",
+              placement: "apps",
+              surfaces: ["cli"],
+            },
+          },
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "src"), { recursive: true });
+    writeFileSync(join(tempDir, "src", "index.ts"), "export const v = 1;\n");
+
+    const result = await runScaffold({
+      target: "mcp",
+      name: "assistant-api",
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    expect(result.value.converted).toBe(true);
+    expect(result.value.movedExisting?.to).toBe(
+      join(tempDir, "apps", "base-app")
+    );
+  });
+
+  test("falls back to legacy heuristics when template metadata is invalid", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "base-app",
+          version: "0.1.0",
+          type: "module",
+          dependencies: {
+            "@outfitter/mcp": "^0.1.0",
+          },
+          outfitter: {
+            template: {
+              kind: "unknown",
+              surfaces: ["unknown-surface"],
+            },
+          },
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "src"), { recursive: true });
+    writeFileSync(join(tempDir, "src", "index.ts"), "export const v = 1;\n");
+
+    const result = await runScaffold({
+      target: "mcp",
+      name: "assistant-api",
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    expect(result.value.converted).toBe(true);
+    expect(result.value.movedExisting?.to).toBe(
+      join(tempDir, "apps", "base-app")
+    );
+  });
+
   test("preserves non-packages workspace settings when appending patterns", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 
