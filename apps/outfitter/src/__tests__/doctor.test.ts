@@ -369,6 +369,20 @@ describe("doctor command result structure", () => {
     expect(result.checks).toHaveProperty("directories");
   });
 
+  test("omits non-scored config and directory detail fields", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({ name: "my-app", version: "1.0.0" }, null, 2)
+    );
+
+    const result = runDoctor({ cwd: tempDir });
+
+    expect(result.checks.configFiles).not.toHaveProperty("biome");
+    expect(result.checks.directories).not.toHaveProperty("tests");
+  });
+
   test("reads target package.json at most once per run", async () => {
     const fs = await import("node:fs");
     const { runDoctor } = await import("../commands/doctor.js");
