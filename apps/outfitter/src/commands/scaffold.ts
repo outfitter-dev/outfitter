@@ -27,9 +27,11 @@ import {
   deriveBinName,
   deriveProjectName,
   executePlan,
+  isPathWithin,
   resolveAuthor,
   resolveYear,
   type ScaffoldPlan,
+  validateProjectDirectoryName,
 } from "../engine/index.js";
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
 import { runPostScaffold } from "../engine/post-scaffold.js";
@@ -353,7 +355,23 @@ function convertToWorkspace(
   const category = detectExistingCategory(existingPkg);
   const placement = category === "runnable" ? "apps" : "packages";
   const existingName = deriveProjectName(existingPkg.name ?? basename(rootDir));
-  const destinationDir = join(rootDir, placement, existingName);
+  const invalidExistingName = validateProjectDirectoryName(existingName);
+  if (invalidExistingName) {
+    return Result.err(
+      new ScaffoldCommandError(
+        `Invalid existing project name '${existingName}': ${invalidExistingName}`
+      )
+    );
+  }
+  const destinationBaseDir = resolve(rootDir, placement);
+  const destinationDir = resolve(destinationBaseDir, existingName);
+  if (!isPathWithin(destinationBaseDir, destinationDir)) {
+    return Result.err(
+      new ScaffoldCommandError(
+        `Invalid existing project name '${existingName}': path escapes '${destinationBaseDir}'`
+      )
+    );
+  }
 
   const entries = readdirSync(rootDir);
   const preserve = new Set([".git", "node_modules", ".outfitter", "bun.lock"]);
@@ -517,6 +535,15 @@ export async function runScaffold(
   const target = targetResult.value;
 
   const targetName = deriveProjectName(options.name ?? target.id);
+  const invalidTargetName = validateProjectDirectoryName(targetName);
+  if (invalidTargetName) {
+    return Result.err(
+      new ScaffoldCommandError(
+        `Invalid target name '${targetName}': ${invalidTargetName}`
+      )
+    );
+  }
+
   const structureResult = detectProjectStructure(options.cwd);
   if (structureResult.isErr()) {
     return structureResult;
@@ -619,7 +646,16 @@ export async function runScaffold(
     converted = true;
   }
 
-  const targetDir = join(rootDir, target.placement, targetName);
+  const targetBaseDir = resolve(rootDir, target.placement);
+  const targetDir = resolve(targetBaseDir, targetName);
+  if (!isPathWithin(targetBaseDir, targetDir)) {
+    return Result.err(
+      new ScaffoldCommandError(
+        `Invalid target name '${targetName}': path escapes '${targetBaseDir}'`
+      )
+    );
+  }
+
   if (existsSync(targetDir) && !options.force && !dryRun) {
     return Result.err(
       new ScaffoldCommandError(
