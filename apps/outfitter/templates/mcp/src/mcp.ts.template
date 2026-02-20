@@ -54,7 +54,7 @@ export function createMCPServer(): Server {
 				const greeting =
 					typeof input.name === "string" && input.name.trim().length > 0 ? input.name : "World";
 
-				logger.info`Greeting ${greeting}`;
+				logger.info(`Greeting ${greeting}`);
 				return {
 					content: [
 						{
@@ -71,7 +71,7 @@ export function createMCPServer(): Server {
 			return handler((args ?? {}) as HelloArgs);
 		}
 
-		logger.warn`Unknown tool ${name}`;
+		logger.warn(`Unknown tool: ${name}`);
 		throw new Error(`Unknown tool: ${name}`);
 	});
 
