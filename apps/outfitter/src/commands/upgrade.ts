@@ -878,24 +878,13 @@ export async function runUpgrade(
       : breakingUpgradable.map((a) => a.name);
 
     // Build structured migration guides when --guide is requested
-    let guidesData =
+    const guidesData =
       options.guide === true
         ? buildMigrationGuides(packages, migrationsDir)
         : undefined;
 
-    // Filter guides to specific packages when --guide packages are specified
-    if (
-      guidesData !== undefined &&
-      options.guidePackages !== undefined &&
-      options.guidePackages.length > 0
-    ) {
-      const filterSet = new Set(
-        options.guidePackages.map((p) =>
-          p.startsWith("@") ? p : `@outfitter/${p}`
-        )
-      );
-      guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
-    }
+    // Note: guide filter is unnecessary here — `buildMigrationGuides` already
+    // operates on the filtered `packages` list from the scan filter above.
 
     const buildResult = (
       overrides: Partial<UpgradeResult> = {}

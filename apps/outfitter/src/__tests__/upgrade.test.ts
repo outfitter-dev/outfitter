@@ -356,3 +356,79 @@ function writeMigrationDoc(
   const content = `---\npackage: "@outfitter/${shortName}"\nversion: ${version}\nbreaking: false\n---\n\n${body}\n`;
   writeFileSync(join(dir, filename), content);
 }
+
+// =============================================================================
+// Package Filtering Tests (OS-254 / OS-270)
+// =============================================================================
+
+describe("upgrade package filtering", () => {
+  test("guidePackages filters scan results to requested packages", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+      "@outfitter/cli": "^0.1.0",
+      "@outfitter/logging": "^0.1.0",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      guidePackages: ["contracts"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.total).toBe(1);
+      expect(result.value.packages[0]?.name).toBe("@outfitter/contracts");
+    }
+  });
+
+  test("bare name normalizes to @outfitter/ prefix", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/cli": "^0.1.0",
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      guidePackages: ["cli"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.total).toBe(1);
+      expect(result.value.packages[0]?.name).toBe("@outfitter/cli");
+    }
+  });
+
+  test("unknown package produces unknownPackages entry", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      guidePackages: ["nonexistent"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.unknownPackages).toContain("@outfitter/nonexistent");
+    }
+  });
+
+  test("scoped package name passes through without mangling", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    const result = await runUpgrade({
+      cwd: tempDir,
+      guidePackages: ["@other-scope/foo"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should report as-is, not mangled to @outfitter/@other-scope/foo
+      expect(result.value.unknownPackages).toContain("@other-scope/foo");
+    }
+  });
+});
