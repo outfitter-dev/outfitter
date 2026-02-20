@@ -4,4 +4,4 @@
  * @packageDocumentation
  */
 
-export { createMCPServer } from "./mcp.js";
+export { server, startServer } from "./mcp.js";
