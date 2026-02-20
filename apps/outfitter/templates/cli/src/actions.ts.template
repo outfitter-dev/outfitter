@@ -1,0 +1,51 @@
+/**
+ * {{projectName}} - Action definitions
+ *
+ * Actions are transport-agnostic handlers that can be exposed via CLI, MCP, or API.
+ * Define input/output schemas with Zod and return Result types from handlers.
+ */
+
+import {
+	createActionRegistry,
+	defineAction,
+	Result,
+} from "@outfitter/contracts";
+import { z } from "zod";
+
+/** Greet someone by name. */
+const hello = defineAction({
+	id: "hello",
+	description: "Say hello to someone",
+	surfaces: ["cli"],
+	input: z.object({
+		name: z.string().default("World").describe("Name to greet"),
+		shout: z.boolean().default(false).describe("Greet in uppercase"),
+	}),
+	output: z.object({
+		greeting: z.string(),
+	}),
+	cli: {
+		command: "<name>",
+		options: [
+			{
+				flags: "--shout",
+				description: "Greet in uppercase",
+			},
+		],
+		mapInput: ({ args, flags }) => ({
+			name: args[0] ?? "World",
+			shout: Boolean(flags.shout),
+		}),
+	},
+	handler: async (input, ctx) => {
+		let greeting = `Hello, ${input.name}!`;
+		if (input.shout) {
+			greeting = greeting.toUpperCase();
+		}
+		ctx.logger.info(`Greeting ${input.name}`);
+		return Result.ok({ greeting });
+	},
+});
+
+/** All registered actions for this CLI. */
+export const actions = createActionRegistry().add(hello);

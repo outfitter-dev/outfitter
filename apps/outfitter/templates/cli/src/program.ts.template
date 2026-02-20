@@ -2,9 +2,11 @@
  * {{projectName}} - CLI program definition
  */
 
-import { command, createCLI } from "@outfitter/cli/command";
-import { verbosePreset } from "@outfitter/cli/flags";
+import { createContext } from "@outfitter/contracts";
+import { buildCliCommands } from "@outfitter/cli/actions";
+import { createCLI } from "@outfitter/cli/command";
 import { exitWithError, output } from "@outfitter/cli/output";
+import { actions } from "./actions.js";
 
 export const program = createCLI({
 	name: "{{binName}}",
@@ -13,18 +15,12 @@ export const program = createCLI({
 	onError: (error) => exitWithError(error),
 });
 
-const verbose = verbosePreset();
-
-program.register(
-	command("hello [name]")
-		.description("Say hello")
-		.preset(verbose)
-		.action<{ verbose: boolean }>(async ({ args, flags }) => {
-			const { verbose: isVerbose } = verbose.resolve(flags);
-			const name = args[0] ?? "World";
-			await output(`Hello, ${name}!`);
-			if (isVerbose) {
-				await output({ detail: "Running in verbose mode" });
-			}
+for (const command of buildCliCommands(actions, {
+	createContext: () =>
+		createContext({
+			cwd: process.cwd(),
+			env: process.env as Record<string, string | undefined>,
 		}),
-);
+})) {
+	program.register(command);
+}

@@ -4,4 +4,5 @@
  * @packageDocumentation
  */
 
+export { actions } from "./actions.js";
 export { program } from "./program.js";
