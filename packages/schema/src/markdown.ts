@@ -284,8 +284,8 @@ function displayName(action: ActionManifestEntry, surface: DocSurface): string {
     const cli = action.cli;
     if (!cli) return action.id;
     const group = cli.group;
-    const command = cli.command ?? action.id;
-    return group ? `${group} ${command}` : command;
+    const command = cli.command ?? (group ? "" : action.id);
+    return group ? `${group} ${command}`.trimEnd() : command;
   }
 
   return action.mcp?.tool ?? action.id;

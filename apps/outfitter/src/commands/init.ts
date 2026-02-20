@@ -8,6 +8,7 @@
  */
 
 import { existsSync } from "node:fs";
+import { realpath } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import {
   cancel,
@@ -667,14 +668,24 @@ export async function printInitResults(
   result: InitResult,
   options?: { mode?: OutputMode }
 ): Promise<void> {
+  // Normalize paths for display (resolves symlinks like /tmp → /private/tmp on macOS)
+  let rootDir = result.rootDir;
+  let projectDir = result.projectDir;
+  try {
+    rootDir = await realpath(rootDir);
+    projectDir = await realpath(projectDir);
+  } catch {
+    // Fall back to raw paths if realpath fails (e.g., path doesn't exist yet in dry-run)
+  }
+
   const structuredMode = resolveStructuredOutputMode(options?.mode);
 
   if (result.dryRunPlan) {
     if (structuredMode) {
       await output(
         {
-          rootDir: result.rootDir,
-          projectDir: result.projectDir,
+          rootDir,
+          projectDir,
           structure: result.structure,
           preset: result.preset,
           packageName: result.packageName,
@@ -689,7 +700,7 @@ export async function printInitResults(
     for (const op of result.dryRunPlan.operations) {
       collector.add(op as never);
     }
-    await renderOperationPlan(collector, { rootDir: result.rootDir });
+    await renderOperationPlan(collector, { rootDir });
     return;
   }
 
@@ -697,8 +708,8 @@ export async function printInitResults(
     await output(
       {
         structure: result.structure,
-        rootDir: result.rootDir,
-        projectDir: result.projectDir,
+        rootDir,
+        projectDir,
         preset: result.preset,
         packageName: result.packageName,
         blocksAdded: result.blocksAdded ?? null,
@@ -711,13 +722,13 @@ export async function printInitResults(
   }
 
   const lines: string[] = [
-    `Project initialized successfully in ${result.rootDir}`,
+    `Project initialized successfully in ${rootDir}`,
     `Structure: ${result.structure}`,
     `Preset: ${result.preset}`,
   ];
 
   if (result.structure === "workspace") {
-    lines.push(`Workspace project path: ${result.projectDir}`);
+    lines.push(`Workspace project path: ${projectDir}`);
   }
 
   if (result.blocksAdded) {
