@@ -70,40 +70,85 @@ export const myHandler: Handler<unknown, Output, ValidationError | NotFoundError
 
 ## CLI Command
 
-Commander.js command calling a handler:
+For Outfitter apps, define CLI behavior in the action registry and let
+`buildCliCommands()` wire Commander for you.
 
 ```typescript
-import { command, output, exitWithError } from "@outfitter/cli";
-import { createContext } from "@outfitter/contracts";
+import { actionCliPresets } from "@outfitter/cli/actions";
+import { output } from "@outfitter/cli";
+import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import { jqPreset, outputModePreset } from "@outfitter/cli/query";
+import { defineAction, Result } from "@outfitter/contracts";
+import { z } from "zod";
 import { myHandler } from "../handlers/my-handler.js";
 
-export const myCommand = command("my-command")
-  .description("What this command does")
-  .argument("<id>", "Resource ID")
-  .option("-l, --limit <n>", "Limit results", parseInt)
-  .action(async ({ args, flags }) => {
-    const ctx = createContext({});
+const shared = actionCliPresets(verbosePreset(), cwdPreset());
+const mode = outputModePreset({ includeJsonl: true });
+const jq = jqPreset();
 
-    const result = await myHandler({ id: args.id, limit: flags.limit }, ctx);
-
+export const myAction = defineAction({
+  id: "my.get",
+  description: "Get a resource",
+  surfaces: ["cli"],
+  input: z.object({
+    id: z.string().min(1),
+    verbose: z.boolean().optional(),
+    cwd: z.string(),
+    outputMode: z.enum(["human", "json", "jsonl"]).default("human"),
+    jq: z.string().optional(),
+  }),
+  output: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  cli: {
+    group: "my",
+    command: "get <id>",
+    options: [...shared.options, ...mode.options, ...jq.options],
+    mapInput: ({ args, flags }) => ({
+      id: String(args[0] ?? ""),
+      ...shared.resolve(flags),
+      ...mode.resolve(flags),
+      ...jq.resolve(flags),
+    }),
+  },
+  handler: async (input, ctx) => {
+    const result = await myHandler({ id: input.id }, ctx);
     if (result.isErr()) {
-      exitWithError(result.error);
+      return result;
     }
 
-    await output(result.value);
-  })
-  .build();
+    await output(result.value, { mode: input.outputMode });
+    return Result.ok(result.value);
+  },
+});
 ```
 
 Register in CLI:
 
 ```typescript
-import { createCLI } from "@outfitter/cli";
-import { myCommand } from "./commands/my-command.js";
+import { buildCliCommands } from "@outfitter/cli/actions";
+import { createCLI } from "@outfitter/cli/command";
+import { createActionRegistry } from "@outfitter/contracts";
+import { myAction } from "./actions/my-action.js";
 
 const cli = createCLI({ name: "myapp", version: "1.0.0" });
-cli.program.addCommand(myCommand);
-cli.program.parse();
+const registry = createActionRegistry([myAction]);
+
+for (const command of buildCliCommands(registry, {
+  schema: { programName: "myapp", surface: {} },
+})) {
+  cli.register(command);
+}
+
+await cli.parse();
+```
+
+After adding actions:
+
+```bash
+myapp schema generate
+myapp schema diff
 ```
 
 ## MCP Tool
@@ -222,10 +267,13 @@ main();
 ## Best Practices
 
 1. **Handler First** — Write handler before adapter (CLI/MCP/API)
-2. **Validate Early** — Use `createValidator` at handler entry
-3. **Type Errors** — List all error types in handler signature
-4. **Context Propagation** — Pass context through all handler calls
-5. **Test Handlers** — Test handlers directly without transport layer
+2. **Action Registry First** — Add CLI behavior via `defineAction()` and `mapInput()`
+3. **Preset Composition** — Prefer shared presets over manual flag parsing
+4. **Schema Drift Guard** — Regenerate and diff `.outfitter/surface.json` after CLI changes
+5. **Validate Early** — Use `createValidator` at handler entry
+6. **Type Errors** — List all error types in handler signature
+7. **Context Propagation** — Pass context through all handler calls
+8. **Test Handlers** — Test handlers directly without transport layer
 
 ## References
 

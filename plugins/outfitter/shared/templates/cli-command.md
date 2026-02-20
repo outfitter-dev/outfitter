@@ -1,77 +1,99 @@
 # CLI Command Template
 
-Commander.js command that wraps a handler.
+Action-registry CLI action that wraps a handler.
 
 ## Template
 
 ```typescript
-import { command } from "@outfitter/cli/command";
 import { output } from "@outfitter/cli";
-import { exitWithError } from "@outfitter/cli/output";
-import { createContext } from "@outfitter/contracts";
+import { actionCliPresets } from "@outfitter/cli/actions";
+import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import { jqPreset, outputModePreset } from "@outfitter/cli/query";
+import { defineAction, Result } from "@outfitter/contracts";
+import { z } from "zod";
 import { myHandler } from "../handlers/my-handler.js";
 
-export const myCommand = command("my-command")
-  // ========================================================================
-  // Metadata
-  // ========================================================================
-  .description("Brief description of what this command does")
+const shared = actionCliPresets(verbosePreset(), cwdPreset());
+const mode = outputModePreset({ includeJsonl: true });
+const jq = jqPreset();
 
-  // ========================================================================
-  // Arguments (positional)
-  // ========================================================================
-  .argument("<id>", "Required resource ID")
-  .argument("[name]", "Optional name")
-
-  // ========================================================================
-  // Options (flags)
-  // ========================================================================
-  .option("-l, --limit <n>", "Maximum number of results", parseInt)
-  .option("-v, --verbose", "Enable verbose output")
-  .option("-t, --tags <tags...>", "Filter by tags (multiple allowed)")
-  .option("--include-deleted", "Include deleted items")
-  .option("-o, --output <format>", "Output format", "table")
-
-  // ========================================================================
-  // Action
-  // ========================================================================
-  .action(async ({ args, flags }) => {
-    // Create context
-    const ctx = createContext({});
-
-    // Call handler
+export const myAction = defineAction({
+  id: "my.get",
+  description: "Brief description of what this command does",
+  surfaces: ["cli"],
+  input: z.object({
+    id: z.string().min(1),
+    limit: z.number().int().positive().default(20),
+    includeDeleted: z.boolean().default(false),
+    verbose: z.boolean().optional(),
+    cwd: z.string(),
+    outputMode: z.enum(["human", "json", "jsonl"]).default("human"),
+    jq: z.string().optional(),
+  }),
+  output: z.object({
+    items: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      })
+    ),
+    total: z.number().int().nonnegative(),
+  }),
+  cli: {
+    group: "my",
+    command: "get <id>",
+    options: [
+      ...shared.options,
+      ...mode.options,
+      ...jq.options,
+      {
+        flags: "-l, --limit <n>",
+        description: "Maximum number of results",
+        defaultValue: "20",
+      },
+      {
+        flags: "--include-deleted",
+        description: "Include deleted items",
+        defaultValue: false,
+      },
+    ],
+    mapInput: ({ args, flags }) => ({
+      id: String(args[0] ?? ""),
+      limit: Number.parseInt(String(flags.limit ?? 20), 10),
+      includeDeleted: Boolean(flags.includeDeleted),
+      ...shared.resolve(flags),
+      ...mode.resolve(flags),
+      ...jq.resolve(flags),
+    }),
+  },
+  handler: async (input, ctx) => {
     const result = await myHandler(
       {
-        id: args.id,
-        name: args.name,
-        limit: flags.limit,
-        tags: flags.tags,
-        includeDeleted: flags.includeDeleted,
+        id: input.id,
+        limit: input.limit,
+        includeDeleted: input.includeDeleted,
       },
       ctx
     );
 
-    // Handle error
     if (result.isErr()) {
-      exitWithError(result.error);
+      return result;
     }
 
-    // Output success
-    await output(result.value);
-  })
-
-  // ========================================================================
-  // Build
-  // ========================================================================
-  .build();
+    await output(result.value, { mode: input.outputMode });
+    return Result.ok(result.value);
+  },
+});
 ```
 
 ## Registration
 
 ```typescript
+import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
-import { myCommand } from "./commands/my-command.js";
-import { otherCommand } from "./commands/other-command.js";
+import { createActionRegistry } from "@outfitter/contracts";
+import { myAction } from "./actions/my-action.js";
+import { otherAction } from "./actions/other-action.js";
 
 const cli = createCLI({
   name: "myapp",
@@ -79,142 +101,104 @@ const cli = createCLI({
   description: "My CLI application",
 });
 
-// Register commands
-cli.register(myCommand);
-cli.register(otherCommand);
+const registry = createActionRegistry([myAction, otherAction]);
 
-// Parse and execute
+for (const command of buildCliCommands(registry, {
+  schema: { programName: "myapp", surface: {} },
+})) {
+  cli.register(command);
+}
+
 await cli.parse();
+```
+
+## Schema Maintenance
+
+```bash
+myapp schema generate
+myapp schema diff
 ```
 
 ## Checklist
 
-- [ ] Description is clear and concise
-- [ ] Arguments use `<required>` and `[optional]` syntax
-- [ ] Options have short and long forms where appropriate
-- [ ] Numeric options use `parseInt` or `parseFloat`
-- [ ] Handler is called with structured input
-- [ ] Errors use `exitWithError()` for correct exit codes
-- [ ] Success uses `await output()` for format detection
+- [ ] Action is defined with `defineAction()` and `surfaces: ["cli"]`
+- [ ] Input/output schemas are declared with Zod
+- [ ] Flag presets are composed first (`actionCliPresets`, `outputModePreset`, `jqPreset`)
+- [ ] `mapInput()` normalizes args/flags into typed handler input
+- [ ] Handler returns `Result` and uses `output(..., { mode: input.outputMode })`
+- [ ] Action is registered via `buildCliCommands()`, not manual `command(...).action(...)`
+- [ ] Surface map is regenerated and verified (`schema generate` + `schema diff`)
 
 ## Patterns
 
-### Pagination Support
+### Grouped Subcommands
 
 ```typescript
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
+export const userCreateAction = defineAction({
+  id: "user.create",
+  surfaces: ["cli"],
+  input: z.object({ email: z.string().email() }),
+  output: z.object({ id: z.string() }),
+  cli: { group: "user", command: "create <email>", options: [] },
+  handler: async (input, ctx) => createUser(input, ctx),
+});
 
-export const listCommand = command("list")
-  .option("-n, --next", "Continue from previous position")
-  .option("--reset", "Reset pagination cursor")
-  .option("-l, --limit <n>", "Results per page", parseInt, 20)
-  .action(async ({ flags }) => {
-    const paginationOpts = { command: "list", toolName: "myapp" };
-
-    if (flags.reset) {
-      clearCursor(paginationOpts);
-      console.log("Cursor reset");
-      return;
-    }
-
-    const cursor = flags.next ? loadCursor(paginationOpts)?.cursor : undefined;
-    const ctx = createContext({});
-    const result = await listHandler({ cursor, limit: flags.limit }, ctx);
-
-    if (result.isErr()) {
-      exitWithError(result.error);
-    }
-
-    await output(result.value.items);
-
-    if (result.value.nextCursor) {
-      saveCursor(result.value.nextCursor, paginationOpts);
-      console.log("\nUse --next for more results");
-    }
-  })
-  .build();
+export const userDeleteAction = defineAction({
+  id: "user.delete",
+  surfaces: ["cli"],
+  input: z.object({ id: z.string().min(1), force: z.boolean().default(false) }),
+  output: z.object({ deleted: z.boolean() }),
+  cli: {
+    group: "user",
+    command: "delete <id>",
+    options: [
+      { flags: "--force", description: "Skip confirmation", defaultValue: false },
+    ],
+  },
+  handler: async (input, ctx) => deleteUser(input, ctx),
+});
 ```
 
-### Subcommands
+### Interactive Flags
 
 ```typescript
-import { Command } from "commander";
+import { actionCliPresets } from "@outfitter/cli/actions";
+import { interactionPreset } from "@outfitter/cli/flags";
 
-const userCommand = new Command("user")
-  .description("User management commands");
+const interaction = actionCliPresets(interactionPreset());
 
-userCommand.addCommand(
-  command("create")
-    .argument("<email>", "User email")
-    .action(async ({ args }) => { /* ... */ })
-    .build()
-);
-
-userCommand.addCommand(
-  command("delete")
-    .argument("<id>", "User ID")
-    .option("--force", "Skip confirmation")
-    .action(async ({ args, flags }) => { /* ... */ })
-    .build()
-);
-
-cli.program.addCommand(userCommand);
-```
-
-### Interactive Prompts
-
-```typescript
-import { promptConfirm, promptText, promptSelect } from "@outfitter/tui/prompt";
-
-export const deleteCommand = command("delete")
-  .argument("<id>", "Resource ID")
-  .option("--force", "Skip confirmation")
-  .action(async ({ args, flags }) => {
-    if (!flags.force) {
-      const result = await promptConfirm({
-        message: `Delete resource ${args.id}?`,
-      });
-
-      if (result.isErr() || !result.value) {
-        console.log("Cancelled");
-        return;
-      }
-    }
-
-    // Proceed with deletion
-  })
-  .build();
+cli: {
+  options: [...interaction.options],
+  mapInput: ({ flags }) => ({
+    ...interaction.resolve(flags),
+  }),
+}
 ```
 
 ## Test Template
 
 ```typescript
-import { describe, test, expect } from "bun:test";
-import { createCliHarness } from "@outfitter/testing";
-import { myCommand } from "../commands/my-command.js";
+import { describe, expect, test } from "bun:test";
+import { actions } from "../actions.js";
 
-const harness = createCliHarness(myCommand);
-
-describe("my-command", () => {
-  test("outputs JSON with --json flag", async () => {
-    const result = await harness.run(["test-id", "--json"]);
-
-    expect(result.exitCode).toBe(0);
-    expect(JSON.parse(result.stdout)).toMatchObject({ id: "test-id" });
+describe("my.get action", () => {
+  test("is registered in the action registry", () => {
+    const action = actions.get("my.get");
+    expect(action).toBeDefined();
+    expect(action?.cli?.group).toBe("my");
+    expect(action?.cli?.command).toBe("get <id>");
   });
 
-  test("exits with error for missing resource", async () => {
-    const result = await harness.run(["missing-id"]);
+  test("maps CLI args and flags", () => {
+    const action = actions.get("my.get");
+    const mapped = action?.cli?.mapInput?.({
+      args: ["abc123"],
+      flags: { output: "json", limit: "5" },
+    }) as { id: string; outputMode: string; limit: number };
 
-    expect(result.exitCode).toBe(2); // not_found
-    expect(result.stderr).toContain("not found");
-  });
-
-  test("validates required arguments", async () => {
-    const result = await harness.run([]);
-
-    expect(result.exitCode).toBe(1);
-    expect(result.stderr).toContain("required");
+    expect(mapped.id).toBe("abc123");
+    expect(mapped.outputMode).toBe("json");
+    expect(mapped.limit).toBe(5);
   });
 });
 ```
