@@ -234,7 +234,7 @@ function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
     ...(pkg.dependencies ?? {}),
     ...(pkg.devDependencies ?? {}),
   };
-  if (deps["@modelcontextprotocol/sdk"]) {
+  if (deps["@modelcontextprotocol/sdk"] || deps["@outfitter/mcp"]) {
     return "runnable";
   }
 
