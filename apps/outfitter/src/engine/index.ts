@@ -9,6 +9,8 @@ export {
   resolveAuthor,
   resolvePackageName,
   resolveYear,
+  sanitizePackageName,
+  validatePackageName,
   validateProjectDirectoryName,
 } from "./names.js";
 export {

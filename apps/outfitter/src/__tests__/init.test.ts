@@ -291,6 +291,25 @@ describe("init command placeholder replacement", () => {
 // =============================================================================
 
 describe("init command default behavior", () => {
+  test("sanitizes inferred package name from directory basename", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const projectDir = join(tempDir, "My Cool Project");
+    mkdirSync(projectDir, { recursive: true });
+
+    const result = await runInit({
+      targetDir: projectDir,
+      name: undefined,
+      preset: "minimal",
+      force: false,
+    });
+
+    expect(result.isOk()).toBe(true);
+    const packageJsonPath = join(projectDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.name).toBe("my-cool-project");
+  });
+
   test("uses directory name as project name when not specified", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -399,7 +418,7 @@ describe("init command workspace scaffolding", () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.message).toContain("project name");
+      expect(result.error.message).toContain("Invalid package name");
     }
     expect(existsSync(join(tempDir, "apps", "escaped"))).toBe(false);
   });
@@ -422,7 +441,7 @@ describe("init command workspace scaffolding", () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.message).toContain("project name");
+      expect(result.error.message).toContain("Invalid package name");
     }
   });
 
@@ -663,6 +682,22 @@ describe("init command --force flag", () => {
 // =============================================================================
 
 describe("init command error handling", () => {
+  test("returns error for invalid explicit package name", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "App Space",
+      preset: "minimal",
+      force: false,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("Invalid package name");
+    }
+  });
+
   test("returns error for invalid template name", async () => {
     const { runInit } = await import("../commands/init.js");
 

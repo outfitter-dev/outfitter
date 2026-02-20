@@ -41,6 +41,40 @@ afterEach(() => {
 });
 
 describe("scaffold command", () => {
+  test("rejects invalid package-name input with spaces", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "acme-workspace",
+          private: true,
+          workspaces: ["apps/*", "packages/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "apps"), { recursive: true });
+    mkdirSync(join(tempDir, "packages"), { recursive: true });
+
+    const result = await runScaffold({
+      target: "mcp",
+      name: "Ops Hub",
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("package name");
+    }
+  });
+
   test("rejects traversal target names that escape workspace placement directory", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 

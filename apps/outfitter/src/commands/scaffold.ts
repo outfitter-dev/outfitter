@@ -31,6 +31,8 @@ import {
   resolveAuthor,
   resolveYear,
   type ScaffoldPlan,
+  sanitizePackageName,
+  validatePackageName,
   validateProjectDirectoryName,
 } from "../engine/index.js";
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
@@ -540,6 +542,19 @@ export async function runScaffold(
     return Result.err(
       new ScaffoldCommandError(
         `Invalid target name '${targetName}': ${invalidTargetName}`
+      )
+    );
+  }
+  const invalidPackageName = validatePackageName(targetName);
+  if (invalidPackageName) {
+    const suggested = sanitizePackageName(targetName);
+    const suggestion =
+      suggested.length > 0 && suggested !== targetName
+        ? ` Try '${suggested}'.`
+        : "";
+    return Result.err(
+      new ScaffoldCommandError(
+        `Invalid package name '${targetName}': ${invalidPackageName}.${suggestion}`
       )
     );
   }
