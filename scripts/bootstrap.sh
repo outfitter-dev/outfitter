@@ -7,6 +7,12 @@
 # By default, exits immediately if all tools and deps are present.
 # Use --force to run full bootstrap regardless.
 #
+# NOTE: This is the Outfitter repo's own bootstrap. It intentionally includes
+# Graphite (gt) because this repo uses stacked PRs via Graphite.
+# The generic template distributed to consumers lives at:
+#   packages/tooling/templates/bootstrap.sh
+# That template does NOT include Graphite — it's project-agnostic.
+#
 
 set -euo pipefail
 

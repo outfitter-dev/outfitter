@@ -7,7 +7,10 @@
 # By default, exits immediately if all tools and deps are present.
 # Use --force to run full bootstrap regardless.
 #
-# Add project-specific tools (e.g., Graphite) by extending this script.
+# This is the generic template distributed via `outfitter add bootstrap`.
+# It does NOT include project-specific tools like Graphite.
+# Add project-specific tools by extending this script or using the
+# TS bootstrap API's `extend` callback.
 
 set -euo pipefail
 
