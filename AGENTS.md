@@ -107,6 +107,39 @@ type Handler<
 
 CLI and MCP are thin adapters over shared handlers. Handlers know nothing about output format or transport.
 
+### Action Registry
+
+Actions are the canonical unit of CLI and MCP functionality. Each action is defined via `defineAction()` with Zod schemas for input/output, CLI option declarations, and a handler function.
+
+**Where actions live**: `apps/outfitter/src/actions.ts` — all actions are registered in a single `ActionRegistry`.
+
+**What an action provides**:
+
+| Field | Purpose |
+|-------|---------|
+| `id` | Unique identifier (e.g. `check.tsdoc`) |
+| `surfaces` | Where the action is exposed (`cli`, `mcp`) |
+| `input` | Zod schema for validated input |
+| `output` | Zod schema for output shape |
+| `cli.group` | CLI group command (e.g. `check`) |
+| `cli.command` | Subcommand name (e.g. `tsdoc`) |
+| `cli.options` | Flag definitions |
+| `cli.mapInput` | Maps CLI args/flags to handler input |
+| `handler` | Pure function returning `Result<T, E>` |
+
+**Introspection**: `outfitter schema` shows all registered actions. `outfitter schema <action-id> --output json` returns the full schema including input/output shapes.
+
+**Surface maps**: `outfitter schema generate` writes `.outfitter/surface.json` for drift detection. `outfitter schema diff` compares committed surface map against runtime, exiting non-zero on drift.
+
+#### Adding a New CLI Command
+
+1. Define the handler in `apps/outfitter/src/commands/<name>.ts` — pure function returning `Result<T, E>`
+2. Register via `defineAction()` in `apps/outfitter/src/actions.ts` with input/output Zod schemas
+3. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
+4. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
+5. Run `outfitter schema generate` to update `.outfitter/surface.json`
+6. Verify with `outfitter schema diff` (should report no drift after regeneration)
+
 ### Error Taxonomy
 
 10 error categories with mapped exit codes and HTTP status:
@@ -243,9 +276,10 @@ fix(cli): handle missing config gracefully
 ### Git Hooks (Lefthook)
 
 - **pre-commit**: Format, lint, typecheck (affected packages)
-- **pre-push**: Build + TDD-aware test suite via `bunx @outfitter/tooling pre-push`
+- **pre-push**: Build + TDD-aware test suite via `bunx @outfitter/tooling pre-push`, plus schema drift check
   - Allows RED phase branches (`*-tests`, `*/tests`, `*_tests`) to skip tests
   - Use `--force` to skip tests on any branch
+  - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
 
 ### Changesets
 

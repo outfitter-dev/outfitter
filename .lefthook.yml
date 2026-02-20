@@ -23,3 +23,5 @@ pre-push:
   commands:
     verify:
       run: bun run packages/tooling/src/cli/index.ts pre-push
+    schema-drift:
+      run: bun run apps/outfitter/src/cli.ts schema diff

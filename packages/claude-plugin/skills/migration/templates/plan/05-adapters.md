@@ -6,9 +6,10 @@
 
 ## Objective
 
-Wrap handlers with CLI and/or MCP transport adapters.
+Wrap handlers with CLI and/or MCP transport adapters, using the action registry
+as the default CLI integration path.
 
-## CLI Commands
+## CLI Actions
 
 {{#each CLI_COMMANDS}}
 ### {{this.name}}
@@ -18,36 +19,65 @@ Wrap handlers with CLI and/or MCP transport adapters.
 
 #### Migration
 
-- [ ] Create command with Zod schema
-- [ ] Wrap handler
-- [ ] Use `output()` for responses
-- [ ] Use `exitWithError()` for errors
-- [ ] Add integration test
+- [ ] Define `defineAction()` with input and output schemas
+- [ ] Compose shared CLI presets with `actionCliPresets(...)`
+- [ ] Add `outputModePreset()` and `jqPreset()` for structured output
+- [ ] Map args/flags in `cli.mapInput`
+- [ ] Register action in the CLI registry consumed by `buildCliCommands()`
+- [ ] Add tests for action registration and `mapInput()`
+- [ ] Run schema drift checks (`schema generate` + `schema diff`)
 
 ```typescript
-import { command, output, exitWithError } from "@outfitter/cli";
-import { {{this.handler}} } from "../handlers/{{this.handlerFile}}";
-import { createAppContext } from "../context";
+import { output } from "@outfitter/cli";
+import { actionCliPresets } from "@outfitter/cli/actions";
+import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import { jqPreset, outputModePreset } from "@outfitter/cli/query";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
+import { {{this.handler}} } from "../handlers/{{this.handlerFile}}";
 
-const InputSchema = z.object({
-  {{this.inputFields}}
-});
+const shared = actionCliPresets(verbosePreset(), cwdPreset());
+const mode = outputModePreset({ includeJsonl: true });
+const jq = jqPreset();
 
-export const {{this.name}}Command = command("{{this.commandName}}")
-  .description("{{this.description}}")
-  {{this.options}}
-  .action(async ({ args, flags }) => {
-    const ctx = createAppContext();
-    const result = await {{this.handler}}({ {{this.inputMapping}} }, ctx);
+export const {{this.name}}Action = defineAction({
+  id: "{{this.name}}",
+  description: "{{this.description}}",
+  surfaces: ["cli"],
+  input: z.object({
+    {{this.inputFields}}
+    verbose: z.boolean().optional(),
+    cwd: z.string(),
+    outputMode: z.enum(["human", "json", "jsonl"]).default("human"),
+    jq: z.string().optional(),
+  }),
+  output: z.unknown(),
+  cli: {
+    command: "{{this.commandName}}",
+    options: [
+      ...shared.options,
+      ...mode.options,
+      ...jq.options,
+      {{this.options}}
+    ],
+    mapInput: ({ args, flags }) => ({
+      {{this.inputMapping}}
+      ...shared.resolve(flags),
+      ...mode.resolve(flags),
+      ...jq.resolve(flags),
+    }),
+  },
+  handler: async (input, ctx) => {
+    const result = await {{this.handler}}(input, ctx);
 
     if (result.isErr()) {
-      exitWithError(result.error);
+      return result;
     }
 
-    await output(result.value);
-  })
-  .build();
+    await output(result.value, { mode: input.outputMode });
+    return Result.ok(result.value);
+  },
+});
 ```
 
 ---
@@ -93,39 +123,64 @@ export const {{this.name}}Tool = defineTool({
 
 ## CLI Patterns
 
+### Action Registry Wiring
+
+```typescript
+import { buildCliCommands } from "@outfitter/cli/actions";
+import { createCLI } from "@outfitter/cli/command";
+
+const cli = createCLI({ name: "myapp", version: "1.0.0" });
+
+for (const command of buildCliCommands(actions, {
+  schema: { programName: "myapp", surface: {} },
+})) {
+  cli.register(command);
+}
+
+await cli.parse();
+```
+
 ### Output Modes
 
 ```typescript
-// Automatic mode detection (TTY vs pipe)
-await output(data);
+const mode = outputModePreset({ includeJsonl: true });
 
-// Force specific mode
-await output(data, { mode: "json" });
-await output(data, { mode: "human" });
-```
-
-### Error Handling
-
-```typescript
-if (result.isErr()) {
-  exitWithError(result.error);
-  // Prints error message
-  // Exits with category-mapped code (1-9, 130)
+cli: {
+  options: [...mode.options],
+  mapInput: ({ flags }) => ({
+    ...mode.resolve(flags),
+  }),
 }
 ```
 
-### Testing CLI
+### Testing CLI Actions
 
 ```typescript
-import { createCliHarness } from "@outfitter/testing";
+import { describe, expect, test } from "bun:test";
 
-const harness = createCliHarness(myCommand);
+describe("my action", () => {
+  test("is registered", () => {
+    const action = actions.get("my.action");
+    expect(action).toBeDefined();
+  });
 
-it("handles success", async () => {
-  const result = await harness.run(["--id", "123"]);
-  expect(result.exitCode).toBe(0);
-  expect(result.stdout).toContain("success");
+  test("maps input", () => {
+    const action = actions.get("my.action");
+    const mapped = action?.cli?.mapInput?.({
+      args: ["123"],
+      flags: { output: "json" },
+    }) as { outputMode: string };
+
+    expect(mapped.outputMode).toBe("json");
+  });
 });
+```
+
+### Schema Drift Guard
+
+```bash
+myapp schema generate
+myapp schema diff
 ```
 
 ## MCP Patterns
@@ -155,11 +210,12 @@ it("handles tool call", async () => {
 
 ## Completion Checklist
 
-- [ ] All CLI commands use `output()` and `exitWithError()`
+- [ ] CLI exposure is defined via action registry (`defineAction` + `buildCliCommands`)
+- [ ] CLI actions use presets + `mapInput()` for typed input resolution
 - [ ] All MCP tools have `.describe()` on schema fields
-- [ ] Handlers wrapped, not inlined
-- [ ] Integration tests with harnesses
-- [ ] Error codes verified
+- [ ] Handlers are wrapped, not inlined
+- [ ] Integration tests cover adapters
+- [ ] Surface map drift checks pass
 
 ## Notes
 
