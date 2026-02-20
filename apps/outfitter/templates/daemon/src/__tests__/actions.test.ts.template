@@ -1,0 +1,14 @@
+import { describe, expect, test } from "bun:test";
+import { actions } from "../actions.js";
+
+describe("{{projectName}} daemon actions", () => {
+	test("registers daemon lifecycle actions", () => {
+		expect(actions.get("start")).toBeDefined();
+		expect(actions.get("stop")).toBeDefined();
+		expect(actions.get("status")).toBeDefined();
+	});
+
+	test("action registry is not empty", () => {
+		expect(actions.list().length).toBeGreaterThan(0);
+	});
+});
