@@ -25,6 +25,7 @@ import {
   applyUpdatesToWorkspace,
   getInstalledPackagesFromWorkspace,
   runInstall,
+  type VersionConflict,
 } from "./upgrade-workspace.js";
 
 const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
@@ -149,6 +150,8 @@ export interface UpgradeResult {
   readonly codemods?: CodemodSummary;
   /** Package names that were requested but not found in the workspace */
   readonly unknownPackages?: readonly string[];
+  /** Version conflicts found across workspace manifests */
+  readonly conflicts?: readonly VersionConflict[];
 }
 
 // =============================================================================
@@ -799,8 +802,12 @@ export async function runUpgrade(
     const codemodTargetDir = scan.workspaceRoot ?? cwd;
 
     if (installed.length === 0 && !unknownPackages?.length) {
-      writeReport("no_updates", emptyResult);
-      return Result.ok(emptyResult);
+      const result: UpgradeResult = {
+        ...emptyResult,
+        ...(scan.conflicts.length > 0 ? { conflicts: scan.conflicts } : {}),
+      };
+      writeReport("no_updates", result);
+      return Result.ok(result);
     }
 
     if (installed.length === 0 && unknownPackages?.length) {
@@ -898,6 +905,7 @@ export async function runUpgrade(
       skippedBreaking,
       ...(guidesData !== undefined ? { guides: guidesData } : {}),
       ...(unknownPackages !== undefined ? { unknownPackages } : {}),
+      ...(scan.conflicts.length > 0 ? { conflicts: scan.conflicts } : {}),
       ...overrides,
     });
 
@@ -1070,38 +1078,41 @@ export async function printUpgradeResults(
 
   if (result.packages.length === 0) {
     lines.push("No @outfitter/* packages found in package.json.");
-    await output(lines, { mode: "human" });
-    return;
-  }
+    if (!result.unknownPackages || result.unknownPackages.length === 0) {
+      await output(lines, { mode: "human" });
+      return;
+    }
+    lines.push("");
+  } else {
+    // Version table header
+    lines.push(
+      `  ${"Package".padEnd(28)} ${"Current".padEnd(10)} ${"Available".padEnd(10)} Migration`
+    );
+    lines.push(
+      `  ${"─".repeat(28)} ${"─".repeat(10)} ${"─".repeat(10)} ${"─".repeat(20)}`
+    );
 
-  // Version table header
-  lines.push(
-    `  ${"Package".padEnd(28)} ${"Current".padEnd(10)} ${"Available".padEnd(10)} Migration`
-  );
-  lines.push(
-    `  ${"─".repeat(28)} ${"─".repeat(10)} ${"─".repeat(10)} ${"─".repeat(20)}`
-  );
+    for (const pkg of result.packages) {
+      const name = pkg.name.padEnd(28);
+      const current = pkg.current.padEnd(10);
+      const available = (pkg.latest ?? "unknown").padEnd(10);
 
-  for (const pkg of result.packages) {
-    const name = pkg.name.padEnd(28);
-    const current = pkg.current.padEnd(10);
-    const available = (pkg.latest ?? "unknown").padEnd(10);
+      let migration: string;
+      if (pkg.latest === null) {
+        migration = theme.muted("lookup failed");
+      } else if (!pkg.updateAvailable) {
+        migration = theme.muted("up to date");
+      } else if (pkg.breaking) {
+        migration = theme.error("breaking");
+      } else {
+        migration = theme.success("non-breaking");
+      }
 
-    let migration: string;
-    if (pkg.latest === null) {
-      migration = theme.muted("lookup failed");
-    } else if (!pkg.updateAvailable) {
-      migration = theme.muted("up to date");
-    } else if (pkg.breaking) {
-      migration = theme.error("breaking");
-    } else {
-      migration = theme.success("non-breaking");
+      lines.push(`  ${name} ${current} ${available} ${migration}`);
     }
 
-    lines.push(`  ${name} ${current} ${available} ${migration}`);
+    lines.push("");
   }
-
-  lines.push("");
 
   // Apply summary
   if (result.applied && result.appliedPackages.length > 0) {
@@ -1187,6 +1198,31 @@ export async function printUpgradeResults(
       }
     }
 
+    lines.push("");
+  }
+
+  // Version conflicts section
+  if (result.conflicts && result.conflicts.length > 0) {
+    lines.push(
+      theme.warning(
+        `Version conflict(s) across workspace (${result.conflicts.length}):`
+      )
+    );
+    for (const conflict of result.conflicts) {
+      lines.push(`  ${conflict.name}`);
+      for (const entry of conflict.versions) {
+        const manifests = entry.manifests
+          .map((m) => {
+            // Show the parent directory of package.json (e.g. "packages/cli")
+            const dir = m.replace(/\/package\.json$/, "");
+            const parts = dir.split("/");
+            // Take last 2 path segments for readability
+            return parts.slice(-2).join("/");
+          })
+          .join(", ");
+        lines.push(`    ${entry.version.padEnd(10)} ${theme.muted(manifests)}`);
+      }
+    }
     lines.push("");
   }
 
@@ -1316,6 +1352,7 @@ export interface UpgradeReport {
     readonly breaking: readonly string[];
   };
   readonly unknownPackages?: readonly string[];
+  readonly conflicts?: readonly VersionConflict[];
   readonly codemods?: CodemodSummary;
   readonly error?: {
     readonly message: string;
@@ -1383,6 +1420,9 @@ function writeUpgradeReport(
     ...(result.unknownPackages !== undefined &&
     result.unknownPackages.length > 0
       ? { unknownPackages: result.unknownPackages }
+      : {}),
+    ...(result.conflicts !== undefined && result.conflicts.length > 0
+      ? { conflicts: result.conflicts }
       : {}),
     ...(result.codemods !== undefined ? { codemods: result.codemods } : {}),
     ...(meta.error !== undefined

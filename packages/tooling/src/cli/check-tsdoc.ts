@@ -377,6 +377,7 @@ function discoverPackages(
 ): Array<{ name: string; path: string; entryPoint: string }> {
 	const packages: Array<{ name: string; path: string; entryPoint: string }> =
 		[];
+	const seenEntryPoints = new Set<string>();
 
 	// Search packages/*/ and apps/*/ for monorepo layouts
 	for (const pattern of ["packages/*/src/index.ts", "apps/*/src/index.ts"]) {
@@ -437,6 +438,7 @@ function discoverPackages(
 				path: cwd,
 				entryPoint,
 			});
+			seenEntryPoints.add(entryPoint);
 		} catch {
 			// No src/index.ts in cwd
 		}

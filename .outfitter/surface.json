@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-19T22:26:44.509Z",
+  "generatedAt": "2026-02-20T16:09:41.041Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -735,7 +735,13 @@
       },
       "cli": {
         "command": "doctor",
-        "description": "Validate environment and dependencies"
+        "description": "Validate environment and dependencies",
+        "options": [
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
       }
     },
     {
@@ -779,6 +785,10 @@
             "flags": "--dry-run",
             "description": "Preview changes without applying",
             "defaultValue": false
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
           }
         ]
       }
@@ -819,16 +829,13 @@
           "block": {
             "type": "string"
           },
-          "ci": {
-            "type": "boolean"
-          },
           "outputMode": {
             "type": "string",
             "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": ["cwd", "verbose", "ci"]
+        "required": ["cwd", "verbose"]
       },
       "cli": {
         "group": "check",
@@ -845,8 +852,13 @@
           },
           {
             "flags": "--ci",
-            "description": "Machine-oriented output for CI",
+            "description": "Deprecated: use --output json instead",
             "defaultValue": false
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
           },
           {
             "flags": "--cwd <path>",

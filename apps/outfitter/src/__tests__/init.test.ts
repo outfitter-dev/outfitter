@@ -499,6 +499,37 @@ describe("init command workspace scaffolding", () => {
     expect(result.value.projectDir).toBe(join(tempDir, "apps", "my-mcp"));
   });
 
+  test("renders scoped workspace README examples without double @", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "@acme/my-mcp",
+      preset: "mcp",
+      structure: "workspace",
+      workspaceName: "@acme/workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const readmePath = join(tempDir, "README.md");
+    const readme = readFileSync(readmePath, "utf-8");
+
+    expect(readme).toContain("outfitter init --name @acme/my-app --preset cli");
+    expect(readme).toContain(
+      "outfitter init --name @acme/my-lib --preset minimal"
+    );
+    expect(readme).not.toContain("@@acme");
+  });
+
   test("stamps manifest inside workspace project directory", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -552,6 +583,20 @@ describe("init command workspace scaffolding", () => {
     expect(existsSync(join(tempDir, "package.json"))).toBe(false);
     expect(existsSync(join(tempDir, "apps"))).toBe(false);
     expect(existsSync(join(tempDir, "packages"))).toBe(false);
+
+    const operations = result.value.dryRunPlan?.operations ?? [];
+    const readmeOp = operations.find((op) => {
+      if (!op || typeof op !== "object") {
+        return false;
+      }
+      const candidate = op as { type?: string; path?: string };
+      return (
+        candidate.path === join(tempDir, "README.md") &&
+        (candidate.type === "file-create" ||
+          candidate.type === "file-overwrite")
+      );
+    });
+    expect(readmeOp).toBeDefined();
   });
 });
 

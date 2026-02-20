@@ -10,9 +10,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   findMigrationDocsDir,
+  printUpgradeResults,
   readMigrationDocs,
   runUpgrade,
+  type UpgradeResult,
 } from "../commands/upgrade.js";
+import { getInstalledPackagesFromWorkspace } from "../commands/upgrade-workspace.js";
 
 // =============================================================================
 // Test Utilities
@@ -47,6 +50,40 @@ function writePackageJson(
       devDependencies: devDeps ?? {},
     })
   );
+}
+
+async function captureUpgradeOutput(
+  result: UpgradeResult,
+  options?: Parameters<typeof printUpgradeResults>[1]
+): Promise<string> {
+  const chunks: string[] = [];
+  const mockStream = {
+    write(data: string, cb?: (error?: Error | null) => void): boolean {
+      chunks.push(data);
+      if (cb) cb(null);
+      return true;
+    },
+    once(_event: string, _handler: (...args: unknown[]) => void): void {
+      // no-op for mock stream
+    },
+  } as unknown as NodeJS.WritableStream;
+
+  const originalStdout = process.stdout;
+  Object.defineProperty(process, "stdout", {
+    value: mockStream,
+    writable: true,
+  });
+
+  try {
+    await printUpgradeResults(result, options);
+  } finally {
+    Object.defineProperty(process, "stdout", {
+      value: originalStdout,
+      writable: true,
+    });
+  }
+
+  return chunks.join("");
 }
 
 // =============================================================================
@@ -176,6 +213,27 @@ describe("upgrade command output structure", () => {
         expect(typeof pkg.breaking).toBe("boolean");
       }
     }
+  });
+});
+
+describe("upgrade command output rendering", () => {
+  test("shows unknown packages even when no installed @outfitter packages were detected", async () => {
+    const result: UpgradeResult = {
+      packages: [],
+      total: 0,
+      updatesAvailable: 0,
+      hasBreaking: false,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking: [],
+      unknownPackages: ["@outfitter/nonexistent"],
+    };
+
+    const output = await captureUpgradeOutput(result);
+
+    expect(output).toContain("No @outfitter/* packages found in package.json.");
+    expect(output).toContain("Unknown package(s) not found in workspace:");
+    expect(output).toContain("@outfitter/nonexistent");
   });
 });
 
@@ -429,6 +487,113 @@ describe("upgrade package filtering", () => {
     if (result.isOk()) {
       // Should report as-is, not mangled to @outfitter/@other-scope/foo
       expect(result.value.unknownPackages).toContain("@other-scope/foo");
+    }
+  });
+});
+
+// =============================================================================
+// Workspace Version Conflict Tests (OS-271)
+// =============================================================================
+
+/**
+ * Create a Bun-style workspace with multiple child packages.
+ *
+ * @param rootDir - temp directory to create workspace in
+ * @param children - map of child dir name to its dependencies
+ */
+function createWorkspace(
+  rootDir: string,
+  children: Record<string, Record<string, string>>
+): void {
+  // Root package.json with workspaces field
+  writeFileSync(
+    join(rootDir, "package.json"),
+    JSON.stringify({
+      name: "test-workspace",
+      private: true,
+      workspaces: ["packages/*"],
+    })
+  );
+
+  for (const [childName, deps] of Object.entries(children)) {
+    const childDir = join(rootDir, "packages", childName);
+    mkdirSync(childDir, { recursive: true });
+    writeFileSync(
+      join(childDir, "package.json"),
+      JSON.stringify({
+        name: `@test/${childName}`,
+        version: "0.0.0",
+        dependencies: deps,
+      })
+    );
+  }
+}
+
+describe("workspace version conflicts", () => {
+  test("detects conflicting versions across workspace members", () => {
+    createWorkspace(tempDir, {
+      "app-a": { "@outfitter/contracts": "^0.1.0" },
+      "app-b": { "@outfitter/contracts": "^0.2.0" },
+    });
+
+    const result = getInstalledPackagesFromWorkspace(tempDir);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.conflicts).toHaveLength(1);
+      expect(result.value.conflicts[0]?.name).toBe("@outfitter/contracts");
+      expect(result.value.conflicts[0]?.versions).toHaveLength(2);
+    }
+  });
+
+  test("no conflicts when versions match", () => {
+    createWorkspace(tempDir, {
+      "app-a": { "@outfitter/contracts": "^0.1.0" },
+      "app-b": { "@outfitter/contracts": "^0.1.0" },
+    });
+
+    const result = getInstalledPackagesFromWorkspace(tempDir);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.conflicts).toHaveLength(0);
+    }
+  });
+
+  test("conflicts surface in runUpgrade result", async () => {
+    createWorkspace(tempDir, {
+      "app-a": { "@outfitter/contracts": "^0.1.0" },
+      "app-b": { "@outfitter/contracts": "^0.2.0" },
+    });
+
+    const result = await runUpgrade({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.conflicts).toBeDefined();
+      expect(result.value.conflicts).toHaveLength(1);
+      expect(result.value.conflicts?.[0]?.name).toBe("@outfitter/contracts");
+    }
+  });
+
+  test("conflicts include manifest paths", () => {
+    createWorkspace(tempDir, {
+      "app-a": { "@outfitter/cli": "^0.1.0" },
+      "app-b": { "@outfitter/cli": "^0.3.0" },
+    });
+
+    const result = getInstalledPackagesFromWorkspace(tempDir);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const conflict = result.value.conflicts[0];
+      expect(conflict?.name).toBe("@outfitter/cli");
+
+      // Each version entry should have at least one manifest path
+      for (const entry of conflict?.versions ?? []) {
+        expect(entry.manifests.length).toBeGreaterThan(0);
+        expect(entry.manifests[0]).toContain("package.json");
+      }
     }
   });
 });

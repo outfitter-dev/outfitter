@@ -113,24 +113,23 @@ exports[`Registry Build Output generated registry output matches snapshot 1`] = 
 # By default, exits immediately if all tools and deps are present.
 # Use --force to run full bootstrap regardless.
 #
-# Add project-specific tools (e.g., Graphite) by extending this script.
+# This is the generic template distributed via \`outfitter add bootstrap\`.
+# It does NOT include project-specific tools like Graphite.
+# Add project-specific tools by extending this script or using the
+# TS bootstrap API's \`extend\` callback.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 BUN_VERSION_FILE="$REPO_ROOT/.bun-version"
+PINNED_BUN_VERSION=""
 
-if [[ ! -f "$BUN_VERSION_FILE" ]]; then
-  echo "Error: Missing .bun-version at $BUN_VERSION_FILE" >&2
-  exit 1
-fi
-
-PINNED_BUN_VERSION="$(tr -d '[:space:]' < "$BUN_VERSION_FILE")"
-
-if [[ -z "$PINNED_BUN_VERSION" ]]; then
-  echo "Error: .bun-version is empty" >&2
-  exit 1
+if [[ -f "$BUN_VERSION_FILE" ]]; then
+  PINNED_BUN_VERSION="$(tr -d '[:space:]' < "$BUN_VERSION_FILE")"
+  if [[ -z "$PINNED_BUN_VERSION" ]]; then
+    echo "Warning: .bun-version is empty; falling back to latest Bun install" >&2
+  fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -141,7 +140,9 @@ if [[ "\${1:-}" != "--force" ]]; then
 
   if command -v bun &>/dev/null; then
     installed_bun_version="$(bun --version)"
-    [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]] || all_present=false
+    if [[ -n "$PINNED_BUN_VERSION" ]]; then
+      [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]] || all_present=false
+    fi
   else
     all_present=false
   fi
@@ -202,18 +203,30 @@ install_bun() {
     installed_bun_version="$(bun --version)"
   fi
 
-  if [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]]; then
-    success "Bun already installed ($installed_bun_version)"
-    return
-  fi
-
   if [[ -n "$installed_bun_version" ]]; then
-    info "Updating Bun from $installed_bun_version to $PINNED_BUN_VERSION..."
-  else
-    info "Installing Bun $PINNED_BUN_VERSION..."
+    if [[ -n "$PINNED_BUN_VERSION" && "$installed_bun_version" == "$PINNED_BUN_VERSION" ]]; then
+      success "Bun already installed ($installed_bun_version)"
+      return
+    fi
+    if [[ -z "$PINNED_BUN_VERSION" ]]; then
+      success "Bun already installed ($installed_bun_version)"
+      return
+    fi
   fi
 
-  curl -fsSL https://bun.sh/install | bash -s -- "bun-v$PINNED_BUN_VERSION"
+  if [[ -n "$PINNED_BUN_VERSION" && -n "$installed_bun_version" ]]; then
+    info "Updating Bun from $installed_bun_version to $PINNED_BUN_VERSION..."
+  elif [[ -n "$PINNED_BUN_VERSION" ]]; then
+    info "Installing Bun $PINNED_BUN_VERSION..."
+  else
+    info "Installing Bun (latest stable)..."
+  fi
+
+  if [[ -n "$PINNED_BUN_VERSION" ]]; then
+    curl -fsSL https://bun.sh/install | bash -s -- "bun-v$PINNED_BUN_VERSION"
+  else
+    curl -fsSL https://bun.sh/install | bash
+  fi
 
   # Source the updated profile
   export BUN_INSTALL="$HOME/.bun"
@@ -223,7 +236,7 @@ install_bun() {
   local resolved_bun_version
   resolved_bun_version="$(bun --version)"
 
-  if [[ "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
+  if [[ -n "$PINNED_BUN_VERSION" && "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
     error "Expected Bun $PINNED_BUN_VERSION but found $resolved_bun_version after install"
     exit 1
   fi
