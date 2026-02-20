@@ -1,0 +1,26 @@
+/**
+ * {{projectName}} - CLI program definition
+ */
+
+import { createContext } from "@outfitter/contracts";
+import { buildCliCommands } from "@outfitter/cli/actions";
+import { createCLI } from "@outfitter/cli/command";
+import { exitWithError } from "@outfitter/cli/output";
+import { actions } from "./actions.js";
+
+export const program = createCLI({
+	name: "{{binName}}",
+	version: "{{version}}",
+	description: "{{description}}",
+	onError: (error) => exitWithError(error),
+});
+
+for (const command of buildCliCommands(actions, {
+	createContext: () =>
+		createContext({
+			cwd: process.cwd(),
+			env: process.env as Record<string, string | undefined>,
+		}),
+})) {
+	program.register(command);
+}
