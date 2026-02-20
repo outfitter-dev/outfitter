@@ -28,12 +28,12 @@ export async function runDaemon(): Promise<void> {
 	// Acquire lock
 	const lockResult = await acquireDaemonLock(lockPath);
 	if (!lockResult.isOk()) {
-		logger.error`Failed to acquire lock: ${lockResult.error.message}`;
+		logger.error(`Failed to acquire lock: ${lockResult.error.message}`);
 		process.exit(1);
 	}
 	const lock = lockResult.value;
 
-	logger.info`Daemon starting on ${socketPath}`;
+	logger.info(`Daemon starting on ${socketPath}`);
 
 	// Create HTTP server on Unix socket
 	const server = Bun.serve({
@@ -50,7 +50,7 @@ export async function runDaemon(): Promise<void> {
 			}
 
 			if (url.pathname === "/shutdown" && request.method === "POST") {
-				logger.info`Shutdown requested`;
+				logger.info("Shutdown requested");
 				// Schedule shutdown
 				setTimeout(async () => {
 					await releaseDaemonLock(lock);
@@ -66,7 +66,7 @@ export async function runDaemon(): Promise<void> {
 
 	// Handle signals
 	const shutdown = async () => {
-		logger.info`Received shutdown signal`;
+		logger.info("Received shutdown signal");
 		await releaseDaemonLock(lock);
 		server.stop();
 		process.exit(0);
@@ -75,5 +75,5 @@ export async function runDaemon(): Promise<void> {
 	process.on("SIGTERM", shutdown);
 	process.on("SIGINT", shutdown);
 
-	logger.info`Daemon running`;
+	logger.info("Daemon running");
 }

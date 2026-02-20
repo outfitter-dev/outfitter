@@ -30,7 +30,7 @@ program.register(
 			const foreground = Boolean((flags as { foreground?: boolean }).foreground);
 
 			if (await isDaemonAlive(lockPath)) {
-				logger.warn`Daemon is already running`;
+				logger.warn("Daemon is already running");
 				process.exit(1);
 			}
 
@@ -45,7 +45,7 @@ program.register(
 					stdio: "ignore",
 				});
 				daemon.unref();
-				logger.info`Daemon started with PID ${daemon.pid}`;
+				logger.info(`Daemon started with PID ${daemon.pid}`);
 			}
 		}),
 );
@@ -55,7 +55,7 @@ program.register(
 		.description("Stop the daemon")
 		.action(async () => {
 			if (!(await isDaemonAlive(lockPath))) {
-				logger.warn`Daemon is not running`;
+				logger.warn("Daemon is not running");
 				process.exit(1);
 			}
 			// Signal daemon to stop via HTTP
@@ -64,10 +64,10 @@ program.register(
 					method: "POST",
 				});
 				if (response.ok) {
-					logger.info`Daemon stopped`;
+					logger.info("Daemon stopped");
 				}
 			} catch {
-				logger.error`Failed to stop daemon`;
+				logger.error("Failed to stop daemon");
 				process.exit(1);
 			}
 		}),
@@ -78,17 +78,17 @@ program.register(
 		.description("Check daemon status")
 		.action(async () => {
 			if (await isDaemonAlive(lockPath)) {
-				logger.info`Daemon is running`;
+				logger.info("Daemon is running");
 				// Fetch health info
 				try {
 					const response = await fetch(`http://unix:${socketPath}:/health`);
 					const health = await response.json();
 					console.log(JSON.stringify(health, null, 2));
 				} catch {
-					logger.warn`Could not fetch health info`;
+					logger.warn("Could not fetch health info");
 				}
 			} else {
-				logger.info`Daemon is not running`;
+				logger.info("Daemon is not running");
 			}
 		}),
 );
