@@ -38,7 +38,7 @@ export interface UpgradeOptions {
   readonly cwd: string;
   /** Show migration guide */
   readonly guide?: boolean;
-  /** Filter migration guides to specific package names */
+  /** Filter to specific package names (scan + guides) */
   readonly guidePackages?: readonly string[];
   /** Preview only — no mutations, no prompt */
   readonly dryRun?: boolean;
@@ -147,6 +147,8 @@ export interface UpgradeResult {
   readonly guides?: readonly MigrationGuide[];
   /** Codemod execution summary (populated when --apply runs codemods) */
   readonly codemods?: CodemodSummary;
+  /** Package names that were requested but not found in the workspace */
+  readonly unknownPackages?: readonly string[];
 }
 
 // =============================================================================
@@ -766,15 +768,49 @@ export async function runUpgrade(
 
     const scan = scanResult.value;
     workspaceRoot = scan.workspaceRoot;
-    const installed = scan.packages;
+
+    // Filter to requested packages when positional args are provided
+    const requestedPackages = options.guidePackages;
+    let installed = scan.packages;
+    let unknownPackages: string[] | undefined;
+
+    if (requestedPackages && requestedPackages.length > 0) {
+      const filterSet = new Set(
+        requestedPackages.map((p) =>
+          p.startsWith("@") ? p : `@outfitter/${p}`
+        )
+      );
+      const found = new Set<string>();
+      installed = scan.packages.filter((pkg) => {
+        if (filterSet.has(pkg.name)) {
+          found.add(pkg.name);
+          return true;
+        }
+        return false;
+      });
+      const notFound = [...filterSet].filter((name) => !found.has(name));
+      if (notFound.length > 0) {
+        unknownPackages = notFound;
+      }
+    }
 
     // Determine the effective root for install (workspace root or cwd)
     const installRoot = scan.workspaceRoot ?? cwd;
     const codemodTargetDir = scan.workspaceRoot ?? cwd;
 
-    if (installed.length === 0) {
+    if (installed.length === 0 && !unknownPackages?.length) {
       writeReport("no_updates", emptyResult);
       return Result.ok(emptyResult);
+    }
+
+    if (installed.length === 0 && unknownPackages?.length) {
+      const result: UpgradeResult = {
+        ...emptyResult,
+        unknownPackages,
+        ...(scan.conflicts.length > 0 ? { conflicts: scan.conflicts } : {}),
+      };
+      writeReport("no_updates", result);
+      return Result.ok(result);
     }
 
     // Query npm for latest versions in parallel
@@ -842,20 +878,13 @@ export async function runUpgrade(
       : breakingUpgradable.map((a) => a.name);
 
     // Build structured migration guides when --guide is requested
-    let guidesData =
+    const guidesData =
       options.guide === true
         ? buildMigrationGuides(packages, migrationsDir)
         : undefined;
 
-    // Filter guides to specific packages when --guide packages are specified
-    if (
-      guidesData !== undefined &&
-      options.guidePackages !== undefined &&
-      options.guidePackages.length > 0
-    ) {
-      const filterSet = new Set(options.guidePackages);
-      guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
-    }
+    // Note: guide filter is unnecessary here — `buildMigrationGuides` already
+    // operates on the filtered `packages` list from the scan filter above.
 
     const buildResult = (
       overrides: Partial<UpgradeResult> = {}
@@ -868,6 +897,7 @@ export async function runUpgrade(
       appliedPackages: [],
       skippedBreaking,
       ...(guidesData !== undefined ? { guides: guidesData } : {}),
+      ...(unknownPackages !== undefined ? { unknownPackages } : {}),
       ...overrides,
     });
 
@@ -1160,6 +1190,15 @@ export async function printUpgradeResults(
     lines.push("");
   }
 
+  // Unknown packages section
+  if (result.unknownPackages && result.unknownPackages.length > 0) {
+    lines.push(theme.error("Unknown package(s) not found in workspace:"));
+    for (const name of result.unknownPackages) {
+      lines.push(`  - ${name}`);
+    }
+    lines.push("");
+  }
+
   if (!result.applied) {
     if (options?.dryRun) {
       lines.push(theme.muted("Dry run — no changes applied."));
@@ -1276,6 +1315,7 @@ export interface UpgradeReport {
   readonly excluded: {
     readonly breaking: readonly string[];
   };
+  readonly unknownPackages?: readonly string[];
   readonly codemods?: CodemodSummary;
   readonly error?: {
     readonly message: string;
@@ -1340,6 +1380,10 @@ function writeUpgradeReport(
     excluded: {
       breaking: result.skippedBreaking,
     },
+    ...(result.unknownPackages !== undefined &&
+    result.unknownPackages.length > 0
+      ? { unknownPackages: result.unknownPackages }
+      : {}),
     ...(result.codemods !== undefined ? { codemods: result.codemods } : {}),
     ...(meta.error !== undefined
       ? {
