@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -37,6 +37,12 @@ export interface CheckTsDocInput {
   readonly level: CoverageLevel | undefined;
   readonly packages: readonly string[];
 }
+
+const DEFAULT_TSDOC_DISCOVERY_PATTERNS = [
+  "packages/*/src/index.ts",
+  "apps/*/src/index.ts",
+  "src/index.ts",
+] as const;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -77,6 +83,128 @@ function calculateCoverage(declarations: readonly DeclarationCoverage[]): {
   const percentage = Math.round((score / total) * 100);
 
   return { documented, partial, undocumented, total, percentage };
+}
+
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as JsonRecord)
+    : undefined;
+}
+
+function readJsonFile(filePath: string): JsonRecord | undefined {
+  try {
+    return JSON.parse(readFileSync(filePath, "utf-8")) as JsonRecord;
+  } catch {
+    return undefined;
+  }
+}
+
+function readEntrypointsFromTsdocObject(
+  value: unknown
+): readonly string[] | undefined {
+  const tsdoc = asRecord(value);
+  const entrypoints = tsdoc?.["entrypoints"];
+  if (!Array.isArray(entrypoints)) {
+    return undefined;
+  }
+
+  const normalized = entrypoints
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function resolveConfiguredEntrypoints(cwd: string): {
+  readonly entrypoints: readonly string[];
+  readonly source: string;
+} | null {
+  const configPath = join(cwd, ".outfitter", "config.json");
+  if (existsSync(configPath)) {
+    const parsed = readJsonFile(configPath);
+    if (parsed) {
+      const fromRoot = readEntrypointsFromTsdocObject(parsed["tsdoc"]);
+      if (fromRoot) {
+        return {
+          entrypoints: fromRoot,
+          source: ".outfitter/config.json#tsdoc.entrypoints",
+        };
+      }
+
+      const fromOutfitter = readEntrypointsFromTsdocObject(
+        asRecord(parsed["outfitter"])?.["tsdoc"]
+      );
+      if (fromOutfitter) {
+        return {
+          entrypoints: fromOutfitter,
+          source: ".outfitter/config.json#outfitter.tsdoc.entrypoints",
+        };
+      }
+    }
+  }
+
+  const packageJsonPath = join(cwd, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return null;
+  }
+
+  const parsedPackageJson = readJsonFile(packageJsonPath);
+  const fromPackageJson = readEntrypointsFromTsdocObject(
+    asRecord(parsedPackageJson?.["outfitter"])?.["tsdoc"]
+  );
+  if (!fromPackageJson) {
+    return null;
+  }
+
+  return {
+    entrypoints: fromPackageJson,
+    source: "package.json#outfitter.tsdoc.entrypoints",
+  };
+}
+
+function derivePackagePathFromEntrypoint(match: string): string {
+  const normalized = match.replaceAll("\\", "/");
+  if (normalized === "src/index.ts") {
+    return ".";
+  }
+  if (normalized.endsWith("/src/index.ts")) {
+    return normalized.slice(0, -"/src/index.ts".length);
+  }
+
+  const srcSegment = normalized.lastIndexOf("/src/");
+  if (srcSegment >= 0) {
+    return srcSegment === 0 ? "." : normalized.slice(0, srcSegment);
+  }
+
+  const separator = normalized.lastIndexOf("/");
+  return separator > 0 ? normalized.slice(0, separator) : ".";
+}
+
+function discoverPathsFromEntrypoints(
+  cwd: string,
+  entrypoints: readonly string[]
+): readonly string[] {
+  const paths = new Set<string>();
+
+  for (const pattern of entrypoints) {
+    const glob = new Bun.Glob(pattern);
+    for (const match of glob.scanSync({ cwd, dot: false })) {
+      paths.add(derivePackagePathFromEntrypoint(match));
+    }
+  }
+
+  return [...paths].sort();
+}
+
+function formatDiscoveryMessage(
+  entrypoints: readonly string[],
+  source?: string
+): string {
+  const patterns = entrypoints.join(", ");
+  return source ? `${patterns} (from ${source})` : patterns;
 }
 
 /** Recalculate count fields from a declarations array. */
@@ -315,16 +443,45 @@ export async function runCheckTsdoc(
 ): Promise<Result<TsDocCheckResult, Error>> {
   try {
     const tooling = await loadToolingCheckTsdocModule();
+    const configuredEntrypoints = resolveConfiguredEntrypoints(input.cwd);
+    const configuredPaths = configuredEntrypoints
+      ? discoverPathsFromEntrypoints(
+          input.cwd,
+          configuredEntrypoints.entrypoints
+        )
+      : [];
+
+    if (configuredEntrypoints && configuredPaths.length === 0) {
+      return Result.err(
+        ValidationError.fromMessage(
+          `No packages found. Searched ${formatDiscoveryMessage(
+            configuredEntrypoints.entrypoints,
+            configuredEntrypoints.source
+          )}.`,
+          { cwd: input.cwd }
+        )
+      );
+    }
+
     const rawResult = tooling.analyzeCheckTsdoc({
       strict: input.strict,
       minCoverage: input.minCoverage,
       cwd: input.cwd,
+      ...(configuredEntrypoints ? { paths: configuredPaths } : {}),
     });
 
     if (!rawResult) {
+      const discoveryPatterns = configuredEntrypoints
+        ? configuredEntrypoints.entrypoints
+        : DEFAULT_TSDOC_DISCOVERY_PATTERNS;
+      const discoverySource = configuredEntrypoints?.source;
+
       return Result.err(
         ValidationError.fromMessage(
-          "No packages found. Searched packages/*, apps/*, and src/index.ts. Use --package <path> to specify explicitly.",
+          `No packages found. Searched ${formatDiscoveryMessage(
+            discoveryPatterns,
+            discoverySource
+          )}. Use --package <path> to specify explicitly.`,
           { cwd: input.cwd }
         )
       );

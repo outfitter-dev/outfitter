@@ -22,6 +22,69 @@ function createWorkspace(source: string): { cwd: string; packageName: string } {
   return { cwd, packageName };
 }
 
+function createConfiguredWorkspace(options: {
+  readonly memberDir: string;
+  readonly packageName: string;
+  readonly source: string;
+  readonly packageJsonEntrypoints?: readonly string[];
+  readonly configEntrypoints?: readonly string[];
+}): { cwd: string; packageName: string } {
+  const cwd = mkdtempSync(join(tmpdir(), "outfitter-check-tsdoc-"));
+  const pkgRoot = join(cwd, options.memberDir);
+
+  mkdirSync(join(pkgRoot, "src"), { recursive: true });
+  writeFileSync(
+    join(pkgRoot, "package.json"),
+    JSON.stringify({ name: options.packageName, version: "0.0.0" }, null, 2)
+  );
+  writeFileSync(join(pkgRoot, "src", "index.ts"), options.source);
+
+  // When memberDir is ".", the member package.json IS the root package.json,
+  // so skip writing a separate root to avoid overwriting the member's name.
+  if (options.memberDir !== ".") {
+    const rootPackageJson = {
+      name: "workspace-root",
+      version: "0.0.0",
+      ...(options.packageJsonEntrypoints
+        ? {
+            outfitter: {
+              tsdoc: {
+                entrypoints: options.packageJsonEntrypoints,
+              },
+            },
+          }
+        : {}),
+    };
+    writeFileSync(
+      join(cwd, "package.json"),
+      JSON.stringify(rootPackageJson, null, 2)
+    );
+  } else if (options.packageJsonEntrypoints) {
+    // Merge entrypoints config into the member's root package.json
+    const existing = JSON.parse(readFileSync(join(cwd, "package.json"), "utf-8"));
+    existing.outfitter = { tsdoc: { entrypoints: options.packageJsonEntrypoints } };
+    writeFileSync(join(cwd, "package.json"), JSON.stringify(existing, null, 2));
+  }
+
+  if (options.configEntrypoints) {
+    mkdirSync(join(cwd, ".outfitter"), { recursive: true });
+    writeFileSync(
+      join(cwd, ".outfitter", "config.json"),
+      JSON.stringify(
+        {
+          tsdoc: {
+            entrypoints: options.configEntrypoints,
+          },
+        },
+        null,
+        2
+      )
+    );
+  }
+
+  return { cwd, packageName: options.packageName };
+}
+
 function createInput(
   cwd: string,
   overrides: Partial<CheckTsDocInput> = {}
@@ -196,6 +259,74 @@ describe("runCheckTsdoc", () => {
       expect(stderr).toContain("jq is not installed");
     } finally {
       spawnSpy.mockRestore();
+      rmSync(workspace.cwd, { recursive: true, force: true });
+    }
+  });
+
+  test("discovers entrypoints from package.json outfitter.tsdoc config", async () => {
+    const workspace = createConfiguredWorkspace({
+      memberDir: "modules/demo",
+      packageName: "@demo/pkg",
+      source: "/** Doc. */\nexport function alpha() {}",
+      packageJsonEntrypoints: ["modules/*/src/index.ts"],
+    });
+
+    try {
+      const { result } = await runWithCapturedOutput(
+        createInput(workspace.cwd)
+      );
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) return;
+
+      expect(result.value.packages).toHaveLength(1);
+      expect(result.value.packages[0]?.name).toBe(workspace.packageName);
+      expect(result.value.packages[0]?.path).toContain("modules/demo");
+    } finally {
+      rmSync(workspace.cwd, { recursive: true, force: true });
+    }
+  });
+
+  test("discovers root-level package via bare src/index.ts entrypoint", async () => {
+    const workspace = createConfiguredWorkspace({
+      memberDir: ".",
+      packageName: "@demo/root-pkg",
+      source: "/** Doc. */\nexport function rootFn() {}",
+      configEntrypoints: ["src/index.ts"],
+    });
+
+    try {
+      const { result } = await runWithCapturedOutput(
+        createInput(workspace.cwd)
+      );
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) return;
+
+      expect(result.value.packages).toHaveLength(1);
+      expect(result.value.packages[0]?.name).toBe(workspace.packageName);
+    } finally {
+      rmSync(workspace.cwd, { recursive: true, force: true });
+    }
+  });
+
+  test("discovers entrypoints from .outfitter/config.json", async () => {
+    const workspace = createConfiguredWorkspace({
+      memberDir: "services/api",
+      packageName: "@demo/api",
+      source: "/** Doc. */\nexport function ping() {}",
+      configEntrypoints: ["services/*/src/index.ts"],
+    });
+
+    try {
+      const { result } = await runWithCapturedOutput(
+        createInput(workspace.cwd)
+      );
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) return;
+
+      expect(result.value.packages).toHaveLength(1);
+      expect(result.value.packages[0]?.name).toBe(workspace.packageName);
+      expect(result.value.packages[0]?.path).toContain("services/api");
+    } finally {
       rmSync(workspace.cwd, { recursive: true, force: true });
     }
   });
