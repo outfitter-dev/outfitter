@@ -100,7 +100,7 @@ bun run typecheck    # TypeScript validation
 
 ## Requirements
 
-Bun >= 1.3.7
+Bun >= 1.3.9
 
 ## License
 

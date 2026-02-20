@@ -66,13 +66,13 @@ describe("runAdd", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.created).toContain("biome.json");
-      expect(result.value.devDependencies.ultracite).toBe("^7.1.1");
+      expect(result.value.devDependencies.ultracite).toBe("^7.2.3");
     }
 
     // Verify package.json was updated
     const pkgContent = readFileSync(join(testDir, "package.json"), "utf-8");
     const pkg = JSON.parse(pkgContent);
-    expect(pkg.devDependencies?.ultracite).toBe("^7.1.1");
+    expect(pkg.devDependencies?.ultracite).toBe("^7.2.3");
   });
 
   test("adds scaffolding block (composite)", async () => {
@@ -87,9 +87,9 @@ describe("runAdd", () => {
     if (result.isOk()) {
       // Should include files from all extended blocks
       expect(result.value.created.length).toBeGreaterThanOrEqual(4);
-      expect(result.value.devDependencies.ultracite).toBe("^7.1.1");
-      expect(result.value.devDependencies.lefthook).toBe("^2.0.16");
-      expect(result.value.devDependencies["@outfitter/tooling"]).toBe("^0.2.1");
+      expect(result.value.devDependencies.ultracite).toBe("^7.2.3");
+      expect(result.value.devDependencies.lefthook).toBe("^2.1.1");
+      expect(result.value.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
     }
   });
 
