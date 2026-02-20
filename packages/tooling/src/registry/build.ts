@@ -175,7 +175,10 @@ export const REGISTRY_CONFIG: RegistryBuildConfig = {
 		bootstrap: {
 			description:
 				"Project bootstrap script for installing tools and dependencies",
-			files: ["scripts/bootstrap.sh"],
+			files: ["packages/tooling/templates/bootstrap.sh"],
+			remap: {
+				"packages/tooling/templates/bootstrap.sh": "scripts/bootstrap.sh",
+			},
 		},
 		scaffolding: {
 			description:

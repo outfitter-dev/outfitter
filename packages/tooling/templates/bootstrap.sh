@@ -7,29 +7,23 @@
 # By default, exits immediately if all tools and deps are present.
 # Use --force to run full bootstrap regardless.
 #
-# NOTE: This is the Outfitter repo's own bootstrap. It intentionally includes
-# Graphite (gt) because this repo uses stacked PRs via Graphite.
-# The generic template distributed to consumers lives at:
-#   packages/tooling/templates/bootstrap.sh
-# That template does NOT include Graphite — it's project-agnostic.
-#
+# This is the generic template distributed via `outfitter add bootstrap`.
+# It does NOT include project-specific tools like Graphite.
+# Add project-specific tools by extending this script or using the
+# TS bootstrap API's `extend` callback.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 BUN_VERSION_FILE="$REPO_ROOT/.bun-version"
+PINNED_BUN_VERSION=""
 
-if [[ ! -f "$BUN_VERSION_FILE" ]]; then
-  echo "Error: Missing .bun-version at $BUN_VERSION_FILE" >&2
-  exit 1
-fi
-
-PINNED_BUN_VERSION="$(tr -d '[:space:]' < "$BUN_VERSION_FILE")"
-
-if [[ -z "$PINNED_BUN_VERSION" ]]; then
-  echo "Error: .bun-version is empty" >&2
-  exit 1
+if [[ -f "$BUN_VERSION_FILE" ]]; then
+  PINNED_BUN_VERSION="$(tr -d '[:space:]' < "$BUN_VERSION_FILE")"
+  if [[ -z "$PINNED_BUN_VERSION" ]]; then
+    echo "Warning: .bun-version is empty; falling back to latest Bun install" >&2
+  fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -40,13 +34,14 @@ if [[ "${1:-}" != "--force" ]]; then
 
   if command -v bun &>/dev/null; then
     installed_bun_version="$(bun --version)"
-    [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]] || all_present=false
+    if [[ -n "$PINNED_BUN_VERSION" ]]; then
+      [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]] || all_present=false
+    fi
   else
     all_present=false
   fi
 
   command -v gh &>/dev/null || all_present=false
-  command -v gt &>/dev/null || all_present=false
   command -v markdownlint-cli2 &>/dev/null || all_present=false
   [[ -d "$REPO_ROOT/node_modules" ]] || all_present=false
 
@@ -102,18 +97,30 @@ install_bun() {
     installed_bun_version="$(bun --version)"
   fi
 
-  if [[ "$installed_bun_version" == "$PINNED_BUN_VERSION" ]]; then
-    success "Bun already installed ($installed_bun_version)"
-    return
-  fi
-
   if [[ -n "$installed_bun_version" ]]; then
-    info "Updating Bun from $installed_bun_version to $PINNED_BUN_VERSION..."
-  else
-    info "Installing Bun $PINNED_BUN_VERSION..."
+    if [[ -n "$PINNED_BUN_VERSION" && "$installed_bun_version" == "$PINNED_BUN_VERSION" ]]; then
+      success "Bun already installed ($installed_bun_version)"
+      return
+    fi
+    if [[ -z "$PINNED_BUN_VERSION" ]]; then
+      success "Bun already installed ($installed_bun_version)"
+      return
+    fi
   fi
 
-  curl -fsSL https://bun.sh/install | bash -s -- "bun-v$PINNED_BUN_VERSION"
+  if [[ -n "$PINNED_BUN_VERSION" && -n "$installed_bun_version" ]]; then
+    info "Updating Bun from $installed_bun_version to $PINNED_BUN_VERSION..."
+  elif [[ -n "$PINNED_BUN_VERSION" ]]; then
+    info "Installing Bun $PINNED_BUN_VERSION..."
+  else
+    info "Installing Bun (latest stable)..."
+  fi
+
+  if [[ -n "$PINNED_BUN_VERSION" ]]; then
+    curl -fsSL https://bun.sh/install | bash -s -- "bun-v$PINNED_BUN_VERSION"
+  else
+    curl -fsSL https://bun.sh/install | bash
+  fi
 
   # Source the updated profile
   export BUN_INSTALL="$HOME/.bun"
@@ -123,7 +130,7 @@ install_bun() {
   local resolved_bun_version
   resolved_bun_version="$(bun --version)"
 
-  if [[ "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
+  if [[ -n "$PINNED_BUN_VERSION" && "$resolved_bun_version" != "$PINNED_BUN_VERSION" ]]; then
     error "Expected Bun $PINNED_BUN_VERSION but found $resolved_bun_version after install"
     exit 1
   fi
@@ -148,23 +155,6 @@ install_gh() {
       sudo apt update && sudo apt install gh -y
     fi
     success "GitHub CLI installed"
-  fi
-}
-
-# -----------------------------------------------------------------------------
-# Graphite CLI (gt)
-# -----------------------------------------------------------------------------
-install_graphite() {
-  if has gt; then
-    success "Graphite CLI already installed ($(gt --version 2>/dev/null || echo 'unknown'))"
-  else
-    info "Installing Graphite CLI..."
-    if $IS_MACOS && has brew; then
-      brew install withgraphite/tap/graphite
-    else
-      bun install -g @withgraphite/graphite-cli
-    fi
-    success "Graphite CLI installed"
   fi
 }
 
@@ -197,16 +187,7 @@ check_auth() {
     echo "    GitHub CLI not authenticated. Run 'gh auth login' or set GH_TOKEN"
   fi
 
-  # Graphite CLI
-  if [[ -n "${GT_AUTH_TOKEN:-}" ]]; then
-    info "Authenticating Graphite CLI..."
-    gt auth --token "$GT_AUTH_TOKEN"
-    success "Graphite CLI authenticated"
-  elif gt auth status &>/dev/null 2>&1; then
-    success "Graphite CLI already authenticated"
-  else
-    echo "    Graphite CLI not authenticated. Run 'gt auth' or set GT_AUTH_TOKEN"
-  fi
+  # Add project-specific auth checks (e.g., Graphite) below
 }
 
 # -----------------------------------------------------------------------------
@@ -238,8 +219,8 @@ main() {
   # Core tools
   install_bun
   install_gh
-  install_graphite
   install_markdownlint
+  # Add project-specific tools (e.g., Graphite) below
 
   # Auth status
   check_auth
