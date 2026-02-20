@@ -324,7 +324,7 @@ export async function runCheckTsdoc(
     if (!rawResult) {
       return Result.err(
         ValidationError.fromMessage(
-          "No packages found with src/index.ts entry points.",
+          "No packages found. Searched packages/*, apps/*, and src/index.ts. Use --package <path> to specify explicitly.",
           { cwd: input.cwd }
         )
       );
