@@ -7,6 +7,7 @@ export type TargetId =
   | "mcp"
   | "daemon"
   | "library"
+  | "full-stack"
   | "api"
   | "worker"
   | "web";

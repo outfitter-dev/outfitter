@@ -113,6 +113,7 @@ describe("scaffold e2e verification", () => {
       const presets = [
         "minimal",
         "library",
+        "full-stack",
         "cli",
         "mcp",
         "daemon",
@@ -146,7 +147,7 @@ describe("scaffold e2e verification", () => {
         const build = await runCommand(targetDir, ["bun", "run", "build"]);
         assertCommandSuccess(preset, "bun run build", build);
 
-        if (preset === "library") {
+        if (preset === "library" || preset === "full-stack") {
           const typecheck = await runCommand(targetDir, [
             "bun",
             "run",

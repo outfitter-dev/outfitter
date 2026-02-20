@@ -144,9 +144,14 @@ describe("outfitter action mapping", () => {
     expect(presetOption).toBeDefined();
     expect(presetOption?.description).toContain("library");
     expect(presetOption?.description).toContain("lib");
+    expect(presetOption?.description).toContain("full-stack");
+    expect(presetOption?.description).toContain("lib");
 
     const libraryPresetAction = outfitterActions.get("init.library");
     expect(libraryPresetAction).toBeDefined();
+
+    const fullStackPresetAction = outfitterActions.get("init.full-stack");
+    expect(fullStackPresetAction).toBeDefined();
   });
 
   test("normalizes legacy lib preset alias to library", () => {

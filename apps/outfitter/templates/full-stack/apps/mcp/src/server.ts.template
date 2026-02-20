@@ -1,0 +1,11 @@
+#!/usr/bin/env bun
+import { connectStdio } from "@outfitter/mcp";
+import { server } from "./mcp.js";
+
+export async function startServer(): Promise<void> {
+	await connectStdio(server);
+}
+
+if (import.meta.main) {
+	await startServer();
+}

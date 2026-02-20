@@ -58,7 +58,7 @@ import {
 export type InitStructure = "single" | "workspace";
 export type InitPresetId = Extract<
   TargetId,
-  "minimal" | "cli" | "mcp" | "daemon" | "library"
+  "minimal" | "cli" | "mcp" | "daemon" | "library" | "full-stack"
 >;
 
 /**
@@ -157,7 +157,8 @@ function isValidInitPreset(value: string): value is InitPresetId {
     value === "cli" ||
     value === "mcp" ||
     value === "daemon" ||
-    value === "library"
+    value === "library" ||
+    value === "full-stack"
   );
 }
 
@@ -238,7 +239,8 @@ async function resolveInitInput(
     }
 
     const preset = presetOverride ?? presetFromFlags ?? "minimal";
-    const structure = options.structure ?? "single";
+    const structure =
+      preset === "full-stack" ? "single" : (options.structure ?? "single");
     const blocksOverride = parseBlocks(options.with);
     const workspaceName =
       structure === "workspace"
@@ -308,23 +310,25 @@ async function resolveInitInput(
   }
 
   const structureValue =
-    options.structure ??
-    (await select<InitStructure>({
-      message: "Project structure",
-      options: [
-        {
-          value: "single",
-          label: "Single package",
-          hint: "One package in the target directory",
-        },
-        {
-          value: "workspace",
-          label: "Workspace",
-          hint: "Root workspace with project under apps/ or packages/",
-        },
-      ],
-      initialValue: "single",
-    }));
+    presetValue === "full-stack"
+      ? "single"
+      : (options.structure ??
+        (await select<InitStructure>({
+          message: "Project structure",
+          options: [
+            {
+              value: "single",
+              label: "Single package",
+              hint: "One package in the target directory",
+            },
+            {
+              value: "workspace",
+              label: "Workspace",
+              hint: "Root workspace with project under apps/ or packages/",
+            },
+          ],
+          initialValue: "single",
+        })));
 
   if (isCancel(structureValue)) {
     cancel("Init cancelled.");
@@ -867,7 +871,7 @@ export function initCommand(program: Command): void {
       .option("-b, --bin <name>", "Binary name (defaults to project name)")
       .option(
         "-p, --preset <preset>",
-        "Preset to use (minimal|cli|mcp|daemon|library)"
+        "Preset to use (minimal|cli|mcp|daemon|library|full-stack)"
       )
       .option("-s, --structure <mode>", "Project structure (single|workspace)")
       .option("--workspace-name <name>", "Workspace root package name")
@@ -1100,6 +1104,53 @@ export function initCommand(program: Command): void {
             : {}),
         },
         "library"
+      );
+
+      if (result.isErr()) {
+        exitWithError(result.error, outputOptions);
+        return;
+      }
+
+      await printInitResults(result.value, outputOptions);
+    }
+  );
+
+  withCommonOptions(
+    init
+      .command("full-stack [directory]")
+      .description("Create a full-stack workspace")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
+
+      const result = await runInit(
+        {
+          targetDir,
+          name: resolvedFlags.name,
+          bin: resolvedFlags.bin,
+          structure: resolvedFlags.structure,
+          workspaceName: resolvedFlags.workspaceName,
+          local: resolveLocal(resolvedFlags),
+          force: resolvedFlags.force ?? false,
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          yes: resolvedFlags.yes,
+          dryRun: Boolean(resolvedFlags.dryRun),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          skipGit: Boolean(resolvedFlags.skipGit),
+          skipCommit: Boolean(resolvedFlags.skipCommit),
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
+            : {}),
+        },
+        "full-stack"
       );
 
       if (result.isErr()) {

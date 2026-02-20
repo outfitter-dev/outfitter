@@ -1,0 +1,22 @@
+import { createGreeting } from "{{packageName}}-core";
+import { createMcpServer, defineTool } from "@outfitter/mcp";
+import { z } from "zod";
+
+const server = createMcpServer({
+	name: "{{projectName}}-mcp",
+	version: "{{version}}",
+});
+
+const greetTool = defineTool({
+	name: "greet",
+	description: "Generate greeting via shared core handler",
+	inputSchema: z.object({
+		name: z.string().default("World").describe("Name to greet"),
+		excited: z.boolean().default(false),
+	}),
+	handler: async (input, ctx) => createGreeting(input, ctx),
+});
+
+server.registerTool(greetTool);
+
+export { server };

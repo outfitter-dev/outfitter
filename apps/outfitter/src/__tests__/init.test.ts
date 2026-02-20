@@ -221,6 +221,95 @@ describe("init command file creation", () => {
     expect(existsSync(join(tempDir, "bunup.config.ts"))).toBe(true);
   });
 
+  test("creates full-stack preset workspace with shared core handler wiring", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-stack",
+      preset: "full-stack",
+      force: false,
+      noTooling: true,
+      yes: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const rootPackageJson = JSON.parse(
+      readFileSync(join(tempDir, "package.json"), "utf-8")
+    );
+    expect(rootPackageJson.name).toBe("test-stack");
+    expect(rootPackageJson.workspaces).toEqual(["apps/*", "packages/*"]);
+
+    const cliPackageJsonPath = join(tempDir, "apps", "cli", "package.json");
+    const mcpPackageJsonPath = join(tempDir, "apps", "mcp", "package.json");
+    const corePackageJsonPath = join(
+      tempDir,
+      "packages",
+      "core",
+      "package.json"
+    );
+
+    expect(existsSync(cliPackageJsonPath)).toBe(true);
+    expect(existsSync(mcpPackageJsonPath)).toBe(true);
+    expect(existsSync(corePackageJsonPath)).toBe(true);
+
+    const cliPackageJson = JSON.parse(
+      readFileSync(cliPackageJsonPath, "utf-8")
+    );
+    const mcpPackageJson = JSON.parse(
+      readFileSync(mcpPackageJsonPath, "utf-8")
+    );
+    const corePackageJson = JSON.parse(
+      readFileSync(corePackageJsonPath, "utf-8")
+    );
+
+    expect(corePackageJson.name).toBe("test-stack-core");
+    expect(cliPackageJson.dependencies[corePackageJson.name]).toBe(
+      "workspace:*"
+    );
+    expect(mcpPackageJson.dependencies[corePackageJson.name]).toBe(
+      "workspace:*"
+    );
+
+    const cliSource = readFileSync(
+      join(tempDir, "apps", "cli", "src", "cli.ts"),
+      "utf-8"
+    );
+    const mcpSource = readFileSync(
+      join(tempDir, "apps", "mcp", "src", "mcp.ts"),
+      "utf-8"
+    );
+    expect(cliSource).toContain(corePackageJson.name);
+    expect(mcpSource).toContain(corePackageJson.name);
+  });
+
+  test("applies tooling files at full-stack workspace root only", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-stack",
+      preset: "full-stack",
+      force: false,
+      yes: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    expect(existsSync(join(tempDir, "biome.json"))).toBe(true);
+    expect(existsSync(join(tempDir, "apps", "cli", "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, "apps", "mcp", "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, "packages", "core", "biome.json"))).toBe(
+      false
+    );
+  });
+
   test("creates src directory structure", async () => {
     const { runInit } = await import("../commands/init.js");
 
