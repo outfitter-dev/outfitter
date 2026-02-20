@@ -29,10 +29,10 @@ import type { TreeGuideStyle } from "../render/tree.js";
  * ```
  */
 export interface GlyphPair {
-  /** Unicode character for modern terminals */
-  unicode: string;
   /** ASCII fallback for limited terminals */
   fallback: string;
+  /** Unicode character for modern terminals */
+  unicode: string;
 }
 
 // ============================================================================
@@ -104,30 +104,30 @@ export type MarkerSpec =
  * when colors are disabled.
  */
 export interface ThemeColors {
-  /** Green - success messages, completed items */
-  success: string;
-  /** Yellow - warnings, caution */
-  warning: string;
+  /** Cyan - interactive elements, highlights */
+  accent: string;
+  /** Bright red - dangerous actions */
+  destructive: string;
   /** Red - errors, failures */
   error: string;
+  /** Bold - strong emphasis */
+  highlight: string;
   /** Blue - informational messages */
   info: string;
+  /** Cyan + underline - URLs, clickable references */
+  link: string;
+  /** Dim - de-emphasized text */
+  muted: string;
   /** Default text color (typically empty string) */
   primary: string;
   /** Gray - secondary text */
   secondary: string;
-  /** Dim - de-emphasized text */
-  muted: string;
-  /** Cyan - interactive elements, highlights */
-  accent: string;
-  /** Bold - strong emphasis */
-  highlight: string;
-  /** Cyan + underline - URLs, clickable references */
-  link: string;
-  /** Bright red - dangerous actions */
-  destructive: string;
   /** Dim gray - less prominent than muted */
   subtle: string;
+  /** Green - success messages, completed items */
+  success: string;
+  /** Yellow - warnings, caution */
+  warning: string;
 }
 
 // ============================================================================
@@ -140,12 +140,12 @@ export interface ThemeColors {
 export interface ThemeSpacing {
   /** Default padding inside boxes (characters) */
   boxPadding: number;
+  /** Gap between items in horizontal stacks (characters) */
+  horizontalGap: number;
   /** Indentation for nested list items (characters) */
   listIndent: number;
   /** Gap between items in vertical stacks (lines) */
   stackGap: number;
-  /** Gap between items in horizontal stacks (characters) */
-  horizontalGap: number;
 }
 
 // ============================================================================
@@ -177,24 +177,11 @@ export interface ThemeSpacing {
  * ```
  */
 export interface VisualTheme {
-  /** Theme identifier */
-  name: string;
-
   // Structure
   /** Border style preset name */
   border: BorderStyle;
   /** Derived border characters for the border style */
   borderChars: BorderCharacters;
-  /** Tree guide style for hierarchical displays */
-  treeGuide: TreeGuideStyle;
-  /** Default delimiter for inline separators */
-  delimiter: DelimiterName;
-
-  // Markers (semantic state → visual)
-  /** Map of semantic states to marker specifications */
-  markers: Record<SemanticState, MarkerSpec>;
-  /** Default list bullet glyph */
-  listBullet: GlyphPair;
   /** Checkbox glyphs for checked/unchecked states */
   checkbox: {
     checked: GlyphPair;
@@ -204,6 +191,16 @@ export interface VisualTheme {
   // Colors (semantic → ANSI codes)
   /** Semantic color tokens */
   colors: ThemeColors;
+  /** Default delimiter for inline separators */
+  delimiter: DelimiterName;
+  /** Default list bullet glyph */
+  listBullet: GlyphPair;
+
+  // Markers (semantic state → visual)
+  /** Map of semantic states to marker specifications */
+  markers: Record<SemanticState, MarkerSpec>;
+  /** Theme identifier */
+  name: string;
 
   // Spacing defaults
   /** Default spacing values */
@@ -212,6 +209,8 @@ export interface VisualTheme {
   // Spinner
   /** Default spinner animation style */
   spinner: SpinnerStyle;
+  /** Tree guide style for hierarchical displays */
+  treeGuide: TreeGuideStyle;
 }
 
 // ============================================================================

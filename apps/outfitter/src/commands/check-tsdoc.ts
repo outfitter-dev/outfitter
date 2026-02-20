@@ -28,14 +28,14 @@ const require = createRequire(import.meta.url);
 
 /** Validated input for the check-tsdoc action handler. */
 export interface CheckTsDocInput {
-  readonly strict: boolean;
-  readonly minCoverage: number;
   readonly cwd: string;
-  readonly outputMode: CliOutputMode;
   readonly jq: string | undefined;
-  readonly summary: boolean;
   readonly level: CoverageLevel | undefined;
+  readonly minCoverage: number;
+  readonly outputMode: CliOutputMode;
   readonly packages: readonly string[];
+  readonly strict: boolean;
+  readonly summary: boolean;
 }
 
 const DEFAULT_TSDOC_DISCOVERY_PATTERNS = [

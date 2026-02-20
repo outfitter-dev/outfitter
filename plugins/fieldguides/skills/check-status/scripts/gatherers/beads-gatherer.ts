@@ -50,9 +50,9 @@ Output:
  * Result of running a bd CLI command.
  */
 interface BdOutput<T> {
-  success: boolean;
   data?: T;
   error?: string;
+  success: boolean;
 }
 
 /**

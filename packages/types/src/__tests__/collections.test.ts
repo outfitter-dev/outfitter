@@ -205,8 +205,8 @@ describe("collections", () => {
 
   describe("sortBy()", () => {
     interface User {
-      name: string;
       age: number;
+      name: string;
       score: number;
     }
 

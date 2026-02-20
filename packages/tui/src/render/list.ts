@@ -34,12 +34,6 @@ export type ListStyle = "dash" | "bullet" | "number" | "checkbox";
  */
 export interface ListOptions {
   /**
-   * The list style to use.
-   * @default "dash"
-   */
-  style?: ListStyle;
-
-  /**
    * Indices of checked top-level items (0-indexed) for checkbox style.
    * Only applies to top-level items. For nested items, use the
    * `checked` property on {@link NestedListItem} instead.
@@ -51,6 +45,11 @@ export interface ListOptions {
    * @default 2
    */
   indent?: number;
+  /**
+   * The list style to use.
+   * @default "dash"
+   */
+  style?: ListStyle;
 }
 
 /**
@@ -78,14 +77,14 @@ export interface ListOptions {
  * ```
  */
 export interface NestedListItem {
-  /** The text content of this list item */
-  text: string;
-  /** Optional nested child items (strings or nested items) */
-  children?: Array<string | NestedListItem>;
   /** Whether this item is checked (for checkbox style) */
   checked?: boolean;
+  /** Optional nested child items (strings or nested items) */
+  children?: Array<string | NestedListItem>;
   /** Override style for children (enables mixed numbered/bullet lists) */
   childStyle?: ListStyle;
+  /** The text content of this list item */
+  text: string;
 }
 
 /**

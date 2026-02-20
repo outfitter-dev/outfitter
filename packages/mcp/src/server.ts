@@ -44,15 +44,15 @@ import {
  * Internal tool storage with handler reference.
  */
 interface StoredTool {
-  name: string;
-  description: string;
-  inputSchema: unknown;
-  deferLoading: boolean;
   annotations?: ToolAnnotations;
+  deferLoading: boolean;
+  description: string;
   handler: (
     input: unknown,
     ctx: HandlerContext
   ) => Promise<Result<unknown, OutfitterError>>;
+  inputSchema: unknown;
+  name: string;
   zodSchema: z.ZodTypeAny;
 }
 

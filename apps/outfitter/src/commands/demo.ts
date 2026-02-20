@@ -23,10 +23,10 @@ const EMBEDDED_DEMO_FLAG = "--__outfitter-embedded-demo";
  * Options for forwarding to the demo CLI.
  */
 export interface DemoOptions {
-  readonly section?: string | undefined;
-  readonly list?: boolean | undefined;
   readonly animate?: boolean | undefined;
+  readonly list?: boolean | undefined;
   readonly outputMode: CliOutputMode;
+  readonly section?: string | undefined;
 }
 
 /**

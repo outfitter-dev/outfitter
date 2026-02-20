@@ -21,10 +21,10 @@ import { TREE_GUIDES, type TreeGuideStyle } from "./tree.js";
  * Delimiter set with unicode and fallback representations.
  */
 export interface DelimiterSet {
-  /** Unicode character for modern terminals */
-  unicode: string;
   /** ASCII fallback for limited terminals */
   fallback: string;
+  /** Unicode character for modern terminals */
+  unicode: string;
 }
 
 /**
@@ -162,12 +162,12 @@ export type ItemState =
  * Maps semantic states to visual representation.
  */
 export interface StackTheme {
-  /** Map semantic states to marker names */
-  markers: Record<ItemState, MarkerName>;
   /** Default delimiter for compact mode */
   delimiter?: DelimiterName;
   /** Default guide style */
   guide?: TreeGuideStyle;
+  /** Map semantic states to marker names */
+  markers: Record<ItemState, MarkerName>;
 }
 
 /**
@@ -189,14 +189,14 @@ export const DEFAULT_STACK_THEME: StackTheme = {
  * An item in a stack with optional metadata.
  */
 export interface StackItem {
-  /** Full content (header + body lines) */
-  content: string | string[];
   /** Compact single-line representation */
   compact?: string;
-  /** Semantic state (resolved via theme) */
-  state?: ItemState;
+  /** Full content (header + body lines) */
+  content: string | string[];
   /** Explicit marker (bypasses theme) */
   marker?: MarkerName | string;
+  /** Semantic state (resolved via theme) */
+  state?: ItemState;
   /** Style function to apply to content */
   style?: (s: string) => string;
 }
@@ -206,12 +206,12 @@ export interface StackItem {
  * Both Box and StackBox satisfy this interface.
  */
 export interface Renderable {
+  /** Height in lines */
+  readonly height: number;
   /** Rendered string representation */
   readonly output: string;
   /** Width in characters */
   readonly width: number;
-  /** Height in lines */
-  readonly height: number;
 }
 
 /**
@@ -244,12 +244,12 @@ export function isRenderable(value: unknown): value is Renderable {
  * Options for horizontal stack.
  */
 export interface HStackOptions {
+  /** Vertical alignment for multi-line items */
+  align?: "top" | "center" | "bottom";
   /** Delimiter between items (name or custom string) */
   delimiter?: DelimiterName | string;
   /** Gap (spaces) around delimiter */
   gap?: number;
-  /** Vertical alignment for multi-line items */
-  align?: "top" | "center" | "bottom";
 }
 
 // ============================================================================
@@ -260,14 +260,14 @@ export interface HStackOptions {
  * Options for vertical stack.
  */
 export interface VStackOptions {
-  /** Display mode */
-  mode?: VStackMode;
   /** Gap (lines) between items */
   gap?: number;
-  /** Theme for marker resolution */
-  theme?: Partial<StackTheme>;
   /** Shorthand for theme.guide */
   guide?: TreeGuideStyle;
+  /** Display mode */
+  mode?: VStackMode;
+  /** Theme for marker resolution */
+  theme?: Partial<StackTheme>;
 }
 
 // ============================================================================
@@ -777,12 +777,12 @@ export function createVStack(
  * Options for boxify helper.
  */
 export interface BoxifyOptions {
-  /** Box title */
-  title?: string;
   /** Border style */
   border?: "single" | "double" | "rounded" | "heavy" | "none";
   /** Padding inside the box */
   padding?: number;
+  /** Box title */
+  title?: string;
 }
 
 /**

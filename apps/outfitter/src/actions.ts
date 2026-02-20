@@ -49,35 +49,35 @@ import {
 } from "./output-mode.js";
 
 interface InitFlags {
-  readonly name?: string | undefined;
   readonly bin?: unknown;
-  readonly preset?: unknown;
-  readonly template?: unknown;
-  readonly structure?: unknown;
-  readonly workspaceName?: unknown;
-  readonly force?: unknown;
-  readonly local?: unknown;
-  readonly workspace?: unknown;
-  readonly with?: unknown;
-  readonly noTooling?: unknown;
-  readonly tooling?: unknown;
-  readonly yes?: unknown;
   readonly dryRun?: unknown;
-  readonly skipInstall?: unknown;
-  readonly skipGit?: unknown;
-  readonly skipCommit?: unknown;
+  readonly force?: unknown;
   readonly installTimeout?: unknown;
   readonly json?: unknown;
+  readonly local?: unknown;
+  readonly name?: string | undefined;
+  readonly noTooling?: unknown;
+  readonly preset?: unknown;
+  readonly skipCommit?: unknown;
+  readonly skipGit?: unknown;
+  readonly skipInstall?: unknown;
+  readonly structure?: unknown;
+  readonly template?: unknown;
+  readonly tooling?: unknown;
+  readonly with?: unknown;
+  readonly workspace?: unknown;
+  readonly workspaceName?: unknown;
+  readonly yes?: unknown;
 }
 
 interface ScaffoldFlags {
-  readonly force?: unknown;
-  readonly skipInstall?: unknown;
   readonly dryRun?: unknown;
-  readonly with?: unknown;
-  readonly noTooling?: unknown;
-  readonly local?: unknown;
+  readonly force?: unknown;
   readonly installTimeout?: unknown;
+  readonly local?: unknown;
+  readonly noTooling?: unknown;
+  readonly skipInstall?: unknown;
+  readonly with?: unknown;
 }
 
 interface InitActionInput extends InitOptions {
@@ -129,17 +129,17 @@ const initInputSchema = z.object({
 }) as z.ZodType<InitActionInput>;
 
 interface ScaffoldActionInput {
-  target: string;
-  name?: string | undefined;
-  force: boolean;
-  skipInstall: boolean;
-  dryRun: boolean;
-  with?: string | undefined;
-  noTooling?: boolean | undefined;
-  local?: boolean | undefined;
-  installTimeout?: number | undefined;
   cwd: string;
+  dryRun: boolean;
+  force: boolean;
+  installTimeout?: number | undefined;
+  local?: boolean | undefined;
+  name?: string | undefined;
+  noTooling?: boolean | undefined;
   outputMode: CliOutputMode;
+  skipInstall: boolean;
+  target: string;
+  with?: string | undefined;
 }
 
 const scaffoldInputSchema = z.object({
@@ -691,10 +691,10 @@ const listBlocksAction = defineAction({
 });
 
 interface CheckActionInput {
-  cwd: string;
-  verbose: boolean;
   block?: string;
+  cwd: string;
   outputMode: CliOutputMode;
+  verbose: boolean;
 }
 
 const checkInputSchema = z.object({
@@ -799,14 +799,14 @@ const checkAction = defineAction({
 });
 
 interface CheckTsDocActionInput {
-  strict: boolean;
-  minCoverage: number;
   cwd: string;
-  outputMode: CliOutputMode;
   jq: string | undefined;
-  summary: boolean;
   level: "documented" | "partial" | "undocumented" | undefined;
+  minCoverage: number;
+  outputMode: CliOutputMode;
   packages: readonly string[];
+  strict: boolean;
+  summary: boolean;
 }
 
 const checkTsdocInputSchema = z.object({
@@ -976,15 +976,15 @@ const checkTsdocAction = defineAction<
 });
 
 interface UpgradeActionInput {
+  all: boolean;
   cwd: string;
+  dryRun: boolean;
   guide: boolean;
   guidePackages?: string[];
-  dryRun: boolean;
-  yes: boolean;
   interactive: boolean;
-  all: boolean;
   noCodemods: boolean;
   outputMode: CliOutputMode;
+  yes: boolean;
 }
 
 const upgradeInputSchema = z.object({

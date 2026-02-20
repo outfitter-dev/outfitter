@@ -20,23 +20,23 @@ import { readMigrationDocsWithMetadata } from "./upgrade.js";
 
 /** Options passed to a codemod's transform function. */
 export interface CodemodOptions {
-  readonly targetDir: string;
   readonly dryRun: boolean;
+  readonly targetDir: string;
 }
 
 /** Result returned by a codemod's transform function. */
 export interface CodemodResult {
   readonly changedFiles: readonly string[];
-  readonly skippedFiles: readonly string[];
   readonly errors: readonly string[];
+  readonly skippedFiles: readonly string[];
 }
 
 /** A discovered codemod with resolved paths. */
 export interface DiscoveredCodemod {
-  /** Path relative to the codemods directory. */
-  readonly relativePath: string;
   /** Absolute path to the codemod file. */
   readonly absolutePath: string;
+  /** Path relative to the codemods directory. */
+  readonly relativePath: string;
 }
 
 // =============================================================================

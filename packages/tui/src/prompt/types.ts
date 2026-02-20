@@ -11,8 +11,8 @@ import type { Validator } from "./validators.js";
  * Error returned when user cancels a prompt.
  */
 export interface CancelledError {
-  type: "cancelled";
   message: string;
+  type: "cancelled";
 }
 
 /**
@@ -28,12 +28,12 @@ export function createCancelledError(
  * Options for text prompts.
  */
 export interface TextPromptOptions {
+  /** Default value */
+  defaultValue?: string;
   /** Prompt message to display */
   message: string;
   /** Placeholder text */
   placeholder?: string;
-  /** Default value */
-  defaultValue?: string;
   /** Validation function */
   validate?: Validator;
 }
@@ -42,18 +42,20 @@ export interface TextPromptOptions {
  * Options for password prompts.
  */
 export interface PasswordPromptOptions {
+  /** Mask character (default: •) */
+  mask?: string;
   /** Prompt message to display */
   message: string;
   /** Validation function */
   validate?: Validator;
-  /** Mask character (default: •) */
-  mask?: string;
 }
 
 /**
  * Options for select prompts.
  */
 export interface SelectPromptOptions<T> {
+  /** Initial selected index */
+  initialValue?: T;
   /** Prompt message to display */
   message: string;
   /** Available options */
@@ -62,8 +64,6 @@ export interface SelectPromptOptions<T> {
     label: string;
     hint?: string;
   }>;
-  /** Initial selected index */
-  initialValue?: T;
   /** Maximum number of items to display at once */
   pageSize?: number;
 }
@@ -72,6 +72,8 @@ export interface SelectPromptOptions<T> {
  * Options for multi-select prompts.
  */
 export interface MultiSelectPromptOptions<T> {
+  /** Initially selected values */
+  initialValues?: T[];
   /** Prompt message to display */
   message: string;
   /** Available options */
@@ -80,22 +82,20 @@ export interface MultiSelectPromptOptions<T> {
     label: string;
     hint?: string;
   }>;
-  /** Initially selected values */
-  initialValues?: T[];
-  /** Require at least one selection */
-  required?: boolean;
   /** Maximum number of items to display at once */
   pageSize?: number;
+  /** Require at least one selection */
+  required?: boolean;
 }
 
 /**
  * Options for confirm prompts.
  */
 export interface ConfirmPromptOptions {
-  /** Prompt message to display */
-  message: string;
   /** Initial value */
   initialValue?: boolean;
+  /** Prompt message to display */
+  message: string;
 }
 
 /**

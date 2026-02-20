@@ -47,9 +47,9 @@ Output:
  * Result of running a gh CLI command.
  */
 interface GhOutput<T> {
-  success: boolean;
   data?: T;
   error?: string;
+  success: boolean;
 }
 
 /**

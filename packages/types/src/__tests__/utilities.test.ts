@@ -53,9 +53,9 @@ describe("utilities", () => {
 
   describe("OptionalKeys<T, K>", () => {
     interface User {
+      email: string;
       id: string;
       name: string;
-      email: string;
     }
 
     it("makes specified keys optional", () => {
@@ -193,8 +193,8 @@ describe("utilities", () => {
   describe("ExactlyOne<T, Keys>", () => {
     it("requires exactly one of specified keys", () => {
       interface Auth {
-        token?: string;
         apiKey?: string;
+        token?: string;
       }
       type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 
@@ -209,8 +209,8 @@ describe("utilities", () => {
 
     it("rejects when both specified keys present", () => {
       interface Auth {
-        token?: string;
         apiKey?: string;
+        token?: string;
       }
       type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 
@@ -221,9 +221,9 @@ describe("utilities", () => {
 
     it("rejects when none of the specified keys present", () => {
       interface Auth {
-        token?: string;
         apiKey?: string;
         extra?: boolean;
+        token?: string;
       }
       type OneAuth = ExactlyOne<Auth, "token" | "apiKey">;
 

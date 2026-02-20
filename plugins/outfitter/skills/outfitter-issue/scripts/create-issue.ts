@@ -60,10 +60,10 @@ async function detectOriginRepo(): Promise<string | null> {
 }
 
 interface ParsedArgs {
-  type?: string;
-  title?: string;
-  submit?: boolean;
   help?: boolean;
+  submit?: boolean;
+  title?: string;
+  type?: string;
   [key: string]: string | boolean | undefined;
 }
 

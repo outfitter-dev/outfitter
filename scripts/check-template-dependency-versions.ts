@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface TemplateVersionManifest {
-  readonly internalDependencies: Record<string, string>;
   readonly externalDependencies: Record<string, string>;
+  readonly internalDependencies: Record<string, string>;
 }
 
 const DEPENDENCY_SECTIONS = [

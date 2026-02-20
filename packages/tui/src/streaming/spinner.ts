@@ -26,28 +26,28 @@ export type SpinnerStyle = keyof typeof SPINNER_FRAMES;
  * Options for creating a spinner.
  */
 export interface SpinnerOptions {
-  /** Spinner style */
-  style?: SpinnerStyle;
-  /** Target stream */
-  stream?: WritableStream;
   /** Frame interval in ms */
   interval?: number;
+  /** Target stream */
+  stream?: WritableStream;
+  /** Spinner style */
+  style?: SpinnerStyle;
 }
 
 /**
  * Spinner interface for animated progress indication.
  */
 export interface Spinner {
-  /** Start the spinner */
-  start(): void;
-  /** Update the spinner message */
-  update(message: string): void;
-  /** Stop with success state */
-  succeed(message?: string): void;
   /** Stop with failure state */
   fail(message?: string): void;
+  /** Start the spinner */
+  start(): void;
   /** Stop the spinner */
   stop(): void;
+  /** Stop with success state */
+  succeed(message?: string): void;
+  /** Update the spinner message */
+  update(message: string): void;
 }
 
 /**

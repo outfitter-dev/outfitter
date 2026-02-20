@@ -451,10 +451,10 @@ const REPLACEMENTS: Array<{
 ];
 
 interface Change {
+  after: string;
+  before: string;
   file: string;
   line: number;
-  before: string;
-  after: string;
   rule: string;
 }
 

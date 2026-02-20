@@ -5,9 +5,9 @@ export type DocsMdxMode = "strict" | "lossy";
 
 export interface DocsCommonCliOptions {
   readonly cwd?: string;
-  readonly packagesDir?: string;
-  readonly outputDir?: string;
   readonly mdxMode?: DocsMdxMode;
+  readonly outputDir?: string;
+  readonly packagesDir?: string;
 }
 
 export interface DocsExportCliOptions extends DocsCommonCliOptions {

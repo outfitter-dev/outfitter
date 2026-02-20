@@ -15,11 +15,11 @@ import type { SurfaceMap } from "./surface.js";
 // =============================================================================
 
 export interface SurfaceMapDiff {
-  readonly hasChanges: boolean;
   readonly added: readonly DiffEntry[];
-  readonly removed: readonly DiffEntry[];
-  readonly modified: readonly ModifiedEntry[];
+  readonly hasChanges: boolean;
   readonly metadataChanges: readonly string[];
+  readonly modified: readonly ModifiedEntry[];
+  readonly removed: readonly DiffEntry[];
 }
 
 export interface DiffEntry {

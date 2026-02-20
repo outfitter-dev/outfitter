@@ -29,12 +29,12 @@ const DEFAULT_TITLES: Record<DocSurface, string> = {
 export interface MarkdownFormatOptions {
   /** Which surface to document. Default: "mcp" */
   readonly surface?: DocSurface;
+  /** Include generated timestamp. Default: true */
+  readonly timestamp?: boolean;
   /** Document title. Default: surface-specific (e.g., "MCP Tools Reference") */
   readonly title?: string;
   /** Include table of contents. Default: true when 2+ entries */
   readonly toc?: boolean;
-  /** Include generated timestamp. Default: true */
-  readonly timestamp?: boolean;
 }
 
 // =============================================================================

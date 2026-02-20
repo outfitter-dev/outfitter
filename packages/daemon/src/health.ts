@@ -37,18 +37,17 @@ import type { Result } from "@outfitter/contracts";
  */
 export interface HealthCheck {
   /**
-   * Unique name identifying this health check.
-   * Used as the key in the HealthStatus.checks record.
-   */
-  name: string;
-
-  /**
    * Function that performs the health check.
    *
    * Should return Result.ok(undefined) if healthy, or Result.err(error)
    * with details about the failure.
    */
   check(): Promise<Result<void, Error>>;
+  /**
+   * Unique name identifying this health check.
+   * Used as the key in the HealthStatus.checks record.
+   */
+  name: string;
 }
 
 /**
@@ -83,11 +82,10 @@ export interface HealthCheckResult {
  * ```
  */
 export interface HealthStatus {
-  /** Overall health status - true only if ALL checks pass */
-  healthy: boolean;
-
   /** Individual check results keyed by check name */
   checks: Record<string, HealthCheckResult>;
+  /** Overall health status - true only if ALL checks pass */
+  healthy: boolean;
 
   /** Uptime in seconds since the health checker was created */
   uptime: number;

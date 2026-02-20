@@ -74,20 +74,19 @@ export type LogLevel =
  * ```
  */
 export interface LogRecord {
-  /** Unix timestamp in milliseconds when the log was created */
-  timestamp: number;
+  /** Logger category/name identifying the source (e.g., "my-service", "api") */
+  category: string;
 
   /** Severity level of the log (excludes "silent" which is only for filtering) */
   level: Exclude<LogLevel, "silent">;
-
-  /** Logger category/name identifying the source (e.g., "my-service", "api") */
-  category: string;
 
   /** Human-readable log message describing the event */
   message: string;
 
   /** Optional structured metadata attached to the log for additional context */
   metadata?: Record<string, unknown>;
+  /** Unix timestamp in milliseconds when the log was created */
+  timestamp: number;
 }
 
 /**
@@ -145,23 +144,22 @@ export interface Formatter {
  */
 export interface Sink {
   /**
-   * Write a log record to the sink's destination.
-   *
-   * @param record - The log record to write
-   * @param formatted - Optional pre-formatted string from the sink's formatter
-   */
-  write(record: LogRecord, formatted?: string): void;
-
-  /** Optional formatter specific to this sink for converting records to strings */
-  formatter?: Formatter;
-
-  /**
    * Optional async flush to ensure all pending/buffered writes complete.
    * Called by the global `flush()` function before process exit.
    *
    * @returns Promise that resolves when all pending writes are complete
    */
   flush?(): Promise<void>;
+
+  /** Optional formatter specific to this sink for converting records to strings */
+  formatter?: Formatter;
+  /**
+   * Write a log record to the sink's destination.
+   *
+   * @param record - The log record to write
+   * @param formatted - Optional pre-formatted string from the sink's formatter
+   */
+  write(record: LogRecord, formatted?: string): void;
 }
 
 /**
@@ -191,11 +189,11 @@ export interface RedactionConfig {
    */
   enabled?: boolean;
 
-  /** Additional regex patterns to match and redact within string values */
-  patterns?: RegExp[];
-
   /** Additional key names whose values should be fully redacted (case-insensitive) */
   keys?: string[];
+
+  /** Additional regex patterns to match and redact within string values */
+  patterns?: RegExp[];
 
   /**
    * Replacement string for redacted values.
@@ -223,23 +221,22 @@ export interface RedactionConfig {
  * ```
  */
 export interface LoggerConfig {
-  /** Logger name used as the category in log records */
-  name: string;
+  /** Initial context metadata attached to all log records from this logger */
+  context?: Record<string, unknown>;
 
   /**
    * Minimum log level to output. Messages below this level are filtered.
    * @defaultValue "info"
    */
   level?: LogLevel;
-
-  /** Initial context metadata attached to all log records from this logger */
-  context?: Record<string, unknown>;
-
-  /** Array of sinks to output log records to */
-  sinks?: Sink[];
+  /** Logger name used as the category in log records */
+  name: string;
 
   /** Redaction configuration for sensitive data scrubbing */
   redaction?: RedactionConfig;
+
+  /** Array of sinks to output log records to */
+  sinks?: Sink[];
 }
 
 /**
@@ -248,20 +245,20 @@ export interface LoggerConfig {
  * These options are passed via `LoggerFactoryConfig.backend`.
  */
 export interface OutfitterLoggerBackendOptions {
-  /** Sinks for this specific logger instance */
-  sinks?: Sink[];
   /** Redaction overrides for this specific logger instance */
   redaction?: RedactionConfig;
+  /** Sinks for this specific logger instance */
+  sinks?: Sink[];
 }
 
 /**
  * Default options applied by the Outfitter logger factory.
  */
 export interface OutfitterLoggerDefaults {
-  /** Default sinks used when a logger does not provide backend sinks */
-  sinks?: Sink[];
   /** Default redaction policy merged with logger-specific redaction */
   redaction?: RedactionConfig;
+  /** Default sinks used when a logger does not provide backend sinks */
+  sinks?: Sink[];
 }
 
 /**
@@ -290,66 +287,6 @@ export interface OutfitterLoggerFactoryOptions {
  */
 export interface LoggerInstance extends ContractLogger {
   /**
-   * Log at trace level (most verbose, for detailed debugging).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  trace(message: string, metadata?: Record<string, unknown>): void;
-  trace(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Log at debug level (development debugging).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  debug(message: string, metadata?: Record<string, unknown>): void;
-  debug(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Log at info level (normal operations).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  info(message: string, metadata?: Record<string, unknown>): void;
-  info(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Log at warn level (unexpected but handled situations).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  warn(message: string, metadata?: Record<string, unknown>): void;
-  warn(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Log at error level (failures requiring attention).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  error(message: string, metadata?: Record<string, unknown>): void;
-  error(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Log at fatal level (unrecoverable failures).
-   * @param message - Human-readable log message
-   * @param metadata - Optional structured metadata
-   */
-  fatal(message: string, metadata?: Record<string, unknown>): void;
-  fatal(metadata: Record<string, unknown>, message: string): never;
-
-  /**
-   * Get the current context metadata attached to this logger.
-   * @returns Copy of the logger's context object
-   */
-  getContext(): Record<string, unknown>;
-
-  /**
-   * Set the minimum log level at runtime.
-   * @param level - New minimum level (messages below this are filtered)
-   */
-  setLevel(level: LogLevel): void;
-
-  /**
    * Add a sink at runtime.
    * @param sink - Sink to add to this logger's output destinations
    */
@@ -375,6 +312,65 @@ export interface LoggerInstance extends ContractLogger {
    * ```
    */
   child(context: Record<string, unknown>): LoggerInstance;
+
+  /**
+   * Log at debug level (development debugging).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  debug(message: string, metadata?: Record<string, unknown>): void;
+  debug(metadata: Record<string, unknown>, message: string): never;
+
+  /**
+   * Log at error level (failures requiring attention).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  error(message: string, metadata?: Record<string, unknown>): void;
+  error(metadata: Record<string, unknown>, message: string): never;
+
+  /**
+   * Log at fatal level (unrecoverable failures).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  fatal(message: string, metadata?: Record<string, unknown>): void;
+  fatal(metadata: Record<string, unknown>, message: string): never;
+
+  /**
+   * Get the current context metadata attached to this logger.
+   * @returns Copy of the logger's context object
+   */
+  getContext(): Record<string, unknown>;
+
+  /**
+   * Log at info level (normal operations).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  info(message: string, metadata?: Record<string, unknown>): void;
+  info(metadata: Record<string, unknown>, message: string): never;
+
+  /**
+   * Set the minimum log level at runtime.
+   * @param level - New minimum level (messages below this are filtered)
+   */
+  setLevel(level: LogLevel): void;
+  /**
+   * Log at trace level (most verbose, for detailed debugging).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  trace(message: string, metadata?: Record<string, unknown>): void;
+  trace(metadata: Record<string, unknown>, message: string): never;
+
+  /**
+   * Log at warn level (unexpected but handled situations).
+   * @param message - Human-readable log message
+   * @param metadata - Optional structured metadata
+   */
+  warn(message: string, metadata?: Record<string, unknown>): void;
+  warn(metadata: Record<string, unknown>, message: string): never;
 }
 
 /**
@@ -468,14 +464,13 @@ export interface ConsoleSinkOptions {
  * ```
  */
 export interface FileSinkOptions {
-  /** Absolute path to the log file */
-  path: string;
-
   /**
    * Append to existing file or truncate before the first write.
    * @defaultValue true
    */
   append?: boolean;
+  /** Absolute path to the log file */
+  path: string;
 }
 
 /**
@@ -497,11 +492,10 @@ export interface FileSinkOptions {
  * ```
  */
 export interface GlobalRedactionConfig {
-  /** Regex patterns to match and redact within string values (applied globally) */
-  patterns?: RegExp[];
-
   /** Key names whose values should be fully redacted (case-insensitive, applied globally) */
   keys?: string[];
+  /** Regex patterns to match and redact within string values (applied globally) */
+  patterns?: RegExp[];
 }
 
 // ============================================================================
@@ -1009,13 +1003,13 @@ function ensureLogtapeBackendConfigured(): void {
  * Internal logger implementation.
  */
 interface InternalLoggerState {
-  loggerId: string;
   backendLogger: LogtapeLogger;
-  name: string;
-  level: LogLevel;
   context: Record<string, unknown>;
-  sinks: Sink[];
+  level: LogLevel;
+  loggerId: string;
+  name: string;
   redaction: RedactionConfig | undefined;
+  sinks: Sink[];
 }
 
 /**

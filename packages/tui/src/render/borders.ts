@@ -35,28 +35,28 @@ export type BorderStyle =
  * tables, boxes, and other bordered elements.
  */
 export interface BorderCharacters {
-  /** Top-left corner (e.g., ┌ ╔ ╭ ┏) */
-  topLeft: string;
-  /** Top-right corner (e.g., ┐ ╗ ╮ ┓) */
-  topRight: string;
   /** Bottom-left corner (e.g., └ ╚ ╰ ┗) */
   bottomLeft: string;
   /** Bottom-right corner (e.g., ┘ ╝ ╯ ┛) */
   bottomRight: string;
-  /** Horizontal line (e.g., ─ ═ ━) */
-  horizontal: string;
-  /** Vertical line (e.g., │ ║ ┃) */
-  vertical: string;
-  /** Top T-intersection for column separators (e.g., ┬ ╦ ┳) */
-  topT: string;
   /** Bottom T-intersection for column separators (e.g., ┴ ╩ ┻) */
   bottomT: string;
+  /** Cross intersection for table cells (e.g., ┼ ╬ ╋) */
+  cross: string;
+  /** Horizontal line (e.g., ─ ═ ━) */
+  horizontal: string;
   /** Left T-intersection for row separators (e.g., ├ ╠ ┣) */
   leftT: string;
   /** Right T-intersection for row separators (e.g., ┤ ╣ ┫) */
   rightT: string;
-  /** Cross intersection for table cells (e.g., ┼ ╬ ╋) */
-  cross: string;
+  /** Top-left corner (e.g., ┌ ╔ ╭ ┏) */
+  topLeft: string;
+  /** Top-right corner (e.g., ┐ ╗ ╮ ┓) */
+  topRight: string;
+  /** Top T-intersection for column separators (e.g., ┬ ╦ ┳) */
+  topT: string;
+  /** Vertical line (e.g., │ ║ ┃) */
+  vertical: string;
 }
 
 // ============================================================================

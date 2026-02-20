@@ -35,37 +35,37 @@ const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
 // =============================================================================
 
 export interface UpgradeOptions {
+  /** Include breaking changes in the upgrade */
+  readonly all?: boolean;
   /** Working directory (defaults to cwd) */
   readonly cwd: string;
+  /** Preview only — no mutations, no prompt */
+  readonly dryRun?: boolean;
   /** Show migration guide */
   readonly guide?: boolean;
   /** Filter to specific package names (scan + guides) */
   readonly guidePackages?: readonly string[];
-  /** Preview only — no mutations, no prompt */
-  readonly dryRun?: boolean;
-  /** Auto-confirm without prompting */
-  readonly yes?: boolean;
   /** Whether interactive prompts are enabled (false in CI) */
   readonly interactive?: boolean;
-  /** Include breaking changes in the upgrade */
-  readonly all?: boolean;
   /** Skip automatic codemod execution during upgrade */
   readonly noCodemods?: boolean;
   /** Output mode */
   readonly outputMode?: OutputMode;
+  /** Auto-confirm without prompting */
+  readonly yes?: boolean;
 }
 
 export interface PackageVersionInfo {
-  /** Full package name */
-  readonly name: string;
+  /** Whether the update contains breaking changes (major bump) */
+  readonly breaking: boolean;
   /** Currently installed version */
   readonly current: string;
   /** Latest available version from npm (null if query failed) */
   readonly latest: string | null;
+  /** Full package name */
+  readonly name: string;
   /** Whether an update is available */
   readonly updateAvailable: boolean;
-  /** Whether the update contains breaking changes (major bump) */
-  readonly breaking: boolean;
 }
 
 /** Classification of a change within a migration. */
@@ -79,79 +79,79 @@ export type MigrationChangeType =
 
 /** A single structured change entry from migration frontmatter. */
 export interface MigrationChange {
-  readonly type: MigrationChangeType;
-  readonly from?: string;
-  readonly to?: string;
-  readonly path?: string;
-  readonly export?: string;
-  readonly detail?: string;
   /** Path to codemod script relative to the codemods directory. */
   readonly codemod?: string;
+  readonly detail?: string;
+  readonly export?: string;
+  readonly from?: string;
+  readonly path?: string;
+  readonly to?: string;
+  readonly type: MigrationChangeType;
 }
 
 /** Parsed frontmatter from a migration doc. */
 export interface MigrationFrontmatter {
-  readonly package: string;
-  readonly version: string;
   readonly breaking: boolean;
   readonly changes?: readonly MigrationChange[];
+  readonly package: string;
+  readonly version: string;
 }
 
 /** A migration doc with parsed frontmatter and body content. */
 export interface MigrationDocWithMetadata {
-  readonly frontmatter: MigrationFrontmatter;
   readonly body: string;
+  readonly frontmatter: MigrationFrontmatter;
   readonly version: string;
 }
 
 export interface MigrationGuide {
-  /** The @outfitter/* package name */
-  readonly packageName: string;
-  /** Currently installed version */
-  readonly fromVersion: string;
-  /** Latest available version */
-  readonly toVersion: string;
   /** Whether this is a breaking change */
   readonly breaking: boolean;
-  /** Migration step strings (empty if no guide exists) */
-  readonly steps: readonly string[];
   /** Structured changes from migration frontmatter, if available */
   readonly changes?: readonly MigrationChange[];
+  /** Currently installed version */
+  readonly fromVersion: string;
+  /** The @outfitter/* package name */
+  readonly packageName: string;
+  /** Migration step strings (empty if no guide exists) */
+  readonly steps: readonly string[];
+  /** Latest available version */
+  readonly toVersion: string;
 }
 
 /** Summary of codemods executed during --apply. */
 export interface CodemodSummary {
-  /** Number of codemods executed */
-  readonly codemodCount: number;
   /** Total files changed across all codemods */
   readonly changedFiles: readonly string[];
+  /** Number of codemods executed */
+  readonly codemodCount: number;
   /** Errors encountered during codemod execution */
   readonly errors: readonly string[];
 }
 
 export interface UpgradeResult {
-  /** Package version info */
-  readonly packages: PackageVersionInfo[];
-  /** Total packages checked */
-  readonly total: number;
-  /** Number of packages with updates available */
-  readonly updatesAvailable: number;
-  /** Whether any update is a breaking change */
-  readonly hasBreaking: boolean;
   /** Whether mutations were made (--apply was used and changes were written) */
   readonly applied: boolean;
   /** Package names that were updated in package.json */
   readonly appliedPackages: string[];
-  /** Package names skipped because they contain breaking changes */
-  readonly skippedBreaking: string[];
-  /** Structured migration guides (populated when --guide is used) */
-  readonly guides?: readonly MigrationGuide[];
   /** Codemod execution summary (populated when --apply runs codemods) */
   readonly codemods?: CodemodSummary;
-  /** Package names that were requested but not found in the workspace */
-  readonly unknownPackages?: readonly string[];
   /** Version conflicts found across workspace manifests */
   readonly conflicts?: readonly VersionConflict[];
+  /** Structured migration guides (populated when --guide is used) */
+  readonly guides?: readonly MigrationGuide[];
+  /** Whether any update is a breaking change */
+  readonly hasBreaking: boolean;
+  /** Package version info */
+  readonly packages: PackageVersionInfo[];
+  /** Package names skipped because they contain breaking changes */
+  readonly skippedBreaking: string[];
+  /** Total packages checked */
+  readonly total: number;
+  /** Package names that were requested but not found in the workspace */
+  readonly unknownPackages?: readonly string[];
+  /** Number of packages with updates available */
+  readonly updatesAvailable: number;
 }
 
 // =============================================================================
@@ -1322,51 +1322,51 @@ export type UpgradeReportStatus =
 
 /** Snapshot of effective flags for this upgrade run. */
 export interface UpgradeReportFlags {
-  readonly dryRun: boolean;
-  readonly yes: boolean;
-  readonly interactive: boolean;
   readonly all: boolean;
+  readonly dryRun: boolean;
+  readonly interactive: boolean;
   readonly noCodemods: boolean;
   readonly outputMode: OutputMode | null;
+  readonly yes: boolean;
 }
 
 /** Machine-readable upgrade report written to `.outfitter/reports/upgrade.json`. */
 export interface UpgradeReport {
   readonly $schema: "https://outfitter.dev/reports/upgrade/v1";
-  readonly status: UpgradeReportStatus;
-  readonly checkedAt: string;
-  readonly startedAt: string;
-  readonly finishedAt: string;
-  readonly cwd: string;
-  readonly workspaceRoot: string | null;
-  readonly flags: UpgradeReportFlags;
   readonly applied: boolean;
+  readonly checkedAt: string;
+  readonly codemods?: CodemodSummary;
+  readonly conflicts?: readonly VersionConflict[];
+  readonly cwd: string;
+  readonly error?: {
+    readonly message: string;
+    readonly category: string;
+    readonly context?: Record<string, unknown>;
+  };
+  readonly excluded: {
+    readonly breaking: readonly string[];
+  };
+  readonly finishedAt: string;
+  readonly flags: UpgradeReportFlags;
+  readonly packages: readonly PackageVersionInfo[];
+  readonly startedAt: string;
+  readonly status: UpgradeReportStatus;
   readonly summary: {
     readonly total: number;
     readonly available: number;
     readonly breaking: number;
     readonly applied: number;
   };
-  readonly packages: readonly PackageVersionInfo[];
-  readonly excluded: {
-    readonly breaking: readonly string[];
-  };
   readonly unknownPackages?: readonly string[];
-  readonly conflicts?: readonly VersionConflict[];
-  readonly codemods?: CodemodSummary;
-  readonly error?: {
-    readonly message: string;
-    readonly category: string;
-    readonly context?: Record<string, unknown>;
-  };
+  readonly workspaceRoot: string | null;
 }
 
 interface WriteUpgradeReportMeta {
-  readonly status: UpgradeReportStatus;
-  readonly startedAt: Date;
-  readonly workspaceRoot: string | null;
-  readonly options: UpgradeOptions;
   readonly error?: OutfitterError;
+  readonly options: UpgradeOptions;
+  readonly startedAt: Date;
+  readonly status: UpgradeReportStatus;
+  readonly workspaceRoot: string | null;
 }
 
 /**

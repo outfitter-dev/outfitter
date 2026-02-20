@@ -12,8 +12,8 @@ const DEPENDENCY_SECTIONS = [
 ] as const;
 
 interface TemplateManifest {
-  readonly internalDependencies: Record<string, string>;
   readonly externalDependencies: Record<string, string>;
+  readonly internalDependencies: Record<string, string>;
 }
 
 function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {

@@ -65,55 +65,55 @@ export type InitPresetId = Extract<
  * Options for the init command.
  */
 export interface InitOptions {
-  readonly targetDir: string;
-  readonly name: string | undefined;
   readonly bin?: string | undefined;
+  readonly dryRun?: boolean | undefined;
+  readonly force: boolean;
+  readonly installTimeout?: number | undefined;
+  readonly local?: boolean | undefined;
+  readonly name: string | undefined;
+  readonly noTooling?: boolean | undefined;
   readonly preset?: InitPresetId | undefined;
+  readonly skipCommit?: boolean | undefined;
+  readonly skipGit?: boolean | undefined;
+  readonly skipInstall?: boolean | undefined;
+  readonly structure?: InitStructure | undefined;
+  readonly targetDir: string;
   /** @deprecated Use `preset` instead. */
   readonly template?: string | undefined;
-  readonly structure?: InitStructure | undefined;
-  readonly workspaceName?: string | undefined;
-  readonly local?: boolean | undefined;
-  readonly force: boolean;
   readonly with?: string | undefined;
-  readonly noTooling?: boolean | undefined;
+  readonly workspaceName?: string | undefined;
   readonly yes?: boolean | undefined;
-  readonly dryRun?: boolean | undefined;
-  readonly skipInstall?: boolean | undefined;
-  readonly skipGit?: boolean | undefined;
-  readonly skipCommit?: boolean | undefined;
-  readonly installTimeout?: number | undefined;
 }
 
 /**
  * Result of running init.
  */
 export interface InitResult {
-  readonly structure: InitStructure;
-  readonly rootDir: string;
-  readonly projectDir: string;
-  readonly preset: InitPresetId;
-  readonly packageName: string;
   readonly blocksAdded?: AddBlockResult | undefined;
-  readonly postScaffold: PostScaffoldResult;
   readonly dryRunPlan?:
     | {
         readonly operations: readonly unknown[];
         readonly summary: Record<string, number>;
       }
     | undefined;
+  readonly packageName: string;
+  readonly postScaffold: PostScaffoldResult;
+  readonly preset: InitPresetId;
+  readonly projectDir: string;
+  readonly rootDir: string;
+  readonly structure: InitStructure;
 }
 
 interface ResolvedInitInput {
-  readonly rootDir: string;
+  readonly binName?: string | undefined;
+  readonly blocksOverride?: readonly string[];
+  readonly includeTooling: boolean;
+  readonly local: boolean;
   readonly packageName: string;
   readonly preset: InitPresetId;
+  readonly rootDir: string;
   readonly structure: InitStructure;
   readonly workspaceName?: string | undefined;
-  readonly includeTooling: boolean;
-  readonly blocksOverride?: readonly string[];
-  readonly local: boolean;
-  readonly binName?: string | undefined;
 }
 
 /**
@@ -818,25 +818,25 @@ export function initCommand(program: Command): void {
     .description("Create a new Outfitter project");
 
   interface InitCommandFlags {
-    name?: string;
     bin?: string;
-    preset?: InitPresetId;
-    template?: string;
-    structure?: InitStructure;
-    workspaceName?: string;
-    local?: boolean;
-    workspace?: boolean;
-    force?: boolean;
-    with?: string;
-    noTooling?: boolean;
-    yes?: boolean;
     dryRun?: boolean;
-    skipInstall?: boolean;
-    skipGit?: boolean;
-    skipCommit?: boolean;
+    force?: boolean;
     installTimeout?: number;
     json?: boolean;
+    local?: boolean;
+    name?: string;
+    noTooling?: boolean;
     opts?: () => InitCommandFlags;
+    preset?: InitPresetId;
+    skipCommit?: boolean;
+    skipGit?: boolean;
+    skipInstall?: boolean;
+    structure?: InitStructure;
+    template?: string;
+    with?: string;
+    workspace?: boolean;
+    workspaceName?: string;
+    yes?: boolean;
   }
 
   const resolveFlags = (

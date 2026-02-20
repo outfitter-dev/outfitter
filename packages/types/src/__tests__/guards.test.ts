@@ -138,8 +138,8 @@ describe("guards", () => {
 
   describe("createGuard()", () => {
     interface User {
-      name: string;
       age: number;
+      name: string;
     }
 
     it("returns a type guard function", () => {

@@ -17,14 +17,13 @@ import type { FlagPreset, OutputMode } from "./types.js";
  * Configuration for the output mode preset.
  */
 export interface OutputModePresetConfig {
-  /** Allowed output modes (default: ["human", "json"]) */
-  readonly modes?: readonly OutputMode[];
-
   /** Default mode when not specified (default: "human") */
   readonly defaultMode?: OutputMode;
 
   /** Whether to include "jsonl" in allowed modes (default: false) */
   readonly includeJsonl?: boolean;
+  /** Allowed output modes (default: ["human", "json"]) */
+  readonly modes?: readonly OutputMode[];
 }
 
 /**

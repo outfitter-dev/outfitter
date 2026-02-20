@@ -43,36 +43,36 @@ export type ThemeMethodCategory = "semantic" | "utility";
 export interface ThemeMethodMeta {
   /** Method category (semantic or utility) */
   category: ThemeMethodCategory;
-  /** Human-readable description */
-  description: string;
   /** Default example text */
   defaultExample: string;
+  /** Human-readable description */
+  description: string;
 }
 
 /**
  * Metadata for a primitive variant (spinner styles, border styles, etc).
  */
 export interface VariantMeta<T extends string> {
-  /** The variant value */
-  value: T;
-  /** Human-readable label */
-  label: string;
   /** Description of the variant */
   description: string;
+  /** Human-readable label */
+  label: string;
+  /** The variant value */
+  value: T;
 }
 
 /**
  * Metadata describing a primitive for demo generation.
  */
 export interface PrimitiveMeta {
-  /** Primitive identifier */
-  id: PrimitiveId;
-  /** Human-readable name */
-  name: string;
   /** Brief description */
   description: string;
+  /** Primitive identifier */
+  id: PrimitiveId;
   /** Import statement example */
   importExample: string;
+  /** Human-readable name */
+  name: string;
 }
 
 // ============================================================================
@@ -85,35 +85,35 @@ export interface PrimitiveMeta {
  * Keys correspond to theme method names and other example contexts.
  */
 export interface ExampleTexts {
-  // Theme semantic colors
-  success: string;
-  warning: string;
-  error: string;
-  info: string;
-  primary: string;
-  secondary: string;
-  muted: string;
   accent: string;
-  highlight: string;
-  link: string;
-  destructive: string;
-  subtle: string;
 
   // Theme utility methods
   bold: string;
-  italic: string;
-  underline: string;
-  dim: string;
 
   // General examples
   boxContent: string;
   boxTitle: string;
-  spinnerMessage: string;
-  progressLabel: string;
+  destructive: string;
+  dim: string;
+  error: string;
+  highlight: string;
+  info: string;
+  italic: string;
+  link: string;
   listItems: string[];
+  markdownSample: string;
+  muted: string;
+  primary: string;
+  progressLabel: string;
+  secondary: string;
+  spinnerMessage: string;
+  subtle: string;
+  // Theme semantic colors
+  success: string;
   tableData: Record<string, unknown>[];
   treeData: Record<string, unknown>;
-  markdownSample: string;
+  underline: string;
+  warning: string;
 }
 
 /**

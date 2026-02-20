@@ -15,14 +15,14 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface CodemodOptions {
-  readonly targetDir: string;
   readonly dryRun: boolean;
+  readonly targetDir: string;
 }
 
 interface CodemodResult {
   readonly changedFiles: readonly string[];
-  readonly skippedFiles: readonly string[];
   readonly errors: readonly string[];
+  readonly skippedFiles: readonly string[];
 }
 
 /**
@@ -130,15 +130,15 @@ function transformMultilineThrows(content: string): string {
 }
 
 interface FunctionScope {
-  readonly startLine: number;
   readonly endLine: number;
   readonly hasResultErr: boolean;
+  readonly startLine: number;
 }
 
 interface OpenFunctionScope {
-  readonly startLine: number;
   readonly depthBeforeBody: number;
   hasResultErr: boolean;
+  readonly startLine: number;
 }
 
 function countChar(line: string, char: string): number {

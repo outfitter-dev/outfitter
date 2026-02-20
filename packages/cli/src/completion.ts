@@ -13,11 +13,10 @@ import { Command } from "commander";
  * Configuration for the completion command.
  */
 export interface CompletionConfig {
-  /** Supported shells (default: bash, zsh, fish) */
-  readonly shells?: readonly ("bash" | "zsh" | "fish")[];
-
   /** Program name for completion scripts (inferred from CLI name if not provided) */
   readonly programName?: string;
+  /** Supported shells (default: bash, zsh, fish) */
+  readonly shells?: readonly ("bash" | "zsh" | "fish")[];
 }
 
 type Shell = "bash" | "zsh" | "fish";

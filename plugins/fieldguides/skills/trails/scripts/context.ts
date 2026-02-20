@@ -10,18 +10,18 @@
  */
 
 export interface TrailContext {
-  /** Current session ID */
-  sessionId: string;
-  /** Parent session ID if this is a subagent */
-  parentSessionId?: string;
-  /** Whether this is a subagent context */
-  isSubagent: boolean;
-  /** Current timestamp */
-  timestamp: Date;
   /** Date directory name (YYYY-MM-DD) */
   dateDir: string;
+  /** Whether this is a subagent context */
+  isSubagent: boolean;
+  /** Parent session ID if this is a subagent */
+  parentSessionId?: string;
+  /** Current session ID */
+  sessionId: string;
   /** Full timestamp for filenames (YYYYMMDDhhmm) */
   timeRoot: string;
+  /** Current timestamp */
+  timestamp: Date;
 }
 
 /**

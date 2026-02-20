@@ -16,10 +16,10 @@ export type ShortId = Branded<string, "ShortId">;
  * Options for short ID generation.
  */
 export interface ShortIdOptions {
-  /** Length of the generated ID. Default: 8 */
-  length?: number;
   /** Character set to use. Default: alphanumeric */
   charset?: "alphanumeric" | "hex" | "base62";
+  /** Length of the generated ID. Default: 8 */
+  length?: number;
   /** Optional prefix to prepend */
   prefix?: string;
 }

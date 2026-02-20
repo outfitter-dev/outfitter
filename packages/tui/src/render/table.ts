@@ -27,26 +27,26 @@ import {
  */
 export interface TableOptions {
   /**
-   * Fixed column widths by key.
-   * If not specified, column width is calculated from content.
-   */
-  columnWidths?: Record<string, number>;
-  /**
-   * Custom header labels by key.
-   * If not specified, the object key is used as the header.
-   */
-  headers?: Record<string, string>;
-  /**
    * Border style for the table.
    * @default "single"
    */
   border?: BorderStyle;
+  /**
+   * Fixed column widths by key.
+   * If not specified, column width is calculated from content.
+   */
+  columnWidths?: Record<string, number>;
   /**
    * Compact mode removes all borders and uses space separators.
    * When true, overrides the border option.
    * @default false
    */
   compact?: boolean;
+  /**
+   * Custom header labels by key.
+   * If not specified, the object key is used as the header.
+   */
+  headers?: Record<string, string>;
 }
 
 /**

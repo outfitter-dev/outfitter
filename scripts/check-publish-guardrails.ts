@@ -12,15 +12,15 @@ interface PackageJson {
 }
 
 export interface WorkspacePackageManifest {
-  path: string;
   manifest: PackageJson;
+  path: string;
 }
 
 interface PublishGuardrailViolation {
+  actual: string | undefined;
+  expected: string;
   packageName: string;
   path: string;
-  expected: string;
-  actual: string | undefined;
 }
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");

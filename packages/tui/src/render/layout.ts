@@ -213,10 +213,10 @@ export type Alignment = "top" | "center" | "bottom";
  * Options for horizontal layout.
  */
 export interface HorizontalLayoutOptions {
-  /** Gap (in characters) between blocks */
-  gap?: number;
   /** Vertical alignment of blocks */
   align?: Alignment;
+  /** Gap (in characters) between blocks */
+  gap?: number;
 }
 
 /**

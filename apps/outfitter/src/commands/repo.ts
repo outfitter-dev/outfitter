@@ -45,11 +45,12 @@ export type RepoCheckSubject =
   | "boundary-invocations";
 
 export interface RepoCommandIo {
-  readonly out?: (line: string) => void;
   readonly err?: (line: string) => void;
+  readonly out?: (line: string) => void;
 }
 
 export interface RepoToolingInvocation {
+  readonly args: readonly string[];
   readonly command:
     | "check-exports"
     | "check-readme-imports"
@@ -57,7 +58,6 @@ export interface RepoToolingInvocation {
     | "check-changeset"
     | "check-clean-tree"
     | "check-boundary-invocations";
-  readonly args: readonly string[];
   readonly cwd: string;
 }
 
@@ -68,12 +68,12 @@ export interface CreateRepoCommandOptions {
     options: ExecuteCheckCommandOptions,
     io: Required<RepoCommandIo>
   ) => Promise<number>;
-  readonly runDocsSync?: (
-    options: ExecuteSyncCommandOptions,
-    io: Required<RepoCommandIo>
-  ) => Promise<number>;
   readonly runDocsExport?: (
     options: ExecuteExportCommandOptions,
+    io: Required<RepoCommandIo>
+  ) => Promise<number>;
+  readonly runDocsSync?: (
+    options: ExecuteSyncCommandOptions,
     io: Required<RepoCommandIo>
   ) => Promise<number>;
   readonly runToolingCommand?: (

@@ -50,11 +50,6 @@ export interface McpHarness {
   listTools(): SerializedTool[];
 
   /**
-   * Search tools by name or description (case-insensitive).
-   */
-  searchTools(query: string): SerializedTool[];
-
-  /**
    * Load fixture data by name (relative to __fixtures__).
    */
   loadFixture<T = string>(name: string): T;
@@ -63,6 +58,11 @@ export interface McpHarness {
    * Reset harness state between tests.
    */
   reset(): void;
+
+  /**
+   * Search tools by name or description (case-insensitive).
+   */
+  searchTools(query: string): SerializedTool[];
 }
 
 export interface McpHarnessOptions {
@@ -71,12 +71,12 @@ export interface McpHarnessOptions {
 }
 
 export interface McpTestHarnessOptions {
-  /** Tools to register on the test MCP server. */
-  readonly tools: ToolDefinition<unknown, unknown, OutfitterError>[];
   /** Base fixtures directory (defaults to `${process.cwd()}/__fixtures__`). */
   readonly fixturesDir?: string;
   /** Optional server name for diagnostics. */
   readonly name?: string;
+  /** Tools to register on the test MCP server. */
+  readonly tools: ToolDefinition<unknown, unknown, OutfitterError>[];
   /** Optional server version for diagnostics. */
   readonly version?: string;
 }

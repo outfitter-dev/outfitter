@@ -15,14 +15,14 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface CodemodOptions {
-  readonly targetDir: string;
   readonly dryRun: boolean;
+  readonly targetDir: string;
 }
 
 interface CodemodResult {
   readonly changedFiles: readonly string[];
-  readonly skippedFiles: readonly string[];
   readonly errors: readonly string[];
+  readonly skippedFiles: readonly string[];
 }
 
 const IMPORT_REWRITES: ReadonlyArray<{ from: string; to: string }> = [

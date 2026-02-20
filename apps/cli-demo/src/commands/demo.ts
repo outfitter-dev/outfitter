@@ -32,22 +32,22 @@ import "./demo/errors.js";
  * Options for the demo command.
  */
 export interface DemoOptions {
-  /** Section to run (undefined = run all) */
-  readonly section?: string | undefined;
-  /** List available sections instead of running */
-  readonly list?: boolean | undefined;
   /** Run animated demo (spinners only) */
   readonly animate?: boolean | undefined;
+  /** List available sections instead of running */
+  readonly list?: boolean | undefined;
+  /** Section to run (undefined = run all) */
+  readonly section?: string | undefined;
 }
 
 /**
  * Result of running the demo command.
  */
 export interface DemoResult {
-  /** Output text to display */
-  readonly output: string;
   /** Exit code (0 = success, 1 = error) */
   readonly exitCode: number;
+  /** Output text to display */
+  readonly output: string;
 }
 
 // =============================================================================

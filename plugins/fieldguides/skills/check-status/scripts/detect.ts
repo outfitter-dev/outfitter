@@ -16,12 +16,6 @@ import { parseArgs } from "node:util";
  * Result of detecting available project tools.
  */
 interface DetectResult {
-  /** Whether Graphite CLI is available and initialized */
-  graphite: boolean;
-  /** Whether GitHub CLI is available and authenticated */
-  github: boolean;
-  /** Whether Linear MCP is available */
-  linear: boolean;
   /** Whether Beads issue tracking is initialized */
   beads: boolean;
   /** Human-readable status details for each tool */
@@ -31,6 +25,12 @@ interface DetectResult {
     linear?: string;
     beads?: string;
   };
+  /** Whether GitHub CLI is available and authenticated */
+  github: boolean;
+  /** Whether Graphite CLI is available and initialized */
+  graphite: boolean;
+  /** Whether Linear MCP is available */
+  linear: boolean;
 }
 
 const { values } = parseArgs({

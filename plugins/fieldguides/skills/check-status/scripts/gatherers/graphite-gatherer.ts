@@ -46,9 +46,9 @@ Output:
  * Result of running a shell command.
  */
 interface CmdOutput {
-  success: boolean;
-  stdout: string;
   stderr: string;
+  stdout: string;
+  success: boolean;
 }
 
 /**

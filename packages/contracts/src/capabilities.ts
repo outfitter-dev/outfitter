@@ -11,8 +11,8 @@ export const CAPABILITY_SURFACES = ["cli", "mcp", "api", "server"] as const;
 export type CapabilitySurface = (typeof CAPABILITY_SURFACES)[number];
 
 export interface ActionCapability {
-  surfaces: readonly CapabilitySurface[];
   notes?: string;
+  surfaces: readonly CapabilitySurface[];
 }
 
 export const DEFAULT_ACTION_SURFACES = ["cli", "mcp"] as const;

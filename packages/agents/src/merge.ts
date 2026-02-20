@@ -3,27 +3,27 @@
  */
 
 export interface HookConfig {
-  type: "command" | "prompt";
   command?: string;
   prompt?: string;
   timeout?: number;
+  type: "command" | "prompt";
 }
 
 export interface HookMatcher {
-  matcher: string;
   hooks: HookConfig[];
+  matcher: string;
 }
 
 export interface HooksConfig {
-  PreToolUse?: HookMatcher[];
+  Notification?: HookMatcher[];
   PostToolUse?: HookMatcher[];
+  PreCompact?: HookMatcher[];
+  PreToolUse?: HookMatcher[];
+  SessionEnd?: HookMatcher[];
+  SessionStart?: HookMatcher[];
   Stop?: HookMatcher[];
   SubagentStop?: HookMatcher[];
   UserPromptSubmit?: HookMatcher[];
-  SessionStart?: HookMatcher[];
-  SessionEnd?: HookMatcher[];
-  PreCompact?: HookMatcher[];
-  Notification?: HookMatcher[];
 }
 
 export interface SettingsJson {

@@ -53,17 +53,17 @@ export function printHeader(title: string): void {
 
 /** Typed constants extracted from skill-spec.json */
 export interface SkillSpec {
-  namePattern: RegExp;
-  nameMinLength: number;
-  nameMaxLength: number;
-  reservedWords: string[];
-  minDescriptionLength: number;
-  maxDescriptionLength: number;
-  maxLines: number;
   baseFields: Set<string>;
   claudeFields: Set<string>;
-  requiredFields: string[];
   claudeRecommendedFields: string[];
+  maxDescriptionLength: number;
+  maxLines: number;
+  minDescriptionLength: number;
+  nameMaxLength: number;
+  nameMinLength: number;
+  namePattern: RegExp;
+  requiredFields: string[];
+  reservedWords: string[];
 }
 
 let cachedSpec: SkillSpec | null = null;
@@ -203,10 +203,10 @@ export function isAllowedToolsCommaSeparated(rawYaml: string): {
 // ── Validation Result ────────────────────────────────────────────────────────
 
 export interface ValidationResult {
-  /** Whether the validation passes all required checks */
-  valid: boolean;
   /** Blocking errors that must be fixed */
   errors: string[];
+  /** Whether the validation passes all required checks */
+  valid: boolean;
   /** Non-blocking warnings for improvement */
   warnings: string[];
 }

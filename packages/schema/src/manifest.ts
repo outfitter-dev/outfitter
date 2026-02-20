@@ -26,44 +26,44 @@ import {
 // =============================================================================
 
 export interface ActionManifest {
-  readonly version: string;
-  readonly generatedAt: string;
-  readonly surfaces: ActionSurface[];
   readonly actions: ActionManifestEntry[];
   readonly errors: Record<ErrorCategory, { exit: number; http: number }>;
+  readonly generatedAt: string;
   readonly outputModes: string[];
+  readonly surfaces: ActionSurface[];
+  readonly version: string;
 }
 
 export interface ActionManifestEntry {
-  readonly id: string;
-  readonly description?: string | undefined;
-  readonly surfaces: ActionSurface[];
-  readonly input: JsonSchema;
-  readonly output?: JsonSchema | undefined;
-  readonly cli?: ManifestCliSpec | undefined;
-  readonly mcp?: ManifestMcpSpec | undefined;
   readonly api?: ManifestApiSpec | undefined;
+  readonly cli?: ManifestCliSpec | undefined;
+  readonly description?: string | undefined;
+  readonly id: string;
+  readonly input: JsonSchema;
+  readonly mcp?: ManifestMcpSpec | undefined;
+  readonly output?: JsonSchema | undefined;
+  readonly surfaces: ActionSurface[];
 }
 
 export interface ManifestCliSpec {
-  readonly group?: string | undefined;
+  readonly aliases?: readonly string[] | undefined;
   readonly command?: string | undefined;
   readonly description?: string | undefined;
-  readonly aliases?: readonly string[] | undefined;
+  readonly group?: string | undefined;
   readonly options?: readonly ManifestCliOption[] | undefined;
 }
 
 export interface ManifestCliOption {
-  readonly flags: string;
-  readonly description: string;
   readonly defaultValue?: string | boolean | string[] | undefined;
+  readonly description: string;
+  readonly flags: string;
   readonly required?: boolean | undefined;
 }
 
 export interface ManifestMcpSpec {
-  readonly tool?: string | undefined;
-  readonly description?: string | undefined;
   readonly deferLoading?: boolean | undefined;
+  readonly description?: string | undefined;
+  readonly tool?: string | undefined;
 }
 
 export interface ManifestApiSpec {

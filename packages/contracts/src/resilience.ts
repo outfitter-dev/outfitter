@@ -5,40 +5,38 @@ import { type OutfitterError, TimeoutError } from "./errors.js";
  * Options for retry behavior.
  */
 export interface RetryOptions {
-  /** Maximum number of retry attempts (default: 3) */
-  maxAttempts?: number;
+  /** Exponential backoff multiplier (default: 2) */
+  backoffMultiplier?: number;
 
   /** Initial delay in milliseconds (default: 1000) */
   initialDelayMs?: number;
 
-  /** Maximum delay in milliseconds (default: 30000) */
-  maxDelayMs?: number;
-
-  /** Exponential backoff multiplier (default: 2) */
-  backoffMultiplier?: number;
-
-  /** Whether to add jitter to delays (default: true) */
-  jitter?: boolean;
-
   /** Predicate to determine if error is retryable */
   isRetryable?: (error: OutfitterError) => boolean;
 
-  /** Abort signal for cancellation */
-  signal?: AbortSignal;
+  /** Whether to add jitter to delays (default: true) */
+  jitter?: boolean;
+  /** Maximum number of retry attempts (default: 3) */
+  maxAttempts?: number;
+
+  /** Maximum delay in milliseconds (default: 30000) */
+  maxDelayMs?: number;
 
   /** Callback invoked before each retry */
   onRetry?: (attempt: number, error: OutfitterError, delayMs: number) => void;
+
+  /** Abort signal for cancellation */
+  signal?: AbortSignal;
 }
 
 /**
  * Options for timeout behavior.
  */
 export interface TimeoutOptions {
-  /** Timeout duration in milliseconds */
-  timeoutMs: number;
-
   /** Operation name for error context */
   operation?: string;
+  /** Timeout duration in milliseconds */
+  timeoutMs: number;
 }
 
 /**

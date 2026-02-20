@@ -36,20 +36,20 @@ export interface DoctorOptions {
  * Result of a single health check.
  */
 export interface CheckResult {
-  /** Whether the check passed */
-  readonly passed: boolean;
   /** Error message if check failed */
   readonly error?: string;
+  /** Whether the check passed */
+  readonly passed: boolean;
 }
 
 /**
  * Bun version check result.
  */
 export interface BunVersionCheck extends CheckResult {
-  /** Current Bun version */
-  readonly version: string;
   /** Required minimum version */
   readonly required: string;
+  /** Current Bun version */
+  readonly version: string;
 }
 
 /**
@@ -92,10 +92,10 @@ export interface DirectoriesCheck {
  * Summary of all checks.
  */
 export interface DoctorSummary {
-  /** Number of passed checks */
-  readonly passed: number;
   /** Number of failed checks */
   readonly failed: number;
+  /** Number of passed checks */
+  readonly passed: number;
   /** Total number of checks */
   readonly total: number;
 }
@@ -112,14 +112,14 @@ export interface DoctorResult {
     readonly configFiles: ConfigFilesCheck;
     readonly directories: DirectoriesCheck;
   };
-  /** Summary of all checks */
-  readonly summary: DoctorSummary;
   /** Exit code (0 = all passed, 1 = some failed) */
   readonly exitCode: number;
   /** Whether this is a workspace root (affects which checks apply) */
   readonly isWorkspaceRoot?: boolean;
   /** Checks intentionally skipped at workspace root */
   readonly skippedChecks?: readonly string[];
+  /** Summary of all checks */
+  readonly summary: DoctorSummary;
   /** Per-member summary when running at a workspace root */
   readonly workspaceMembers?: readonly WorkspaceMemberHealth[];
 }
@@ -128,12 +128,12 @@ export interface DoctorResult {
  * Health summary for a workspace member package.
  */
 export interface WorkspaceMemberHealth {
+  /** Member exit code (0 = pass, 1 = failed checks) */
+  readonly exitCode: number;
   /** Workspace-relative member path (for example, apps/my-cli) */
   readonly path: string;
   /** Summary for the member doctor run */
   readonly summary: DoctorSummary;
-  /** Member exit code (0 = pass, 1 = failed checks) */
-  readonly exitCode: number;
 }
 
 interface PackageJsonReadResult {

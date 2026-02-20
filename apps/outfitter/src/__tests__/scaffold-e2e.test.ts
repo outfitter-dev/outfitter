@@ -15,8 +15,8 @@ import { runInit } from "../commands/init.js";
 
 interface CommandResult {
   readonly exitCode: number;
-  readonly stdout: string;
   readonly stderr: string;
+  readonly stdout: string;
   readonly timedOut: boolean;
 }
 

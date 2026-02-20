@@ -10,11 +10,11 @@ type DocsMdxMode = "strict" | "lossy";
 
 interface DocsBaseOptions {
   readonly cwd?: string;
-  readonly workspaceRoot?: string;
-  readonly packagesDir?: string;
-  readonly outputDir?: string;
   readonly excludedFilenames?: readonly string[];
   readonly mdxMode?: DocsMdxMode;
+  readonly outputDir?: string;
+  readonly packagesDir?: string;
+  readonly workspaceRoot?: string;
 }
 
 export interface ExecuteCheckCommandOptions extends DocsBaseOptions {}
@@ -30,8 +30,8 @@ export interface ExecuteExportCommandOptions extends DocsBaseOptions {
 }
 
 export interface DocsCommandIo {
-  readonly out: (line: string) => void;
   readonly err: (line: string) => void;
+  readonly out: (line: string) => void;
 }
 
 export interface CreateDocsCommandOptions {
@@ -48,12 +48,12 @@ interface DocsModule {
     options: ExecuteCheckCommandOptions,
     io: DocsCommandIo
   ) => Promise<number>;
-  executeSyncCommand: (
-    options: ExecuteSyncCommandOptions,
-    io: DocsCommandIo
-  ) => Promise<number>;
   executeExportCommand: (
     options: ExecuteExportCommandOptions,
+    io: DocsCommandIo
+  ) => Promise<number>;
+  executeSyncCommand: (
+    options: ExecuteSyncCommandOptions,
     io: DocsCommandIo
   ) => Promise<number>;
 }
