@@ -27,6 +27,40 @@ export interface CheckTsDocInput {
   readonly minCoverage: number;
   readonly cwd: string;
   readonly outputMode: CliOutputMode;
+  readonly jq: string | undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Jq helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply a jq expression to JSON data using the system `jq` binary.
+ *
+ * @param data - Data to filter
+ * @param expr - jq expression
+ * @returns Filtered output string, or the original JSON if jq fails
+ */
+async function applyJq(data: unknown, expr: string): Promise<string> {
+  const json = JSON.stringify(data);
+  const proc = Bun.spawn(["jq", expr], {
+    stdin: new Response(json),
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+
+  if (exitCode !== 0) {
+    process.stderr.write(`jq error: ${stderr.trim()}\n`);
+    return `${JSON.stringify(data, null, 2)}\n`;
+  }
+
+  return stdout;
 }
 
 type ToolingCheckTsdocModule = Pick<
@@ -100,7 +134,10 @@ export async function runCheckTsdoc(
       );
     }
 
-    if (input.outputMode === "json" || input.outputMode === "jsonl") {
+    if (input.jq) {
+      const filtered = await applyJq(result, input.jq);
+      process.stdout.write(filtered);
+    } else if (input.outputMode === "json" || input.outputMode === "jsonl") {
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     } else {
       tooling.printCheckTsdocHuman(result, {

@@ -15,6 +15,7 @@ import {
   interactionPreset,
   verbosePreset,
 } from "@outfitter/cli/flags";
+import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -757,6 +758,7 @@ interface CheckTsDocActionInput {
   minCoverage: number;
   cwd: string;
   outputMode: CliOutputMode;
+  jq: string | undefined;
 }
 
 const checkTsdocInputSchema = z.object({
@@ -764,6 +766,7 @@ const checkTsdocInputSchema = z.object({
   minCoverage: z.number(),
   cwd: z.string(),
   outputMode: outputModeSchema,
+  jq: z.string().optional(),
 }) as z.ZodType<CheckTsDocActionInput>;
 
 const checkTsdocOutputSchema = z.object({
@@ -797,6 +800,9 @@ const checkTsdocOutputSchema = z.object({
   }),
 }) as z.ZodType<TsDocCheckResult>;
 
+const checkTsdocOutputMode = outputModePreset({ includeJsonl: true });
+const checkTsdocJq = jqPreset();
+
 const checkTsdocAction = defineAction<
   CheckTsDocActionInput,
   TsDocCheckResult,
@@ -821,9 +827,23 @@ const checkTsdocAction = defineAction<
         flags: "--min-coverage <percent>",
         description: "Minimum coverage percentage (used with --strict)",
       },
+      ...checkTsdocOutputMode.options,
+      ...checkTsdocJq.options,
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { outputMode: presetOutputMode } = checkTsdocOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = checkTsdocJq.resolve(context.flags);
+      let outputMode: CliOutputMode;
+      if (typeof context.flags["output"] === "string") {
+        outputMode =
+          presetOutputMode === "json" || presetOutputMode === "jsonl"
+            ? presetOutputMode
+            : "human";
+      } else {
+        outputMode = resolveOutputModeFromContext(context.flags);
+      }
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];
       let minCoverage = 0;
@@ -838,6 +858,7 @@ const checkTsdocAction = defineAction<
         minCoverage,
         cwd: process.cwd(),
         outputMode,
+        jq,
       };
     },
   },
