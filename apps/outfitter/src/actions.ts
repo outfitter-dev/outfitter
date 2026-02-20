@@ -703,6 +703,8 @@ const checkAction = defineAction({
   input: checkInputSchema,
   cli: {
     group: "check",
+    // No `command` — this IS the base "check" command. Omitting `command`
+    // prevents schema from rendering "check check".
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
