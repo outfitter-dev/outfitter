@@ -25,24 +25,24 @@ export interface DocsToolInput {
 }
 
 export interface DocsToolEntry {
-  name: string;
-  summary?: string;
   examples?: Array<{
     input: Record<string, unknown>;
     description?: string;
   }>;
+  name: string;
+  summary?: string;
 }
 
 export interface DocsToolResponse {
-  overview?: string;
-  tools?: DocsToolEntry[];
   examples?: Array<{
     name?: string;
     description?: string;
     input?: Record<string, unknown>;
     output?: unknown;
   }>;
+  overview?: string;
   schemas?: Record<string, unknown>;
+  tools?: DocsToolEntry[];
 }
 
 export interface DocsToolOptions {
@@ -114,10 +114,10 @@ export interface ConfigToolInput {
 
 export interface ConfigToolResponse {
   action: ConfigAction;
+  config?: Record<string, unknown>;
+  found?: boolean;
   key?: string;
   value?: unknown;
-  found?: boolean;
-  config?: Record<string, unknown>;
 }
 
 export interface ConfigStore {
@@ -126,8 +126,8 @@ export interface ConfigStore {
   ):
     | { value: unknown; found: boolean }
     | Promise<{ value: unknown; found: boolean }>;
-  set(key: string, value: unknown): void | Promise<void>;
   list(): Record<string, unknown> | Promise<Record<string, unknown>>;
+  set(key: string, value: unknown): void | Promise<void>;
 }
 
 export interface ConfigToolOptions {
@@ -225,17 +225,17 @@ export function defineConfigTool(
 // =============================================================================
 
 export interface QueryToolInput {
-  q?: string | undefined;
-  query?: string | undefined;
-  limit?: number | undefined;
   cursor?: string | undefined;
   filters?: Record<string, unknown> | undefined;
+  limit?: number | undefined;
+  q?: string | undefined;
+  query?: string | undefined;
 }
 
 export interface QueryToolResponse<T = unknown> {
-  results: T[];
-  nextCursor?: string;
   _meta?: Record<string, unknown>;
+  nextCursor?: string;
+  results: T[];
 }
 
 export interface QueryToolOptions<T = unknown> {
@@ -312,8 +312,8 @@ export function defineQueryTool<T = unknown>(
 // =============================================================================
 
 export interface CoreToolsOptions {
-  docs?: DocsToolOptions;
   config?: ConfigToolOptions;
+  docs?: DocsToolOptions;
   query?: QueryToolOptions;
 }
 

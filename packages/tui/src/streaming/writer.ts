@@ -10,8 +10,8 @@ import { ANSI } from "./ansi.js";
  * Minimal writable stream interface.
  */
 export interface WritableStream {
-  write(str: string): boolean;
   isTTY?: boolean;
+  write(str: string): boolean;
 }
 
 /**
@@ -26,14 +26,14 @@ export interface StreamWriterOptions {
  * Interface for managing in-place terminal output.
  */
 export interface StreamWriter {
-  /** Write content (replaces current content) */
-  write(content: string): void;
-  /** Update content in place */
-  update(content: string): void;
-  /** Persist current content and move to new line */
-  persist(): void;
   /** Clear current content */
   clear(): void;
+  /** Persist current content and move to new line */
+  persist(): void;
+  /** Update content in place */
+  update(content: string): void;
+  /** Write content (replaces current content) */
+  write(content: string): void;
 }
 
 /**

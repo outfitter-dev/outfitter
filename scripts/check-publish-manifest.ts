@@ -8,18 +8,18 @@ type DependencySection =
   | "optionalDependencies";
 
 interface PackageJson {
-  name?: string;
-  version?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
+  name?: string;
   optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  version?: string;
 }
 
 interface WorkspaceRangeViolation {
-  section: DependencySection;
   dependency: string;
   range: string;
+  section: DependencySection;
 }
 
 const CHECKED_SECTIONS: DependencySection[] = [

@@ -19,16 +19,16 @@ import type { z } from "zod";
 // ============================================================================
 
 export interface LogEntry {
+  data?: Record<string, unknown>;
   level: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
   message: string;
-  data?: Record<string, unknown>;
 }
 
 export interface TestLogger extends Logger {
-  /** Captured log entries for assertions */
-  logs: LogEntry[];
   /** Clear captured logs */
   clear(): void;
+  /** Captured log entries for assertions */
+  logs: LogEntry[];
 }
 
 // ============================================================================

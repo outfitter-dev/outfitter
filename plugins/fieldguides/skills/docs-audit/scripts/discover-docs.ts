@@ -24,22 +24,22 @@ import { $ } from "bun";
  * Documentation file with git metadata.
  */
 interface DocFile {
-  /** File path relative to repo root */
-  path: string;
-  /** Short SHA of last commit touching this file */
-  lastCommitSha: string;
-  /** ISO date of last commit */
-  lastCommitDate: string;
-  /** Author name of last commit */
-  lastAuthor: string;
-  /** Days since last modification */
-  daysAgo: number;
   /** Activity classification based on age */
   activityStatus: "active" | "recent" | "idle" | "stale" | "ancient";
-  /** Line count */
-  lines: number;
   /** File size in bytes */
   bytes: number;
+  /** Days since last modification */
+  daysAgo: number;
+  /** Author name of last commit */
+  lastAuthor: string;
+  /** ISO date of last commit */
+  lastCommitDate: string;
+  /** Short SHA of last commit touching this file */
+  lastCommitSha: string;
+  /** Line count */
+  lines: number;
+  /** File path relative to repo root */
+  path: string;
   /** Code files modified in same commits */
   relatedCodeFiles: string[];
 }
@@ -48,16 +48,16 @@ interface DocFile {
  * Discovery manifest with all markdown files.
  */
 interface Manifest {
-  /** Generation timestamp */
-  generated: string;
-  /** Repository root path */
-  repoRoot: string;
-  /** Whether this is a git repository */
-  isGitRepo: boolean;
-  /** Total files discovered */
-  totalFiles: number;
   /** Documentation files with metadata */
   files: DocFile[];
+  /** Generation timestamp */
+  generated: string;
+  /** Whether this is a git repository */
+  isGitRepo: boolean;
+  /** Repository root path */
+  repoRoot: string;
+  /** Total files discovered */
+  totalFiles: number;
 }
 
 // Activity status thresholds (days)

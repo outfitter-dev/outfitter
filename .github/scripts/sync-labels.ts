@@ -21,16 +21,16 @@ import { $ } from "bun";
 import { parse } from "yaml";
 
 interface LabelDef {
-  name: string;
+  aliases?: string[];
   color: string;
   description: string;
-  aliases?: string[];
+  name: string;
 }
 
 interface GitHubLabel {
-  name: string;
   color: string;
   description: string | null;
+  name: string;
 }
 
 // Parse args

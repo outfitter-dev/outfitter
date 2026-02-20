@@ -19,20 +19,20 @@ import { joinVertical } from "../render/layout.js";
  * Options for creating a demo section.
  */
 export interface SectionOptions {
-  /** Separator character style (default: "─") */
-  separator?: SeparatorStyle;
   /** Case transformation (default: "title") */
   case?: CaseMode;
+  /** Separator character style (default: "─") */
+  separator?: SeparatorStyle;
 }
 
 /**
  * Options for creating a subsection.
  */
 export interface SubsectionOptions {
-  /** Separator character style (default: "─") */
-  separator?: SeparatorStyle;
   /** Case transformation (default: "title") */
   case?: CaseMode;
+  /** Separator character style (default: "─") */
+  separator?: SeparatorStyle;
 }
 
 /**

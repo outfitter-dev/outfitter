@@ -28,20 +28,20 @@ import {
 // ── CLI Parsing ──────────────────────────────────────────────────────────────
 
 interface Options {
-  pluginName: string;
-  directory: string;
-  description: string;
-  version: string;
-  license: string;
-  authorName: string;
   authorEmail: string;
-  withSkills: boolean;
-  withCommands: boolean;
-  withAgents: boolean;
-  withHooks: boolean;
-  withMcp: boolean;
+  authorName: string;
+  description: string;
+  directory: string;
   git: boolean;
   githubActions: boolean;
+  license: string;
+  pluginName: string;
+  version: string;
+  withAgents: boolean;
+  withCommands: boolean;
+  withHooks: boolean;
+  withMcp: boolean;
+  withSkills: boolean;
 }
 
 function usage(): never {

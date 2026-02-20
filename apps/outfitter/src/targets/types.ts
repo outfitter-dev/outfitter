@@ -31,12 +31,12 @@ export type TargetScope = "init-only" | "scaffold-only" | "both";
  * Complete definition for a scaffold target.
  */
 export interface TargetDefinition {
-  readonly id: TargetId;
-  readonly description: string;
   readonly category: TargetCategory;
-  readonly placement: "apps" | "packages";
-  readonly templateDir: string;
   readonly defaultBlocks: readonly string[];
-  readonly status: TargetStatus;
+  readonly description: string;
+  readonly id: TargetId;
+  readonly placement: "apps" | "packages";
   readonly scope: TargetScope;
+  readonly status: TargetStatus;
+  readonly templateDir: string;
 }

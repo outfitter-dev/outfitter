@@ -23,14 +23,14 @@ import { dirname, relative } from "node:path";
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export interface FenceFinding {
-  file: string;
-  line: number;
-  type: "bare-fence" | "nesting";
+  context: string;
   /** The fence marker (e.g., "```" or "````") */
   fence: string;
+  file: string;
+  line: number;
   /** Suggested language for bare fences */
   suggestion?: string;
-  context: string;
+  type: "bare-fence" | "nesting";
 }
 
 export interface ScanResult {

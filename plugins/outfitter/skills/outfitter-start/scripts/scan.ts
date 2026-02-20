@@ -31,70 +31,70 @@ const FUNCTION_PROXIMITY_LINES = 50; // How close a throw must be to a function 
 
 // Types
 interface ScanResult {
+  content: string;
   file: string;
   line: number;
-  content: string;
 }
 
 interface HandlerInfo {
-  name: string;
-  file: string;
-  line: number;
-  signature: string;
-  throws: string[];
-  priority: "high" | "medium" | "low";
+  blastRadius: "low" | "medium" | "high";
   callerCount: number;
   callerFiles: number;
-  blastRadius: "low" | "medium" | "high";
+  file: string;
+  line: number;
+  name: string;
+  priority: "high" | "medium" | "low";
+  signature: string;
+  throws: string[];
 }
 
 interface ErrorClassInfo {
-  name: string;
   file: string;
   line: number;
-  usageCount: number;
+  name: string;
   suggestedMapping: string;
+  usageCount: number;
 }
 
 interface PathUsage {
+  current: string;
   file: string;
   line: number;
-  current: string;
   pattern: "homedir" | "tilde" | "hardcoded";
 }
 
 interface Unknown {
-  id: string;
-  title: string;
-  file: string;
-  line: number;
-  priority: "high" | "medium" | "low";
   category: string;
   code: string;
-  reason: string;
+  file: string;
+  id: string;
+  line: number;
   options: string[];
+  priority: "high" | "medium" | "low";
+  reason: string;
+  title: string;
 }
 
 interface PackageRecommendation {
   name: string;
   purpose: string;
-  recommendation: "recommended" | "conditional" | "optional";
   reason: string;
+  recommendation: "recommended" | "conditional" | "optional";
 }
 
 interface ScanData {
-  projectName: string;
-  projectType: "greenfield" | "migration" | "partial";
-  date: string;
-  throws: ScanResult[];
-  tryCatch: ScanResult[];
   console: ScanResult[];
-  paths: PathUsage[];
+  date: string;
+  docs: string[];
   errorClasses: ErrorClassInfo[];
   handlers: HandlerInfo[];
-  docs: string[];
-  unknowns: Unknown[];
   packageRecommendations: PackageRecommendation[];
+  paths: PathUsage[];
+  projectName: string;
+  projectType: "greenfield" | "migration" | "partial";
+  throws: ScanResult[];
+  tryCatch: ScanResult[];
+  unknowns: Unknown[];
 }
 
 // Scanner functions

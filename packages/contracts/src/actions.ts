@@ -10,9 +10,9 @@ export const DEFAULT_REGISTRY_SURFACES: readonly ActionSurface[] =
   ACTION_SURFACES;
 
 export interface ActionCliOption {
-  readonly flags: string;
-  readonly description: string;
   readonly defaultValue?: string | boolean | string[];
+  readonly description: string;
+  readonly flags: string;
   readonly required?: boolean;
 }
 
@@ -22,19 +22,19 @@ export interface ActionCliInputContext {
 }
 
 export interface ActionCliSpec<TInput = unknown> {
-  readonly group?: string;
+  readonly aliases?: readonly string[];
   readonly command?: string;
   readonly description?: string;
-  readonly aliases?: readonly string[];
-  readonly options?: readonly ActionCliOption[];
+  readonly group?: string;
   readonly mapInput?: (context: ActionCliInputContext) => TInput;
+  readonly options?: readonly ActionCliOption[];
 }
 
 export interface ActionMcpSpec<TInput = unknown> {
-  readonly tool?: string;
-  readonly description?: string;
   readonly deferLoading?: boolean;
+  readonly description?: string;
   readonly mapInput?: (input: unknown) => TInput;
+  readonly tool?: string;
 }
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -54,17 +54,17 @@ export interface ActionSpec<
   TOutput,
   TError extends OutfitterError = OutfitterError,
 > {
-  readonly id: string;
+  readonly api?: ActionApiSpec;
+  readonly cli?: ActionCliSpec<TInput>;
   readonly description?: string;
-  readonly surfaces?: readonly ActionSurface[];
-  readonly input: z.ZodType<TInput>;
-  readonly output?: z.ZodType<TOutput>;
   readonly handler:
     | Handler<TInput, TOutput, TError>
     | SyncHandler<TInput, TOutput, TError>;
-  readonly cli?: ActionCliSpec<TInput>;
+  readonly id: string;
+  readonly input: z.ZodType<TInput>;
   readonly mcp?: ActionMcpSpec<TInput>;
-  readonly api?: ActionApiSpec;
+  readonly output?: z.ZodType<TOutput>;
+  readonly surfaces?: readonly ActionSurface[];
   readonly trpc?: ActionTrpcSpec;
 }
 
@@ -74,9 +74,9 @@ export interface ActionRegistry {
   add<TInput, TOutput, TError extends OutfitterError = OutfitterError>(
     action: ActionSpec<TInput, TOutput, TError>
   ): ActionRegistry;
-  list(): AnyActionSpec[];
-  get(id: string): AnyActionSpec | undefined;
   forSurface(surface: ActionSurface): AnyActionSpec[];
+  get(id: string): AnyActionSpec | undefined;
+  list(): AnyActionSpec[];
 }
 
 export function defineAction<

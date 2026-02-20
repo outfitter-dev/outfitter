@@ -28,26 +28,25 @@ export interface ResolvedConfig {
  * ```
  */
 export interface HandlerContext {
-  /** Abort signal for cancellation propagation */
-  signal?: AbortSignal;
-
-  /** Unique request identifier for tracing (UUIDv7) */
-  requestId: string;
-
-  /** Structured logger with automatic redaction */
-  logger: Logger;
-
   /** Resolved configuration values */
   config?: ResolvedConfig;
-
-  /** Workspace root path, if detected */
-  workspaceRoot?: string;
 
   /** Current working directory */
   cwd: string;
 
   /** Environment variables (filtered, redacted) */
   env: Record<string, string | undefined>;
+
+  /** Structured logger with automatic redaction */
+  logger: Logger;
+
+  /** Unique request identifier for tracing (UUIDv7) */
+  requestId: string;
+  /** Abort signal for cancellation propagation */
+  signal?: AbortSignal;
+
+  /** Workspace root path, if detected */
+  workspaceRoot?: string;
 }
 
 /**

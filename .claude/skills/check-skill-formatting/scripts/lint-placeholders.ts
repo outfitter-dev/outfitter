@@ -25,11 +25,11 @@ import { dirname, relative } from "node:path";
 // ── Types ───────────────────────────────────────────────────────────────────
 
 interface Finding {
+  column: number;
+  context: string;
   file: string;
   line: number;
-  column: number;
   match: string;
-  context: string;
 }
 
 interface ScanResult {

@@ -24,51 +24,48 @@ import type { Command } from "commander";
  * ```
  */
 export interface CLIConfig {
-  /** CLI name (used in help output and error messages) */
-  readonly name: string;
-
-  /** CLI version (displayed with --version) */
-  readonly version: string;
-
   /** CLI description (displayed in help output) */
   readonly description?: string;
+  /** CLI name (used in help output and error messages) */
+  readonly name: string;
 
   /** Custom error handler */
   readonly onError?: (error: Error) => void;
 
   /** Custom exit handler (defaults to process.exit) */
   readonly onExit?: (code: number) => void | Promise<void>;
+
+  /** CLI version (displayed with --version) */
+  readonly version: string;
 }
 
 /**
  * CLI instance returned by createCLI.
  */
 export interface CLI {
-  /** Register a command with the CLI */
-  register(command: CommandBuilder | Command): this;
-
   /** Parse arguments and execute the matched command */
   parse(argv?: readonly string[]): Promise<void>;
 
   /** Get the underlying Commander program */
   readonly program: Command;
+  /** Register a command with the CLI */
+  register(command: CommandBuilder | Command): this;
 }
 
 /**
  * Configuration for a single command.
  */
 export interface CommandConfig {
-  /** Command name and argument syntax (e.g., "list" or "get <id>") */
-  readonly name: string;
+  /** Command aliases */
+  readonly aliases?: readonly string[];
 
   /** Command description */
   readonly description?: string;
 
-  /** Command aliases */
-  readonly aliases?: readonly string[];
-
   /** Whether to hide from help output */
   readonly hidden?: boolean;
+  /** Command name and argument syntax (e.g., "list" or "get <id>") */
+  readonly name: string;
 }
 
 /**
@@ -98,11 +95,24 @@ export type CommandFlags = Record<string, unknown>;
  * Builder interface for constructing commands fluently.
  */
 export interface CommandBuilder {
+  /** Set the action handler */
+  action<TFlags extends CommandFlags = CommandFlags>(
+    handler: CommandAction<TFlags>
+  ): this;
+
+  /** Add command aliases */
+  alias(alias: string): this;
+
+  /** Build the underlying Commander command */
+  build(): Command;
   /** Set command description */
   description(text: string): this;
 
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
+
+  /** Apply a flag preset (adds its options to the command) */
+  preset(preset: FlagPreset<Record<string, unknown>>): this;
 
   /** Add a required option */
   requiredOption(
@@ -110,20 +120,6 @@ export interface CommandBuilder {
     description: string,
     defaultValue?: unknown
   ): this;
-
-  /** Add command aliases */
-  alias(alias: string): this;
-
-  /** Apply a flag preset (adds its options to the command) */
-  preset(preset: FlagPreset<Record<string, unknown>>): this;
-
-  /** Set the action handler */
-  action<TFlags extends CommandFlags = CommandFlags>(
-    handler: CommandAction<TFlags>
-  ): this;
-
-  /** Build the underlying Commander command */
-  build(): Command;
 }
 
 // =============================================================================
@@ -134,31 +130,29 @@ export interface CommandBuilder {
  * A family of related command verbs with a primary name and aliases.
  */
 export interface VerbFamily {
-  /** Primary verb name */
-  readonly primary: string;
-
   /** Alternative names for this verb */
   readonly aliases: readonly string[];
 
   /** Description of what this verb family does */
   readonly description: string;
+  /** Primary verb name */
+  readonly primary: string;
 }
 
 /**
  * Configuration for resolving a verb family with project-level overrides.
  */
 export interface VerbConfig {
-  /** Override the primary verb (e.g., "edit" instead of "modify") */
-  readonly primary?: string;
-
   /** Whether to include aliases (default: true) */
   readonly aliases?: boolean;
 
-  /** Additional aliases beyond defaults */
-  readonly extraAliases?: readonly string[];
-
   /** Aliases to exclude */
   readonly excludeAliases?: readonly string[];
+
+  /** Additional aliases beyond defaults */
+  readonly extraAliases?: readonly string[];
+  /** Override the primary verb (e.g., "edit" instead of "modify") */
+  readonly primary?: string;
 }
 
 // =============================================================================
@@ -200,29 +194,28 @@ export interface FlagPresetConfig<TResolved extends Record<string, unknown>> {
  * Configuration for creating a custom boolean flag preset.
  */
 export interface BooleanFlagPresetConfig<TKey extends string> {
+  /** Default resolved value (defaults to false) */
+  readonly defaultValue?: boolean;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Commander option definition (e.g., "--force" or "--no-codemods") */
+  readonly flags: string;
   /** Unique identifier for deduplication */
   readonly id: string;
 
   /** Resolved output property name */
   readonly key: TKey;
 
-  /** Commander option definition (e.g., "--force" or "--no-codemods") */
-  readonly flags: string;
-
-  /** Help description for the option */
-  readonly description: string;
-
-  /** Default resolved value (defaults to false) */
-  readonly defaultValue?: boolean;
-
-  /** Candidate raw flag keys to read (defaults to [key]) */
-  readonly sources?: readonly string[];
-
   /** Positive keys that should be negated (e.g., "codemods" for --no-codemods) */
   readonly negatedSources?: readonly string[];
 
   /** Whether the option is required */
   readonly required?: boolean;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
 }
 
 /**
@@ -232,96 +225,93 @@ export interface EnumFlagPresetConfig<
   TKey extends string,
   TValue extends string,
 > {
+  /** Fallback value when input is missing or invalid */
+  readonly defaultValue: TValue;
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Commander option definition */
+  readonly flags: string;
   /** Unique identifier for deduplication */
   readonly id: string;
 
   /** Resolved output property name */
   readonly key: TKey;
 
-  /** Commander option definition */
-  readonly flags: string;
-
-  /** Help description for the option */
-  readonly description: string;
-
-  /** Allowed enum values */
-  readonly values: readonly TValue[];
-
-  /** Fallback value when input is missing or invalid */
-  readonly defaultValue: TValue;
+  /** Whether the option is required */
+  readonly required?: boolean;
 
   /** Candidate raw flag keys to read (defaults to [key]) */
   readonly sources?: readonly string[];
 
-  /** Whether the option is required */
-  readonly required?: boolean;
+  /** Allowed enum values */
+  readonly values: readonly TValue[];
 }
 
 /**
  * Configuration for creating a custom numeric flag preset.
  */
 export interface NumberFlagPresetConfig<TKey extends string> {
-  /** Unique identifier for deduplication */
-  readonly id: string;
-
-  /** Resolved output property name */
-  readonly key: TKey;
-
-  /** Commander option definition */
-  readonly flags: string;
+  /** Fallback value when input is missing or invalid */
+  readonly defaultValue: number;
 
   /** Help description for the option */
   readonly description: string;
 
-  /** Fallback value when input is missing or invalid */
-  readonly defaultValue: number;
-
-  /** Candidate raw flag keys to read (defaults to [key]) */
-  readonly sources?: readonly string[];
-
-  /** Lower bound (inclusive) */
-  readonly min?: number;
-
-  /** Upper bound (inclusive) */
-  readonly max?: number;
+  /** Commander option definition */
+  readonly flags: string;
+  /** Unique identifier for deduplication */
+  readonly id: string;
 
   /** Floor parsed values (defaults to true) */
   readonly integer?: boolean;
 
+  /** Resolved output property name */
+  readonly key: TKey;
+
+  /** Upper bound (inclusive) */
+  readonly max?: number;
+
+  /** Lower bound (inclusive) */
+  readonly min?: number;
+
   /** Whether the option is required */
   readonly required?: boolean;
+
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
 }
 
 /**
  * Configuration for creating a custom string-list flag preset.
  */
 export interface StringListFlagPresetConfig<TKey extends string> {
+  /** Remove duplicate values while preserving order */
+  readonly dedupe?: boolean;
+
+  /** Fallback list when input is missing or invalid */
+  readonly defaultValue?: readonly string[];
+
+  /** Help description for the option */
+  readonly description: string;
+
+  /** Commander option definition */
+  readonly flags: string;
   /** Unique identifier for deduplication */
   readonly id: string;
 
   /** Resolved output property name */
   readonly key: TKey;
 
-  /** Commander option definition */
-  readonly flags: string;
-
-  /** Help description for the option */
-  readonly description: string;
-
-  /** Candidate raw flag keys to read (defaults to [key]) */
-  readonly sources?: readonly string[];
-
-  /** Fallback list when input is missing or invalid */
-  readonly defaultValue?: readonly string[];
+  /** Whether the option is required */
+  readonly required?: boolean;
 
   /** Split string values by this separator (defaults to ",") */
   readonly separator?: string;
 
-  /** Remove duplicate values while preserving order */
-  readonly dedupe?: boolean;
-
-  /** Whether the option is required */
-  readonly required?: boolean;
+  /** Candidate raw flag keys to read (defaults to [key]) */
+  readonly sources?: readonly string[];
 }
 
 /**
@@ -402,11 +392,10 @@ export type ExecutionFlags = {
  * Configuration for the execution flag preset.
  */
 export interface ExecutionPresetConfig {
-  /** Default timeout in milliseconds (default: undefined) */
-  readonly defaultTimeout?: number;
-
   /** Default number of retries (default: 0) */
   readonly defaultRetries?: number;
+  /** Default timeout in milliseconds (default: undefined) */
+  readonly defaultTimeout?: number;
 
   /** Maximum number of retries (default: 10) */
   readonly maxRetries?: number;
@@ -469,17 +458,16 @@ export type OutputMode = "human" | "json" | "jsonl" | "tree" | "table";
  * Options for the output() function.
  */
 export interface OutputOptions {
+  /** Exit code to use after output (undefined = don't exit) */
+  readonly exitCode?: number;
   /** Force a specific output mode (overrides flag detection) */
   readonly mode?: OutputMode;
-
-  /** Stream to write to (defaults to stdout) */
-  readonly stream?: NodeJS.WritableStream;
 
   /** Whether to pretty-print JSON output */
   readonly pretty?: boolean;
 
-  /** Exit code to use after output (undefined = don't exit) */
-  readonly exitCode?: number;
+  /** Stream to write to (defaults to stdout) */
+  readonly stream?: NodeJS.WritableStream;
 }
 
 // =============================================================================
@@ -538,11 +526,11 @@ export interface ParseGlobOptions {
   /** Patterns to exclude */
   readonly ignore?: readonly string[];
 
-  /** Only match files (not directories) */
-  readonly onlyFiles?: boolean;
-
   /** Only match directories (not files) */
   readonly onlyDirectories?: boolean;
+
+  /** Only match files (not directories) */
+  readonly onlyFiles?: boolean;
 }
 
 /**
@@ -552,17 +540,17 @@ export interface NormalizeIdOptions {
   /** Whether to lowercase the ID */
   readonly lowercase?: boolean;
 
-  /** Whether to trim whitespace */
-  readonly trim?: boolean;
+  /** Maximum length requirement */
+  readonly maxLength?: number;
 
   /** Minimum length requirement */
   readonly minLength?: number;
 
-  /** Maximum length requirement */
-  readonly maxLength?: number;
-
   /** Pattern the ID must match */
   readonly pattern?: RegExp;
+
+  /** Whether to trim whitespace */
+  readonly trim?: boolean;
 }
 
 /**
@@ -574,18 +562,18 @@ export type Range = NumericRange | DateRange;
  * Numeric range (e.g., "1-10").
  */
 export interface NumericRange {
-  readonly type: "number";
-  readonly min: number;
   readonly max: number;
+  readonly min: number;
+  readonly type: "number";
 }
 
 /**
  * Date range (e.g., "2024-01-01..2024-12-31").
  */
 export interface DateRange {
-  readonly type: "date";
-  readonly start: Date;
   readonly end: Date;
+  readonly start: Date;
+  readonly type: "date";
 }
 
 /**
@@ -593,16 +581,16 @@ export interface DateRange {
  */
 export interface FilterExpression {
   readonly field: string;
-  readonly value: string;
   readonly operator?: "eq" | "ne" | "gt" | "lt" | "gte" | "lte" | "contains";
+  readonly value: string;
 }
 
 /**
  * Sort criteria parsed from CLI input.
  */
 export interface SortCriteria {
-  readonly field: string;
   readonly direction: "asc" | "desc";
+  readonly field: string;
 }
 
 /**
@@ -621,20 +609,19 @@ export interface KeyValuePair {
  * State for paginated command results.
  */
 export interface PaginationState {
-  /** Cursor for the next page */
-  readonly cursor: string;
-
   /** Command that generated this state */
   readonly command: string;
 
   /** Context key for scoping pagination */
   readonly context?: string;
-
-  /** Timestamp when state was created */
-  readonly timestamp: number;
+  /** Cursor for the next page */
+  readonly cursor: string;
 
   /** Whether there are more results */
   readonly hasMore: boolean;
+
+  /** Timestamp when state was created */
+  readonly timestamp: number;
 
   /** Total count (if known) */
   readonly total?: number;
@@ -650,14 +637,14 @@ export interface CursorOptions {
   /** Context key for additional scoping */
   readonly context?: string;
 
-  /** Tool name for XDG path resolution */
-  readonly toolName: string;
+  /** Whether there are more results (defaults to true) */
+  readonly hasMore?: boolean;
 
   /** Maximum age in milliseconds before a cursor is treated as expired */
   readonly maxAgeMs?: number;
 
-  /** Whether there are more results (defaults to true) */
-  readonly hasMore?: boolean;
+  /** Tool name for XDG path resolution */
+  readonly toolName: string;
 
   /** Total count of results (if known) */
   readonly total?: number;

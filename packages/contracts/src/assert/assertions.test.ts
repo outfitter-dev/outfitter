@@ -160,8 +160,8 @@ describe("assertMatches", () => {
       type: string;
     }
     interface Dog extends Animal {
-      type: "dog";
       bark: () => string;
+      type: "dog";
     }
     const isDog = (a: Animal): a is Dog => a.type === "dog";
     const animal: Animal = { type: "dog", bark: () => "woof" } as Dog;

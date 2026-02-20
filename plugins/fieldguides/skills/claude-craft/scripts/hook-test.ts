@@ -25,28 +25,28 @@ const colors = {
  * JSON input structure for Claude Code hooks.
  */
 interface HookInput {
-  session_id: string;
-  transcript_path: string;
   cwd: string;
   hook_event_name: string;
-  tool_name?: string;
-  tool_input?: Record<string, unknown>;
   reason?: string;
+  session_id: string;
+  tool_input?: Record<string, unknown>;
+  tool_name?: string;
+  transcript_path: string;
 }
 
 /**
  * Options for testing a hook script.
  */
 interface TestOptions {
-  event: string;
-  tool?: string;
-  filePath?: string;
-  content?: string;
   command?: string;
-  reason?: string;
+  content?: string;
   customInput?: string;
-  verbose: boolean;
+  event: string;
+  filePath?: string;
+  reason?: string;
   timeout: number;
+  tool?: string;
+  verbose: boolean;
 }
 
 // Show help

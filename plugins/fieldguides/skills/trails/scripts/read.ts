@@ -34,14 +34,14 @@ type NoteType = "handoff" | "log" | "all";
  * Options for reading trail notes.
  */
 interface ReadOptions {
-  /** Filter by note type */
-  type: NoteType;
   /** Number of days to look back */
   days: number;
   /** Max lines to output (null for unlimited) */
   lines: number | null;
   /** Whether to strip YAML frontmatter */
   noFrontmatter: boolean;
+  /** Filter by note type */
+  type: NoteType;
 }
 
 /**

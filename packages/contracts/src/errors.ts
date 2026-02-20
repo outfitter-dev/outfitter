@@ -130,8 +130,8 @@ export type ErrorCode =
 export interface SerializedError {
   _tag: string;
   category: ErrorCategory;
-  message: string;
   context?: Record<string, unknown>;
+  message: string;
 }
 
 /**
@@ -139,9 +139,9 @@ export interface SerializedError {
  * All concrete error classes must include these fields.
  */
 export interface KitErrorProps {
-  message: string;
   category: ErrorCategory;
   context?: Record<string, unknown>;
+  message: string;
 }
 
 /**

@@ -19,10 +19,10 @@ import {
  * A demo section that can be executed.
  */
 export interface DemoSection {
-  /** Section identifier */
-  readonly id: string;
   /** Human-readable description */
   readonly description: string;
+  /** Section identifier */
+  readonly id: string;
   /** Execute the section and return output */
   readonly run: () => string;
 }

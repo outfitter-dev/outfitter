@@ -23,8 +23,8 @@ import { registerSection } from "./registry.js";
  * Error class information for demonstration.
  */
 interface ErrorInfo {
-  readonly name: string;
   readonly category: ErrorCategory;
+  readonly name: string;
 }
 
 /**

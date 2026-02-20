@@ -27,11 +27,11 @@ interface Manifest {
 }
 
 interface Settings {
+  enabledPlugins?: Record<string, boolean>;
   extraKnownMarketplaces?: Record<
     string,
     { source: { source: string; repo: string } }
   >;
-  enabledPlugins?: Record<string, boolean>;
 }
 
 // ---------------------------------------------------------------------------

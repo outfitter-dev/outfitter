@@ -9,24 +9,24 @@ interface GitState {
 }
 
 export interface PostScaffoldOptions {
-  readonly rootDir: string;
-  readonly projectDir: string;
-  readonly origin: ScaffoldOrigin;
-  readonly target: string;
-  readonly structure: "single" | "workspace";
-  readonly skipInstall: boolean;
-  readonly skipGit: boolean;
-  readonly skipCommit: boolean;
   readonly dryRun: boolean;
   readonly installTimeoutMs: number;
+  readonly origin: ScaffoldOrigin;
+  readonly projectDir: string;
+  readonly rootDir: string;
+  readonly skipCommit: boolean;
+  readonly skipGit: boolean;
+  readonly skipInstall: boolean;
+  readonly structure: "single" | "workspace";
+  readonly target: string;
 }
 
 export interface PostScaffoldResult {
-  readonly installResult: "success" | "failed" | "skipped";
-  readonly installError?: string | undefined;
-  readonly gitInitResult: "success" | "failed" | "skipped" | "already-repo";
   readonly gitCommitResult: "success" | "failed" | "skipped";
   readonly gitError?: string | undefined;
+  readonly gitInitResult: "success" | "failed" | "skipped" | "already-repo";
+  readonly installError?: string | undefined;
+  readonly installResult: "success" | "failed" | "skipped";
   readonly nextSteps: readonly string[];
 }
 

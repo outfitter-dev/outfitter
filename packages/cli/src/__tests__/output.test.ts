@@ -17,8 +17,8 @@ import { exitWithError, output } from "../output.js";
  * Captures stdout/stderr output during function execution.
  */
 interface CapturedOutput {
-  readonly stdout: string;
   readonly stderr: string;
+  readonly stdout: string;
 }
 
 /**
@@ -89,8 +89,8 @@ async function captureOutput(
  * Mocks process.exit to capture exit codes without actually exiting.
  */
 interface ExitCapture {
-  readonly exitCode: number | undefined;
   readonly called: boolean;
+  readonly exitCode: number | undefined;
 }
 
 function mockProcessExit(): {

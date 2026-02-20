@@ -15,31 +15,31 @@ import { dirname, join, relative, resolve } from "node:path";
 // =============================================================================
 
 interface Replacement {
-  id: string;
-  name: string;
-  category: string;
   bunApi: string;
-  docs: string;
+  category: string;
   detectors: {
     packages?: string[];
     imports?: string[];
     files?: string[];
   };
+  docs: string;
+  id: string;
+  name: string;
   notes?: string;
 }
 
 interface Ignore {
+  exceptions?: string[];
+  partialReplacement?: boolean;
   pattern: string;
   reason: string;
-  partialReplacement?: boolean;
-  exceptions?: string[];
 }
 
 interface Manifest {
-  version: string;
   bunVersion: string;
-  replacements: Replacement[];
   ignores: Ignore[];
+  replacements: Replacement[];
+  version: string;
 }
 
 interface PackageJson {
@@ -48,22 +48,25 @@ interface PackageJson {
 }
 
 interface Finding {
-  pattern: string;
-  type: "package" | "import" | "config";
   category: string;
-  replacement: string;
-  docs: string;
   count: number;
+  docs: string;
   locations: string[];
+  pattern: string;
+  replacement: string;
+  type: "package" | "import" | "config";
 }
 
 interface IgnoredItem {
+  locations: string[];
   pattern: string;
   reason: string;
-  locations: string[];
 }
 
 interface AuditResult {
+  bunUsage: string[];
+  findings: Finding[];
+  ignored: IgnoredItem[];
   meta: {
     target: string;
     scannedAt: string;
@@ -74,9 +77,6 @@ interface AuditResult {
     bunNative: number;
     ignored: number;
   };
-  findings: Finding[];
-  ignored: IgnoredItem[];
-  bunUsage: string[];
 }
 
 // =============================================================================

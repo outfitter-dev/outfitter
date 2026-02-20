@@ -21,11 +21,11 @@ import { Result } from "better-result";
 export type MdxMode = "strict" | "lossy";
 
 export interface PackageDocsOptions {
-  readonly workspaceRoot?: string;
-  readonly packagesDir?: string;
-  readonly outputDir?: string;
   readonly excludedFilenames?: readonly string[];
   readonly mdxMode?: MdxMode;
+  readonly outputDir?: string;
+  readonly packagesDir?: string;
+  readonly workspaceRoot?: string;
 }
 
 export type LlmsTarget = "llms" | "llms-full";
@@ -38,42 +38,42 @@ export interface LlmsDocsOptions extends PackageDocsOptions {
 
 export interface SyncPackageDocsResult {
   readonly packageNames: readonly string[];
-  readonly writtenFiles: readonly string[];
   readonly removedFiles: readonly string[];
   readonly warnings: readonly DocsWarning[];
+  readonly writtenFiles: readonly string[];
 }
 
 export type DriftKind = "missing" | "changed" | "unexpected";
 
 export interface DocsDrift {
-  readonly path: string;
   readonly kind: DriftKind;
+  readonly path: string;
 }
 
 export interface DocsWarning {
-  readonly path: string;
   readonly message: string;
+  readonly path: string;
 }
 
 export interface CheckPackageDocsResult {
-  readonly packageNames: readonly string[];
-  readonly expectedFiles: readonly string[];
   readonly drift: readonly DocsDrift[];
+  readonly expectedFiles: readonly string[];
   readonly isUpToDate: boolean;
+  readonly packageNames: readonly string[];
   readonly warnings: readonly DocsWarning[];
 }
 
 export interface SyncLlmsDocsResult {
   readonly packageNames: readonly string[];
-  readonly writtenFiles: readonly string[];
   readonly warnings: readonly DocsWarning[];
+  readonly writtenFiles: readonly string[];
 }
 
 export interface CheckLlmsDocsResult {
-  readonly packageNames: readonly string[];
-  readonly expectedFiles: readonly string[];
   readonly drift: readonly DocsDrift[];
+  readonly expectedFiles: readonly string[];
   readonly isUpToDate: boolean;
+  readonly packageNames: readonly string[];
   readonly warnings: readonly DocsWarning[];
 }
 
@@ -119,11 +119,11 @@ export class DocsCoreError extends Error {
 export type PackageDocsError = DocsCoreError;
 
 interface ResolvedPackageDocsOptions {
-  readonly workspaceRoot: string;
-  readonly packagesRoot: string;
-  readonly outputRoot: string;
   readonly excludedLowercaseNames: ReadonlySet<string>;
   readonly mdxMode: MdxMode;
+  readonly outputRoot: string;
+  readonly packagesRoot: string;
+  readonly workspaceRoot: string;
 }
 
 interface DiscoveredPackage {
@@ -132,27 +132,27 @@ interface DiscoveredPackage {
 }
 
 interface ExpectedOutput {
-  readonly packageNames: readonly string[];
-  readonly files: ReadonlyMap<string, string>;
   readonly entries: readonly ExpectedOutputEntry[];
+  readonly files: ReadonlyMap<string, string>;
+  readonly packageNames: readonly string[];
   readonly warnings: readonly DocsWarning[];
 }
 
 interface ExpectedOutputEntry {
-  readonly packageName: string;
-  readonly destinationAbsolutePath: string;
   readonly content: string;
+  readonly destinationAbsolutePath: string;
+  readonly packageName: string;
 }
 
 interface CollectedMarkdownFile {
+  readonly destinationAbsolutePath: string;
   readonly packageName: string;
   readonly sourceAbsolutePath: string;
-  readonly destinationAbsolutePath: string;
 }
 
 interface ResolvedLlmsOptions {
-  readonly llmsPath: string;
   readonly llmsFullPath: string;
+  readonly llmsPath: string;
   readonly targets: readonly LlmsTarget[];
 }
 

@@ -4,13 +4,13 @@ import type { AddBlockResult } from "@outfitter/tooling";
  * Unified placeholder values for template substitution.
  */
 export interface PlaceholderValues {
-  readonly name: string;
-  readonly projectName: string;
-  readonly packageName: string;
-  readonly binName: string;
-  readonly version: string;
-  readonly description: string;
   readonly author: string;
+  readonly binName: string;
+  readonly description: string;
+  readonly name: string;
+  readonly packageName: string;
+  readonly projectName: string;
+  readonly version: string;
   readonly year: string;
 }
 
@@ -40,16 +40,16 @@ export type ScaffoldChange =
  * A complete scaffold plan.
  */
 export interface ScaffoldPlan {
-  readonly values: PlaceholderValues;
   readonly changes: readonly ScaffoldChange[];
+  readonly values: PlaceholderValues;
 }
 
 /**
  * Result of executing a scaffold plan.
  */
 export interface ScaffoldResult {
-  readonly projectDir: string;
   readonly blocksAdded?: AddBlockResult | undefined;
+  readonly projectDir: string;
 }
 
 /**
@@ -63,8 +63,8 @@ export interface EngineCollector {
  * Shared options used by engine functions.
  */
 export interface EngineOptions {
-  readonly force: boolean;
   readonly collector?: EngineCollector | undefined;
+  readonly force: boolean;
 }
 
 /**

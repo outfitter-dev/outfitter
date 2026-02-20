@@ -16,12 +16,12 @@
 interface ContextResult {
   /** Detected platform context */
   context: "claude" | "codex" | "cursor" | "github" | "generic";
+  /** Normalized file path that was analyzed */
+  path: string;
   /** Explanation for why this context was detected */
   reason: string;
   /** Platform-specific recommendations */
   recommendations: string[];
-  /** Normalized file path that was analyzed */
-  path: string;
 }
 
 const CONTEXT_PATTERNS: Record<

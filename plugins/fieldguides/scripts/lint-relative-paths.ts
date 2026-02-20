@@ -22,12 +22,12 @@ import { dirname, relative } from "node:path";
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export interface RelativePathFinding {
+  context: string;
   file: string;
   line: number;
-  type: "markdown-link" | "bare-path";
   /** The relative path found */
   path: string;
-  context: string;
+  type: "markdown-link" | "bare-path";
 }
 
 export interface ScanResult {

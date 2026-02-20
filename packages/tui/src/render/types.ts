@@ -44,8 +44,8 @@ export type WidthMode = "text" | "full" | "container" | number | `${number}%`;
  * ```
  */
 export interface LayoutContext {
-  /** Available content width in characters */
-  readonly width: number;
   /** Parent context for chained calculations */
   readonly parent?: LayoutContext;
+  /** Available content width in characters */
+  readonly width: number;
 }

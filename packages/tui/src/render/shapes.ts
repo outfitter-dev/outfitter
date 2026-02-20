@@ -32,10 +32,10 @@ import { renderTree } from "./tree.js";
  * ```
  */
 export interface TreeNode {
-  /** The name/label of this node */
-  name: string;
   /** Child nodes (empty array for leaf nodes) */
   children: TreeNode[];
+  /** The name/label of this node */
+  name: string;
 }
 
 /**
@@ -58,12 +58,12 @@ export interface TreeNode {
  * ```
  */
 export interface Collection {
-  /** Discriminant for Collection type */
-  type: "collection";
-  /** Array of items to render */
-  items: unknown[];
   /** Optional custom headers for table rendering */
   headers?: Record<string, string>;
+  /** Array of items to render */
+  items: unknown[];
+  /** Discriminant for Collection type */
+  type: "collection";
 }
 
 /**
@@ -84,10 +84,10 @@ export interface Collection {
  * ```
  */
 export interface Hierarchy {
-  /** Discriminant for Hierarchy type */
-  type: "hierarchy";
   /** Root node of the tree */
   root: TreeNode;
+  /** Discriminant for Hierarchy type */
+  type: "hierarchy";
 }
 
 /**
@@ -106,10 +106,10 @@ export interface Hierarchy {
  * ```
  */
 export interface KeyValue {
-  /** Discriminant for KeyValue type */
-  type: "keyvalue";
   /** Key-value entries to display */
   entries: Record<string, unknown>;
+  /** Discriminant for KeyValue type */
+  type: "keyvalue";
 }
 
 /**
@@ -131,12 +131,12 @@ export interface KeyValue {
  * ```
  */
 export interface Resource {
-  /** Discriminant for Resource type */
-  type: "resource";
   /** The content to render */
   data: unknown;
   /** Output format (defaults to "json") */
   format?: "json" | "markdown" | "text";
+  /** Discriminant for Resource type */
+  type: "resource";
 }
 
 /**
@@ -171,12 +171,12 @@ export type Shape = Collection | Hierarchy | KeyValue | Resource;
  * ```
  */
 export interface RenderOptions {
-  /** Maximum width for output (used by some renderers) */
-  width?: number;
   /** Whether to use ANSI colors in output */
   color?: boolean;
   /** Force a specific output format, overriding auto-selection */
   format?: "table" | "list" | "tree" | "json" | "text";
+  /** Maximum width for output (used by some renderers) */
+  width?: number;
 }
 
 // ============================================================================

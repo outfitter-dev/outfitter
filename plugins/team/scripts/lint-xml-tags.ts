@@ -27,9 +27,9 @@ import { Glob } from "bun";
 interface Violation {
   file: string;
   line: number;
+  message: string;
   tag: string;
   type: "opening" | "closing";
-  message: string;
 }
 
 // XML tag patterns - matches tags like <when_to_use>, </rules>, etc.

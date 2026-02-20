@@ -15,57 +15,57 @@ import { basename, dirname, join } from "node:path";
 
 // Types
 interface ScanResult {
+  content: string;
   file: string;
   line: number;
-  content: string;
 }
 
 interface HandlerInfo {
-  name: string;
   file: string;
   line: number;
+  name: string;
+  priority: "high" | "medium" | "low";
   signature: string;
   throws: string[];
-  priority: "high" | "medium" | "low";
 }
 
 interface ErrorClassInfo {
-  name: string;
   file: string;
   line: number;
-  usageCount: number;
+  name: string;
   suggestedMapping: string;
+  usageCount: number;
 }
 
 interface PathUsage {
+  current: string;
   file: string;
   line: number;
-  current: string;
   pattern: "homedir" | "tilde" | "hardcoded";
 }
 
 interface Unknown {
-  id: string;
-  title: string;
-  file: string;
-  line: number;
-  priority: "high" | "medium" | "low";
   category: string;
   code: string;
-  reason: string;
+  file: string;
+  id: string;
+  line: number;
   options: string[];
+  priority: "high" | "medium" | "low";
+  reason: string;
+  title: string;
 }
 
 interface ScanData {
-  projectName: string;
-  date: string;
-  throws: ScanResult[];
-  tryCatch: ScanResult[];
   console: ScanResult[];
-  paths: PathUsage[];
+  date: string;
+  docs: string[];
   errorClasses: ErrorClassInfo[];
   handlers: HandlerInfo[];
-  docs: string[];
+  paths: PathUsage[];
+  projectName: string;
+  throws: ScanResult[];
+  tryCatch: ScanResult[];
   unknowns: Unknown[];
 }
 

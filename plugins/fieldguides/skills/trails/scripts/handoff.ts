@@ -26,10 +26,10 @@ import { buildFilename, truncateSessionId } from "./filename.ts";
  * Options for creating a handoff note.
  */
 interface HandoffOptions {
-  /** Current session ID (required) */
-  sessionId: string;
   /** Parent session ID if this is a subagent */
   parentSessionId?: string;
+  /** Current session ID (required) */
+  sessionId: string;
 }
 
 /**

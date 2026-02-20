@@ -26,22 +26,22 @@ import { parseArgs } from "node:util";
  * Components of a report path.
  */
 interface ReportPathComponents {
+  /** Just the filename */
+  filename: string;
+  /** Whether this is a directory mode report */
+  isMulti: boolean;
+  /** Full path including base */
+  path: string;
+  /** Full session ID (or empty) */
+  sessionFull: string;
+  /** First 8 chars of session ID (or empty) */
+  sessionShort: string;
   /** Timestamp as YYYYMMDDhhmm */
   timestamp: string;
   /** ISO 8601 timestamp for frontmatter */
   timestampISO: string;
   /** Report type (e.g., "docs-audit") */
   type: string;
-  /** Full session ID (or empty) */
-  sessionFull: string;
-  /** First 8 chars of session ID (or empty) */
-  sessionShort: string;
-  /** Just the filename */
-  filename: string;
-  /** Full path including base */
-  path: string;
-  /** Whether this is a directory mode report */
-  isMulti: boolean;
 }
 
 /**

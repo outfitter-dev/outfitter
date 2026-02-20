@@ -21,20 +21,20 @@ const TEMPLATES_DIR = path.join(SCRIPT_DIR, "../templates/skill-archetypes");
  * Result of skill initialization.
  */
 interface InitResult {
-  /** Whether initialization succeeded or failed */
-  status: "success" | "error";
-  /** Path to created skill directory */
-  skillDir?: string;
-  /** Template used if any */
-  template?: string;
+  /** Available templates when template not found */
+  availableTemplates?: string[];
+  /** Error message if status is "error" */
+  error?: string;
   /** Files created during initialization */
   files?: string[];
   /** Suggested next steps after initialization */
   nextSteps?: string[];
-  /** Error message if status is "error" */
-  error?: string;
-  /** Available templates when template not found */
-  availableTemplates?: string[];
+  /** Path to created skill directory */
+  skillDir?: string;
+  /** Whether initialization succeeded or failed */
+  status: "success" | "error";
+  /** Template used if any */
+  template?: string;
 }
 
 function getAvailableTemplates(): string[] {

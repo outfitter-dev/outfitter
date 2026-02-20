@@ -11,12 +11,12 @@
 // ============================================================================
 
 export interface CliTestResult {
-  /** Captured stdout */
-  stdout: string;
-  /** Captured stderr */
-  stderr: string;
   /** Process exit code */
   exitCode: number;
+  /** Captured stderr */
+  stderr: string;
+  /** Captured stdout */
+  stdout: string;
 }
 
 // ============================================================================

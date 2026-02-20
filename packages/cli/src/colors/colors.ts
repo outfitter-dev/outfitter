@@ -58,45 +58,44 @@ export const ANSI = {
  * ```
  */
 export interface Theme {
-  // Semantic colors (existing)
-  /** Applies green color for success messages */
-  success: (text: string) => string;
-  /** Applies yellow color for warning messages */
-  warning: (text: string) => string;
-  /** Applies red color for error messages */
-  error: (text: string) => string;
-  /** Applies blue color for informational messages */
-  info: (text: string) => string;
-  /** Returns text unchanged (primary/default text) */
-  primary: (text: string) => string;
-  /** Applies gray color for secondary text */
-  secondary: (text: string) => string;
-  /** Applies dim styling for de-emphasized text */
-  muted: (text: string) => string;
-
   // Semantic colors (new)
   /** Applies cyan color for interactive elements and highlights */
   accent: (text: string) => string;
-  /** Applies bold for strong emphasis */
-  highlight: (text: string) => string;
-  /** Applies cyan + underline for URLs and clickable references */
-  link: (text: string) => string;
-  /** Applies bright red for dangerous actions */
-  destructive: (text: string) => string;
-  /** Applies dim gray for less prominent text than muted */
-  subtle: (text: string) => string;
 
   // Utility methods
   /** Applies bold styling */
   bold: (text: string) => string;
-  /** Applies italic styling */
-  italic: (text: string) => string;
-  /** Applies underline styling */
-  underline: (text: string) => string;
+  /** Applies bright red for dangerous actions */
+  destructive: (text: string) => string;
   /** Applies dim styling (alias for muted style) */
   dim: (text: string) => string;
+  /** Applies red color for error messages */
+  error: (text: string) => string;
+  /** Applies bold for strong emphasis */
+  highlight: (text: string) => string;
+  /** Applies blue color for informational messages */
+  info: (text: string) => string;
   /** Applies inverse styling (swaps foreground/background) */
   inverse: (text: string) => string;
+  /** Applies italic styling */
+  italic: (text: string) => string;
+  /** Applies cyan + underline for URLs and clickable references */
+  link: (text: string) => string;
+  /** Applies dim styling for de-emphasized text */
+  muted: (text: string) => string;
+  /** Returns text unchanged (primary/default text) */
+  primary: (text: string) => string;
+  /** Applies gray color for secondary text */
+  secondary: (text: string) => string;
+  /** Applies dim gray for less prominent text than muted */
+  subtle: (text: string) => string;
+  // Semantic colors (existing)
+  /** Applies green color for success messages */
+  success: (text: string) => string;
+  /** Applies underline styling */
+  underline: (text: string) => string;
+  /** Applies yellow color for warning messages */
+  warning: (text: string) => string;
 }
 
 /**
@@ -140,45 +139,44 @@ export type ColorName =
  * ```
  */
 export interface Tokens {
-  // Semantic colors (existing)
-  /** Green color for success messages */
-  success: string;
-  /** Yellow color for warning messages */
-  warning: string;
-  /** Red color for error messages */
-  error: string;
-  /** Blue color for informational messages */
-  info: string;
-  /** Default text color (typically empty string) */
-  primary: string;
-  /** Subdued color for secondary text */
-  secondary: string;
-  /** Dim/gray color for de-emphasized text */
-  muted: string;
-
   // Semantic colors (new)
   /** Cyan color for interactive elements and highlights */
   accent: string;
-  /** Bold for strong emphasis */
-  highlight: string;
-  /** Cyan + underline for URLs and clickable references */
-  link: string;
-  /** Bright red for dangerous actions */
-  destructive: string;
-  /** Dim gray for less prominent text than muted */
-  subtle: string;
 
   // Utility tokens
   /** Bold styling */
   bold: string;
-  /** Italic styling */
-  italic: string;
-  /** Underline styling */
-  underline: string;
+  /** Bright red for dangerous actions */
+  destructive: string;
   /** Dim styling */
   dim: string;
+  /** Red color for error messages */
+  error: string;
+  /** Bold for strong emphasis */
+  highlight: string;
+  /** Blue color for informational messages */
+  info: string;
   /** Inverse styling (swaps foreground/background) */
   inverse: string;
+  /** Italic styling */
+  italic: string;
+  /** Cyan + underline for URLs and clickable references */
+  link: string;
+  /** Dim/gray color for de-emphasized text */
+  muted: string;
+  /** Default text color (typically empty string) */
+  primary: string;
+  /** Subdued color for secondary text */
+  secondary: string;
+  /** Dim gray for less prominent text than muted */
+  subtle: string;
+  // Semantic colors (existing)
+  /** Green color for success messages */
+  success: string;
+  /** Underline styling */
+  underline: string;
+  /** Yellow color for warning messages */
+  warning: string;
 }
 
 /**
@@ -195,11 +193,6 @@ export interface Tokens {
  */
 export interface TokenOptions {
   /**
-   * Override NO_COLOR environment variable.
-   * When true, colors are enabled regardless of NO_COLOR.
-   */
-  forceColor?: boolean;
-  /**
    * Color support level:
    * - 0: No color support (all tokens are empty strings)
    * - 1: Basic ANSI colors (16 colors)
@@ -209,6 +202,11 @@ export interface TokenOptions {
    * When not specified, level is auto-detected from environment.
    */
   colorLevel?: 0 | 1 | 2 | 3;
+  /**
+   * Override NO_COLOR environment variable.
+   * When true, colors are enabled regardless of NO_COLOR.
+   */
+  forceColor?: boolean;
 }
 
 // ============================================================================

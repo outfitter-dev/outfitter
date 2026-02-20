@@ -23,21 +23,21 @@ import { DaemonError } from "./types.js";
 // ============================================================================
 
 interface DaemonInternalOptions {
+  logger: DaemonOptions["logger"];
   name: string;
   pidFile: string;
-  logger: DaemonOptions["logger"];
   shutdownTimeout: number;
 }
 
 interface DaemonInternalState {
-  state: DaemonState;
+  isShuttingDown: boolean;
   options: DaemonInternalOptions;
   shutdownHandlers: ShutdownHandler[];
   signalHandlers: {
     sigterm?: () => void;
     sigint?: () => void;
   };
-  isShuttingDown: boolean;
+  state: DaemonState;
 }
 
 // ============================================================================

@@ -27,10 +27,10 @@ import { spawn } from "bun";
 const SCRIPTS_DIR = dirname(new URL(import.meta.url).pathname);
 
 interface FormatResult {
+  changed: boolean;
+  output: string;
   step: string;
   success: boolean;
-  output: string;
-  changed: boolean;
 }
 
 async function runCommand(

@@ -85,11 +85,11 @@ describe("deep path types", () => {
 
     it("handles mixed object with arrays and primitives", () => {
       interface T {
-        name: string;
         config: {
           enabled: boolean;
           tags: string[];
         };
+        name: string;
       }
       type Keys = DeepKeys<T>;
 
@@ -318,8 +318,8 @@ describe("deep path types", () => {
   describe("edge cases", () => {
     it("handles optional properties in DeepKeys", () => {
       interface T {
-        required: string;
         optional?: number;
+        required: string;
       }
       type Keys = DeepKeys<T>;
 
@@ -378,8 +378,8 @@ describe("deep path types", () => {
 
     it("handles readonly properties", () => {
       interface T {
-        readonly id: string;
         data: { readonly value: number };
+        readonly id: string;
       }
       type Keys = DeepKeys<T>;
 
@@ -394,8 +394,8 @@ describe("deep path types", () => {
 
     it("handles union types in object values", () => {
       interface T {
-        status: "active" | "inactive";
         config: { mode: "dev" | "prod" };
+        status: "active" | "inactive";
       }
 
       type Status = DeepGet<T, "status">;

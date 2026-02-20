@@ -44,19 +44,18 @@ export type IpcMessageHandler = (message: unknown) => Promise<unknown>;
  */
 export interface IpcServer {
   /**
+   * Stop listening and close all connections.
+   *
+   * Removes the socket file and cleans up resources.
+   */
+  close(): Promise<void>;
+  /**
    * Start listening for connections on the Unix socket.
    *
    * Creates the socket file and begins accepting client connections.
    * Messages are processed using the handler registered via onMessage.
    */
   listen(): Promise<void>;
-
-  /**
-   * Stop listening and close all connections.
-   *
-   * Removes the socket file and cleans up resources.
-   */
-  close(): Promise<void>;
 
   /**
    * Register a message handler for incoming messages.
@@ -89,6 +88,12 @@ export interface IpcServer {
  */
 export interface IpcClient {
   /**
+   * Close the connection to the server.
+   *
+   * Can be called multiple times safely.
+   */
+  close(): void;
+  /**
    * Connect to the IPC server.
    *
    * Establishes a connection to the Unix socket. Throws if the
@@ -108,13 +113,6 @@ export interface IpcClient {
    * @throws Error if not connected or communication fails
    */
   send<T>(message: unknown): Promise<T>;
-
-  /**
-   * Close the connection to the server.
-   *
-   * Can be called multiple times safely.
-   */
-  close(): void;
 }
 
 // ============================================================================
@@ -123,13 +121,13 @@ export interface IpcClient {
 
 interface IpcMessage {
   id: string;
-  type: "request" | "response" | "error";
   payload: unknown;
+  type: "request" | "response" | "error";
 }
 
 interface PendingRequest {
-  resolve: (value: unknown) => void;
   reject: (error: Error) => void;
+  resolve: (value: unknown) => void;
 }
 
 // ============================================================================

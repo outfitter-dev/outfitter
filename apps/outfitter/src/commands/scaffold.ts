@@ -46,15 +46,15 @@ import { resolveStructuredOutputMode } from "../output-mode.js";
 import { getScaffoldTarget, type TargetDefinition } from "../targets/index.js";
 
 interface PackageJsonData {
-  readonly name?: string;
-  readonly version?: string;
-  readonly private?: boolean;
-  readonly workspaces?: string[] | { packages?: string[] };
   readonly bin?: string | Record<string, string>;
-  readonly scripts?: Record<string, string>;
   readonly dependencies?: Record<string, string>;
   readonly devDependencies?: Record<string, string>;
+  readonly name?: string;
   readonly outfitter?: unknown;
+  readonly private?: boolean;
+  readonly scripts?: Record<string, string>;
+  readonly version?: string;
+  readonly workspaces?: string[] | { packages?: string[] };
   readonly [key: string]: unknown;
 }
 
@@ -81,23 +81,27 @@ type ProjectStructure =
     };
 
 export interface ScaffoldOptions {
-  readonly target: string;
-  readonly name?: string | undefined;
-  readonly force: boolean;
-  readonly skipInstall: boolean;
-  readonly dryRun: boolean;
-  readonly with?: string | undefined;
-  readonly noTooling?: boolean | undefined;
-  readonly local?: boolean | undefined;
   readonly cwd: string;
+  readonly dryRun: boolean;
+  readonly force: boolean;
   readonly installTimeout?: number | undefined;
+  readonly local?: boolean | undefined;
+  readonly name?: string | undefined;
+  readonly noTooling?: boolean | undefined;
+  readonly skipInstall: boolean;
+  readonly target: string;
+  readonly with?: string | undefined;
 }
 
 export interface ScaffoldCommandResult {
-  readonly target: string;
-  readonly rootDir: string;
-  readonly targetDir: string;
+  readonly blocksAdded?: AddBlockResult | undefined;
   readonly converted: boolean;
+  readonly dryRunPlan?:
+    | {
+        readonly operations: readonly unknown[];
+        readonly summary: Record<string, number>;
+      }
+    | undefined;
   readonly movedExisting?:
     | {
         readonly from: string;
@@ -105,15 +109,11 @@ export interface ScaffoldCommandResult {
         readonly name: string;
       }
     | undefined;
-  readonly workspacePatternsUpdated: boolean;
-  readonly blocksAdded?: AddBlockResult | undefined;
   readonly postScaffold: PostScaffoldResult;
-  readonly dryRunPlan?:
-    | {
-        readonly operations: readonly unknown[];
-        readonly summary: Record<string, number>;
-      }
-    | undefined;
+  readonly rootDir: string;
+  readonly target: string;
+  readonly targetDir: string;
+  readonly workspacePatternsUpdated: boolean;
 }
 
 export class ScaffoldCommandError extends Error {
@@ -873,14 +873,14 @@ export async function printScaffoldResults(
  */
 export function scaffoldCommand(program: Command): void {
   interface ScaffoldCommandFlags {
-    force?: boolean;
-    skipInstall?: boolean;
     dryRun?: boolean;
-    with?: string;
-    noTooling?: boolean;
-    local?: boolean;
+    force?: boolean;
     installTimeout?: number;
     json?: boolean;
+    local?: boolean;
+    noTooling?: boolean;
+    skipInstall?: boolean;
+    with?: string;
   }
 
   program

@@ -23,12 +23,12 @@ export type IndicatorCategory =
  * An indicator with unicode and fallback representations.
  */
 export interface IndicatorSet {
-  /** Unicode character for modern terminals */
-  unicode: string;
-  /** ASCII fallback for limited terminals */
-  fallback: string;
   /** Optional semantic color name */
   color?: string;
+  /** ASCII fallback for limited terminals */
+  fallback: string;
+  /** Unicode character for modern terminals */
+  unicode: string;
 }
 
 /**

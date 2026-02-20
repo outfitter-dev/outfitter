@@ -7,8 +7,8 @@ import {
 } from "../logging.js";
 
 interface TestBackendOptions {
-  transport: "console" | "json";
   redactionEnabled: boolean;
+  transport: "console" | "json";
 }
 
 describe("logger factory contract", () => {

@@ -11,40 +11,38 @@ import { serializeError } from "./serialization.js";
  * Metadata attached to every response envelope.
  */
 export interface EnvelopeMeta {
+  /** Operation duration in milliseconds */
+  durationMs?: number;
   /** Unique request identifier for tracing */
   requestId: string;
 
   /** ISO timestamp of response generation */
   timestamp: string;
-
-  /** Operation duration in milliseconds */
-  durationMs?: number;
 }
 
 /**
  * Pagination metadata for list responses.
  */
 export interface PaginationMeta {
-  /** Total number of items (if known) */
-  total?: number;
-
   /** Number of items returned */
   count: number;
 
-  /** Cursor for next page (null if no more pages) */
-  nextCursor: string | null;
-
   /** Whether more pages exist */
   hasMore: boolean;
+
+  /** Cursor for next page (null if no more pages) */
+  nextCursor: string | null;
+  /** Total number of items (if known) */
+  total?: number;
 }
 
 /**
  * Success envelope structure.
  */
 export interface SuccessEnvelope<T> {
-  ok: true;
   data: T;
   meta: EnvelopeMeta;
+  ok: true;
   pagination?: PaginationMeta;
 }
 
@@ -52,9 +50,9 @@ export interface SuccessEnvelope<T> {
  * Error envelope structure.
  */
 export interface ErrorEnvelope {
-  ok: false;
   error: SerializedError;
   meta: EnvelopeMeta;
+  ok: false;
 }
 
 /**
@@ -66,8 +64,8 @@ export type Envelope<T> = SuccessEnvelope<T> | ErrorEnvelope;
  * HTTP-style response with status code.
  */
 export interface HttpResponse<T> {
-  status: number;
   body: Envelope<T>;
+  status: number;
 }
 
 /**

@@ -28,16 +28,16 @@ import { resolveStructuredOutputMode } from "../output-mode.js";
  * Options for the check command.
  */
 export interface CheckOptions {
-  /** Working directory to check. */
-  readonly cwd: string;
-  /** Show diff information for drifted files. */
-  readonly verbose?: boolean;
   /** Check a specific block only. */
   readonly block?: string;
   /** Machine-oriented output for CI. */
   readonly ci?: boolean;
+  /** Working directory to check. */
+  readonly cwd: string;
   /** Output mode override. */
   readonly outputMode?: OutputMode;
+  /** Show diff information for drifted files. */
+  readonly verbose?: boolean;
 }
 
 /**
@@ -54,16 +54,16 @@ export interface DriftedFileInfo {
  * Status of a single block after comparison.
  */
 export interface BlockCheckStatus {
-  /** Block name. */
-  readonly name: string;
-  /** Comparison result. */
-  readonly status: "current" | "drifted" | "missing";
-  /** Tooling version the block was installed from. */
-  readonly installedFrom?: string;
   /** Current tooling version providing the registry. */
   readonly currentToolingVersion?: string;
   /** Drifted file details (populated when verbose is true). */
   readonly driftedFiles?: DriftedFileInfo[];
+  /** Tooling version the block was installed from. */
+  readonly installedFrom?: string;
+  /** Block name. */
+  readonly name: string;
+  /** Comparison result. */
+  readonly status: "current" | "drifted" | "missing";
 }
 
 /**
@@ -72,14 +72,14 @@ export interface BlockCheckStatus {
 export interface CheckResult {
   /** Per-block comparison results. */
   readonly blocks: BlockCheckStatus[];
-  /** Number of blocks checked. */
-  readonly totalChecked: number;
   /** Number of blocks matching the registry. */
   readonly currentCount: number;
   /** Number of blocks with local modifications. */
   readonly driftedCount: number;
   /** Number of blocks with missing files. */
   readonly missingCount: number;
+  /** Number of blocks checked. */
+  readonly totalChecked: number;
 }
 
 /**
