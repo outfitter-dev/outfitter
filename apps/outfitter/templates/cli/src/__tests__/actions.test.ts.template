@@ -1,0 +1,15 @@
+import { describe, expect, test } from "bun:test";
+import { actions } from "../actions.js";
+
+describe("{{projectName}} actions", () => {
+	test("hello action is registered", () => {
+		const hello = actions.get("hello");
+		expect(hello).toBeDefined();
+		expect(hello?.description).toBe("Say hello to someone");
+	});
+
+	test("action registry is not empty", () => {
+		const all = actions.list();
+		expect(all.length).toBeGreaterThan(0);
+	});
+});
