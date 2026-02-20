@@ -48,9 +48,9 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.12",
     "@changesets/cli": "^2.29.8",
-    "bunup": "^0.16.20",
-    "lefthook": "^2.0.16",
-    "turbo": "^2.7.5",
+    "bunup": "^0.16.29",
+    "lefthook": "^2.1.1",
+    "turbo": "^2.8.10",
     "typedoc": "^0.28.17",
     "typedoc-plugin-coverage": "^4.0.2",
     "typedoc-plugin-markdown": "^4.10.0",
@@ -66,6 +66,7 @@
     "@biomejs/biome"
   ],
   "dependencies": {
+    "@types/node": "^25.3.0",
     "smol-toml": "^1.6.0",
     "yaml": "^2.8.2"
   }
