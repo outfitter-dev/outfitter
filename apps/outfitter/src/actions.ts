@@ -23,7 +23,9 @@ import {
   defineAction,
   InternalError,
   Result,
+  ValidationError,
 } from "@outfitter/contracts";
+import type { TsDocCheckResult } from "@outfitter/tooling";
 import { z } from "zod";
 import {
   type AddInput,
@@ -764,11 +766,47 @@ const checkTsdocInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<CheckTsDocActionInput>;
 
-const checkTsdocAction = defineAction({
+const checkTsdocOutputSchema = z.object({
+  ok: z.boolean(),
+  packages: z.array(
+    z.object({
+      name: z.string(),
+      path: z.string(),
+      declarations: z.array(
+        z.object({
+          name: z.string(),
+          kind: z.string(),
+          level: z.enum(["documented", "partial", "undocumented"]),
+          file: z.string(),
+          line: z.number(),
+        })
+      ),
+      documented: z.number(),
+      partial: z.number(),
+      undocumented: z.number(),
+      total: z.number(),
+      percentage: z.number(),
+    })
+  ),
+  summary: z.object({
+    documented: z.number(),
+    partial: z.number(),
+    undocumented: z.number(),
+    total: z.number(),
+    percentage: z.number(),
+  }),
+}) as z.ZodType<TsDocCheckResult>;
+
+const checkTsdocAction = defineAction<
+  CheckTsDocActionInput,
+  TsDocCheckResult,
+  ValidationError | InternalError
+>({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
   input: checkTsdocInputSchema,
+  output: checkTsdocOutputSchema,
   cli: {
     group: "check",
     command: "tsdoc",
@@ -807,6 +845,10 @@ const checkTsdocAction = defineAction({
     const result = await runCheckTsdoc(input);
 
     if (result.isErr()) {
+      if (result.error instanceof ValidationError) {
+        return Result.err(result.error);
+      }
+
       return Result.err(
         new InternalError({
           message: result.error.message,
@@ -815,8 +857,8 @@ const checkTsdocAction = defineAction({
       );
     }
 
-    if (result.value.exitCode !== 0) {
-      process.exitCode = result.value.exitCode;
+    if (!result.value.ok) {
+      process.exitCode = 1;
     }
 
     return Result.ok(result.value);

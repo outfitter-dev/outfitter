@@ -1,9 +1,8 @@
 /**
  * `outfitter check tsdoc` - Check TSDoc coverage on exported declarations.
  *
- * Thin wrapper that delegates to the `check-tsdoc` command in
- * `@outfitter/tooling`. Spawns the tooling CLI as a subprocess to
- * avoid `process.exit()` side effects in the action handler.
+ * Delegates to the pure analysis function in `@outfitter/tooling`.
+ * Resolves source entrypoints in monorepo dev to avoid requiring a build step.
  *
  * @packageDocumentation
  */
@@ -11,7 +10,9 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { Result } from "@outfitter/contracts";
+import { pathToFileURL } from "node:url";
+import { Result, ValidationError } from "@outfitter/contracts";
+import type { TsDocCheckResult } from "@outfitter/tooling";
 import type { CliOutputMode } from "../output-mode.js";
 
 const require = createRequire(import.meta.url);
@@ -28,66 +29,45 @@ export interface CheckTsDocInput {
   readonly outputMode: CliOutputMode;
 }
 
-/** Result of running check-tsdoc. */
-export interface CheckTsDocRunResult {
-  readonly exitCode: number;
-}
+type ToolingCheckTsdocModule = Pick<
+  typeof import("@outfitter/tooling"),
+  "analyzeCheckTsdoc" | "printCheckTsdocHuman"
+>;
 
-// ---------------------------------------------------------------------------
-// Args builder (pure, testable)
-// ---------------------------------------------------------------------------
+let toolingCheckTsdocModule: Promise<ToolingCheckTsdocModule> | undefined;
 
 /**
- * Build the CLI argument array for the tooling `check-tsdoc` command.
+ * Resolve the `@outfitter/tooling` entrypoint.
  *
- * @param input - Validated action input
- * @returns Argument array starting with the command name
- */
-export function buildCheckTsdocArgs(input: CheckTsDocInput): string[] {
-  const args: string[] = ["check-tsdoc"];
-
-  if (input.strict) {
-    args.push("--strict");
-  }
-
-  if (input.minCoverage > 0) {
-    args.push("--min-coverage", String(input.minCoverage));
-  }
-
-  if (input.outputMode === "json" || input.outputMode === "jsonl") {
-    args.push("--json");
-  }
-
-  return args;
-}
-
-// ---------------------------------------------------------------------------
-// Tooling entrypoint resolution
-// ---------------------------------------------------------------------------
-
-/**
- * Resolve the `@outfitter/tooling` CLI entrypoint path.
- *
- * Prefers the source entrypoint in monorepo dev so new commands are
- * immediately available without a build step.
+ * Prefers source in monorepo development to avoid requiring dist builds.
  */
 function resolveToolingEntrypoint(): string {
   const packageJsonPath = require.resolve("@outfitter/tooling/package.json");
   const packageRoot = dirname(packageJsonPath);
 
-  const srcEntrypoint = join(packageRoot, "src", "cli", "index.ts");
+  const srcEntrypoint = join(packageRoot, "src", "index.ts");
   if (existsSync(srcEntrypoint)) {
     return srcEntrypoint;
   }
 
-  const distEntrypoint = join(packageRoot, "dist", "cli", "index.js");
+  const distEntrypoint = join(packageRoot, "dist", "index.js");
   if (existsSync(distEntrypoint)) {
     return distEntrypoint;
   }
 
   throw new Error(
-    "Unable to resolve @outfitter/tooling CLI entrypoint (expected dist/cli/index.js or src/cli/index.ts)."
+    "Unable to resolve @outfitter/tooling entrypoint (expected src/index.ts or dist/index.js)."
   );
+}
+
+function loadToolingCheckTsdocModule(): Promise<ToolingCheckTsdocModule> {
+  if (!toolingCheckTsdocModule) {
+    toolingCheckTsdocModule = import(
+      pathToFileURL(resolveToolingEntrypoint()).href
+    ) as Promise<ToolingCheckTsdocModule>;
+  }
+
+  return toolingCheckTsdocModule;
 }
 
 // ---------------------------------------------------------------------------
@@ -95,27 +75,41 @@ function resolveToolingEntrypoint(): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Run the `check-tsdoc` command via the tooling CLI subprocess.
+ * Run TSDoc coverage analysis and format output.
  *
  * @param input - Validated action input
- * @returns Result containing the subprocess exit code
+ * @returns Result containing the coverage analysis
  */
 export async function runCheckTsdoc(
   input: CheckTsDocInput
-): Promise<Result<CheckTsDocRunResult, Error>> {
+): Promise<Result<TsDocCheckResult, Error>> {
   try {
-    const entrypoint = resolveToolingEntrypoint();
-    const args = buildCheckTsdocArgs(input);
-
-    const child = Bun.spawn([process.execPath, entrypoint, ...args], {
+    const tooling = await loadToolingCheckTsdocModule();
+    const result = tooling.analyzeCheckTsdoc({
+      strict: input.strict,
+      minCoverage: input.minCoverage,
       cwd: input.cwd,
-      stdin: "inherit",
-      stdout: "inherit",
-      stderr: "inherit",
     });
 
-    const exitCode = await child.exited;
-    return Result.ok({ exitCode });
+    if (!result) {
+      return Result.err(
+        ValidationError.fromMessage(
+          "No packages found with src/index.ts entry points.",
+          { cwd: input.cwd }
+        )
+      );
+    }
+
+    if (input.outputMode === "json" || input.outputMode === "jsonl") {
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    } else {
+      tooling.printCheckTsdocHuman(result, {
+        strict: input.strict,
+        minCoverage: input.minCoverage,
+      });
+    }
+
+    return Result.ok(result);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to run check-tsdoc";

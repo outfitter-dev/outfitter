@@ -1,14 +1,22 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import ts from "typescript";
 import {
+	analyzeCheckTsdoc,
 	analyzeSourceFile,
 	calculateCoverage,
 	classifyDeclaration,
+	coverageLevelSchema,
 	type DeclarationCoverage,
+	declarationCoverageSchema,
 	getDeclarationKind,
 	getDeclarationName,
 	isExportedDeclaration,
+	packageCoverageSchema,
 	resolveJsonMode,
+	tsDocCheckResultSchema,
 } from "../cli/check-tsdoc.js";
 
 // ---------------------------------------------------------------------------
@@ -491,5 +499,139 @@ describe("resolveJsonMode", () => {
 		process.env["OUTFITTER_JSON"] = "0";
 		expect(resolveJsonMode({})).toBe(false);
 		delete process.env["OUTFITTER_JSON"];
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Zod schemas
+// ---------------------------------------------------------------------------
+
+describe("Zod schemas", () => {
+	test("coverageLevelSchema validates valid levels", () => {
+		expect(coverageLevelSchema.parse("documented")).toBe("documented");
+		expect(coverageLevelSchema.parse("partial")).toBe("partial");
+		expect(coverageLevelSchema.parse("undocumented")).toBe("undocumented");
+	});
+
+	test("coverageLevelSchema rejects invalid values", () => {
+		expect(() => coverageLevelSchema.parse("invalid")).toThrow();
+	});
+
+	test("declarationCoverageSchema validates a declaration", () => {
+		const input = {
+			name: "foo",
+			kind: "function",
+			level: "documented",
+			file: "test.ts",
+			line: 1,
+		};
+		expect(declarationCoverageSchema.parse(input)).toEqual(input);
+	});
+
+	test("packageCoverageSchema validates package data", () => {
+		const input = {
+			name: "@outfitter/cli",
+			path: "/tmp/packages/cli",
+			declarations: [],
+			documented: 0,
+			partial: 0,
+			undocumented: 0,
+			total: 0,
+			percentage: 100,
+		};
+		expect(packageCoverageSchema.parse(input)).toEqual(input);
+	});
+
+	test("tsDocCheckResultSchema validates a full result", () => {
+		const input = {
+			ok: true,
+			packages: [],
+			summary: {
+				documented: 5,
+				partial: 1,
+				undocumented: 2,
+				total: 8,
+				percentage: 69,
+			},
+		};
+		expect(tsDocCheckResultSchema.parse(input)).toEqual(input);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// analyzeCheckTsdoc
+// ---------------------------------------------------------------------------
+
+describe("analyzeCheckTsdoc", () => {
+	test("returns null when no packages found", () => {
+		const emptyDir = mkdtempSync(join(tmpdir(), "outfitter-check-tsdoc-"));
+		try {
+			// With no paths and no packages/*/src/index.ts in cwd, returns null.
+			const result = analyzeCheckTsdoc({ cwd: emptyDir, paths: [] });
+			expect(result).toBeNull();
+		} finally {
+			rmSync(emptyDir, { recursive: true, force: true });
+		}
+	});
+
+	test("returns TsDocCheckResult with packages and summary for explicit paths", () => {
+		// Point at the tooling package itself (which has src/index.ts)
+		const result = analyzeCheckTsdoc({ paths: ["."] });
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		expect(result.ok).toBeDefined();
+		expect(result.packages).toBeInstanceOf(Array);
+		expect(result.packages.length).toBe(1);
+		expect(result.summary).toBeDefined();
+		expect(typeof result.summary.percentage).toBe("number");
+		expect(typeof result.summary.total).toBe("number");
+	});
+
+	test("respects cwd when resolving relative paths", () => {
+		const repoRoot = resolve(import.meta.dir, "../../../..");
+		const result = analyzeCheckTsdoc({
+			cwd: repoRoot,
+			paths: ["packages/tooling"],
+		});
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		expect(result.packages).toHaveLength(1);
+		expect(result.packages[0]?.name).toBe("@outfitter/tooling");
+	});
+
+	test("result conforms to tsDocCheckResultSchema", () => {
+		const result = analyzeCheckTsdoc({ paths: ["."] });
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		// Should parse without throwing
+		const parsed = tsDocCheckResultSchema.parse(result);
+		expect(parsed.ok).toBe(result.ok);
+		expect(parsed.packages.length).toBe(result.packages.length);
+	});
+
+	test("returns ok=true in non-strict mode regardless of coverage", () => {
+		const result = analyzeCheckTsdoc({ paths: ["."], strict: false });
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		expect(result.ok).toBe(true);
+	});
+
+	test("returns ok=false in strict mode with high threshold", () => {
+		const result = analyzeCheckTsdoc({
+			paths: ["."],
+			strict: true,
+			minCoverage: 100,
+		});
+		expect(result).not.toBeNull();
+		if (!result) return;
+
+		// Unless coverage is exactly 100%, ok should be false
+		if (result.summary.percentage < 100) {
+			expect(result.ok).toBe(false);
+		}
 	});
 });

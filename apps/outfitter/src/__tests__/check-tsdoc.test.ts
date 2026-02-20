@@ -6,7 +6,6 @@
 
 import { describe, expect, test } from "bun:test";
 import { outfitterActions } from "../actions.js";
-import { buildCheckTsdocArgs } from "../commands/check-tsdoc.js";
 
 // ---------------------------------------------------------------------------
 // Action registration
@@ -31,6 +30,11 @@ describe("check-tsdoc action registration", () => {
   test("check.tsdoc action is CLI-only", () => {
     const action = outfitterActions.get("check.tsdoc");
     expect(action?.surfaces).toEqual(["cli"]);
+  });
+
+  test("check.tsdoc action has an output schema", () => {
+    const action = outfitterActions.get("check.tsdoc");
+    expect(action?.output).toBeDefined();
   });
 
   test("existing check action is preserved with group structure", () => {
@@ -93,84 +97,5 @@ describe("check-tsdoc mapInput", () => {
     }) as { outputMode: string };
 
     expect(mapped.outputMode).toBe("json");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Args builder
-// ---------------------------------------------------------------------------
-
-describe("buildCheckTsdocArgs", () => {
-  test("returns base args with no options", () => {
-    const args = buildCheckTsdocArgs({
-      strict: false,
-      minCoverage: 0,
-      cwd: "/tmp/test",
-      outputMode: "human",
-    });
-
-    expect(args).toEqual(["check-tsdoc"]);
-  });
-
-  test("adds --strict flag when enabled", () => {
-    const args = buildCheckTsdocArgs({
-      strict: true,
-      minCoverage: 0,
-      cwd: "/tmp/test",
-      outputMode: "human",
-    });
-
-    expect(args).toContain("--strict");
-  });
-
-  test("adds --min-coverage flag when above zero", () => {
-    const args = buildCheckTsdocArgs({
-      strict: false,
-      minCoverage: 80,
-      cwd: "/tmp/test",
-      outputMode: "human",
-    });
-
-    expect(args).toContain("--min-coverage");
-    expect(args).toContain("80");
-  });
-
-  test("adds --json flag for json output mode", () => {
-    const args = buildCheckTsdocArgs({
-      strict: false,
-      minCoverage: 0,
-      cwd: "/tmp/test",
-      outputMode: "json",
-    });
-
-    expect(args).toContain("--json");
-  });
-
-  test("does not add --json for human output mode", () => {
-    const args = buildCheckTsdocArgs({
-      strict: false,
-      minCoverage: 0,
-      cwd: "/tmp/test",
-      outputMode: "human",
-    });
-
-    expect(args).not.toContain("--json");
-  });
-
-  test("combines all flags correctly", () => {
-    const args = buildCheckTsdocArgs({
-      strict: true,
-      minCoverage: 75,
-      cwd: "/tmp/test",
-      outputMode: "json",
-    });
-
-    expect(args).toEqual([
-      "check-tsdoc",
-      "--strict",
-      "--min-coverage",
-      "75",
-      "--json",
-    ]);
   });
 });
