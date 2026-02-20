@@ -60,8 +60,8 @@ export const BlockSchema: ZodType<Block> = z.object({
 	name: z.string().min(1),
 	description: z.string().min(1),
 	files: z.array(FileEntrySchema).optional(),
-	dependencies: z.record(z.string()).optional(),
-	devDependencies: z.record(z.string()).optional(),
+	dependencies: z.record(z.string(), z.string()).optional(),
+	devDependencies: z.record(z.string(), z.string()).optional(),
 	extends: z.array(z.string()).optional(),
 });
 
@@ -81,7 +81,7 @@ export interface Registry {
  */
 export const RegistrySchema: ZodType<Registry> = z.object({
 	version: z.string(),
-	blocks: z.record(BlockSchema),
+	blocks: z.record(z.string(), BlockSchema),
 });
 
 /**
