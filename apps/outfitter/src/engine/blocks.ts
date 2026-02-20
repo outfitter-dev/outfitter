@@ -18,9 +18,11 @@ export async function addBlocks(
   };
 
   for (const blockName of blocks) {
+    // Always force during plan execution — blocks are the canonical source
+    // for tooling files, and plan-based writes are always initial project creation.
     const result = await runAdd({
       block: blockName,
-      force: options.force,
+      force: true,
       dryRun: Boolean(options.collector),
       cwd: targetDir,
     });

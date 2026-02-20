@@ -166,12 +166,9 @@ describe("init command file creation", () => {
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
     expect(tsconfig.extends).toBeUndefined();
 
-    const biomePath = join(tempDir, "biome.json");
-    const biome = JSON.parse(readFileSync(biomePath, "utf-8"));
-    expect(biome.$schema).toBe(
-      "https://biomejs.dev/schemas/2.3.12/schema.json"
-    );
-    expect(biome.extends).toEqual(["ultracite/config/biome/core/biome.jsonc"]);
+    // biome.json is provided by the biome block, not the template.
+    // With --no-tooling, no blocks are added and no biome.json is created.
+    expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
 
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
@@ -820,16 +817,16 @@ describe("init command registry blocks", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeDefined();
-      // Scaffolding creates files that don't exist in the template
+      // Blocks are the canonical source for tooling files — no template duplicates.
       expect(result.value.blocksAdded?.created).toContain(
         ".claude/settings.json"
       );
       expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(".lefthook.yml");
       expect(result.value.blocksAdded?.created).toContain(
         "scripts/bootstrap.sh"
       );
-      // .lefthook.yml is skipped because template already creates it
-      expect(result.value.blocksAdded?.skipped).toContain(".lefthook.yml");
+      expect(result.value.blocksAdded?.skipped).toEqual([]);
     }
   });
 
