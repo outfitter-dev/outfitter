@@ -467,4 +467,108 @@ describe("doctor command workspace root handling", () => {
       "checks.directories.src",
     ]);
   });
+
+  test("includes workspace member health summary when run at workspace root", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "my-workspace",
+          version: "1.0.0",
+          workspaces: ["apps/*", "packages/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "node_modules"), { recursive: true });
+
+    const healthyMember = join(tempDir, "apps", "healthy-cli");
+    mkdirSync(join(healthyMember, "src"), { recursive: true });
+    writeFileSync(
+      join(healthyMember, "package.json"),
+      JSON.stringify({ name: "@acme/healthy-cli", version: "1.0.0" }, null, 2)
+    );
+    writeFileSync(join(healthyMember, "tsconfig.json"), "{}");
+
+    const unhealthyMember = join(tempDir, "apps", "needs-fixes");
+    mkdirSync(unhealthyMember, { recursive: true });
+    writeFileSync(
+      join(unhealthyMember, "package.json"),
+      JSON.stringify({ name: "@acme/needs-fixes", version: "1.0.0" }, null, 2)
+    );
+
+    const result = runDoctor({ cwd: tempDir });
+    const members = result.workspaceMembers ?? [];
+
+    expect(result.isWorkspaceRoot).toBe(true);
+    expect(result.summary.total).toBe(3);
+    expect(members).toHaveLength(2);
+    expect(members.map((member) => member.path)).toEqual([
+      "apps/healthy-cli",
+      "apps/needs-fixes",
+    ]);
+    expect(members[0]?.exitCode).toBe(0);
+    expect(members[0]?.summary.failed).toBe(0);
+    expect(members[1]?.exitCode).toBe(1);
+    expect(members[1]?.summary.failed).toBeGreaterThan(0);
+  });
+
+  test("workspace member passes dep check when deps are hoisted to root node_modules", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    // Set up workspace root with node_modules containing the hoisted dep
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "my-workspace",
+          version: "1.0.0",
+          workspaces: ["apps/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "node_modules", "some-pkg"), { recursive: true });
+
+    // Set up workspace member that declares a dep but does NOT have its own node_modules
+    const memberDir = join(tempDir, "apps", "my-app");
+    mkdirSync(join(memberDir, "src"), { recursive: true });
+    writeFileSync(
+      join(memberDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "@acme/my-app",
+          version: "1.0.0",
+          dependencies: { "some-pkg": "^1.0.0" },
+        },
+        null,
+        2
+      )
+    );
+    writeFileSync(join(memberDir, "tsconfig.json"), "{}");
+
+    const result = runDoctor({ cwd: tempDir });
+    const members = result.workspaceMembers ?? [];
+
+    expect(members).toHaveLength(1);
+    expect(members[0]?.summary.failed).toBe(0);
+    expect(members[0]?.exitCode).toBe(0);
+  });
+
+  test("does not include workspace member summary for non-workspace projects", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({ name: "my-app", version: "1.0.0" }, null, 2)
+    );
+
+    const result = runDoctor({ cwd: tempDir });
+    expect(result.isWorkspaceRoot).toBeUndefined();
+    expect(result.workspaceMembers).toBeUndefined();
+  });
 });
