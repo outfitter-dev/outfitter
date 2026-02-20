@@ -731,15 +731,12 @@ const checkAction = defineAction({
       } else if (context.flags["ci"]) {
         // Deprecated --ci alias
         outputMode = "json";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
       } else {
-        // Env var fallback only — --output preset supersedes legacy flags
-        if (process.env["OUTFITTER_JSONL"] === "1") {
-          outputMode = "jsonl";
-        } else if (process.env["OUTFITTER_JSON"] === "1") {
-          outputMode = "json";
-        } else {
-          outputMode = "human";
-        }
+        outputMode = "human";
       }
       const { verbose } = checkVerbose.resolve(context.flags);
       const { cwd: rawCwd } = checkCwd.resolve(context.flags);
@@ -884,13 +881,15 @@ const checkTsdocAction = defineAction<
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
       let outputMode: CliOutputMode;
-      if (typeof context.flags["output"] === "string") {
-        outputMode =
-          presetOutputMode === "json" || presetOutputMode === "jsonl"
-            ? presetOutputMode
-            : "human";
+      if (explicitOutput) {
+        // Explicit --output should always win over env fallbacks.
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
       } else {
-        outputMode = resolveOutputModeFromContext(context.flags);
+        outputMode = "human";
       }
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];

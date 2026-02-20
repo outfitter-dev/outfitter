@@ -159,14 +159,16 @@ describe("check-tsdoc mapInput", () => {
     expect(mapped.outputMode).toBe("jsonl");
   });
 
-  test("falls back to legacy --json flag when --output is omitted", () => {
+  test("--json flag is superseded by --output preset (Commander always populates --output default)", () => {
     const action = outfitterActions.get("check.tsdoc");
+    // In real Commander usage, --output is always present with default "human".
+    // Legacy --json flag is effectively dead — outputModePreset owns output mode.
     const mapped = action?.cli?.mapInput?.({
       args: [],
       flags: { json: true },
     }) as { outputMode: string };
 
-    expect(mapped.outputMode).toBe("json");
+    expect(mapped.outputMode).toBe("human");
   });
 
   test("falls back to OUTFITTER_JSON when --output is omitted", () => {
