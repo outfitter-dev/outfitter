@@ -475,6 +475,14 @@ describe("init command workspace scaffolding", () => {
     expect(rootPackageJson.private).toBe(true);
     expect(rootPackageJson.workspaces).toEqual(["apps/*", "packages/*"]);
 
+    // Workspace root README
+    const readmePath = join(tempDir, "README.md");
+    expect(existsSync(readmePath)).toBe(true);
+    const readme = readFileSync(readmePath, "utf-8");
+    expect(readme).toContain("acme-workspace");
+    expect(readme).toContain("apps/");
+    expect(readme).toContain("packages/");
+
     const projectPackageJsonPath = join(
       tempDir,
       "apps",
