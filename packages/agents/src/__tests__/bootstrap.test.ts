@@ -85,7 +85,6 @@ describe("bootstrap", () => {
     const toolsExist =
       Bun.spawnSync(["which", "bun"]).exitCode === 0 &&
       Bun.spawnSync(["which", "gh"]).exitCode === 0 &&
-      Bun.spawnSync(["which", "gt"]).exitCode === 0 &&
       Bun.spawnSync(["which", "markdownlint-cli2"]).exitCode === 0;
 
     if (!toolsExist) {
@@ -111,7 +110,6 @@ describe("bootstrap", () => {
     const coreToolsExist =
       Bun.spawnSync(["which", "bun"]).exitCode === 0 &&
       Bun.spawnSync(["which", "gh"]).exitCode === 0 &&
-      Bun.spawnSync(["which", "gt"]).exitCode === 0 &&
       Bun.spawnSync(["which", "markdownlint-cli2"]).exitCode === 0;
 
     if (!coreToolsExist) {
