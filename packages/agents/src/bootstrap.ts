@@ -45,17 +45,6 @@ const CORE_TOOLS: ToolCheck[] = [
     },
   },
   {
-    name: "gt",
-    command: "gt",
-    install: async () => {
-      if (process.platform === "darwin") {
-        await run("brew", ["install", "withgraphite/tap/graphite"]);
-      } else {
-        await run("bun", ["install", "-g", "@withgraphite/graphite-cli"]);
-      }
-    },
-  },
-  {
     name: "markdownlint-cli2",
     command: "markdownlint-cli2",
     install: async () => {
@@ -93,6 +82,23 @@ function info(message: string, quiet: boolean): void {
 
 /**
  * Run bootstrap with optional extensions.
+ *
+ * Core tools (gh, markdownlint-cli2) are always checked. Use the `tools`
+ * and `extend` options for project-specific tools and auth checks.
+ *
+ * @example
+ * ```typescript
+ * // Add Graphite as a project-specific tool with auth
+ * await bootstrap({
+ *   tools: ["gt"],
+ *   extend: async () => {
+ *     const token = process.env["GT_AUTH_TOKEN"];
+ *     if (token) {
+ *       Bun.spawnSync(["gt", "auth", "--token", token]);
+ *     }
+ *   },
+ * });
+ * ```
  */
 export async function bootstrap(options: BootstrapOptions = {}): Promise<void> {
   const { tools = [], extend, force = false, quiet = false } = options;
@@ -165,21 +171,6 @@ export async function bootstrap(options: BootstrapOptions = {}): Promise<void> {
   } else {
     log(
       "    GitHub CLI not authenticated. Run 'gh auth login' or set GH_TOKEN",
-      quiet
-    );
-  }
-
-  const gtAuthToken = process.env["GT_AUTH_TOKEN"];
-
-  if (gtAuthToken) {
-    info("Authenticating Graphite CLI...", quiet);
-    await run("gt", ["auth", "--token", gtAuthToken]);
-    success("Graphite CLI authenticated", quiet);
-  } else if ((await Bun.spawnSync(["gt", "auth", "status"])).exitCode === 0) {
-    success("Graphite CLI authenticated", quiet);
-  } else {
-    log(
-      "    Graphite CLI not authenticated. Run 'gt auth' or set GT_AUTH_TOKEN",
       quiet
     );
   }
