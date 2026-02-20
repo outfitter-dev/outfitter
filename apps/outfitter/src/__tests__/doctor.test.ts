@@ -56,7 +56,7 @@ describe("doctor command Bun version check", () => {
   test("passes when Bun version is 1.3.6 or higher", async () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     // Bun version should pass (we're running on Bun)
     expect(result.checks.bunVersion.passed).toBe(true);
@@ -65,7 +65,7 @@ describe("doctor command Bun version check", () => {
   test("includes Bun version in check result", async () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.bunVersion.version).toBeDefined();
     expect(typeof result.checks.bunVersion.version).toBe("string");
@@ -74,7 +74,7 @@ describe("doctor command Bun version check", () => {
   test("Bun version check includes minimum requirement info", async () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.bunVersion.required).toBe("1.3.6");
   });
@@ -98,7 +98,7 @@ describe("doctor command package.json validation", () => {
       JSON.stringify(packageJson, null, 2)
     );
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.packageJson.passed).toBe(true);
   });
@@ -106,7 +106,7 @@ describe("doctor command package.json validation", () => {
   test("fails when package.json does not exist", async () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.packageJson.passed).toBe(false);
     expect(result.checks.packageJson.error).toContain("not found");
@@ -117,7 +117,7 @@ describe("doctor command package.json validation", () => {
 
     writeFileSync(join(tempDir, "package.json"), "{ invalid json }");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.packageJson.passed).toBe(false);
     expect(result.checks.packageJson.error).toContain("invalid");
@@ -132,7 +132,7 @@ describe("doctor command package.json validation", () => {
       JSON.stringify({ type: "module" })
     );
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.packageJson.passed).toBe(false);
   });
@@ -145,7 +145,7 @@ describe("doctor command package.json validation", () => {
       JSON.stringify({ name: "App Space", version: "1.0.0" })
     );
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.packageJson.passed).toBe(false);
     expect(result.checks.packageJson.error).toContain("invalid package name");
@@ -175,7 +175,7 @@ describe("doctor command dependencies check", () => {
     // Create node_modules with a dependency
     mkdirSync(join(tempDir, "node_modules", "some-dep"), { recursive: true });
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.dependencies.passed).toBe(true);
   });
@@ -195,7 +195,7 @@ describe("doctor command dependencies check", () => {
       JSON.stringify(packageJson, null, 2)
     );
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.dependencies.passed).toBe(false);
     expect(result.checks.dependencies.error).toContain("install");
@@ -213,7 +213,7 @@ describe("doctor command dependencies check", () => {
       JSON.stringify(packageJson, null, 2)
     );
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     // No dependencies means check passes (nothing to verify)
     expect(result.checks.dependencies.passed).toBe(true);
@@ -234,7 +234,7 @@ describe("doctor command config files check", () => {
     const tsconfig = { compilerOptions: { strict: true } };
     writeFileSync(join(tempDir, "tsconfig.json"), JSON.stringify(tsconfig));
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.configFiles.tsconfig).toBe(true);
   });
@@ -245,7 +245,7 @@ describe("doctor command config files check", () => {
     const packageJson = { name: "test", version: "1.0.0" };
     writeFileSync(join(tempDir, "package.json"), JSON.stringify(packageJson));
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.configFiles.tsconfig).toBe(false);
   });
@@ -263,7 +263,7 @@ describe("doctor command required directories check", () => {
     writeFileSync(join(tempDir, "package.json"), JSON.stringify(packageJson));
     mkdirSync(join(tempDir, "src"), { recursive: true });
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.directories.src).toBe(true);
   });
@@ -274,7 +274,7 @@ describe("doctor command required directories check", () => {
     const packageJson = { name: "test", version: "1.0.0" };
     writeFileSync(join(tempDir, "package.json"), JSON.stringify(packageJson));
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.checks.directories.src).toBe(false);
   });
@@ -297,7 +297,7 @@ describe("doctor command exit codes", () => {
     );
     mkdirSync(join(tempDir, "src"), { recursive: true });
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.exitCode).toBe(0);
   });
@@ -306,7 +306,7 @@ describe("doctor command exit codes", () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
     // Empty directory - many checks will fail
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.exitCode).toBe(1);
   });
@@ -323,7 +323,7 @@ describe("doctor command output format", () => {
     const packageJson = { name: "test", version: "1.0.0" };
     writeFileSync(join(tempDir, "package.json"), JSON.stringify(packageJson));
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     // Result should have structured check information
     expect(result.checks).toBeDefined();
@@ -337,7 +337,7 @@ describe("doctor command output format", () => {
     const packageJson = { name: "test", version: "1.0.0" };
     writeFileSync(join(tempDir, "package.json"), JSON.stringify(packageJson));
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     expect(result.summary).toBeDefined();
     expect(typeof result.summary.passed).toBe("number");
@@ -354,7 +354,7 @@ describe("doctor command result structure", () => {
   test("returns well-structured DoctorResult", async () => {
     const { runDoctor } = await import("../commands/doctor.js");
 
-    const result = await runDoctor({ cwd: tempDir });
+    const result = runDoctor({ cwd: tempDir });
 
     // Verify structure
     expect(result).toHaveProperty("checks");

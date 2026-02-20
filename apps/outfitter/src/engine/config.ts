@@ -7,6 +7,7 @@ import {
   resolveTemplateDependencyVersions,
 } from "./dependency-versions.js";
 import { ScaffoldError } from "./types.js";
+import { getWorkspacePatterns } from "./workspace.js";
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
