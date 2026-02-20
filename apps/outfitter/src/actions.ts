@@ -766,7 +766,7 @@ const checkAction = defineAction({
     }
 
     await printCheckResults(result.value, {
-      mode: effectiveMode,
+      mode: outputMode,
       verbose: checkInput.verbose,
     });
 
@@ -882,6 +882,7 @@ const checkTsdocAction = defineAction<
         context.flags
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
       let outputMode: CliOutputMode;
       if (explicitOutput) {
         // Explicit --output should always win over env fallbacks.
