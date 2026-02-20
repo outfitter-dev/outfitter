@@ -151,7 +151,7 @@ describe("init command file creation", () => {
 
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
-    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.1");
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
     expect(packageJson.scripts["verify:ci"]).toBe(
       "bun run typecheck && bun run check && bun run build && bun run test"
     );
@@ -159,6 +159,7 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies.commander).toBe("^14.0.2");
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
 
@@ -391,7 +392,7 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
-    expect(packageJson.dependencies.commander).toBe("^14.0.0");
+    expect(packageJson.dependencies.commander).toBe("^14.0.2");
   });
 });
 

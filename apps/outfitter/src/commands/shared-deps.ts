@@ -7,20 +7,63 @@
  * @packageDocumentation
  */
 
+import type { ResolvedTemplateDependencyVersions } from "../engine/dependency-versions.js";
+import { resolveTemplateDependencyVersions } from "../engine/dependency-versions.js";
+
+let _dependencyVersions: ResolvedTemplateDependencyVersions | undefined;
+function getDependencyVersions(): ResolvedTemplateDependencyVersions {
+  if (!_dependencyVersions) {
+    _dependencyVersions = resolveTemplateDependencyVersions();
+  }
+  return _dependencyVersions;
+}
+
+function pickVersion(
+  source: Record<string, string>,
+  name: string,
+  fallback: string
+): string {
+  return source[name] ?? fallback;
+}
+
 /**
  * Shared devDependencies injected into all scaffolded projects.
  * Template-specific devDependencies take precedence over these defaults.
  *
  * Keep these in sync with the root package.json versions.
  */
-export const SHARED_DEV_DEPS = {
-  "@biomejs/biome": "^2.3.12",
-  "@outfitter/tooling": "^0.2.1",
-  "@types/bun": "^1.3.7",
-  lefthook: "^2.0.16",
-  typescript: "^5.9.3",
-  ultracite: "^7.1.1",
-} as const;
+export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
+  "@biomejs/biome": pickVersion(
+    getDependencyVersions().external,
+    "@biomejs/biome",
+    "^2.3.12"
+  ),
+  "@outfitter/tooling": pickVersion(
+    getDependencyVersions().internal,
+    "@outfitter/tooling",
+    "^0.2.4"
+  ),
+  "@types/bun": pickVersion(
+    getDependencyVersions().external,
+    "@types/bun",
+    "^1.3.7"
+  ),
+  lefthook: pickVersion(
+    getDependencyVersions().external,
+    "lefthook",
+    "^2.0.16"
+  ),
+  typescript: pickVersion(
+    getDependencyVersions().external,
+    "typescript",
+    "^5.9.3"
+  ),
+  ultracite: pickVersion(
+    getDependencyVersions().external,
+    "ultracite",
+    "^7.1.1"
+  ),
+};
 
 /**
  * Shared scripts injected into all scaffolded projects.

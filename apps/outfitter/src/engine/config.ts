@@ -2,6 +2,10 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Result } from "@outfitter/contracts";
 import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "../commands/shared-deps.js";
+import {
+  applyResolvedDependencyVersions,
+  resolveTemplateDependencyVersions,
+} from "./dependency-versions.js";
 import { ScaffoldError } from "./types.js";
 
 const DEPENDENCY_SECTIONS = [
@@ -22,6 +26,8 @@ export function injectSharedConfig(
   try {
     const content = readFileSync(packageJsonPath, "utf-8");
     const parsed = JSON.parse(content) as Record<string, unknown>;
+    const dependencyVersions = resolveTemplateDependencyVersions();
+    applyResolvedDependencyVersions(parsed, dependencyVersions);
 
     const existingDevDeps =
       (parsed["devDependencies"] as Record<string, unknown>) ?? {};
