@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -367,6 +367,31 @@ describe("doctor command result structure", () => {
     expect(result.checks).toHaveProperty("dependencies");
     expect(result.checks).toHaveProperty("configFiles");
     expect(result.checks).toHaveProperty("directories");
+  });
+
+  test("reads target package.json at most once per run", async () => {
+    const fs = await import("node:fs");
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({ name: "my-app", version: "1.0.0" }, null, 2)
+    );
+
+    const readSpy = spyOn(fs, "readFileSync");
+    try {
+      runDoctor({ cwd: tempDir });
+
+      const targetPath = join(tempDir, "package.json");
+      const packageReads = readSpy.mock.calls.filter((call) => {
+        const pathArg = call[0];
+        return typeof pathArg === "string" && pathArg === targetPath;
+      });
+
+      expect(packageReads).toHaveLength(1);
+    } finally {
+      readSpy.mockRestore();
+    }
   });
 });
 
