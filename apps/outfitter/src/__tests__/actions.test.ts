@@ -143,9 +143,22 @@ describe("outfitter action mapping", () => {
 
     expect(presetOption).toBeDefined();
     expect(presetOption?.description).toContain("library");
+    expect(presetOption?.description).toContain("lib");
 
     const libraryPresetAction = outfitterActions.get("init.library");
     expect(libraryPresetAction).toBeDefined();
+  });
+
+  test("normalizes legacy lib preset alias to library", () => {
+    const action = outfitterActions.get("init");
+    expect(action?.cli?.mapInput).toBeDefined();
+
+    const mapped = action?.cli?.mapInput?.({
+      args: ["/tmp/lib-init"],
+      flags: { preset: "lib" },
+    }) as { preset?: string };
+
+    expect(mapped.preset).toBe("library");
   });
 
   test("maps scaffold shared force/dryRun flags via presets", () => {

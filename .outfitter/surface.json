@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-20T20:17:22.593Z",
+  "generatedAt": "2026-02-20T20:55:46.678Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -117,7 +117,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon", "library"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -240,7 +240,7 @@
           },
           {
             "flags": "-p, --preset <preset>",
-            "description": "Preset to use (minimal, cli, mcp, daemon, library)"
+            "description": "Preset to use (minimal, cli, mcp, daemon, library, lib)"
           },
           {
             "flags": "-t, --template <template>",
@@ -267,7 +267,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon", "library"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -409,7 +409,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon", "library"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -551,7 +551,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon", "library"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -693,7 +693,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon", "library"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"

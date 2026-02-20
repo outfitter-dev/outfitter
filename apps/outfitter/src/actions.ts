@@ -85,11 +85,32 @@ interface InitActionInput extends InitOptions {
 }
 const outputModeSchema = z.enum(["human", "json", "jsonl"]).default("human");
 
+const initPresetValues = [
+  "minimal",
+  "cli",
+  "mcp",
+  "daemon",
+  "library",
+  "lib",
+] as const;
+
+type InitPresetFlag = (typeof initPresetValues)[number];
+type NormalizedInitPreset = Exclude<InitPresetFlag, "lib">;
+
+function normalizeInitPreset(
+  preset: InitPresetFlag | undefined
+): NormalizedInitPreset | undefined {
+  if (preset === undefined) {
+    return undefined;
+  }
+  return preset === "lib" ? "library" : preset;
+}
+
 const initInputSchema = z.object({
   targetDir: z.string(),
   name: z.string().optional(),
   bin: z.string().optional(),
-  preset: z.enum(["minimal", "cli", "mcp", "daemon", "library"]).optional(),
+  preset: z.enum(initPresetValues).optional(),
   template: z.string().optional(),
   structure: z.enum(["single", "workspace"]).optional(),
   workspaceName: z.string().optional(),
@@ -179,22 +200,17 @@ function resolveLocalFlag(flags: {
 
 function resolveInitOptions(
   context: ActionCliInputContext,
-  presetOverride?: "minimal" | "cli" | "mcp" | "daemon" | "library"
+  presetOverride?: NormalizedInitPreset
 ): InitActionInput {
   const flags = context.flags as InitFlags;
   const { force, dryRun, yes } = initSharedFlags.resolve(context);
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
-  const preset =
+  const preset = normalizeInitPreset(
     presetOverride ??
-    (resolveStringFlag(flags.preset) as
-      | "minimal"
-      | "cli"
-      | "mcp"
-      | "daemon"
-      | "library"
-      | undefined);
+      (resolveStringFlag(flags.preset) as InitPresetFlag | undefined)
+  );
   const template = resolveStringFlag(flags.template);
   const structure = resolveStringFlag(flags.structure) as
     | "single"
@@ -319,13 +335,13 @@ function createInitAction(options: {
   readonly id: string;
   readonly description: string;
   readonly command: string;
-  readonly presetOverride?: "minimal" | "cli" | "mcp" | "daemon" | "library";
+  readonly presetOverride?: NormalizedInitPreset;
   readonly includePresetOption?: boolean;
   readonly includeTemplateOption?: boolean;
 }) {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
-    description: "Preset to use (minimal, cli, mcp, daemon, library)",
+    description: "Preset to use (minimal, cli, mcp, daemon, library, lib)",
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
