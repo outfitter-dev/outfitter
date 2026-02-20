@@ -25,6 +25,7 @@ import {
   applyUpdatesToWorkspace,
   getInstalledPackagesFromWorkspace,
   runInstall,
+  type VersionConflict,
 } from "./upgrade-workspace.js";
 
 const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
@@ -149,6 +150,8 @@ export interface UpgradeResult {
   readonly codemods?: CodemodSummary;
   /** Package names that were requested but not found in the workspace */
   readonly unknownPackages?: readonly string[];
+  /** Version conflicts found across workspace manifests */
+  readonly conflicts?: readonly VersionConflict[];
 }
 
 // =============================================================================
@@ -898,6 +901,7 @@ export async function runUpgrade(
       skippedBreaking,
       ...(guidesData !== undefined ? { guides: guidesData } : {}),
       ...(unknownPackages !== undefined ? { unknownPackages } : {}),
+      ...(scan.conflicts.length > 0 ? { conflicts: scan.conflicts } : {}),
       ...overrides,
     });
 
@@ -1190,6 +1194,31 @@ export async function printUpgradeResults(
     lines.push("");
   }
 
+  // Version conflicts section
+  if (result.conflicts && result.conflicts.length > 0) {
+    lines.push(
+      theme.warning(
+        `Version conflict(s) across workspace (${result.conflicts.length}):`
+      )
+    );
+    for (const conflict of result.conflicts) {
+      lines.push(`  ${conflict.name}`);
+      for (const entry of conflict.versions) {
+        const manifests = entry.manifests
+          .map((m) => {
+            // Show the parent directory of package.json (e.g. "packages/cli")
+            const dir = m.replace(/\/package\.json$/, "");
+            const parts = dir.split("/");
+            // Take last 2 path segments for readability
+            return parts.slice(-2).join("/");
+          })
+          .join(", ");
+        lines.push(`    ${entry.version.padEnd(10)} ${theme.muted(manifests)}`);
+      }
+    }
+    lines.push("");
+  }
+
   // Unknown packages section
   if (result.unknownPackages && result.unknownPackages.length > 0) {
     lines.push(theme.error("Unknown package(s) not found in workspace:"));
@@ -1316,6 +1345,7 @@ export interface UpgradeReport {
     readonly breaking: readonly string[];
   };
   readonly unknownPackages?: readonly string[];
+  readonly conflicts?: readonly VersionConflict[];
   readonly codemods?: CodemodSummary;
   readonly error?: {
     readonly message: string;
@@ -1383,6 +1413,9 @@ function writeUpgradeReport(
     ...(result.unknownPackages !== undefined &&
     result.unknownPackages.length > 0
       ? { unknownPackages: result.unknownPackages }
+      : {}),
+    ...(result.conflicts !== undefined && result.conflicts.length > 0
+      ? { conflicts: result.conflicts }
       : {}),
     ...(result.codemods !== undefined ? { codemods: result.codemods } : {}),
     ...(meta.error !== undefined
