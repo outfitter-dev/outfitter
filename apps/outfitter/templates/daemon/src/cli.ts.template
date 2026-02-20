@@ -6,6 +6,7 @@
  */
 
 import { command, createCLI } from "@outfitter/cli/command";
+import { exitWithError } from "@outfitter/cli/output";
 import { createLogger } from "@outfitter/logging";
 import { spawn } from "node:child_process";
 import { getSocketPath, getLockPath, isDaemonAlive } from "@outfitter/daemon";
@@ -20,6 +21,7 @@ const program = createCLI({
 	name: "{{binName}}",
 	version: "{{version}}",
 	description: "{{description}}",
+	onError: (error) => exitWithError(error),
 });
 
 program.register(
@@ -93,4 +95,4 @@ program.register(
 		}),
 );
 
-program.parse(process.argv);
+await program.parse(process.argv);
