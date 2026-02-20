@@ -375,37 +375,65 @@ function bar(percentage: number, width = 20): string {
 function discoverPackages(
 	cwd: string,
 ): Array<{ name: string; path: string; entryPoint: string }> {
-	const glob = new Bun.Glob("packages/*/src/index.ts");
 	const packages: Array<{ name: string; path: string; entryPoint: string }> =
 		[];
 
-	for (const match of glob.scanSync({ cwd, dot: false })) {
-		// Extract package directory name
-		const parts = match.split("/");
-		const pkgDir = parts[1];
-		if (!pkgDir) continue;
+	// Search packages/*/ and apps/*/ for monorepo layouts
+	for (const pattern of ["packages/*/src/index.ts", "apps/*/src/index.ts"]) {
+		const glob = new Bun.Glob(pattern);
+		for (const match of glob.scanSync({ cwd, dot: false })) {
+			const parts = match.split("/");
+			const pkgDir = parts[1];
+			if (!pkgDir) continue;
 
-		const pkgRoot = resolve(cwd, "packages", pkgDir);
-		let pkgName = pkgDir;
+			const pkgRoot = resolve(cwd, parts[0]!, pkgDir);
+			let pkgName = pkgDir;
 
-		// Try to read package.json for the real name
-		try {
-			const pkgJson = JSON.parse(
-				require("node:fs").readFileSync(
-					resolve(pkgRoot, "package.json"),
-					"utf-8",
-				),
-			) as { name?: string };
-			if (pkgJson.name) pkgName = pkgJson.name;
-		} catch {
-			// Fall back to directory name
+			try {
+				const pkgJson = JSON.parse(
+					require("node:fs").readFileSync(
+						resolve(pkgRoot, "package.json"),
+						"utf-8",
+					),
+				) as { name?: string };
+				if (pkgJson.name) pkgName = pkgJson.name;
+			} catch {
+				// Fall back to directory name
+			}
+
+			packages.push({
+				name: pkgName,
+				path: pkgRoot,
+				entryPoint: resolve(cwd, match),
+			});
 		}
+	}
 
-		packages.push({
-			name: pkgName,
-			path: pkgRoot,
-			entryPoint: resolve(cwd, match),
-		});
+	// Single-app repo: check cwd itself for src/index.ts
+	if (packages.length === 0) {
+		const entryPoint = resolve(cwd, "src/index.ts");
+		try {
+			require("node:fs").accessSync(entryPoint);
+			let pkgName = "root";
+			try {
+				const pkgJson = JSON.parse(
+					require("node:fs").readFileSync(
+						resolve(cwd, "package.json"),
+						"utf-8",
+					),
+				) as { name?: string };
+				if (pkgJson.name) pkgName = pkgJson.name;
+			} catch {
+				// Fall back to "root"
+			}
+			packages.push({
+				name: pkgName,
+				path: cwd,
+				entryPoint,
+			});
+		} catch {
+			// No src/index.ts in cwd
+		}
 	}
 
 	return packages.sort((a, b) => a.name.localeCompare(b.name));
@@ -693,7 +721,11 @@ export async function runCheckTsdoc(
 	const result = analyzeCheckTsdoc(options);
 
 	if (!result) {
-		process.stderr.write("No packages found with src/index.ts entry points.\n");
+		process.stderr.write(
+			"No packages found with src/index.ts entry points.\n" +
+				"Searched: packages/*/src/index.ts, apps/*/src/index.ts, src/index.ts\n" +
+				"Use --package <path> to specify a package path explicitly.\n",
+		);
 		process.exit(1);
 	}
 
