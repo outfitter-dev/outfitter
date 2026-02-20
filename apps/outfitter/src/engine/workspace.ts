@@ -71,7 +71,7 @@ interface PackageDeps {
   [key: string]: unknown;
 }
 
-function hasWorkspacesField(pkg: PackageDeps): boolean {
+export function hasWorkspacesField(pkg: PackageDeps): boolean {
   const workspaces = pkg.workspaces;
 
   if (Array.isArray(workspaces) && workspaces.length > 0) {
