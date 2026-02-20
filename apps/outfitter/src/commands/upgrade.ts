@@ -889,7 +889,11 @@ export async function runUpgrade(
       options.guidePackages !== undefined &&
       options.guidePackages.length > 0
     ) {
-      const filterSet = new Set(options.guidePackages);
+      const filterSet = new Set(
+        options.guidePackages.map((p) =>
+          p.startsWith("@") ? p : `@outfitter/${p}`
+        )
+      );
       guidesData = guidesData.filter((g) => filterSet.has(g.packageName));
     }
 
