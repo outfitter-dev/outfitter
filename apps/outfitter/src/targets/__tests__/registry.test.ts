@@ -31,9 +31,9 @@ function findRepoRoot(): string {
 }
 
 describe("target registry", () => {
-  test("contains exactly 8 targets", () => {
-    expect(TARGET_REGISTRY.size).toBe(8);
-    expect(TARGET_IDS.length).toBe(8);
+  test("contains exactly 9 targets", () => {
+    expect(TARGET_REGISTRY.size).toBe(9);
+    expect(TARGET_IDS.length).toBe(9);
   });
 
   test("all target IDs are unique", () => {

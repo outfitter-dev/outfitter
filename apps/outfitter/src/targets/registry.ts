@@ -120,6 +120,20 @@ export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> = new Map<
       scope: "init-only",
     },
   ],
+  [
+    "full-stack",
+    {
+      id: "full-stack",
+      description:
+        "Workspace with CLI + MCP apps sharing a core handler package",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "full-stack",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "init-only",
+    },
+  ],
 ]);
 
 export const TARGET_IDS: readonly TargetId[] = [...TARGET_REGISTRY.keys()];

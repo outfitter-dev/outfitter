@@ -91,6 +91,7 @@ const initPresetValues = [
   "mcp",
   "daemon",
   "library",
+  "full-stack",
   "lib",
 ] as const;
 
@@ -341,7 +342,8 @@ function createInitAction(options: {
 }) {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
-    description: "Preset to use (minimal, cli, mcp, daemon, library, lib)",
+    description:
+      "Preset to use (minimal, cli, mcp, daemon, library, full-stack, lib)",
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
@@ -1138,6 +1140,14 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
       description: "Create a new library project",
       command: "library [directory]",
       presetOverride: "library",
+    })
+  )
+  .add(
+    createInitAction({
+      id: "init.full-stack",
+      description: "Create a full-stack workspace",
+      command: "full-stack [directory]",
+      presetOverride: "full-stack",
     })
   )
   .add(demoAction)
