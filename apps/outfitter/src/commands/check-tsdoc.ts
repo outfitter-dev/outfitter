@@ -28,11 +28,28 @@ export interface CheckTsDocInput {
   readonly cwd: string;
   readonly outputMode: CliOutputMode;
   readonly jq: string | undefined;
+  readonly summary: boolean;
 }
 
 // ---------------------------------------------------------------------------
-// Jq helper
+// Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Strip declaration detail for compact output while preserving schema shape.
+ *
+ * This keeps `check.tsdoc` output contract-compatible in JSON/JQ modes.
+ */
+function summarizeResult(result: TsDocCheckResult): TsDocCheckResult {
+  return {
+    ok: result.ok,
+    packages: result.packages.map((pkg) => ({
+      ...pkg,
+      declarations: [],
+    })),
+    summary: result.summary,
+  };
+}
 
 /**
  * Apply a jq expression to JSON data using the system `jq` binary.
@@ -134,19 +151,21 @@ export async function runCheckTsdoc(
       );
     }
 
+    const outputData = input.summary ? summarizeResult(result) : result;
+
     if (input.jq) {
-      const filtered = await applyJq(result, input.jq);
+      const filtered = await applyJq(outputData, input.jq);
       process.stdout.write(filtered);
     } else if (input.outputMode === "json" || input.outputMode === "jsonl") {
-      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      process.stdout.write(`${JSON.stringify(outputData, null, 2)}\n`);
     } else {
-      tooling.printCheckTsdocHuman(result, {
+      tooling.printCheckTsdocHuman(outputData, {
         strict: input.strict,
         minCoverage: input.minCoverage,
       });
     }
 
-    return Result.ok(result);
+    return Result.ok(outputData);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to run check-tsdoc";
