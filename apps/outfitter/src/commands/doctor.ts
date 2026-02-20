@@ -75,8 +75,6 @@ export interface DependenciesCheck extends CheckResult {
 export interface ConfigFilesCheck {
   /** Whether tsconfig.json exists */
   readonly tsconfig: boolean;
-  /** Whether biome.json exists */
-  readonly biome?: boolean;
 }
 
 /**
@@ -85,8 +83,6 @@ export interface ConfigFilesCheck {
 export interface DirectoriesCheck {
   /** Whether src directory exists */
   readonly src: boolean;
-  /** Whether tests directory exists */
-  readonly tests?: boolean;
 }
 
 /**
@@ -336,7 +332,6 @@ function checkDependencies(
 function checkConfigFiles(cwd: string): ConfigFilesCheck {
   return {
     tsconfig: existsSync(join(cwd, "tsconfig.json")),
-    biome: existsSync(join(cwd, "biome.json")),
   };
 }
 
@@ -346,9 +341,6 @@ function checkConfigFiles(cwd: string): ConfigFilesCheck {
 function checkDirectories(cwd: string): DirectoriesCheck {
   return {
     src: existsSync(join(cwd, "src")),
-    tests:
-      existsSync(join(cwd, "src", "__tests__")) ||
-      existsSync(join(cwd, "tests")),
   };
 }
 
