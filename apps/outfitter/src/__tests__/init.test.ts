@@ -156,10 +156,10 @@ describe("init command file creation", () => {
       "bun run typecheck && bun run check && bun run build && bun run test"
     );
     expect(packageJson.scripts["clean:artifacts"]).toBe("rm -rf dist .turbo");
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.2.0");
-    expect(packageJson.dependencies["@outfitter/types"]).toBe("^0.2.0");
-    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.4.0");
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0-rc.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/types"]).toBe("^0.2.2");
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
 
     const tsconfigPath = join(tempDir, "tsconfig.json");
@@ -175,8 +175,8 @@ describe("init command file creation", () => {
 
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
-    expect(programContent).toMatch(/logger\.info\(`Hello, \$\{name\}!`\);/);
-    expect(programContent).not.toMatch(/logger\.info`Hello, \$\{name\}!`;/);
+    expect(programContent).toMatch(/await output\(`Hello, \$\{name\}!`\);/);
+    expect(programContent).not.toMatch(/logger\.info/);
   });
 
   test("creates src directory structure", async () => {
@@ -371,7 +371,7 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
-    expect(packageJson.dependencies.commander).toBe("^12.0.0");
+    expect(packageJson.dependencies.commander).toBe("^14.0.0");
   });
 });
 
