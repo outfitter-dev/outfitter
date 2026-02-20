@@ -1,17 +1,26 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { Result } from "@outfitter/contracts";
+import { sanitizePackageName } from "./names.js";
 import { ScaffoldError } from "./types.js";
 
 function deriveWorkspaceScopeForExamples(workspaceName: string): string {
-  if (workspaceName.startsWith("@")) {
-    const separator = workspaceName.indexOf("/");
+  const sanitized = sanitizePackageName(workspaceName);
+  if (sanitized.startsWith("@")) {
+    const separator = sanitized.indexOf("/");
     if (separator > 1) {
-      return workspaceName.slice(0, separator);
+      return sanitized.slice(0, separator);
     }
-    return workspaceName;
+    if (sanitized.length > 1) {
+      return sanitized;
+    }
   }
-  return `@${workspaceName}`;
+
+  if (sanitized.length > 0) {
+    return `@${sanitized}`;
+  }
+
+  return "@your-scope";
 }
 
 export function buildWorkspaceRootReadme(workspaceName: string): string {
@@ -126,6 +135,34 @@ export function scaffoldWorkspaceRoot(
       new ScaffoldError(`Failed to scaffold workspace root: ${message}`)
     );
   }
+}
+
+/**
+ * Extracts workspace glob patterns from a package.json `workspaces` field.
+ *
+ * Handles both array form (`["apps/*"]`) and object form (`{ packages: ["apps/*"] }`).
+ */
+export function getWorkspacePatterns(workspaces: unknown): readonly string[] {
+  if (Array.isArray(workspaces)) {
+    return workspaces.filter(
+      (entry): entry is string => typeof entry === "string"
+    );
+  }
+
+  if (
+    workspaces &&
+    typeof workspaces === "object" &&
+    !Array.isArray(workspaces)
+  ) {
+    const packages = (workspaces as { packages?: unknown }).packages;
+    if (Array.isArray(packages)) {
+      return packages.filter(
+        (entry): entry is string => typeof entry === "string"
+      );
+    }
+  }
+
+  return [];
 }
 
 interface PackageDeps {

@@ -14,7 +14,10 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme } from "@outfitter/tui/render";
 import type { Command } from "commander";
 import { validatePackageName } from "../engine/index.js";
-import { hasWorkspacesField } from "../engine/workspace.js";
+import {
+  getWorkspacePatterns,
+  hasWorkspacesField,
+} from "../engine/workspace.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
 // =============================================================================
@@ -258,6 +261,10 @@ function checkPackageJson(
 
 /**
  * Checks if dependencies are installed.
+ *
+ * When `rootCwd` is provided (workspace member checks), dependencies not found
+ * in the member's own `node_modules` are also looked up in the root
+ * `node_modules`, since package managers hoist shared dependencies.
  */
 function checkDependencies(
   cwd: string,
@@ -294,8 +301,10 @@ function checkDependencies(
   const nodeModulesPath = join(cwd, "node_modules");
   const rootNodeModulesPath = rootCwd ? join(rootCwd, "node_modules") : null;
   if (
-    !existsSync(nodeModulesPath) &&
-    (!rootNodeModulesPath || !existsSync(rootNodeModulesPath))
+    !(
+      existsSync(nodeModulesPath) ||
+      (rootNodeModulesPath && existsSync(rootNodeModulesPath))
+    )
   ) {
     return {
       passed: false,
@@ -312,6 +321,10 @@ function checkDependencies(
     if (existsSync(localDepPath)) {
       continue;
     }
+    if (rootNodeModulesPath && existsSync(join(rootNodeModulesPath, dep))) {
+      continue;
+    }
+    missing.push(dep);
   }
 
   if (missing.length > 0) {
@@ -617,7 +630,7 @@ export function doctorCommand(program: Command): void {
         ? { mode: "json" as OutputMode }
         : undefined;
 
-      const result = await runDoctor({ cwd: process.cwd() });
+      const result = runDoctor({ cwd: process.cwd() });
 
       await printDoctorResults(result, outputOptions);
 

@@ -665,6 +665,20 @@ describe("init command workspace scaffolding", () => {
     expect(readme).not.toContain("@@acme");
   });
 
+  test("renders workspace README examples with npm-safe scope for unsanitized workspace names", async () => {
+    const { buildWorkspaceRootReadme } = await import("../engine/workspace.js");
+
+    const readme = buildWorkspaceRootReadme("My Cool Project");
+
+    expect(readme).toContain(
+      "outfitter init --name @my-cool-project/my-app --preset cli"
+    );
+    expect(readme).toContain(
+      "outfitter init --name @my-cool-project/my-lib --preset library"
+    );
+    expect(readme).not.toContain("@My Cool Project/");
+  });
+
   test("stamps manifest inside workspace project directory", async () => {
     const { runInit } = await import("../commands/init.js");
 

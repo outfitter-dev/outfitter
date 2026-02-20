@@ -1,5 +1,11 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -61,8 +67,12 @@ function createConfiguredWorkspace(options: {
     );
   } else if (options.packageJsonEntrypoints) {
     // Merge entrypoints config into the member's root package.json
-    const existing = JSON.parse(readFileSync(join(cwd, "package.json"), "utf-8"));
-    existing.outfitter = { tsdoc: { entrypoints: options.packageJsonEntrypoints } };
+    const existing = JSON.parse(
+      readFileSync(join(cwd, "package.json"), "utf-8")
+    );
+    existing.outfitter = {
+      tsdoc: { entrypoints: options.packageJsonEntrypoints },
+    };
     writeFileSync(join(cwd, "package.json"), JSON.stringify(existing, null, 2));
   }
 
