@@ -13,7 +13,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 function createTempDir(): string {
   const tempDir = join(
@@ -41,6 +41,78 @@ afterEach(() => {
 });
 
 describe("scaffold command", () => {
+  test("rejects traversal target names that escape workspace placement directory", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "acme-workspace",
+          private: true,
+          workspaces: ["apps/*", "packages/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "apps"), { recursive: true });
+    mkdirSync(join(tempDir, "packages"), { recursive: true });
+
+    const escapedName = `../../scaffold-escape-${Date.now()}`;
+    const escapedPath = resolve(tempDir, "apps", escapedName);
+
+    const result = await runScaffold({
+      target: "mcp",
+      name: escapedName,
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("target name");
+    }
+    expect(existsSync(escapedPath)).toBe(false);
+  });
+
+  test("rejects absolute path style target names", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "acme-workspace",
+          private: true,
+          workspaces: ["apps/*", "packages/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "apps"), { recursive: true });
+    mkdirSync(join(tempDir, "packages"), { recursive: true });
+
+    const result = await runScaffold({
+      target: "mcp",
+      name: "/tmp/scaffold-escape",
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("target name");
+    }
+  });
+
   test("scaffolds into an existing workspace using target placement", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 

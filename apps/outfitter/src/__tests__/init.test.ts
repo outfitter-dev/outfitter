@@ -381,6 +381,51 @@ describe("init command local dependency rewriting", () => {
 // =============================================================================
 
 describe("init command workspace scaffolding", () => {
+  test("rejects path traversal in workspace project name", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "../escaped",
+      preset: "cli",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("project name");
+    }
+    expect(existsSync(join(tempDir, "apps", "escaped"))).toBe(false);
+  });
+
+  test("rejects absolute path style workspace project names", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "/tmp/outside-root",
+      preset: "cli",
+      structure: "workspace",
+      workspaceName: "acme-workspace",
+      yes: true,
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("project name");
+    }
+  });
+
   test("scaffolds workspace root and places runnable preset under apps/", async () => {
     const { runInit } = await import("../commands/init.js");
 

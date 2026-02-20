@@ -28,11 +28,13 @@ import {
   deriveBinName,
   deriveProjectName,
   executePlan,
+  isPathWithin,
   resolveAuthor,
   resolvePackageName,
   resolveYear,
   type ScaffoldPlan,
   scaffoldWorkspaceRoot,
+  validateProjectDirectoryName,
 } from "../engine/index.js";
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
 import { runPostScaffold } from "../engine/post-scaffold.js";
@@ -457,17 +459,36 @@ export async function runInit(
   }
   const target = targetResult.value;
 
+  const projectName = deriveProjectName(input.packageName);
+  if (input.structure === "workspace") {
+    const invalidProjectName = validateProjectDirectoryName(projectName);
+    if (invalidProjectName) {
+      return Result.err(
+        new InitError(
+          `Invalid workspace project name '${projectName}': ${invalidProjectName}`
+        )
+      );
+    }
+  }
+
   const dryRun = Boolean(options.dryRun);
   const collector = dryRun ? new OperationCollector() : undefined;
 
+  const projectBaseDir = resolve(input.rootDir, target.placement);
+  const resolvedProjectDir = resolve(projectBaseDir, projectName);
+  if (
+    input.structure === "workspace" &&
+    !isPathWithin(projectBaseDir, resolvedProjectDir)
+  ) {
+    return Result.err(
+      new InitError(
+        `Invalid workspace project name '${projectName}': path escapes '${projectBaseDir}'`
+      )
+    );
+  }
+
   const projectDir =
-    input.structure === "workspace"
-      ? join(
-          input.rootDir,
-          target.placement,
-          deriveProjectName(input.packageName)
-        )
-      : input.rootDir;
+    input.structure === "workspace" ? resolvedProjectDir : input.rootDir;
 
   if (input.structure === "single") {
     if (existsSync(join(input.rootDir, "package.json")) && !options.force) {
