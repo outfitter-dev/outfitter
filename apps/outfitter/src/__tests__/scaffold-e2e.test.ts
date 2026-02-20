@@ -108,7 +108,7 @@ describe("scaffold e2e verification", () => {
   }
 
   test(
-    "scaffolds each supported preset and runs generated tests",
+    "scaffolds each supported preset and runs generated build + tests",
     async () => {
       const presets = ["minimal", "basic", "cli", "mcp", "daemon"] as const;
 
@@ -136,6 +136,9 @@ describe("scaffold e2e verification", () => {
 
         const install = await runCommand(targetDir, ["bun", "install"]);
         assertCommandSuccess(preset, "bun install", install);
+
+        const build = await runCommand(targetDir, ["bun", "run", "build"]);
+        assertCommandSuccess(preset, "bun run build", build);
 
         const tests = await runCommand(targetDir, ["bun", "test"]);
         assertCommandSuccess(preset, "bun test", tests);
