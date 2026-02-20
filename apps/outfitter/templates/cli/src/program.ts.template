@@ -4,14 +4,13 @@
 
 import { command, createCLI } from "@outfitter/cli/command";
 import { verbosePreset } from "@outfitter/cli/flags";
-import { createLogger } from "@outfitter/logging";
-
-const logger = createLogger({ name: "{{binName}}" });
+import { exitWithError, output } from "@outfitter/cli/output";
 
 export const program = createCLI({
 	name: "{{binName}}",
 	version: "{{version}}",
 	description: "{{description}}",
+	onError: (error) => exitWithError(error),
 });
 
 const verbose = verbosePreset();
@@ -23,9 +22,9 @@ program.register(
 		.action<{ verbose: boolean }>(async ({ args, flags }) => {
 			const { verbose: isVerbose } = verbose.resolve(flags);
 			const name = args[0] ?? "World";
-			logger.info(`Hello, ${name}!`);
+			await output(`Hello, ${name}!`);
 			if (isVerbose) {
-				logger.debug("Running in verbose mode");
+				await output({ detail: "Running in verbose mode" });
 			}
 		}),
 );

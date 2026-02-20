@@ -5,4 +5,4 @@
 
 import { program } from "./program.js";
 
-program.parse(process.argv);
+await program.parse(process.argv);
