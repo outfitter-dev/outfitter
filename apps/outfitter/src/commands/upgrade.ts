@@ -802,8 +802,12 @@ export async function runUpgrade(
     const codemodTargetDir = scan.workspaceRoot ?? cwd;
 
     if (installed.length === 0 && !unknownPackages?.length) {
-      writeReport("no_updates", emptyResult);
-      return Result.ok(emptyResult);
+      const result: UpgradeResult = {
+        ...emptyResult,
+        ...(scan.conflicts.length > 0 ? { conflicts: scan.conflicts } : {}),
+      };
+      writeReport("no_updates", result);
+      return Result.ok(result);
     }
 
     if (installed.length === 0 && unknownPackages?.length) {
