@@ -119,6 +119,8 @@ export interface DoctorResult {
   readonly exitCode: number;
   /** Whether this is a workspace root (affects which checks apply) */
   readonly isWorkspaceRoot?: boolean;
+  /** Checks intentionally skipped at workspace root */
+  readonly skippedChecks?: readonly string[];
 }
 
 // =============================================================================
@@ -343,6 +345,12 @@ export function runDoctor(options: DoctorOptions): DoctorResult {
   const dependencies = checkDependencies(cwd);
   const configFiles = checkConfigFiles(cwd);
   const directories = checkDirectories(cwd);
+  const normalizedConfigFiles = wsRoot
+    ? { ...configFiles, tsconfig: true }
+    : configFiles;
+  const normalizedDirectories = wsRoot
+    ? { ...directories, src: true }
+    : directories;
 
   // Calculate summary — workspace roots don't require tsconfig.json or src/
   const checkResults = wsRoot
@@ -364,12 +372,20 @@ export function runDoctor(options: DoctorOptions): DoctorResult {
       bunVersion,
       packageJson,
       dependencies,
-      configFiles,
-      directories,
+      configFiles: normalizedConfigFiles,
+      directories: normalizedDirectories,
     },
     summary: { passed, failed, total },
     exitCode: failed > 0 ? 1 : 0,
     ...(wsRoot ? { isWorkspaceRoot: true } : {}),
+    ...(wsRoot
+      ? {
+          skippedChecks: [
+            "checks.configFiles.tsconfig",
+            "checks.directories.src",
+          ] as const,
+        }
+      : {}),
   };
 }
 

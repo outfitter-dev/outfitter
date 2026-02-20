@@ -589,6 +589,23 @@ export async function runInit(
             }
       );
 
+      const readmePath = join(input.rootDir, "README.md");
+      if (options.force || !existsSync(readmePath)) {
+        collector?.add(
+          existsSync(readmePath)
+            ? {
+                type: "file-overwrite",
+                path: readmePath,
+                source: "generated",
+              }
+            : {
+                type: "file-create",
+                path: readmePath,
+                source: "generated",
+              }
+        );
+      }
+
       const gitignorePath = join(input.rootDir, ".gitignore");
       if (options.force || !existsSync(gitignorePath)) {
         collector?.add(

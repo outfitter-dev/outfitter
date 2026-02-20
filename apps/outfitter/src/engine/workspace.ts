@@ -3,6 +3,17 @@ import { dirname, join, resolve } from "node:path";
 import { Result } from "@outfitter/contracts";
 import { ScaffoldError } from "./types.js";
 
+function deriveWorkspaceScopeForExamples(workspaceName: string): string {
+  if (workspaceName.startsWith("@")) {
+    const separator = workspaceName.indexOf("/");
+    if (separator > 1) {
+      return workspaceName.slice(0, separator);
+    }
+    return workspaceName;
+  }
+  return `@${workspaceName}`;
+}
+
 export function buildWorkspaceRootReadme(workspaceName: string): string {
   const workspaceScope = deriveWorkspaceScopeForExamples(workspaceName);
 

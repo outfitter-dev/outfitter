@@ -10,8 +10,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   findMigrationDocsDir,
+  printUpgradeResults,
   readMigrationDocs,
   runUpgrade,
+  type UpgradeResult,
 } from "../commands/upgrade.js";
 import { getInstalledPackagesFromWorkspace } from "../commands/upgrade-workspace.js";
 
@@ -48,6 +50,40 @@ function writePackageJson(
       devDependencies: devDeps ?? {},
     })
   );
+}
+
+async function captureUpgradeOutput(
+  result: UpgradeResult,
+  options?: Parameters<typeof printUpgradeResults>[1]
+): Promise<string> {
+  const chunks: string[] = [];
+  const mockStream = {
+    write(data: string, cb?: (error?: Error | null) => void): boolean {
+      chunks.push(data);
+      if (cb) cb(null);
+      return true;
+    },
+    once(_event: string, _handler: (...args: unknown[]) => void): void {
+      // no-op for mock stream
+    },
+  } as unknown as NodeJS.WritableStream;
+
+  const originalStdout = process.stdout;
+  Object.defineProperty(process, "stdout", {
+    value: mockStream,
+    writable: true,
+  });
+
+  try {
+    await printUpgradeResults(result, options);
+  } finally {
+    Object.defineProperty(process, "stdout", {
+      value: originalStdout,
+      writable: true,
+    });
+  }
+
+  return chunks.join("");
 }
 
 // =============================================================================
@@ -177,6 +213,27 @@ describe("upgrade command output structure", () => {
         expect(typeof pkg.breaking).toBe("boolean");
       }
     }
+  });
+});
+
+describe("upgrade command output rendering", () => {
+  test("shows unknown packages even when no installed @outfitter packages were detected", async () => {
+    const result: UpgradeResult = {
+      packages: [],
+      total: 0,
+      updatesAvailable: 0,
+      hasBreaking: false,
+      applied: false,
+      appliedPackages: [],
+      skippedBreaking: [],
+      unknownPackages: ["@outfitter/nonexistent"],
+    };
+
+    const output = await captureUpgradeOutput(result);
+
+    expect(output).toContain("No @outfitter/* packages found in package.json.");
+    expect(output).toContain("Unknown package(s) not found in workspace:");
+    expect(output).toContain("@outfitter/nonexistent");
   });
 });
 
