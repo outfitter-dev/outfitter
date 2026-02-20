@@ -110,7 +110,13 @@ describe("scaffold e2e verification", () => {
   test(
     "scaffolds each supported preset and runs generated build + tests",
     async () => {
-      const presets = ["minimal", "basic", "cli", "mcp", "daemon"] as const;
+      const presets = [
+        "minimal",
+        "library",
+        "cli",
+        "mcp",
+        "daemon",
+      ] as const;
 
       for (const preset of presets) {
         const targetDir = join(tempDir, preset);
@@ -139,6 +145,15 @@ describe("scaffold e2e verification", () => {
 
         const build = await runCommand(targetDir, ["bun", "run", "build"]);
         assertCommandSuccess(preset, "bun run build", build);
+
+        if (preset === "library") {
+          const typecheck = await runCommand(targetDir, [
+            "bun",
+            "run",
+            "typecheck",
+          ]);
+          assertCommandSuccess(preset, "bun run typecheck", typecheck);
+        }
 
         const tests = await runCommand(targetDir, ["bun", "test"]);
         assertCommandSuccess(preset, "bun test", tests);

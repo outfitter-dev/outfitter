@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-20T16:09:41.041Z",
+  "generatedAt": "2026-02-20T20:55:46.678Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -117,7 +117,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -240,7 +240,7 @@
           },
           {
             "flags": "-p, --preset <preset>",
-            "description": "Preset to use (minimal, cli, mcp, daemon)"
+            "description": "Preset to use (minimal, cli, mcp, daemon, library, lib)"
           },
           {
             "flags": "-t, --template <template>",
@@ -267,7 +267,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -409,7 +409,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -551,7 +551,7 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["minimal", "cli", "mcp", "daemon"]
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
           },
           "template": {
             "type": "string"
@@ -605,6 +605,148 @@
         "group": "init",
         "command": "daemon [directory]",
         "description": "Create a new daemon project",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.library",
+      "description": "Create a new library project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": ["minimal", "cli", "mcp", "daemon", "library", "lib"]
+          },
+          "template": {
+            "type": "string"
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "library [directory]",
+        "description": "Create a new library project",
         "options": [
           {
             "flags": "-n, --name <name>",

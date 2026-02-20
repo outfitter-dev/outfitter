@@ -83,6 +83,15 @@ describe("target registry", () => {
     expect(result.value.id).toBe("minimal");
   });
 
+  test("getTarget supports legacy lib alias", () => {
+    const result = getTarget("lib");
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+    expect(result.value.id).toBe("library");
+  });
+
   test("getTarget returns NotFoundError for unknown target", () => {
     const result = getTarget("unknown");
     expect(result.isErr()).toBe(true);
@@ -115,16 +124,16 @@ describe("target registry", () => {
 
   test("placement resolves from category metadata", () => {
     const cli = TARGET_REGISTRY.get("cli");
-    const lib = TARGET_REGISTRY.get("lib");
+    const library = TARGET_REGISTRY.get("library");
 
     expect(cli).toBeDefined();
-    expect(lib).toBeDefined();
-    if (!(cli && lib)) {
+    expect(library).toBeDefined();
+    if (!(cli && library)) {
       return;
     }
 
     expect(resolvePlacement(cli)).toBe("apps");
-    expect(resolvePlacement(lib)).toBe("packages");
+    expect(resolvePlacement(library)).toBe("packages");
   });
 
   test("INIT_TARGET_IDS includes only ready init-capable targets", () => {
@@ -153,7 +162,7 @@ describe("target registry", () => {
 
   test("listTargets filters by status", () => {
     const stubs = listTargets({ status: "stub" });
-    expect(stubs.length).toBe(4);
+    expect(stubs.length).toBe(3);
     expect(stubs.every((target) => target.status === "stub")).toBe(true);
   });
 

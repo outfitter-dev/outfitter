@@ -6,10 +6,10 @@ export type TargetId =
   | "cli"
   | "mcp"
   | "daemon"
+  | "library"
   | "api"
   | "worker"
-  | "web"
-  | "lib";
+  | "web";
 
 /**
  * Whether the target produces a runnable application or a library package.
