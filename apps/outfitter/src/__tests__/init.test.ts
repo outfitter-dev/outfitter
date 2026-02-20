@@ -162,6 +162,9 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies.commander).toBe("^14.0.2");
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
+    expect(packageJson.outfitter.template.kind).toBe("runnable");
+    expect(packageJson.outfitter.template.placement).toBe("apps");
+    expect(packageJson.outfitter.template.surfaces).toEqual(["cli"]);
 
     const tsconfigPath = join(tempDir, "tsconfig.json");
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
@@ -205,6 +208,9 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
+    expect(packageJson.outfitter.template.kind).toBe("library");
+    expect(packageJson.outfitter.template.placement).toBe("packages");
+    expect(packageJson.outfitter.template.surfaces).toEqual([]);
 
     const indexPath = join(tempDir, "src", "index.ts");
     const indexContent = readFileSync(indexPath, "utf-8");

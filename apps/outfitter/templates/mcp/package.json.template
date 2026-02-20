@@ -36,5 +36,12 @@
 		"@types/bun": "^1.3.7",
 		"typescript": "^5.9.3"
 	},
+	"outfitter": {
+		"template": {
+			"kind": "runnable",
+			"placement": "apps",
+			"surfaces": ["mcp"]
+		}
+	},
 	"license": "MIT"
 }

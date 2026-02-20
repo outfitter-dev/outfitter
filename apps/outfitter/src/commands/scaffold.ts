@@ -54,7 +54,14 @@ interface PackageJsonData {
   readonly scripts?: Record<string, string>;
   readonly dependencies?: Record<string, string>;
   readonly devDependencies?: Record<string, string>;
+  readonly outfitter?: unknown;
   readonly [key: string]: unknown;
+}
+
+interface TemplateMetadata {
+  readonly kind?: "runnable" | "library";
+  readonly placement?: "apps" | "packages";
+  readonly surfaces?: readonly ("cli" | "mcp" | "daemon")[];
 }
 
 type ProjectStructure =
@@ -225,6 +232,20 @@ function detectProjectStructure(
 }
 
 function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
+  const metadata = readTemplateMetadata(pkg);
+  if (metadata?.kind) {
+    return metadata.kind;
+  }
+  if (metadata?.placement === "apps") {
+    return "runnable";
+  }
+  if (metadata?.placement === "packages") {
+    return "library";
+  }
+  if (metadata?.surfaces && metadata.surfaces.length > 0) {
+    return "runnable";
+  }
+
   if (pkg.bin) {
     if (typeof pkg.bin === "string") {
       return "runnable";
@@ -243,6 +264,59 @@ function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
   }
 
   return "library";
+}
+
+function readTemplateMetadata(pkg: PackageJsonData): TemplateMetadata | null {
+  const outfitter = pkg.outfitter;
+  if (!outfitter || typeof outfitter !== "object" || Array.isArray(outfitter)) {
+    return null;
+  }
+
+  const template = (outfitter as Record<string, unknown>)["template"];
+  if (!template || typeof template !== "object" || Array.isArray(template)) {
+    return null;
+  }
+
+  const templateRecord = template as Record<string, unknown>;
+  const kind =
+    templateRecord["kind"] === "runnable" ||
+    templateRecord["kind"] === "library"
+      ? templateRecord["kind"]
+      : undefined;
+  const placement =
+    templateRecord["placement"] === "apps" ||
+    templateRecord["placement"] === "packages"
+      ? templateRecord["placement"]
+      : undefined;
+  const surfaces = parseTemplateSurfaces(templateRecord["surfaces"]);
+
+  const hasMetadata =
+    kind !== undefined ||
+    placement !== undefined ||
+    (surfaces !== undefined && surfaces.length > 0);
+  if (!hasMetadata) {
+    return null;
+  }
+
+  return {
+    ...(kind ? { kind } : {}),
+    ...(placement ? { placement } : {}),
+    ...(surfaces ? { surfaces } : {}),
+  };
+}
+
+function parseTemplateSurfaces(
+  value: unknown
+): readonly ("cli" | "mcp" | "daemon")[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const surfaces = value.filter(
+    (entry): entry is "cli" | "mcp" | "daemon" =>
+      entry === "cli" || entry === "mcp" || entry === "daemon"
+  );
+  return surfaces.length === value.length ? surfaces : undefined;
 }
 
 function ensureWorkspacePattern(
