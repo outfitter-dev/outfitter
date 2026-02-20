@@ -5,7 +5,8 @@
   "type": "module",
   "files": [
     "dist",
-    "templates"
+    "templates",
+    "template-versions.json"
   ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -154,6 +155,12 @@
         "default": "./dist/engine/config.js"
       }
     },
+    "./engine/dependency-versions": {
+      "import": {
+        "types": "./dist/engine/dependency-versions.d.ts",
+        "default": "./dist/engine/dependency-versions.js"
+      }
+    },
     "./engine/executor": {
       "import": {
         "types": "./dist/engine/executor.d.ts",
@@ -220,7 +227,9 @@
         "types": "./dist/targets/types.d.ts",
         "default": "./dist/targets/types.js"
       }
-    }
+    },
+    "./template-versions": "./template-versions.json",
+    "./template-versions.json": "./template-versions.json"
   },
   "bin": {
     "outfitter": "./dist/cli.js",

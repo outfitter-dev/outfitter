@@ -190,6 +190,58 @@ describe("scaffold command", () => {
     ).toBe(true);
   });
 
+  test("applies resolved dependency versions for scaffolded daemon projects", async () => {
+    const { runScaffold } = await import("../commands/scaffold.js");
+
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "acme-workspace",
+          private: true,
+          workspaces: ["apps/*", "packages/*"],
+        },
+        null,
+        2
+      )
+    );
+    mkdirSync(join(tempDir, "apps"), { recursive: true });
+    mkdirSync(join(tempDir, "packages"), { recursive: true });
+
+    const result = await runScaffold({
+      target: "daemon",
+      name: "assistant-daemon",
+      cwd: tempDir,
+      force: false,
+      skipInstall: true,
+      dryRun: false,
+      noTooling: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      return;
+    }
+
+    const packageJson = JSON.parse(
+      readFileSync(
+        join(tempDir, "apps", "assistant-daemon", "package.json"),
+        "utf-8"
+      )
+    ) as {
+      dependencies: Record<string, string>;
+      devDependencies: Record<string, string>;
+    };
+
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/types"]).toBe("^0.2.2");
+    expect(packageJson.dependencies["@outfitter/daemon"]).toBe("^0.2.3");
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies.commander).toBe("^14.0.2");
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
+  });
+
   test("converts a single-package project to workspace before scaffolding", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 

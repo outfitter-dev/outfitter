@@ -38,6 +38,33 @@ function sortExports(
   return sorted;
 }
 
+function addConfigFileExports(
+  exportsMap: Record<string, unknown>,
+  files: readonly string[] | undefined
+): void {
+  const CONFIG_RE = /\.(json|jsonc|yml|yaml|toml)$/;
+
+  for (const file of files ?? []) {
+    if (!CONFIG_RE.test(file) || file === "package.json") {
+      continue;
+    }
+
+    exportsMap[`./${file}`] = `./${file}`;
+
+    let alias = file.replace(CONFIG_RE, "");
+    const presetMatch = alias.match(/^(.+)\.preset(?:\.(.+))?$/);
+    if (presetMatch?.[1]) {
+      alias = presetMatch[2]
+        ? `${presetMatch[1]}-${presetMatch[2]}`
+        : presetMatch[1];
+    }
+
+    if (alias !== file) {
+      exportsMap[`./${alias}`] = `./${file}`;
+    }
+  }
+}
+
 /** Detect indentation from file content (tab vs spaces) */
 function detectIndent(content: string): string {
   const match = content.match(/^(\s+)"/m);
@@ -64,12 +91,19 @@ for (const root of WORKSPACE_ROOTS) {
     continue;
   }
 
-  const sorted = sortExports(pkg.exports as Record<string, unknown>);
-  const keys = Object.keys(pkg.exports as Record<string, unknown>);
-  const sortedKeys = Object.keys(sorted);
+  const exportsWithConfigs = {
+    ...(pkg.exports as Record<string, unknown>),
+  };
+  addConfigFileExports(exportsWithConfigs, pkg.files as string[] | undefined);
+  exportsWithConfigs["./package.json"] = "./package.json";
 
-  // Check if already sorted
-  if (keys.every((k, i) => k === sortedKeys[i])) continue;
+  const sorted = sortExports(exportsWithConfigs);
+  const currentExportsJson = JSON.stringify(pkg.exports);
+  const sortedExportsJson = JSON.stringify(sorted);
+
+  if (currentExportsJson === sortedExportsJson) {
+    continue;
+  }
 
   pkg.exports = sorted;
   await Bun.write(pkgPath, `${JSON.stringify(pkg, null, indent)}\n`);
