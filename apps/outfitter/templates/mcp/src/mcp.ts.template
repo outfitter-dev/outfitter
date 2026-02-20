@@ -2,78 +2,32 @@
  * {{projectName}} - MCP server definition
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { createLogger } from "@outfitter/logging";
+import { Result } from "@outfitter/contracts";
+import { createMcpServer, defineTool, connectStdio } from "@outfitter/mcp";
+import { z } from "zod";
 
-const logger = createLogger({ name: "{{binName}}" });
+const server = createMcpServer({
+	name: "{{binName}}",
+	version: "{{version}}",
+});
 
-type HelloArgs = {
-	name?: unknown;
-};
+const helloTool = defineTool({
+	name: "hello",
+	description: "Say hello to someone",
+	inputSchema: z.object({
+		name: z.string().default("World").describe("Name to greet"),
+	}),
+	handler: async (input, ctx) => {
+		ctx.logger.info(`Greeting ${input.name}`);
+		return Result.ok({ greeting: `Hello, ${input.name}!` });
+	},
+});
 
-export function createMCPServer(): Server {
-	const server = new Server(
-		{
-			name: "{{binName}}",
-			version: "{{version}}",
-		},
-		{
-			capabilities: {
-				tools: {},
-			},
-		}
-	);
+server.registerTool(helloTool);
 
-	// List available tools
-	server.setRequestHandler(ListToolsRequestSchema, async () => ({
-		tools: [
-			{
-				name: "hello",
-				description: "Say hello to someone",
-				inputSchema: {
-					type: "object" as const,
-					properties: {
-						name: {
-							type: "string",
-							description: "Name to greet",
-							default: "World",
-						},
-					},
-				},
-			},
-		],
-	}));
+export { server };
 
-	// Handle tool calls
-	server.setRequestHandler(CallToolRequestSchema, async (request) => {
-		const { name, arguments: args } = request.params;
-
-		const handlers: Record<string, (input: HelloArgs) => { content: { type: "text"; text: string }[] }> = {
-			hello: (input) => {
-				const greeting =
-					typeof input.name === "string" && input.name.trim().length > 0 ? input.name : "World";
-
-				logger.info(`Greeting ${greeting}`);
-				return {
-					content: [
-						{
-							type: "text" as const,
-							text: `Hello, ${greeting}!`,
-						},
-					],
-				};
-			},
-		};
-
-		const handler = handlers[name];
-		if (handler) {
-			return handler((args ?? {}) as HelloArgs);
-		}
-
-		logger.warn(`Unknown tool: ${name}`);
-		throw new Error(`Unknown tool: ${name}`);
-	});
-
-	return server;
+/** Start the MCP server over stdio transport. */
+export async function startServer(): Promise<void> {
+	await connectStdio(server);
 }
