@@ -51,7 +51,7 @@ bun run typecheck
 outfitter init --name ${workspaceScope}/my-app --preset cli
 
 # Add a shared library
-outfitter init --name ${workspaceScope}/my-lib --preset minimal
+outfitter init --name ${workspaceScope}/my-lib --preset library
 \`\`\`
 `;
 }

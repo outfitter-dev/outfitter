@@ -182,6 +182,45 @@ describe("init command file creation", () => {
     expect(actionsContent).toMatch(/createActionRegistry/);
   });
 
+  test("creates library template with Result handler pattern and no binary entrypoint", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-library",
+      preset: "library",
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const packageJsonPath = join(tempDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.bin).toBeUndefined();
+    expect(packageJson.scripts.build).toBe("bunup");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies.zod).toBe("^4.3.5");
+
+    const indexPath = join(tempDir, "src", "index.ts");
+    const indexContent = readFileSync(indexPath, "utf-8");
+    expect(indexContent).toContain('export * from "./types.js";');
+    expect(indexContent).toContain('export * from "./handlers.js";');
+
+    const handlerPath = join(tempDir, "src", "handlers.ts");
+    const handlerContent = readFileSync(handlerPath, "utf-8");
+    expect(handlerContent).toContain("Result.ok");
+    expect(handlerContent).toContain("createLogger");
+    expect(handlerContent).toContain("logger.info(");
+
+    expect(existsSync(join(tempDir, "src", "index.test.ts"))).toBe(true);
+    expect(existsSync(join(tempDir, "bunup.config.ts"))).toBe(true);
+  });
+
   test("creates src directory structure", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -526,7 +565,7 @@ describe("init command workspace scaffolding", () => {
 
     expect(readme).toContain("outfitter init --name @acme/my-app --preset cli");
     expect(readme).toContain(
-      "outfitter init --name @acme/my-lib --preset minimal"
+      "outfitter init --name @acme/my-lib --preset library"
     );
     expect(readme).not.toContain("@@acme");
   });

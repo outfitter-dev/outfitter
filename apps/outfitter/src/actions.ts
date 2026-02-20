@@ -89,7 +89,7 @@ const initInputSchema = z.object({
   targetDir: z.string(),
   name: z.string().optional(),
   bin: z.string().optional(),
-  preset: z.enum(["minimal", "cli", "mcp", "daemon"]).optional(),
+  preset: z.enum(["minimal", "cli", "mcp", "daemon", "library"]).optional(),
   template: z.string().optional(),
   structure: z.enum(["single", "workspace"]).optional(),
   workspaceName: z.string().optional(),
@@ -179,7 +179,7 @@ function resolveLocalFlag(flags: {
 
 function resolveInitOptions(
   context: ActionCliInputContext,
-  presetOverride?: "minimal" | "cli" | "mcp" | "daemon"
+  presetOverride?: "minimal" | "cli" | "mcp" | "daemon" | "library"
 ): InitActionInput {
   const flags = context.flags as InitFlags;
   const { force, dryRun, yes } = initSharedFlags.resolve(context);
@@ -193,6 +193,7 @@ function resolveInitOptions(
       | "cli"
       | "mcp"
       | "daemon"
+      | "library"
       | undefined);
   const template = resolveStringFlag(flags.template);
   const structure = resolveStringFlag(flags.structure) as
@@ -318,13 +319,13 @@ function createInitAction(options: {
   readonly id: string;
   readonly description: string;
   readonly command: string;
-  readonly presetOverride?: "minimal" | "cli" | "mcp" | "daemon";
+  readonly presetOverride?: "minimal" | "cli" | "mcp" | "daemon" | "library";
   readonly includePresetOption?: boolean;
   readonly includeTemplateOption?: boolean;
 }) {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
-    description: "Preset to use (minimal, cli, mcp, daemon)",
+    description: "Preset to use (minimal, cli, mcp, daemon, library)",
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
@@ -1113,6 +1114,14 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
       description: "Create a new daemon project",
       command: "daemon [directory]",
       presetOverride: "daemon",
+    })
+  )
+  .add(
+    createInitAction({
+      id: "init.library",
+      description: "Create a new library project",
+      command: "library [directory]",
+      presetOverride: "library",
     })
   )
   .add(demoAction)

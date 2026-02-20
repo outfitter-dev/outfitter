@@ -135,6 +135,19 @@ describe("outfitter action mapping", () => {
     expect(mapped.yes).toBe(true);
   });
 
+  test("exposes library preset in init action options and preset subcommand", () => {
+    const init = outfitterActions.get("init");
+    const presetOption = init?.cli?.options?.find((option) =>
+      option.flags.includes("--preset")
+    );
+
+    expect(presetOption).toBeDefined();
+    expect(presetOption?.description).toContain("library");
+
+    const libraryPresetAction = outfitterActions.get("init.library");
+    expect(libraryPresetAction).toBeDefined();
+  });
+
   test("maps scaffold shared force/dryRun flags via presets", () => {
     const action = outfitterActions.get("scaffold");
     expect(action?.cli?.mapInput).toBeDefined();

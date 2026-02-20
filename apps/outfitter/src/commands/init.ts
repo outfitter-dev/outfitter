@@ -58,7 +58,7 @@ import {
 export type InitStructure = "single" | "workspace";
 export type InitPresetId = Extract<
   TargetId,
-  "minimal" | "cli" | "mcp" | "daemon"
+  "minimal" | "cli" | "mcp" | "daemon" | "library"
 >;
 
 /**
@@ -156,7 +156,8 @@ function isValidInitPreset(value: string): value is InitPresetId {
     value === "minimal" ||
     value === "cli" ||
     value === "mcp" ||
-    value === "daemon"
+    value === "daemon" ||
+    value === "library"
   );
 }
 
@@ -864,7 +865,10 @@ export function initCommand(program: Command): void {
     command
       .option("-n, --name <name>", "Package name (defaults to directory name)")
       .option("-b, --bin <name>", "Binary name (defaults to project name)")
-      .option("-p, --preset <preset>", "Preset to use (minimal|cli|mcp|daemon)")
+      .option(
+        "-p, --preset <preset>",
+        "Preset to use (minimal|cli|mcp|daemon|library)"
+      )
       .option("-s, --structure <mode>", "Project structure (single|workspace)")
       .option("--workspace-name <name>", "Workspace root package name")
       .option("-f, --force", "Overwrite existing files", false)
@@ -1051,6 +1055,51 @@ export function initCommand(program: Command): void {
             : {}),
         },
         "daemon"
+      );
+
+      if (result.isErr()) {
+        exitWithError(result.error, outputOptions);
+        return;
+      }
+
+      await printInitResults(result.value, outputOptions);
+    }
+  );
+
+  withCommonOptions(
+    init.command("library [directory]").description("Create a new library")
+  ).action(
+    async (
+      directory: string | undefined,
+      flags: InitCommandFlags,
+      command: Command
+    ) => {
+      const targetDir = directory ?? process.cwd();
+      const resolvedFlags = resolveFlags(flags, command);
+      const mode = resolveOutputMode(resolvedFlags);
+      const outputOptions = mode ? { mode } : undefined;
+
+      const result = await runInit(
+        {
+          targetDir,
+          name: resolvedFlags.name,
+          bin: resolvedFlags.bin,
+          structure: resolvedFlags.structure,
+          workspaceName: resolvedFlags.workspaceName,
+          local: resolveLocal(resolvedFlags),
+          force: resolvedFlags.force ?? false,
+          with: resolvedFlags.with,
+          noTooling: resolvedFlags.noTooling,
+          yes: resolvedFlags.yes,
+          dryRun: Boolean(resolvedFlags.dryRun),
+          skipInstall: Boolean(resolvedFlags.skipInstall),
+          skipGit: Boolean(resolvedFlags.skipGit),
+          skipCommit: Boolean(resolvedFlags.skipCommit),
+          ...(resolvedFlags.installTimeout !== undefined
+            ? { installTimeout: resolvedFlags.installTimeout }
+            : {}),
+        },
+        "library"
       );
 
       if (result.isErr()) {

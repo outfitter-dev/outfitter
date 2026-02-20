@@ -9,6 +9,7 @@ import type {
 
 const TARGET_ALIASES: ReadonlyMap<string, TargetId> = new Map([
   ["basic", "minimal"],
+  ["lib", "library"],
 ]);
 
 export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> = new Map<
@@ -107,16 +108,16 @@ export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> = new Map<
     },
   ],
   [
-    "lib",
+    "library",
     {
-      id: "lib",
-      description: "Shared library package",
+      id: "library",
+      description: "Reusable library package with Result handlers",
       category: "library",
       placement: "packages",
-      templateDir: "lib",
+      templateDir: "library",
       defaultBlocks: ["scaffolding"],
-      status: "stub",
-      scope: "both",
+      status: "ready",
+      scope: "init-only",
     },
   ],
 ]);
