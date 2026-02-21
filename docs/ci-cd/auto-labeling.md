@@ -113,8 +113,7 @@ Some labels are applied manually, not automatically:
 | `release:patch` | Bug fix release |
 | `release:minor` | Feature release |
 | `release:major` | Breaking change release |
-| `release:none` | No release needed |
-| `release:none` | Skip changeset requirement in CI |
+| `release:none` | No release needed -- skips changeset requirement in CI |
 
 See [Releases](../RELEASES.md) for details.
 
