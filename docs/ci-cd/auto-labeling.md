@@ -35,7 +35,7 @@ PRs touching package source code get `package/*` labels:
 | `package/tooling` | `packages/tooling/**` |
 | `package/kit` | `packages/kit/**` |
 
-These labels are used by the auto-changeset workflow to determine which packages need version bumps.
+These labels help categorize which packages a PR affects.
 
 ### Area Labels
 

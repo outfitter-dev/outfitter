@@ -284,15 +284,22 @@ fix(cli): handle missing config gracefully
 
 ### Changesets
 
-For package-impacting changes:
+Add a changeset when your PR includes releasable changes:
 
-1. Add changeset: `bun run changeset`
-2. Version: `bun run version-packages`
-3. Publish: `bun run release`
+```bash
+bun changeset
+```
+
+After merge, canary versions publish automatically to `@canary`. Stable releases are triggered manually via **Actions > Release > Run workflow**, which opens a release PR — merging it publishes `@latest`.
+
+For PRs that don't need a release (docs, CI, tests), add the `release:none` label.
+
+See [docs/RELEASES.md](./docs/RELEASES.md) for the full process.
 
 ## Key Files
 
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — How packages fit together
+- [docs/RELEASES.md](./docs/RELEASES.md) — Changesets, canary publishing, stable release workflow
 - [docs/reference/patterns.md](./docs/reference/patterns.md) — Handler contract, Result types, error taxonomy
 - [docs/cli/conventions.md](./docs/cli/conventions.md) — CLI flag presets, verb conventions, queryability
 - [docs/getting-started.md](./docs/getting-started.md) — Tutorials
