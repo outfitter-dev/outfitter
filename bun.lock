@@ -47,7 +47,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.2.7",
+      "version": "0.3.0",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -57,11 +57,14 @@
         "@outfitter/cli": "workspace:*",
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
+        "@outfitter/daemon": "workspace:*",
         "@outfitter/docs": "workspace:*",
         "@outfitter/logging": "workspace:*",
+        "@outfitter/mcp": "workspace:*",
         "@outfitter/presets": "workspace:*",
         "@outfitter/tooling": "workspace:*",
         "@outfitter/tui": "workspace:*",
+        "@outfitter/types": "workspace:*",
         "commander": "catalog:",
         "typescript": "catalog:",
         "zod": "catalog:",
@@ -236,7 +239,7 @@
     },
     "packages/presets": {
       "name": "@outfitter/presets",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@biomejs/biome": "catalog:",
         "@clack/prompts": "catalog:",
@@ -299,7 +302,7 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
