@@ -43,6 +43,7 @@
     "version-packages": "changeset version && bun run sync-plugin-versions",
     "sync-plugin-versions": "bun run scripts/sync-plugin-versions.ts",
     "release": "turbo run build && bun run scripts/changeset-publish.ts",
+    "release:canary": "npx changeset version --snapshot canary && turbo run build && bun run scripts/changeset-publish.ts --tag canary",
     "publish:rc": "bun run scripts/publish-rc.ts",
     "prepare": "lefthook install"
   },
