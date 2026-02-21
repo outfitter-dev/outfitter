@@ -527,6 +527,6 @@ console.log(boxed.output);
 
 ## Related Documentation
 
-- [Box Rendering](../packages/tui/src/render/box.ts) — Box primitives and options
-- [PATTERNS.md](./PATTERNS.md) — Handler patterns and conventions
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Package structure and dependencies
+- [Box Rendering](../../packages/tui/src/render/box.ts) — Box primitives and options
+- [Patterns](./patterns.md) — Handler patterns and conventions
+- [Architecture](../ARCHITECTURE.md) — Package structure and dependencies

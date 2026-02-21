@@ -238,7 +238,7 @@ const result = Result.gen(function* () {
 // Result<{ user: User; settings: Settings }, UserError | SettingsError>
 ```
 
-See [RESULT-COOKBOOK.md](./RESULT-COOKBOOK.md) for detailed `Result.gen` patterns.
+See [Result Cookbook](./result-cookbook.md) for detailed `Result.gen` patterns.
 
 ### Result.await
 

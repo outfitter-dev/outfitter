@@ -202,8 +202,21 @@ logger.debug("Config loaded", { config }); // Secrets auto-redacted
 
 ### Logging API Migration (Message-First)
 
-If you're coming from Pino or another object-first logger, use the
-[Logging Migration Guide](./LOGGING-MIGRATION.md) to translate patterns.
+Outfitter logging is **message-first**: `logger.info("message", { meta })`. Pino and many other loggers are **object-first**: `logger.info({ meta }, "message")`. If you keep the object-first order, logs will be malformed.
+
+| Pattern | Pino (object-first) | @outfitter/logging (message-first) |
+| --- | --- | --- |
+| Basic log | `logger.info({ msg: "hello" })` | `logger.info("hello")` |
+| With metadata | `logger.info({ userId: 123 }, "hello")` | `logger.info("hello", { userId: 123 })` |
+| Error | `logger.error({ err, msg: "failed" })` | `logger.error("failed", { error: err })` |
+| Child logger | `logger.child({ userId })` | `logger.child({ userId })` |
+
+`@outfitter/logging` ships with message-first method signatures. Swapping arguments is a TypeScript error in strict mode.
+
+Common pitfalls:
+- **Object-first habits**: `logger.info({ userId }, "message")` is invalid here.
+- **Relying on `msg` key**: prefer the first string argument as the message.
+- **Using logs for user output**: logs are for diagnostics. CLI output should go through `@outfitter/cli` output utilities.
 
 ### From Manual Paths to XDG Compliance
 
@@ -232,9 +245,9 @@ const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
 
 ## Boundary and Command Migration
 
-For command-surface and boundary rules, use
-[Boundary and Command Conventions](./BOUNDARY-CONVENTIONS.md) as the source of
-truth.
+For command-surface and boundary rules, see the
+[Boundary Conventions](./ARCHITECTURE.md#boundary-conventions) section in
+Architecture.
 
 Key migration points:
 
@@ -328,11 +341,11 @@ When upgrading Outfitter packages:
 
 - **Package READMEs** — Detailed API documentation for each package
 - **[Architecture](./ARCHITECTURE.md)** — Understanding package relationships
-- **[Patterns](./PATTERNS.md)** — Common conventions and idioms
+- **[Patterns](./reference/patterns.md)** — Common conventions and idioms
 - **GitHub Issues** — Report bugs or request features
 
 ## Related Documentation
 
 - [Architecture](./ARCHITECTURE.md) — How packages fit together
-- [Getting Started](./GETTING-STARTED.md) — Hands-on tutorials
-- [Patterns](./PATTERNS.md) — Common conventions
+- [Getting Started](./getting-started.md) — Hands-on tutorials
+- [Patterns](./reference/patterns.md) — Common conventions

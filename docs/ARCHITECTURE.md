@@ -114,12 +114,6 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 | `@outfitter/docs` | Docs CLI and host adapter for product CLIs |
 | `@outfitter/tooling` | Dev tooling presets and CLI workflows |
 
-### Adoption IA
-
-For mixed-adoption sequencing across logging and non-logging workstreams, see:
-
-- [Mixed Adoption IA](./ADOPTION-IA.md)
-
 ### Deprecated Packages
 
 - `@outfitter/agents` is deprecated. Use `npx outfitter add scaffolding` instead.
@@ -306,8 +300,46 @@ Ten error categories cover all failure modes:
 
 Exit code 130 follows Unix convention (128 + SIGINT).
 
+## Boundary Conventions
+
+Clear boundaries between `apps/` and `packages/` keep the codebase modular and prevent tangled dependencies.
+
+### `packages/*` are library/runtime surfaces
+
+- Export importable APIs.
+- Avoid process entrypoint concerns (`process.argv`, `process.exit`, shebang scripts) unless shipping an explicit package bin.
+- Do not require root scripts to execute `packages/*/src/*` directly.
+
+### `apps/*` are runnable command hosts
+
+- Own user-facing command orchestration.
+- Wire package APIs into coherent command surfaces.
+- Host canonical command entrypoints.
+
+### Root scripts call canonical surfaces
+
+From the monorepo root, call app entrypoints (for monorepo workflows) or package bins (for standalone package workflows). Do not call package source files directly.
+
+### Command Model
+
+User-facing verbs we standardize around:
+
+| Verb | Purpose | Status |
+|------|---------|--------|
+| `init` | Create or bootstrap a project | Implemented |
+| `setup` | Opinionated setup wrapper for common defaults | Planned |
+| `add` | Add capabilities or tooling blocks | Implemented |
+| `check` | Validate project health and policy conformance | Implemented |
+| `fix` | Apply safe automated fixes for checkable issues | Planned |
+
+Repository maintenance operations are namespaced under `outfitter repo check|sync|export <subject>`. Current subjects: `docs`, `exports`, `readme`, `registry`, `changeset`, `tree`, `boundary-invocations`.
+
+### CI and Hook Enforcement
+
+`verify:ci` enforces boundary and command policy through `check-exports`, `check-readme-imports`, `check-clean-tree`, and `check-boundary-invocations`. Pre-push runs the same sequence through `bunx @outfitter/tooling pre-push`.
+
 ## Related Documentation
 
-- [Getting Started](./GETTING-STARTED.md) — Build your first project
-- [Patterns](./PATTERNS.md) — Common conventions and idioms
-- [Migration](./MIGRATION.md) — Upgrading and adoption guide
+- [Getting Started](./getting-started.md) — Build your first project
+- [Patterns](./reference/patterns.md) — Common conventions and idioms
+- [Migration](./migration.md) — Upgrading and adoption guide

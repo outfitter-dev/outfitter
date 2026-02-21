@@ -198,7 +198,5 @@ check-exports -> build (if drift) -> check-clean-tree -> check-readme-imports
 
 ## Related Documentation
 
-- [Architecture](./ARCHITECTURE.md) -- Package tiers and dependency graph
-- [Patterns](./PATTERNS.md) -- Handler contract, Result types
-- [Boundary and Command Conventions](./BOUNDARY-CONVENTIONS.md) -- Canonical
-  invocation and migration policy
+- [Architecture](../ARCHITECTURE.md) -- Package tiers and dependency graph
+- [Patterns](./patterns.md) -- Handler contract, Result types

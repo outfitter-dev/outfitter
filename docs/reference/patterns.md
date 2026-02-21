@@ -138,7 +138,7 @@ const finalResult = orElse(primaryResult, fallbackResult);
 
 ## Error Taxonomy
 
-Ten error categories cover all failure modes. Each maps to exit codes and HTTP status. See the [full taxonomy table](./ARCHITECTURE.md#error-taxonomy) in Architecture.
+Ten error categories cover all failure modes. Each maps to exit codes and HTTP status. See the [full taxonomy table](../ARCHITECTURE.md#error-taxonomy) in Architecture.
 
 ### Creating Errors
 
@@ -385,7 +385,7 @@ if (diff.hasChanges) {
 }
 ```
 
-For CLI-specific schema publication and command conventions, see [CLI Conventions](./CLI-CONVENTIONS.md).
+For CLI-specific schema publication and command conventions, see [CLI Conventions](../cli/conventions.md).
 
 ## Output Modes
 
@@ -630,6 +630,6 @@ const result = resolveConfig(AppConfigSchema, {
 
 ## Related Documentation
 
-- [Architecture](./ARCHITECTURE.md) — How packages fit together
-- [Getting Started](./GETTING-STARTED.md) — Hands-on tutorials
-- [Migration](./MIGRATION.md) — Upgrading and adoption
+- [Architecture](../ARCHITECTURE.md) — How packages fit together
+- [Getting Started](../getting-started.md) — Hands-on tutorials
+- [Migration](../migration.md) — Upgrading and adoption

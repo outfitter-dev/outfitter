@@ -21,9 +21,9 @@ body:
         - "@outfitter/tooling"
         - "@outfitter/types"
         - "AGENTS.md"
-        - "docs/PATTERNS.md"
+        - "docs/reference/patterns.md"
         - "docs/ARCHITECTURE.md"
-        - "docs/GETTING-STARTED.md"
+        - "docs/getting-started.md"
         - "README"
         - "Other"
     validations:
