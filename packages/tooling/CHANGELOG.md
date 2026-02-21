@@ -1,5 +1,11 @@
 # @outfitter/tooling
 
+## 0.3.1
+
+### Patch Changes
+
+- 70c1bac: Migrate to Bun workspace catalogs and @outfitter/presets for centralized dependency version management. Scaffold engine and registry now resolve versions dynamically from presets. Remove deprecated --template CLI flag. Rename internal template references to preset.
+
 ## 0.3.0
 
 ### Minor Changes
