@@ -28,7 +28,7 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@logtape/logtape": "^2.0.0"
+    "@logtape/logtape": "catalog:"
   },
   "peerDependencies": {
     "@outfitter/config": ">=0.3.0",
@@ -37,8 +37,8 @@
   "devDependencies": {
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",

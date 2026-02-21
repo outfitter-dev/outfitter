@@ -70,8 +70,8 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "zod": "^4.3.5"
+    "@modelcontextprotocol/sdk": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "@outfitter/config": ">=0.3.0",
@@ -82,8 +82,8 @@
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@outfitter/logging": "workspace:*",
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",

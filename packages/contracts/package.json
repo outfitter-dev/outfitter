@@ -130,12 +130,12 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "better-result": "^2.5.0",
-    "zod": "^4.3.5"
+    "better-result": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",

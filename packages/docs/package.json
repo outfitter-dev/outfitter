@@ -38,11 +38,11 @@
   },
   "dependencies": {
     "@outfitter/docs-core": "workspace:*",
-    "commander": "^14.0.2"
+    "commander": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",
