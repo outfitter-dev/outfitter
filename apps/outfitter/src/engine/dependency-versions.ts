@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getResolvedVersions } from "@outfitter/presets";
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
@@ -8,11 +9,6 @@ const DEPENDENCY_SECTIONS = [
   "peerDependencies",
   "optionalDependencies",
 ] as const;
-
-export interface TemplateVersionManifest {
-  readonly externalDependencies: Record<string, string>;
-  readonly internalDependencies: Record<string, string>;
-}
 
 export interface ResolvedTemplateDependencyVersions {
   readonly external: Record<string, string>;
@@ -72,7 +68,7 @@ function findOutfitterPackageRoot(): string {
   );
 }
 
-function collectDependencyRangesFromPackageJson(
+function collectOutfitterDepsFromPackageJson(
   packageJson: Record<string, unknown>
 ): Record<string, string> {
   const collected: Record<string, string> = {};
@@ -144,68 +140,45 @@ function collectWorkspacePackageRanges(
   return collected;
 }
 
-function loadTemplateVersionManifest(
-  packageRoot: string
-): TemplateVersionManifest {
-  const manifestPath = join(packageRoot, "template-versions.json");
-  const parsed = readJsonFile(manifestPath);
-  if (!isRecord(parsed)) {
-    throw new Error("template-versions.json must be a JSON object");
-  }
-
-  const internalDependencies = parsed["internalDependencies"];
-  const externalDependencies = parsed["externalDependencies"];
-  if (!(isRecord(internalDependencies) && isRecord(externalDependencies))) {
-    throw new Error(
-      "template-versions.json must include internalDependencies and externalDependencies objects"
-    );
-  }
-
-  return {
-    internalDependencies: Object.fromEntries(
-      Object.entries(internalDependencies).filter(
-        ([, value]) => typeof value === "string"
-      ) as readonly (readonly [string, string])[]
-    ),
-    externalDependencies: Object.fromEntries(
-      Object.entries(externalDependencies).filter(
-        ([, value]) => typeof value === "string"
-      ) as readonly (readonly [string, string])[]
-    ),
-  };
-}
-
+/**
+ * Resolve dependency versions for scaffold templates.
+ *
+ * External deps (zod, commander, etc.) come from `@outfitter/presets` which
+ * has concrete versions (catalog: resolved at publish time).
+ *
+ * Internal deps (`@outfitter/*`) come from workspace package scanning (monorepo)
+ * or from the outfitter CLI's own package.json deps (when published).
+ */
 export function resolveTemplateDependencyVersions(): ResolvedTemplateDependencyVersions {
   if (cachedResolvedVersions) {
     return cachedResolvedVersions;
   }
 
-  const packageRoot = findOutfitterPackageRoot();
-  const manifest = loadTemplateVersionManifest(packageRoot);
+  // External deps from @outfitter/presets (catalog-resolved at publish time).
+  const { all: presetsVersions } = getResolvedVersions();
 
+  // Internal deps: workspace packages (monorepo) take precedence over
+  // outfitter's own package.json deps (published, frozen at release time).
+  const packageRoot = findOutfitterPackageRoot();
   const packageJsonPath = join(packageRoot, "package.json");
   const raw = existsSync(packageJsonPath)
     ? readJsonFile(packageJsonPath)
     : undefined;
   const fromOutfitterPackage =
     raw !== undefined && isRecord(raw)
-      ? collectDependencyRangesFromPackageJson(raw)
+      ? collectOutfitterDepsFromPackageJson(raw)
       : {};
   const fromWorkspacePackages = collectWorkspacePackageRanges(packageRoot);
 
-  const internal: Record<string, string> = {};
-  for (const [name, fallbackRange] of Object.entries(
-    manifest.internalDependencies
-  )) {
-    internal[name] =
-      fromOutfitterPackage[name] ??
-      fromWorkspacePackages[name] ??
-      fallbackRange;
-  }
+  // Workspace overrides outfitter's own deps (live vs frozen).
+  const internal: Record<string, string> = {
+    ...fromOutfitterPackage,
+    ...fromWorkspacePackages,
+  };
 
   cachedResolvedVersions = {
     internal,
-    external: { ...manifest.externalDependencies },
+    external: { ...presetsVersions },
   };
   return cachedResolvedVersions;
 }
