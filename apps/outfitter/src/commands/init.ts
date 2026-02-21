@@ -78,8 +78,6 @@ export interface InitOptions {
   readonly skipInstall?: boolean | undefined;
   readonly structure?: InitStructure | undefined;
   readonly targetDir: string;
-  /** @deprecated Use `preset` instead. */
-  readonly template?: string | undefined;
   readonly with?: string | undefined;
   readonly workspaceName?: string | undefined;
   readonly yes?: boolean | undefined;
@@ -175,27 +173,6 @@ function resolvePresetFromFlags(
       );
     }
     return Result.ok(presetFromFlag);
-  }
-
-  if (options.template) {
-    const mapped = options.template === "basic" ? "minimal" : options.template;
-    process.stderr.write(
-      "Warning: --template is deprecated and will be removed in the next major version.\n" +
-        `  Use --preset instead: outfitter init --preset ${mapped}\n` +
-        (options.template === "basic"
-          ? '  Note: "basic" has been renamed to "minimal".\n'
-          : "")
-    );
-
-    if (isValidInitPreset(mapped)) {
-      return Result.ok(mapped);
-    }
-
-    return Result.err(
-      new InitError(
-        `Unknown template '${options.template}'. Available presets: ${INIT_TARGET_IDS.join(", ")}`
-      )
-    );
   }
 
   return Result.ok(undefined);
@@ -836,7 +813,6 @@ export function initCommand(program: Command): void {
     skipGit?: boolean;
     skipInstall?: boolean;
     structure?: InitStructure;
-    template?: string;
     with?: string;
     workspace?: boolean;
     workspaceName?: string;
@@ -891,11 +867,7 @@ export function initCommand(program: Command): void {
       .option("--skip-commit", "Skip initial commit only", false)
       .option("--install-timeout <ms>", "bun install timeout in ms");
 
-  withCommonOptions(
-    init
-      .argument("[directory]")
-      .option("-t, --template <template>", "Template to use (deprecated)")
-  ).action(
+  withCommonOptions(init.argument("[directory]")).action(
     async (
       directory: string | undefined,
       flags: InitCommandFlags,
@@ -911,7 +883,6 @@ export function initCommand(program: Command): void {
         name: resolvedFlags.name,
         bin: resolvedFlags.bin,
         preset: resolvedFlags.preset,
-        template: resolvedFlags.template,
         structure: resolvedFlags.structure,
         workspaceName: resolvedFlags.workspaceName,
         local: resolveLocal(resolvedFlags),

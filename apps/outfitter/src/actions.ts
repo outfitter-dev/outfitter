@@ -62,7 +62,6 @@ interface InitFlags {
   readonly skipGit?: unknown;
   readonly skipInstall?: unknown;
   readonly structure?: unknown;
-  readonly template?: unknown;
   readonly tooling?: unknown;
   readonly with?: unknown;
   readonly workspace?: unknown;
@@ -112,7 +111,6 @@ const initInputSchema = z.object({
   name: z.string().optional(),
   bin: z.string().optional(),
   preset: z.enum(initPresetValues).optional(),
-  template: z.string().optional(),
   structure: z.enum(["single", "workspace"]).optional(),
   workspaceName: z.string().optional(),
   local: z.boolean().optional(),
@@ -212,7 +210,6 @@ function resolveInitOptions(
     presetOverride ??
       (resolveStringFlag(flags.preset) as InitPresetFlag | undefined)
   );
-  const template = resolveStringFlag(flags.template);
   const structure = resolveStringFlag(flags.structure) as
     | "single"
     | "workspace"
@@ -239,7 +236,6 @@ function resolveInitOptions(
     targetDir,
     name,
     ...(preset ? { preset } : {}),
-    ...(template ? { template } : {}),
     ...(structure ? { structure } : {}),
     ...(workspaceName ? { workspaceName } : {}),
     force,
@@ -316,11 +312,6 @@ const commonInitOptions: ActionCliOption[] = [
   },
 ];
 
-const deprecatedTemplateOption: ActionCliOption = {
-  flags: "-t, --template <template>",
-  description: "Template to use (deprecated, use --preset)",
-};
-
 const initSharedFlags = actionCliPresets(
   forcePreset(),
   dryRunPreset(),
@@ -338,7 +329,6 @@ function createInitAction(options: {
   readonly command: string;
   readonly presetOverride?: NormalizedInitPreset;
   readonly includePresetOption?: boolean;
-  readonly includeDeprecatedTemplateOption?: boolean;
 }) {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
@@ -379,10 +369,6 @@ function createInitAction(options: {
   if (options.includePresetOption) {
     initOptions.push(presetOption);
   }
-  if (options.includeDeprecatedTemplateOption) {
-    initOptions.push(deprecatedTemplateOption);
-  }
-
   return defineAction({
     id: options.id,
     description: options.description,
@@ -1107,7 +1093,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
       description: "Create a new Outfitter project",
       command: "[directory]",
       includePresetOption: true,
-      includeDeprecatedTemplateOption: true,
     })
   )
   .add(

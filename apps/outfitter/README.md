@@ -62,7 +62,6 @@ Options:
 - `-n, --name <name>` - Package name
 - `-b, --bin <name>` - Binary name
 - `-p, --preset <preset>` - Preset (`minimal`, `cli`, `mcp`, `daemon`)
-- `-t, --template <template>` - Deprecated alias for `--preset`
 - `-s, --structure <mode>` - Project structure (`single` | `workspace`)
 - `--workspace-name <name>` - Workspace root package name
 - `--local` - Use `workspace:*` for `@outfitter/*` dependencies
@@ -82,7 +81,7 @@ Examples:
 outfitter init my-lib --preset minimal --yes
 outfitter init cli my-project --yes
 outfitter init my-workspace --preset mcp --structure workspace --workspace-name @acme/root
-outfitter init . --template basic --name my-lib
+outfitter init . --preset minimal --name my-lib
 ```
 
 ### `scaffold`

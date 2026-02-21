@@ -926,22 +926,6 @@ describe("init command error handling", () => {
     }
   });
 
-  test("returns error for invalid template name", async () => {
-    const { runInit } = await import("../commands/init.js");
-
-    const result = await runInit({
-      targetDir: tempDir,
-      name: "test-project",
-      template: "nonexistent-template",
-      force: false,
-    });
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("template");
-    }
-  });
-
   test("returns error when target directory does not exist and cannot be created", async () => {
     const { runInit } = await import("../commands/init.js");
 
