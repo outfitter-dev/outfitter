@@ -286,11 +286,12 @@ export async function runCheckChangeset(
 	const check = checkChangesetRequired(changedPackages, changesetFiles);
 
 	if (!check.ok) {
-		// Fail with actionable error
-		process.stderr.write(`${COLORS.red}Missing changeset!${COLORS.reset}\n\n`);
+		// Warn but don't block — manual changesets are recommended
 		process.stderr.write(
-			"The following packages have source changes but no changeset:\n\n",
+			`${COLORS.yellow}No changeset found.${COLORS.reset} ` +
+				"Consider adding one with `bun run changeset` for a custom changelog entry.\n\n",
 		);
+		process.stderr.write("Packages with source changes:\n\n");
 
 		for (const pkg of check.missingFor) {
 			process.stderr.write(
@@ -299,11 +300,9 @@ export async function runCheckChangeset(
 		}
 
 		process.stderr.write(
-			`\nRun ${COLORS.blue}bun run changeset${COLORS.reset} to add a changeset, ` +
-				`or add the ${COLORS.blue}no-changeset${COLORS.reset} label to skip.\n`,
+			`\nRun ${COLORS.blue}bun run changeset${COLORS.reset} for a custom changelog entry, ` +
+				`or add ${COLORS.blue}release:none${COLORS.reset} to skip.\n`,
 		);
-
-		process.exit(1);
 	}
 
 	const ignoredReferences = getIgnoredReferencesForChangedChangesets(

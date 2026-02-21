@@ -7,6 +7,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | Document | Description |
 |----------|-------------|
 | [Architecture](./ARCHITECTURE.md) | Package tiers, dependency graph, boundary conventions, design decisions |
+| [Releases](./RELEASES.md) | Changesets, canary publishing, stable release workflow |
 | [Getting Started](./getting-started.md) | Build your first CLI, MCP server, or daemon |
 | [Migration](./migration.md) | Adopting Outfitter, upgrading between versions |
 
