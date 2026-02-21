@@ -66,8 +66,8 @@ export function planCreateProject(
   const defaultBlocks = includeTooling ? [...preset.defaultBlocks] : [];
   const changes: CreatePlanChange[] = [
     {
-      type: "copy-template",
-      template: preset.template,
+      type: "copy-preset",
+      preset: preset.presetDir,
       targetDir,
       overlayBaseTemplate: true,
     },

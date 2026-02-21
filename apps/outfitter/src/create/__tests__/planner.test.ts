@@ -26,8 +26,8 @@ describe("create planner", () => {
     });
     expect(result.value.changes).toEqual([
       {
-        type: "copy-template",
-        template: "cli",
+        type: "copy-preset",
+        preset: "cli",
         targetDir: "/tmp/hello-cli",
         overlayBaseTemplate: true,
       },

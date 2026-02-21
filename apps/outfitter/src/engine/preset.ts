@@ -52,10 +52,10 @@ const BINARY_EXTENSIONS = new Set([
 ]);
 
 /**
- * Get the directory containing scaffold preset/template files.
+ * Get the directory containing scaffold preset files.
  * Delegates to `@outfitter/presets` which is the single source of truth.
  */
-export function getTemplatesDir(): string {
+export function getPresetsBaseDir(): string {
   return getPresetsDir();
 }
 
@@ -81,8 +81,8 @@ export function replacePlaceholders(
   });
 }
 
-export function copyTemplateFiles(
-  templateDir: string,
+export function copyPresetFiles(
+  presetDir: string,
   targetDir: string,
   values: PlaceholderValues,
   options: EngineOptions,
@@ -109,10 +109,10 @@ export function copyTemplateFiles(
       }
     }
 
-    const entries = readdirSync(templateDir);
+    const entries = readdirSync(presetDir);
 
     for (const entry of entries) {
-      const sourcePath = join(templateDir, entry);
+      const sourcePath = join(presetDir, entry);
       const sourceStat = statSync(sourcePath);
       const relativePath = relativePrefix
         ? `${relativePrefix}/${entry}`
@@ -124,7 +124,7 @@ export function copyTemplateFiles(
 
       if (sourceStat.isDirectory()) {
         const targetSubDir = join(targetDir, entry);
-        const nestedResult = copyTemplateFiles(
+        const nestedResult = copyPresetFiles(
           sourcePath,
           targetSubDir,
           values,
@@ -173,13 +173,13 @@ export function copyTemplateFiles(
           options.collector.add({
             type: "file-overwrite",
             path: targetPath,
-            source: "template",
+            source: "preset",
           });
         } else {
           options.collector.add({
             type: "file-create",
             path: targetPath,
-            source: "template",
+            source: "preset",
           });
         }
         copyOptions?.writtenPaths?.add(targetPath);
@@ -203,7 +203,7 @@ export function copyTemplateFiles(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return Result.err(
-      new ScaffoldError(`Failed to copy template files: ${message}`)
+      new ScaffoldError(`Failed to copy preset files: ${message}`)
     );
   }
 }

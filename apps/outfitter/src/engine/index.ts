@@ -14,12 +14,12 @@ export {
   validateProjectDirectoryName,
 } from "./names.js";
 export {
-  copyTemplateFiles,
+  copyPresetFiles,
   getOutputFilename,
-  getTemplatesDir,
+  getPresetsBaseDir,
   isBinaryFile,
   replacePlaceholders,
-} from "./template.js";
+} from "./preset.js";
 export type {
   EngineCollector,
   EngineOptions,

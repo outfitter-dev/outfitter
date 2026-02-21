@@ -58,7 +58,7 @@ interface PackageJsonData {
   readonly [key: string]: unknown;
 }
 
-interface TemplateMetadata {
+interface PresetMetadata {
   readonly kind?: "runnable" | "library";
   readonly placement?: "apps" | "packages";
   readonly surfaces?: readonly ("cli" | "mcp" | "daemon")[];
@@ -232,7 +232,7 @@ function detectProjectStructure(
 }
 
 function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
-  const metadata = readTemplateMetadata(pkg);
+  const metadata = readPresetMetadata(pkg);
   if (metadata?.kind) {
     return metadata.kind;
   }
@@ -266,7 +266,7 @@ function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
   return "library";
 }
 
-function readTemplateMetadata(pkg: PackageJsonData): TemplateMetadata | null {
+function readPresetMetadata(pkg: PackageJsonData): PresetMetadata | null {
   const outfitter = pkg.outfitter;
   if (!outfitter || typeof outfitter !== "object" || Array.isArray(outfitter)) {
     return null;
@@ -288,7 +288,7 @@ function readTemplateMetadata(pkg: PackageJsonData): TemplateMetadata | null {
     templateRecord["placement"] === "packages"
       ? templateRecord["placement"]
       : undefined;
-  const surfaces = parseTemplateSurfaces(templateRecord["surfaces"]);
+  const surfaces = parsePresetSurfaces(templateRecord["surfaces"]);
 
   const hasMetadata =
     kind !== undefined ||
@@ -305,7 +305,7 @@ function readTemplateMetadata(pkg: PackageJsonData): TemplateMetadata | null {
   };
 }
 
-function parseTemplateSurfaces(
+function parsePresetSurfaces(
   value: unknown
 ): readonly ("cli" | "mcp" | "daemon")[] | undefined {
   if (!Array.isArray(value)) {
@@ -587,8 +587,8 @@ function buildScaffoldPlan(
     },
     changes: [
       {
-        type: "copy-template",
-        template: target.templateDir,
+        type: "copy-preset",
+        preset: target.presetDir,
         targetDir,
         overlayBaseTemplate: true,
       },

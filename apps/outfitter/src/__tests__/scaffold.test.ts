@@ -336,7 +336,7 @@ describe("scaffold command", () => {
     ).toBe(true);
   });
 
-  test("uses template metadata to classify existing project kind during conversion", async () => {
+  test("uses preset metadata to classify existing project kind during conversion", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 
     writeFileSync(
@@ -382,7 +382,7 @@ describe("scaffold command", () => {
     );
   });
 
-  test("falls back to legacy heuristics when template metadata is invalid", async () => {
+  test("falls back to legacy heuristics when preset metadata is invalid", async () => {
     const { runScaffold } = await import("../commands/scaffold.js");
 
     writeFileSync(

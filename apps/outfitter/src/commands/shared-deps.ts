@@ -8,7 +8,7 @@
  */
 
 import { getResolvedVersions } from "@outfitter/presets";
-import { resolveTemplateDependencyVersions } from "../engine/dependency-versions.js";
+import { resolvePresetDependencyVersions } from "../engine/dependency-versions.js";
 
 const { all: resolvedVersions } = getResolvedVersions();
 
@@ -23,7 +23,7 @@ function requireVersion(name: string): string {
 }
 
 function requireInternalVersion(name: string): string {
-  const versions = resolveTemplateDependencyVersions();
+  const versions = resolvePresetDependencyVersions();
   const version = versions.internal[name];
   if (!version) {
     throw new Error(

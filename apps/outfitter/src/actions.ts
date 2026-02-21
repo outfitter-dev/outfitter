@@ -316,7 +316,7 @@ const commonInitOptions: ActionCliOption[] = [
   },
 ];
 
-const templateOption: ActionCliOption = {
+const deprecatedTemplateOption: ActionCliOption = {
   flags: "-t, --template <template>",
   description: "Template to use (deprecated, use --preset)",
 };
@@ -338,7 +338,7 @@ function createInitAction(options: {
   readonly command: string;
   readonly presetOverride?: NormalizedInitPreset;
   readonly includePresetOption?: boolean;
-  readonly includeTemplateOption?: boolean;
+  readonly includeDeprecatedTemplateOption?: boolean;
 }) {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
@@ -379,8 +379,8 @@ function createInitAction(options: {
   if (options.includePresetOption) {
     initOptions.push(presetOption);
   }
-  if (options.includeTemplateOption) {
-    initOptions.push(templateOption);
+  if (options.includeDeprecatedTemplateOption) {
+    initOptions.push(deprecatedTemplateOption);
   }
 
   return defineAction({
@@ -1107,7 +1107,7 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
       description: "Create a new Outfitter project",
       command: "[directory]",
       includePresetOption: true,
-      includeTemplateOption: true,
+      includeDeprecatedTemplateOption: true,
     })
   )
   .add(

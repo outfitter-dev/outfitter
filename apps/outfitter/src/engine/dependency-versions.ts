@@ -10,12 +10,12 @@ const DEPENDENCY_SECTIONS = [
   "optionalDependencies",
 ] as const;
 
-export interface ResolvedTemplateDependencyVersions {
+export interface ResolvedPresetDependencyVersions {
   readonly external: Record<string, string>;
   readonly internal: Record<string, string>;
 }
 
-let cachedResolvedVersions: ResolvedTemplateDependencyVersions | undefined;
+let cachedResolvedVersions: ResolvedPresetDependencyVersions | undefined;
 
 export function clearResolvedVersionsCache(): void {
   cachedResolvedVersions = undefined;
@@ -141,7 +141,7 @@ function collectWorkspacePackageRanges(
 }
 
 /**
- * Resolve dependency versions for scaffold templates.
+ * Resolve dependency versions for scaffold presets.
  *
  * External deps (zod, commander, etc.) come from `@outfitter/presets` which
  * has concrete versions (catalog: resolved at publish time).
@@ -149,7 +149,7 @@ function collectWorkspacePackageRanges(
  * Internal deps (`@outfitter/*`) come from workspace package scanning (monorepo)
  * or from the outfitter CLI's own package.json deps (when published).
  */
-export function resolveTemplateDependencyVersions(): ResolvedTemplateDependencyVersions {
+export function resolvePresetDependencyVersions(): ResolvedPresetDependencyVersions {
   if (cachedResolvedVersions) {
     return cachedResolvedVersions;
   }
@@ -185,7 +185,7 @@ export function resolveTemplateDependencyVersions(): ResolvedTemplateDependencyV
 
 export function applyResolvedDependencyVersions(
   parsedPackageJson: Record<string, unknown>,
-  versions: ResolvedTemplateDependencyVersions
+  versions: ResolvedPresetDependencyVersions
 ): void {
   for (const section of DEPENDENCY_SECTIONS) {
     const sectionValue = parsedPackageJson[section];

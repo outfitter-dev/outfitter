@@ -489,8 +489,8 @@ function buildInitPlan(
     },
     changes: [
       {
-        type: "copy-template",
-        template: target.templateDir,
+        type: "copy-preset",
+        preset: target.presetDir,
         targetDir: projectDir,
         overlayBaseTemplate: true,
       },

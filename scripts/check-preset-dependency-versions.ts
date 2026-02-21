@@ -1,11 +1,11 @@
 /**
  * CI drift check for catalog architecture.
  *
- * Validates that template files, registry blocks, and source files
+ * Validates that preset files, registry blocks, and source files
  * stay in sync with the canonical versions from @outfitter/presets.
  *
  * Checks:
- * 1. Template deps match presets (base version comparison)
+ * 1. Preset deps match presets (base version comparison)
  * 2. Registry.json devDependency versions match presets
  * 3. Biome schema URLs match the catalog biome version
  * 4. Bun version is consistent across .bun-version, engines, and docs
@@ -36,9 +36,9 @@ function normalizeVersionRange(version: string): string {
   return trimmed.replace(/^[\^~>=<]+/, "");
 }
 
-// --- Check 1: Template deps ---
+// --- Check 1: Preset deps ---
 
-function validateTemplateDeps(
+function validatePresetDeps(
   resolvedVersions: Readonly<Record<string, string>>,
   problems: string[]
 ): void {
@@ -261,7 +261,7 @@ function main(): number {
   const { all: resolvedVersions } = getResolvedVersions();
   const problems: string[] = [];
 
-  validateTemplateDeps(resolvedVersions, problems);
+  validatePresetDeps(resolvedVersions, problems);
   validateRegistryVersions(resolvedVersions, problems);
 
   const biomeVersion = resolvedVersions["@biomejs/biome"];

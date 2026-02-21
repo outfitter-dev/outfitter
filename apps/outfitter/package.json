@@ -177,16 +177,16 @@
         "default": "./dist/engine/post-scaffold.js"
       }
     },
+    "./engine/preset": {
+      "import": {
+        "types": "./dist/engine/preset.d.ts",
+        "default": "./dist/engine/preset.js"
+      }
+    },
     "./engine/render-plan": {
       "import": {
         "types": "./dist/engine/render-plan.d.ts",
         "default": "./dist/engine/render-plan.js"
-      }
-    },
-    "./engine/template": {
-      "import": {
-        "types": "./dist/engine/template.d.ts",
-        "default": "./dist/engine/template.js"
       }
     },
     "./engine/types": {

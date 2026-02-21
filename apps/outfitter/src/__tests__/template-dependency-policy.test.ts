@@ -15,31 +15,32 @@ const DEPENDENCY_SECTIONS = [
   "optionalDependencies",
 ] as const;
 
-function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {
+function getPresetPackageJsonPaths(rootDir: string): readonly string[] {
   const glob = new Bun.Glob("**/package.json.template");
   return Array.from(glob.scanSync({ cwd: rootDir, absolute: false }))
     .map((relative) => join(rootDir, relative))
     .sort();
 }
 
-describe("template dependency policy", () => {
-  test("all template package.json files use workspace protocol for @outfitter deps and presets versions for external deps", () => {
+describe("preset dependency policy", () => {
+  test("all preset package.json files use workspace protocol for @outfitter deps and presets versions for external deps", () => {
     const currentDir = dirname(fileURLToPath(import.meta.url));
     const packageRoot = join(currentDir, "..", "..");
     const repoRoot = join(packageRoot, "..", "..");
     const { all: resolvedVersions } = getResolvedVersions();
 
-    const templateRoots = [
+    const presetRoots = [
       join(repoRoot, "templates"),
       join(repoRoot, "packages", "presets", "presets"),
     ] as const;
 
-    for (const templateRoot of templateRoots) {
-      const packageTemplates = getTemplatePackageJsonPaths(templateRoot);
-      for (const templatePath of packageTemplates) {
-        const parsed = JSON.parse(
-          readFileSync(templatePath, "utf-8")
-        ) as Record<string, unknown>;
+    for (const presetRoot of presetRoots) {
+      const packagePresets = getPresetPackageJsonPaths(presetRoot);
+      for (const presetPath of packagePresets) {
+        const parsed = JSON.parse(readFileSync(presetPath, "utf-8")) as Record<
+          string,
+          unknown
+        >;
 
         for (const section of DEPENDENCY_SECTIONS) {
           const sectionValue = parsed[section];
