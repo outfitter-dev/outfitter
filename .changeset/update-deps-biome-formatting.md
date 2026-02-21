@@ -1,5 +1,4 @@
 ---
-"@outfitter/agents": patch
 "@outfitter/cli": patch
 "@outfitter/config": patch
 "@outfitter/contracts": patch
