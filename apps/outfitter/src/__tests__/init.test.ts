@@ -490,17 +490,16 @@ describe("init command default behavior", () => {
     expect(packageJson.name).toBe("my-project-dir");
   });
 
-  test("uses 'basic' template by default", async () => {
+  test("uses minimal preset by default", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: undefined,
       force: false,
     });
 
-    // Should succeed without error using basic template
+    // Should succeed without error using minimal preset
     const packageJsonPath = join(tempDir, "package.json");
     expect(existsSync(packageJsonPath)).toBe(true);
   });

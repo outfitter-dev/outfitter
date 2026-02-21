@@ -14,9 +14,9 @@ Outfitter provides shared infrastructure for AI-agent-ready tooling: CLI, MCP se
 
 ## Project Structure
 
-- `apps/` — Runnable applications; `apps/outfitter/` is the CLI and scaffolding templates
-- `packages/` — Versioned libraries (`@outfitter/*`) with source in `src/`
-- `templates/` — Shared templates
+- `apps/` — Runnable applications; `apps/outfitter/` is the CLI
+- `packages/` — Versioned libraries (`@outfitter/*`) with source in `src/`; `packages/presets/` holds scaffold presets
+- `templates/` — Legacy shared templates (canonical location: `packages/presets/presets/`)
 - `docs/` — Specs and plan documents
 
 Tests live alongside code in `src/__tests__/` with `*.test.ts` files; snapshots use `__snapshots__/` with `.snap` format.
