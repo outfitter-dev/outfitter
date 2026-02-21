@@ -137,6 +137,88 @@ function validateManifestVsReality(
   }
 }
 
+function validateBiomeSchemaUrls(
+  expectedBiomeVersion: string,
+  problems: string[]
+): void {
+  const baseVersion = stripRangePrefix(expectedBiomeVersion);
+  const glob = new Bun.Glob("{templates,packages/presets/presets}/**/biome.json.template");
+  for (const path of glob.scanSync({ absolute: false })) {
+    try {
+      const content = readFileSync(path, "utf-8");
+      const match = content.match(
+        /biomejs\.dev\/schemas\/([\d.]+)\/schema\.json/
+      );
+      if (match && match[1] !== baseVersion) {
+        problems.push(
+          `biome schema drift: ${path} has schema version ${match[1]} but expected ${baseVersion}`
+        );
+        if (match && match[1] !== baseVersion) {
+          problems.push(
+            `biome schema drift: ${path} has ${match[1]} but expected ${baseVersion}`
+          );
+        }
+      } catch {
+        // Skip unreadable files.
+      }
+    }
+  }
+}
+
+function validateBunVersionConsistency(problems: string[]): void {
+  const bunVersionFile = readFileSync(".bun-version", "utf-8").trim();
+
+  const rootPkg = loadRootPackageJson();
+  const engines = rootPkg["engines"];
+  if (isRecord(engines) && typeof engines["bun"] === "string") {
+    const engineBun = stripRangePrefix(engines["bun"]);
+    if (engineBun !== bunVersionFile) {
+      problems.push(
+        `Bun version drift: .bun-version is ${bunVersionFile} but engines.bun is ${engines["bun"]}`
+      );
+    }
+
+    let bunTypesVersion: string | undefined;
+    const catalog = rootPkg["catalog"];
+    if (isRecord(catalog) && typeof catalog["@types/bun"] === "string") {
+      bunTypesVersion = catalog["@types/bun"];
+    }
+    if (!bunTypesVersion) {
+      const devDependencies = rootPkg["devDependencies"];
+      if (
+        isRecord(devDependencies) &&
+        typeof devDependencies["@types/bun"] === "string"
+      ) {
+        bunTypesVersion = devDependencies["@types/bun"];
+      }
+    }
+    if (
+      bunTypesVersion &&
+      normalizeVersionRange(bunTypesVersion) !== bunVersionFile
+    ) {
+      problems.push(
+        `Bun version drift: .bun-version is ${bunVersionFile} but @types/bun is ${bunTypesVersion}`
+      );
+    }
+  }
+
+  const docsWithBunVersion = ["README.md", "apps/outfitter/README.md"] as const;
+
+  for (const docPath of docsWithBunVersion) {
+    try {
+      const content = readFileSync(docPath, "utf-8");
+      const match = content.match(/\bbun\b\s*(?:>=|>|=)\s*([\d.]+)/i);
+      if (match && match[1] !== bunVersionFile) {
+        problems.push(
+          `Bun version drift: ${docPath} references Bun ${match[1]} but .bun-version is ${bunVersionFile}`
+        );
+      }
+    } catch {
+      // Skip missing docs.
+    }
+  }
+}
+
 function main(): number {
   const manifest = loadManifest();
   const internal = new Set(Object.keys(manifest.internalDependencies));
@@ -147,6 +229,15 @@ function main(): number {
 
   // Check manifest versions match reality.
   validateManifestVsReality(manifest, problems);
+
+  // Check biome schema URLs match the manifest biome version.
+  const biomeVersion = manifest.externalDependencies["@biomejs/biome"];
+  if (biomeVersion) {
+    validateBiomeSchemaUrls(biomeVersion, problems);
+  }
+
+  // Check Bun version consistency across the repo.
+  validateBunVersionConsistency(problems);
 
   for (const templateRoot of templateRoots) {
     for (const templatePath of getTemplatePackageJsonPaths(templateRoot)) {
