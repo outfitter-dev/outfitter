@@ -309,6 +309,7 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "@outfitter/presets": "workspace:*",
         "@types/bun": "catalog:",
         "yaml": "catalog:",
       },
