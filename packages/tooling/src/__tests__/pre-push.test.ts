@@ -5,6 +5,7 @@ import {
 	createVerificationPlan,
 	hasPackageSourceChanges,
 	isRedPhaseBranch,
+	isReleaseBranch,
 	isScaffoldBranch,
 	isTestOnlyPath,
 } from "../cli/pre-push.js";
@@ -24,6 +25,12 @@ describe("pre-push branch detection", () => {
 		expect(isScaffoldBranch("feature/logging-scaffold")).toBe(true);
 		expect(isScaffoldBranch("feature/logging/scaffold")).toBe(true);
 		expect(isScaffoldBranch("feature/logging_scaffold")).toBe(true);
+	});
+
+	test("detects changeset release branches", () => {
+		expect(isReleaseBranch("changeset-release/main")).toBe(true);
+		expect(isReleaseBranch("changeset-release/feature")).toBe(true);
+		expect(isReleaseBranch("feature/normal")).toBe(false);
 	});
 });
 

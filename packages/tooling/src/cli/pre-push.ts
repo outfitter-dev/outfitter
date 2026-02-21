@@ -83,6 +83,10 @@ export function isScaffoldBranch(branch: string): boolean {
 	);
 }
 
+export function isReleaseBranch(branch: string): boolean {
+	return branch.startsWith("changeset-release/");
+}
+
 const TEST_PATH_PATTERNS = [
 	/(^|\/)__tests__\//,
 	/(^|\/)__snapshots__\//,
@@ -424,6 +428,16 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 	log("");
 
 	const branch = getCurrentBranch();
+
+	if (isReleaseBranch(branch)) {
+		log(
+			`${COLORS.yellow}Release branch detected${COLORS.reset}: ${COLORS.blue}${branch}${COLORS.reset}`,
+		);
+		log(
+			`${COLORS.yellow}Skipping strict verification${COLORS.reset} for automated changeset release push`,
+		);
+		process.exit(0);
+	}
 
 	// Check for RED phase branch
 	if (isRedPhaseBranch(branch)) {
