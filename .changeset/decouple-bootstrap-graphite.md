@@ -1,5 +1,4 @@
 ---
-"@outfitter/agents": patch
 "@outfitter/tooling": patch
 ---
 
