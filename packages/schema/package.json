@@ -57,11 +57,11 @@
     "@outfitter/types": "workspace:*"
   },
   "peerDependencies": {
-    "zod": "^4.3.5"
+    "zod": ">=4.0.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.3.9",
-    "typescript": "^5.9.3"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "engines": {
     "bun": ">=1.3.9"

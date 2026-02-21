@@ -32,16 +32,16 @@
         "cli-demo": "./dist/cli.js",
       },
       "dependencies": {
-        "@clack/prompts": "^1.0.1",
+        "@clack/prompts": "catalog:",
         "@outfitter/cli": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "@outfitter/tui": "workspace:*",
-        "commander": "^14.0.2",
-        "typescript": "^5.9.3",
+        "commander": "catalog:",
+        "typescript": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.9",
-        "@types/node": "^25.0.10",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
       },
     },
     "apps/outfitter": {
@@ -52,7 +52,7 @@
         "out": "./dist/cli.js",
       },
       "dependencies": {
-        "@clack/prompts": "^1.0.1",
+        "@clack/prompts": "catalog:",
         "@outfitter/cli": "workspace:*",
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
@@ -60,13 +60,13 @@
         "@outfitter/logging": "workspace:*",
         "@outfitter/tooling": "workspace:*",
         "@outfitter/tui": "workspace:*",
-        "commander": "^14.0.2",
-        "typescript": "^5.9.3",
-        "zod": "^4.3.5",
+        "commander": "catalog:",
+        "typescript": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.9",
-        "@types/node": "^25.0.10",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
       },
     },
     "packages/agents": {
@@ -76,33 +76,33 @@
         "@outfitter/contracts": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "bunup": "latest",
-        "typescript": "^5.8.3",
+        "@types/bun": "catalog:",
+        "bunup": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/cli": {
       "name": "@outfitter/cli",
       "version": "0.5.2",
       "dependencies": {
-        "@clack/prompts": "^1.0.1",
-        "better-result": "^2.5.1",
-        "commander": "^14.0.2",
+        "@clack/prompts": "catalog:",
+        "better-result": "catalog:",
+        "commander": "catalog:",
       },
       "devDependencies": {
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "@outfitter/schema": "workspace:*",
-        "@types/bun": "^1.3.9",
-        "@types/node": "^25.0.10",
-        "typescript": "^5.9.3",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
         "@outfitter/config": ">=0.3.0",
         "@outfitter/contracts": ">=0.2.0",
         "@outfitter/schema": ">=0.1.0",
         "@outfitter/types": ">=0.2.0",
-        "zod": "^4.3.5",
+        "zod": "catalog:",
       },
     },
     "packages/config": {
@@ -111,25 +111,25 @@
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
-        "smol-toml": "^1.6.0",
-        "yaml": "^2.8.2",
-        "zod": "^4.3.5",
+        "smol-toml": "catalog:",
+        "yaml": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/contracts": {
       "name": "@outfitter/contracts",
       "version": "0.4.1",
       "dependencies": {
-        "better-result": "^2.5.0",
-        "zod": "^4.3.5",
+        "better-result": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/daemon": {
@@ -141,8 +141,8 @@
         "@outfitter/logging": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/docs": {
@@ -153,22 +153,22 @@
       },
       "dependencies": {
         "@outfitter/docs-core": "workspace:*",
-        "commander": "^14.0.2",
+        "commander": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/docs-core": {
       "name": "@outfitter/docs-core",
       "version": "0.1.2",
       "dependencies": {
-        "better-result": "^2.5.0",
+        "better-result": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/file-ops": {
@@ -179,8 +179,8 @@
         "@outfitter/types": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/index": {
@@ -191,21 +191,21 @@
         "@outfitter/file-ops": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/logging": {
       "name": "@outfitter/logging",
       "version": "0.4.1",
       "dependencies": {
-        "@logtape/logtape": "^2.0.0",
+        "@logtape/logtape": "catalog:",
       },
       "devDependencies": {
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
         "@outfitter/config": ">=0.3.0",
@@ -216,15 +216,15 @@
       "name": "@outfitter/mcp",
       "version": "0.4.2",
       "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.12.1",
-        "zod": "^4.3.5",
+        "@modelcontextprotocol/sdk": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@outfitter/config": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "@outfitter/logging": "workspace:*",
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
         "@outfitter/config": ">=0.3.0",
@@ -240,11 +240,11 @@
         "@outfitter/types": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.9",
-        "typescript": "^5.9.3",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
-        "zod": "^4.3.5",
+        "zod": "catalog:",
       },
     },
     "packages/state": {
@@ -255,8 +255,8 @@
         "@outfitter/types": "workspace:*",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/testing": {
@@ -265,11 +265,11 @@
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/mcp": "workspace:*",
-        "zod": "^4.3.5",
+        "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/tooling": {
@@ -280,18 +280,18 @@
       },
       "dependencies": {
         "@outfitter/cli": "workspace:*",
-        "commander": "^14.0.2",
-        "typescript": "^5.9.3",
-        "zod": "^4.3.5",
+        "commander": "catalog:",
+        "typescript": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.9",
-        "yaml": "^2.8.2",
+        "@types/bun": "catalog:",
+        "yaml": "catalog:",
       },
       "peerDependencies": {
-        "lefthook": "^2.0.0",
+        "lefthook": "catalog:",
         "markdownlint-cli2": ">=0.17.0",
-        "ultracite": "^7.0.0",
+        "ultracite": "catalog:",
       },
       "optionalPeers": [
         "lefthook",
@@ -303,16 +303,16 @@
       "name": "@outfitter/tui",
       "version": "0.2.1",
       "dependencies": {
-        "@clack/prompts": "^1.0.1",
-        "better-result": "^2.5.1",
+        "@clack/prompts": "catalog:",
+        "better-result": "catalog:",
       },
       "devDependencies": {
         "@outfitter/cli": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
-        "@types/bun": "^1.3.9",
-        "@types/node": "^25.0.10",
-        "typescript": "^5.9.3",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
       },
       "peerDependencies": {
         "@outfitter/cli": ">=0.3.0",
@@ -325,11 +325,11 @@
       "version": "0.2.3",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
-        "better-result": "^2.5.0",
+        "better-result": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.8.0",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "plugins/fieldguides": {
@@ -1094,16 +1094,6 @@
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
 
-    "@outfitter/daemon/@types/bun": ["@types/bun@1.3.8", "", { "dependencies": { "bun-types": "1.3.8" } }, "sha512-3LvWJ2q5GerAXYxO2mffLTqOzEu5qnhEAlh48Vnu8WQfnmSwbgagjGZV6BoHKJztENYEDn6QmVd949W4uESRJA=="],
-
-    "@outfitter/file-ops/@types/bun": ["@types/bun@1.3.8", "", { "dependencies": { "bun-types": "1.3.8" } }, "sha512-3LvWJ2q5GerAXYxO2mffLTqOzEu5qnhEAlh48Vnu8WQfnmSwbgagjGZV6BoHKJztENYEDn6QmVd949W4uESRJA=="],
-
-    "@outfitter/index/@types/bun": ["@types/bun@1.3.8", "", { "dependencies": { "bun-types": "1.3.8" } }, "sha512-3LvWJ2q5GerAXYxO2mffLTqOzEu5qnhEAlh48Vnu8WQfnmSwbgagjGZV6BoHKJztENYEDn6QmVd949W4uESRJA=="],
-
-    "@outfitter/state/@types/bun": ["@types/bun@1.3.8", "", { "dependencies": { "bun-types": "1.3.8" } }, "sha512-3LvWJ2q5GerAXYxO2mffLTqOzEu5qnhEAlh48Vnu8WQfnmSwbgagjGZV6BoHKJztENYEDn6QmVd949W4uESRJA=="],
-
-    "@outfitter/testing/@types/bun": ["@types/bun@1.3.8", "", { "dependencies": { "bun-types": "1.3.8" } }, "sha512-3LvWJ2q5GerAXYxO2mffLTqOzEu5qnhEAlh48Vnu8WQfnmSwbgagjGZV6BoHKJztENYEDn6QmVd949W4uESRJA=="],
-
     "better-result/@clack/prompts": ["@clack/prompts@0.11.0", "", { "dependencies": { "@clack/core": "0.5.0", "picocolors": "^1.0.0", "sisteransi": "^1.0.5" } }, "sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw=="],
 
     "bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
@@ -1111,16 +1101,6 @@
     "glob/minimatch": ["minimatch@10.2.2", "", { "dependencies": { "brace-expansion": "^5.0.2" } }, "sha512-+G4CpNBxa5MprY+04MbgOw1v7So6n5JY166pFi9KfYwT78fxScCeSNQSNzp6dpPSW2rONOps6Ocam1wFhCgoVw=="],
 
     "read-yaml-file/js-yaml": ["js-yaml@3.14.2", "", { "dependencies": { "argparse": "^1.0.7", "esprima": "^4.0.0" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg=="],
-
-    "@outfitter/daemon/@types/bun/bun-types": ["bun-types@1.3.8", "", { "dependencies": { "@types/node": "*" } }, "sha512-fL99nxdOWvV4LqjmC+8Q9kW3M4QTtTR1eePs94v5ctGqU8OeceWrSUaRw3JYb7tU3FkMIAjkueehrHPPPGKi5Q=="],
-
-    "@outfitter/file-ops/@types/bun/bun-types": ["bun-types@1.3.8", "", { "dependencies": { "@types/node": "*" } }, "sha512-fL99nxdOWvV4LqjmC+8Q9kW3M4QTtTR1eePs94v5ctGqU8OeceWrSUaRw3JYb7tU3FkMIAjkueehrHPPPGKi5Q=="],
-
-    "@outfitter/index/@types/bun/bun-types": ["bun-types@1.3.8", "", { "dependencies": { "@types/node": "*" } }, "sha512-fL99nxdOWvV4LqjmC+8Q9kW3M4QTtTR1eePs94v5ctGqU8OeceWrSUaRw3JYb7tU3FkMIAjkueehrHPPPGKi5Q=="],
-
-    "@outfitter/state/@types/bun/bun-types": ["bun-types@1.3.8", "", { "dependencies": { "@types/node": "*" } }, "sha512-fL99nxdOWvV4LqjmC+8Q9kW3M4QTtTR1eePs94v5ctGqU8OeceWrSUaRw3JYb7tU3FkMIAjkueehrHPPPGKi5Q=="],
-
-    "@outfitter/testing/@types/bun/bun-types": ["bun-types@1.3.8", "", { "dependencies": { "@types/node": "*" } }, "sha512-fL99nxdOWvV4LqjmC+8Q9kW3M4QTtTR1eePs94v5ctGqU8OeceWrSUaRw3JYb7tU3FkMIAjkueehrHPPPGKi5Q=="],
 
     "better-result/@clack/prompts/@clack/core": ["@clack/core@0.5.0", "", { "dependencies": { "picocolors": "^1.0.0", "sisteransi": "^1.0.5" } }, "sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow=="],
 
@@ -1130,26 +1110,6 @@
 
     "read-yaml-file/js-yaml/argparse": ["argparse@1.0.10", "", { "dependencies": { "sprintf-js": "~1.0.2" } }, "sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg=="],
 
-    "@outfitter/daemon/@types/bun/bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
-
-    "@outfitter/file-ops/@types/bun/bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
-
-    "@outfitter/index/@types/bun/bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
-
-    "@outfitter/state/@types/bun/bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
-
-    "@outfitter/testing/@types/bun/bun-types/@types/node": ["@types/node@25.2.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg=="],
-
     "glob/minimatch/brace-expansion/balanced-match": ["balanced-match@4.0.3", "", {}, "sha512-1pHv8LX9CpKut1Zp4EXey7Z8OfH11ONNH6Dhi2WDUt31VVZFXZzKwXcysBgqSumFCmR+0dqjMK5v5JiFHzi0+g=="],
-
-    "@outfitter/daemon/@types/bun/bun-types/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
-
-    "@outfitter/file-ops/@types/bun/bun-types/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
-
-    "@outfitter/index/@types/bun/bun-types/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
-
-    "@outfitter/state/@types/bun/bun-types/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
-
-    "@outfitter/testing/@types/bun/bun-types/@types/node/undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
   }
 }

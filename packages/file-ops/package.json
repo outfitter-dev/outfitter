@@ -32,8 +32,8 @@
     "@outfitter/types": "workspace:*"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",

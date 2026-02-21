@@ -69,11 +69,11 @@
   },
   "dependencies": {
     "@outfitter/contracts": "workspace:*",
-    "better-result": "^2.5.0"
+    "better-result": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   },
   "keywords": [
     "outfitter",

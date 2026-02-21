@@ -83,13 +83,13 @@
 	},
 	"dependencies": {
 		"@outfitter/cli": "workspace:*",
-		"commander": "^14.0.2",
-		"typescript": "^5.9.3",
-		"zod": "^4.3.5"
+		"commander": "catalog:",
+		"typescript": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.3.9",
-		"yaml": "^2.8.2"
+		"@types/bun": "catalog:",
+		"yaml": "catalog:"
 	},
 	"peerDependencies": {
 		"ultracite": "^7.0.0",
