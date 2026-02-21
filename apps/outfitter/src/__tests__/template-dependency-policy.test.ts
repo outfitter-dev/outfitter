@@ -2,7 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import templateVersions from "../../template-versions.json";
+import { getResolvedVersions } from "@outfitter/presets";
+
+function stripRangePrefix(version: string): string {
+  return version.replace(/^[\^~>=<]+/, "");
+}
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
@@ -10,11 +14,6 @@ const DEPENDENCY_SECTIONS = [
   "peerDependencies",
   "optionalDependencies",
 ] as const;
-
-interface TemplateManifest {
-  readonly externalDependencies: Record<string, string>;
-  readonly internalDependencies: Record<string, string>;
-}
 
 function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {
   const glob = new Bun.Glob("**/package.json.template");
@@ -24,11 +23,11 @@ function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {
 }
 
 describe("template dependency policy", () => {
-  test("all template package.json files use workspace protocol for @outfitter deps and manifest versions for external deps", () => {
+  test("all template package.json files use workspace protocol for @outfitter deps and presets versions for external deps", () => {
     const currentDir = dirname(fileURLToPath(import.meta.url));
     const packageRoot = join(currentDir, "..", "..");
     const repoRoot = join(packageRoot, "..", "..");
-    const manifest = templateVersions as TemplateManifest;
+    const { all: resolvedVersions } = getResolvedVersions();
 
     const templateRoots = [
       join(repoRoot, "templates"),
@@ -59,9 +58,11 @@ describe("template dependency policy", () => {
               expect(value).toBe("workspace:*");
             }
 
-            const expectedExternal = manifest.externalDependencies[name];
-            if (expectedExternal) {
-              expect(value).toBe(expectedExternal);
+            const expectedExternal = resolvedVersions[name];
+            if (expectedExternal && typeof value === "string") {
+              expect(stripRangePrefix(value as string)).toBe(
+                stripRangePrefix(expectedExternal)
+              );
             }
           }
         }
