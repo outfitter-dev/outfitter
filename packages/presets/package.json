@@ -1,0 +1,63 @@
+{
+  "name": "@outfitter/presets",
+  "description": "Scaffold presets and shared dependency versions for Outfitter projects",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "presets"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@biomejs/biome": "catalog:",
+    "@clack/prompts": "catalog:",
+    "@logtape/logtape": "catalog:",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "@types/node": "catalog:",
+    "better-result": "catalog:",
+    "bunup": "catalog:",
+    "commander": "catalog:",
+    "lefthook": "catalog:",
+    "smol-toml": "catalog:",
+    "ultracite": "catalog:",
+    "yaml": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "bun": ">=1.3.9"
+  },
+  "keywords": [
+    "outfitter",
+    "presets",
+    "scaffolding",
+    "templates",
+    "versions"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/stack.git",
+    "directory": "packages/presets"
+  },
+  "scripts": {
+    "build": "cd ../.. && bunup --filter @outfitter/presets",
+    "clean": "rm -rf dist .turbo",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
+  }
+}

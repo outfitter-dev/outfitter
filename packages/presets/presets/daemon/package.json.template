@@ -1,0 +1,56 @@
+{
+	"name": "{{packageName}}",
+	"version": "{{version}}",
+	"description": "{{description}}",
+	"type": "module",
+	"bin": {
+		"{{binName}}": "./dist/cli.js",
+		"{{binName}}d": "./dist/daemon.js"
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "bun build src/cli.ts src/daemon.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
+		"dev": "bun --watch src/daemon.ts -- --foreground",
+		"dev:daemon": "bun --watch src/daemon.ts -- --foreground",
+		"typecheck": "tsc --noEmit",
+		"check": "ultracite check",
+		"verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
+		"test": "bun test",
+		"test:watch": "bun test --watch",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
+		"format": "biome format --write .",
+		"clean:artifacts": "rm -rf dist .turbo"
+	},
+	"dependencies": {
+		"@outfitter/contracts": "workspace:*",
+		"@outfitter/types": "workspace:*",
+		"@outfitter/daemon": "workspace:*",
+		"@outfitter/cli": "workspace:*",
+		"@outfitter/logging": "workspace:*",
+		"commander": "^14.0.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.4",
+		"@outfitter/tooling": "workspace:*",
+		"@types/bun": "^1.3.9",
+		"lefthook": "^2.1.1",
+		"typescript": "^5.9.3",
+		"ultracite": "^7.2.3"
+	},
+	"outfitter": {
+		"template": {
+			"kind": "runnable",
+			"placement": "apps",
+			"surfaces": ["cli", "daemon"]
+		}
+	},
+	"license": "MIT"
+}
