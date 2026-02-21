@@ -6,6 +6,10 @@ on:
     types: [closed]
     branches: [main]
 
+concurrency:
+  group: release-prepare
+  cancel-in-progress: false
+
 jobs:
   # Phase 1: Prepare release (manual trigger)
   # Versions packages, creates a release branch, and opens a PR
