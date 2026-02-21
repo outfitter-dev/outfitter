@@ -62,6 +62,7 @@ have concrete branded ID or shared utility adoption points.
 ### Tooling (Early)
 
 - [outfitter](../apps/outfitter/README.md) -- Umbrella CLI for scaffolding
+- [@outfitter/presets](../packages/presets/) -- Scaffold presets and shared dependency versions
 - [@outfitter/docs-core](./packages/docs-core/) -- Core docs assembly and freshness checks
 - [@outfitter/docs](./packages/docs/) -- Docs CLI and host adapter for product CLIs
 - [@outfitter/tooling](./packages/tooling/) -- Dev tooling presets and CLI (Biome, Lefthook, markdownlint)

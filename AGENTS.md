@@ -84,6 +84,7 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 **Tooling (Early)** — APIs will change:
 
 - `outfitter` — Umbrella CLI for scaffolding
+- `@outfitter/presets` — Scaffold presets and shared dependency versions (catalog-resolved)
 - `@outfitter/testing` — Test harnesses for MCP and CLI
 
 **Deprecated**:

@@ -65,7 +65,7 @@ Packages are organized into tiers based on stability and dependency direction. H
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    TOOLING (Early)                      │
-│  outfitter CLI, docs/docs-core, tooling                 │
+│  outfitter CLI, presets, docs/docs-core, tooling        │
 ├─────────────────────────────────────────────────────────┤
 │                    RUNTIME (Active)                     │
 │  cli, config, logging, file-ops, state, schema, tui,   │
@@ -110,6 +110,7 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 | Package | Purpose |
 |---------|---------|
 | `outfitter` | Umbrella CLI for scaffolding projects |
+| `@outfitter/presets` | Scaffold presets and shared dependency versions (catalog-resolved) |
 | `@outfitter/docs-core` | Core docs assembly and freshness checks |
 | `@outfitter/docs` | Docs CLI and host adapter for product CLIs |
 | `@outfitter/tooling` | Dev tooling presets and CLI workflows |
@@ -128,29 +129,36 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
         ┌──────────────────┼──────────────────┐
         │                  │                  │
         ▼                  ▼                  ▼
+   ┌────────┐        ┌─────────┐        ┌─────────┐
+   │  cli   │        │ presets │        │ tooling │
+   └───┬────┘        └────┬────┘        └────┬────┘
+       │                  │                  │
+       │            (catalog-resolved        │
+       │             dep versions)           │
+       │                  │                  │
+       ▼                  ▼                  ▼
    ┌────────┐        ┌─────────┐        ┌────────┐
-   │  cli   │        │   mcp   │        │ daemon │
+   │  mcp   │        │  config │        │ daemon │
    └───┬────┘        └────┬────┘        └───┬────┘
        │                  │                 │
        └────────┬─────────┴─────────┬───────┘
                 │                   │
                 ▼                   ▼
          ┌──────────┐        ┌──────────┐
-         │  config  │        │ file-ops │
-         └────┬─────┘        └────┬─────┘
-              │                   │
-              └─────────┬─────────┘
-                        │
-                        ▼
-               ┌────────────────┐
-               │   contracts    │◄──── types
-               └────────────────┘
+         │ file-ops │        │  logging │
+         └────┬─────┘        └──────────┘
+              │
+              ▼
+     ┌────────────────┐
+     │   contracts    │◄──── types
+     └────────────────┘
 ```
 
 **Key relationships:**
 
 - `contracts` is the foundation — everything depends on it
 - `types` provides utilities to `contracts`
+- `presets` holds scaffold presets and shared dependency versions (catalog-resolved at publish time)
 - `config` and `file-ops` are shared by CLI, MCP, and daemon surfaces
 - `logging` is used throughout but kept optional via interface injection
 - `cli` includes terminal rendering via `/render` and `/terminal` subpaths
@@ -176,6 +184,7 @@ outfitter/stack/
 │   ├── index/               # SQLite FTS5 indexing
 │   ├── logging/             # Structured logging
 │   ├── mcp/                 # MCP server framework
+│   ├── presets/             # Scaffold presets and shared dep versions
 │   ├── schema/              # Schema introspection and surface maps
 │   ├── state/               # State management
 │   ├── testing/             # Test harnesses
