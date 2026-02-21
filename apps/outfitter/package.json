@@ -4,8 +4,7 @@
   "version": "0.2.7",
   "type": "module",
   "files": [
-    "dist",
-    "template-versions.json"
+    "dist"
   ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -226,9 +225,7 @@
         "types": "./dist/targets/types.d.ts",
         "default": "./dist/targets/types.js"
       }
-    },
-    "./template-versions": "./template-versions.json",
-    "./template-versions.json": "./template-versions.json"
+    }
   },
   "bin": {
     "outfitter": "./dist/cli.js",

@@ -1,64 +1,52 @@
 /**
  * Shared dependencies and scripts injected into all scaffolded projects.
  *
- * Edit this file to update versions across all templates. These are merged
- * with template-specific values, with template values taking precedence.
+ * Versions come from `@outfitter/presets` resolved deps (catalog-resolved at
+ * publish time). Missing versions are real errors — fail loudly.
  *
  * @packageDocumentation
  */
 
-import type { ResolvedTemplateDependencyVersions } from "../engine/dependency-versions.js";
+import { getResolvedVersions } from "@outfitter/presets";
 import { resolveTemplateDependencyVersions } from "../engine/dependency-versions.js";
 
-let _dependencyVersions: ResolvedTemplateDependencyVersions | undefined;
-function getDependencyVersions(): ResolvedTemplateDependencyVersions {
-  if (!_dependencyVersions) {
-    _dependencyVersions = resolveTemplateDependencyVersions();
+const { all: resolvedVersions } = getResolvedVersions();
+
+function requireVersion(name: string): string {
+  const version = resolvedVersions[name];
+  if (!version) {
+    throw new Error(
+      `Missing resolved version for "${name}" in @outfitter/presets`
+    );
   }
-  return _dependencyVersions;
+  return version;
 }
 
-function pickVersion(
-  source: Record<string, string>,
-  name: string,
-  fallback: string
-): string {
-  return source[name] ?? fallback;
+function requireInternalVersion(name: string): string {
+  const versions = resolveTemplateDependencyVersions();
+  const version = versions.internal[name];
+  if (!version) {
+    throw new Error(
+      `Missing internal version for "${name}" — not found in workspace packages or outfitter's own dependencies`
+    );
+  }
+  return version;
 }
 
 /**
  * Shared devDependencies injected into all scaffolded projects.
  * Template-specific devDependencies take precedence over these defaults.
  *
- * Keep these in sync with the root package.json versions.
+ * Versions are resolved from @outfitter/presets (catalog-resolved at publish time).
+ * Internal @outfitter/* versions come from workspace scanning.
  */
 export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
-  "@biomejs/biome": pickVersion(
-    getDependencyVersions().external,
-    "@biomejs/biome",
-    "^2.4.4"
-  ),
-  "@outfitter/tooling": pickVersion(
-    getDependencyVersions().internal,
-    "@outfitter/tooling",
-    "^0.2.4"
-  ),
-  "@types/bun": pickVersion(
-    getDependencyVersions().external,
-    "@types/bun",
-    "^1.3.9"
-  ),
-  lefthook: pickVersion(getDependencyVersions().external, "lefthook", "^2.1.1"),
-  typescript: pickVersion(
-    getDependencyVersions().external,
-    "typescript",
-    "^5.9.3"
-  ),
-  ultracite: pickVersion(
-    getDependencyVersions().external,
-    "ultracite",
-    "^7.2.3"
-  ),
+  "@biomejs/biome": requireVersion("@biomejs/biome"),
+  "@outfitter/tooling": requireInternalVersion("@outfitter/tooling"),
+  "@types/bun": requireVersion("@types/bun"),
+  lefthook: requireVersion("lefthook"),
+  typescript: requireVersion("typescript"),
+  ultracite: requireVersion("ultracite"),
 };
 
 /**
