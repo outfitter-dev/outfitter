@@ -189,6 +189,12 @@
         "default": "./dist/engine/render-plan.js"
       }
     },
+    "./engine/template": {
+      "import": {
+        "types": "./dist/engine/template.d.ts",
+        "default": "./dist/engine/template.js"
+      }
+    },
     "./engine/types": {
       "import": {
         "types": "./dist/engine/types.d.ts",
@@ -252,10 +258,13 @@
     "@outfitter/tui": "workspace:*",
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/daemon": "workspace:*",
     "@outfitter/presets": "workspace:*",
     "@outfitter/docs": "workspace:*",
     "@outfitter/logging": "workspace:*",
+    "@outfitter/mcp": "workspace:*",
     "@outfitter/tooling": "workspace:*",
+    "@outfitter/types": "workspace:*",
     "commander": "catalog:",
     "typescript": "catalog:",
     "zod": "catalog:"

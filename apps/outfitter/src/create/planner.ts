@@ -69,6 +69,7 @@ export function planCreateProject(
       type: "copy-preset",
       preset: preset.presetDir,
       targetDir,
+      includeTooling,
       overlayBaseTemplate: true,
     },
     { type: "inject-shared-config" },

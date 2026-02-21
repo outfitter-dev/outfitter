@@ -116,7 +116,7 @@ outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
 
 | Preset | Creates |
 |----------|---------|
-| `basic` | Library with src/index.ts, Result types |
+| `minimal` | Library with src/index.ts, Result types |
 | `cli` | CLI app with commands/, config loading, output contract |
 | `mcp` | MCP server with typed tools, action registry |
 | `daemon` | Daemon + CLI control, IPC, health checks |

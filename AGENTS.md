@@ -14,9 +14,9 @@ Outfitter provides shared infrastructure for AI-agent-ready tooling: CLI, MCP se
 
 ## Project Structure
 
-- `apps/` — Runnable applications; `apps/outfitter/` is the CLI and scaffolding templates
-- `packages/` — Versioned libraries (`@outfitter/*`) with source in `src/`
-- `templates/` — Shared templates
+- `apps/` — Runnable applications; `apps/outfitter/` is the CLI
+- `packages/` — Versioned libraries (`@outfitter/*`) with source in `src/`; `packages/presets/` holds scaffold presets
+- `templates/` — Legacy shared templates (canonical location: `packages/presets/presets/`)
 - `docs/` — Specs and plan documents
 
 Tests live alongside code in `src/__tests__/` with `*.test.ts` files; snapshots use `__snapshots__/` with `.snap` format.
@@ -222,7 +222,7 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 
 | Concern | Package |
 |---------|---------|
-| Result type | `better-result` (`^2.5.0`) |
+| Result type | `better-result` (`^2.5.1`) |
 | Schema validation | `zod` (`^4.3.5`) |
 | CLI parsing | `commander` (`^14.0.2`) |
 | Logging | `@logtape/logtape` (`^2.0.0`) |

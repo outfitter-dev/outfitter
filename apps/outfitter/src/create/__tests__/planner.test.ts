@@ -29,6 +29,7 @@ describe("create planner", () => {
         type: "copy-preset",
         preset: "cli",
         targetDir: "/tmp/hello-cli",
+        includeTooling: true,
         overlayBaseTemplate: true,
       },
       { type: "inject-shared-config" },
@@ -73,6 +74,9 @@ describe("create planner", () => {
     expect(
       result.value.changes.find((change) => change.type === "add-blocks")
     ).toBeUndefined();
+    expect(
+      result.value.changes.find((change) => change.type === "copy-preset")
+    ).toMatchObject({ includeTooling: false });
   });
 
   test("derives scoped project and bin names from packageName", () => {

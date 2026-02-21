@@ -490,17 +490,16 @@ describe("init command default behavior", () => {
     expect(packageJson.name).toBe("my-project-dir");
   });
 
-  test("uses 'basic' template by default", async () => {
+  test("uses minimal preset by default", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
       targetDir: tempDir,
       name: "test-project",
-      template: undefined,
       force: false,
     });
 
-    // Should succeed without error using basic template
+    // Should succeed without error using minimal preset
     const packageJsonPath = join(tempDir, "package.json");
     expect(existsSync(packageJsonPath)).toBe(true);
   });
@@ -926,22 +925,6 @@ describe("init command error handling", () => {
     }
   });
 
-  test("returns error for invalid template name", async () => {
-    const { runInit } = await import("../commands/init.js");
-
-    const result = await runInit({
-      targetDir: tempDir,
-      name: "test-project",
-      template: "nonexistent-template",
-      force: false,
-    });
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.message).toContain("template");
-    }
-  });
-
   test("returns error when target directory does not exist and cannot be created", async () => {
     const { runInit } = await import("../commands/init.js");
 
@@ -1040,6 +1023,9 @@ describe("init command registry blocks", () => {
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeUndefined();
     }
+    expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, ".lefthook.yml"))).toBe(false);
+    expect(existsSync(join(tempDir, ".claude"))).toBe(false);
   });
 
   test("adds claude block when specified", async () => {

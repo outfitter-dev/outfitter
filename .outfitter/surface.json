@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-20T20:56:28.422Z",
+  "generatedAt": "2026-02-21T03:52:51.089Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -127,9 +127,6 @@
               "lib"
             ]
           },
-          "template": {
-            "type": "string"
-          },
           "structure": {
             "type": "string",
             "enum": ["single", "workspace"]
@@ -249,10 +246,6 @@
           {
             "flags": "-p, --preset <preset>",
             "description": "Preset to use (minimal, cli, mcp, daemon, library, full-stack, lib)"
-          },
-          {
-            "flags": "-t, --template <template>",
-            "description": "Template to use (deprecated, use --preset)"
           }
         ]
       }
@@ -284,9 +277,6 @@
               "full-stack",
               "lib"
             ]
-          },
-          "template": {
-            "type": "string"
           },
           "structure": {
             "type": "string",
@@ -435,9 +425,6 @@
               "lib"
             ]
           },
-          "template": {
-            "type": "string"
-          },
           "structure": {
             "type": "string",
             "enum": ["single", "workspace"]
@@ -584,9 +571,6 @@
               "full-stack",
               "lib"
             ]
-          },
-          "template": {
-            "type": "string"
           },
           "structure": {
             "type": "string",
@@ -735,9 +719,6 @@
               "lib"
             ]
           },
-          "template": {
-            "type": "string"
-          },
           "structure": {
             "type": "string",
             "enum": ["single", "workspace"]
@@ -884,9 +865,6 @@
               "full-stack",
               "lib"
             ]
-          },
-          "template": {
-            "type": "string"
           },
           "structure": {
             "type": "string",

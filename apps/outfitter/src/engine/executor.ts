@@ -7,6 +7,29 @@ import { copyPresetFiles, getPresetsBaseDir } from "./preset.js";
 import type { EngineOptions, ScaffoldPlan, ScaffoldResult } from "./types.js";
 import { ScaffoldError } from "./types.js";
 
+const TOOLING_PRESET_PATHS = new Set([
+  ".claude/settings.json",
+  ".claude/hooks/format-code-on-stop.sh",
+  ".lefthook.yml",
+  ".markdownlint-cli2.jsonc",
+  "biome.json",
+  "scripts/bootstrap.sh",
+]);
+
+function createPresetSkipFilter(
+  includeTooling: boolean
+): ((relativePath: string) => boolean) | undefined {
+  if (includeTooling) {
+    return undefined;
+  }
+  return (relativePath) => {
+    const normalized = relativePath.endsWith(".template")
+      ? relativePath.slice(0, -".template".length)
+      : relativePath;
+    return TOOLING_PRESET_PATHS.has(normalized);
+  };
+}
+
 export async function executePlan(
   plan: ScaffoldPlan,
   options: EngineOptions
@@ -32,6 +55,7 @@ export async function executePlan(
               )
             );
           }
+          const skipFilter = createPresetSkipFilter(change.includeTooling);
 
           if (change.overlayBaseTemplate) {
             const basePath = join(presetsDir, "_base");
@@ -44,6 +68,7 @@ export async function executePlan(
                 options,
                 {
                   writtenPaths: baseWrittenPaths,
+                  ...(skipFilter ? { skipFilter } : {}),
                 }
               );
               if (baseResult.isErr()) {
@@ -58,6 +83,7 @@ export async function executePlan(
                 {
                   allowOverwrite: true,
                   overwritablePaths: baseWrittenPaths,
+                  ...(skipFilter ? { skipFilter } : {}),
                 }
               );
               if (presetResult.isErr()) {
@@ -71,7 +97,10 @@ export async function executePlan(
             presetPath,
             projectDir,
             plan.values,
-            options
+            options,
+            {
+              ...(skipFilter ? { skipFilter } : {}),
+            }
           );
           if (presetResult.isErr()) {
             return presetResult;
