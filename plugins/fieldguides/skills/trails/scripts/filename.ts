@@ -10,14 +10,14 @@
  */
 
 export interface FilenameOptions {
+  /** File extension (default: "md") */
+  ext?: string;
   /** Optional prefix (e.g., "handoff", "log") */
   prefix?: string;
   /** Timestamp root (YYYYMMDDhhmm) - required */
   root: string;
   /** Optional suffix (e.g., session ID, slug) */
   suffix?: string;
-  /** File extension (default: "md") */
-  ext?: string;
 }
 
 /**

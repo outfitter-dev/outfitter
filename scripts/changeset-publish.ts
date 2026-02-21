@@ -14,13 +14,13 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface PackageJson {
-  name?: string;
-  version?: string;
-  private?: boolean;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
+  name?: string;
   optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  private?: boolean;
+  version?: string;
 }
 
 type DependencySection =
@@ -31,9 +31,9 @@ type DependencySection =
 
 interface WorkspacePackage {
   name: string;
-  version: string;
-  path: string;
   packageJson: PackageJson;
+  path: string;
+  version: string;
 }
 
 interface WorkspaceRangeReference {

@@ -469,10 +469,10 @@ export function parseConfigFile(
 export interface ConfigSources<T> {
   /** Default values (lowest precedence) */
   defaults?: Partial<T>;
-  /** Values loaded from config file */
-  file?: Partial<T>;
   /** Values from environment variables */
   env?: Partial<T>;
+  /** Values loaded from config file */
+  file?: Partial<T>;
   /** CLI flag values (highest precedence) */
   flags?: Partial<T>;
 }

@@ -3,12 +3,12 @@
  */
 
 export interface IssueTemplate {
-  type: string;
-  labels: string[];
-  titlePrefix: string;
   bodyTemplate: string;
-  requiredFields: string[];
+  labels: string[];
   optionalFields: string[];
+  requiredFields: string[];
+  titlePrefix: string;
+  type: string;
 }
 
 export interface TemplateFields {

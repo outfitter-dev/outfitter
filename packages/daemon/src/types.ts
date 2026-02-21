@@ -98,6 +98,11 @@ export type DaemonState = "stopped" | "starting" | "running" | "stopping";
  */
 export interface DaemonOptions {
   /**
+   * Optional logger instance for daemon messages.
+   * If not provided, logging is disabled.
+   */
+  logger?: LoggerInstance;
+  /**
    * Unique name identifying this daemon.
    * Used in log messages and error context.
    */
@@ -109,12 +114,6 @@ export interface DaemonOptions {
    * Used to prevent multiple instances and for external process management.
    */
   pidFile: string;
-
-  /**
-   * Optional logger instance for daemon messages.
-   * If not provided, logging is disabled.
-   */
-  logger?: LoggerInstance;
 
   /**
    * Maximum time in milliseconds to wait for graceful shutdown.
@@ -168,31 +167,6 @@ export type ShutdownHandler = () => Promise<void>;
  */
 export interface Daemon {
   /**
-   * Current lifecycle state of the daemon.
-   */
-  readonly state: DaemonState;
-
-  /**
-   * Start the daemon.
-   *
-   * Creates PID file and registers signal handlers.
-   * Transitions from `stopped` to `starting` then `running`.
-   *
-   * @returns Result with void on success, or DaemonError on failure
-   */
-  start(): Promise<Result<void, DaemonError>>;
-
-  /**
-   * Stop the daemon gracefully.
-   *
-   * Runs shutdown handlers, removes PID file, and cleans up signal handlers.
-   * Transitions from `running` to `stopping` then `stopped`.
-   *
-   * @returns Result with void on success, or DaemonError on failure
-   */
-  stop(): Promise<Result<void, DaemonError>>;
-
-  /**
    * Check if the daemon is currently running.
    *
    * @returns true if state is "running", false otherwise
@@ -208,4 +182,28 @@ export interface Daemon {
    * @param handler - Async function to execute during shutdown
    */
   onShutdown(handler: ShutdownHandler): void;
+
+  /**
+   * Start the daemon.
+   *
+   * Creates PID file and registers signal handlers.
+   * Transitions from `stopped` to `starting` then `running`.
+   *
+   * @returns Result with void on success, or DaemonError on failure
+   */
+  start(): Promise<Result<void, DaemonError>>;
+  /**
+   * Current lifecycle state of the daemon.
+   */
+  readonly state: DaemonState;
+
+  /**
+   * Stop the daemon gracefully.
+   *
+   * Runs shutdown handlers, removes PID file, and cleans up signal handlers.
+   * Transitions from `running` to `stopping` then `stopped`.
+   *
+   * @returns Result with void on success, or DaemonError on failure
+   */
+  stop(): Promise<Result<void, DaemonError>>;
 }

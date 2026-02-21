@@ -8,21 +8,21 @@
 export type CreatePresetId = "basic" | "cli" | "daemon" | "mcp";
 
 export interface CreatePresetDefinition {
-  readonly id: CreatePresetId;
-  readonly template: CreatePresetId;
-  readonly summary: string;
   readonly defaultBlocks: readonly string[];
+  readonly id: CreatePresetId;
+  readonly summary: string;
+  readonly template: CreatePresetId;
 }
 
 export interface CreateProjectInput {
-  readonly name: string;
-  readonly targetDir: string;
-  readonly preset: CreatePresetId;
-  readonly packageName?: string;
   readonly description?: string;
-  readonly version?: string;
   readonly includeTooling?: boolean;
   readonly local?: boolean;
+  readonly name: string;
+  readonly packageName?: string;
+  readonly preset: CreatePresetId;
+  readonly targetDir: string;
+  readonly version?: string;
   readonly year?: string;
 }
 
@@ -46,6 +46,7 @@ export type CreatePlanChange =
     };
 
 export interface CreateProjectPlan {
+  readonly changes: readonly CreatePlanChange[];
   readonly preset: CreatePresetDefinition;
   readonly values: {
     readonly packageName: string;
@@ -55,5 +56,4 @@ export interface CreateProjectPlan {
     readonly binName: string;
     readonly year: string;
   };
-  readonly changes: readonly CreatePlanChange[];
 }

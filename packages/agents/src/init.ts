@@ -8,9 +8,9 @@ import { mergeSettings, type SettingsJson } from "./merge.js";
 
 export interface InitOptions {
   /**
-   * Target directory (defaults to cwd).
+   * Overwrite existing files.
    */
-  target?: string;
+  force?: boolean;
 
   /**
    * Merge with existing files instead of skipping.
@@ -18,14 +18,13 @@ export interface InitOptions {
   merge?: boolean;
 
   /**
-   * Overwrite existing files.
-   */
-  force?: boolean;
-
-  /**
    * Suppress output.
    */
   quiet?: boolean;
+  /**
+   * Target directory (defaults to cwd).
+   */
+  target?: string;
 }
 
 const TEMPLATES_DIR = resolve(import.meta.dirname, "../scaffolding/templates");

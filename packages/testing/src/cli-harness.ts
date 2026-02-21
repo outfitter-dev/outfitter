@@ -18,12 +18,12 @@
  * Contains the captured output streams and exit code from the command.
  */
 export interface CliResult {
-  /** Standard output from the command */
-  stdout: string;
-  /** Standard error output from the command */
-  stderr: string;
   /** Exit code from the command (0 typically indicates success) */
   exitCode: number;
+  /** Standard error output from the command */
+  stderr: string;
+  /** Standard output from the command */
+  stdout: string;
 }
 
 /**

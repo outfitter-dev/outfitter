@@ -41,12 +41,12 @@ export type OutfitterEnv = "development" | "production" | "test";
  * packages can override or extend.
  */
 export interface EnvironmentDefaults {
+  /** How much error detail to include in output. */
+  errorDetail: "full" | "message";
   /** Default log level. `null` means logging is disabled by default. */
   logLevel: "debug" | "info" | "warn" | "error" | null;
   /** Whether verbose output is enabled by default. */
   verbose: boolean;
-  /** How much error detail to include in output. */
-  errorDetail: "full" | "message";
 }
 
 // ============================================================================

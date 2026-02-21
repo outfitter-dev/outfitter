@@ -48,9 +48,9 @@ function toTextPayload(value: unknown): string {
 
 interface ErrorRecord {
   _tag?: unknown;
-  message?: unknown;
   code?: unknown;
   context?: unknown;
+  message?: unknown;
 }
 
 function serializeError(error: unknown): Record<string, unknown> {

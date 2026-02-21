@@ -502,9 +502,9 @@ describe("Search Operations", () => {
 
 describe("Metadata Operations", () => {
   interface NoteMetadata {
-    title: string;
-    tags: string[];
     priority: number;
+    tags: string[];
+    title: string;
   }
 
   let tmpDir: string;

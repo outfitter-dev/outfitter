@@ -32,34 +32,34 @@ const spec = loadSkillSpec();
  * Result of skill frontmatter validation.
  */
 interface ValidationResult {
-  /** Whether the frontmatter passes all required checks */
-  valid: boolean;
   /** Blocking errors that must be fixed */
   errors: string[];
-  /** Non-blocking warnings for improvement */
-  warnings: string[];
   /** Parsed frontmatter if YAML was valid */
   frontmatter: Record<string, unknown> | null;
+  /** Whether the frontmatter passes all required checks */
+  valid: boolean;
+  /** Non-blocking warnings for improvement */
+  warnings: string[];
 }
 
 /**
  * Expected structure of SKILL.md frontmatter.
  */
 interface SkillFrontmatter {
-  name?: string;
-  description?: string;
-  version?: string;
-  license?: string;
-  compatibility?: string;
-  metadata?: Record<string, unknown>;
-  "allowed-tools"?: string;
-  "user-invocable"?: boolean;
-  "disable-model-invocation"?: boolean;
-  context?: string;
   agent?: string;
-  model?: string;
-  hooks?: Record<string, string>;
+  "allowed-tools"?: string;
   "argument-hint"?: string;
+  compatibility?: string;
+  context?: string;
+  description?: string;
+  "disable-model-invocation"?: boolean;
+  hooks?: Record<string, string>;
+  license?: string;
+  metadata?: Record<string, unknown>;
+  model?: string;
+  name?: string;
+  "user-invocable"?: boolean;
+  version?: string;
   [key: string]: unknown;
 }
 
@@ -309,13 +309,13 @@ function formatOutput(result: ValidationResult, path: string): void {
  * Hook input from Claude Code PreToolUse
  */
 interface HookInput {
-  tool_name: string;
   tool_input: {
     file_path: string;
     content?: string; // Write tool
     old_string?: string; // Edit tool
     new_string?: string; // Edit tool
   };
+  tool_name: string;
 }
 
 /**

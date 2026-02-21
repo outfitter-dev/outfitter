@@ -37,13 +37,13 @@ export interface LogMethod {
  * Logger interface for handler contexts and cross-package contracts.
  */
 export interface Logger {
-  trace: LogMethod;
+  child(context: LogMetadata): Logger;
   debug: LogMethod;
-  info: LogMethod;
-  warn: LogMethod;
   error: LogMethod;
   fatal: LogMethod;
-  child(context: LogMetadata): Logger;
+  info: LogMethod;
+  trace: LogMethod;
+  warn: LogMethod;
 }
 
 /**
@@ -52,14 +52,14 @@ export interface Logger {
  * `backend` carries adapter-specific configuration in a strongly typed way.
  */
 export interface LoggerFactoryConfig<TBackendOptions = unknown> {
-  /** Logger category/name identifying the source (e.g., "cli", "mcp") */
-  name: string;
-  /** Minimum level to emit */
-  level?: LogLevel;
-  /** Static context attached to every emitted record */
-  context?: LogMetadata;
   /** Adapter-specific backend options */
   backend?: TBackendOptions;
+  /** Static context attached to every emitted record */
+  context?: LogMetadata;
+  /** Minimum level to emit */
+  level?: LogLevel;
+  /** Logger category/name identifying the source (e.g., "cli", "mcp") */
+  name: string;
 }
 
 /**

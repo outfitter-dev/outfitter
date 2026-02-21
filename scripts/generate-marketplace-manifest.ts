@@ -18,8 +18,8 @@ const DEST = join(
 
 interface MarketplaceJson {
   name: string;
-  repository: string;
   plugins: { name: string; source: string }[];
+  repository: string;
 }
 
 function deriveRepo(repositoryUrl: string): string {

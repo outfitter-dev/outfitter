@@ -3,20 +3,20 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface PackageJson {
-  name?: string;
-  version?: string;
-  private?: boolean;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
+  name?: string;
   optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  private?: boolean;
+  version?: string;
 }
 
 interface WorkspacePackage {
   name: string;
-  version: string;
-  path: string;
   packageJson: PackageJson;
+  path: string;
+  version: string;
 }
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");

@@ -29,10 +29,10 @@ import {
 // ── CLI Parsing ──────────────────────────────────────────────────────────────
 
 interface Options {
-  strict: boolean;
-  quiet: boolean;
   fix: boolean;
   pluginDir: string;
+  quiet: boolean;
+  strict: boolean;
 }
 
 function usage(): never {
@@ -111,14 +111,14 @@ function parseArgs(argv: string[]): Options {
 // ── Validation Logic ─────────────────────────────────────────────────────────
 
 interface PluginJson {
+  agents?: string[];
+  author?: { name?: string; email?: string };
+  description?: string;
+  hooks?: Record<string, unknown>;
+  license?: string;
+  mcpServers?: Record<string, unknown>;
   name?: string;
   version?: string;
-  description?: string;
-  author?: { name?: string; email?: string };
-  license?: string;
-  agents?: string[];
-  hooks?: Record<string, unknown>;
-  mcpServers?: Record<string, unknown>;
   [key: string]: unknown;
 }
 

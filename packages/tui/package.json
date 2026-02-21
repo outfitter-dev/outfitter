@@ -221,7 +221,7 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.0.1",
     "better-result": "^2.5.1"
   },
   "peerDependencies": {
@@ -233,12 +233,12 @@
     "@outfitter/cli": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@outfitter/types": "workspace:*",
-    "@types/bun": "^1.3.7",
+    "@types/bun": "^1.3.9",
     "@types/node": "^25.0.10",
     "typescript": "^5.9.3"
   },
   "engines": {
-    "bun": ">=1.3.7"
+    "bun": ">=1.3.9"
   },
   "publishConfig": {
     "access": "public"

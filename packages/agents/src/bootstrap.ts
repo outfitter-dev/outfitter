@@ -6,11 +6,6 @@
 
 export interface BootstrapOptions {
   /**
-   * Additional tools to install via bun global.
-   */
-  tools?: string[];
-
-  /**
    * Project-specific setup to run after core bootstrap.
    */
   extend?: () => Promise<void>;
@@ -24,12 +19,16 @@ export interface BootstrapOptions {
    * Suppress output (for CI/hooks).
    */
   quiet?: boolean;
+  /**
+   * Additional tools to install via bun global.
+   */
+  tools?: string[];
 }
 
 interface ToolCheck {
-  name: string;
   command: string;
   install: () => Promise<void>;
+  name: string;
 }
 
 const CORE_TOOLS: ToolCheck[] = [

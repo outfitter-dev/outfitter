@@ -45,18 +45,18 @@ import {
  * ```
  */
 export interface Cursor {
-  /** Unique identifier for this cursor (UUID format) */
-  readonly id: string;
-  /** Current position/offset in the result set (zero-based) */
-  readonly position: number;
-  /** Optional user-defined metadata associated with this cursor */
-  readonly metadata?: Record<string, unknown>;
-  /** Time-to-live in milliseconds (optional, omitted if cursor never expires) */
-  readonly ttl?: number;
-  /** Unix timestamp (ms) when this cursor expires (computed from createdAt + ttl) */
-  readonly expiresAt?: number;
   /** Unix timestamp (ms) when this cursor was created */
   readonly createdAt: number;
+  /** Unix timestamp (ms) when this cursor expires (computed from createdAt + ttl) */
+  readonly expiresAt?: number;
+  /** Unique identifier for this cursor (UUID format) */
+  readonly id: string;
+  /** Optional user-defined metadata associated with this cursor */
+  readonly metadata?: Record<string, unknown>;
+  /** Current position/offset in the result set (zero-based) */
+  readonly position: number;
+  /** Time-to-live in milliseconds (optional, omitted if cursor never expires) */
+  readonly ttl?: number;
 }
 
 /**
@@ -79,10 +79,10 @@ export interface Cursor {
 export interface CreateCursorOptions {
   /** Custom cursor ID (UUID generated if not provided) */
   id?: string;
-  /** Starting position in the result set (must be non-negative) */
-  position: number;
   /** User-defined metadata to associate with the cursor */
   metadata?: Record<string, unknown>;
+  /** Starting position in the result set (must be non-negative) */
+  position: number;
   /** Time-to-live in milliseconds (cursor never expires if omitted) */
   ttl?: number;
 }
@@ -116,10 +116,14 @@ export interface CreateCursorOptions {
  */
 export interface CursorStore {
   /**
-   * Save or update a cursor in the store.
-   * @param cursor - The cursor to store (replaces existing if same ID)
+   * Remove all cursors from the store.
    */
-  set(cursor: Cursor): void;
+  clear(): void;
+  /**
+   * Delete a cursor by ID.
+   * @param id - The cursor ID to delete (no-op if not found)
+   */
+  delete(id: string): void;
   /**
    * Retrieve a cursor by ID.
    * @param id - The cursor ID to look up
@@ -133,15 +137,6 @@ export interface CursorStore {
    */
   has(id: string): boolean;
   /**
-   * Delete a cursor by ID.
-   * @param id - The cursor ID to delete (no-op if not found)
-   */
-  delete(id: string): void;
-  /**
-   * Remove all cursors from the store.
-   */
-  clear(): void;
-  /**
    * List all cursor IDs in the store (including expired).
    * @returns Array of cursor IDs
    */
@@ -151,6 +146,11 @@ export interface CursorStore {
    * @returns Number of cursors that were pruned
    */
   prune(): number;
+  /**
+   * Save or update a cursor in the store.
+   * @param cursor - The cursor to store (replaces existing if same ID)
+   */
+  set(cursor: Cursor): void;
 }
 
 /**
@@ -226,16 +226,16 @@ export interface PersistentStoreOptions {
  */
 export interface PersistentStore extends CursorStore {
   /**
+   * Dispose of the store and cleanup resources.
+   * Call this when the store is no longer needed.
+   */
+  dispose(): void;
+  /**
    * Flush all in-memory cursors to disk.
    * Uses atomic write (temp file + rename) to prevent corruption.
    * @returns Promise that resolves when write is complete
    */
   flush(): Promise<void>;
-  /**
-   * Dispose of the store and cleanup resources.
-   * Call this when the store is no longer needed.
-   */
-  dispose(): void;
 }
 
 // ============================================================================
@@ -514,12 +514,12 @@ export function decodeCursor(
   }
 
   interface ParsedCursor {
-    id: string;
-    position: number;
     createdAt: number;
-    metadata?: Record<string, unknown>;
-    ttl?: number;
     expiresAt?: number;
+    id: string;
+    metadata?: Record<string, unknown>;
+    position: number;
+    ttl?: number;
   }
 
   const obj = data as Partial<ParsedCursor>;
@@ -1056,6 +1056,11 @@ export const DEFAULT_PAGE_LIMIT = 25;
  */
 export interface PaginationStore {
   /**
+   * Delete a cursor by ID.
+   * @param id - The cursor ID to delete
+   */
+  delete(id: string): void;
+  /**
    * Get a cursor by ID.
    * @param id - The cursor ID to look up
    * @returns The cursor if found, null otherwise
@@ -1067,11 +1072,6 @@ export interface PaginationStore {
    * @param cursor - The cursor to store
    */
   set(id: string, cursor: Cursor): void;
-  /**
-   * Delete a cursor by ID.
-   * @param id - The cursor ID to delete
-   */
-  delete(id: string): void;
 }
 
 // Module-level default store instance (lazy initialization)
@@ -1147,10 +1147,10 @@ export function createPaginationStore(): PaginationStore {
  * @typeParam T - The type of items being paginated
  */
 export interface PaginationResult<T> {
-  /** The items in the current page */
-  page: T[];
   /** The cursor for the next page, or null if this is the last page */
   nextCursor: Cursor | null;
+  /** The items in the current page */
+  page: T[];
 }
 
 /**

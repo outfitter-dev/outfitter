@@ -165,10 +165,10 @@ function getExitCode(error: Error): number {
  * Serializable error structure for JSON output.
  */
 interface SerializedCliError {
-  message: string;
   _tag?: string;
   category?: string;
   context?: Record<string, unknown>;
+  message: string;
 }
 
 /**

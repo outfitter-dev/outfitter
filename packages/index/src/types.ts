@@ -38,6 +38,10 @@ export type TokenizerType = "unicode61" | "porter" | "trigram";
  */
 export interface IndexOptions {
   /**
+   * Optional migration registry for upgrading older index versions.
+   */
+  migrations?: IndexMigrationRegistry;
+  /**
    * Absolute path to the SQLite database file.
    * The file will be created if it does not exist.
    */
@@ -64,11 +68,6 @@ export interface IndexOptions {
    * Optional tool version recorded in index metadata.
    */
   toolVersion?: string;
-
-  /**
-   * Optional migration registry for upgrading older index versions.
-   */
-  migrations?: IndexMigrationRegistry;
 }
 
 // =============================================================================
@@ -79,14 +78,14 @@ export interface IndexOptions {
  * Metadata stored alongside the index to track version and provenance.
  */
 export interface IndexMetadata {
-  /** File format version */
-  version: number;
   /** When this index was created */
   created: string;
   /** Tool that created the index */
   tool: string;
   /** Tool version that created the index */
   toolVersion: string;
+  /** File format version */
+  version: number;
 }
 
 // ============================================================================
@@ -110,11 +109,10 @@ export interface IndexMetadata {
  * ```
  */
 export interface IndexDocument {
-  /** Unique identifier for this document */
-  id: string;
-
   /** Searchable text content */
   content: string;
+  /** Unique identifier for this document */
+  id: string;
 
   /**
    * Optional metadata associated with the document.
@@ -151,9 +149,6 @@ export interface IndexDocument {
  * ```
  */
 export interface SearchQuery {
-  /** FTS5 query string */
-  query: string;
-
   /**
    * Maximum number of results to return.
    * @defaultValue 25
@@ -165,6 +160,8 @@ export interface SearchQuery {
    * @defaultValue 0
    */
   offset?: number;
+  /** FTS5 query string */
+  query: string;
 }
 
 /**
@@ -193,8 +190,19 @@ export interface SearchQuery {
  * ```
  */
 export interface SearchResult<T = unknown> {
+  /** Full document content */
+  content: string;
+
+  /**
+   * Matching snippets from the content.
+   * Uses FTS5 snippet() function for context-aware highlights.
+   */
+  highlights?: string[];
   /** Document ID */
   id: string;
+
+  /** Document metadata (if present) */
+  metadata?: T;
 
   /**
    * BM25 relevance ranking score.
@@ -202,18 +210,6 @@ export interface SearchResult<T = unknown> {
    * Note: FTS5 BM25 returns negative values (closer to 0 = better match).
    */
   score: number;
-
-  /** Full document content */
-  content: string;
-
-  /** Document metadata (if present) */
-  metadata?: T;
-
-  /**
-   * Matching snippets from the content.
-   * Uses FTS5 snippet() function for context-aware highlights.
-   */
-  highlights?: string[];
 }
 
 // ============================================================================
@@ -269,24 +265,6 @@ export interface Index<T = unknown> {
   addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>>;
 
   /**
-   * Search the index using FTS5 query syntax.
-   * Returns results ranked by BM25 relevance score.
-   *
-   * @param query - Search query parameters
-   * @returns Result containing array of search results or StorageError
-   */
-  search(query: SearchQuery): Promise<Result<SearchResult<T>[], StorageError>>;
-
-  /**
-   * Remove a document from the index by ID.
-   * No error is returned if the document does not exist.
-   *
-   * @param id - Document ID to remove
-   * @returns Result indicating success or StorageError
-   */
-  remove(id: string): Promise<Result<void, StorageError>>;
-
-  /**
    * Remove all documents from the index.
    *
    * @returns Result indicating success or StorageError
@@ -298,4 +276,22 @@ export interface Index<T = unknown> {
    * The index should not be used after calling close().
    */
   close(): void;
+
+  /**
+   * Remove a document from the index by ID.
+   * No error is returned if the document does not exist.
+   *
+   * @param id - Document ID to remove
+   * @returns Result indicating success or StorageError
+   */
+  remove(id: string): Promise<Result<void, StorageError>>;
+
+  /**
+   * Search the index using FTS5 query syntax.
+   * Returns results ranked by BM25 relevance score.
+   *
+   * @param query - Search query parameters
+   * @returns Result containing array of search results or StorageError
+   */
+  search(query: SearchQuery): Promise<Result<SearchResult<T>[], StorageError>>;
 }

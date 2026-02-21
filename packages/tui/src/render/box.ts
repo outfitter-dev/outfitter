@@ -41,23 +41,28 @@ export type BoxAlign = "left" | "center" | "right";
  * Spacing configuration for individual sides.
  */
 export interface BoxSpacing {
-  top?: number;
-  right?: number;
   bottom?: number;
   left?: number;
+  right?: number;
+  top?: number;
 }
 
 /**
  * Border visibility configuration for individual sides.
  */
 export interface BoxBorders {
-  top?: boolean;
-  right?: boolean;
   bottom?: boolean;
   left?: boolean;
+  right?: boolean;
+  top?: boolean;
 }
 
 export interface BoxOptions {
+  /**
+   * Content alignment within the box.
+   * @default "left"
+   */
+  align?: BoxAlign;
   /**
    * Border style to use.
    * @default "single"
@@ -71,33 +76,17 @@ export interface BoxOptions {
   borders?: BoxBorders;
 
   /**
-   * Internal padding (spaces between border and content).
-   * Can be a single number for all sides or an object for individual sides.
-   * @default 1
-   */
-  padding?: number | BoxSpacing;
-
-  /**
    * External margin (spacing outside the box).
    * Can be a single number for all sides or an object for individual sides.
    */
   margin?: number | BoxSpacing;
 
   /**
-   * Fixed width for the box. If not specified, auto-fits to content.
+   * Internal padding (spaces between border and content).
+   * Can be a single number for all sides or an object for individual sides.
+   * @default 1
    */
-  width?: number;
-
-  /**
-   * Optional title to display in the top border.
-   */
-  title?: string;
-
-  /**
-   * Content alignment within the box.
-   * @default "left"
-   */
-  align?: BoxAlign;
+  padding?: number | BoxSpacing;
 
   /**
    * Content sections separated by internal dividers.
@@ -125,18 +114,28 @@ export interface BoxOptions {
    * ```
    */
   sections?: Array<string | string[]>;
+
+  /**
+   * Optional title to display in the top border.
+   */
+  title?: string;
+
+  /**
+   * Fixed width for the box. If not specified, auto-fits to content.
+   */
+  width?: number;
 }
 
 /**
  * A rendered box with metadata for composition.
  */
 export interface Box {
+  /** Height in lines */
+  readonly height: number;
   /** Rendered string representation */
   readonly output: string;
   /** Width in characters */
   readonly width: number;
-  /** Height in lines */
-  readonly height: number;
 }
 
 /**
@@ -180,20 +179,20 @@ function alignLine(line: string, width: number, align: BoxAlign): string {
  * Normalized spacing with all four sides defined.
  */
 export interface NormalizedSpacing {
-  top: number;
-  right: number;
   bottom: number;
   left: number;
+  right: number;
+  top: number;
 }
 
 /**
  * Normalized borders with all four sides defined.
  */
 export interface NormalizedBorders {
-  top: boolean;
-  right: boolean;
   bottom: boolean;
   left: boolean;
+  right: boolean;
+  top: boolean;
 }
 
 /**

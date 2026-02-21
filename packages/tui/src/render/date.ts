@@ -14,10 +14,10 @@ import { Result, ValidationError } from "@outfitter/contracts";
  * Represents a date range with start and end dates.
  */
 export interface DateRange {
-  /** Start of the range (inclusive, at 00:00:00.000) */
-  start: Date;
   /** End of the range (inclusive, at 23:59:59.999) */
   end: Date;
+  /** Start of the range (inclusive, at 00:00:00.000) */
+  start: Date;
 }
 
 /** ISO date format regex: YYYY-MM-DD */

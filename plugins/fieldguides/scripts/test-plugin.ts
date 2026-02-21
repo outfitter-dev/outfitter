@@ -29,8 +29,8 @@ import { validatePlugin } from "./validate-plugin.ts";
 
 interface Options {
   keep: boolean;
-  validate: boolean;
   pluginDir: string;
+  validate: boolean;
 }
 
 function usage(): never {

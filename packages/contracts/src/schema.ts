@@ -13,31 +13,31 @@ import type { z } from "zod";
  * JSON Schema representation.
  */
 export interface JsonSchema {
-  type?: string;
-  properties?: Record<string, JsonSchema>;
-  required?: string[];
-  items?: JsonSchema | JsonSchema[];
-  description?: string;
-  default?: unknown;
-  minimum?: number;
-  maximum?: number;
-  exclusiveMinimum?: number;
-  exclusiveMaximum?: number;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  format?: string;
-  enum?: unknown[];
-  const?: unknown;
-  anyOf?: JsonSchema[];
-  oneOf?: JsonSchema[];
-  allOf?: JsonSchema[];
-  not?: JsonSchema | Record<string, never>;
+  $defs?: Record<string, JsonSchema>;
   $ref?: string;
   $schema?: string;
-  $defs?: Record<string, JsonSchema>;
-  definitions?: Record<string, JsonSchema>;
   additionalProperties?: boolean | JsonSchema;
+  allOf?: JsonSchema[];
+  anyOf?: JsonSchema[];
+  const?: unknown;
+  default?: unknown;
+  definitions?: Record<string, JsonSchema>;
+  description?: string;
+  enum?: unknown[];
+  exclusiveMaximum?: number;
+  exclusiveMinimum?: number;
+  format?: string;
+  items?: JsonSchema | JsonSchema[];
+  maximum?: number;
+  maxLength?: number;
+  minimum?: number;
+  minLength?: number;
+  not?: JsonSchema | Record<string, never>;
+  oneOf?: JsonSchema[];
+  pattern?: string;
+  properties?: Record<string, JsonSchema>;
+  required?: string[];
+  type?: string;
 }
 
 /**

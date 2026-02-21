@@ -23,17 +23,17 @@ import { statSync } from "node:fs";
 import { Glob } from "bun";
 
 interface TableIssue {
+  after: string;
+  before: string;
   file: string;
   line: number;
   message: string;
-  before: string;
-  after: string;
 }
 
 interface FormatResult {
+  changed: boolean;
   content: string;
   issues: TableIssue[];
-  changed: boolean;
 }
 
 // Match a table separator line (line with only |, -, :, and spaces)

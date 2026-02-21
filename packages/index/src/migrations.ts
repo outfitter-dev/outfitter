@@ -11,16 +11,16 @@ import type { StorageError } from "@outfitter/contracts";
 import { Result } from "@outfitter/contracts";
 
 export interface MigrationRegistry<TContext> {
-  register(
-    fromVersion: number,
-    toVersion: number,
-    migrate: (context: TContext) => Result<void, StorageError>
-  ): void;
   migrate(
     context: TContext,
     fromVersion: number,
     toVersion: number
   ): Result<void, StorageError>;
+  register(
+    fromVersion: number,
+    toVersion: number,
+    migrate: (context: TContext) => Result<void, StorageError>
+  ): void;
 }
 
 export interface IndexMigrationContext {

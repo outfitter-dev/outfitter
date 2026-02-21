@@ -23,9 +23,9 @@ const demoRootFlagsPreset = composePresets(
 );
 
 export interface DemoRootFlags {
-  readonly list: boolean;
   readonly animate: boolean;
   readonly jsonl: boolean;
+  readonly list: boolean;
 }
 
 export function applyDemoRootFlags(command: Command): Command {

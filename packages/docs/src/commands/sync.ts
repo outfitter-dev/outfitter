@@ -10,8 +10,8 @@ export interface ExecuteSyncCommandOptions extends PackageDocsOptions {
 }
 
 export interface CommandIo {
-  readonly out: (line: string) => void;
   readonly err: (line: string) => void;
+  readonly out: (line: string) => void;
 }
 
 function toCoreOptions(options: ExecuteSyncCommandOptions): PackageDocsOptions {

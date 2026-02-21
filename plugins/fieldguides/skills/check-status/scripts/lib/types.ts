@@ -10,16 +10,16 @@ export type GathererStatus = "success" | "unavailable" | "error";
  * @typeParam T - Type of gathered data
  */
 export interface GathererResult<T = unknown> {
-  /** Source identifier */
-  source: string;
-  /** Operation status */
-  status: GathererStatus;
   /** Gathered data (present when success) */
   data?: T;
   /** Error message (present when error) */
   error?: string;
   /** Unavailability reason (present when unavailable) */
   reason?: string;
+  /** Source identifier */
+  source: string;
+  /** Operation status */
+  status: GathererStatus;
   /** ISO timestamp of when data was gathered */
   timestamp: string;
 }
@@ -28,57 +28,55 @@ export interface GathererResult<T = unknown> {
  * Issue from Beads local issue tracking.
  */
 export interface BeadsIssue {
-  id: string;
-  title: string;
-  description?: string;
-  status: "open" | "in_progress" | "blocked" | "closed";
-  issue_type: "bug" | "feature" | "task" | "epic" | "chore";
-  priority: 0 | 1 | 2 | 3 | 4;
   assignee?: string;
-  labels: string[];
-  created_at: string;
-  updated_at: string;
   closed_at?: string;
+  created_at: string;
   dependency_count: number;
   dependent_count: number;
+  description?: string;
+  id: string;
+  issue_type: "bug" | "feature" | "task" | "epic" | "chore";
+  labels: string[];
+  priority: 0 | 1 | 2 | 3 | 4;
+  status: "open" | "in_progress" | "blocked" | "closed";
+  title: string;
+  updated_at: string;
 }
 
 /**
  * Aggregated statistics for Beads issues.
  */
 export interface BeadsStats {
-  total: number;
-  open: number;
-  in_progress: number;
+  average_lead_time?: number;
   blocked: number;
   closed: number;
+  in_progress: number;
+  open: number;
   ready: number;
-  average_lead_time?: number;
+  total: number;
 }
 
 /**
  * Data gathered from Beads issue tracker.
  */
 export interface BeadsData {
-  stats: BeadsStats;
+  blocked: BeadsIssue[];
   inProgress: BeadsIssue[];
   ready: BeadsIssue[];
-  blocked: BeadsIssue[];
   recentlyClosed: BeadsIssue[];
+  stats: BeadsStats;
 }
 
 /**
  * Pull request from GitHub.
  */
 export interface GitHubPR {
-  number: number;
-  title: string;
-  state: "OPEN" | "CLOSED" | "MERGED";
-  isDraft: boolean;
   author: { login: string };
-  updatedAt: string;
-  url: string;
   headRefName: string;
+  isDraft: boolean;
+  number: number;
+  reviewDecision?: "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED" | null;
+  state: "OPEN" | "CLOSED" | "MERGED";
   statusCheckRollup?: {
     state: "SUCCESS" | "FAILURE" | "PENDING" | "EXPECTED";
     contexts?: Array<{
@@ -87,17 +85,19 @@ export interface GitHubPR {
       conclusion?: string;
     }>;
   };
-  reviewDecision?: "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED" | null;
+  title: string;
+  updatedAt: string;
+  url: string;
 }
 
 /**
  * GitHub Actions workflow run.
  */
 export interface GitHubWorkflowRun {
-  name: string;
-  status: string;
   conclusion: string | null;
   createdAt: string;
+  name: string;
+  status: string;
   url: string;
 }
 
@@ -105,51 +105,51 @@ export interface GitHubWorkflowRun {
  * Data gathered from GitHub.
  */
 export interface GitHubData {
-  repo: string;
   openPRs: GitHubPR[];
   recentRuns: GitHubWorkflowRun[];
+  repo: string;
 }
 
 /**
  * Branch in a Graphite stack.
  */
 export interface GraphiteBranch {
+  children: string[];
+  commitCount: number;
+  isCurrent: boolean;
   name: string;
+  needsRestack: boolean;
+  needsSubmit: boolean;
+  parent?: string;
   prNumber?: number;
   prStatus?: "draft" | "open" | "ready" | "merged" | "closed";
   prUrl?: string;
-  parent?: string;
-  children: string[];
-  isCurrent: boolean;
-  needsRestack: boolean;
-  needsSubmit: boolean;
-  commitCount: number;
 }
 
 /**
  * Data gathered from Graphite.
  */
 export interface GraphiteData {
-  currentBranch: string;
-  trunk: string;
   branches: GraphiteBranch[];
+  currentBranch: string;
   stacks: string[][]; // Each stack as array of branch names
+  trunk: string;
 }
 
 /**
  * Issue from Linear.
  */
 export interface LinearIssue {
+  assignee?: { name: string };
+  createdAt: string;
   identifier: string;
-  title: string;
+  labels: Array<{ name: string }>;
+  priority: number;
   state: {
     name: string;
     type: string;
   };
-  priority: number;
-  assignee?: { name: string };
-  labels: Array<{ name: string }>;
-  createdAt: string;
+  title: string;
   updatedAt: string;
   url: string;
 }
@@ -158,21 +158,21 @@ export interface LinearIssue {
  * Data gathered from Linear.
  */
 export interface LinearData {
-  team?: string;
   issues: LinearIssue[];
+  team?: string;
 }
 
 /**
  * Aggregated status report result.
  */
 export interface SitrepResult {
-  timeConstraint: string;
-  timestamp: string;
-  sources: string[];
   results: {
     graphite?: GathererResult<GraphiteData>;
     github?: GathererResult<GitHubData>;
     linear?: GathererResult<LinearData>;
     beads?: GathererResult<BeadsData>;
   };
+  sources: string[];
+  timeConstraint: string;
+  timestamp: string;
 }

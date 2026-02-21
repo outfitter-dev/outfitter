@@ -31,12 +31,12 @@ export type CaseMode = "upper" | "lower" | "title" | "none";
  * Options for rendering a heading.
  */
 export interface HeadingOptions {
+  /** Case transformation (default: "upper") */
+  case?: CaseMode;
   /** Separator character/style (default: "=") */
   separator?: SeparatorStyle;
   /** Width mode (default: "text") */
   width?: HeadingWidthMode;
-  /** Case transformation (default: "upper") */
-  case?: CaseMode;
 }
 
 /** ANSI escape sequence pattern */

@@ -25,10 +25,10 @@ import { getEnvBoolean } from "@outfitter/config";
  * ```
  */
 export interface TerminalOptions {
-  /** Override TTY detection (uses process.stdout.isTTY if not specified) */
-  isTTY?: boolean;
   /** Override CI detection (uses CI env variable if not specified) */
   isCI?: boolean;
+  /** Override TTY detection (uses process.stdout.isTTY if not specified) */
+  isTTY?: boolean;
 }
 
 /**

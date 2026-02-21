@@ -23,12 +23,12 @@
 export interface ProgressOptions {
   /** Current progress value */
   current: number;
+  /** Whether to show percentage after the bar (default: false) */
+  showPercent?: boolean;
   /** Total value (100% when current equals total) */
   total: number;
   /** Width of the progress bar in characters (default: 20) */
   width?: number;
-  /** Whether to show percentage after the bar (default: false) */
-  showPercent?: boolean;
 }
 
 /**

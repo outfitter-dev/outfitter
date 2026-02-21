@@ -38,14 +38,14 @@ export interface VersionConflict {
 
 /** Result of scanning a workspace for @outfitter/* packages. */
 export interface WorkspaceScanResult {
-  /** Deduplicated @outfitter/* packages (uses lowest version for conflicts) */
-  readonly packages: readonly WorkspacePackageEntry[];
   /** Version conflicts found across manifests */
   readonly conflicts: readonly VersionConflict[];
-  /** Maps package name to the manifest paths that contain it */
-  readonly manifestsByPackage: ReadonlyMap<string, readonly string[]>;
   /** All manifest paths scanned */
   readonly manifestPaths: readonly string[];
+  /** Maps package name to the manifest paths that contain it */
+  readonly manifestsByPackage: ReadonlyMap<string, readonly string[]>;
+  /** Deduplicated @outfitter/* packages (uses lowest version for conflicts) */
+  readonly packages: readonly WorkspacePackageEntry[];
   /** Workspace root directory (null if not a workspace) */
   readonly workspaceRoot: string | null;
 }
@@ -55,9 +55,9 @@ export interface WorkspaceScanResult {
 // =============================================================================
 
 interface PackageDeps {
-  workspaces?: unknown;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  workspaces?: unknown;
   [key: string]: unknown;
 }
 

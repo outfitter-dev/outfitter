@@ -45,12 +45,12 @@ export interface ThemedLayoutContext extends LayoutContext {
  * Options for creating a themed layout context.
  */
 export interface ThemedContextOptions {
+  /** Parent context for inheritance */
+  parent?: ThemedLayoutContext;
   /** Visual theme (inherited from parent if not specified) */
   theme?: VisualTheme;
   /** Available width in characters */
   width?: number;
-  /** Parent context for inheritance */
-  parent?: ThemedLayoutContext;
 }
 
 /**

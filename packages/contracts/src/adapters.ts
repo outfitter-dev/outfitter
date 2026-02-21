@@ -8,46 +8,45 @@ import type { Result } from "better-result";
 /** Error during indexing operations */
 export interface IndexError {
   readonly _tag: "IndexError";
-  readonly message: string;
   readonly cause?: unknown;
+  readonly message: string;
 }
 
 /** Error during cache operations */
 export interface CacheError {
   readonly _tag: "CacheError";
-  readonly message: string;
   readonly cause?: unknown;
+  readonly message: string;
 }
 
 /** Error during auth/credential operations */
 export interface AdapterAuthError {
   readonly _tag: "AdapterAuthError";
-  readonly message: string;
   readonly cause?: unknown;
+  readonly message: string;
 }
 
 /** Error during storage operations */
 export interface StorageError {
   readonly _tag: "StorageError";
-  readonly message: string;
   readonly cause?: unknown;
+  readonly message: string;
 }
 
 /**
  * Search options for index adapter.
  */
 export interface SearchOptions {
+  /** Fields to boost in relevance scoring */
+  boostFields?: string[];
+
+  /** Field-specific filters */
+  filters?: Record<string, unknown>;
   /** Maximum results to return */
   limit?: number;
 
   /** Offset for pagination */
   offset?: number;
-
-  /** Field-specific filters */
-  filters?: Record<string, unknown>;
-
-  /** Fields to boost in relevance scoring */
-  boostFields?: string[];
 }
 
 /**
@@ -61,11 +60,11 @@ export interface SearchResult<T> {
     highlights?: Record<string, string[]>;
   }>;
 
-  /** Total number of matches (for pagination) */
-  total: number;
-
   /** Search execution time in milliseconds */
   took: number;
+
+  /** Total number of matches (for pagination) */
+  total: number;
 }
 
 /**
@@ -75,11 +74,11 @@ export interface IndexStats {
   /** Total documents indexed */
   documentCount: number;
 
-  /** Index size in bytes (if available) */
-  sizeBytes?: number;
-
   /** Last update timestamp */
   lastUpdated: Date | null;
+
+  /** Index size in bytes (if available) */
+  sizeBytes?: number;
 }
 
 /**
@@ -102,20 +101,19 @@ export interface IndexStats {
  * ```
  */
 export interface IndexAdapter<T> {
+  /** Clear all indexed documents */
+  clear(): Promise<Result<void, IndexError>>;
   /** Add or update documents in the index */
   index(items: T[]): Promise<Result<void, IndexError>>;
+
+  /** Remove documents by ID */
+  remove(ids: string[]): Promise<Result<void, IndexError>>;
 
   /** Full-text search with optional filters */
   search(
     query: string,
     options?: SearchOptions
   ): Promise<Result<SearchResult<T>, IndexError>>;
-
-  /** Remove documents by ID */
-  remove(ids: string[]): Promise<Result<void, IndexError>>;
-
-  /** Clear all indexed documents */
-  clear(): Promise<Result<void, IndexError>>;
 
   /** Get index statistics */
   stats(): Promise<Result<IndexStats, IndexError>>;
@@ -137,8 +135,19 @@ export interface IndexAdapter<T> {
  * ```
  */
 export interface CacheAdapter<T> {
+  /** Clear all cached values */
+  clear(): Promise<Result<void, CacheError>>;
+
+  /** Delete cached value, returns true if existed */
+  delete(key: string): Promise<Result<boolean, CacheError>>;
   /** Get cached value, null if not found or expired */
   get(key: string): Promise<Result<T | null, CacheError>>;
+
+  /** Get multiple values at once */
+  getMany(keys: string[]): Promise<Result<Map<string, T>, CacheError>>;
+
+  /** Check if key exists (without retrieving value) */
+  has(key: string): Promise<Result<boolean, CacheError>>;
 
   /** Set value with optional TTL in seconds */
   set(
@@ -146,18 +155,6 @@ export interface CacheAdapter<T> {
     value: T,
     ttlSeconds?: number
   ): Promise<Result<void, CacheError>>;
-
-  /** Delete cached value, returns true if existed */
-  delete(key: string): Promise<Result<boolean, CacheError>>;
-
-  /** Clear all cached values */
-  clear(): Promise<Result<void, CacheError>>;
-
-  /** Check if key exists (without retrieving value) */
-  has(key: string): Promise<Result<boolean, CacheError>>;
-
-  /** Get multiple values at once */
-  getMany(keys: string[]): Promise<Result<Map<string, T>, CacheError>>;
 }
 
 /**
@@ -174,17 +171,16 @@ export interface CacheAdapter<T> {
  * ```
  */
 export interface AuthAdapter {
+  /** Remove credential */
+  delete(key: string): Promise<Result<boolean, AdapterAuthError>>;
   /** Retrieve credential by key */
   get(key: string): Promise<Result<string | null, AdapterAuthError>>;
 
-  /** Store credential */
-  set(key: string, value: string): Promise<Result<void, AdapterAuthError>>;
-
-  /** Remove credential */
-  delete(key: string): Promise<Result<boolean, AdapterAuthError>>;
-
   /** List available credential keys (not values) */
   list(): Promise<Result<string[], AdapterAuthError>>;
+
+  /** Store credential */
+  set(key: string, value: string): Promise<Result<void, AdapterAuthError>>;
 }
 
 /**
@@ -201,12 +197,6 @@ export interface AuthAdapter {
  * ```
  */
 export interface StorageAdapter {
-  /** Read file contents */
-  read(path: string): Promise<Result<Uint8Array, StorageError>>;
-
-  /** Write file contents */
-  write(path: string, data: Uint8Array): Promise<Result<void, StorageError>>;
-
   /** Delete file */
   delete(path: string): Promise<Result<boolean, StorageError>>;
 
@@ -215,9 +205,14 @@ export interface StorageAdapter {
 
   /** List files in directory */
   list(prefix: string): Promise<Result<string[], StorageError>>;
+  /** Read file contents */
+  read(path: string): Promise<Result<Uint8Array, StorageError>>;
 
   /** Get file metadata (size, modified time) */
   stat(
     path: string
   ): Promise<Result<{ size: number; modifiedAt: Date } | null, StorageError>>;
+
+  /** Write file contents */
+  write(path: string, data: Uint8Array): Promise<Result<void, StorageError>>;
 }

@@ -24,18 +24,18 @@ export type BumpClassification =
 
 /** Describes the planned action for a single package. */
 export interface PackageUpgradeAction {
-  /** Full package name (e.g. "@outfitter/cli") */
-  readonly name: string;
+  /** Whether this update contains breaking changes */
+  readonly breaking: boolean;
+  /** Bump classification */
+  readonly classification: BumpClassification;
   /** Currently installed version */
   readonly currentVersion: string;
   /** Latest available version */
   readonly latestVersion: string;
-  /** Bump classification */
-  readonly classification: BumpClassification;
-  /** Whether this update contains breaking changes */
-  readonly breaking: boolean;
   /** Migration doc path if available */
   readonly migrationDoc?: string;
+  /** Full package name (e.g. "@outfitter/cli") */
+  readonly name: string;
 }
 
 /** The complete update plan with per-package actions and aggregate summary. */

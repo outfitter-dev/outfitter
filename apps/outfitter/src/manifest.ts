@@ -32,18 +32,18 @@ const MANIFEST_FILE = "manifest.json";
 
 /** A single block entry in the manifest. */
 export interface BlockEntry {
-  /** Tooling version the block was installed from. */
-  installedFrom: string;
   /** ISO 8601 timestamp of when the block was installed or last updated. */
   installedAt: string;
+  /** Tooling version the block was installed from. */
+  installedFrom: string;
 }
 
 /** The full manifest structure. */
 export interface Manifest {
-  /** Manifest format version. Currently always 1. */
-  version: 1;
   /** Map of block name to install metadata. */
   blocks: Record<string, BlockEntry>;
+  /** Manifest format version. Currently always 1. */
+  version: 1;
 }
 
 // =============================================================================

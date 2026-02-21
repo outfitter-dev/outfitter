@@ -34,9 +34,9 @@ import type {
 
 describe("IndexAdapter interface", () => {
   interface TestDocument {
+    content: string;
     id: string;
     title: string;
-    content: string;
   }
 
   it("compiles with mock implementation", () => {

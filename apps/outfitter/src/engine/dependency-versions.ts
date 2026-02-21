@@ -10,13 +10,13 @@ const DEPENDENCY_SECTIONS = [
 ] as const;
 
 export interface TemplateVersionManifest {
-  readonly internalDependencies: Record<string, string>;
   readonly externalDependencies: Record<string, string>;
+  readonly internalDependencies: Record<string, string>;
 }
 
 export interface ResolvedTemplateDependencyVersions {
-  readonly internal: Record<string, string>;
   readonly external: Record<string, string>;
+  readonly internal: Record<string, string>;
 }
 
 let cachedResolvedVersions: ResolvedTemplateDependencyVersions | undefined;

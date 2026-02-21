@@ -2,31 +2,29 @@
  * Configuration for creating a redactor.
  */
 export interface RedactorConfig {
-  /** Regex patterns to match and redact */
-  patterns: RegExp[];
+  /** Whether to redact recursively in nested objects (default: true) */
+  deep?: boolean;
 
   /** Object keys whose values should always be redacted */
   keys: string[];
+  /** Regex patterns to match and redact */
+  patterns: RegExp[];
 
   /** Replacement string (default: "[REDACTED]") */
   replacement?: string;
-
-  /** Whether to redact recursively in nested objects (default: true) */
-  deep?: boolean;
 }
 
 /**
  * Redaction event for audit logging.
  */
 export interface RedactionEvent {
-  /** Type of redaction applied */
-  redactedBy: "pattern" | "key";
-
   /** Identifier of the pattern/key that matched */
   matcher: string;
 
   /** Location in the object path (e.g., "config.auth.apiKey") */
   path: string;
+  /** Type of redaction applied */
+  redactedBy: "pattern" | "key";
 }
 
 /**
@@ -57,20 +55,19 @@ export type RedactionCallback = (event: RedactionEvent) => void;
  * ```
  */
 export interface Redactor {
-  /** Redact sensitive values from an object (deep) */
-  redact<T>(value: T): T;
-
-  /** Redact sensitive values from a string */
-  redactString(value: string): string;
-
-  /** Check if a key name is sensitive */
-  isSensitiveKey(key: string): boolean;
-
   /** Add a pattern at runtime */
   addPattern(pattern: RegExp): void;
 
   /** Add a sensitive key at runtime */
   addSensitiveKey(key: string): void;
+
+  /** Check if a key name is sensitive */
+  isSensitiveKey(key: string): boolean;
+  /** Redact sensitive values from an object (deep) */
+  redact<T>(value: T): T;
+
+  /** Redact sensitive values from a string */
+  redactString(value: string): string;
 }
 
 /**

@@ -11,14 +11,13 @@ import { Err, Ok, type Result } from "better-result";
  * Options for confirmDestructive().
  */
 export interface ConfirmDestructiveOptions {
-  /** Message to display to the user */
-  readonly message: string;
-
   /** Whether to bypass confirmation (e.g., --yes flag) */
   readonly bypassFlag?: boolean;
 
   /** Number of items affected (shown in confirmation) */
   readonly itemCount?: number;
+  /** Message to display to the user */
+  readonly message: string;
 }
 
 /**

@@ -69,20 +69,20 @@ export interface GlobOptions {
    */
   cwd?: string;
   /**
-   * Patterns to exclude from results.
-   * Supports negation with "!" prefix to re-include previously excluded files.
+   * Include files and directories starting with a dot in results.
+   * @defaultValue false
    */
-  ignore?: string[];
+  dot?: boolean;
   /**
    * Follow symbolic links when scanning directories.
    * @defaultValue false
    */
   followSymlinks?: boolean;
   /**
-   * Include files and directories starting with a dot in results.
-   * @defaultValue false
+   * Patterns to exclude from results.
+   * Supports negation with "!" prefix to re-include previously excluded files.
    */
-  dot?: boolean;
+  ignore?: string[];
 }
 
 /**
@@ -98,16 +98,16 @@ export interface AtomicWriteOptions {
    */
   createParentDirs?: boolean;
   /**
+   * Unix file mode for newly created files.
+   * @defaultValue 0o644
+   */
+  mode?: number;
+  /**
    * Preserve file permissions from existing file.
    * If the target file does not exist, falls back to the mode option.
    * @defaultValue false
    */
   preservePermissions?: boolean;
-  /**
-   * Unix file mode for newly created files.
-   * @defaultValue 0o644
-   */
-  mode?: number;
 }
 
 /**
@@ -117,10 +117,10 @@ export interface AtomicWriteOptions {
  * acquisition timestamp. Used with acquireLock and releaseLock functions.
  */
 export interface FileLock {
-  /** Absolute path to the locked file */
-  path: string;
   /** Path to the .lock file that indicates the lock */
   lockPath: string;
+  /** Absolute path to the locked file */
+  path: string;
   /** Process ID of the lock holder */
   pid: number;
   /** Unix timestamp (milliseconds) when the lock was acquired */
@@ -145,15 +145,15 @@ export interface SharedFileLock extends FileLock {
  */
 export interface LockOptions {
   /**
-   * Maximum time in milliseconds to wait for lock acquisition.
-   * If not specified, fails immediately if lock cannot be acquired.
-   */
-  timeout?: number;
-  /**
    * Interval in milliseconds between retry attempts when waiting.
    * @defaultValue 50
    */
   retryInterval?: number;
+  /**
+   * Maximum time in milliseconds to wait for lock acquisition.
+   * If not specified, fails immediately if lock cannot be acquired.
+   */
+  timeout?: number;
 }
 
 // ============================================================================
@@ -927,9 +927,9 @@ export async function atomicWriteJson<T>(
  * Internal type for exclusive lock file content.
  */
 interface ExclusiveLockData {
-  type: "exclusive";
   pid: number;
   timestamp: number;
+  type: "exclusive";
 }
 
 /**
@@ -945,8 +945,8 @@ interface SharedLockReader {
  * Internal type for shared lock file content.
  */
 interface SharedLockData {
-  type: "shared";
   readers: SharedLockReader[];
+  type: "shared";
 }
 
 /**

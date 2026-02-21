@@ -4,7 +4,7 @@ Build CLI tools, MCP servers, and daemons with Outfitter's shared infrastructure
 
 ## Prerequisites
 
-- **Bun >= 1.3.7** — Install from [bun.sh](https://bun.sh)
+- **Bun >= 1.3.9** — Install from [bun.sh](https://bun.sh)
 - **TypeScript knowledge** — Outfitter is TypeScript-first
 - **Familiarity with Result types** — See [Patterns](./PATTERNS.md) if new to this style
 

@@ -19,16 +19,16 @@ import { basename, dirname, resolve } from "node:path";
 import { Glob } from "bun";
 
 interface SkillInfo {
-  path: string;
   name: string;
+  path: string;
   relatedSkills: string[];
 }
 
 interface Violation {
-  sourceSkill: string;
-  sourcePath: string;
-  targetSkill: string;
   message: string;
+  sourcePath: string;
+  sourceSkill: string;
+  targetSkill: string;
 }
 
 /**

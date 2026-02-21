@@ -26,11 +26,11 @@ import { parse as parseYaml } from "yaml";
 // ── Types ───────────────────────────────────────────────────────────────────
 
 interface Finding {
+  column: number;
+  context: string;
   file: string;
   line: number;
-  column: number;
   match: string;
-  context: string;
 }
 
 interface ScanResult {

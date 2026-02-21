@@ -34,12 +34,12 @@ import { resolveStructuredOutputMode } from "../output-mode.js";
 export interface AddInput {
   /** Block name to add */
   readonly block: string;
-  /** Overwrite existing files */
-  readonly force: boolean;
-  /** Show what would be done without making changes */
-  readonly dryRun: boolean;
   /** Working directory (defaults to cwd) */
   readonly cwd?: string;
+  /** Show what would be done without making changes */
+  readonly dryRun: boolean;
+  /** Overwrite existing files */
+  readonly force: boolean;
 }
 
 /**

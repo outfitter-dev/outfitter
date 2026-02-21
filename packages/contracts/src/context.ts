@@ -4,26 +4,25 @@ import type { HandlerContext, Logger, ResolvedConfig } from "./handler.js";
  * Options for creating a handler context.
  */
 export interface CreateContextOptions {
-  /** Logger instance (uses no-op logger if not provided) */
-  logger?: Logger;
-
   /** Resolved configuration */
   config?: ResolvedConfig;
-
-  /** Abort signal for cancellation */
-  signal?: AbortSignal;
-
-  /** Explicit request ID (generates UUIDv7 if not provided) */
-  requestId?: string;
-
-  /** Workspace root path */
-  workspaceRoot?: string;
 
   /** Current working directory (defaults to process.cwd()) */
   cwd?: string;
 
   /** Environment variables to include */
   env?: Record<string, string | undefined>;
+  /** Logger instance (uses no-op logger if not provided) */
+  logger?: Logger;
+
+  /** Explicit request ID (generates UUIDv7 if not provided) */
+  requestId?: string;
+
+  /** Abort signal for cancellation */
+  signal?: AbortSignal;
+
+  /** Workspace root path */
+  workspaceRoot?: string;
 }
 
 /**

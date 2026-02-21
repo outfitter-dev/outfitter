@@ -45,24 +45,6 @@ const TaggedError = TaggedErrorImpl;
  */
 export interface McpServerOptions {
   /**
-   * Server name, used in MCP protocol handshake.
-   * Should be a short, descriptive identifier.
-   */
-  name: string;
-
-  /**
-   * Server version (semver format recommended).
-   * Sent to clients during initialization.
-   */
-  version: string;
-
-  /**
-   * Optional logger instance for server logging.
-   * If not provided, the server uses the Outfitter logger factory defaults.
-   */
-  logger?: Logger;
-
-  /**
    * Default MCP log level for client-facing log forwarding.
    *
    * Precedence (highest wins):
@@ -75,6 +57,23 @@ export interface McpServerOptions {
    * The MCP client can always override via `logging/setLevel`.
    */
   defaultLogLevel?: import("./logging.js").McpLogLevel | null;
+
+  /**
+   * Optional logger instance for server logging.
+   * If not provided, the server uses the Outfitter logger factory defaults.
+   */
+  logger?: Logger;
+  /**
+   * Server name, used in MCP protocol handshake.
+   * Should be a short, descriptive identifier.
+   */
+  name: string;
+
+  /**
+   * Server version (semver format recommended).
+   * Sent to clients during initialization.
+   */
+  version: string;
 }
 
 // ============================================================================
@@ -90,9 +89,6 @@ export interface McpServerOptions {
  * @see https://spec.modelcontextprotocol.io/specification/2025-03-26/server/tools/#annotations
  */
 export interface ToolAnnotations {
-  /** When true, the tool does not modify any state. */
-  readOnlyHint?: boolean;
-
   /** When true, the tool may perform destructive operations (e.g., deleting data). */
   destructiveHint?: boolean;
 
@@ -101,6 +97,8 @@ export interface ToolAnnotations {
 
   /** When true, the tool may interact with external systems beyond the server. */
   openWorldHint?: boolean;
+  /** When true, the tool does not modify any state. */
+  readOnlyHint?: boolean;
 }
 
 /**
@@ -201,16 +199,10 @@ export interface ToolDefinition<
   TError extends OutfitterError = OutfitterError,
 > {
   /**
-   * Unique tool name (kebab-case recommended).
-   * Used by clients to invoke the tool.
+   * Optional behavioral annotations for the tool.
+   * Helps clients understand tool behavior without invoking it.
    */
-  name: string;
-
-  /**
-   * Human-readable description of what the tool does.
-   * Shown to clients and used by LLMs to understand tool capabilities.
-   */
-  description: string;
+  annotations?: ToolAnnotations;
 
   /**
    * Whether the tool should be deferred for tool search.
@@ -219,22 +211,27 @@ export interface ToolDefinition<
   deferLoading?: boolean;
 
   /**
-   * Zod schema for validating and parsing input.
-   * The schema defines the expected input structure.
+   * Human-readable description of what the tool does.
+   * Shown to clients and used by LLMs to understand tool capabilities.
    */
-  inputSchema: z.ZodType<TInput>;
-
-  /**
-   * Optional behavioral annotations for the tool.
-   * Helps clients understand tool behavior without invoking it.
-   */
-  annotations?: ToolAnnotations;
+  description: string;
 
   /**
    * Handler function that processes the tool invocation.
    * Receives validated input and HandlerContext, returns Result.
    */
   handler: Handler<TInput, TOutput, TError>;
+
+  /**
+   * Zod schema for validating and parsing input.
+   * The schema defines the expected input structure.
+   */
+  inputSchema: z.ZodType<TInput>;
+  /**
+   * Unique tool name (kebab-case recommended).
+   * Used by clients to invoke the tool.
+   */
+  name: string;
 }
 
 /**
@@ -242,20 +239,19 @@ export interface ToolDefinition<
  * This is the format sent to clients during tool listing.
  */
 export interface SerializedTool {
-  /** Tool name */
-  name: string;
+  /** Behavioral annotations for the tool */
+  annotations?: ToolAnnotations;
+
+  /** MCP tool-search hint: whether tool is deferred */
+  defer_loading?: boolean;
 
   /** Tool description */
   description: string;
 
   /** JSON Schema representation of the input schema */
   inputSchema: Record<string, unknown>;
-
-  /** MCP tool-search hint: whether tool is deferred */
-  defer_loading?: boolean;
-
-  /** Behavioral annotations for the tool */
-  annotations?: ToolAnnotations;
+  /** Tool name */
+  name: string;
 }
 
 // ============================================================================
@@ -290,28 +286,28 @@ export interface ContentAnnotations {
  * Text content returned from a resource read.
  */
 export interface TextResourceContent {
-  /** Resource URI */
-  uri: string;
-  /** Text content */
-  text: string;
-  /** Optional MIME type */
-  mimeType?: string;
   /** Optional content annotations */
   annotations?: ContentAnnotations;
+  /** Optional MIME type */
+  mimeType?: string;
+  /** Text content */
+  text: string;
+  /** Resource URI */
+  uri: string;
 }
 
 /**
  * Binary (base64-encoded) content returned from a resource read.
  */
 export interface BlobResourceContent {
-  /** Resource URI */
-  uri: string;
+  /** Optional content annotations */
+  annotations?: ContentAnnotations;
   /** Base64-encoded binary content */
   blob: string;
   /** Optional MIME type */
   mimeType?: string;
-  /** Optional content annotations */
-  annotations?: ContentAnnotations;
+  /** Resource URI */
+  uri: string;
 }
 
 /**
@@ -353,22 +349,16 @@ export type ResourceReadHandler = (
  */
 export interface ResourceDefinition {
   /**
-   * Unique resource URI.
-   * Must be a valid URI (file://, https://, custom://, etc.).
-   */
-  uri: string;
-
-  /**
-   * Human-readable resource name.
-   * Displayed to users in resource listings.
-   */
-  name: string;
-
-  /**
    * Optional description of the resource.
    * Provides additional context about the resource contents.
    */
   description?: string;
+
+  /**
+   * Optional handler for reading the resource content.
+   * If not provided, the resource is metadata-only.
+   */
+  handler?: ResourceReadHandler;
 
   /**
    * Optional MIME type of the resource content.
@@ -377,10 +367,15 @@ export interface ResourceDefinition {
   mimeType?: string;
 
   /**
-   * Optional handler for reading the resource content.
-   * If not provided, the resource is metadata-only.
+   * Human-readable resource name.
+   * Displayed to users in resource listings.
    */
-  handler?: ResourceReadHandler;
+  name: string;
+  /**
+   * Unique resource URI.
+   * Must be a valid URI (file://, https://, custom://, etc.).
+   */
+  uri: string;
 }
 
 // ============================================================================
@@ -419,23 +414,22 @@ export type ResourceTemplateReadHandler = (
  * ```
  */
 export interface ResourceTemplateDefinition {
-  /** URI template with `{param}` placeholders (RFC 6570 Level 1). */
-  uriTemplate: string;
-
-  /** Human-readable name for the template. */
-  name: string;
+  /** Optional completion handlers keyed by parameter name. */
+  complete?: Record<string, CompletionHandler>;
 
   /** Optional description. */
   description?: string;
 
+  /** Handler for reading matched resources. */
+  handler: ResourceTemplateReadHandler;
+
   /** Optional MIME type. */
   mimeType?: string;
 
-  /** Optional completion handlers keyed by parameter name. */
-  complete?: Record<string, CompletionHandler>;
-
-  /** Handler for reading matched resources. */
-  handler: ResourceTemplateReadHandler;
+  /** Human-readable name for the template. */
+  name: string;
+  /** URI template with `{param}` placeholders (RFC 6570 Level 1). */
+  uriTemplate: string;
 }
 
 // ============================================================================
@@ -450,12 +444,12 @@ export interface ResourceTemplateDefinition {
  * Result of a completion request.
  */
 export interface CompletionResult {
-  /** Completion values */
-  values: string[];
-  /** Total number of available values (for pagination) */
-  total?: number;
   /** Whether there are more values */
   hasMore?: boolean;
+  /** Total number of available values (for pagination) */
+  total?: number;
+  /** Completion values */
+  values: string[];
 }
 
 /**
@@ -474,46 +468,46 @@ export type CompletionRef =
  * Argument definition for a prompt.
  */
 export interface PromptArgument {
-  /** Argument name */
-  name: string;
-  /** Human-readable description */
-  description?: string;
-  /** Whether this argument is required */
-  required?: boolean;
   /** Optional completion handler for this argument */
   complete?: CompletionHandler;
+  /** Human-readable description */
+  description?: string;
+  /** Argument name */
+  name: string;
+  /** Whether this argument is required */
+  required?: boolean;
 }
 
 /**
  * Content block within a prompt message.
  */
 export interface PromptMessageContent {
-  /** Content type */
-  type: "text";
-  /** Text content */
-  text: string;
   /** Optional content annotations */
   annotations?: ContentAnnotations;
+  /** Text content */
+  text: string;
+  /** Content type */
+  type: "text";
 }
 
 /**
  * A message in a prompt response.
  */
 export interface PromptMessage {
-  /** Message role */
-  role: "user" | "assistant";
   /** Message content */
   content: PromptMessageContent;
+  /** Message role */
+  role: "user" | "assistant";
 }
 
 /**
  * Result returned from getting a prompt.
  */
 export interface PromptResult {
-  /** Prompt messages */
-  messages: PromptMessage[];
   /** Optional description override */
   description?: string;
+  /** Prompt messages */
+  messages: PromptMessage[];
 }
 
 /**
@@ -543,14 +537,14 @@ export type PromptHandler = (
  * ```
  */
 export interface PromptDefinition {
-  /** Unique prompt name */
-  name: string;
-  /** Human-readable description */
-  description?: string;
   /** Prompt arguments */
   arguments: PromptArgument[];
+  /** Human-readable description */
+  description?: string;
   /** Handler to generate messages */
   handler: PromptHandler;
+  /** Unique prompt name */
+  name: string;
 }
 
 // ============================================================================
@@ -606,14 +600,13 @@ export class McpError extends McpErrorBase {
  * Options for invoking a tool.
  */
 export interface InvokeToolOptions {
-  /** Abort signal for cancellation */
-  signal?: AbortSignal;
+  /** Progress token from client for tracking progress */
+  progressToken?: string | number;
 
   /** Custom request ID (auto-generated if not provided) */
   requestId?: string;
-
-  /** Progress token from client for tracking progress */
-  progressToken?: string | number;
+  /** Abort signal for cancellation */
+  signal?: AbortSignal;
 }
 
 /**
@@ -636,49 +629,13 @@ export interface InvokeToolOptions {
  * ```
  */
 export interface McpServer {
-  /** Server name */
-  readonly name: string;
-
-  /** Server version */
-  readonly version: string;
-
   /**
-   * Register a tool with the server.
-   * @param tool - Tool definition to register
+   * Bind the SDK server instance for notifications.
+   * Called internally by the transport layer.
+   * @param sdkServer - The MCP SDK Server instance
    */
-  registerTool<TInput, TOutput, TError extends OutfitterError>(
-    tool: ToolDefinition<TInput, TOutput, TError>
-  ): void;
-
-  /**
-   * Register a resource with the server.
-   * @param resource - Resource definition to register
-   */
-  registerResource(resource: ResourceDefinition): void;
-
-  /**
-   * Get all registered tools.
-   * @returns Array of serialized tool information
-   */
-  getTools(): SerializedTool[];
-
-  /**
-   * Register a resource template with the server.
-   * @param template - Resource template definition to register
-   */
-  registerResourceTemplate(template: ResourceTemplateDefinition): void;
-
-  /**
-   * Get all registered resources.
-   * @returns Array of resource definitions
-   */
-  getResources(): ResourceDefinition[];
-
-  /**
-   * Get all registered resource templates.
-   * @returns Array of resource template definitions
-   */
-  getResourceTemplates(): ResourceTemplateDefinition[];
+  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
+  bindSdkServer?(sdkServer: any): void;
 
   /**
    * Complete an argument value.
@@ -694,10 +651,15 @@ export interface McpServer {
   ): Promise<Result<CompletionResult, InstanceType<typeof McpError>>>;
 
   /**
-   * Register a prompt with the server.
-   * @param prompt - Prompt definition to register
+   * Get a specific prompt's messages.
+   * @param name - Prompt name
+   * @param args - Prompt arguments
+   * @returns Result with prompt result or McpError
    */
-  registerPrompt(prompt: PromptDefinition): void;
+  getPrompt(
+    name: string,
+    args: Record<string, string | undefined>
+  ): Promise<Result<PromptResult, InstanceType<typeof McpError>>>;
 
   /**
    * Get all registered prompts.
@@ -710,24 +672,22 @@ export interface McpServer {
   }>;
 
   /**
-   * Get a specific prompt's messages.
-   * @param name - Prompt name
-   * @param args - Prompt arguments
-   * @returns Result with prompt result or McpError
+   * Get all registered resources.
+   * @returns Array of resource definitions
    */
-  getPrompt(
-    name: string,
-    args: Record<string, string | undefined>
-  ): Promise<Result<PromptResult, InstanceType<typeof McpError>>>;
+  getResources(): ResourceDefinition[];
 
   /**
-   * Read a resource by URI.
-   * @param uri - Resource URI
-   * @returns Result with resource content or McpError
+   * Get all registered resource templates.
+   * @returns Array of resource template definitions
    */
-  readResource(
-    uri: string
-  ): Promise<Result<ResourceContent[], InstanceType<typeof McpError>>>;
+  getResourceTemplates(): ResourceTemplateDefinition[];
+
+  /**
+   * Get all registered tools.
+   * @returns Array of serialized tool information
+   */
+  getTools(): SerializedTool[];
 
   /**
    * Invoke a tool by name.
@@ -741,18 +701,18 @@ export interface McpServer {
     input: unknown,
     options?: InvokeToolOptions
   ): Promise<Result<T, InstanceType<typeof McpError>>>;
+  /** Server name */
+  readonly name: string;
 
   /**
-   * Subscribe to updates for a resource URI.
-   * @param uri - Resource URI to subscribe to
+   * Notify connected clients that the prompt list has changed.
    */
-  subscribe(uri: string): void;
+  notifyPromptsChanged(): void;
 
   /**
-   * Unsubscribe from updates for a resource URI.
-   * @param uri - Resource URI to unsubscribe from
+   * Notify connected clients that the resource list has changed.
    */
-  unsubscribe(uri: string): void;
+  notifyResourcesChanged(): void;
 
   /**
    * Notify connected clients that a specific resource has been updated.
@@ -767,21 +727,39 @@ export interface McpServer {
   notifyToolsChanged(): void;
 
   /**
-   * Notify connected clients that the resource list has changed.
+   * Read a resource by URI.
+   * @param uri - Resource URI
+   * @returns Result with resource content or McpError
    */
-  notifyResourcesChanged(): void;
+  readResource(
+    uri: string
+  ): Promise<Result<ResourceContent[], InstanceType<typeof McpError>>>;
 
   /**
-   * Notify connected clients that the prompt list has changed.
+   * Register a prompt with the server.
+   * @param prompt - Prompt definition to register
    */
-  notifyPromptsChanged(): void;
+  registerPrompt(prompt: PromptDefinition): void;
 
   /**
-   * Set the client-requested log level.
-   * Only log messages at or above this level will be forwarded.
-   * @param level - MCP log level string
+   * Register a resource with the server.
+   * @param resource - Resource definition to register
    */
-  setLogLevel?(level: string): void;
+  registerResource(resource: ResourceDefinition): void;
+
+  /**
+   * Register a resource template with the server.
+   * @param template - Resource template definition to register
+   */
+  registerResourceTemplate(template: ResourceTemplateDefinition): void;
+
+  /**
+   * Register a tool with the server.
+   * @param tool - Tool definition to register
+   */
+  registerTool<TInput, TOutput, TError extends OutfitterError>(
+    tool: ToolDefinition<TInput, TOutput, TError>
+  ): void;
 
   /**
    * Send a log message to connected clients.
@@ -799,12 +777,11 @@ export interface McpServer {
   ): void;
 
   /**
-   * Bind the SDK server instance for notifications.
-   * Called internally by the transport layer.
-   * @param sdkServer - The MCP SDK Server instance
+   * Set the client-requested log level.
+   * Only log messages at or above this level will be forwarded.
+   * @param level - MCP log level string
    */
-  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
-  bindSdkServer?(sdkServer: any): void;
+  setLogLevel?(level: string): void;
 
   /**
    * Start the MCP server.
@@ -817,6 +794,21 @@ export interface McpServer {
    * Closes all connections and cleans up resources.
    */
   stop(): Promise<void>;
+
+  /**
+   * Subscribe to updates for a resource URI.
+   * @param uri - Resource URI to subscribe to
+   */
+  subscribe(uri: string): void;
+
+  /**
+   * Unsubscribe from updates for a resource URI.
+   * @param uri - Resource URI to unsubscribe from
+   */
+  unsubscribe(uri: string): void;
+
+  /** Server version */
+  readonly version: string;
 }
 
 // ============================================================================
@@ -849,11 +841,10 @@ export interface ProgressReporter {
  * Includes MCP-specific information in addition to standard HandlerContext.
  */
 export interface McpHandlerContext extends HandlerContext {
-  /** The name of the tool being invoked */
-  toolName?: string;
-
   /** Progress reporter, present when client provides a progressToken */
   progress?: ProgressReporter;
+  /** The name of the tool being invoked */
+  toolName?: string;
 }
 
 // ============================================================================
