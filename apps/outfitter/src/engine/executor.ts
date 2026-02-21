@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { Result } from "@outfitter/contracts";
 import { addBlocks } from "./blocks.js";
 import { injectSharedConfig, rewriteLocalDependencies } from "./config.js";
-import { copyTemplateFiles, getTemplatesDir } from "./template.js";
+import { copyPresetFiles, getPresetsBaseDir } from "./preset.js";
 import type { EngineOptions, ScaffoldPlan, ScaffoldResult } from "./types.js";
 import { ScaffoldError } from "./types.js";
 
@@ -12,32 +12,32 @@ export async function executePlan(
   options: EngineOptions
 ): Promise<Result<ScaffoldResult, ScaffoldError>> {
   try {
-    const templatesDir = getTemplatesDir();
+    const presetsDir = getPresetsBaseDir();
     let projectDir: string | undefined;
     let blocksAdded: ScaffoldResult["blocksAdded"];
 
     for (const change of plan.changes) {
       switch (change.type) {
-        case "copy-template": {
+        case "copy-preset": {
           projectDir = change.targetDir;
           if (!(existsSync(projectDir) || options.collector)) {
             mkdirSync(projectDir, { recursive: true });
           }
 
-          const templatePath = join(templatesDir, change.template);
-          if (!existsSync(templatePath)) {
+          const presetPath = join(presetsDir, change.preset);
+          if (!existsSync(presetPath)) {
             return Result.err(
               new ScaffoldError(
-                `Template '${change.template}' not found in ${templatesDir}`
+                `Preset '${change.preset}' not found in ${presetsDir}`
               )
             );
           }
 
           if (change.overlayBaseTemplate) {
-            const basePath = join(templatesDir, "_base");
+            const basePath = join(presetsDir, "_base");
             if (existsSync(basePath)) {
               const baseWrittenPaths = new Set<string>();
-              const baseResult = copyTemplateFiles(
+              const baseResult = copyPresetFiles(
                 basePath,
                 projectDir,
                 plan.values,
@@ -50,8 +50,8 @@ export async function executePlan(
                 return baseResult;
               }
 
-              const templateResult = copyTemplateFiles(
-                templatePath,
+              const presetResult = copyPresetFiles(
+                presetPath,
                 projectDir,
                 plan.values,
                 options,
@@ -60,21 +60,21 @@ export async function executePlan(
                   overwritablePaths: baseWrittenPaths,
                 }
               );
-              if (templateResult.isErr()) {
-                return templateResult;
+              if (presetResult.isErr()) {
+                return presetResult;
               }
               break;
             }
           }
 
-          const templateResult = copyTemplateFiles(
-            templatePath,
+          const presetResult = copyPresetFiles(
+            presetPath,
             projectDir,
             plan.values,
             options
           );
-          if (templateResult.isErr()) {
-            return templateResult;
+          if (presetResult.isErr()) {
+            return presetResult;
           }
           break;
         }
@@ -136,9 +136,7 @@ export async function executePlan(
     }
 
     if (!projectDir) {
-      return Result.err(
-        new ScaffoldError("Plan contains no copy-template step")
-      );
+      return Result.err(new ScaffoldError("Plan contains no copy-preset step"));
     }
 
     return Result.ok({ projectDir, blocksAdded });

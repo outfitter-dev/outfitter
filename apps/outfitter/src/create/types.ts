@@ -10,8 +10,8 @@ export type CreatePresetId = "basic" | "cli" | "daemon" | "mcp";
 export interface CreatePresetDefinition {
   readonly defaultBlocks: readonly string[];
   readonly id: CreatePresetId;
+  readonly presetDir: CreatePresetId;
   readonly summary: string;
-  readonly template: CreatePresetId;
 }
 
 export interface CreateProjectInput {
@@ -28,8 +28,8 @@ export interface CreateProjectInput {
 
 export type CreatePlanChange =
   | {
-      readonly type: "copy-template";
-      readonly template: string;
+      readonly type: "copy-preset";
+      readonly preset: string;
       readonly targetDir: string;
       readonly overlayBaseTemplate: boolean;
     }

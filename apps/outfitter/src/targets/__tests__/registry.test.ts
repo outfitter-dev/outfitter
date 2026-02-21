@@ -51,10 +51,8 @@ describe("target registry", () => {
       if (!target) {
         continue;
       }
-      expect(existsSync(join(sourceTemplatesDir, target.templateDir))).toBe(
-        true
-      );
-      expect(existsSync(join(presetsDir, target.templateDir))).toBe(true);
+      expect(existsSync(join(sourceTemplatesDir, target.presetDir))).toBe(true);
+      expect(existsSync(join(presetsDir, target.presetDir))).toBe(true);
     }
   });
 

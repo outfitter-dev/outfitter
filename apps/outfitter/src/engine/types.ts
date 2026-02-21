@@ -19,8 +19,8 @@ export interface PlaceholderValues {
  */
 export type ScaffoldChange =
   | {
-      readonly type: "copy-template";
-      readonly template: string;
+      readonly type: "copy-preset";
+      readonly preset: string;
       readonly targetDir: string;
       readonly overlayBaseTemplate: boolean;
     }

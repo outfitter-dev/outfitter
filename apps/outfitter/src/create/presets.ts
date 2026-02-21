@@ -5,25 +5,25 @@ export const CREATE_PRESETS: Readonly<
 > = {
   basic: {
     id: "basic",
-    template: "basic",
+    presetDir: "basic",
     summary: "Minimal Bun + TypeScript project.",
     defaultBlocks: ["scaffolding"],
   },
   cli: {
     id: "cli",
-    template: "cli",
+    presetDir: "cli",
     summary: "CLI starter with Outfitter command ergonomics.",
     defaultBlocks: ["scaffolding"],
   },
   daemon: {
     id: "daemon",
-    template: "daemon",
+    presetDir: "daemon",
     summary: "Daemon + control CLI starter.",
     defaultBlocks: ["scaffolding"],
   },
   mcp: {
     id: "mcp",
-    template: "mcp",
+    presetDir: "mcp",
     summary: "MCP server starter.",
     defaultBlocks: ["scaffolding"],
   },

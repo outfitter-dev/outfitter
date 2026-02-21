@@ -4,7 +4,7 @@ import { Result } from "@outfitter/contracts";
 import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "../commands/shared-deps.js";
 import {
   applyResolvedDependencyVersions,
-  resolveTemplateDependencyVersions,
+  resolvePresetDependencyVersions,
 } from "./dependency-versions.js";
 import { ScaffoldError } from "./types.js";
 import { getWorkspacePatterns } from "./workspace.js";
@@ -89,7 +89,7 @@ export function injectSharedConfig(
   try {
     const content = readFileSync(packageJsonPath, "utf-8");
     const parsed = JSON.parse(content) as Record<string, unknown>;
-    const dependencyVersions = resolveTemplateDependencyVersions();
+    const dependencyVersions = resolvePresetDependencyVersions();
     applyResolvedDependencyVersions(parsed, dependencyVersions);
 
     const existingDevDeps =

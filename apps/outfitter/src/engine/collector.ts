@@ -2,12 +2,12 @@ export type Operation =
   | {
       readonly type: "file-create";
       readonly path: string;
-      readonly source: "template" | "block" | "generated";
+      readonly source: "preset" | "block" | "generated";
     }
   | {
       readonly type: "file-overwrite";
       readonly path: string;
-      readonly source: "template" | "block" | "generated";
+      readonly source: "preset" | "block" | "generated";
     }
   | {
       readonly type: "file-skip";

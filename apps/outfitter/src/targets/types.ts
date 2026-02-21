@@ -36,7 +36,7 @@ export interface TargetDefinition {
   readonly description: string;
   readonly id: TargetId;
   readonly placement: "apps" | "packages";
+  readonly presetDir: string;
   readonly scope: TargetScope;
   readonly status: TargetStatus;
-  readonly templateDir: string;
 }
