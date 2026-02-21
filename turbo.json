@@ -12,7 +12,7 @@
         "package.json",
         "../../bunup.config.ts"
       ],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "registry/**"]
     },
     "test": {
       "dependsOn": ["build"],
