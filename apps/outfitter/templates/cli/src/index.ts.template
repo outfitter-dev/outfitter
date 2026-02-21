@@ -1,8 +1,0 @@
-/**
- * {{projectName}} - Public API exports
- *
- * @packageDocumentation
- */
-
-export { actions } from "./actions.js";
-export { program } from "./program.js";

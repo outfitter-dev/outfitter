@@ -191,7 +191,6 @@ describe("init command file creation", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.commander).toBe("^14.0.2");
-    expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.outfitter.template.kind).toBe("runnable");
     expect(packageJson.outfitter.template.placement).toBe("apps");
@@ -201,19 +200,11 @@ describe("init command file creation", () => {
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
     expect(tsconfig.extends).toBeUndefined();
 
-    // biome.json is provided by the biome block, not the template.
-    // With --no-tooling, no blocks are added and no biome.json is created.
     expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
 
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
-    expect(programContent).toMatch(/buildCliCommands/);
-    expect(programContent).toMatch(/createContext/);
-
-    const actionsPath = join(tempDir, "src", "actions.ts");
-    const actionsContent = readFileSync(actionsPath, "utf-8");
-    expect(actionsContent).toMatch(/defineAction/);
-    expect(actionsContent).toMatch(/createActionRegistry/);
+    expect(programContent).toMatch(/createCLI/);
   });
 
   test("creates library template with Result handler pattern and no binary entrypoint", async () => {
@@ -1139,11 +1130,17 @@ describe("init command registry blocks", () => {
         ".claude/settings.json"
       );
       expect(result.value.blocksAdded?.created).toContain("biome.json");
-      expect(result.value.blocksAdded?.created).toContain(".lefthook.yml");
       expect(result.value.blocksAdded?.created).toContain(
         "scripts/bootstrap.sh"
       );
-      expect(result.value.blocksAdded?.skipped).toEqual([]);
+      // .lefthook.yml is provided by both the preset template and the block.
+      // Since the template is copied first, the block's version is skipped.
+      // OS-302 will remove tooling files from presets so blocks are canonical.
+      const allBlockFiles = [
+        ...(result.value.blocksAdded?.created ?? []),
+        ...(result.value.blocksAdded?.skipped ?? []),
+      ];
+      expect(allBlockFiles).toContain(".lefthook.yml");
     }
   });
 

@@ -32,7 +32,7 @@ describe("template dependency policy", () => {
 
     const templateRoots = [
       join(repoRoot, "templates"),
-      join(packageRoot, "templates"),
+      join(repoRoot, "packages", "presets", "presets"),
     ] as const;
 
     for (const templateRoot of templateRoots) {

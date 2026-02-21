@@ -1,8 +1,0 @@
-import { describe, expect, test } from "bun:test";
-
-describe("{{projectName}} daemon", () => {
-	test("module exports are defined", async () => {
-		const mod = await import("../index.js");
-		expect(mod).toBeDefined();
-	});
-});
