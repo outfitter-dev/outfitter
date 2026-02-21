@@ -164,6 +164,16 @@ describe("parseChangesetFrontmatterPackageNames", () => {
 		]);
 	});
 
+	test("extracts package names from CRLF frontmatter", () => {
+		const markdown =
+			"---\r\n\"@outfitter/tooling\": patch\r\n'@outfitter/cli': minor\r\n---\r\n\r\nSummary";
+
+		expect(parseChangesetFrontmatterPackageNames(markdown)).toEqual([
+			"@outfitter/cli",
+			"@outfitter/tooling",
+		]);
+	});
+
 	test("returns empty array when frontmatter is absent", () => {
 		expect(parseChangesetFrontmatterPackageNames("No frontmatter")).toEqual([]);
 	});
@@ -193,5 +203,18 @@ describe("findIgnoredPackageReferences", () => {
 		});
 
 		expect(references).toEqual([]);
+	});
+
+	test("skips files that return empty content (deleted files)", () => {
+		const references = findIgnoredPackageReferences({
+			changesetFiles: ["exists.md", "deleted.md"],
+			ignoredPackages: ["@outfitter/agents"],
+			readChangesetFile: (filename) =>
+				filename === "exists.md" ? '---\n"@outfitter/agents": patch\n---' : "",
+		});
+
+		expect(references).toEqual([
+			{ file: "exists.md", packages: ["@outfitter/agents"] },
+		]);
 	});
 });

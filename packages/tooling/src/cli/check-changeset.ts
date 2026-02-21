@@ -122,13 +122,13 @@ export function parseIgnoredPackagesFromChangesetConfig(
 export function parseChangesetFrontmatterPackageNames(
 	markdownContent: string,
 ): string[] {
-	const frontmatterMatch = /^---\n([\s\S]*?)\n---/.exec(markdownContent);
+	const frontmatterMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(markdownContent);
 	if (!frontmatterMatch?.[1]) {
 		return [];
 	}
 
 	const packages = new Set<string>();
-	for (const line of frontmatterMatch[1].split("\n")) {
+	for (const line of frontmatterMatch[1].split(/\r?\n/)) {
 		const trimmed = line.trim();
 		const match = /^(["']?)(@[^"':\s]+\/[^"':\s]+)\1\s*:/.exec(trimmed);
 		if (match?.[2]) {
@@ -188,8 +188,13 @@ function getIgnoredReferencesForChangedChangesets(
 	return findIgnoredPackageReferences({
 		changesetFiles,
 		ignoredPackages,
-		readChangesetFile: (filename) =>
-			readFileSync(join(cwd, ".changeset", filename), "utf-8"),
+		readChangesetFile: (filename) => {
+			try {
+				return readFileSync(join(cwd, ".changeset", filename), "utf-8");
+			} catch {
+				return "";
+			}
+		},
 	});
 }
 

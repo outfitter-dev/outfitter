@@ -111,6 +111,8 @@
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
+        "smol-toml": "^1.6.0",
+        "yaml": "^2.8.2",
         "zod": "^4.3.5",
       },
       "devDependencies": {
