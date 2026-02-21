@@ -1,25 +1,16 @@
 # Changesets
 
-This directory is used by [Changesets](https://github.com/changesets/changesets) to manage versioning and changelogs.
-
-## Adding a changeset
-
-When you make a change that should be released, run:
+When your PR includes changes that should be released, add a changeset:
 
 ```bash
 bun changeset
 ```
 
-This will prompt you to:
-1. Select which packages have changed
-2. Choose the semver bump type (major, minor, patch)
-3. Write a summary of the changes
+This prompts you to select affected packages, choose a semver bump type, and write a changelog summary. Commit the generated file with your PR.
 
-## Releasing
+## What Happens After Merge
 
-To release all changesets:
+- **Canary:** Every push to main with changeset files publishes `@canary` versions automatically. Changeset files are not consumed.
+- **Stable:** Triggered manually via **Actions > Release > Run workflow**. This versions packages, opens a release PR, and publishes `@latest` on merge.
 
-```bash
-bun run version-packages  # Updates versions and changelogs
-bun run release           # Builds and publishes to npm
-```
+For the full release process, see [docs/RELEASES.md](../docs/RELEASES.md).
