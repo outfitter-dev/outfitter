@@ -7,7 +7,7 @@ Evaluate a codebase to determine adoption scope and approach.
 ```
 Is this a new project with no existing code?
 ├─ Yes → Greenfield Path
-│        Use templates directly, skip conversion stages
+│        Use presets directly, skip conversion stages
 │
 └─ No → Migration Path
          ├─ Run scanner to quantify scope
@@ -123,7 +123,7 @@ rg "(homedir\(\)|os\.homedir|~/\.)" --type ts -c
 
 ### Recommended Approach
 
-[ ] Greenfield — Use templates, no conversion needed
+[ ] Greenfield — Use presets, no conversion needed
 [ ] Quick migration — Low effort, ~X handlers to convert
 [ ] Staged migration — Medium effort, plan by feature area
 [ ] Major migration — High effort, allocate dedicated time
