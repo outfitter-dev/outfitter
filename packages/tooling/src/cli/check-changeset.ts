@@ -8,6 +8,9 @@
  * @packageDocumentation
  */
 
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -16,6 +19,11 @@
 export interface ChangesetCheckResult {
 	readonly ok: boolean;
 	readonly missingFor: string[];
+}
+
+export interface ChangesetIgnoredReference {
+	readonly file: string;
+	readonly packages: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +100,97 @@ export function checkChangesetRequired(
 	}
 
 	return { ok: false, missingFor: changedPackages };
+}
+
+export function parseIgnoredPackagesFromChangesetConfig(
+	jsonContent: string,
+): string[] {
+	try {
+		const parsed = JSON.parse(jsonContent) as { ignore?: unknown };
+		if (!Array.isArray(parsed.ignore)) {
+			return [];
+		}
+
+		return parsed.ignore.filter(
+			(entry): entry is string => typeof entry === "string",
+		);
+	} catch {
+		return [];
+	}
+}
+
+export function parseChangesetFrontmatterPackageNames(
+	markdownContent: string,
+): string[] {
+	const frontmatterMatch = /^---\n([\s\S]*?)\n---/.exec(markdownContent);
+	if (!frontmatterMatch?.[1]) {
+		return [];
+	}
+
+	const packages = new Set<string>();
+	for (const line of frontmatterMatch[1].split("\n")) {
+		const trimmed = line.trim();
+		const match = /^(["']?)(@[^"':\s]+\/[^"':\s]+)\1\s*:/.exec(trimmed);
+		if (match?.[2]) {
+			packages.add(match[2]);
+		}
+	}
+
+	return [...packages].sort();
+}
+
+export function findIgnoredPackageReferences(input: {
+	readonly changesetFiles: readonly string[];
+	readonly ignoredPackages: readonly string[];
+	readonly readChangesetFile: (filename: string) => string;
+}): ChangesetIgnoredReference[] {
+	if (input.ignoredPackages.length === 0 || input.changesetFiles.length === 0) {
+		return [];
+	}
+
+	const ignored = new Set(input.ignoredPackages);
+	const results: ChangesetIgnoredReference[] = [];
+
+	for (const file of input.changesetFiles) {
+		const content = input.readChangesetFile(file);
+		const referencedPackages = parseChangesetFrontmatterPackageNames(content);
+		const invalidReferences = referencedPackages.filter((pkg) =>
+			ignored.has(pkg),
+		);
+		if (invalidReferences.length > 0) {
+			results.push({ file, packages: invalidReferences.sort() });
+		}
+	}
+
+	return results.sort((a, b) => a.file.localeCompare(b.file));
+}
+
+function loadIgnoredPackages(cwd: string): string[] {
+	const configPath = join(cwd, ".changeset", "config.json");
+	if (!existsSync(configPath)) {
+		return [];
+	}
+
+	try {
+		return parseIgnoredPackagesFromChangesetConfig(
+			readFileSync(configPath, "utf-8"),
+		);
+	} catch {
+		return [];
+	}
+}
+
+function getIgnoredReferencesForChangedChangesets(
+	cwd: string,
+	changesetFiles: readonly string[],
+): ChangesetIgnoredReference[] {
+	const ignoredPackages = loadIgnoredPackages(cwd);
+	return findIgnoredPackageReferences({
+		changesetFiles,
+		ignoredPackages,
+		readChangesetFile: (filename) =>
+			readFileSync(join(cwd, ".changeset", filename), "utf-8"),
+	});
 }
 
 // ---------------------------------------------------------------------------
@@ -181,29 +280,56 @@ export async function runCheckChangeset(
 	const changesetFiles = getChangedChangesetFiles(changedFiles);
 	const check = checkChangesetRequired(changedPackages, changesetFiles);
 
-	if (check.ok) {
-		process.stdout.write(
-			`${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`,
-		);
-		process.exit(0);
-	}
-
-	// Fail with actionable error
-	process.stderr.write(`${COLORS.red}Missing changeset!${COLORS.reset}\n\n`);
-	process.stderr.write(
-		"The following packages have source changes but no changeset:\n\n",
-	);
-
-	for (const pkg of check.missingFor) {
+	if (!check.ok) {
+		// Fail with actionable error
+		process.stderr.write(`${COLORS.red}Missing changeset!${COLORS.reset}\n\n`);
 		process.stderr.write(
-			`  ${COLORS.yellow}@outfitter/${pkg}${COLORS.reset}\n`,
+			"The following packages have source changes but no changeset:\n\n",
 		);
+
+		for (const pkg of check.missingFor) {
+			process.stderr.write(
+				`  ${COLORS.yellow}@outfitter/${pkg}${COLORS.reset}\n`,
+			);
+		}
+
+		process.stderr.write(
+			`\nRun ${COLORS.blue}bun run changeset${COLORS.reset} to add a changeset, ` +
+				`or add the ${COLORS.blue}no-changeset${COLORS.reset} label to skip.\n`,
+		);
+
+		process.exit(1);
 	}
 
-	process.stderr.write(
-		`\nRun ${COLORS.blue}bun run changeset${COLORS.reset} to add a changeset, ` +
-			`or add the ${COLORS.blue}no-changeset${COLORS.reset} label to skip.\n`,
+	const ignoredReferences = getIgnoredReferencesForChangedChangesets(
+		cwd,
+		changesetFiles,
 	);
+	if (ignoredReferences.length > 0) {
+		process.stderr.write(
+			`${COLORS.red}Invalid changeset package reference(s).${COLORS.reset}\n\n`,
+		);
+		process.stderr.write(
+			"Changesets must not reference packages listed in .changeset/config.json ignore:\n\n",
+		);
 
-	process.exit(1);
+		for (const reference of ignoredReferences) {
+			process.stderr.write(
+				`  ${COLORS.yellow}${reference.file}${COLORS.reset}\n`,
+			);
+			for (const pkg of reference.packages) {
+				process.stderr.write(`    - ${pkg}\n`);
+			}
+		}
+
+		process.stderr.write(
+			`\nUpdate the affected changeset files to remove ignored packages before merging.\n`,
+		);
+		process.exit(1);
+	}
+
+	process.stdout.write(
+		`${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`,
+	);
+	process.exit(0);
 }
