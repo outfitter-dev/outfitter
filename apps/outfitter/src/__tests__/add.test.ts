@@ -9,8 +9,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { getResolvedVersions } from "@outfitter/presets";
 import { listBlocks, runAdd } from "../commands/add.js";
 import type { Manifest } from "../manifest.js";
+
+const resolvedVersions = getResolvedVersions().all;
 
 describe("runAdd", () => {
   const testDir = join(import.meta.dirname, ".test-add-output");
@@ -66,13 +69,15 @@ describe("runAdd", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.created).toContain("biome.json");
-      expect(result.value.devDependencies.ultracite).toBe("^7.2.3");
+      expect(result.value.devDependencies.ultracite).toBe(
+        resolvedVersions["ultracite"]
+      );
     }
 
     // Verify package.json was updated
     const pkgContent = readFileSync(join(testDir, "package.json"), "utf-8");
     const pkg = JSON.parse(pkgContent);
-    expect(pkg.devDependencies?.ultracite).toBe("^7.2.3");
+    expect(pkg.devDependencies?.ultracite).toBe(resolvedVersions["ultracite"]);
   });
 
   test("adds scaffolding block (composite)", async () => {
@@ -87,9 +92,13 @@ describe("runAdd", () => {
     if (result.isOk()) {
       // Should include files from all extended blocks
       expect(result.value.created.length).toBeGreaterThanOrEqual(4);
-      expect(result.value.devDependencies.ultracite).toBe("^7.2.3");
-      expect(result.value.devDependencies.lefthook).toBe("^2.1.1");
-      expect(result.value.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
+      expect(result.value.devDependencies.ultracite).toBe(
+        resolvedVersions["ultracite"]
+      );
+      expect(result.value.devDependencies.lefthook).toBe(
+        resolvedVersions["lefthook"]
+      );
+      expect(result.value.devDependencies["@outfitter/tooling"]).toBeDefined();
     }
   });
 

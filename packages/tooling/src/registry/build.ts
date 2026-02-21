@@ -16,6 +16,7 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
+import { getResolvedVersions } from "@outfitter/presets";
 import type {
 	Block,
 	BlockDefinition,
@@ -140,53 +141,95 @@ function buildRegistry(
 }
 
 /**
- * Registry build configuration
+ * Resolve a version from the presets package, throwing if not found.
  */
-export const REGISTRY_CONFIG: RegistryBuildConfig = {
-	version: "1.0.0",
-	blocks: {
-		claude: {
-			description: "Claude Code settings and hooks for automated formatting",
-			files: [".claude/settings.json", ".claude/hooks/format-code-on-stop.sh"],
-		},
-		biome: {
-			description: "Biome linter/formatter configuration via Ultracite",
-			files: ["packages/tooling/biome.json"],
-			remap: { "packages/tooling/biome.json": "biome.json" },
-			devDependencies: { ultracite: "^7.2.3" },
-		},
-		lefthook: {
-			description: "Git hooks via Lefthook for pre-commit and pre-push",
-			files: ["packages/tooling/lefthook.yml"],
-			remap: { "packages/tooling/lefthook.yml": ".lefthook.yml" },
-			devDependencies: {
-				"@outfitter/tooling": "^0.2.4",
-				lefthook: "^2.1.1",
-				ultracite: "^7.2.3",
+function resolveVersion(
+	versions: Readonly<Record<string, string>>,
+	name: string,
+): string {
+	const version = versions[name];
+	if (!version) {
+		throw new Error(
+			`Missing resolved version for "${name}" in @outfitter/presets`,
+		);
+	}
+	return version;
+}
+
+/**
+ * Read the tooling package's own version for self-referencing in registry blocks.
+ */
+function getToolingVersion(): string {
+	const pkgPath = join(
+		dirname(fileURLToPath(import.meta.url)),
+		"../../package.json",
+	);
+	const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
+	return `^${pkg.version}`;
+}
+
+/**
+ * Build the registry configuration with versions resolved from @outfitter/presets.
+ */
+function createRegistryConfig(): RegistryBuildConfig {
+	const { all: versions } = getResolvedVersions();
+	const toolingVersion = getToolingVersion();
+
+	return {
+		version: "1.0.0",
+		blocks: {
+			claude: {
+				description: "Claude Code settings and hooks for automated formatting",
+				files: [
+					".claude/settings.json",
+					".claude/hooks/format-code-on-stop.sh",
+				],
+			},
+			biome: {
+				description: "Biome linter/formatter configuration via Ultracite",
+				files: ["packages/tooling/biome.json"],
+				remap: { "packages/tooling/biome.json": "biome.json" },
+				devDependencies: {
+					ultracite: resolveVersion(versions, "ultracite"),
+				},
+			},
+			lefthook: {
+				description: "Git hooks via Lefthook for pre-commit and pre-push",
+				files: ["packages/tooling/lefthook.yml"],
+				remap: { "packages/tooling/lefthook.yml": ".lefthook.yml" },
+				devDependencies: {
+					"@outfitter/tooling": toolingVersion,
+					lefthook: resolveVersion(versions, "lefthook"),
+					ultracite: resolveVersion(versions, "ultracite"),
+				},
+			},
+			markdownlint: {
+				description: "Markdown linting configuration via markdownlint-cli2",
+				files: ["packages/tooling/.markdownlint-cli2.jsonc"],
+				remap: {
+					"packages/tooling/.markdownlint-cli2.jsonc":
+						".markdownlint-cli2.jsonc",
+				},
+			},
+			bootstrap: {
+				description:
+					"Project bootstrap script for installing tools and dependencies",
+				files: ["packages/tooling/templates/bootstrap.sh"],
+				remap: {
+					"packages/tooling/templates/bootstrap.sh": "scripts/bootstrap.sh",
+				},
+			},
+			scaffolding: {
+				description:
+					"Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
+				extends: ["claude", "biome", "lefthook", "markdownlint", "bootstrap"],
 			},
 		},
-		markdownlint: {
-			description: "Markdown linting configuration via markdownlint-cli2",
-			files: ["packages/tooling/.markdownlint-cli2.jsonc"],
-			remap: {
-				"packages/tooling/.markdownlint-cli2.jsonc": ".markdownlint-cli2.jsonc",
-			},
-		},
-		bootstrap: {
-			description:
-				"Project bootstrap script for installing tools and dependencies",
-			files: ["packages/tooling/templates/bootstrap.sh"],
-			remap: {
-				"packages/tooling/templates/bootstrap.sh": "scripts/bootstrap.sh",
-			},
-		},
-		scaffolding: {
-			description:
-				"Full starter kit: Claude settings, Biome, Lefthook, markdownlint, and bootstrap script",
-			extends: ["claude", "biome", "lefthook", "markdownlint", "bootstrap"],
-		},
-	},
-};
+	};
+}
+
+/** Registry build configuration with dynamically resolved versions. */
+export const REGISTRY_CONFIG: RegistryBuildConfig = createRegistryConfig();
 
 /**
  * Main entry point
