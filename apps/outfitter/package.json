@@ -5,7 +5,6 @@
   "type": "module",
   "files": [
     "dist",
-    "templates",
     "template-versions.json"
   ],
   "module": "./dist/index.js",
@@ -247,8 +246,6 @@
     "lint:fix": "biome lint --write ./src",
     "pretypecheck": "(test -f ../../packages/logging/dist/index.d.ts || bun run --filter @outfitter/logging build) && (test -f ../../packages/cli/dist/output.d.ts || bun run --filter @outfitter/cli build)",
     "typecheck": "tsc --noEmit",
-    "sync:templates": "bun run ../../scripts/sync-templates.ts",
-    "prepack": "bun run sync:templates",
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts",
     "clean": "rm -rf dist"
   },
@@ -258,6 +255,7 @@
     "@outfitter/tui": "workspace:*",
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/presets": "workspace:*",
     "@outfitter/docs": "workspace:*",
     "@outfitter/logging": "workspace:*",
     "@outfitter/tooling": "workspace:*",

@@ -142,7 +142,9 @@ function validateBiomeSchemaUrls(
   problems: string[]
 ): void {
   const baseVersion = stripRangePrefix(expectedBiomeVersion);
-  const glob = new Bun.Glob("{templates,packages/presets/presets}/**/biome.json.template");
+  const glob = new Bun.Glob(
+    "{templates,packages/presets/presets}/**/biome.json.template"
+  );
   for (const path of glob.scanSync({ absolute: false })) {
     try {
       const content = readFileSync(path, "utf-8");
@@ -224,7 +226,7 @@ function main(): number {
   const internal = new Set(Object.keys(manifest.internalDependencies));
   const external = manifest.externalDependencies;
 
-  const templateRoots = ["templates", "apps/outfitter/templates"] as const;
+  const templateRoots = ["templates", "packages/presets/presets"] as const;
   const problems: string[] = [];
 
   // Check manifest versions match reality.

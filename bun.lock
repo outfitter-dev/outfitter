@@ -58,6 +58,7 @@
         "@outfitter/contracts": "workspace:*",
         "@outfitter/docs": "workspace:*",
         "@outfitter/logging": "workspace:*",
+        "@outfitter/presets": "workspace:*",
         "@outfitter/tooling": "workspace:*",
         "@outfitter/tui": "workspace:*",
         "commander": "catalog:",

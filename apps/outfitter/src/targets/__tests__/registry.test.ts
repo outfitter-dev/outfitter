@@ -20,8 +20,8 @@ function findRepoRoot(): string {
   let currentDir = dirname(fileURLToPath(import.meta.url));
 
   for (let i = 0; i < 12; i++) {
-    const syncScript = join(currentDir, "scripts", "sync-templates.ts");
-    if (existsSync(syncScript)) {
+    const marker = join(currentDir, "turbo.json");
+    if (existsSync(marker)) {
       return currentDir;
     }
     currentDir = dirname(currentDir);
@@ -40,15 +40,10 @@ describe("target registry", () => {
     expect(new Set(TARGET_IDS).size).toBe(TARGET_IDS.length);
   });
 
-  test("every ready target exists in source and mirrored template directories", () => {
+  test("every ready target exists in source and presets directories", () => {
     const repoRoot = findRepoRoot();
     const sourceTemplatesDir = join(repoRoot, "templates");
-    const mirroredTemplatesDir = join(
-      repoRoot,
-      "apps",
-      "outfitter",
-      "templates"
-    );
+    const presetsDir = join(repoRoot, "packages", "presets", "presets");
 
     for (const id of READY_TARGET_IDS) {
       const target = TARGET_REGISTRY.get(id);
@@ -59,9 +54,7 @@ describe("target registry", () => {
       expect(existsSync(join(sourceTemplatesDir, target.templateDir))).toBe(
         true
       );
-      expect(existsSync(join(mirroredTemplatesDir, target.templateDir))).toBe(
-        true
-      );
+      expect(existsSync(join(presetsDir, target.templateDir))).toBe(true);
     }
   });
 

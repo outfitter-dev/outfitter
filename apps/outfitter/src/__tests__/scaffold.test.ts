@@ -272,30 +272,17 @@ describe("scaffold command", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.commander).toBe("^14.0.2");
-    expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.devDependencies["@outfitter/tooling"]).toBe(
       workspaceVersion("@outfitter/tooling")
     );
 
     const projectRoot = join(tempDir, "apps", "assistant-daemon");
     const cliSource = readFileSync(join(projectRoot, "src", "cli.ts"), "utf-8");
-    const programSource = readFileSync(
-      join(projectRoot, "src", "program.ts"),
-      "utf-8"
-    );
-    const actionsSource = readFileSync(
-      join(projectRoot, "src", "actions.ts"),
-      "utf-8"
-    );
 
-    expect(cliSource).toContain('import { program } from "./program.js";');
-    expect(programSource).toContain("buildCliCommands");
-    expect(programSource).toContain("createContext");
-    expect(actionsSource).toContain("defineAction");
-    expect(actionsSource).toContain("createActionRegistry");
-    expect(actionsSource).toContain('id: "start"');
-    expect(actionsSource).toContain('id: "stop"');
-    expect(actionsSource).toContain('id: "status"');
+    expect(cliSource).toContain("createCLI");
+    expect(cliSource).toContain('"start"');
+    expect(cliSource).toContain('"stop"');
+    expect(cliSource).toContain('"status"');
   });
 
   test("converts a single-package project to workspace before scaffolding", async () => {

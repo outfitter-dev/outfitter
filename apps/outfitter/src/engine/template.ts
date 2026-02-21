@@ -6,9 +6,9 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { extname, join } from "node:path";
 import { Result } from "@outfitter/contracts";
+import { getPresetsDir } from "@outfitter/presets";
 import type { EngineOptions, PlaceholderValues } from "./types.js";
 import { ScaffoldError } from "./types.js";
 
@@ -51,38 +51,12 @@ const BINARY_EXTENSIONS = new Set([
   ".sqlite3",
 ]);
 
-function hasOutfitterPackage(dir: string): boolean {
-  const packageJsonPath = join(dir, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return false;
-  }
-
-  try {
-    const content = readFileSync(packageJsonPath, "utf-8");
-    const parsed = JSON.parse(content) as { name?: unknown };
-    return parsed.name === "outfitter";
-  } catch {
-    return false;
-  }
-}
-
+/**
+ * Get the directory containing scaffold preset/template files.
+ * Delegates to `@outfitter/presets` which is the single source of truth.
+ */
 export function getTemplatesDir(): string {
-  let currentDir = dirname(fileURLToPath(import.meta.url));
-
-  for (let i = 0; i < 10; i++) {
-    const templatesPath = join(currentDir, "templates");
-    if (existsSync(templatesPath) && hasOutfitterPackage(currentDir)) {
-      return templatesPath;
-    }
-    currentDir = dirname(currentDir);
-  }
-
-  const fallback = join(process.cwd(), "apps/outfitter/templates");
-  if (existsSync(fallback)) {
-    return fallback;
-  }
-
-  return join(process.cwd(), "templates");
+  return getPresetsDir();
 }
 
 export function getOutputFilename(templateFilename: string): string {
