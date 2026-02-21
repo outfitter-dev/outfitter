@@ -1,5 +1,11 @@
 # @outfitter/tooling
 
+## 0.3.3
+
+### Patch Changes
+
+- ec34a0c: Add canary release support: snapshot config, --tag passthrough, release:canary script
+
 ## 0.3.2
 
 ### Patch Changes
