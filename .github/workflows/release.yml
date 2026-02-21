@@ -112,7 +112,7 @@ jobs:
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
       - name: Run Tests
-        run: bun run test || (rc=$?; echo "::warning::Tests exited $rc, retrying..." && bun run test)
+        run: bun run test || bun run test
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
