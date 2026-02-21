@@ -36,7 +36,7 @@ jobs:
           NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'no-changeset') && '1' || '0' }}
 
       - name: Run Tests
-        run: bun run test || (echo "::warning::Tests failed, retrying..." && bun run test)
+        run: bun run test || (rc=$?; echo "::warning::Tests exited $rc, retrying..." && bun run test)
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}

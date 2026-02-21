@@ -47,7 +47,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.2.7",
+      "version": "0.3.0",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -239,7 +239,7 @@
     },
     "packages/presets": {
       "name": "@outfitter/presets",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@biomejs/biome": "catalog:",
         "@clack/prompts": "catalog:",
@@ -302,7 +302,7 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
