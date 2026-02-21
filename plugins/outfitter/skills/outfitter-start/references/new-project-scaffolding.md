@@ -19,10 +19,10 @@ ls CLAUDE.md SPEC.md PLAN.md README.md 2>/dev/null
 ```
 
 **If context files exist**, read them and look for keywords:
-- "CLI", "command-line", "tool" → suggest `cli` template
-- "MCP", "server", "tools for AI" → suggest `mcp` template
-- "daemon", "background", "service" → suggest `daemon` template
-- Otherwise → suggest `basic` template
+- "CLI", "command-line", "tool" → suggest `cli` preset
+- "MCP", "server", "tools for AI" → suggest `mcp` preset
+- "daemon", "background", "service" → suggest `daemon` preset
+- Otherwise → suggest `minimal` preset
 
 ### Check Git State
 
@@ -36,18 +36,18 @@ git status --porcelain 2>/dev/null | wc -l
 
 Always use AskUserQuestion to confirm before running commands.
 
-### Step 1: Template Selection
+### Step 1: Preset Selection
 
-If context files suggested a template:
+If context files suggested a preset:
 
 ```
 AskUserQuestion:
   question: "Based on [SPEC.md/CLAUDE.md], this looks like a CLI project. Is that right?"
-  header: "Template"
+  header: "Preset"
   options:
     - label: "Yes, scaffold as CLI"
       description: "Creates CLI with commands, config loading, and output formatting"
-    - label: "No, choose different template"
+    - label: "No, choose different preset"
       description: "I'll show you the other options"
 ```
 
@@ -56,7 +56,7 @@ If no context or user wants different:
 ```
 AskUserQuestion:
   question: "What type of project are you building?"
-  header: "Template"
+  header: "Preset"
   options:
     - label: "CLI application"
       description: "Command-line tool with typed commands, config, logging"
@@ -90,7 +90,7 @@ AskUserQuestion:
   options:
     - label: "Yes, add scaffolding (Recommended)"
       description: "Adds biome.json, .lefthook.yml, .claude/settings.json, bootstrap script"
-    - label: "No, just the template"
+    - label: "No, just the preset"
       description: "Only creates the project structure"
 ```
 
@@ -101,20 +101,20 @@ After gathering answers, run the appropriate command:
 ```bash
 # Full scaffolding (default)
 outfitter init <cli|mcp|daemon> . --name <name>
-# Or: outfitter init . --template <template> --name <name>
+# Or: outfitter init . --preset <preset> --name <name>
 
 # Without tooling
 outfitter init <cli|mcp|daemon> . --name <name> --no-tooling
-# Or: outfitter init . --template <template> --name <name> --no-tooling
+# Or: outfitter init . --preset <preset> --name <name> --no-tooling
 
 # With specific blocks
 outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
-# Or: outfitter init . --template <template> --name <name> --with claude,biome
+# Or: outfitter init . --preset <preset> --name <name> --with claude,biome
 ```
 
-### Available Templates
+### Available Presets
 
-| Template | Creates |
+| Preset | Creates |
 |----------|---------|
 | `basic` | Library with src/index.ts, Result types |
 | `cli` | CLI app with commands/, config loading, output contract |

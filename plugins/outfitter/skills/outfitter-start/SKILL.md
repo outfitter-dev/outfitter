@@ -35,24 +35,24 @@ For new projects, use the CLI with agent-guided setup.
 
 ### Step 1: Gather Context
 
-Check for files that inform template choice:
+Check for files that inform preset choice:
 
 ```bash
 ls CLAUDE.md SPEC.md PLAN.md README.md 2>/dev/null
 ```
 
 **If context files exist**, read them and look for keywords:
-- "CLI", "command-line", "tool" → suggest `cli` template
-- "MCP", "server", "tools for AI" → suggest `mcp` template
-- "daemon", "background", "service" → suggest `daemon` template
-- Otherwise → suggest `basic` template
+- "CLI", "command-line", "tool" → suggest `cli` preset
+- "MCP", "server", "tools for AI" → suggest `mcp` preset
+- "daemon", "background", "service" → suggest `daemon` preset
+- Otherwise → suggest `minimal` preset
 
 ### Step 2: Ask User Questions
 
 Use AskUserQuestion to clarify before running commands. See [references/new-project-scaffolding.md](references/new-project-scaffolding.md) for the full decision flow.
 
 **Key questions:**
-1. Template type (CLI, MCP, daemon, basic)
+1. Preset type (CLI, MCP, daemon, minimal)
 2. Project name
 3. Whether to include tooling (scaffolding block)
 
@@ -60,7 +60,7 @@ Use AskUserQuestion to clarify before running commands. See [references/new-proj
 
 ```bash
 outfitter init <cli|mcp|daemon> . --name <name>
-# Or: outfitter init . --template <template> --name <name>
+# Or: outfitter init . --preset <preset> --name <name>
 ```
 
 **Options:**
@@ -138,7 +138,7 @@ The script will refuse to run if a plan already exists (won't override).
 
 | Finding | Meaning |
 |---------|---------|
-| 0 throws, 0 custom errors | Greenfield — skip to Foundation, use fieldguide templates |
+| 0 throws, 0 custom errors | Greenfield — skip to Foundation, use fieldguide presets |
 | 1-5 throws | Low effort — straightforward conversions |
 | 6-15 throws | Medium effort — plan your approach |
 | 16+ throws | High effort — work through stages methodically |
@@ -153,7 +153,7 @@ has clear branded-type or utility adoption points.
 ### Decision Point
 
 After reviewing SCAN.md:
-- **Greenfield?** → Load fieldguide, use its templates directly
+- **Greenfield?** → Load fieldguide, use its presets directly
 - **Migration?** → Continue to Stage 2
 
 ## Stage 2: Configure
