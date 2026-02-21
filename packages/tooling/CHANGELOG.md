@@ -1,5 +1,21 @@
 # @outfitter/tooling
 
+## 0.3.0
+
+### Minor Changes
+
+- 43388f2: Expand `check-tsdoc` tooling with reusable analysis primitives and richer CLI behaviors consumed by `outfitter check tsdoc`, including summary and filter support, JSONL output, and runner hardening around `cwd` and missing `jq` handling.
+
+### Patch Changes
+
+- 0055e2d: Broaden check-tsdoc package discovery to include apps/ directory and single-app repos
+- c37b4b0: Decouple generic bootstrap from Graphite. `CORE_TOOLS` no longer includes `gt`; use the `extend` callback to add project-specific tools. The distributed bootstrap block template no longer installs or authenticates Graphite.
+- 2e8843f: Add ignored-package detection to changeset validator and skip pre-push verification on `changeset-release/*` branches.
+- b3e6b5d: Remove deprecated `@outfitter/kit` package. Templates now depend on `@outfitter/contracts` and `@outfitter/types` directly.
+- 9fc51cc: Upgrade @clack/prompts to 1.0.1 and zod to 4.3.5 in @outfitter/tooling. Cascade version updates to templates, registry, and documentation.
+- Updated dependencies [9fc51cc]
+  - @outfitter/cli@0.5.2
+
 ## 0.2.4
 
 ### Patch Changes

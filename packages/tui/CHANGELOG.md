@@ -1,5 +1,11 @@
 # @outfitter/tui
 
+## 0.2.1
+
+### Patch Changes
+
+- 9fc51cc: Update devDependencies: Bun 1.3.9, biome 2.4.4, ultracite 7.2.3, bunup 0.16.29, lefthook 2.1.1, turbo 2.8.10. Mechanical interface member sorting from biome's new `useSortedInterfaceMembers` rule (formatting only, no behavior changes).
+
 ## 0.2.0
 
 ### Minor Changes
