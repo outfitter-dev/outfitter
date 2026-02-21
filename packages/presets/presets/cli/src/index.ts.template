@@ -1,0 +1,7 @@
+/**
+ * {{projectName}} - Public API exports
+ *
+ * @packageDocumentation
+ */
+
+export { program } from "./program.js";

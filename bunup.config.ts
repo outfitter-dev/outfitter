@@ -182,6 +182,10 @@ export default defineWorkspace(
       root: "packages/state",
     },
     {
+      name: "@outfitter/presets",
+      root: "packages/presets",
+    },
+    {
       name: "@outfitter/testing",
       root: "packages/testing",
     },

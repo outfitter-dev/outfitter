@@ -102,7 +102,7 @@
         "@outfitter/contracts": ">=0.2.0",
         "@outfitter/schema": ">=0.1.0",
         "@outfitter/types": ">=0.2.0",
-        "zod": "catalog:",
+        "zod": ">=4.0.0",
       },
     },
     "packages/config": {
@@ -232,6 +232,29 @@
         "@outfitter/logging": ">=0.3.0",
       },
     },
+    "packages/presets": {
+      "name": "@outfitter/presets",
+      "version": "0.1.0",
+      "dependencies": {
+        "@biomejs/biome": "catalog:",
+        "@clack/prompts": "catalog:",
+        "@logtape/logtape": "catalog:",
+        "@modelcontextprotocol/sdk": "catalog:",
+        "@types/node": "catalog:",
+        "better-result": "catalog:",
+        "bunup": "catalog:",
+        "commander": "catalog:",
+        "lefthook": "catalog:",
+        "smol-toml": "catalog:",
+        "ultracite": "catalog:",
+        "yaml": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/schema": {
       "name": "@outfitter/schema",
       "version": "0.2.2",
@@ -244,7 +267,7 @@
         "typescript": "catalog:",
       },
       "peerDependencies": {
-        "zod": "catalog:",
+        "zod": ">=4.0.0",
       },
     },
     "packages/state": {
@@ -289,9 +312,9 @@
         "yaml": "catalog:",
       },
       "peerDependencies": {
-        "lefthook": "catalog:",
+        "lefthook": "^2.0.0",
         "markdownlint-cli2": ">=0.17.0",
-        "ultracite": "catalog:",
+        "ultracite": "^7.0.0",
       },
       "optionalPeers": [
         "lefthook",
@@ -491,6 +514,8 @@
     "@outfitter/logging": ["@outfitter/logging@workspace:packages/logging"],
 
     "@outfitter/mcp": ["@outfitter/mcp@workspace:packages/mcp"],
+
+    "@outfitter/presets": ["@outfitter/presets@workspace:packages/presets"],
 
     "@outfitter/schema": ["@outfitter/schema@workspace:packages/schema"],
 
