@@ -262,7 +262,12 @@ function main(): void {
 
   try {
     // Let changeset handle the actual publishing
-    run("npx", ["changeset", "publish"]);
+    const publishArgs = ["changeset", "publish"];
+    const tagIndex = process.argv.indexOf("--tag");
+    if (tagIndex !== -1 && process.argv[tagIndex + 1]) {
+      publishArgs.push("--tag", process.argv[tagIndex + 1]);
+    }
+    run("npx", publishArgs);
   } finally {
     // Always restore original package.json files
     for (const pkg of workspacePackages) {
