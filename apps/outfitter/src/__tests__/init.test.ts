@@ -16,6 +16,29 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Manifest } from "../manifest.js";
 
+/**
+ * Read expected versions directly from workspace package.json files,
+ * independent of the resolver under test, so resolver bugs don't mask
+ * test failures.
+ */
+function workspaceVersion(pkg: string): string {
+  const name = pkg.replace("@outfitter/", "");
+  const raw = readFileSync(
+    join(
+      import.meta.dirname,
+      "..",
+      "..",
+      "..",
+      "..",
+      "packages",
+      name,
+      "package.json"
+    ),
+    "utf-8"
+  );
+  return `^${JSON.parse(raw).version}`;
+}
+
 // =============================================================================
 // Test Utilities
 // =============================================================================
@@ -151,14 +174,22 @@ describe("init command file creation", () => {
 
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
-    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe(
+      workspaceVersion("@outfitter/tooling")
+    );
     expect(packageJson.scripts["verify:ci"]).toBe(
       "bun run typecheck && bun run check && bun run build && bun run test"
     );
     expect(packageJson.scripts["clean:artifacts"]).toBe("rm -rf dist .turbo");
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
-    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
+      workspaceVersion("@outfitter/contracts")
+    );
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe(
+      workspaceVersion("@outfitter/cli")
+    );
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe(
+      workspaceVersion("@outfitter/logging")
+    );
     expect(packageJson.dependencies.commander).toBe("^14.0.2");
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
@@ -205,8 +236,12 @@ describe("init command file creation", () => {
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     expect(packageJson.bin).toBeUndefined();
     expect(packageJson.scripts.build).toBe("bunup");
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
+      workspaceVersion("@outfitter/contracts")
+    );
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe(
+      workspaceVersion("@outfitter/logging")
+    );
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
     expect(packageJson.outfitter.template.kind).toBe("library");
     expect(packageJson.outfitter.template.placement).toBe("packages");

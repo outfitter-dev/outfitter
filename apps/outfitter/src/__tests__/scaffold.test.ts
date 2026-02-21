@@ -15,6 +15,29 @@ import {
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
+/**
+ * Read expected versions directly from workspace package.json files,
+ * independent of the resolver under test, so resolver bugs don't mask
+ * test failures.
+ */
+function workspaceVersion(pkg: string): string {
+  const name = pkg.replace("@outfitter/", "");
+  const raw = readFileSync(
+    join(
+      import.meta.dirname,
+      "..",
+      "..",
+      "..",
+      "..",
+      "packages",
+      name,
+      "package.json"
+    ),
+    "utf-8"
+  );
+  return `^${JSON.parse(raw).version}`;
+}
+
 function createTempDir(): string {
   const tempDir = join(
     tmpdir(),
@@ -233,14 +256,26 @@ describe("scaffold command", () => {
       devDependencies: Record<string, string>;
     };
 
-    expect(packageJson.dependencies["@outfitter/contracts"]).toBe("^0.4.0");
-    expect(packageJson.dependencies["@outfitter/types"]).toBe("^0.2.2");
-    expect(packageJson.dependencies["@outfitter/daemon"]).toBe("^0.2.3");
-    expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.5.1");
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.4.0");
+    expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
+      workspaceVersion("@outfitter/contracts")
+    );
+    expect(packageJson.dependencies["@outfitter/types"]).toBe(
+      workspaceVersion("@outfitter/types")
+    );
+    expect(packageJson.dependencies["@outfitter/daemon"]).toBe(
+      workspaceVersion("@outfitter/daemon")
+    );
+    expect(packageJson.dependencies["@outfitter/cli"]).toBe(
+      workspaceVersion("@outfitter/cli")
+    );
+    expect(packageJson.dependencies["@outfitter/logging"]).toBe(
+      workspaceVersion("@outfitter/logging")
+    );
     expect(packageJson.dependencies.commander).toBe("^14.0.2");
     expect(packageJson.dependencies.zod).toBe("^4.3.5");
-    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.4");
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe(
+      workspaceVersion("@outfitter/tooling")
+    );
 
     const projectRoot = join(tempDir, "apps", "assistant-daemon");
     const cliSource = readFileSync(join(projectRoot, "src", "cli.ts"), "utf-8");
