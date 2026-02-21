@@ -1,7 +1,7 @@
 {
   "name": "@outfitter/docs",
   "description": "CLI and host command adapter for Outfitter docs workflows",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "dist"

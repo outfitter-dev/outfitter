@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.7
+
+### Patch Changes
+
+- c37b4b0: CLI polish: add `--cwd` to `doctor` and `add` commands, normalize `check` output mode to use `--output` preset (keep `--ci` as deprecated alias), fix "check check" display in schema, normalize `/tmp` paths via `realpath`, filter upgrade scan by positional args, and surface workspace version conflicts in `upgrade` output.
+- b3e6b5d: Remove deprecated `@outfitter/kit` package. Templates now depend on `@outfitter/contracts` and `@outfitter/types` directly.
+- 9fc51cc: Upgrade @clack/prompts to 1.0.1 and zod to 4.3.5 in @outfitter/tooling. Cascade version updates to templates, registry, and documentation.
+- Updated dependencies [0055e2d]
+- Updated dependencies [c37b4b0]
+- Updated dependencies [43388f2]
+- Updated dependencies [2e8843f]
+- Updated dependencies [b3e6b5d]
+- Updated dependencies [9fc51cc]
+- Updated dependencies [9fc51cc]
+  - @outfitter/tooling@0.3.0
+  - @outfitter/cli@0.5.2
+  - @outfitter/config@0.3.3
+  - @outfitter/contracts@0.4.1
+  - @outfitter/docs@0.1.2
+  - @outfitter/logging@0.4.1
+  - @outfitter/tui@0.2.1
+
 ## 0.2.6
 
 ### Patch Changes
