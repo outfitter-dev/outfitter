@@ -189,6 +189,12 @@
         "default": "./dist/engine/render-plan.js"
       }
     },
+    "./engine/template": {
+      "import": {
+        "types": "./dist/engine/template.d.ts",
+        "default": "./dist/engine/template.js"
+      }
+    },
     "./engine/types": {
       "import": {
         "types": "./dist/engine/types.d.ts",
