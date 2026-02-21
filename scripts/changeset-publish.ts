@@ -125,9 +125,42 @@ function resolveWorkspaceRange(
   return token;
 }
 
-function rewriteWorkspaceRanges(
+function loadCatalogMap(): Map<string, string> {
+  const rootPackagePath = join(ROOT, "package.json");
+  const rootPackageJson = readPackageJson(rootPackagePath);
+  const catalog = rootPackageJson["catalog"];
+  if (!catalog || typeof catalog !== "object") {
+    return new Map();
+  }
+
+  return new Map(
+    Object.entries(catalog).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string"
+    )
+  );
+}
+
+function resolveProtocolRange(
+  depName: string,
+  range: string,
+  versionMap: Map<string, string>,
+  catalogMap: Map<string, string>
+): string {
+  if (range === "catalog:") {
+    const catalogVersion = catalogMap.get(depName);
+    if (!catalogVersion) {
+      throw new Error(`Missing catalog version for ${depName}`);
+    }
+    return catalogVersion;
+  }
+
+  return resolveWorkspaceRange(depName, range, versionMap);
+}
+
+function rewriteProtocolRanges(
   pkg: WorkspacePackage,
-  versionMap: Map<string, string>
+  versionMap: Map<string, string>,
+  catalogMap: Map<string, string>
 ): boolean {
   let changed = false;
 
@@ -135,7 +168,7 @@ function rewriteWorkspaceRanges(
     const deps = pkg.packageJson[section];
     if (!deps) continue;
     for (const [depName, range] of Object.entries(deps)) {
-      const next = resolveWorkspaceRange(depName, range, versionMap);
+      const next = resolveProtocolRange(depName, range, versionMap, catalogMap);
       if (next !== range) {
         deps[depName] = next;
         changed = true;
@@ -146,7 +179,7 @@ function rewriteWorkspaceRanges(
   return changed;
 }
 
-function findWorkspaceRangeReferences(
+function findProtocolRangeReferences(
   pkg: WorkspacePackage
 ): WorkspaceRangeReference[] {
   const references: WorkspaceRangeReference[] = [];
@@ -155,7 +188,10 @@ function findWorkspaceRangeReferences(
     const deps = pkg.packageJson[section];
     if (!deps) continue;
     for (const [dependency, range] of Object.entries(deps)) {
-      if (typeof range === "string" && range.startsWith("workspace:")) {
+      if (
+        typeof range === "string" &&
+        (range.startsWith("workspace:") || range === "catalog:")
+      ) {
         references.push({ dependency, range, section });
       }
     }
@@ -164,9 +200,9 @@ function findWorkspaceRangeReferences(
   return references;
 }
 
-function assertNoWorkspaceRanges(packages: WorkspacePackage[]): void {
+function assertNoProtocolRanges(packages: WorkspacePackage[]): void {
   const issues = packages.flatMap((pkg) =>
-    findWorkspaceRangeReferences(pkg).map((reference) => ({
+    findProtocolRangeReferences(pkg).map((reference) => ({
       packageName: pkg.name,
       path: pkg.path,
       ...reference,
@@ -184,10 +220,9 @@ function assertNoWorkspaceRanges(packages: WorkspacePackage[]): void {
     .join("\n");
 
   throw new Error(
-    [
-      "Workspace protocol ranges remain after publish manifest rewrite.",
-      details,
-    ].join("\n")
+    ["Protocol ranges remain after publish manifest rewrite.", details].join(
+      "\n"
+    )
   );
 }
 
@@ -205,13 +240,14 @@ function main(): void {
   const versionMap = new Map(
     workspacePackages.map((pkg) => [pkg.name, pkg.version])
   );
+  const catalogMap = loadCatalogMap();
   const originals = new Map<string, string>();
 
-  // Transform workspace:* to actual versions
+  // Transform workspace:* and catalog: references to concrete versions.
   let transformedCount = 0;
   for (const pkg of workspacePackages) {
     originals.set(pkg.path, readFileSync(pkg.path, "utf8"));
-    const changed = rewriteWorkspaceRanges(pkg, versionMap);
+    const changed = rewriteProtocolRanges(pkg, versionMap, catalogMap);
     if (changed) {
       writePackageJson(
         pkg.path,
@@ -221,8 +257,8 @@ function main(): void {
       transformedCount++;
     }
   }
-  console.log(`Transformed workspace refs in ${transformedCount} packages`);
-  assertNoWorkspaceRanges(workspacePackages);
+  console.log(`Transformed protocol refs in ${transformedCount} packages`);
+  assertNoProtocolRanges(workspacePackages);
 
   try {
     // Let changeset handle the actual publishing

@@ -590,6 +590,7 @@ function buildScaffoldPlan(
         type: "copy-preset",
         preset: target.presetDir,
         targetDir,
+        includeTooling: !options.noTooling,
         overlayBaseTemplate: true,
       },
       { type: "inject-shared-config" },

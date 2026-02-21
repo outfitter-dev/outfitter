@@ -31,6 +31,7 @@ export type CreatePlanChange =
       readonly type: "copy-preset";
       readonly preset: string;
       readonly targetDir: string;
+      readonly includeTooling: boolean;
       readonly overlayBaseTemplate: boolean;
     }
   | {

@@ -1023,6 +1023,9 @@ describe("init command registry blocks", () => {
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeUndefined();
     }
+    expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, ".lefthook.yml"))).toBe(false);
+    expect(existsSync(join(tempDir, ".claude"))).toBe(false);
   });
 
   test("adds claude block when specified", async () => {

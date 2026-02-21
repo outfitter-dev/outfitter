@@ -469,6 +469,7 @@ function buildInitPlan(
         type: "copy-preset",
         preset: target.presetDir,
         targetDir: projectDir,
+        includeTooling: input.includeTooling,
         overlayBaseTemplate: true,
       },
       { type: "inject-shared-config" },
