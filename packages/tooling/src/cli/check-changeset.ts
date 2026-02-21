@@ -286,10 +286,10 @@ export async function runCheckChangeset(
 	const check = checkChangesetRequired(changedPackages, changesetFiles);
 
 	if (!check.ok) {
-		// Warn but don't block — changesets are auto-generated on merge if missing
+		// Warn but don't block — manual changesets are recommended
 		process.stderr.write(
 			`${COLORS.yellow}No changeset found.${COLORS.reset} ` +
-				"A changeset will be auto-generated from the PR title on merge.\n\n",
+				"Consider adding one with `bun run changeset` for a custom changelog entry.\n\n",
 		);
 		process.stderr.write("Packages with source changes:\n\n");
 
