@@ -70,7 +70,7 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 
 **Runtime (Active)** — Evolving based on usage:
 
-- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors, [flag conventions](./docs/CLI-CONVENTIONS.md)
+- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors, [flag conventions](./docs/cli/conventions.md)
 - `@outfitter/mcp` — MCP server framework with typed tools and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
 - `@outfitter/logging` — Structured logging via logtape
@@ -206,7 +206,7 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 2. **Green**: Minimal code to pass
 3. **Refactor**: Improve while green
 
-**Result Types** — Handlers return `Result<T, E>`, not exceptions. See [Patterns](./docs/PATTERNS.md).
+**Result Types** — Handlers return `Result<T, E>`, not exceptions. See [Patterns](./docs/reference/patterns.md).
 
 ### Strong Preferences
 
@@ -292,6 +292,6 @@ For package-impacting changes:
 ## Key Files
 
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — How packages fit together
-- [docs/PATTERNS.md](./docs/PATTERNS.md) — Handler contract, Result types, error taxonomy
-- [docs/CLI-CONVENTIONS.md](./docs/CLI-CONVENTIONS.md) — CLI flag presets, verb conventions, queryability
-- [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md) — Tutorials
+- [docs/reference/patterns.md](./docs/reference/patterns.md) — Handler contract, Result types, error taxonomy
+- [docs/cli/conventions.md](./docs/cli/conventions.md) — CLI flag presets, verb conventions, queryability
+- [docs/getting-started.md](./docs/getting-started.md) — Tutorials

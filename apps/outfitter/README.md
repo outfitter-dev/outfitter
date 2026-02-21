@@ -40,7 +40,7 @@ Top-level commands:
 - `scaffold <target> [name]` - Add a new capability to an existing project
 - `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
 - `repo <action> <subject>` - Repository maintenance namespace (`check|sync|export`)
-- `update` - Check installed `@outfitter/*` versions and optionally show migration guidance
+- `upgrade` - Check installed `@outfitter/*` versions and optionally show migration guidance
 - `doctor` - Validate local environment and project dependencies
 - `demo [section]` - Forward to the dedicated demo CLI (`outfitter-demo`)
 
@@ -211,10 +211,58 @@ Options:
 
 Use `outfitter-demo` (or `cli-demo`) directly for the dedicated demo app.
 
+### `schema`
+
+Machine-readable introspection of registered actions. Agents can discover CLI capabilities without scraping `--help`.
+
+```bash
+outfitter schema                          # Human-readable summary
+outfitter schema <action-id>              # Detail view for a single action
+outfitter schema --output json            # Machine-readable JSON manifest
+outfitter schema --output json --pretty   # Pretty-printed JSON
+outfitter schema --surface cli            # Filter by surface
+```
+
+Subcommands for surface map management:
+
+```bash
+outfitter schema generate                 # Write .outfitter/surface.json
+outfitter schema generate --dry-run       # Print without writing
+outfitter schema diff                     # Compare runtime vs committed
+outfitter schema diff --output json       # Structured diff as JSON
+```
+
+### `check`
+
+Compare local config blocks against the registry for drift detection.
+
+```bash
+outfitter check [options]
+outfitter check tsdoc [options]
+```
+
+Options:
+
+- `-v, --verbose` - Show diffs for drifted files
+- `-b, --block <name>` - Check a specific block only
+- `-o, --output <mode>` - Output mode (`human`, `json`, `jsonl`)
+- `--cwd <path>` - Working directory
+
+`check tsdoc` checks TSDoc coverage on exported declarations:
+
+```bash
+outfitter check tsdoc                     # Human-readable coverage report
+outfitter check tsdoc --strict            # Fail if coverage is below threshold
+outfitter check tsdoc --output json       # Machine-readable JSON output
+outfitter check tsdoc --summary           # Compact output
+outfitter check tsdoc --level undocumented # Filter by coverage level
+outfitter check tsdoc --package @outfitter/cli # Filter to specific package
+```
+
 ## Command Conventions
 
 Canonical boundary and command conventions are documented in
-[`docs/BOUNDARY-CONVENTIONS.md`](../../docs/BOUNDARY-CONVENTIONS.md).
+[Architecture: Boundary Conventions](../../docs/ARCHITECTURE.md#boundary-conventions).
 
 Quick model status:
 
@@ -240,7 +288,7 @@ Command subpath exports:
 
 ```typescript
 import { runAdd } from "outfitter/commands/add";
-import { runUpdate } from "outfitter/commands/update";
+import { runUpgrade } from "outfitter/commands/upgrade";
 ```
 
 Example:

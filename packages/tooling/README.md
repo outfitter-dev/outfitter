@@ -98,6 +98,75 @@ bunx @outfitter/tooling check-boundary-invocations
 When this fails, replace direct source execution with canonical command surfaces
 (`outfitter repo ...` in monorepo scripts, or package bins for standalone use).
 
+### `tooling check-bunup-registry`
+
+Validate that packages using `bunup --filter` are registered in `bunup.config.ts`.
+
+```bash
+bunx @outfitter/tooling check-bunup-registry
+```
+
+### `tooling check-changeset`
+
+Validate that PRs touching package source include a changeset.
+
+```bash
+bunx @outfitter/tooling check-changeset
+
+# Skip the check (e.g. for non-package changes)
+bunx @outfitter/tooling check-changeset --skip
+```
+
+### `tooling check-exports`
+
+Validate that `package.json` exports match source entry points.
+
+```bash
+bunx @outfitter/tooling check-exports
+
+# Machine-readable output
+bunx @outfitter/tooling check-exports --json
+```
+
+### `tooling check-tsdoc`
+
+Check TSDoc coverage on exported declarations.
+
+```bash
+bunx @outfitter/tooling check-tsdoc
+
+# Check specific packages
+bunx @outfitter/tooling check-tsdoc packages/cli packages/contracts
+
+# Strict mode with coverage threshold
+bunx @outfitter/tooling check-tsdoc --strict --min-coverage 80
+
+# JSON output
+bunx @outfitter/tooling check-tsdoc --json
+```
+
+### `tooling check-clean-tree`
+
+Assert the working tree is clean (no modified or untracked files).
+
+```bash
+bunx @outfitter/tooling check-clean-tree
+
+# Check specific paths only
+bunx @outfitter/tooling check-clean-tree --paths packages/cli packages/contracts
+```
+
+### `tooling check-readme-imports`
+
+Validate that README import examples match package exports.
+
+```bash
+bunx @outfitter/tooling check-readme-imports
+
+# Machine-readable output
+bunx @outfitter/tooling check-readme-imports --json
+```
+
 ## Configuration Presets
 
 ### Biome

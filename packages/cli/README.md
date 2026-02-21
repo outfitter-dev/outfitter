@@ -363,7 +363,7 @@ if (flags.reset) {
 
 ## Conventions
 
-Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../docs/CLI-CONVENTIONS.md) for the complete catalog.
+Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../docs/cli/conventions.md) for the complete catalog.
 
 ```typescript
 import { composePresets, verbosePreset, cwdPreset, forcePreset } from "@outfitter/cli/flags";

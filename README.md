@@ -7,7 +7,7 @@ Shared infrastructure for building AI-agent-ready tools. CLIs, MCP servers, daem
 ## Quick Start
 
 ```bash
-bunx outfitter create my-project --preset cli --structure single --yes
+bunx outfitter init my-project --preset cli --yes
 cd my-project
 bun install
 bun run dev
@@ -68,6 +68,8 @@ The building blocks for applications.
 | `@outfitter/index` | SQLite full-text search (FTS5) with WAL mode |
 | `@outfitter/daemon` | Daemon lifecycle, health checks, IPC |
 | `@outfitter/state` | Pagination cursors and ephemeral state |
+| `@outfitter/schema` | Schema introspection, surface maps, drift detection |
+| `@outfitter/tui` | Terminal UI rendering -- tables, lists, boxes, trees, spinners, themes, prompts, streaming |
 
 ### Tooling (Early)
 
@@ -82,11 +84,10 @@ Developer-facing tools built on the runtime.
 
 | Guide | When to read it |
 |-------|-----------------|
-| [Getting Started](docs/GETTING-STARTED.md) | Build your first CLI, MCP server, or daemon |
-| [Patterns](docs/PATTERNS.md) | Understand handlers, Result types, error taxonomy |
+| [Getting Started](docs/getting-started.md) | Build your first CLI, MCP server, or daemon |
+| [Patterns](docs/reference/patterns.md) | Understand handlers, Result types, error taxonomy |
 | [Architecture](docs/ARCHITECTURE.md) | How packages fit together |
-| [Boundary Conventions](docs/BOUNDARY-CONVENTIONS.md) | Canonical command model and `apps/*` vs `packages/*` boundaries |
-| [Migration](docs/MIGRATION.md) | Adopting Outfitter or upgrading versions |
+| [Migration](docs/migration.md) | Adopting Outfitter or upgrading versions |
 
 ## Development
 

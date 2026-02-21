@@ -6,7 +6,7 @@ Build CLI tools, MCP servers, and daemons with Outfitter's shared infrastructure
 
 - **Bun >= 1.3.9** — Install from [bun.sh](https://bun.sh)
 - **TypeScript knowledge** — Outfitter is TypeScript-first
-- **Familiarity with Result types** — See [Patterns](./PATTERNS.md) if new to this style
+- **Familiarity with Result types** — See [Patterns](./reference/patterns.md) if new to this style
 
 ## Quick Start
 
@@ -421,7 +421,7 @@ The scaffolded projects include sensible defaults. If you're setting up manually
 
 ## Next Steps
 
-- **[Patterns](./PATTERNS.md)** — Learn the conventions for handlers, errors, and validation
+- **[Patterns](./reference/patterns.md)** — Learn the conventions for handlers, errors, and validation
 - **[Architecture](./ARCHITECTURE.md)** — Understand how packages fit together
 - **Package READMEs** — Deep dive into specific packages:
   - [@outfitter/cli](./packages/cli/) — Full CLI API reference

@@ -274,5 +274,5 @@ return Result.ok(user);
 
 ## See Also
 
-- [RESULT-API.md](./RESULT-API.md) — Full Result API reference
-- [PATTERNS.md](./PATTERNS.md) — Handler contract and error taxonomy
+- [Result API](./result-api.md) — Full Result API reference
+- [Patterns](./patterns.md) — Handler contract and error taxonomy
