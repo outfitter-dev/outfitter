@@ -1,26 +1,98 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-prepare
+  cancel-in-progress: false
 
 jobs:
-  release:
-    name: Release
+  # Phase 1: Prepare release (manual trigger)
+  # Versions packages, creates a release branch, and opens a PR
+  prepare:
+    name: Prepare Release
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # PAT required so the release PR can trigger CI workflows
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check for changesets
+        id: check
+        run: |
+          COUNT=$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "::error::No changesets found. Nothing to release."
+            exit 1
+          fi
+          echo "Found $COUNT changeset(s)"
+
+      - name: Version packages
+        run: bun run version-packages
+
+      - name: Create release branch and PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          BRANCH="release/$(date +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "chore: version packages for release"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: version packages for release" \
+            --body "$(cat <<'BODY'
+          ## Release
+
+          This PR was created by the release workflow. Merging it will publish all versioned packages to npm.
+
+          **Review the changelog entries and version bumps below, then merge to publish.**
+          BODY
+          )" \
+            --label "autorelease"
+
+  # Phase 2: Publish (release PR merged)
+  # Builds and publishes packages to npm @latest
+  publish:
+    name: Publish to npm
+    if: >
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
     runs-on: ubuntu-latest
     environment: npm-publish
     permissions:
       contents: write
-      pull-requests: write
       id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -33,13 +105,14 @@ jobs:
       - name: Verify CI Gate (checks)
         run: bun run verify:ci:checks
         env:
+          NO_CHANGESET: "1"
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
       - name: Run Tests
-        run: bun run test || (rc=$?; echo "::warning::Tests exited $rc, retrying..." && bun run test)
+        run: bun run test || bun run test
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
@@ -55,12 +128,25 @@ jobs:
       - name: Upgrade npm for OIDC support
         run: npm install -g npm@latest
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: bun run version-packages
-          publish: bun run release
+      # OIDC handles npm auth by default (id-token: write).
+      # To use token-based auth instead, add NPM_TOKEN to the npm-publish environment.
+      - name: Set npm auth token (if not using OIDC)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "NODE_AUTH_TOKEN=$NPM_TOKEN" >> "$GITHUB_ENV"
+          fi
+
+      - name: Publish to npm
+        run: bun run release
+        env:
           NPM_CONFIG_PROVENANCE: true
+
+      - name: Create git tags
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npx changeset tag
+          git push --tags

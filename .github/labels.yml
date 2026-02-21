@@ -298,6 +298,10 @@
   color: "d93f0b"
   description: Do not publish yet
 
+- name: autorelease
+  color: "2ea44f"
+  description: Auto-created release PR (triggers publish on merge)
+
 # =============================================================================
 # GRAPHITE MERGE QUEUE
 # =============================================================================

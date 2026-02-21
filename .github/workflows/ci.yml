@@ -33,7 +33,7 @@ jobs:
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
-          NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'no-changeset') && '1' || '0' }}
+          NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'release:none') && '1' || '0' }}
 
       - name: Run Tests
         run: bun run test || (rc=$?; echo "::warning::Tests exited $rc, retrying..." && bun run test)
