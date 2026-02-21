@@ -41,7 +41,10 @@ export function findWorkspaceRangeViolations(
     }
 
     for (const [dependency, range] of Object.entries(deps)) {
-      if (typeof range === "string" && range.startsWith("workspace:")) {
+      if (
+        typeof range === "string" &&
+        (range.startsWith("workspace:") || range === "catalog:")
+      ) {
         violations.push({ section, dependency, range });
       }
     }
