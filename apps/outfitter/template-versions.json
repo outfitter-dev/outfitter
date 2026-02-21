@@ -1,12 +1,12 @@
 {
   "internalDependencies": {
-    "@outfitter/contracts": "^0.4.0",
-    "@outfitter/types": "^0.2.2",
-    "@outfitter/cli": "^0.5.1",
-    "@outfitter/logging": "^0.4.0",
-    "@outfitter/mcp": "^0.4.1",
-    "@outfitter/daemon": "^0.2.3",
-    "@outfitter/tooling": "^0.2.4"
+    "@outfitter/contracts": "^0.4.1",
+    "@outfitter/types": "^0.2.3",
+    "@outfitter/cli": "^0.5.2",
+    "@outfitter/logging": "^0.4.1",
+    "@outfitter/mcp": "^0.4.2",
+    "@outfitter/daemon": "^0.2.4",
+    "@outfitter/tooling": "^0.3.0"
   },
   "externalDependencies": {
     "@biomejs/biome": "^2.4.4",
