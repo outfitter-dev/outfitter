@@ -114,8 +114,9 @@ Some labels are applied manually, not automatically:
 | `release:minor` | Feature release |
 | `release:major` | Breaking change release |
 | `release:none` | No release needed |
+| `release:none` | Skip changeset requirement in CI |
 
-See [Releases](./releases.md) for details.
+See [Releases](../RELEASES.md) for details.
 
 ### Priority Labels
 
