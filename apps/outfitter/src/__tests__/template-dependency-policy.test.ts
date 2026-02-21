@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import templateVersions from "../../template-versions.json";
@@ -17,9 +17,9 @@ interface TemplateManifest {
 }
 
 function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {
-  return readdirSync(rootDir)
-    .map((entry) => join(rootDir, entry, "package.json.template"))
-    .filter((path) => existsSync(path))
+  const glob = new Bun.Glob("**/package.json.template");
+  return Array.from(glob.scanSync({ cwd: rootDir, absolute: false }))
+    .map((relative) => join(rootDir, relative))
     .sort();
 }
 

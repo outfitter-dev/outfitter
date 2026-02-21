@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface TemplateVersionManifest {
@@ -47,9 +47,9 @@ function loadManifest(): TemplateVersionManifest {
 }
 
 function getTemplatePackageJsonPaths(rootDir: string): readonly string[] {
-  return readdirSync(rootDir)
-    .map((entry) => join(rootDir, entry, "package.json.template"))
-    .filter((path) => existsSync(path))
+  const glob = new Bun.Glob("**/package.json.template");
+  return Array.from(glob.scanSync({ cwd: rootDir, absolute: false }))
+    .map((relative) => join(rootDir, relative))
     .sort();
 }
 
