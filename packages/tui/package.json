@@ -221,7 +221,7 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.0.1",
     "better-result": "^2.5.1"
   },
   "peerDependencies": {

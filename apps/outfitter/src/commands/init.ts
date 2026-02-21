@@ -280,7 +280,9 @@ async function resolveInitInput(
       placeholder: defaultPackageName,
       initialValue: defaultPackageName,
       validate: (value) =>
-        value.trim().length === 0 ? "Project name is required" : undefined,
+        (value ?? "").trim().length === 0
+          ? "Project name is required"
+          : undefined,
     }));
 
   if (isCancel(packageNameValue)) {
@@ -395,7 +397,9 @@ async function resolveInitInput(
         placeholder: defaultPackageName,
         initialValue: defaultPackageName,
         validate: (value) =>
-          value.trim().length === 0 ? "Workspace name is required" : undefined,
+          (value ?? "").trim().length === 0
+            ? "Workspace name is required"
+            : undefined,
       }));
 
     if (isCancel(workspaceNameValue)) {

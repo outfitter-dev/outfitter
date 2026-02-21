@@ -48,7 +48,8 @@ export async function promptText(
     textOptions.defaultValue = options.defaultValue;
   }
   if (options.validate !== undefined) {
-    textOptions.validate = options.validate;
+    const userValidate = options.validate;
+    textOptions.validate = (value) => userValidate(value ?? "");
   }
 
   const result = await text(textOptions);
@@ -85,7 +86,8 @@ export async function promptPassword(
     mask: options.mask ?? "•",
   };
   if (options.validate !== undefined) {
-    passwordOptions.validate = options.validate;
+    const userValidate = options.validate;
+    passwordOptions.validate = (value) => userValidate(value ?? "");
   }
 
   const result = await password(passwordOptions);
