@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [f38bb82]
+  - @outfitter/tooling@0.3.2
+
 ## 0.3.0
 
 ### Minor Changes

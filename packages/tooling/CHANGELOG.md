@@ -1,5 +1,13 @@
 # @outfitter/tooling
 
+## 0.3.2
+
+### Patch Changes
+
+- f38bb82: Stop tracking generated `registry.json` in git. The file is a build artifact
+  produced by `prebuild` and was causing CI failures when inputs (versions, config
+  files) changed between commit and build.
+
 ## 0.3.1
 
 ### Patch Changes
