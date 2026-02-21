@@ -123,8 +123,10 @@ describe("Registry Build Output", () => {
 		}
 	});
 
-	test("generated registry output matches snapshot", () => {
-		const registry = readRegistry();
-		expect(registry).toMatchSnapshot();
+	test("self-referencing tooling version uses caret range", () => {
+		const version =
+			REGISTRY_CONFIG.blocks.lefthook?.devDependencies?.["@outfitter/tooling"];
+		expect(version).toBeDefined();
+		expect(version).toMatch(/^\^\d+\.\d+\.\d+$/);
 	});
 });

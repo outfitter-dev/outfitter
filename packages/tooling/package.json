@@ -76,7 +76,7 @@
 		"prepack": "bun run sync:exports",
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
-		"test": "bun test",
+		"test": "bun run build:registry && bun test",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist registry",
 		"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
