@@ -38,6 +38,11 @@ import { printCheckResults, runCheck } from "./commands/check.js";
 import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
 import {
+  type DocsApiInput,
+  printDocsApiResults,
+  runDocsApi,
+} from "./commands/docs-api.js";
+import {
   type DocsExportInput,
   type DocsExportTarget,
   printDocsExportResults,
@@ -1341,6 +1346,104 @@ const docsSearchAction = defineAction({
 });
 
 // ---------------------------------------------------------------------------
+// docs.api action
+// ---------------------------------------------------------------------------
+
+const docsApiInputSchema = z.object({
+  cwd: z.string(),
+  level: z.enum(["documented", "partial", "undocumented"]).optional(),
+  packages: z.array(z.string()),
+  jq: z.string().optional(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<DocsApiInput>;
+
+const docsApiCwd = cwdPreset();
+const docsApiOutputMode = outputModePreset({ includeJsonl: true });
+const docsApiJq = jqPreset();
+
+const docsApiAction = defineAction({
+  id: "docs.api",
+  description: "Extract API reference from TSDoc coverage data",
+  surfaces: ["cli"],
+  input: docsApiInputSchema,
+  output: checkTsdocOutputSchema,
+  cli: {
+    group: "docs",
+    command: "api",
+    description: "Extract API reference from TSDoc coverage data",
+    options: [
+      {
+        flags: "--level <level>",
+        description:
+          "Filter declarations by coverage level (undocumented, partial, documented)",
+      },
+      {
+        flags: "--package <name>",
+        description: "Filter to specific package(s) by name (repeatable)",
+      },
+      ...docsApiOutputMode.options,
+      ...docsApiJq.options,
+      ...docsApiCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsApiOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = docsApiJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
+      const { cwd: rawCwd } = docsApiCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+
+      // Resolve --level flag
+      const levelRaw = context.flags["level"];
+      const validLevels = new Set(["documented", "partial", "undocumented"]);
+      const level =
+        typeof levelRaw === "string" && validLevels.has(levelRaw)
+          ? (levelRaw as "documented" | "partial" | "undocumented")
+          : undefined;
+
+      // Resolve --package flag (Commander collects repeatable into array)
+      const pkgRaw = context.flags["package"];
+      let packages: string[] = [];
+      if (Array.isArray(pkgRaw)) {
+        packages = pkgRaw.filter((v): v is string => typeof v === "string");
+      } else if (typeof pkgRaw === "string") {
+        packages = [pkgRaw];
+      }
+
+      return {
+        cwd,
+        outputMode,
+        jq,
+        level,
+        packages,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, jq, ...apiInput } = input;
+    const result = await runDocsApi({ ...apiInput, outputMode, jq });
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsApiResults(result.value, { mode: outputMode, jq });
+    return Result.ok(result.value);
+  },
+});
+
+// ---------------------------------------------------------------------------
 // docs.export action
 // ---------------------------------------------------------------------------
 
@@ -1479,4 +1582,5 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(docsListAction)
   .add(docsShowAction)
   .add(docsSearchAction)
+  .add(docsApiAction)
   .add(docsExportAction);
