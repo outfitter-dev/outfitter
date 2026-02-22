@@ -128,6 +128,17 @@ describe("docs command execution", () => {
 });
 
 describe("createDocsCommand", () => {
+  const originalExitCode = process.exitCode ?? 0;
+  const workspaceRoots = new Set<string>();
+
+  afterEach(async () => {
+    process.exitCode = originalExitCode;
+    for (const workspaceRoot of workspaceRoots) {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+    workspaceRoots.clear();
+  });
+
   it("creates a host-mountable docs command with sync, check, and export subcommands", () => {
     const command = createDocsCommand();
 
@@ -137,7 +148,7 @@ describe("createDocsCommand", () => {
       subcommand.name()
     );
 
-    expect(subcommandNames).toEqual(["sync", "check", "export"]);
+    expect(subcommandNames).toEqual(["sync", "check", "export", "sync-readme"]);
   });
 
   it("uses shared docs option bundles across subcommands", () => {
@@ -163,5 +174,39 @@ describe("createDocsCommand", () => {
     expect(exportCommand?.options.map((option) => option.flags)).toEqual(
       exportFlags
     );
+  });
+
+  it("sync-readme fails when PACKAGE_LIST sentinel markers are missing", async () => {
+    const workspaceRoot = await mkdtemp(
+      join(tmpdir(), "outfitter-docs-sync-readme-test-")
+    );
+    workspaceRoots.add(workspaceRoot);
+
+    await mkdir(join(workspaceRoot, "docs"), { recursive: true });
+    await writeFile(
+      join(workspaceRoot, "docs", "README.md"),
+      "# Docs\n\nNo sentinels here.\n",
+      "utf8"
+    );
+
+    const out: string[] = [];
+    const err: string[] = [];
+    const command = createDocsCommand({
+      io: {
+        out: (line) => out.push(line),
+        err: (line) => err.push(line),
+      },
+    });
+
+    await command.parseAsync(
+      ["node", "docs", "sync-readme", "--cwd", workspaceRoot],
+      { from: "node" }
+    );
+
+    expect(out).toEqual([]);
+    expect(err).toEqual([
+      "docs/README.md is missing PACKAGE_LIST sentinel markers.",
+    ]);
+    expect(process.exitCode).toBe(1);
   });
 });
