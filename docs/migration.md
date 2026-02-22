@@ -253,8 +253,8 @@ Key migration points:
 
 - Docs workflows now route through `outfitter repo <action> docs` for monorepo
   maintenance.
-- `@outfitter/docs-core` is library-only; runnable docs command behavior lives
-  in `@outfitter/docs` and host CLIs.
+- `@outfitter/docs` provides both library (core assembly, freshness checks) and
+  runnable docs command behavior for host CLIs.
 - Demo command hosting moved to `apps/cli-demo`; `outfitter demo` remains a
   compatibility bridge.
 - Legacy long-form repo command aliases remain available during transition, but

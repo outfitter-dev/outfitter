@@ -65,7 +65,7 @@ Packages are organized into tiers based on stability and dependency direction. H
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    TOOLING (Early)                      │
-│  outfitter CLI, presets, docs/docs-core, tooling        │
+│  outfitter CLI, presets, docs, tooling                   │
 ├─────────────────────────────────────────────────────────┤
 │                    RUNTIME (Active)                     │
 │  cli, config, logging, file-ops, state, schema, tui,   │
@@ -111,8 +111,7 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 |---------|---------|
 | `outfitter` | Umbrella CLI for scaffolding projects |
 | `@outfitter/presets` | Scaffold presets and shared dependency versions (catalog-resolved) |
-| `@outfitter/docs-core` | Core docs assembly and freshness checks |
-| `@outfitter/docs` | Docs CLI and host adapter for product CLIs |
+| `@outfitter/docs` | Docs CLI, core assembly, freshness checks, and host adapter |
 | `@outfitter/tooling` | Dev tooling presets and CLI workflows |
 
 ### Deprecated Packages
