@@ -33,6 +33,12 @@
         "default": "./dist/core/docs-map-schema.js"
       }
     },
+    "./core/package-doc-collection": {
+      "import": {
+        "types": "./dist/core/package-doc-collection.d.ts",
+        "default": "./dist/core/package-doc-collection.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {
