@@ -47,7 +47,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.3.0",
+      "version": "0.3.2",
       "bin": {
         "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
@@ -302,7 +302,7 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.3.1",
+      "version": "0.3.3",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
