@@ -40,6 +40,10 @@ export {
   writeDocsMap,
 } from "./core/docs-map-generator.js";
 export {
+  renderLlmsFullFromMap,
+  renderLlmsIndexFromMap,
+} from "./core/docs-map-render.js";
+export {
   type DocKind,
   DocKindSchema,
   type DocsMap,
