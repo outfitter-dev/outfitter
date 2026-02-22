@@ -214,7 +214,7 @@ function addDocsSyncSubcommand(
 ): void {
   const docsSyncCommand = command
     .command("docs")
-    .description("Assemble package docs into docs/packages");
+    .description("Assemble package docs mirrors locally");
 
   withDocsCommonOptions(docsSyncCommand).action(
     async (cmdOptions: DocsCommonCliOptions) => {

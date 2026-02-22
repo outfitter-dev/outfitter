@@ -227,5 +227,6 @@ Why divergence is intentional:
 
 ## Change Log
 
+- 2026-02-21: D2 revised -- `docs/packages/` mirrors are no longer committed. The docs map and CLI commands (`docs list`, `docs show`, `docs search`) are the canonical discovery mechanism. The pipeline still generates mirrors locally for LLM output rendering.
 - 2026-02-12: Initial decision set recorded from planning discussion and package/workspace review.
 

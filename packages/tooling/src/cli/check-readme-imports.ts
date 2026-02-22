@@ -188,9 +188,8 @@ export function resolveJsonMode(
 /**
  * Run check-readme-imports across all workspace packages.
  *
- * Finds README.md files in `packages/` and `docs/packages/`, extracts
- * import examples, and validates each subpath against the corresponding
- * package.json exports.
+ * Finds README.md files in `packages/`, extracts import examples, and
+ * validates each subpath against the corresponding package.json exports.
  */
 export async function runCheckReadmeImports(
 	options: CheckReadmeImportsOptions = {},
@@ -199,7 +198,7 @@ export async function runCheckReadmeImports(
 
 	// Discover README files
 	const readmeGlob = new Bun.Glob("**/README.md");
-	const readmeDirs = ["packages", "docs/packages"];
+	const readmeDirs = ["packages"];
 	const readmePaths: string[] = [];
 
 	for (const dir of readmeDirs) {

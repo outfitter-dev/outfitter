@@ -152,7 +152,7 @@ Exit codes: `0` = clean, `1` = dirty files found.
 
 ### check-readme-imports
 
-Validates that import examples in README files reference actually-exported subpaths. Scans `packages/*/README.md` and `docs/packages/*/README.md`.
+Validates that import examples in README files reference actually-exported subpaths. Scans `packages/*/README.md`.
 
 ```bash
 # Human-readable output
