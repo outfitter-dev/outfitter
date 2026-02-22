@@ -8,7 +8,7 @@ import {
   checkPackageDocs,
   syncLlmsDocs,
   syncPackageDocs,
-} from "../index.js";
+} from "../core/index.js";
 
 async function createWorkspaceFixture(): Promise<string> {
   const workspaceRoot = await mkdtemp(

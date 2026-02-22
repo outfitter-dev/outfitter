@@ -157,19 +157,8 @@
         "outfitter-docs": "./dist/cli.js",
       },
       "dependencies": {
-        "@outfitter/docs-core": "workspace:*",
-        "commander": "catalog:",
-      },
-      "devDependencies": {
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "packages/docs-core": {
-      "name": "@outfitter/docs-core",
-      "version": "0.1.2",
-      "dependencies": {
         "better-result": "catalog:",
+        "commander": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -510,8 +499,6 @@
     "@outfitter/daemon": ["@outfitter/daemon@workspace:packages/daemon"],
 
     "@outfitter/docs": ["@outfitter/docs@workspace:packages/docs"],
-
-    "@outfitter/docs-core": ["@outfitter/docs-core@workspace:packages/docs-core"],
 
     "@outfitter/file-ops": ["@outfitter/file-ops@workspace:packages/file-ops"],
 

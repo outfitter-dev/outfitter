@@ -15,10 +15,10 @@
         "default": "./dist/index.js"
       }
     },
-    "./docs-core-loader": {
+    "./core": {
       "import": {
-        "types": "./dist/docs-core-loader.d.ts",
-        "default": "./dist/docs-core-loader.js"
+        "types": "./dist/core/index.d.ts",
+        "default": "./dist/core/index.js"
       }
     },
     "./package.json": "./package.json"
@@ -37,7 +37,7 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@outfitter/docs-core": "workspace:*",
+    "better-result": "catalog:",
     "commander": "catalog:"
   },
   "devDependencies": {

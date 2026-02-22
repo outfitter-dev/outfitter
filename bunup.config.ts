@@ -112,14 +112,9 @@ export default defineWorkspace(
       root: "packages/config",
     },
     {
-      name: "@outfitter/docs-core",
-      root: "packages/docs-core",
-      // Keep the package surface limited to the library entrypoint.
-    },
-    {
       name: "@outfitter/docs",
       root: "packages/docs",
-      // Publish a stable top-level API from src/index.ts.
+      // Publish a stable top-level API from src/index.ts and ./core subpath.
       // Internal command modules and the CLI shim are not public imports.
       config: {
         exports: {

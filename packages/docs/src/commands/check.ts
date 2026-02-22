@@ -1,10 +1,6 @@
-import type { PackageDocsOptions } from "@outfitter/docs-core";
-import { loadDocsCoreModule } from "../docs-core-loader.js";
+import type { PackageDocsOptions } from "../core/index.js";
+import { checkPackageDocs } from "../core/index.js";
 import type { CommandIo } from "./sync.js";
-
-type CheckPackageDocsResult = Awaited<
-  ReturnType<typeof import("@outfitter/docs-core")["checkPackageDocs"]>
->;
 
 export interface ExecuteCheckCommandOptions extends PackageDocsOptions {
   readonly cwd?: string;
@@ -30,10 +26,7 @@ export async function executeCheckCommand(
   options: ExecuteCheckCommandOptions,
   io: CommandIo
 ): Promise<number> {
-  const docsCore = await loadDocsCoreModule();
-  const result = (await docsCore.checkPackageDocs(
-    toCoreOptions(options)
-  )) as CheckPackageDocsResult;
+  const result = await checkPackageDocs(toCoreOptions(options));
 
   if (result.isErr()) {
     io.err(`docs check failed: ${result.error.message}`);
