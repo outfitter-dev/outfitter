@@ -21,6 +21,12 @@
         "default": "./dist/core/index.js"
       }
     },
+    "./core/docs-map-schema": {
+      "import": {
+        "types": "./dist/core/docs-map-schema.d.ts",
+        "default": "./dist/core/docs-map-schema.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {
@@ -38,7 +44,8 @@
   },
   "dependencies": {
     "better-result": "catalog:",
-    "commander": "catalog:"
+    "commander": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

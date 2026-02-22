@@ -33,7 +33,14 @@ export {
   type ExecuteSyncCommandOptions,
   executeSyncCommand,
 } from "./commands/sync.js";
-
+export {
+  type DocKind,
+  DocKindSchema,
+  type DocsMap,
+  type DocsMapEntry,
+  DocsMapEntrySchema,
+  DocsMapSchema,
+} from "./core/docs-map-schema.js";
 export type {
   CheckLlmsDocsResult,
   CheckPackageDocsResult,

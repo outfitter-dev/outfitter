@@ -159,6 +159,7 @@
       "dependencies": {
         "better-result": "catalog:",
         "commander": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
