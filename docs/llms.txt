@@ -6,6 +6,7 @@ Outfitter package docs index for LLM retrieval.
 - docs/packages/agents/README.md — @outfitter/agents
 
 ## cli
+- docs/packages/cli/docs/output-modes.md — Output Modes
 - docs/packages/cli/HARVEST_MAP.md — @outfitter/cli Harvest Map
 - docs/packages/cli/README.md — @outfitter/cli
 
@@ -13,6 +14,7 @@ Outfitter package docs index for LLM retrieval.
 - docs/packages/config/README.md — @outfitter/config
 
 ## contracts
+- docs/packages/contracts/docs/error-taxonomy.md — Error Taxonomy
 - docs/packages/contracts/README.md — @outfitter/contracts
 
 ## daemon

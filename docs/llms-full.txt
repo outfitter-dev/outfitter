@@ -284,6 +284,74 @@ bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ qui
 - [@outfitter/config](../config/README.md) — XDG-compliant configuration
 
 ---
+path: docs/packages/cli/docs/output-modes.md
+package: cli
+title: Output Modes
+---
+
+# Output Modes
+
+CLI commands default to human-readable output. Machine-readable formats are opt-in via the `--output` flag or environment variables.
+
+## Available Modes
+
+| Mode | Flag | Description |
+|------|------|-------------|
+| `human` | `--output human` | Formatted text for terminal display (default) |
+| `json` | `--output json` | Single JSON object or array |
+| `jsonl` | `--output jsonl` | Newline-delimited JSON (one object per line) |
+
+## Selecting a Mode
+
+Use the `-o` / `--output` flag:
+
+```bash
+mycli list --output json
+mycli list -o jsonl
+```
+
+Or set environment variables (useful in CI):
+
+```bash
+OUTFITTER_JSON=1 mycli list     # Force JSON
+OUTFITTER_JSONL=1 mycli list    # Force JSONL
+```
+
+## Priority
+
+The resolved mode follows this precedence (highest wins):
+
+1. Explicit `--output <mode>` flag
+2. `OUTFITTER_JSONL=1`
+3. `OUTFITTER_JSON=1`
+4. Default: `human`
+
+Setting `OUTFITTER_JSON=0` or `OUTFITTER_JSONL=0` explicitly forces human mode.
+
+## Filtering with jq
+
+Commands that support `--jq` allow inline filtering of JSON output:
+
+```bash
+mycli list --output json --jq '.[] | .name'
+```
+
+The `--jq` flag requires an output mode that produces JSON (`json` or `jsonl`).
+
+## Adding Output Mode Support
+
+Use the `outputModePreset` from `@outfitter/cli/query`:
+
+```typescript
+import { outputModePreset, jqPreset } from "@outfitter/cli/query";
+
+const mode = outputModePreset({ includeJsonl: true });
+const jq = jqPreset();
+```
+
+See [CLI Flag Conventions](../../../cli/conventions.md) for the full preset catalog.
+
+---
 path: docs/packages/cli/HARVEST_MAP.md
 package: cli
 title: @outfitter/cli Harvest Map
@@ -2048,6 +2116,61 @@ if (result.isErr()) {
 ## License
 
 MIT
+
+---
+path: docs/packages/contracts/docs/error-taxonomy.md
+package: contracts
+title: Error Taxonomy
+---
+
+# Error Taxonomy
+
+Outfitter uses 10 error categories to classify all failure modes. Each category maps to a CLI exit code and an HTTP status code, ensuring consistent error handling across CLI, MCP, and API surfaces.
+
+## Category Reference
+
+| Category | Exit Code | HTTP Status | Description |
+|----------|-----------|-------------|-------------|
+| `validation` | 1 | 400 | Invalid input, schema violation, constraint failure |
+| `not_found` | 2 | 404 | Requested resource does not exist |
+| `conflict` | 3 | 409 | Resource state conflict (e.g., duplicate creation) |
+| `permission` | 4 | 403 | Insufficient permissions for the operation |
+| `timeout` | 5 | 504 | Operation exceeded its time limit |
+| `rate_limit` | 6 | 429 | Request rate exceeded, try again later |
+| `network` | 7 | 502 | Network or upstream service failure |
+| `internal` | 8 | 500 | Unexpected internal error |
+| `auth` | 9 | 401 | Authentication required or invalid credentials |
+| `cancelled` | 130 | 499 | Operation cancelled by user (POSIX: 128 + SIGINT) |
+
+## Usage
+
+### Creating Errors
+
+```typescript
+import { ValidationError, NotFoundError } from "@outfitter/contracts";
+
+ValidationError.create("email", "invalid format", { value: input });
+NotFoundError.create("user", userId);
+```
+
+### Code Mapping
+
+```typescript
+import { getExitCode, getStatusCode } from "@outfitter/contracts";
+
+getExitCode("not_found");   // 2
+getStatusCode("not_found"); // 404
+```
+
+### Recovery Classification
+
+Categories are classified by recoverability for retry logic:
+
+- **Retryable** (automatic): `network`, `timeout`
+- **Recoverable** (with intervention): `network`, `timeout`, `rate_limit`, `conflict`
+- **Permanent**: `validation`, `not_found`, `permission`, `auth`, `internal`, `cancelled`
+
+See `isRetryable()` and `isRecoverable()` from `@outfitter/contracts` for programmatic checks.
 
 ---
 path: docs/packages/contracts/README.md
