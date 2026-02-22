@@ -26,6 +26,7 @@ Guides and reference documentation for the Outfitter monorepo.
 | [Result Cookbook](./reference/result-cookbook.md) | Generator-based composition with `Result.gen()` |
 | [Export Contracts](./reference/export-contracts.md) | Package export verification pipeline and tooling |
 | [TUI Stacks](./reference/tui-stacks.md) | Composable hstack/vstack primitives for CLI layouts |
+| [`.outfitter/` Directory](./reference/outfitter-directory.md) | Project directory conventions, contents, git strategy |
 
 ## Package READMEs
 
