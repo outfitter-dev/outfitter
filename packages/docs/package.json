@@ -45,6 +45,12 @@
         "default": "./dist/core/package-doc-collection.js"
       }
     },
+    "./core/sentinel-generator": {
+      "import": {
+        "types": "./dist/core/sentinel-generator.d.ts",
+        "default": "./dist/core/sentinel-generator.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "bin": {

@@ -71,3 +71,7 @@ export {
   syncLlmsDocs,
   syncPackageDocs,
 } from "./core/index.js";
+export {
+  generatePackageListSection,
+  replaceSentinelSection,
+} from "./core/sentinel-generator.js";

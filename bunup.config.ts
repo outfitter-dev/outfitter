@@ -118,7 +118,13 @@ export default defineWorkspace(
       // Internal command modules and the CLI shim are not public imports.
       config: {
         exports: {
-          exclude: ["./cli", "./command/*", "./commands/*", "./version"],
+          exclude: [
+            "./cli",
+            "./command/*",
+            "./commands/*",
+            "./core/sentinel-sync",
+            "./version",
+          ],
         },
       },
     },

@@ -28,51 +28,34 @@ Guides and reference documentation for the Outfitter monorepo.
 | [TUI Stacks](./reference/tui-stacks.md) | Composable hstack/vstack primitives for CLI layouts |
 | [`.outfitter/` Directory](./reference/outfitter-directory.md) | Project directory conventions, contents, git strategy |
 
-## Package READMEs
+## Packages
 
 Each package has detailed API documentation in its own directory. The canonical
 location is `packages/<name>/README.md` (and `packages/<name>/docs/` for deep
 docs). Use `outfitter docs list` to browse the docs index, or
 `outfitter docs show <id>` to view a specific document.
 
-Stability labels indicate API maturity:
-
-- **Stable** -- APIs locked, breaking changes rare
-- **Active** -- APIs evolving based on usage
-- **Early** -- APIs will change, not production-ready
-
-### Foundation (Stable)
-
-- [@outfitter/contracts](../packages/contracts/README.md) -- Result/Error patterns, handler contract
-- [@outfitter/types](../packages/types/README.md) -- Optional branded types, type utilities
-
-Adoption note: `@outfitter/types` is not a default dependency. Add it when you
-have concrete branded ID or shared utility adoption points.
-
-### Runtime (Active)
-
-- [@outfitter/cli](../packages/cli/README.md) -- CLI framework with output modes, terminal rendering
-- [@outfitter/config](../packages/config/README.md) -- XDG-compliant configuration
-- [@outfitter/logging](../packages/logging/README.md) -- Structured logging with redaction
-- [@outfitter/file-ops](../packages/file-ops/README.md) -- Path security, atomic writes
-- [@outfitter/state](../packages/state/README.md) -- Pagination cursors, state management
-- [@outfitter/mcp](../packages/mcp/README.md) -- MCP server framework with typed tools
-- [@outfitter/index](../packages/index/README.md) -- SQLite FTS5 full-text search
-- [@outfitter/daemon](../packages/daemon/README.md) -- Daemon lifecycle, IPC, health checks
-- [@outfitter/schema](../packages/schema/README.md) -- Schema introspection, surface maps, and drift detection
-- [@outfitter/tui](../packages/tui/README.md) -- Terminal UI primitives, themes, prompts, and streaming
-- [@outfitter/testing](../packages/testing/README.md) -- Test harnesses for CLI and MCP
-
-### Tooling (Early)
-
-- [outfitter](../apps/outfitter/README.md) -- Umbrella CLI for scaffolding
-- [@outfitter/presets](../packages/presets/) -- Scaffold presets and shared dependency versions
-- [@outfitter/docs](../packages/docs/README.md) -- Docs CLI, core assembly, freshness checks, and host adapter
-- [@outfitter/tooling](../packages/tooling/README.md) -- Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
-
-### Deprecated
-
-- [@outfitter/agents](../packages/agents/README.md) -- Deprecated. Use `npx outfitter add scaffolding` instead.
+<!-- BEGIN:GENERATED:PACKAGE_LIST -->
+| Package | Description |
+|---------|-------------|
+| [`@outfitter/agents`](../packages/agents/) | DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects |
+| [`@outfitter/cli`](../packages/cli/) | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing |
+| [`@outfitter/config`](../packages/config/) | XDG-compliant config loading with schema validation for Outfitter |
+| [`@outfitter/contracts`](../packages/contracts/) | Result/Error patterns, error taxonomy, and handler contracts for Outfitter |
+| [`@outfitter/daemon`](../packages/daemon/) | Daemon lifecycle, IPC, and health checks for Outfitter |
+| [`@outfitter/docs`](../packages/docs/) | CLI and host command adapter for Outfitter docs workflows |
+| [`@outfitter/file-ops`](../packages/file-ops/) | Workspace detection, secure path handling, and file locking for Outfitter |
+| [`@outfitter/index`](../packages/index/) | SQLite FTS5 full-text search indexing for Outfitter |
+| [`@outfitter/logging`](../packages/logging/) | Structured logging via logtape with redaction support for Outfitter |
+| [`@outfitter/mcp`](../packages/mcp/) | MCP server framework with typed tools for Outfitter |
+| [`@outfitter/presets`](../packages/presets/) | Scaffold presets and shared dependency versions for Outfitter projects |
+| [`@outfitter/schema`](../packages/schema/) | Schema introspection, surface map generation, and drift detection for Outfitter |
+| [`@outfitter/state`](../packages/state/) | Pagination cursor persistence and state management for Outfitter |
+| [`@outfitter/testing`](../packages/testing/) | Test harnesses, fixtures, and utilities for Outfitter packages |
+| [`@outfitter/tooling`](../packages/tooling/) | Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint) |
+| [`@outfitter/tui`](../packages/tui/) | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
+| [`@outfitter/types`](../packages/types/) | Branded types, type guards, and type utilities for Outfitter |
+<!-- END:GENERATED:PACKAGE_LIST -->
 
 ## Quick Links
 

@@ -4515,6 +4515,43 @@ Run `outfitter upgrade --guide` for version-specific migration instructions, or 
 - [@outfitter/config](../config/README.md) — Configuration loading
 
 ---
+path: docs/packages/presets/README.md
+package: presets
+title: @outfitter/presets
+---
+
+# @outfitter/presets
+
+Scaffold presets and shared dependency versions for Outfitter projects.
+
+## Installation
+
+```bash
+bun add -d @outfitter/presets
+```
+
+## Overview
+
+This package provides:
+
+- **Scaffold presets** -- Template configurations used by `outfitter add` to generate project boilerplate
+- **Shared dependency versions** -- Catalog-resolved dependency versions ensuring consistency across Outfitter projects
+
+## Usage
+
+Presets are consumed by the `outfitter` CLI during scaffolding:
+
+```bash
+npx outfitter add <preset-name>
+```
+
+For programmatic access to preset metadata:
+
+```typescript
+import { presets } from "@outfitter/presets";
+```
+
+---
 path: docs/packages/schema/README.md
 package: schema
 title: @outfitter/schema
