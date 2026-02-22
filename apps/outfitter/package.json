@@ -45,6 +45,12 @@
         "default": "./dist/commands/demo.js"
       }
     },
+    "./commands/docs-export": {
+      "import": {
+        "types": "./dist/commands/docs-export.d.ts",
+        "default": "./dist/commands/docs-export.js"
+      }
+    },
     "./commands/docs-list": {
       "import": {
         "types": "./dist/commands/docs-list.d.ts",
@@ -55,6 +61,12 @@
       "import": {
         "types": "./dist/commands/docs-module-loader.d.ts",
         "default": "./dist/commands/docs-module-loader.js"
+      }
+    },
+    "./commands/docs-search": {
+      "import": {
+        "types": "./dist/commands/docs-search.d.ts",
+        "default": "./dist/commands/docs-search.js"
       }
     },
     "./commands/docs-show": {

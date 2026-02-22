@@ -38,10 +38,20 @@ import { printCheckResults, runCheck } from "./commands/check.js";
 import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
 import {
+  type DocsExportInput,
+  printDocsExportResults,
+  runDocsExport,
+} from "./commands/docs-export.js";
+import {
   type DocsListInput,
   printDocsListResults,
   runDocsList,
 } from "./commands/docs-list.js";
+import {
+  type DocsSearchInput,
+  printDocsSearchResults,
+  runDocsSearch,
+} from "./commands/docs-search.js";
 import {
   type DocsShowInput,
   printDocsShowResults,
@@ -1245,6 +1255,168 @@ const docsShowAction = defineAction({
   },
 });
 
+// ---------------------------------------------------------------------------
+// docs.search action
+// ---------------------------------------------------------------------------
+
+const docsSearchInputSchema = z.object({
+  query: z.string(),
+  cwd: z.string(),
+  kind: z.string().optional(),
+  package: z.string().optional(),
+  jq: z.string().optional(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<DocsSearchInput>;
+
+const docsSearchCwd = cwdPreset();
+const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
+const docsSearchJq = jqPreset();
+
+const docsSearchAction = defineAction({
+  id: "docs.search",
+  description: "Search documentation content for a query string",
+  surfaces: ["cli"],
+  input: docsSearchInputSchema,
+  cli: {
+    group: "docs",
+    command: "search <query>",
+    description: "Search documentation content for a query string",
+    options: [
+      {
+        flags: "-k, --kind <kind>",
+        description:
+          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
+      },
+      {
+        flags: "-p, --package <name>",
+        description: "Filter by package name",
+      },
+      ...docsSearchOutputMode.options,
+      ...docsSearchJq.options,
+      ...docsSearchCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = docsSearchJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
+      const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const kind = resolveStringFlag(context.flags["kind"]);
+      const pkg = resolveStringFlag(context.flags["package"]);
+
+      return {
+        query: context.args[0] as string,
+        cwd,
+        outputMode,
+        jq,
+        ...(kind !== undefined ? { kind } : {}),
+        ...(pkg !== undefined ? { package: pkg } : {}),
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, jq, ...searchInput } = input;
+    const result = await runDocsSearch({ ...searchInput, outputMode, jq });
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsSearchResults(result.value, { mode: outputMode, jq });
+    return Result.ok(result.value);
+  },
+});
+
+// ---------------------------------------------------------------------------
+// docs.export action
+// ---------------------------------------------------------------------------
+
+const docsExportTargetValues = [
+  "packages",
+  "llms",
+  "llms-full",
+  "all",
+] as const;
+
+const docsExportInputSchema = z.object({
+  cwd: z.string(),
+  target: z.enum(docsExportTargetValues).default("all"),
+  outputMode: outputModeSchema,
+}) as z.ZodType<DocsExportInput>;
+
+const docsExportCwd = cwdPreset();
+const docsExportOutputMode = outputModePreset({ includeJsonl: true });
+
+const docsExportAction = defineAction({
+  id: "docs.export",
+  description: "Export documentation to packages, llms.txt, or both",
+  surfaces: ["cli"],
+  input: docsExportInputSchema,
+  cli: {
+    group: "docs",
+    command: "export",
+    description: "Export documentation to packages, llms.txt, or both",
+    options: [
+      {
+        flags: "-t, --target <target>",
+        description:
+          "Export target (packages|llms|llms-full|all, default: all)",
+      },
+      ...docsExportOutputMode.options,
+      ...docsExportCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
+        context.flags
+      );
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
+      const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const targetRaw = resolveStringFlag(context.flags["target"]);
+      const target = (targetRaw ?? "all") as DocsExportTarget;
+
+      return {
+        cwd,
+        target,
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, ...exportInput } = input;
+    const result = await runDocsExport({ ...exportInput, outputMode });
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsExportResults(result.value, { mode: outputMode });
+    return Result.ok(result.value);
+  },
+});
+
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(scaffoldAction)
@@ -1304,4 +1476,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(checkTsdocAction)
   .add(upgradeAction)
   .add(docsListAction)
-  .add(docsShowAction);
+  .add(docsShowAction)
+  .add(docsSearchAction)
+  .add(docsExportAction);
