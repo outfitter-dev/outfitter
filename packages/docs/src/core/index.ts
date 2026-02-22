@@ -17,6 +17,7 @@ import {
   resolve,
 } from "node:path";
 import { Result } from "better-result";
+import { collectPackageDocs } from "./package-doc-collection.js";
 
 export type MdxMode = "strict" | "lossy";
 
@@ -124,11 +125,6 @@ interface ResolvedPackageDocsOptions {
   readonly outputRoot: string;
   readonly packagesRoot: string;
   readonly workspaceRoot: string;
-}
-
-interface DiscoveredPackage {
-  readonly packageDirName: string;
-  readonly packageRoot: string;
 }
 
 interface ExpectedOutput {
@@ -343,116 +339,6 @@ function resolveLlmsOptions(
   });
 }
 
-async function discoverPackageDirectories(
-  packagesRoot: string
-): Promise<DiscoveredPackage[]> {
-  const entries = await readdir(packagesRoot, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => ({
-      packageDirName: entry.name,
-      packageRoot: join(packagesRoot, entry.name),
-    }))
-    .sort((a, b) => a.packageDirName.localeCompare(b.packageDirName));
-}
-
-async function isPublishablePackage(packageRoot: string): Promise<boolean> {
-  const packageJsonPath = join(packageRoot, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return false;
-  }
-
-  try {
-    const content = await readFile(packageJsonPath, "utf8");
-    const parsed = JSON.parse(content) as { private?: boolean };
-    return parsed.private !== true;
-  } catch {
-    return false;
-  }
-}
-
-function isDocsSourceFile(path: string): boolean {
-  const extension = extname(path).toLowerCase();
-  return extension === ".md" || extension === ".mdx";
-}
-
-function isExcludedFileName(
-  path: string,
-  excludedLowercaseNames: ReadonlySet<string>
-): boolean {
-  const fileName = path.split(/[\\/]/).at(-1) ?? "";
-  return excludedLowercaseNames.has(fileName.toLowerCase());
-}
-
-async function collectDocsSubtreeSourceFiles(
-  docsRoot: string,
-  excludedLowercaseNames: ReadonlySet<string>
-): Promise<string[]> {
-  if (!existsSync(docsRoot)) {
-    return [];
-  }
-
-  const files: string[] = [];
-  const directories = [docsRoot];
-
-  while (directories.length > 0) {
-    const currentDir = directories.pop();
-    if (!currentDir) {
-      continue;
-    }
-
-    const entries = await readdir(currentDir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = join(currentDir, entry.name);
-      if (entry.isDirectory()) {
-        directories.push(fullPath);
-        continue;
-      }
-
-      if (!entry.isFile()) {
-        continue;
-      }
-
-      if (!isDocsSourceFile(entry.name)) {
-        continue;
-      }
-
-      if (isExcludedFileName(entry.name, excludedLowercaseNames)) {
-        continue;
-      }
-
-      files.push(fullPath);
-    }
-  }
-
-  return files.sort((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
-}
-
-async function collectPackageSourceFiles(
-  packageRoot: string,
-  excludedLowercaseNames: ReadonlySet<string>
-): Promise<string[]> {
-  const rootEntries = await readdir(packageRoot, { withFileTypes: true });
-
-  const rootDocsFiles = rootEntries
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((entryName) => isDocsSourceFile(entryName))
-    .filter(
-      (entryName) => !isExcludedFileName(entryName, excludedLowercaseNames)
-    )
-    .map((entryName) => join(packageRoot, entryName));
-
-  const docsSubtreeDocsFiles = await collectDocsSubtreeSourceFiles(
-    join(packageRoot, "docs"),
-    excludedLowercaseNames
-  );
-
-  return [...rootDocsFiles, ...docsSubtreeDocsFiles].sort((a, b) =>
-    toPosixPath(a).localeCompare(toPosixPath(b))
-  );
-}
-
 function splitMarkdownTarget(target: string): {
   pathPart: string;
   suffix: string;
@@ -566,15 +452,6 @@ function rewriteMarkdownLinks(
         mirrorTargetBySourcePath
       )}${suffix}`
   );
-}
-
-function toOutputRelativePath(relativePath: string): string {
-  const extension = extname(relativePath).toLowerCase();
-  if (extension !== ".mdx") {
-    return relativePath;
-  }
-
-  return `${relativePath.slice(0, -".mdx".length)}.md`;
 }
 
 function getCodeFenceDelimiter(line: string): string | null {
@@ -735,74 +612,42 @@ function processDocsSourceContent(input: {
 async function buildExpectedOutput(
   options: ResolvedPackageDocsOptions
 ): Promise<ExpectedOutput> {
-  const discoveredPackages = await discoverPackageDirectories(
-    options.packagesRoot
-  );
-  const packageNames: string[] = [];
-  const collectedFiles: CollectedMarkdownFile[] = [];
+  const collectedDocsResult = await collectPackageDocs({
+    workspaceRoot: options.workspaceRoot,
+    packagesRoot: options.packagesRoot,
+    outputRoot: options.outputRoot,
+    excludedLowercaseNames: options.excludedLowercaseNames,
+  });
+  if (collectedDocsResult.isErr()) {
+    const error = collectedDocsResult.error;
+    if (error.kind === "outputPathOutsideWorkspace") {
+      throw DocsCoreError.validation(
+        "outputPath must resolve inside workspace",
+        {
+          sourcePath: error.sourcePath,
+          outputAbsPath: error.outputAbsolutePath,
+        }
+      );
+    }
+
+    throw DocsCoreError.validation(
+      "Multiple source docs files resolve to the same output path",
+      {
+        outputPath: error.outputPath,
+        firstSourcePath: error.collisionSourcePath,
+        secondSourcePath: error.sourcePath,
+      }
+    );
+  }
+
+  const collectedFiles: CollectedMarkdownFile[] =
+    collectedDocsResult.value.files.map((file) => ({
+      packageName: file.packageName,
+      sourceAbsolutePath: file.sourceAbsolutePath,
+      destinationAbsolutePath: file.destinationAbsolutePath,
+    }));
   const files = new Map<string, string>();
   const warnings: DocsWarning[] = [];
-  const sourceByDestinationPath = new Map<string, string>();
-
-  for (const discoveredPackage of discoveredPackages) {
-    const publishable = await isPublishablePackage(
-      discoveredPackage.packageRoot
-    );
-    if (!publishable) {
-      continue;
-    }
-
-    const markdownFiles = await collectPackageSourceFiles(
-      discoveredPackage.packageRoot,
-      options.excludedLowercaseNames
-    );
-    if (markdownFiles.length === 0) {
-      continue;
-    }
-
-    packageNames.push(discoveredPackage.packageDirName);
-
-    for (const sourceAbsolutePath of markdownFiles) {
-      const relativeFromPackageRoot = relative(
-        discoveredPackage.packageRoot,
-        sourceAbsolutePath
-      );
-      const destinationAbsolutePath = join(
-        options.outputRoot,
-        discoveredPackage.packageDirName,
-        toOutputRelativePath(relativeFromPackageRoot)
-      );
-      const existingSourceAbsolutePath = sourceByDestinationPath.get(
-        destinationAbsolutePath
-      );
-      if (existingSourceAbsolutePath) {
-        throw DocsCoreError.validation(
-          "Multiple source docs files resolve to the same output path",
-          {
-            outputPath: relativeToWorkspace(
-              options.workspaceRoot,
-              destinationAbsolutePath
-            ),
-            firstSourcePath: relativeToWorkspace(
-              options.workspaceRoot,
-              existingSourceAbsolutePath
-            ),
-            secondSourcePath: relativeToWorkspace(
-              options.workspaceRoot,
-              sourceAbsolutePath
-            ),
-          }
-        );
-      }
-
-      sourceByDestinationPath.set(destinationAbsolutePath, sourceAbsolutePath);
-      collectedFiles.push({
-        packageName: discoveredPackage.packageDirName,
-        sourceAbsolutePath,
-        destinationAbsolutePath,
-      });
-    }
-  }
 
   const mirrorTargetBySourcePath = new Map<string, string>(
     collectedFiles.map((file) => [
@@ -852,7 +697,7 @@ async function buildExpectedOutput(
   }
 
   return {
-    packageNames: packageNames.sort((a, b) => a.localeCompare(b)),
+    packageNames: collectedDocsResult.value.packageNames,
     files,
     entries,
     warnings,
