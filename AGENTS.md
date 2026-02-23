@@ -292,6 +292,7 @@ fix(cli): handle missing config gracefully
   - Allows RED phase branches (`*-tests`, `*/tests`, `*_tests`) to skip tests
   - Use `--force` to skip tests on any branch
   - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
+  - Docs README sentinel drift (`bun run docs:check:readme-sentinel`) fails the push if `docs/README.md` generated sections are stale
 
 ### Changesets
 
