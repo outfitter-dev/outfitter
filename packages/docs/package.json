@@ -27,6 +27,12 @@
         "default": "./dist/core/docs-map-generator.js"
       }
     },
+    "./core/docs-map-render": {
+      "import": {
+        "types": "./dist/core/docs-map-render.d.ts",
+        "default": "./dist/core/docs-map-render.js"
+      }
+    },
     "./core/docs-map-schema": {
       "import": {
         "types": "./dist/core/docs-map-schema.d.ts",
