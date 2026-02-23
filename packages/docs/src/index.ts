@@ -33,3 +33,24 @@ export {
   type ExecuteSyncCommandOptions,
   executeSyncCommand,
 } from "./commands/sync.js";
+
+export type {
+  CheckLlmsDocsResult,
+  CheckPackageDocsResult,
+  DocsDrift,
+  DocsWarning,
+  DriftKind,
+  LlmsDocsOptions,
+  LlmsTarget,
+  MdxMode,
+  PackageDocsOptions,
+  SyncLlmsDocsResult,
+  SyncPackageDocsResult,
+} from "./core/index.js";
+export {
+  checkLlmsDocs,
+  checkPackageDocs,
+  DocsCoreError,
+  syncLlmsDocs,
+  syncPackageDocs,
+} from "./core/index.js";

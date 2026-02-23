@@ -1,9 +1,5 @@
-import type { PackageDocsOptions } from "@outfitter/docs-core";
-import { loadDocsCoreModule } from "../docs-core-loader.js";
-
-type SyncPackageDocsResult = Awaited<
-  ReturnType<typeof import("@outfitter/docs-core")["syncPackageDocs"]>
->;
+import type { PackageDocsOptions } from "../core/index.js";
+import { syncPackageDocs } from "../core/index.js";
 
 export interface ExecuteSyncCommandOptions extends PackageDocsOptions {
   readonly cwd?: string;
@@ -32,10 +28,7 @@ export async function executeSyncCommand(
   options: ExecuteSyncCommandOptions,
   io: CommandIo
 ): Promise<number> {
-  const docsCore = await loadDocsCoreModule();
-  const result = (await docsCore.syncPackageDocs(
-    toCoreOptions(options)
-  )) as SyncPackageDocsResult;
+  const result = await syncPackageDocs(toCoreOptions(options));
 
   if (result.isErr()) {
     io.err(`docs sync failed: ${result.error.message}`);

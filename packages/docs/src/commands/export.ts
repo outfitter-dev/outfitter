@@ -1,13 +1,6 @@
-import type { LlmsDocsOptions, PackageDocsOptions } from "@outfitter/docs-core";
-import { loadDocsCoreModule } from "../docs-core-loader.js";
+import type { LlmsDocsOptions, PackageDocsOptions } from "../core/index.js";
+import { syncLlmsDocs, syncPackageDocs } from "../core/index.js";
 import type { CommandIo } from "./sync.js";
-
-type SyncLlmsDocsResult = Awaited<
-  ReturnType<typeof import("@outfitter/docs-core")["syncLlmsDocs"]>
->;
-type SyncPackageDocsResult = Awaited<
-  ReturnType<typeof import("@outfitter/docs-core")["syncPackageDocs"]>
->;
 
 export type DocsExportTarget = "packages" | "llms" | "llms-full" | "all";
 
@@ -91,7 +84,6 @@ export async function executeExportCommand(
   options: ExecuteExportCommandOptions,
   io: CommandIo
 ): Promise<number> {
-  const docsCore = await loadDocsCoreModule();
   const targetInput = options.target ?? "all";
   if (!isDocsExportTarget(targetInput)) {
     io.err(
@@ -101,9 +93,7 @@ export async function executeExportCommand(
   }
 
   if (targetInput === "packages" || targetInput === "all") {
-    const packageResult = (await docsCore.syncPackageDocs(
-      toPackageOptions(options)
-    )) as SyncPackageDocsResult;
+    const packageResult = await syncPackageDocs(toPackageOptions(options));
     if (packageResult.isErr()) {
       io.err(`docs export failed: ${packageResult.error.message}`);
       return 1;
@@ -122,9 +112,7 @@ export async function executeExportCommand(
 
   const llmsTargets = targetsFromExportTarget(targetInput);
   if (llmsTargets.length > 0) {
-    const llmsResult = (await docsCore.syncLlmsDocs(
-      toLlmsOptions(options, llmsTargets)
-    )) as SyncLlmsDocsResult;
+    const llmsResult = await syncLlmsDocs(toLlmsOptions(options, llmsTargets));
     if (llmsResult.isErr()) {
       io.err(`docs export failed: ${llmsResult.error.message}`);
       return 1;
