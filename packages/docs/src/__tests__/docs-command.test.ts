@@ -209,4 +209,52 @@ describe("createDocsCommand", () => {
     ]);
     expect(process.exitCode).toBe(1);
   });
+
+  it("sync-readme updates PACKAGE_LIST sentinel section when markers exist", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    await writeFile(
+      join(workspaceRoot, "docs", "README.md"),
+      [
+        "# Docs",
+        "",
+        "<!-- BEGIN:GENERATED:PACKAGE_LIST -->",
+        "stale generated content",
+        "<!-- END:GENERATED:PACKAGE_LIST -->",
+        "",
+      ].join("\n"),
+      "utf8"
+    );
+
+    const out: string[] = [];
+    const err: string[] = [];
+    const command = createDocsCommand({
+      io: {
+        out: (line) => out.push(line),
+        err: (line) => err.push(line),
+      },
+    });
+
+    await command.parseAsync(
+      ["node", "docs", "sync-readme", "--cwd", workspaceRoot],
+      { from: "node" }
+    );
+
+    const updatedReadme = await readFile(
+      join(workspaceRoot, "docs", "README.md"),
+      "utf8"
+    );
+
+    expect(err).toEqual([]);
+    expect(out).toEqual([
+      "docs/README.md updated with generated package list.",
+    ]);
+    expect(updatedReadme).toContain("| Package | Description |");
+    expect(updatedReadme).toContain(
+      "| [`@acme/alpha`](../packages/alpha/) | |"
+    );
+    expect(updatedReadme).not.toContain("stale generated content");
+    expect(process.exitCode).toBe(originalExitCode);
+  });
 });
