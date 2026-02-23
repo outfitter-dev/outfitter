@@ -39,6 +39,7 @@ import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
 import {
   type DocsExportInput,
+  type DocsExportTarget,
   printDocsExportResults,
   runDocsExport,
 } from "./commands/docs-export.js";

@@ -13,6 +13,9 @@ import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
+
+export type { DocsExportTarget } from "./docs-module-loader.js";
+
 import type { DocsExportTarget } from "./docs-module-loader.js";
 import { loadDocsModule } from "./docs-module-loader.js";
 
