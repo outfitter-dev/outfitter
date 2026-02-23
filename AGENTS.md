@@ -314,3 +314,4 @@ See [docs/RELEASES.md](./docs/RELEASES.md) for the full process.
 - [docs/reference/patterns.md](./docs/reference/patterns.md) — Handler contract, Result types, error taxonomy
 - [docs/cli/conventions.md](./docs/cli/conventions.md) — CLI flag presets, verb conventions, queryability
 - [docs/getting-started.md](./docs/getting-started.md) — Tutorials
+- [docs/reference/outfitter-directory.md](./docs/reference/outfitter-directory.md) — `.outfitter/` directory conventions
