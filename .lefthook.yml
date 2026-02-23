@@ -11,7 +11,14 @@ pre-commit:
 
     typecheck:
       glob: "*.{ts,tsx}"
-      run: bun run typecheck
+      # Avoid turbo dependency fan-out (^build) in commit hooks, which can
+      # trigger bunup export rewrites and leave unstaged package.json drift.
+      run: bun run typecheck -- --only
+
+    check-exports:
+      glob: "*.{ts,tsx}"
+      # Keep export drift detection explicit and non-mutating in pre-commit.
+      run: bun run check-exports
 
     sync-agent-scaffolding:
       glob: ".claude/{settings.json,hooks/*}"
