@@ -303,6 +303,8 @@ bun changeset
 
 After merge, canary versions publish automatically to `@canary`. Stable releases are triggered manually via **Actions > Release > Run workflow**, which opens a release PR — merging it publishes `@latest`.
 
+Stable release prepare also refreshes tracked llms artifacts (`docs/llms.txt`, `docs/llms-full.txt`). PR CI checks package docs freshness; llms freshness is enforced in the release workflow.
+
 For PRs that don't need a release (docs, CI, tests), add the `release:none` label.
 
 See [docs/RELEASES.md](./docs/RELEASES.md) for the full process.
