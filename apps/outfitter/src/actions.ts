@@ -37,6 +37,16 @@ import {
 import { printCheckResults, runCheck } from "./commands/check.js";
 import { runCheckTsdoc } from "./commands/check-tsdoc.js";
 import { runDemo } from "./commands/demo.js";
+import {
+  type DocsListInput,
+  printDocsListResults,
+  runDocsList,
+} from "./commands/docs-list.js";
+import {
+  type DocsShowInput,
+  printDocsShowResults,
+  runDocsShow,
+} from "./commands/docs-show.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { printInitResults, runInit } from "./commands/init.js";
@@ -1084,6 +1094,157 @@ const upgradeAction = defineAction({
   },
 });
 
+// ---------------------------------------------------------------------------
+// docs.list action
+// ---------------------------------------------------------------------------
+
+const docsListInputSchema = z.object({
+  cwd: z.string(),
+  kind: z.string().optional(),
+  package: z.string().optional(),
+  jq: z.string().optional(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<DocsListInput>;
+
+const docsListCwd = cwdPreset();
+const docsListOutputMode = outputModePreset({ includeJsonl: true });
+const docsListJq = jqPreset();
+
+const docsListAction = defineAction({
+  id: "docs.list",
+  description: "List documentation entries from the docs map",
+  surfaces: ["cli"],
+  input: docsListInputSchema,
+  cli: {
+    group: "docs",
+    command: "list",
+    description: "List documentation entries from the docs map",
+    options: [
+      {
+        flags: "-k, --kind <kind>",
+        description:
+          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
+      },
+      {
+        flags: "-p, --package <name>",
+        description: "Filter by package name",
+      },
+      ...docsListOutputMode.options,
+      ...docsListJq.options,
+      ...docsListCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsListOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = docsListJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
+      const { cwd: rawCwd } = docsListCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const kind = resolveStringFlag(context.flags["kind"]);
+      const pkg = resolveStringFlag(context.flags["package"]);
+
+      return {
+        cwd,
+        outputMode,
+        jq,
+        ...(kind !== undefined ? { kind } : {}),
+        ...(pkg !== undefined ? { package: pkg } : {}),
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, jq } = input;
+    const result = await runDocsList(input);
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsListResults(result.value, { mode: outputMode, jq });
+    return Result.ok(result.value);
+  },
+});
+
+// ---------------------------------------------------------------------------
+// docs.show action
+// ---------------------------------------------------------------------------
+
+const docsShowInputSchema = z.object({
+  id: z.string(),
+  cwd: z.string(),
+  jq: z.string().optional(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<DocsShowInput>;
+
+const docsShowCwd = cwdPreset();
+const docsShowOutputMode = outputModePreset({ includeJsonl: true });
+const docsShowJq = jqPreset();
+
+const docsShowAction = defineAction({
+  id: "docs.show",
+  description: "Show a specific documentation entry and its content",
+  surfaces: ["cli"],
+  input: docsShowInputSchema,
+  cli: {
+    group: "docs",
+    command: "show <id>",
+    description: "Show a specific documentation entry and its content",
+    options: [
+      ...docsShowOutputMode.options,
+      ...docsShowJq.options,
+      ...docsShowCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsShowOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = docsShowJq.resolve(context.flags);
+      const explicitOutput = typeof context.flags["output"] === "string";
+      let outputMode: CliOutputMode;
+      if (explicitOutput) {
+        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
+      } else if (process.env["OUTFITTER_JSONL"] === "1") {
+        outputMode = "jsonl";
+      } else if (process.env["OUTFITTER_JSON"] === "1") {
+        outputMode = "json";
+      } else {
+        outputMode = "human";
+      }
+      const { cwd: rawCwd } = docsShowCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+
+      return {
+        id: context.args[0] as string,
+        cwd,
+        jq,
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, jq } = input;
+    const result = await runDocsShow(input);
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsShowResults(result.value, { mode: outputMode, jq });
+    return Result.ok(result.value);
+  },
+});
+
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(scaffoldAction)
@@ -1141,4 +1302,6 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(listBlocksAction)
   .add(checkAction)
   .add(checkTsdocAction)
-  .add(upgradeAction);
+  .add(upgradeAction)
+  .add(docsListAction)
+  .add(docsShowAction);

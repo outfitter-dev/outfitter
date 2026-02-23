@@ -1,0 +1,1603 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-22T04:17:05.492Z",
+  "surfaces": ["cli"],
+  "actions": [
+    {
+      "id": "create",
+      "description": "Removed - use 'outfitter init' instead",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {}
+      },
+      "cli": {
+        "command": "create [directory]",
+        "description": "Removed - use 'outfitter init' instead"
+      }
+    },
+    {
+      "id": "scaffold",
+      "description": "Add a capability to an existing project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["target", "force", "skipInstall", "dryRun", "cwd"]
+      },
+      "cli": {
+        "command": "scaffold <target> [name]",
+        "description": "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
+        "options": [
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Comma-separated tooling blocks to add"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip default tooling blocks"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init",
+      "description": "Create a new Outfitter project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "[directory]",
+        "description": "Create a new Outfitter project",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          },
+          {
+            "flags": "-p, --preset <preset>",
+            "description": "Preset to use (minimal, cli, mcp, daemon, library, full-stack, lib)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.cli",
+      "description": "Create a new CLI project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "cli [directory]",
+        "description": "Create a new CLI project",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.mcp",
+      "description": "Create a new MCP server",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "mcp [directory]",
+        "description": "Create a new MCP server",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.daemon",
+      "description": "Create a new daemon project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "daemon [directory]",
+        "description": "Create a new daemon project",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.library",
+      "description": "Create a new library project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "library [directory]",
+        "description": "Create a new library project",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "init.full-stack",
+      "description": "Create a full-stack workspace",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "targetDir": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bin": {
+            "type": "string"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "cli",
+              "mcp",
+              "daemon",
+              "library",
+              "full-stack",
+              "lib"
+            ]
+          },
+          "structure": {
+            "type": "string",
+            "enum": ["single", "workspace"]
+          },
+          "workspaceName": {
+            "type": "string"
+          },
+          "local": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "with": {
+            "type": "string"
+          },
+          "noTooling": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "skipInstall": {
+            "type": "boolean"
+          },
+          "skipGit": {
+            "type": "boolean"
+          },
+          "skipCommit": {
+            "type": "boolean"
+          },
+          "installTimeout": {
+            "type": "number"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["targetDir", "force"]
+      },
+      "cli": {
+        "group": "init",
+        "command": "full-stack [directory]",
+        "description": "Create a full-stack workspace",
+        "options": [
+          {
+            "flags": "-n, --name <name>",
+            "description": "Package name (defaults to directory name)"
+          },
+          {
+            "flags": "-b, --bin <name>",
+            "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "--local",
+            "description": "Use workspace:* for @outfitter dependencies"
+          },
+          {
+            "flags": "--workspace",
+            "description": "Alias for --local"
+          },
+          {
+            "flags": "--with <blocks>",
+            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+          },
+          {
+            "flags": "--no-tooling",
+            "description": "Skip tooling setup"
+          },
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Skip prompts and use defaults for missing values",
+            "defaultValue": false
+          },
+          {
+            "flags": "-s, --structure <mode>",
+            "description": "Project structure (single|workspace)"
+          },
+          {
+            "flags": "--workspace-name <name>",
+            "description": "Workspace root package name"
+          },
+          {
+            "flags": "--skip-install",
+            "description": "Skip bun install",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-git",
+            "description": "Skip git init and initial commit",
+            "defaultValue": false
+          },
+          {
+            "flags": "--skip-commit",
+            "description": "Skip initial commit only",
+            "defaultValue": false
+          },
+          {
+            "flags": "--install-timeout <ms>",
+            "description": "bun install timeout in milliseconds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "demo",
+      "description": "Run the CLI demo app",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "list": {
+            "type": "boolean"
+          },
+          "animate": {
+            "type": "boolean"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        }
+      },
+      "cli": {
+        "command": "demo [section]",
+        "description": "Run the CLI demo app",
+        "options": [
+          {
+            "flags": "-l, --list",
+            "description": "List available demo sections",
+            "defaultValue": false
+          },
+          {
+            "flags": "-a, --animate",
+            "description": "Run animated demo (spinners only)",
+            "defaultValue": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "doctor",
+      "description": "Validate environment and dependencies",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "command": "doctor",
+        "description": "Validate environment and dependencies",
+        "options": [
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "add",
+      "description": "Add a block from the registry to your project",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "block": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["block", "force", "dryRun"]
+      },
+      "cli": {
+        "group": "add",
+        "command": "<block>",
+        "description": "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
+        "options": [
+          {
+            "flags": "-f, --force",
+            "description": "Force operation (skip confirmations)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "add.list",
+      "description": "List available blocks",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        }
+      },
+      "cli": {
+        "group": "add",
+        "command": "list",
+        "description": "List available blocks"
+      }
+    },
+    {
+      "id": "check",
+      "description": "Compare local config blocks against the registry for drift detection",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "verbose": {
+            "type": "boolean"
+          },
+          "block": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd", "verbose"]
+      },
+      "cli": {
+        "group": "check",
+        "description": "Compare local config blocks against the registry for drift detection",
+        "options": [
+          {
+            "flags": "-v, --verbose",
+            "description": "Show diffs for drifted files",
+            "defaultValue": false
+          },
+          {
+            "flags": "-b, --block <name>",
+            "description": "Check a specific block only"
+          },
+          {
+            "flags": "--ci",
+            "description": "Deprecated: use --output json instead",
+            "defaultValue": false
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.tsdoc",
+      "description": "Check TSDoc coverage on exported declarations",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "strict": {
+            "type": "boolean"
+          },
+          "minCoverage": {
+            "type": "number"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["documented", "partial", "undocumented"]
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["strict", "minCoverage", "cwd", "summary", "packages"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "declarations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "level": {
+                        "type": "string",
+                        "enum": ["documented", "partial", "undocumented"]
+                      },
+                      "file": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["name", "kind", "level", "file", "line"]
+                  }
+                },
+                "documented": {
+                  "type": "number"
+                },
+                "partial": {
+                  "type": "number"
+                },
+                "undocumented": {
+                  "type": "number"
+                },
+                "total": {
+                  "type": "number"
+                },
+                "percentage": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "path",
+                "declarations",
+                "documented",
+                "partial",
+                "undocumented",
+                "total",
+                "percentage"
+              ]
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "documented": {
+                "type": "number"
+              },
+              "partial": {
+                "type": "number"
+              },
+              "undocumented": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "documented",
+              "partial",
+              "undocumented",
+              "total",
+              "percentage"
+            ]
+          }
+        },
+        "required": ["ok", "packages", "summary"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "tsdoc",
+        "description": "Check TSDoc coverage on exported declarations",
+        "options": [
+          {
+            "flags": "--strict",
+            "description": "Fail if coverage is below the minimum threshold",
+            "defaultValue": false
+          },
+          {
+            "flags": "--min-coverage <percent>",
+            "description": "Minimum coverage percentage (used with --strict)"
+          },
+          {
+            "flags": "--summary",
+            "description": "Omit per-declaration detail for compact output (~2KB vs ~64KB)",
+            "defaultValue": false
+          },
+          {
+            "flags": "--level <level>",
+            "description": "Filter declarations by coverage level (undocumented, partial, documented)"
+          },
+          {
+            "flags": "--package <name>",
+            "description": "Filter to specific package(s) by name (repeatable)"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          }
+        ]
+      }
+    },
+    {
+      "id": "upgrade",
+      "description": "Check for @outfitter/* package updates and migration guidance",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "guide": {
+            "type": "boolean"
+          },
+          "guidePackages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "yes": {
+            "type": "boolean"
+          },
+          "interactive": {
+            "type": "boolean"
+          },
+          "all": {
+            "type": "boolean"
+          },
+          "noCodemods": {
+            "type": "boolean"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": [
+          "cwd",
+          "guide",
+          "dryRun",
+          "yes",
+          "interactive",
+          "all",
+          "noCodemods"
+        ]
+      },
+      "cli": {
+        "command": "upgrade [packages...]",
+        "description": "Check for @outfitter/* package updates and migration guidance",
+        "options": [
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
+            "defaultValue": false
+          },
+          {
+            "flags": "--non-interactive",
+            "description": "Disable interactive prompts",
+            "defaultValue": false
+          },
+          {
+            "flags": "--no-input",
+            "description": "Disable interactive prompts (alias)"
+          },
+          {
+            "flags": "-y, --yes",
+            "description": "Auto-confirm prompts",
+            "defaultValue": false
+          },
+          {
+            "flags": "--all",
+            "description": "Include breaking changes in the upgrade",
+            "defaultValue": false
+          },
+          {
+            "flags": "--no-codemods",
+            "description": "Skip automatic codemod execution during upgrade"
+          },
+          {
+            "flags": "--guide",
+            "description": "Show migration instructions for available updates. Pass package names to filter.",
+            "defaultValue": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.list",
+      "description": "List documentation entries from the docs map",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "list",
+        "description": "List documentation entries from the docs map",
+        "options": [
+          {
+            "flags": "-k, --kind <kind>",
+            "description": "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)"
+          },
+          {
+            "flags": "-p, --package <name>",
+            "description": "Filter by package name"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.show",
+      "description": "Show a specific documentation entry and its content",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["id", "cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "show <id>",
+        "description": "Show a specific documentation entry and its content",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": {
+    "validation": {
+      "exit": 1,
+      "http": 400
+    },
+    "not_found": {
+      "exit": 2,
+      "http": 404
+    },
+    "conflict": {
+      "exit": 3,
+      "http": 409
+    },
+    "permission": {
+      "exit": 4,
+      "http": 403
+    },
+    "timeout": {
+      "exit": 5,
+      "http": 504
+    },
+    "rate_limit": {
+      "exit": 6,
+      "http": 429
+    },
+    "network": {
+      "exit": 7,
+      "http": 502
+    },
+    "internal": {
+      "exit": 8,
+      "http": 500
+    },
+    "auth": {
+      "exit": 9,
+      "http": 401
+    },
+    "cancelled": {
+      "exit": 130,
+      "http": 499
+    }
+  },
+  "outputModes": ["human", "json", "jsonl", "tree", "table"],
+  "$schema": "https://outfitter.dev/surface/v1",
+  "generator": "build"
+}

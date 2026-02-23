@@ -45,10 +45,28 @@
         "default": "./dist/commands/demo.js"
       }
     },
+    "./commands/docs-list": {
+      "import": {
+        "types": "./dist/commands/docs-list.d.ts",
+        "default": "./dist/commands/docs-list.js"
+      }
+    },
     "./commands/docs-module-loader": {
       "import": {
         "types": "./dist/commands/docs-module-loader.d.ts",
         "default": "./dist/commands/docs-module-loader.js"
+      }
+    },
+    "./commands/docs-show": {
+      "import": {
+        "types": "./dist/commands/docs-show.d.ts",
+        "default": "./dist/commands/docs-show.js"
+      }
+    },
+    "./commands/docs-types": {
+      "import": {
+        "types": "./dist/commands/docs-types.d.ts",
+        "default": "./dist/commands/docs-types.js"
       }
     },
     "./commands/doctor": {
@@ -61,6 +79,12 @@
       "import": {
         "types": "./dist/commands/init.d.ts",
         "default": "./dist/commands/init.js"
+      }
+    },
+    "./commands/jq-utils": {
+      "import": {
+        "types": "./dist/commands/jq-utils.d.ts",
+        "default": "./dist/commands/jq-utils.js"
       }
     },
     "./commands/repo": {
