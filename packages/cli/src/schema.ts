@@ -360,6 +360,10 @@ export function createSchemaCommand(
         }) => {
           let left: Awaited<ReturnType<typeof readSurfaceMap>>;
           let right: Awaited<ReturnType<typeof readSurfaceMap>>;
+          let diffMode:
+            | "committed-to-runtime"
+            | "snapshot-to-runtime"
+            | "snapshot-to-snapshot" = "committed-to-runtime";
 
           if (
             (diffOptions.from && !diffOptions.to) ||
@@ -374,6 +378,7 @@ export function createSchemaCommand(
 
           if (diffOptions.from && diffOptions.to) {
             // Snapshot-to-snapshot: --from v1 --to v2
+            diffMode = "snapshot-to-snapshot";
             const fromPath = resolveSnapshotPath(
               cwd,
               outputDir,
@@ -410,6 +415,7 @@ export function createSchemaCommand(
             }
           } else if (diffOptions.against) {
             // Snapshot-to-runtime: --against v1
+            diffMode = "snapshot-to-runtime";
             const snapshotPath = resolveSnapshotPath(
               cwd,
               outputDir,
@@ -455,7 +461,7 @@ export function createSchemaCommand(
             right = generateSurfaceMap(source, { generator: "runtime" });
           }
 
-          const result = diffSurfaceMaps(left, right);
+          const result = diffSurfaceMaps(left, right, { mode: diffMode });
 
           if (diffOptions.output === "json") {
             process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

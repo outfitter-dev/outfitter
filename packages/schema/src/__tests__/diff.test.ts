@@ -277,6 +277,95 @@ describe("diffSurfaceMaps", () => {
     expect(diff.metadataChanges).toContain("outputModes");
   });
 
+  it("detects missing $schema metadata (present vs missing)", () => {
+    const registry = createBaseRegistry();
+    const committed = generateSurfaceMap(registry, { generator: "build" });
+    const current = {
+      ...generateSurfaceMap(registry, { generator: "runtime" }),
+    } as Record<string, unknown>;
+    delete current.$schema;
+
+    const diff = diffSurfaceMaps(
+      committed,
+      current as unknown as typeof committed
+    );
+
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.metadataChanges).toContain("$schema");
+  });
+
+  it("detects missing generator metadata (present vs missing)", () => {
+    const registry = createBaseRegistry();
+    const committed = generateSurfaceMap(registry, { generator: "build" });
+    const current = {
+      ...generateSurfaceMap(registry, { generator: "runtime" }),
+    } as Record<string, unknown>;
+    delete current.generator;
+
+    const diff = diffSurfaceMaps(
+      committed,
+      current as unknown as typeof committed
+    );
+
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.metadataChanges).toContain("generator");
+  });
+
+  it("flags generator drift when both sides omit the metadata", () => {
+    const registry = createBaseRegistry();
+    const baseSurface = generateSurfaceMap(registry, { generator: "build" });
+
+    const committed = { ...baseSurface } as Record<string, unknown>;
+    const current = { ...baseSurface } as Record<string, unknown>;
+
+    delete committed.generator;
+    delete current.generator;
+
+    const diff = diffSurfaceMaps(
+      committed as unknown as typeof baseSurface,
+      current as unknown as typeof baseSurface
+    );
+
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.metadataChanges).toContain("generator");
+  });
+
+  it("requires build/runtime generator pair in committed-to-runtime mode", () => {
+    const registry = createBaseRegistry();
+    const committed = generateSurfaceMap(registry, { generator: "runtime" });
+    const current = generateSurfaceMap(registry, { generator: "runtime" });
+
+    const diff = diffSurfaceMaps(committed, current, {
+      mode: "committed-to-runtime",
+    });
+
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.metadataChanges).toContain("generator");
+  });
+
+  it("treats build/runtime generator pair as valid in committed-to-runtime mode", () => {
+    const registry = createBaseRegistry();
+    const committed = generateSurfaceMap(registry, { generator: "build" });
+    const current = generateSurfaceMap(registry, { generator: "runtime" });
+
+    const diff = diffSurfaceMaps(committed, current, {
+      mode: "committed-to-runtime",
+    });
+
+    expect(diff.metadataChanges).not.toContain("generator");
+  });
+
+  it("treats generator mismatch as drift in snapshot-to-snapshot mode", () => {
+    const registry = createBaseRegistry();
+    const from = generateSurfaceMap(registry, { generator: "build" });
+    const to = generateSurfaceMap(registry, { generator: "runtime" });
+
+    const diff = diffSurfaceMaps(from, to, { mode: "snapshot-to-snapshot" });
+
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.metadataChanges).toContain("generator");
+  });
+
   it("detects multiple changes at once", () => {
     const baseRegistry = createBaseRegistry();
     const committed = generateSurfaceMap(baseRegistry);

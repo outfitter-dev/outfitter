@@ -9,9 +9,11 @@
 
 export {
   type DiffEntry,
+  type DiffSurfaceMapsOptions,
   diffSurfaceMaps,
   type ModifiedEntry,
   type SurfaceMapDiff,
+  type SurfaceMapDiffMode,
 } from "./diff.js";
 export {
   type ActionManifest,
