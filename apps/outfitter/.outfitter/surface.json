@@ -1522,6 +1522,9 @@
           "cwd": {
             "type": "string"
           },
+          "jq": {
+            "type": "string"
+          },
           "outputMode": {
             "type": "string",
             "enum": ["human", "json", "jsonl"],

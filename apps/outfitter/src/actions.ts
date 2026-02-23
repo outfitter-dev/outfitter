@@ -42,7 +42,6 @@ import {
   printDocsListResults,
   runDocsList,
 } from "./commands/docs-list.js";
-import type { DocsExportTarget } from "./commands/docs-module-loader.js";
 import {
   type DocsShowInput,
   printDocsShowResults,
