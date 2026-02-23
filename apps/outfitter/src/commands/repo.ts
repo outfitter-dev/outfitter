@@ -57,7 +57,8 @@ export interface RepoToolingInvocation {
     | "check-bunup-registry"
     | "check-changeset"
     | "check-clean-tree"
-    | "check-boundary-invocations";
+    | "check-boundary-invocations"
+    | "check-markdown-links";
   readonly cwd: string;
 }
 
@@ -368,6 +369,15 @@ function addToolingCheckSubcommands(
     description:
       "Validate root/app scripts do not execute packages/*/src entrypoints directly",
     toolingCommand: "check-boundary-invocations",
+    preset: toolingWithCwd,
+    buildArgs: () => [],
+  });
+
+  registerToolingCheckSubcommand({
+    name: "markdown-links",
+    description:
+      "Validate relative links in markdown files resolve to existing files",
+    toolingCommand: "check-markdown-links",
     preset: toolingWithCwd,
     buildArgs: () => [],
   });

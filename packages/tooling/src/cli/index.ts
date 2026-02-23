@@ -18,6 +18,7 @@ import { runCheckBunupRegistry } from "./check-bunup-registry.js";
 import { runCheckChangeset } from "./check-changeset.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
+import { runCheckMarkdownLinks } from "./check-markdown-links.js";
 import { runCheckTsdoc } from "./check-tsdoc.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
@@ -164,6 +165,22 @@ register(
 				"./check-readme-imports.js"
 			);
 			await runCheckReadmeImports(options);
+		}),
+);
+
+register(
+	new Command("check-markdown-links")
+		.description(
+			"Validate relative links in markdown files resolve to existing files",
+		)
+		.argument("[patterns...]", "Glob patterns to scan")
+		.action(async (patterns: string[]) => {
+			const cwd = process.cwd();
+			const exitCode = await runCheckMarkdownLinks(
+				cwd,
+				patterns.length > 0 ? patterns : undefined,
+			);
+			if (exitCode !== 0) process.exit(exitCode);
 		}),
 );
 

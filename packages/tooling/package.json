@@ -31,6 +31,12 @@
 				"default": "./dist/cli/check.js"
 			}
 		},
+		"./cli/check-markdown-links": {
+			"import": {
+				"types": "./dist/cli/check-markdown-links.d.ts",
+				"default": "./dist/cli/check-markdown-links.js"
+			}
+		},
 		"./cli/check-tsdoc": {
 			"import": {
 				"types": "./dist/cli/check-tsdoc.d.ts",
