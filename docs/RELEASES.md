@@ -56,16 +56,18 @@ Stable releases are a two-phase process:
 
 1. Go to **Actions > Release > Run workflow** in GitHub
 2. The workflow versions packages (`changeset version`), consuming all changeset files
-3. A `release/YYYYMMDD-HHMMSS` branch is created with version bumps and changelog updates
-4. A PR is opened against `main` with the `autorelease` label
+3. The workflow refreshes tracked LLM artifacts (`docs/llms.txt`, `docs/llms-full.txt`)
+4. A `release/YYYYMMDD-HHMMSS` branch is created with version bumps, changelog updates, and any llms artifact updates
+5. A PR is opened against `main` with the `autorelease` label
 
 ### Phase 2: Publish
 
 1. Review the release PR — check version bumps, changelog entries, and CI status
 2. Merge the PR
 3. The publish job detects the `autorelease` label and `release/` branch prefix
-4. Packages are built, tested, and published to npm with the `@latest` dist-tag
-5. Git tags are created for each published package
+4. The publish job verifies llms artifacts are deterministic and up to date
+5. Packages are built, tested, and published to npm with the `@latest` dist-tag
+6. Git tags are created for each published package
 
 ### Requirements
 

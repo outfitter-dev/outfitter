@@ -50,6 +50,9 @@ jobs:
       - name: Version packages
         run: bun run version-packages
 
+      - name: Refresh release LLM artifacts
+        run: bun run docs:sync:release:llms
+
       - name: Create release branch and PR
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
@@ -110,6 +113,9 @@ jobs:
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+
+      - name: Verify release LLM artifacts
+        run: bun run docs:check:release:llms
 
       - name: Run Tests
         run: bun run test || bun run test
