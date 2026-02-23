@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/docs",
-  "description": "CLI and host command adapter for Outfitter docs workflows",
+  "description": "Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows",
   "version": "0.1.2",
   "type": "module",
   "files": [

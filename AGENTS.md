@@ -85,6 +85,8 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 
 - `outfitter` — Umbrella CLI for scaffolding
 - `@outfitter/presets` — Scaffold presets and shared dependency versions (catalog-resolved)
+- `@outfitter/docs` — Docs CLI, core assembly primitives, freshness checks, and host adapter
+- `@outfitter/tooling` — Dev tooling presets and CLI workflows (biome, typescript, lefthook, markdownlint)
 - `@outfitter/testing` — Test harnesses for MCP and CLI
 
 **Deprecated**:

@@ -7,7 +7,6 @@
     "packages/contracts",
     "packages/daemon",
     "packages/docs",
-    "packages/docs-core",
     "packages/file-ops",
     "packages/index",
     "packages/logging",
