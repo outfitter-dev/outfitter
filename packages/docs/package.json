@@ -21,10 +21,22 @@
         "default": "./dist/core/index.js"
       }
     },
+    "./core/docs-map-generator": {
+      "import": {
+        "types": "./dist/core/docs-map-generator.d.ts",
+        "default": "./dist/core/docs-map-generator.js"
+      }
+    },
     "./core/docs-map-schema": {
       "import": {
         "types": "./dist/core/docs-map-schema.d.ts",
         "default": "./dist/core/docs-map-schema.js"
+      }
+    },
+    "./core/package-doc-collection": {
+      "import": {
+        "types": "./dist/core/package-doc-collection.d.ts",
+        "default": "./dist/core/package-doc-collection.js"
       }
     },
     "./package.json": "./package.json"

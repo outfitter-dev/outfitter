@@ -34,6 +34,12 @@ export {
   executeSyncCommand,
 } from "./commands/sync.js";
 export {
+  type GenerateDocsMapOptions,
+  generateDocsMap,
+  readDocsMap,
+  writeDocsMap,
+} from "./core/docs-map-generator.js";
+export {
   type DocKind,
   DocKindSchema,
   type DocsMap,
