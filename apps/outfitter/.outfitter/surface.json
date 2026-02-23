@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-22T04:29:16.283Z",
+  "generatedAt": "2026-02-22T04:34:03.129Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1596,6 +1596,166 @@
           {
             "flags": "-p, --package <name>",
             "description": "Filter by package name"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.api",
+      "description": "Extract API reference from TSDoc coverage data",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["documented", "partial", "undocumented"]
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd", "packages"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "declarations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "level": {
+                        "type": "string",
+                        "enum": ["documented", "partial", "undocumented"]
+                      },
+                      "file": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["name", "kind", "level", "file", "line"]
+                  }
+                },
+                "documented": {
+                  "type": "number"
+                },
+                "partial": {
+                  "type": "number"
+                },
+                "undocumented": {
+                  "type": "number"
+                },
+                "total": {
+                  "type": "number"
+                },
+                "percentage": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "path",
+                "declarations",
+                "documented",
+                "partial",
+                "undocumented",
+                "total",
+                "percentage"
+              ]
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "documented": {
+                "type": "number"
+              },
+              "partial": {
+                "type": "number"
+              },
+              "undocumented": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "documented",
+              "partial",
+              "undocumented",
+              "total",
+              "percentage"
+            ]
+          }
+        },
+        "required": ["ok", "packages", "summary"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "api",
+        "description": "Extract API reference from TSDoc coverage data",
+        "options": [
+          {
+            "flags": "--level <level>",
+            "description": "Filter declarations by coverage level (undocumented, partial, documented)"
+          },
+          {
+            "flags": "--package <name>",
+            "description": "Filter to specific package(s) by name (repeatable)"
           },
           {
             "flags": "-o, --output <mode>",

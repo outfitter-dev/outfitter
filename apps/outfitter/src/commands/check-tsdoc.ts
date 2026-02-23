@@ -30,6 +30,7 @@ const require = createRequire(import.meta.url);
 /** Validated input for the check-tsdoc action handler. */
 export interface CheckTsDocInput {
   readonly cwd: string;
+  readonly emitOutput?: boolean;
   readonly jq: string | undefined;
   readonly level: CoverageLevel | undefined;
   readonly minCoverage: number;
@@ -449,35 +450,37 @@ export async function runCheckTsdoc(
       ? summarizeResult(filteredResult)
       : filteredResult;
 
-    if (input.outputMode === "jsonl") {
-      const lines = emitJsonlLines(filteredResult, input.summary);
+    if (input.emitOutput !== false) {
+      if (input.outputMode === "jsonl") {
+        const lines = emitJsonlLines(filteredResult, input.summary);
 
-      if (input.jq) {
-        for (const line of lines) {
-          const filtered = await applyJq(line, input.jq, { compact: true });
-          for (const rawLine of filtered.split(/\r?\n/)) {
-            const trimmed = rawLine.trim();
-            if (!trimmed) {
-              continue;
+        if (input.jq) {
+          for (const line of lines) {
+            const filtered = await applyJq(line, input.jq, { compact: true });
+            for (const rawLine of filtered.split(/\r?\n/)) {
+              const trimmed = rawLine.trim();
+              if (!trimmed) {
+                continue;
+              }
+              process.stdout.write(`${normalizeJsonlRecord(trimmed)}\n`);
             }
-            process.stdout.write(`${normalizeJsonlRecord(trimmed)}\n`);
+          }
+        } else {
+          for (const line of lines) {
+            process.stdout.write(`${JSON.stringify(line)}\n`);
           }
         }
+      } else if (input.jq) {
+        const filtered = await applyJq(outputData, input.jq);
+        process.stdout.write(filtered);
+      } else if (input.outputMode === "json") {
+        process.stdout.write(`${JSON.stringify(outputData, null, 2)}\n`);
       } else {
-        for (const line of lines) {
-          process.stdout.write(`${JSON.stringify(line)}\n`);
-        }
+        tooling.printCheckTsdocHuman(outputData, {
+          strict: input.strict,
+          minCoverage: input.minCoverage,
+        });
       }
-    } else if (input.jq) {
-      const filtered = await applyJq(outputData, input.jq);
-      process.stdout.write(filtered);
-    } else if (input.outputMode === "json") {
-      process.stdout.write(`${JSON.stringify(outputData, null, 2)}\n`);
-    } else {
-      tooling.printCheckTsdocHuman(outputData, {
-        strict: input.strict,
-        minCoverage: input.minCoverage,
-      });
     }
 
     return Result.ok(outputData);
