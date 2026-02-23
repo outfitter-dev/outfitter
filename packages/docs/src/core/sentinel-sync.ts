@@ -34,7 +34,9 @@ async function main(): Promise<void> {
   ]);
 
   if (!(readmeContent.includes(beginTag) && readmeContent.includes(endTag))) {
-    process.stderr.write("docs/README.md is missing PACKAGE_LIST sentinel markers.\n");
+    process.stderr.write(
+      "docs/README.md is missing PACKAGE_LIST sentinel markers.\n"
+    );
     process.exitCode = 1;
     return;
   }
