@@ -55,6 +55,7 @@ yarn-error.log*
 tmp/
 temp/
 .outfitter/reports/
+apps/outfitter/.outfitter/surface.json
 
 # Agent memory
 **/.claude/agent-memory/

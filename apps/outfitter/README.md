@@ -231,6 +231,9 @@ outfitter schema diff                     # Compare runtime vs committed
 outfitter schema diff --output json       # Structured diff as JSON
 ```
 
+Canonical artifact policy: commit root `.outfitter/surface.json` only. Do not
+commit `apps/outfitter/.outfitter/surface.json`.
+
 ### `check`
 
 Compare local config blocks against the registry for drift detection.
