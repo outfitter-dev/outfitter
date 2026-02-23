@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-22T04:17:05.492Z",
+  "generatedAt": "2026-02-22T04:29:16.283Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1546,6 +1546,109 @@
           {
             "flags": "--jq <expr>",
             "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.search",
+      "description": "Search documentation content for a query string",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["query", "cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "search <query>",
+        "description": "Search documentation content for a query string",
+        "options": [
+          {
+            "flags": "-k, --kind <kind>",
+            "description": "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)"
+          },
+          {
+            "flags": "-p, --package <name>",
+            "description": "Filter by package name"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.export",
+      "description": "Export documentation to packages, llms.txt, or both",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string",
+            "enum": ["packages", "llms", "llms-full", "all"],
+            "default": "all"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "export",
+        "description": "Export documentation to packages, llms.txt, or both",
+        "options": [
+          {
+            "flags": "-t, --target <target>",
+            "description": "Export target (packages|llms|llms-full|all, default: all)"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
           },
           {
             "flags": "--cwd <path>",
