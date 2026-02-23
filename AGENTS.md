@@ -254,6 +254,15 @@ Keep types explicit; avoid `any`. Prefer module-local organization over central 
 - Snapshots: `__snapshots__/*.snap`
 - Run focused tests from a package (`bun test`) or full suite from root (`bun run test`)
 
+### Package Deep Docs
+
+Packages can include additional documentation in `packages/<pkg>/docs/`:
+
+- These files are collected alongside the package README by the docs pipeline
+- They're mirrored to `docs/packages/<pkg>/docs/` during `docs:sync`
+- Use for guides, references, or architectural docs specific to a package
+- File naming: lowercase-kebab-case (e.g., `output-modes.md`, `error-taxonomy.md`)
+
 ## Git Workflow
 
 ### Branch Naming
