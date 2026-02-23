@@ -21,9 +21,6 @@ Outfitter package docs index for LLM retrieval.
 ## docs
 - docs/packages/docs/README.md — @outfitter/docs
 
-## docs-core
-- docs/packages/docs-core/README.md — @outfitter/docs-core
-
 ## file-ops
 - docs/packages/file-ops/README.md — @outfitter/file-ops
 
