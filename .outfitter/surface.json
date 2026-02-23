@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-21T03:52:51.089Z",
+  "generatedAt": "2026-02-22T23:24:34.890Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1446,6 +1446,370 @@
             "flags": "--guide",
             "description": "Show migration instructions for available updates. Pass package names to filter.",
             "defaultValue": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.list",
+      "description": "List documentation entries from the docs map",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "list",
+        "description": "List documentation entries from the docs map",
+        "options": [
+          {
+            "flags": "-k, --kind <kind>",
+            "description": "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)"
+          },
+          {
+            "flags": "-p, --package <name>",
+            "description": "Filter by package name"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.show",
+      "description": "Show a specific documentation entry and its content",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["id", "cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "show <id>",
+        "description": "Show a specific documentation entry and its content",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.search",
+      "description": "Search documentation content for a query string",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["query", "cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "search <query>",
+        "description": "Search documentation content for a query string",
+        "options": [
+          {
+            "flags": "-k, --kind <kind>",
+            "description": "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)"
+          },
+          {
+            "flags": "-p, --package <name>",
+            "description": "Filter by package name"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.api",
+      "description": "Extract API reference from TSDoc coverage data",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["documented", "partial", "undocumented"]
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jq": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd", "packages"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "declarations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "level": {
+                        "type": "string",
+                        "enum": ["documented", "partial", "undocumented"]
+                      },
+                      "file": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["name", "kind", "level", "file", "line"]
+                  }
+                },
+                "documented": {
+                  "type": "number"
+                },
+                "partial": {
+                  "type": "number"
+                },
+                "undocumented": {
+                  "type": "number"
+                },
+                "total": {
+                  "type": "number"
+                },
+                "percentage": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "path",
+                "declarations",
+                "documented",
+                "partial",
+                "undocumented",
+                "total",
+                "percentage"
+              ]
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "documented": {
+                "type": "number"
+              },
+              "partial": {
+                "type": "number"
+              },
+              "undocumented": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "documented",
+              "partial",
+              "undocumented",
+              "total",
+              "percentage"
+            ]
+          }
+        },
+        "required": ["ok", "packages", "summary"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "api",
+        "description": "Extract API reference from TSDoc coverage data",
+        "options": [
+          {
+            "flags": "--level <level>",
+            "description": "Filter declarations by coverage level (undocumented, partial, documented)"
+          },
+          {
+            "flags": "--package <name>",
+            "description": "Filter to specific package(s) by name (repeatable)"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--jq <expr>",
+            "description": "Filter JSON output with a jq expression"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "docs.export",
+      "description": "Export documentation to packages, llms.txt, or both",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string",
+            "enum": ["packages", "llms", "llms-full", "all"],
+            "default": "all"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "docs",
+        "command": "export",
+        "description": "Export documentation to packages, llms.txt, or both",
+        "options": [
+          {
+            "flags": "-t, --target <target>",
+            "description": "Export target (packages|llms|llms-full|all, default: all)"
+          },
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json, jsonl)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
           }
         ]
       }
