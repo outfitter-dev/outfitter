@@ -29,8 +29,10 @@ Guides and reference documentation for the Outfitter monorepo.
 
 ## Package READMEs
 
-Each package has detailed API documentation. The generated mirror lives under
-`docs/packages/*` and can be refreshed with `bun run docs:sync`.
+Each package has detailed API documentation in its own directory. The canonical
+location is `packages/<name>/README.md` (and `packages/<name>/docs/` for deep
+docs). Use `outfitter docs list` to browse the docs index, or
+`outfitter docs show <id>` to view a specific document.
 
 Stability labels indicate API maturity:
 
@@ -40,36 +42,36 @@ Stability labels indicate API maturity:
 
 ### Foundation (Stable)
 
-- [@outfitter/contracts](./packages/contracts/) -- Result/Error patterns, handler contract
-- [@outfitter/types](./packages/types/) -- Optional branded types, type utilities
+- [@outfitter/contracts](../packages/contracts/README.md) -- Result/Error patterns, handler contract
+- [@outfitter/types](../packages/types/README.md) -- Optional branded types, type utilities
 
 Adoption note: `@outfitter/types` is not a default dependency. Add it when you
 have concrete branded ID or shared utility adoption points.
 
 ### Runtime (Active)
 
-- [@outfitter/cli](./packages/cli/) -- CLI framework with output modes, terminal rendering
-- [@outfitter/config](./packages/config/) -- XDG-compliant configuration
-- [@outfitter/logging](./packages/logging/) -- Structured logging with redaction
-- [@outfitter/file-ops](./packages/file-ops/) -- Path security, atomic writes
-- [@outfitter/state](./packages/state/) -- Pagination cursors, state management
-- [@outfitter/mcp](./packages/mcp/) -- MCP server framework with typed tools
-- [@outfitter/index](./packages/index/) -- SQLite FTS5 full-text search
-- [@outfitter/daemon](./packages/daemon/) -- Daemon lifecycle, IPC, health checks
-- [@outfitter/schema](./packages/schema/) -- Schema introspection, surface maps, and drift detection
-- [@outfitter/tui](./packages/tui/) -- Terminal UI primitives, themes, prompts, and streaming
-- [@outfitter/testing](./packages/testing/) -- Test harnesses for CLI and MCP
+- [@outfitter/cli](../packages/cli/README.md) -- CLI framework with output modes, terminal rendering
+- [@outfitter/config](../packages/config/README.md) -- XDG-compliant configuration
+- [@outfitter/logging](../packages/logging/README.md) -- Structured logging with redaction
+- [@outfitter/file-ops](../packages/file-ops/README.md) -- Path security, atomic writes
+- [@outfitter/state](../packages/state/README.md) -- Pagination cursors, state management
+- [@outfitter/mcp](../packages/mcp/README.md) -- MCP server framework with typed tools
+- [@outfitter/index](../packages/index/README.md) -- SQLite FTS5 full-text search
+- [@outfitter/daemon](../packages/daemon/README.md) -- Daemon lifecycle, IPC, health checks
+- [@outfitter/schema](../packages/schema/README.md) -- Schema introspection, surface maps, and drift detection
+- [@outfitter/tui](../packages/tui/README.md) -- Terminal UI primitives, themes, prompts, and streaming
+- [@outfitter/testing](../packages/testing/README.md) -- Test harnesses for CLI and MCP
 
 ### Tooling (Early)
 
 - [outfitter](../apps/outfitter/README.md) -- Umbrella CLI for scaffolding
 - [@outfitter/presets](../packages/presets/) -- Scaffold presets and shared dependency versions
-- [@outfitter/docs](./packages/docs/) -- Docs CLI, core assembly, freshness checks, and host adapter
-- [@outfitter/tooling](./packages/tooling/) -- Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
+- [@outfitter/docs](../packages/docs/README.md) -- Docs CLI, core assembly, freshness checks, and host adapter
+- [@outfitter/tooling](../packages/tooling/README.md) -- Dev tooling presets and CLI (Biome, Lefthook, markdownlint)
 
 ### Deprecated
 
-- [@outfitter/agents](./packages/agents/) -- Deprecated. Use `npx outfitter add scaffolding` instead.
+- [@outfitter/agents](../packages/agents/README.md) -- Deprecated. Use `npx outfitter add scaffolding` instead.
 
 ## Quick Links
 

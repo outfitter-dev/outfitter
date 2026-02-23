@@ -30,6 +30,9 @@ coverage/
 # Generated API docs
 docs/api/
 
+# Generated package doc mirrors (pipeline writes here locally; not committed)
+docs/packages/
+
 # Logs
 *.log
 npm-debug.log*

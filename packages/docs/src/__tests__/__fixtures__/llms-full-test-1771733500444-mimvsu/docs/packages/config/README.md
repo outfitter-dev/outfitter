@@ -1,3 +1,0 @@
-# Config
-
-The config package.

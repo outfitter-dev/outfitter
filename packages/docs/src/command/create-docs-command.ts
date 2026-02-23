@@ -37,9 +37,7 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
   command.description("Synchronize and verify package docs outputs");
 
   const syncCommand = withDocsCommonOptions(
-    command
-      .command("sync")
-      .description("Assemble package docs into docs/packages")
+    command.command("sync").description("Assemble package docs mirrors locally")
   );
 
   syncCommand.action(async (cmdOptions: DocsCommonCliOptions) => {

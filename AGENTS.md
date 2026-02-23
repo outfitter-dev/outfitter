@@ -259,7 +259,7 @@ Keep types explicit; avoid `any`. Prefer module-local organization over central 
 Packages can include additional documentation in `packages/<pkg>/docs/`:
 
 - These files are collected alongside the package README by the docs pipeline
-- They're mirrored to `docs/packages/<pkg>/docs/` during `docs:sync`
+- Discoverable via `outfitter docs list` and `outfitter docs show <id>`
 - Use for guides, references, or architectural docs specific to a package
 - File naming: lowercase-kebab-case (e.g., `output-modes.md`, `error-taxonomy.md`)
 

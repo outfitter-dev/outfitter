@@ -144,7 +144,7 @@ outfitter repo export <subject> [options]
 Current subjects:
 
 - `check docs` - Validate generated package docs are up to date
-- `sync docs` - Generate package docs into `docs/packages`
+- `sync docs` - Generate package docs mirrors locally
 - `export docs` - Export package and LLM docs artifacts
 - `check exports` - Validate package export maps
 - `check readme` - Validate README import examples
