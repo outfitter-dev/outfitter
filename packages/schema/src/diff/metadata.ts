@@ -55,9 +55,9 @@ export function diffMetadata(
 
   const hasCommittedSchema = hasOwnKey(committed, "$schema");
   const hasCurrentSchema = hasOwnKey(current, "$schema");
-  if (!(hasCommittedSchema && hasCurrentSchema)) {
+  if (hasCommittedSchema !== hasCurrentSchema) {
     metadataChanges.push("$schema");
-  } else if (committed.$schema !== current.$schema) {
+  } else if (hasCommittedSchema && committed.$schema !== current.$schema) {
     metadataChanges.push("$schema");
   }
 

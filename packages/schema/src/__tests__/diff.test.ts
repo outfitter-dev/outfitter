@@ -311,6 +311,25 @@ describe("diffSurfaceMaps", () => {
     expect(diff.metadataChanges).toContain("generator");
   });
 
+  it("does not flag $schema drift when both sides omit the metadata", () => {
+    const registry = createBaseRegistry();
+    const baseSurface = generateSurfaceMap(registry, { generator: "build" });
+
+    const committed = { ...baseSurface } as Record<string, unknown>;
+    const current = { ...baseSurface } as Record<string, unknown>;
+
+    delete committed.$schema;
+    delete current.$schema;
+
+    const diff = diffSurfaceMaps(
+      committed as unknown as typeof baseSurface,
+      current as unknown as typeof baseSurface
+    );
+
+    expect(diff.hasChanges).toBe(false);
+    expect(diff.metadataChanges).not.toContain("$schema");
+  });
+
   it("flags generator drift when both sides omit the metadata", () => {
     const registry = createBaseRegistry();
     const baseSurface = generateSurfaceMap(registry, { generator: "build" });
