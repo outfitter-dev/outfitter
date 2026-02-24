@@ -62,3 +62,6 @@ apps/outfitter/.outfitter/surface.json
 
 # Local Claude worktrees
 .claude/worktrees/
+
+# Local Claude settings
+.claude/settings.local.json
