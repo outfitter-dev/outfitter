@@ -4,7 +4,9 @@
  * Verifies the full prompt system: registration, listing, invocation.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import { createMcpServer, definePrompt } from "../index.js";
 
 describe("Prompts", () => {

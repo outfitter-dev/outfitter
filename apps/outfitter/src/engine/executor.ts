@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import { addBlocks } from "./blocks.js";
 import { injectSharedConfig, rewriteLocalDependencies } from "./config.js";
 import { copyPresetFiles, getPresetsBaseDir } from "./preset.js";

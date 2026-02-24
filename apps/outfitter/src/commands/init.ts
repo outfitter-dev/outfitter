@@ -10,6 +10,7 @@
 import { existsSync } from "node:fs";
 import { realpath } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
+
 import {
   cancel,
   confirm,
@@ -24,6 +25,7 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
+
 import { OperationCollector } from "../engine/collector.js";
 import {
   deriveBinName,

@@ -14,7 +14,7 @@ function validateUser(data: unknown) {
   const UserSchema = z.object({
     id: z.string(),
     email: z.string().email(),
-    name: z.string()
+    name: z.string(),
   });
   return UserSchema.safeParse(data);
 }
@@ -23,7 +23,7 @@ function validateUser(data: unknown) {
 const UserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 function validateUser(data: unknown) {
@@ -132,11 +132,11 @@ const UserSchema = z.object({
         notifications: z.object({
           email: z.boolean(),
           push: z.boolean(),
-          sms: z.boolean()
-        })
-      })
+          sms: z.boolean(),
+        }),
+      }),
     })
-    .optional()
+    .optional(),
 });
 
 // ✅ Lazy - Only creates nested schema if profile exists
@@ -153,12 +153,12 @@ const UserSchema = z.object({
           notifications: z.object({
             email: z.boolean(),
             push: z.boolean(),
-            sms: z.boolean()
-          })
-        })
+            sms: z.boolean(),
+          }),
+        }),
       })
     )
-    .optional()
+    .optional(),
 });
 ```
 
@@ -176,19 +176,19 @@ const ProductSchema = z.object({
         dimensions: z.object({
           length: z.number(),
           width: z.number(),
-          height: z.number()
+          height: z.number(),
         }),
         materials: z.array(z.string()),
         certifications: z.array(
           z.object({
             name: z.string(),
             issuedBy: z.string(),
-            expiresAt: z.coerce.date()
+            expiresAt: z.coerce.date(),
           })
-        )
+        ),
       })
     )
-    .optional()
+    .optional(),
 });
 ```
 
@@ -333,7 +333,7 @@ function validateProgressively(data: unknown) {
   const BasicSchema = z.object({
     id: z.string(),
     type: z.enum(["user", "admin"]),
-    email: z.string()
+    email: z.string(),
   });
 
   const basic = BasicSchema.safeParse(data);
@@ -344,7 +344,7 @@ function validateProgressively(data: unknown) {
   // Step 2: Validate format (more expensive)
   const FormatSchema = BasicSchema.extend({
     email: z.string().email(), // regex validation
-    id: z.string().uuid() // more complex regex
+    id: z.string().uuid(), // more complex regex
   });
 
   const format = FormatSchema.safeParse(data);
@@ -420,29 +420,37 @@ const user = result.data;
 
 ```typescript
 // ❌ BAD - Expensive regex in refinement
-const EmailSchema = z.string().refine(
-  (val) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val),
-  "Invalid email"
-);
+const EmailSchema = z
+  .string()
+  .refine(
+    (val) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val),
+    "Invalid email"
+  );
 
 // ✅ GOOD - Use built-in validator
 const EmailSchema = z.string().email();
 
 // ❌ BAD - Database call in synchronous refinement
-const UniqueEmailSchema = z.string().email().refine((email) => {
-  // This blocks!
-  const existing = db.users.findByEmailSync(email);
-  return !existing;
-});
+const UniqueEmailSchema = z
+  .string()
+  .email()
+  .refine((email) => {
+    // This blocks!
+    const existing = db.users.findByEmailSync(email);
+    return !existing;
+  });
 
 // ✅ GOOD - Use async refinement
-const UniqueEmailSchema = z.string().email().refine(
-  async (email) => {
-    const existing = await db.users.findByEmail(email);
-    return !existing;
-  },
-  { message: "Email already exists" }
-);
+const UniqueEmailSchema = z
+  .string()
+  .email()
+  .refine(
+    async (email) => {
+      const existing = await db.users.findByEmail(email);
+      return !existing;
+    },
+    { message: "Email already exists" }
+  );
 
 // Must use parseAsync
 await UniqueEmailSchema.parseAsync(email);
@@ -480,25 +488,25 @@ const Password = z.string().superRefine((val, ctx) => {
   if (val.length < 8) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Too short"
+      message: "Too short",
     });
   }
   if (!/[A-Z]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Need uppercase"
+      message: "Need uppercase",
     });
   }
   if (!/[a-z]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Need lowercase"
+      message: "Need lowercase",
     });
   }
   if (!/[0-9]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Need number"
+      message: "Need number",
     });
   }
 });
@@ -517,9 +525,9 @@ const Schema = z
   .transform((val) => val.replace(/\s+/g, "-"));
 
 // ✅ GOOD - Single transform
-const Schema = z.string().transform((val) =>
-  val.toLowerCase().trim().replace(/\s+/g, "-")
-);
+const Schema = z
+  .string()
+  .transform((val) => val.toLowerCase().trim().replace(/\s+/g, "-"));
 ```
 
 ### Preprocess for coercion
@@ -550,7 +558,9 @@ function benchmark(name: string, fn: () => void, iterations = 10000) {
   const duration = end - start;
   const opsPerSecond = (iterations / duration) * 1000;
 
-  console.log(`${name}: ${duration.toFixed(2)}ms (${opsPerSecond.toFixed(0)} ops/sec)`);
+  console.log(
+    `${name}: ${duration.toFixed(2)}ms (${opsPerSecond.toFixed(0)} ops/sec)`
+  );
 }
 
 // Compare different approaches
@@ -582,7 +592,7 @@ Zod doesn't currently support schema compilation, but you can prepare for it:
 export const UserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 // If Zod adds .compile() in future:
@@ -604,8 +614,8 @@ const UserSchema = z.object({
   ...(strictMode && {
     // Extra validation only in development
     metadata: z.record(z.unknown()).refine(/* expensive check */),
-    tags: z.array(z.string()).min(1)
-  })
+    tags: z.array(z.string()).min(1),
+  }),
 });
 ```
 
@@ -616,7 +626,7 @@ const UserSchema = z.object({
 function formatErrors(error: z.ZodError) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
-    message: issue.message
+    message: issue.message,
   }));
 }
 
@@ -625,7 +635,7 @@ function formatFirstError(error: z.ZodError) {
   const first = error.issues[0];
   return {
     field: first.path.join("."),
-    message: first.message
+    message: first.message,
   };
 }
 
@@ -634,7 +644,7 @@ function* formatErrorsLazy(error: z.ZodError) {
   for (const issue of error.issues) {
     yield {
       field: issue.path.join("."),
-      message: issue.message
+      message: issue.message,
     };
   }
 }
@@ -660,6 +670,7 @@ const firstError = errors.next().value;
 10. Benchmark critical paths
 
 **Typical gains**:
+
 - Schema caching: 10-100x faster
 - Batch validation: 2-5x faster
 - Partial validation: 2-10x faster (depending on schema size)

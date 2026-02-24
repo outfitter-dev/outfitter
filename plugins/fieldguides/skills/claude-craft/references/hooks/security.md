@@ -306,27 +306,36 @@ echo "API key configured: $([ -n "$API_KEY" ] && echo "yes" || echo "no")"
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "Bash",
-      "hooks": [{
-        "type": "command",
-        "command": "./.claude/hooks/validate.sh",
-        "timeout": 5
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "Write|Edit",
-      "hooks": [{
-        "type": "command",
-        "command": "./.claude/hooks/format.sh",
-        "timeout": 30
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/validate.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/format.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
 ```
 
 **Guidelines**:
+
 - Quick validation: 3-5 seconds
 - Formatting: 10-30 seconds
 - Network operations: 30-60 seconds

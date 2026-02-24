@@ -35,9 +35,5 @@ export {
 } from "@outfitter/cli/colors";
 export { type BoxOptions, renderBox } from "../box/index.js";
 
-export {
-  type ListOptions,
-  type ListStyle,
-  renderList,
-} from "../list/index.js";
+export { type ListOptions, type ListStyle, renderList } from "../list/index.js";
 export { renderTable, type TableOptions } from "../table/index.js";

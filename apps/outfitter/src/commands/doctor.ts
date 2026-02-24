@@ -9,10 +9,12 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+
 import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme } from "@outfitter/tui/render";
 import type { Command } from "commander";
+
 import { validatePackageName } from "../engine/index.js";
 import {
   getWorkspacePatterns,

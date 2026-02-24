@@ -11,6 +11,7 @@ Convert functions with `throw` to handlers returning `Result<T, E>`.
 ## Handlers to Convert
 
 {{#each HANDLERS}}
+
 ### {{this.name}}
 
 - **File:** `{{this.file}}:{{this.line}}`
@@ -63,7 +64,10 @@ try {
 ```typescript
 import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
-const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
+const getUser: Handler<{ id: string }, User, NotFoundError> = async (
+  input,
+  ctx
+) => {
   const user = await db.users.findById(input.id);
   if (!user) return Result.err(NotFoundError.create("user", input.id));
   return Result.ok(user);

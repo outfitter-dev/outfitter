@@ -29,12 +29,19 @@ const bad: FormState = {
 ```typescript
 // ✅ Only valid states possible
 type FormState =
-  | { readonly status: 'idle' }
-  | { readonly status: 'validating'; readonly data: FormData }
-  | { readonly status: 'validation-error'; readonly errors: readonly ValidationError[] }
-  | { readonly status: 'submitting'; readonly data: FormData }
-  | { readonly status: 'success'; readonly id: string; readonly data: FormData }
-  | { readonly status: 'submit-error'; readonly error: string; readonly data: FormData };
+  | { readonly status: "idle" }
+  | { readonly status: "validating"; readonly data: FormData }
+  | {
+      readonly status: "validation-error";
+      readonly errors: readonly ValidationError[];
+    }
+  | { readonly status: "submitting"; readonly data: FormData }
+  | { readonly status: "success"; readonly id: string; readonly data: FormData }
+  | {
+      readonly status: "submit-error";
+      readonly error: string;
+      readonly data: FormData;
+    };
 ```
 
 ## Full Example: Multi-Step Form
@@ -525,68 +532,68 @@ async function submitForm(data: FormData): Promise<string> {
 ## Testing
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('formReducer', () => {
-  it('starts in editing state at step 1', () => {
+describe("formReducer", () => {
+  it("starts in editing state at step 1", () => {
     const state = initialState;
-    expect(state.status).toBe('editing');
+    expect(state.status).toBe("editing");
     expect(state.currentStep).toBe(1);
   });
 
-  it('transitions to validating when next clicked', () => {
-    const state = formReducer(initialState, { type: 'validation-started' });
-    expect(state.status).toBe('validating');
+  it("transitions to validating when next clicked", () => {
+    const state = formReducer(initialState, { type: "validation-started" });
+    expect(state.status).toBe("validating");
   });
 
-  it('transitions to validation-error on failed validation', () => {
+  it("transitions to validation-error on failed validation", () => {
     const validating: FormState = {
-      status: 'validating',
+      status: "validating",
       currentStep: 1,
-      data: initialState.data
+      data: initialState.data,
     };
 
-    const errors = [{ field: 'name', message: 'Required' }];
+    const errors = [{ field: "name", message: "Required" }];
     const state = formReducer(validating, {
-      type: 'validation-failed',
-      errors
+      type: "validation-failed",
+      errors,
     });
 
-    expect(state.status).toBe('validation-error');
-    if (state.status === 'validation-error') {
+    expect(state.status).toBe("validation-error");
+    if (state.status === "validation-error") {
       expect(state.errors).toEqual(errors);
     }
   });
 
-  it('transitions to submitting on step 3 validation success', () => {
+  it("transitions to submitting on step 3 validation success", () => {
     const validating: FormState = {
-      status: 'validating',
+      status: "validating",
       currentStep: 3,
       data: {
-        step1: { name: 'Test', email: 'test@example.com' },
-        step2: { address: '123 Main', city: 'City', zipCode: '12345' },
-        step3: { paymentMethod: 'card', agreeToTerms: true }
-      }
+        step1: { name: "Test", email: "test@example.com" },
+        step2: { address: "123 Main", city: "City", zipCode: "12345" },
+        step3: { paymentMethod: "card", agreeToTerms: true },
+      },
     };
 
-    const state = formReducer(validating, { type: 'validation-success' });
-    expect(state.status).toBe('submitting');
+    const state = formReducer(validating, { type: "validation-success" });
+    expect(state.status).toBe("submitting");
   });
 
-  it('transitions to success on successful submit', () => {
+  it("transitions to success on successful submit", () => {
     const submitting: FormState = {
-      status: 'submitting',
-      data: initialState.data
+      status: "submitting",
+      data: initialState.data,
     };
 
     const state = formReducer(submitting, {
-      type: 'submit-success',
-      id: 'form-123'
+      type: "submit-success",
+      id: "form-123",
     });
 
-    expect(state.status).toBe('success');
-    if (state.status === 'success') {
-      expect(state.id).toBe('form-123');
+    expect(state.status).toBe("success");
+    if (state.status === "success") {
+      expect(state.id).toBe("form-123");
     }
   });
 });

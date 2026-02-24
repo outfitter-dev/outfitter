@@ -7,6 +7,7 @@
 import { existsSync } from "node:fs";
 import { readdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
+
 import { relativeToWorkspace, toPosixPath } from "./path-utils.js";
 import type {
   DocsDrift,

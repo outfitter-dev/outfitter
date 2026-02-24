@@ -17,6 +17,7 @@ allowed-tools: Read Grep Glob
 ---
 
 Perform a security audit focusing on:
+
 - Authentication flows
 - Input validation
 - SQL injection vectors
@@ -36,6 +37,7 @@ description: Review PR with style checks
 ---
 
 Use the Skill tool to load the code-review skill, then:
+
 1. Review changes in the current PR
 2. Check against style guidelines
 3. Generate review comments
@@ -161,7 +163,6 @@ agent: analyst
 model: opus
 description: Deep analysis requiring extensive reasoning
 ---
-
 # Deep Analysis
 
 Perform thorough analysis of the given topic...
@@ -177,6 +178,7 @@ Agents can load skills for specific capabilities:
 # Security Reviewer Agent
 
 When reviewing code:
+
 1. Load the security-patterns skill for vulnerability patterns
 2. Apply patterns to codebase
 3. Report findings with remediation
@@ -264,6 +266,7 @@ Skills can reference other skills for complex workflows.
 # Smart Analyzer
 
 Based on file type:
+
 - `.ts`/`.tsx`: Load `typescript-patterns` skill
 - `.rs`: Load `rust-patterns` skill
 - `.py`: Load `python-patterns` skill

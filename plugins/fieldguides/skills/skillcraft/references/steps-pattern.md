@@ -39,7 +39,7 @@ Conditions should be brief and contextual.
 
 ```markdown
 2. Analyze the codebase structure
-5. Generate the implementation plan
+3. Generate the implementation plan
 ```
 
 Use imperative voice, drop articles, keep brief.
@@ -54,6 +54,7 @@ Skills with `context: fork` + `agent` delegate work to agents rather than loadin
 ```
 
 **Key difference**:
+
 - `Load the skill` → instructions enter current context
 - `Delegate by loading the skill` → agent runs in isolated context, returns results
 
@@ -97,6 +98,7 @@ Use Plan mode and AskUserQuestion for workflows that need user input or have dec
 ```
 
 **Why Plan mode?** Claude thinks more carefully and presents options sequentially. Good for:
+
 - Transitioning from automated to manual work
 - Complex decisions requiring user input
 - Presenting multiple options with tradeoffs
@@ -203,9 +205,11 @@ Each step should be one line. If a step needs explanation, the detail belongs in
 
 ```markdown
 # Good
+
 2. Analyze authentication patterns
 
 # Bad
+
 2. Analyze authentication patterns including OAuth flows, JWT handling,
    session management, and credential storage
 ```
@@ -217,11 +221,11 @@ Each step should be one line. If a step needs explanation, the detail belongs in
 
 ### Steps vs Workflow Tag
 
-| Use `## Steps` | Use `<workflow>` tag |
-|----------------|---------------------|
+| Use `## Steps`               | Use `<workflow>` tag   |
+| ---------------------------- | ---------------------- |
 | Dependencies on other skills | Self-contained process |
-| High-level orchestration | Detailed methodology |
-| Composable building blocks | Single-skill workflow |
+| High-level orchestration     | Detailed methodology   |
+| Composable building blocks   | Single-skill workflow  |
 
 Can combine both: Steps for orchestration, `<workflow>` for detail within a step.
 
@@ -239,12 +243,15 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 3. Load synthesis skill
 
 ## Stage 1: Discovery
+
 { detailed content }
 
 ## Stage 2: Analysis
+
 { detailed content }
 
 ## Stage 3: Output
+
 { detailed content }
 ```
 
@@ -254,9 +261,11 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 ```markdown
 # Wrong
+
 1. See [skillcraft](../skillcraft/SKILL.md) for base patterns
 
 # Right
+
 1. Load the `skillcraft` skill
 ```
 
@@ -264,10 +273,12 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 ```markdown
 # Wrong
+
 1. First, you should load the skillcraft skill which provides the base
    Agent Skills specification that this skill extends
 
 # Right
+
 1. Load the `skillcraft` skill
 ```
 
@@ -275,13 +286,17 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 ```markdown
 # Wrong - these are stages, not steps
+
 ## Steps
+
 1. Discovery
 2. Analysis
 3. Synthesis
 
 # Right - actionable steps
+
 ## Steps
+
 1. Load the `codebase-analysis` skill
 2. Investigate problem area
 3. Load the `report-findings` skill
@@ -291,7 +306,9 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 
 ```markdown
 # Wrong - this is a detailed workflow, not steps
+
 ## Steps
+
 1. Read the error message
 2. Check the stack trace
 3. Find the failing line
@@ -304,7 +321,9 @@ Steps are for the top-level flow. Stages are for detailed breakdown within the s
 10. Run tests
 
 # Right - high-level steps, detail in body
+
 ## Steps
+
 1. Load the `find-root-causes` skill
 2. Diagnose with systematic investigation
 3. Implement and validate fix

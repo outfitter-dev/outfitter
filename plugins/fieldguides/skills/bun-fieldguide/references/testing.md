@@ -5,19 +5,27 @@ Bun's built-in test runner patterns and lifecycle hooks.
 ## Test Structure
 
 ```typescript
-import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test';
+import {
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "bun:test";
 
-describe('feature', () => {
+describe("feature", () => {
   let resource: Resource;
 
   beforeAll(() => {
     // Suite setup — runs once before all tests
-    console.log('Setup test suite');
+    console.log("Setup test suite");
   });
 
   afterAll(() => {
     // Suite cleanup — runs once after all tests
-    console.log('Cleanup test suite');
+    console.log("Cleanup test suite");
   });
 
   beforeEach(() => {
@@ -30,7 +38,7 @@ describe('feature', () => {
     resource.dispose();
   });
 
-  test('behavior', () => {
+  test("behavior", () => {
     expect(result).toBe(expected);
   });
 });
@@ -40,10 +48,10 @@ describe('feature', () => {
 
 ```typescript
 // Equality
-expect(value).toBe(expected);           // Strict equality (===)
-expect(obj).toEqual({ foo: 'bar' });    // Deep equality
-expect(arr).toContain(item);            // Array/string contains
-expect(obj).toMatchObject({ key: 'value' }); // Partial object match
+expect(value).toBe(expected); // Strict equality (===)
+expect(obj).toEqual({ foo: "bar" }); // Deep equality
+expect(arr).toContain(item); // Array/string contains
+expect(obj).toMatchObject({ key: "value" }); // Partial object match
 
 // Truthiness
 expect(value).toBeTruthy();
@@ -57,12 +65,12 @@ expect(num).toBeGreaterThan(0);
 expect(num).toBeGreaterThanOrEqual(0);
 expect(num).toBeLessThan(100);
 expect(num).toBeLessThanOrEqual(100);
-expect(num).toBeCloseTo(0.3, 5);  // Float comparison
+expect(num).toBeCloseTo(0.3, 5); // Float comparison
 
 // Strings
 expect(str).toMatch(/pattern/);
-expect(str).toStartWith('prefix');
-expect(str).toEndWith('suffix');
+expect(str).toStartWith("prefix");
+expect(str).toEndWith("suffix");
 
 // Arrays
 expect(arr).toHaveLength(3);
@@ -70,7 +78,7 @@ expect(arr).toContainEqual({ id: 1 });
 
 // Exceptions
 expect(fn).toThrow();
-expect(fn).toThrow('error message');
+expect(fn).toThrow("error message");
 expect(fn).toThrow(ErrorType);
 
 // Negation
@@ -82,39 +90,39 @@ expect(arr).not.toContain(item);
 
 ```typescript
 // Async/await
-test('async operation', async () => {
+test("async operation", async () => {
   const result = await fetchData();
   expect(result).toBeDefined();
 });
 
 // Promise resolution
-test('promise resolves', async () => {
-  await expect(asyncFn()).resolves.toBe('success');
+test("promise resolves", async () => {
+  await expect(asyncFn()).resolves.toBe("success");
 });
 
 // Promise rejection
-test('promise rejects', async () => {
-  await expect(asyncFn()).rejects.toThrow('error');
+test("promise rejects", async () => {
+  await expect(asyncFn()).rejects.toThrow("error");
 });
 
 // Timeout (default 5000ms)
-test('slow operation', async () => {
+test("slow operation", async () => {
   const result = await slowOperation();
   expect(result).toBeDefined();
-}, 10000);  // 10 second timeout
+}, 10000); // 10 second timeout
 ```
 
 ## Database Testing
 
 ```typescript
-import { Database } from 'bun:sqlite';
+import { Database } from "bun:sqlite";
 
-describe('Database operations', () => {
+describe("Database operations", () => {
   let db: Database;
 
   beforeEach(() => {
     // Fresh in-memory database per test
-    db = new Database(':memory:');
+    db = new Database(":memory:");
     db.run(`
       CREATE TABLE users (
         id TEXT PRIMARY KEY,
@@ -128,30 +136,34 @@ describe('Database operations', () => {
     db.close();
   });
 
-  test('insert user', () => {
-    const user = db.prepare(`
+  test("insert user", () => {
+    const user = db
+      .prepare(
+        `
       INSERT INTO users (id, email, name)
       VALUES (?, ?, ?)
       RETURNING *
-    `).get('1', 'alice@example.com', 'Alice');
+    `
+      )
+      .get("1", "alice@example.com", "Alice");
 
     expect(user).toMatchObject({
-      id: '1',
-      email: 'alice@example.com',
-      name: 'Alice'
+      id: "1",
+      email: "alice@example.com",
+      name: "Alice",
     });
   });
 
-  test('query user', () => {
+  test("query user", () => {
     db.run("INSERT INTO users VALUES ('1', 'alice@example.com', 'Alice')");
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get('1');
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get("1");
 
     expect(user).toBeDefined();
-    expect(user.email).toBe('alice@example.com');
+    expect(user.email).toBe("alice@example.com");
   });
 
-  test('unique constraint', () => {
+  test("unique constraint", () => {
     db.run("INSERT INTO users VALUES ('1', 'alice@example.com', 'Alice')");
 
     expect(() => {
@@ -164,34 +176,34 @@ describe('Database operations', () => {
 ## File System Testing
 
 ```typescript
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-describe('File operations', () => {
+describe("File operations", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await mkdtemp(join(tmpdir(), 'test-'));
+    tempDir = await mkdtemp(join(tmpdir(), "test-"));
   });
 
   afterEach(async () => {
     await rm(tempDir, { recursive: true });
   });
 
-  test('write and read file', async () => {
-    const filepath = join(tempDir, 'test.txt');
+  test("write and read file", async () => {
+    const filepath = join(tempDir, "test.txt");
 
-    await Bun.write(filepath, 'Hello, world!');
+    await Bun.write(filepath, "Hello, world!");
 
     const file = Bun.file(filepath);
     expect(await file.exists()).toBe(true);
-    expect(await file.text()).toBe('Hello, world!');
+    expect(await file.text()).toBe("Hello, world!");
   });
 
-  test('write JSON', async () => {
-    const filepath = join(tempDir, 'data.json');
-    const data = { name: 'test', value: 42 };
+  test("write JSON", async () => {
+    const filepath = join(tempDir, "data.json");
+    const data = { name: "test", value: 42 };
 
     await Bun.write(filepath, JSON.stringify(data));
 
@@ -204,18 +216,18 @@ describe('File operations', () => {
 ## Mocking
 
 ```typescript
-import { mock, spyOn } from 'bun:test';
+import { mock, spyOn } from "bun:test";
 
-describe('Mocking', () => {
-  test('mock function', () => {
-    const mockFn = mock(() => 'mocked');
+describe("Mocking", () => {
+  test("mock function", () => {
+    const mockFn = mock(() => "mocked");
 
-    expect(mockFn()).toBe('mocked');
+    expect(mockFn()).toBe("mocked");
     expect(mockFn).toHaveBeenCalled();
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  test('mock with arguments', () => {
+  test("mock with arguments", () => {
     const mockFn = mock((x: number) => x * 2);
 
     mockFn(5);
@@ -223,12 +235,12 @@ describe('Mocking', () => {
     expect(mockFn).toHaveBeenCalledWith(5);
   });
 
-  test('spy on method', () => {
+  test("spy on method", () => {
     const obj = {
-      method: (x: number) => x * 2
+      method: (x: number) => x * 2,
     };
 
-    const spy = spyOn(obj, 'method');
+    const spy = spyOn(obj, "method");
 
     obj.method(5);
 
@@ -236,22 +248,22 @@ describe('Mocking', () => {
     expect(spy).toHaveBeenCalledWith(5);
   });
 
-  test('mock return value', () => {
-    const mockFn = mock(() => 'original');
+  test("mock return value", () => {
+    const mockFn = mock(() => "original");
 
-    mockFn.mockReturnValue('mocked');
-    expect(mockFn()).toBe('mocked');
+    mockFn.mockReturnValue("mocked");
+    expect(mockFn()).toBe("mocked");
 
-    mockFn.mockReturnValueOnce('once');
-    expect(mockFn()).toBe('once');
-    expect(mockFn()).toBe('mocked');
+    mockFn.mockReturnValueOnce("once");
+    expect(mockFn()).toBe("once");
+    expect(mockFn()).toBe("mocked");
   });
 
-  test('mock implementation', () => {
-    const mockFn = mock(() => 'original');
+  test("mock implementation", () => {
+    const mockFn = mock(() => "original");
 
-    mockFn.mockImplementation(() => 'new implementation');
-    expect(mockFn()).toBe('new implementation');
+    mockFn.mockImplementation(() => "new implementation");
+    expect(mockFn()).toBe("new implementation");
   });
 });
 ```
@@ -259,34 +271,36 @@ describe('Mocking', () => {
 ## Mock fetch
 
 ```typescript
-describe('External API calls', () => {
+describe("External API calls", () => {
   const originalFetch = global.fetch;
 
   afterEach(() => {
     global.fetch = originalFetch;
   });
 
-  test('mock API response', async () => {
-    global.fetch = mock(async () =>
-      new Response(JSON.stringify({ data: 'mocked' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      })
+  test("mock API response", async () => {
+    global.fetch = mock(
+      async () =>
+        new Response(JSON.stringify({ data: "mocked" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
     );
 
-    const res = await fetch('https://api.example.com/data');
+    const res = await fetch("https://api.example.com/data");
     const data = await res.json();
 
-    expect(data).toEqual({ data: 'mocked' });
-    expect(global.fetch).toHaveBeenCalledWith('https://api.example.com/data');
+    expect(data).toEqual({ data: "mocked" });
+    expect(global.fetch).toHaveBeenCalledWith("https://api.example.com/data");
   });
 
-  test('mock API error', async () => {
-    global.fetch = mock(async () =>
-      new Response(JSON.stringify({ error: 'Not found' }), { status: 404 })
+  test("mock API error", async () => {
+    global.fetch = mock(
+      async () =>
+        new Response(JSON.stringify({ error: "Not found" }), { status: 404 })
     );
 
-    const res = await fetch('https://api.example.com/missing');
+    const res = await fetch("https://api.example.com/missing");
 
     expect(res.status).toBe(404);
   });
@@ -297,26 +311,26 @@ describe('External API calls', () => {
 
 ```typescript
 // Skip tests
-test.skip('work in progress', () => {
+test.skip("work in progress", () => {
   // Not executed
 });
 
 // Mark as todo
-test.todo('future feature');
+test.todo("future feature");
 
 // Only run specific test
-test.only('focus on this', () => {
+test.only("focus on this", () => {
   // Only this test runs in file
 });
 
 // Conditional skip
-const isCI = process.env.CI === 'true';
-test.skipIf(isCI)('skip in CI', () => {
+const isCI = process.env.CI === "true";
+test.skipIf(isCI)("skip in CI", () => {
   // Skipped when CI=true
 });
 
 // Run if condition
-test.if(!isCI)('local only', () => {
+test.if(!isCI)("local only", () => {
   // Only runs locally
 });
 ```
@@ -324,16 +338,16 @@ test.if(!isCI)('local only', () => {
 ## Snapshot Testing
 
 ```typescript
-import { expect, test } from 'bun:test';
+import { expect, test } from "bun:test";
 
-test('snapshot', () => {
+test("snapshot", () => {
   const result = generateOutput();
 
   expect(result).toMatchSnapshot();
 });
 
-test('inline snapshot', () => {
-  const result = { name: 'test', value: 42 };
+test("inline snapshot", () => {
+  const result = { name: "test", value: 42 };
 
   expect(result).toMatchInlineSnapshot(`
     {

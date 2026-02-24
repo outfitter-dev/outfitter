@@ -9,28 +9,31 @@ Validate plugin before distribution.
 ## Audit Checklist
 
 **Structure**:
+
 - [ ] plugin.json exists and valid
 - [ ] Name matches directory
 - [ ] Version is semver
 
 **Components**:
+
 - [ ] All skills have SKILL.md
 - [ ] All commands have descriptions
 - [ ] Hook scripts are executable
 - [ ] No broken references
 
 **Documentation**:
+
 - [ ] README.md present
 - [ ] Installation instructions work
 - [ ] Usage examples accurate
 
 ## Severity Levels
 
-| Level | Indicator | Meaning |
-|-------|-----------|---------|
-| Critical | `◈` | Blocks functionality, must fix |
-| Warning | `◆` | Best practice violation, should fix |
-| Info | `◇` | Suggestion, optional |
+| Level    | Indicator | Meaning                             |
+| -------- | --------- | ----------------------------------- |
+| Critical | `◈`       | Blocks functionality, must fix      |
+| Warning  | `◆`       | Best practice violation, should fix |
+| Info     | `◇`       | Suggestion, optional                |
 
 ## Output
 
@@ -47,8 +50,8 @@ When audit passes:
 
 ## Distribution Options
 
-| Method | Best For | Setup |
-|--------|----------|-------|
-| GitHub repo | Public/team plugins | Push to GitHub |
-| Git URL | GitLab, Bitbucket | Full URL in source |
-| Local path | Development/testing | Relative path |
+| Method      | Best For            | Setup              |
+| ----------- | ------------------- | ------------------ |
+| GitHub repo | Public/team plugins | Push to GitHub     |
+| Git URL     | GitLab, Bitbucket   | Full URL in source |
+| Local path  | Development/testing | Relative path      |

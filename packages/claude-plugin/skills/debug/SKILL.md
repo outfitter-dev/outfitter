@@ -7,7 +7,7 @@ allowed-tools: Read Grep Glob Bash(rg *) Bash(bun *)
 
 # Stack Debugging
 
-Troubleshoot @outfitter/* package issues.
+Troubleshoot @outfitter/\* package issues.
 
 ## Result Issues
 
@@ -16,6 +16,7 @@ Troubleshoot @outfitter/* package issues.
 **Symptom:** Result is `err` when it should be `ok`.
 
 **Check validation:**
+
 ```typescript
 const inputResult = validateInput(rawInput);
 if (inputResult.isErr()) {
@@ -25,9 +26,10 @@ if (inputResult.isErr()) {
 ```
 
 **Check async:**
+
 ```typescript
 // BAD: Missing await
-const result = getUser(id);  // Promise, not Result!
+const result = getUser(id); // Promise, not Result!
 
 // GOOD
 const result = await getUser(id);
@@ -41,7 +43,7 @@ const result = await getUser(id);
 // BAD: Reassigning breaks narrowing
 let result = await getUser(id);
 if (result.isOk()) {
-  result = await updateUser(result.value);  // Breaks!
+  result = await updateUser(result.value); // Breaks!
 }
 
 // GOOD: Separate variables
@@ -53,6 +55,7 @@ const updateResult = await updateUser(getResult.value);
 ### Error Type Lost
 
 **Use `_tag` for narrowing:**
+
 ```typescript
 if (result.isErr()) {
   switch (result.error._tag) {
@@ -71,9 +74,10 @@ if (result.isErr()) {
 ### Tool Not Appearing
 
 1. Register before `start()`:
+
    ```typescript
    server.registerTool(myTool);
-   server.start();  // After registration!
+   server.start(); // After registration!
    ```
 
 2. Check schema is valid Zod with `.describe()`:
@@ -86,13 +90,16 @@ if (result.isErr()) {
 ### Tool Invocation Failing
 
 1. Verify handler is async:
+
    ```typescript
-   handler: async (input) => {  // Not sync!
+   handler: async (input) => {
+     // Not sync!
      return Result.ok(data);
-   }
+   };
    ```
 
 2. Return Result, not raw value:
+
    ```typescript
    // BAD
    return { data: "value" };
@@ -106,21 +113,24 @@ if (result.isErr()) {
 ### JSON Not Printing
 
 1. Force mode:
+
    ```typescript
    await output(data, { mode: "json" });
    ```
 
 2. Check environment:
+
    ```bash
    OUTFITTER_JSON=1 myapp list
    OUTFITTER_JSON=0 myapp list --json  # Forces human!
    ```
 
 3. Await output:
+
    ```typescript
    // BAD
    output(data);
-   process.exit(0);  // May exit before output!
+   process.exit(0); // May exit before output!
 
    // GOOD
    await output(data);
@@ -129,6 +139,7 @@ if (result.isErr()) {
 ### Wrong Exit Code
 
 1. Use `exitWithError`:
+
    ```typescript
    // BAD
    process.exit(1);
@@ -139,18 +150,18 @@ if (result.isErr()) {
 
 2. Exit code table:
 
-   | Category | Exit |
-   |----------|------|
-   | validation | 1 |
-   | not_found | 2 |
-   | conflict | 3 |
-   | permission | 4 |
-   | timeout | 5 |
-   | rate_limit | 6 |
-   | network | 7 |
-   | internal | 8 |
-   | auth | 9 |
-   | cancelled | 130 |
+   | Category   | Exit |
+   | ---------- | ---- |
+   | validation | 1    |
+   | not_found  | 2    |
+   | conflict   | 3    |
+   | permission | 4    |
+   | timeout    | 5    |
+   | rate_limit | 6    |
+   | network    | 7    |
+   | internal   | 8    |
+   | auth       | 9    |
+   | cancelled  | 130  |
 
 ## Logging Issues
 
@@ -158,7 +169,7 @@ if (result.isErr()) {
 
 ```typescript
 const logger = createLogger({
-  redaction: { enabled: true },  // Must be true!
+  redaction: { enabled: true }, // Must be true!
 });
 
 // Custom patterns
@@ -180,7 +191,7 @@ const requestLogger = createChildLogger(ctx.logger, {
   handler: "myHandler",
 });
 
-requestLogger.info("Processing", { data });  // Includes requestId
+requestLogger.info("Processing", { data }); // Includes requestId
 ```
 
 ### Wrong Level
@@ -200,8 +211,11 @@ const logger = createLogger({
 
 ```typescript
 function traceResult<T, E>(name: string, result: Result<T, E>): Result<T, E> {
-  console.log(`[${name}]`, result.isOk() ? "OK:" : "ERR:",
-    result.isOk() ? result.value : result.error);
+  console.log(
+    `[${name}]`,
+    result.isOk() ? "OK:" : "ERR:",
+    result.isOk() ? result.value : result.error
+  );
   return result;
 }
 

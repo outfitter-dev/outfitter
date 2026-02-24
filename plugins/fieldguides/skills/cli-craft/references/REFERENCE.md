@@ -2,9 +2,9 @@
 
 ## Scope and sources
 
-This reference is a *condensed, operational* guide for building well-behaved CLI tools.
+This reference is a _condensed, operational_ guide for building well-behaved CLI tools.
 
-- Primary source (adapted heavily): *Command Line Interface Guidelines* (<https://clig.dev/>)
+- Primary source (adapted heavily): _Command Line Interface Guidelines_ (<https://clig.dev/>)
   - License: CC BY-SA 4.0
   - Authors: Aanand Prasad, Ben Firshman, Carl Tashian, Eva Parish
 - Additional sources: POSIX utility conventions, GNU standards, Heroku CLI style guide, 12-factor CLI apps, XDG base directory spec, NO_COLOR convention.
@@ -35,7 +35,7 @@ This reference is a *condensed, operational* guide for building well-behaved CLI
   - Clear, calm messages
   - Example-first help
   - Progress indicators for long operations
-- Still be *composable* in UNIX pipelines:
+- Still be _composable_ in UNIX pipelines:
   - Clean `stdout` for data
   - Meaningful exit codes
   - No unexpected prompts in scripts
@@ -47,7 +47,7 @@ This reference is a *condensed, operational* guide for building well-behaved CLI
   - Same option names mean the same thing everywhere.
   - Output formats don't randomly change between subcommands.
 
-### Say *just* enough
+### Say _just_ enough
 
 - Too little:
   - Silent hangs
@@ -111,6 +111,7 @@ This reference is a *condensed, operational* guide for building well-behaved CLI
 ### Concise help by default (when invocation is incomplete)
 
 If the user runs a command with missing required args/flags, print a concise help block:
+
 - What the tool does (one line)
 - 1–2 common examples
 - The most important flags (or a pointer to full help)
@@ -119,6 +120,7 @@ If the user runs a command with missing required args/flags, print a concise hel
 ### Full help when asked
 
 Full help should include:
+
 - Usage line(s)
 - Description
 - Commands (if any)
@@ -137,6 +139,7 @@ Full help should include:
 ### If stdin is required but not provided
 
 If your tool expects piped input and `stdin` is a TTY, don't hang.
+
 - Print help or a clear message.
 - Exit non-zero.
 
@@ -145,12 +148,14 @@ If your tool expects piped input and `stdin` is a TTY, don't hang.
 ### Human-readable output is the default
 
 A practical heuristic:
+
 - If output is going to a TTY, it's probably a human.
 - If output is being captured/piped, it's probably a program.
 
 ### Provide machine-readable output when it doesn't harm usability
 
 Common patterns:
+
 - `--json` outputs structured JSON (stable shape, versioned if needed).
 - `--plain` outputs simple line/tabular output with one record per line.
 - Encourage scripts to use `--json`/`--plain` rather than scraping the human UI.
@@ -159,7 +164,7 @@ Common patterns:
 
 - Printing nothing can feel like "it hung."
 - Printing too much becomes noise.
-- If you changed state, tell the user *what changed*.
+- If you changed state, tell the user _what changed_.
 
 ### Color and symbols
 
@@ -193,6 +198,7 @@ Common patterns:
 ### Rewrite expected errors for humans
 
 Don't dump raw stack traces for normal user errors.
+
 - Say what failed
 - Say why it might have failed (likely causes)
 - Say what to do next (actionable fix)
@@ -211,6 +217,7 @@ Don't dump raw stack traces for normal user errors.
 ### Unexpected errors
 
 When something truly unexpected happens:
+
 - Provide a short human summary
 - Offer a way to get debug details:
   - `--debug` or `--verbose`
@@ -236,6 +243,7 @@ Short flags are a scarce resource. Spend them wisely.
 ### Standard flag names (use existing conventions)
 
 Common conventions across CLI ecosystems:
+
 - `-h`, `--help`
 - `--version`
 - `-v`, `--verbose` (but note ambiguity: sometimes `-v` is version)
@@ -252,6 +260,7 @@ Common conventions across CLI ecosystems:
 
 Users often add flags to the end of the previous command via ↑.
 If possible, allow:
+
 - `tool --flag subcmd`
 - `tool subcmd --flag`
 
@@ -280,6 +289,7 @@ If possible, allow:
 ### Confirm dangerous operations
 
 Different danger levels:
+
 - Mild:
   - Deleting an explicit file the user named
 - Moderate:
@@ -310,6 +320,7 @@ Different danger levels:
 ### Precedence (high → low)
 
 A common, predictable precedence order:
+
 - Flags
 - Process environment
 - Project config (`.env` / tool config in repo)
@@ -319,6 +330,7 @@ A common, predictable precedence order:
 ### XDG base directory spec
 
 Prefer:
+
 - Config: `$XDG_CONFIG_HOME` (default `~/.config`)
 - Data: `$XDG_DATA_HOME` (default `~/.local/share`)
 - Cache: `$XDG_CACHE_HOME` (default `~/.cache`)
@@ -332,17 +344,18 @@ Prefer:
 ### `.env` is not a real config system
 
 `.env` is useful for small "context knobs," but it's limited:
+
 - Everything is a string
 - Often not versioned
 - Often abused for secrets
 
 ## Secrets and sensitive data
 
-- Do *not* accept secrets via flags:
+- Do _not_ accept secrets via flags:
   - Leaks into shell history and process listings (`ps`)
-- Do *not* accept secrets via environment variables:
+- Do _not_ accept secrets via environment variables:
   - Easy to leak into logs, `docker inspect`, systemd unit displays, etc.
-Prefer:
+    Prefer:
 - `--token-file path`
 - `--password-stdin`
 - OS keychains / secret managers
@@ -352,7 +365,7 @@ Prefer:
 
 ### Responsive beats fast
 
-- Aim to print *something* within ~100ms for operations that might take time:
+- Aim to print _something_ within ~100ms for operations that might take time:
   - "Fetching…"
   - "Computing…"
   - "Connecting to …"
@@ -404,7 +417,7 @@ Prefer:
 - If you collect anything:
   - Explain what, why, how anonymized, and retention period
   - Make opting out easy
-Consider alternatives:
+    Consider alternatives:
 - Instrument docs
 - Measure downloads
 - Talk to users
@@ -424,6 +437,7 @@ Consider alternatives:
 ### Practical output design tip
 
 When in doubt:
+
 - Human UI = defaults when TTY
 - Machine UI = explicit flags (`--json`, `--plain`)
 - Debug UI = explicit flags (`--debug`, `--verbose`)

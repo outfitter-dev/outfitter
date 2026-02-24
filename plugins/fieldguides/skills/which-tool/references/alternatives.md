@@ -74,6 +74,7 @@ site:github.com modern ls replacement stars:>500
 ```
 
 **Why GitHub:**
+
 - Active development visible (commit history)
 - Star count indicates adoption and community validation
 - Issues/PRs show maintenance quality
@@ -82,21 +83,25 @@ site:github.com modern ls replacement stars:>500
 #### 2. Curated Lists
 
 **awesome-cli-apps**: <https://github.com/agarrharr/awesome-cli-apps>
+
 - Categorized by function
 - Curated for quality
 - Regularly updated
 
 **modern-unix**: <https://github.com/ibraheemdev/modern-unix>
+
 - Specifically Unix tool replacements
 - Focus on performance and ergonomics
 - Comparison with legacy tools
 
 **awesome-tuis**: <https://github.com/rothgar/awesome-tuis>
+
 - Terminal UI applications
 - Interactive tools
 - Well-maintained list
 
 **Why curated lists:**
+
 - Pre-filtered for quality
 - Organized by category
 - Community-vetted
@@ -104,13 +109,16 @@ site:github.com modern ls replacement stars:>500
 #### 3. Language-Specific Ecosystems
 
 **Rust CLI Working Group**:
+
 - <https://rust-cli.github.io/book/>
 - <https://lib.rs/command-line-utilities>
 
 **Go CLI Tools**:
+
 - <https://github.com/avelino/awesome-go#command-line>
 
 **Why language ecosystems:**
+
 - Rust tools often fastest (native performance, zero-cost abstractions)
 - Go tools good balance (fast, easy distribution, single binary)
 - Language communities maintain tool lists
@@ -128,6 +136,7 @@ site:news.ycombinator.com CLI productivity
 ```
 
 **Why HN:**
+
 - Real-world usage discussions
 - Trade-off analysis from practitioners
 - Early visibility into trending tools
@@ -141,6 +150,7 @@ site:news.ycombinator.com CLI productivity
 **r/programming** - General tool discussions
 
 **Why Reddit:**
+
 - User reviews and experiences
 - Comparison threads
 - Common pain points surfaced
@@ -148,11 +158,13 @@ site:news.ycombinator.com CLI productivity
 #### Tool Comparison Sites
 
 **AlternativeTo**: <https://alternativeto.net>
+
 - User ratings
 - Feature comparison matrices
 - Platform availability
 
 **Why comparison sites:**
+
 - Side-by-side feature lists
 - Community ratings
 - Discover tools you didn't know existed
@@ -160,12 +172,14 @@ site:news.ycombinator.com CLI productivity
 ### Research Workflow
 
 **Query progression**:
+
 1. `{TASK} CLI tool 2025` or `{TASK} CLI tool 2024`
 2. `best {TASK} command line tool`
 3. `modern alternative to {LEGACY_TOOL}`
 4. `{LANGUAGE} {TASK} CLI` (try rust first, then go)
 
 **Initial filtering**:
+
 - Published/updated within last 2 years
 - Active development (commits within 6 months)
 - Community traction (GitHub stars >500 for niche, >1000 for common tools)
@@ -179,12 +193,14 @@ Evaluate candidates across these dimensions:
 ### 1. Speed (Weight: High - 40%)
 
 **Measure:**
+
 - Benchmarks on representative workload
 - Compare with legacy tool on same task
 - Check scaling behavior (10 files vs 10,000 files)
 - Startup time (matters for frequently-run commands)
 
 **Thresholds:**
+
 - **2× faster**: Consider if other benefits exist
 - **5× faster**: Strong candidate, likely worth adoption
 - **10× faster**: High priority upgrade, significant productivity gain
@@ -206,6 +222,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 ### 2. Ergonomics (Weight: Medium-High - 30%)
 
 **Evaluate:**
+
 - **Syntax simplicity**: Can you remember it without docs?
 - **Defaults**: Do common operations require flags?
 - **Output quality**: Readable, informative, well-formatted?
@@ -213,6 +230,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 - **Composability**: Works well in pipes and scripts?
 
 **Good indicators:**
+
 - Colored output by default
 - Smart defaults (respects .gitignore, etc.)
 - Short, memorable command names
@@ -220,6 +238,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 - Intuitive flag names
 
 **Red flags:**
+
 - Complex syntax requiring constant reference
 - Poor error messages ("error" with no context)
 - Unexpected default behavior
@@ -228,6 +247,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 ### 3. Maintenance (Weight: High - 20%)
 
 **Check repository health:**
+
 - **Last commit**: <6 months is active, <3 months is excellent
 - **Issue response time**: Maintainer engagement (check recent issues)
 - **Release cadence**: Regular releases, not constant churn
@@ -235,6 +255,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 - **Organization backing**: Company/org-backed often more stable
 
 **Red flags:**
+
 - Archived repository
 - 100+ open issues with no maintainer responses
 - Last release >2 years ago
@@ -242,6 +263,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 - Major bugs unaddressed
 
 **Green flags:**
+
 - Active CI/CD
 - Regular security updates
 - Responsive to community
@@ -250,12 +272,14 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 ### 4. Installation Complexity (Weight: Medium - 10%)
 
 **Assess ease of installation:**
+
 - Available in major package managers (brew, apt, cargo, dnf)
 - Binary releases for major platforms (Linux, macOS, Windows)
 - Dependency count (fewer is better)
 - Binary size (under 50MB is reasonable for most tools)
 
 **Scoring:**
+
 - **Excellent**: `brew install`, `apt install`, or `cargo install`
 - **Good**: Binary releases on GitHub, one-liner install script
 - **Acceptable**: Build from source with standard toolchain
@@ -265,6 +289,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 ### 5. Adoption (Weight: Medium - Points to maturity)
 
 **Indicators of healthy adoption:**
+
 - GitHub stars (>1k is good, >5k is excellent, >10k is widely adopted)
 - Used by major projects (check GitHub dependents)
 - Mentioned in blog posts, tool lists, conference talks
@@ -272,6 +297,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 - Production usage stories
 
 **Why adoption matters:**
+
 - More usage → more bugs found and fixed
 - Better documentation and examples
 - Higher probability of long-term maintenance
@@ -280,6 +306,7 @@ hyperfine --parameter-scan num 10 10000 '{tool} args'
 ### 6. Compatibility (Weight: Medium-Low - Important for drop-in replacements)
 
 **Check replacement viability:**
+
 - **Drop-in replacement**: Can alias old command to new? (`alias cat=bat`)
 - **POSIX compliance**: Matters for portable scripts
 - **Output format**: Parseable by downstream tools?
@@ -353,6 +380,7 @@ cd ~/Developer  # or another large directory tree
 ```
 
 **Evaluate results:**
+
 - Does output format work for your needs?
 - Are error messages helpful?
 - Any surprising behavior?
@@ -405,7 +433,7 @@ When presenting tool findings to user:
 
 ### Template
 
-```
+````
 Found: {TOOL_NAME} — {one-line description}
 
 Performance:
@@ -420,12 +448,14 @@ Benefits:
 Installation:
 ```bash
 {install command}
-```
+````
 
 Trade-offs:
+
 - {any downsides, or "None identified"}
 
 Confidence: {HIGH/MEDIUM/LOW}
+
 - HIGH: Widely adopted, clear win, drop-in replacement
 - MEDIUM: Good but niche, or requires workflow changes
 - LOW: Bleeding edge, or significant compatibility concerns
@@ -441,10 +471,12 @@ Recommend: {INSTALL/TRY/SKIP}
 Found: ripgrep (rg) — Fast line-oriented search tool
 
 Performance:
+
 - 15× faster than grep on this codebase
 - Searched 50k files in 0.3s vs 4.5s with grep -r
 
 Benefits:
+
 - Respects .gitignore by default (no node_modules noise)
 - Colored output with line numbers
 - Better regex support (PCRE2)
@@ -457,17 +489,19 @@ brew install ripgrep
 ```
 
 Trade-offs:
+
 - Different flags than grep (muscle memory adjustment)
 - Recursive by default (explicit -r not needed)
 
 Confidence: HIGH
+
 - 40k+ GitHub stars
 - Used by major projects (VS Code search backend)
 - Drop-in for most grep use cases
 
 Recommend: INSTALL
 
-```
+````
 
 ## When to Recommend Installation
 
@@ -527,7 +561,7 @@ if command -v rg &> /dev/null; then
 else
   grep -r pattern .
 fi
-```
+````
 
 ### Pattern 2: Function Wrapper
 
@@ -570,17 +604,18 @@ fi
 **Search query**: "fast code search CLI tool 2024"
 
 **Candidates found**:
+
 1. ripgrep (rg) — Rust-based, 10-100x faster than grep
 2. The Silver Searcher (ag) — C-based, 3-5x faster than grep
 3. ugrep — C++ with advanced regex, similar speed to rg
 
 **Initial evaluation**:
 
-| Tool | Speed | Ergonomics | Maintenance | Install |
-|------|-------|------------|-------------|---------|
-| rg | ★★★ | ★★★ | ★★★ | ★★★ |
-| ag | ★★ | ★★ | ★ | ★★★ |
-| ugrep | ★★★ | ★★ | ★★ | ★★ |
+| Tool  | Speed | Ergonomics | Maintenance | Install |
+| ----- | ----- | ---------- | ----------- | ------- |
+| rg    | ★★★   | ★★★        | ★★★         | ★★★     |
+| ag    | ★★    | ★★         | ★           | ★★★     |
+| ugrep | ★★★   | ★★         | ★★          | ★★      |
 
 **Hands-on test**:
 

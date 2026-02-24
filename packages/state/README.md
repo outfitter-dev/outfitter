@@ -42,14 +42,14 @@ if (cursorResult.isOk()) {
 
 Cursors are intentionally **opaque** to consumers. They are immutable, frozen objects that encapsulate pagination state.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Unique identifier for storage lookup |
-| `position` | `number` | Current offset in the result set |
-| `metadata` | `Record<string, unknown>` | Optional user-defined context |
-| `ttl` | `number` | Time-to-live in milliseconds (optional) |
-| `expiresAt` | `number` | Computed Unix timestamp for expiry (if TTL set) |
-| `createdAt` | `number` | Unix timestamp when cursor was created |
+| Property    | Type                      | Description                                     |
+| ----------- | ------------------------- | ----------------------------------------------- |
+| `id`        | `string`                  | Unique identifier for storage lookup            |
+| `position`  | `number`                  | Current offset in the result set                |
+| `metadata`  | `Record<string, unknown>` | Optional user-defined context                   |
+| `ttl`       | `number`                  | Time-to-live in milliseconds (optional)         |
+| `expiresAt` | `number`                  | Computed Unix timestamp for expiry (if TTL set) |
+| `createdAt` | `number`                  | Unix timestamp when cursor was created          |
 
 ### Why Opaque?
 
@@ -95,7 +95,11 @@ if (result.isOk()) {
 ### Example: Paginated Handler
 
 ```typescript
-import { createCursor, createCursorStore, advanceCursor } from "@outfitter/state";
+import {
+  createCursor,
+  createCursorStore,
+  advanceCursor,
+} from "@outfitter/state";
 import { Result } from "@outfitter/contracts";
 
 const store = createCursorStore();
@@ -150,11 +154,11 @@ const issuesStore = createScopedStore(store, "linear:issues");
 const prsStore = createScopedStore(store, "github:prs");
 
 // Cursors are isolated - same ID won't conflict
-issuesStore.set(issueCursor);  // Stored as "linear:issues:cursor-id"
-prsStore.set(prCursor);        // Stored as "github:prs:cursor-id"
+issuesStore.set(issueCursor); // Stored as "linear:issues:cursor-id"
+prsStore.set(prCursor); // Stored as "github:prs:cursor-id"
 
 // Each scope manages its own cursors
-issuesStore.clear();  // Only clears issue cursors
+issuesStore.clear(); // Only clears issue cursors
 ```
 
 ### Nested Scopes
@@ -167,8 +171,8 @@ const githubStore = createScopedStore(store, "github");
 const issuesStore = createScopedStore(githubStore, "issues");
 const prsStore = createScopedStore(githubStore, "prs");
 
-issuesStore.getScope();  // "github:issues"
-prsStore.getScope();     // "github:prs"
+issuesStore.getScope(); // "github:issues"
+prsStore.getScope(); // "github:prs"
 ```
 
 ### Scoped Store Behavior
@@ -183,15 +187,15 @@ if (cursor.isOk()) {
   scoped.set(cursor.value);
 
   // Underlying store has prefixed ID
-  store.list();  // ["my-scope:abc123"]
+  store.list(); // ["my-scope:abc123"]
 
   // Scoped store returns clean ID
-  scoped.list();  // ["abc123"]
+  scoped.list(); // ["abc123"]
 
   // Get returns cursor with clean ID
   const result = scoped.get("abc123");
   if (result.isOk()) {
-    result.value.id;  // "abc123" (not "my-scope:abc123")
+    result.value.id; // "abc123" (not "my-scope:abc123")
   }
 }
 ```
@@ -257,7 +261,7 @@ const result = createCursor({
 
 if (result.isOk()) {
   const cursor = result.value;
-  cursor.ttl;       // 3600000
+  cursor.ttl; // 3600000
   cursor.expiresAt; // Unix timestamp (e.g., 1706000000000)
 }
 ```
@@ -289,7 +293,7 @@ Cursors created without a TTL never expire:
 ```typescript
 const result = createCursor({ position: 0 });
 if (result.isOk()) {
-  result.value.ttl;       // undefined
+  result.value.ttl; // undefined
   result.value.expiresAt; // undefined
   isExpired(result.value); // always false
 }
@@ -299,24 +303,24 @@ if (result.isOk()) {
 
 ### Functions
 
-| Function | Description |
-|----------|-------------|
-| `createCursor(options)` | Create a new immutable pagination cursor |
+| Function                          | Description                               |
+| --------------------------------- | ----------------------------------------- |
+| `createCursor(options)`           | Create a new immutable pagination cursor  |
 | `advanceCursor(cursor, position)` | Create a new cursor with updated position |
-| `isExpired(cursor)` | Check if a cursor has expired |
-| `createCursorStore()` | Create an in-memory cursor store |
-| `createPersistentStore(options)` | Create a disk-backed cursor store |
-| `createScopedStore(store, scope)` | Create a namespace-isolated cursor store |
+| `isExpired(cursor)`               | Check if a cursor has expired             |
+| `createCursorStore()`             | Create an in-memory cursor store          |
+| `createPersistentStore(options)`  | Create a disk-backed cursor store         |
+| `createScopedStore(store, scope)` | Create a namespace-isolated cursor store  |
 
 ### Interfaces
 
-| Interface | Description |
-|-----------|-------------|
-| `Cursor` | Immutable pagination cursor |
-| `CreateCursorOptions` | Options for `createCursor()` |
-| `CursorStore` | Base interface for cursor stores |
-| `ScopedStore` | Cursor store with namespace isolation |
-| `PersistentStore` | Cursor store with disk persistence |
+| Interface                | Description                           |
+| ------------------------ | ------------------------------------- |
+| `Cursor`                 | Immutable pagination cursor           |
+| `CreateCursorOptions`    | Options for `createCursor()`          |
+| `CursorStore`            | Base interface for cursor stores      |
+| `ScopedStore`            | Cursor store with namespace isolation |
+| `PersistentStore`        | Cursor store with disk persistence    |
 | `PersistentStoreOptions` | Options for `createPersistentStore()` |
 
 ## Error Handling
@@ -339,7 +343,7 @@ if (getResult.isErr()) {
   // NotFoundError: Cursor not found: nonexistent
   console.error(getResult.error.message);
   console.log(getResult.error.resourceType); // "cursor"
-  console.log(getResult.error.resourceId);   // "nonexistent"
+  console.log(getResult.error.resourceId); // "nonexistent"
 }
 ```
 

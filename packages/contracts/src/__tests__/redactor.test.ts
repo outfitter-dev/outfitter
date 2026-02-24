@@ -11,6 +11,7 @@
  * Total: 27 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   createRedactor,
   DEFAULT_PATTERNS,

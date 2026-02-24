@@ -7,6 +7,7 @@
  */
 
 import { getStringWidth, padText, truncateText } from "@outfitter/cli/text";
+
 import {
   type BorderCharacters,
   type BorderStyle,

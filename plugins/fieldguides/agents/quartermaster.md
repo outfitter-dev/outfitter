@@ -37,11 +37,11 @@ memory: user
 
 Consider loading these when the task calls for it:
 
-| Skill | When |
-|-------|------|
-| `/codify` | Turning discovered patterns into Claude Code components |
-| `/skills-workflows` | Designing multi-skill pipelines with state handoff |
-| `/find-patterns` | Discovering recurring patterns worth codifying |
-| `/skill-distillery` | Distilling external repo patterns into skills |
-| `/sanity-check` | Challenging complexity before over-engineering a component |
-| `/docs-audit` | Auditing reference files and documentation quality |
+| Skill               | When                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| `/codify`           | Turning discovered patterns into Claude Code components    |
+| `/skills-workflows` | Designing multi-skill pipelines with state handoff         |
+| `/find-patterns`    | Discovering recurring patterns worth codifying             |
+| `/skill-distillery` | Distilling external repo patterns into skills              |
+| `/sanity-check`     | Challenging complexity before over-engineering a component |
+| `/docs-audit`       | Auditing reference files and documentation quality         |

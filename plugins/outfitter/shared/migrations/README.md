@@ -9,6 +9,7 @@ outfitter-<package>-<version>.md
 ```
 
 Examples:
+
 - `outfitter-contracts-0.2.0.md`
 - `outfitter-cli-0.2.0.md`
 - `outfitter-contracts-0.2.1.md`
@@ -53,26 +54,26 @@ changes:
 
 ### Frontmatter Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `package` | string | Full package name (`@outfitter/contracts`) |
-| `version` | string | Target version |
-| `breaking` | boolean | Whether this version has breaking changes |
-| `changes` | array | Structured change entries (optional, see below) |
+| Field      | Type    | Description                                     |
+| ---------- | ------- | ----------------------------------------------- |
+| `package`  | string  | Full package name (`@outfitter/contracts`)      |
+| `version`  | string  | Target version                                  |
+| `breaking` | boolean | Whether this version has breaking changes       |
+| `changes`  | array   | Structured change entries (optional, see below) |
 
 ### Changes Array
 
 Each entry in `changes` describes one machine-actionable change. Used by `outfitter upgrade` to discover and run codemods.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | string | One of: `renamed`, `removed`, `signature-changed`, `moved`, `deprecated`, `added` |
-| `from` | string | Previous import path, export name, or identifier |
-| `to` | string | New import path, export name, or identifier |
-| `path` | string | Package path where the export lives |
-| `export` | string | Exported symbol name |
-| `detail` | string | Human-readable migration note |
-| `codemod` | string | Path to codemod script relative to `shared/codemods/` |
+| Field     | Type   | Description                                                                       |
+| --------- | ------ | --------------------------------------------------------------------------------- |
+| `type`    | string | One of: `renamed`, `removed`, `signature-changed`, `moved`, `deprecated`, `added` |
+| `from`    | string | Previous import path, export name, or identifier                                  |
+| `to`      | string | New import path, export name, or identifier                                       |
+| `path`    | string | Package path where the export lives                                               |
+| `export`  | string | Exported symbol name                                                              |
+| `detail`  | string | Human-readable migration note                                                     |
+| `codemod` | string | Path to codemod script relative to `shared/codemods/`                             |
 
 All fields except `type` are optional. Include what's relevant for each change.
 

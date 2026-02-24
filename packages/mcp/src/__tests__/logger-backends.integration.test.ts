@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import {
   createLoggerFactory,
   type Logger,
@@ -13,6 +14,7 @@ import {
   type Sink,
 } from "@outfitter/logging";
 import { z } from "zod";
+
 import { createMcpServer, defineTool } from "../index.js";
 
 interface MemoryRecord {

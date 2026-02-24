@@ -135,35 +135,40 @@ COMMANDs orchestrated by SKILL:
 
 ## Selection Matrix
 
-| Criteria | Skill | Command | Agent | Hook |
-|----------|-------|---------|-------|------|
-| User-invoked | ✓ | ✓ | ✓ | ✗ |
-| Event-triggered | ✗ | ✗ | ✗ | ✓ |
-| Requires judgment | ✓ | ✗ | ✓ | ✗ |
-| Fully automatable | ✗ | ✓ | ✗ | ✓ |
-| Domain expertise | ✗ | ✗ | ✓ | ✗ |
-| Progressive disclosure | ✓ | ✗ | rarely | ✗ |
-| Can block operations | ✗ | can fail | ✗ | ✓ (pre-*) |
+| Criteria               | Skill | Command  | Agent  | Hook       |
+| ---------------------- | ----- | -------- | ------ | ---------- |
+| User-invoked           | ✓     | ✓        | ✓      | ✗          |
+| Event-triggered        | ✗     | ✗        | ✗      | ✓          |
+| Requires judgment      | ✓     | ✗        | ✓      | ✗          |
+| Fully automatable      | ✗     | ✓        | ✗      | ✓          |
+| Domain expertise       | ✗     | ✗        | ✓      | ✗          |
+| Progressive disclosure | ✓     | ✗        | rarely | ✗          |
+| Can block operations   | ✗     | can fail | ✗      | ✓ (pre-\*) |
 
 ## Composite Patterns
 
 **SKILL + COMMAND**: Workflow has guidance + automation needs
+
 - SKILL provides strategy, COMMAND handles execution
 - Example: TDD skill + `/run-tests`
 
 **SKILL + HOOK**: Guidance reinforced with automated checks
+
 - SKILL teaches best practices, HOOK enforces them
 - Example: PR workflow + pre-push size validation
 
 **AGENT + SKILL**: Expert needs extended capabilities
+
 - AGENT embodies expertise, SKILLs extend it
 - Example: Security agent + vulnerability scanning skill
 
 **COMMAND + HOOK**: Same operation, manual and automatic
+
 - COMMAND for manual, HOOK for automation
 - Example: `/format-code` + pre-commit format hook
 
 **Multi-component (SKILL + COMMAND + HOOK)**: Complete workflow
+
 - SKILL guides, COMMAND automates, HOOK enforces
 - Example: Testing (strategy skill + /run-tests + pre-push coverage)
 

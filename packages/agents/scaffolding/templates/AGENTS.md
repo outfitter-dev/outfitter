@@ -38,6 +38,7 @@ bun run typecheck    # TypeScript validation
 ### Commits
 
 Conventional Commits with scopes:
+
 ```
 feat(scope): add feature
 fix(scope): fix bug

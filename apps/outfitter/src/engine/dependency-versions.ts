@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { getResolvedVersions } from "@outfitter/presets";
 
 const DEPENDENCY_SECTIONS = [

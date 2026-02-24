@@ -17,16 +17,19 @@ Bad: "Ask question wait response"
 ## Variables and Placeholders
 
 **Variables** — all caps, no spaces, curly braces:
+
 - `{VARIABLE}` — concrete placeholder to be replaced
 - Examples: `{N}`, `{REASON}`, `{BAR}`, `{NAME}`, `{FILE_PATH}`
 
 **Instructional prose** — lowercase, spaces inside braces:
+
 - `{ description of what goes here }` — guidance for what to fill in
 - Examples: `{ question text }`, `{ why it matters }`, `{ if needed }`
 
 ## XML Tags in Skills
 
 Use XML tags for structural sections in skill files:
+
 - `<when_to_use>` — trigger conditions
 - `<confidence>` — confidence levels/tracking
 - `<stages>` — workflow stages
@@ -162,9 +165,9 @@ Give tasks friendly, context-specific descriptions instead of generic stage name
 
 When referencing skills in documentation, use specific language based on skill type:
 
-| Skill Type | Language | Example |
-|------------|----------|---------|
-| Standard | "Load the skill" | Load the `skillcraft` skill |
+| Skill Type                            | Language              | Example                                        |
+| ------------------------------------- | --------------------- | ---------------------------------------------- |
+| Standard                              | "Load the skill"      | Load the `skillcraft` skill                    |
 | Delegated (`context: fork` + `agent`) | "Delegate by loading" | Delegate by loading the `security-audit` skill |
 
 **Standard skills** load instructions into the current context. The agent continues with those instructions available.
@@ -177,9 +180,11 @@ When referencing skills in documentation, use specific language based on skill t
 
 ```markdown
 # Wrong
+
 See [skillcraft](../skillcraft/SKILL.md) for patterns.
 
 # Right
+
 Load the `skillcraft` skill for patterns.
 ```
 

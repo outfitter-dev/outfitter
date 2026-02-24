@@ -15,11 +15,13 @@
 ## Alternatives Considered
 
 ### Option 1: {NAME}
+
 - **Pros**: {BENEFITS}
 - **Cons**: {DRAWBACKS}
 - **Why not chosen**: {REASON}
 
 ### Option 2: {NAME}
+
 - **Pros**: {BENEFITS}
 - **Cons**: {DRAWBACKS}
 - **Why not chosen**: {REASON}
@@ -27,14 +29,17 @@
 ## Consequences
 
 **Positive**:
+
 - {BENEFIT_1}
 - {BENEFIT_2}
 
 **Negative**:
+
 - {TRADEOFF_1}
 - {TRADEOFF_2}
 
 **Neutral**:
+
 - {IMPACT_1}
 - {IMPACT_2}
 

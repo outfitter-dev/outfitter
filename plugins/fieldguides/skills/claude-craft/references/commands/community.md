@@ -8,12 +8,14 @@ Curated collection of community-created slash commands, patterns, and resources.
 
 **[wshobson/commands](https://github.com/wshobson/commands)**
 57 production-ready commands organized into workflows and tools:
+
 - 15 workflow commands (feature development, TDD, modernization)
 - 42 tool commands (testing, security, infrastructure)
 - Invocation: `/workflows:command-name` or `/tools:command-name`
 
 **[Claude Command Suite](https://github.com/qdhenry/Claude-Command-Suite)**
 Enterprise-scale development toolkit:
+
 - 148+ slash commands
 - 54 AI agents
 - Namespace organization: `/dev:*`, `/test:*`, `/security:*`, `/deploy:*`
@@ -21,6 +23,7 @@ Enterprise-scale development toolkit:
 
 **[awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)**
 Curated list of commands, CLAUDE.md files, and workflows:
+
 - Git workflows: `/commit`, `/create-pr`, `/fix-github-issue`
 - Code quality: `/check`, `/optimize`, `/tdd`
 - Documentation: `/create-docs`, `/update-docs`
@@ -30,12 +33,14 @@ Curated list of commands, CLAUDE.md files, and workflows:
 
 **[claude-code-showcase](https://github.com/ChrisWiles/claude-code-showcase)**
 Comprehensive project configuration example:
+
 - Hooks, skills, agents, commands
 - GitHub Actions workflows
 - Best practices demonstration
 
 **[claude-code-guide](https://github.com/zebbern/claude-code-guide)**
 Setup guide with:
+
 - SKILL.md files
 - Agents and commands
 - Workflow examples
@@ -88,6 +93,7 @@ Vulnerability assessment with OWASP patterns.
 
 **`/tdd-cycle`**
 Test-driven development orchestration:
+
 - Red: Write failing tests
 - Green: Implement to pass
 - Refactor: Clean up
@@ -143,9 +149,9 @@ Lightweight context setup via directory visualization.
 description: Intelligent problem resolution
 ---
 Based on the issue type, delegate to:
-- Security issues -> security agent
-- Performance -> optimization agent
-- Tests failing -> debugging agent
+  - Security issues -> security agent
+  - Performance -> optimization agent
+  - Tests failing -> debugging agent
 ```
 
 ### Resume Capability
@@ -271,6 +277,7 @@ allowed-tools: Bash(*)
 ### Quality Checklist
 
 Before sharing:
+
 - [ ] Commands have clear descriptions
 - [ ] Arguments are documented with `argument-hint`
 - [ ] `allowed-tools` specified for safety
@@ -291,6 +298,7 @@ Before sharing:
 ### Version Compatibility
 
 Commands may need updates when:
+
 - Frontmatter schema changes
 - New features added (new fields)
 - Tool names modified

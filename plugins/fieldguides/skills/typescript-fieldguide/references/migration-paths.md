@@ -131,7 +131,7 @@ grep -r "try.*finally" src/
 async function queryDatabase() {
   const conn = await pool.getConnection();
   try {
-    const result = await conn.query('SELECT * FROM users');
+    const result = await conn.query("SELECT * FROM users");
     return result;
   } finally {
     conn.release();
@@ -156,7 +156,7 @@ class PooledConnection implements AsyncDisposable {
 
 async function queryDatabase() {
   await using conn = await pool.getConnection();
-  return conn.query('SELECT * FROM users');
+  return conn.query("SELECT * FROM users");
 }
 ```
 
@@ -166,11 +166,11 @@ async function queryDatabase() {
 
 ```typescript
 function readConfig() {
-  const fd = fs.openSync('config.json', 'r');
+  const fd = fs.openSync("config.json", "r");
   try {
     const buffer = Buffer.alloc(1024);
     fs.readSync(fd, buffer, 0, 1024, 0);
-    return JSON.parse(buffer.toString('utf8'));
+    return JSON.parse(buffer.toString("utf8"));
   } finally {
     fs.closeSync(fd);
   }
@@ -194,12 +194,12 @@ class FileHandle implements Disposable {
   read(size: number): string {
     const buffer = Buffer.alloc(size);
     fs.readSync(this.fd, buffer, 0, size, 0);
-    return buffer.toString('utf8');
+    return buffer.toString("utf8");
   }
 }
 
 function readConfig() {
-  using file = new FileHandle('config.json', 'r');
+  using file = new FileHandle("config.json", "r");
   return JSON.parse(file.read(1024));
 }
 ```
@@ -275,11 +275,11 @@ grep -r ": typeof" src/
 ```typescript
 const config: Config = {
   port: 3000,
-  host: 'localhost',
+  host: "localhost",
   features: {
     analytics: true,
-    darkMode: false
-  }
+    darkMode: false,
+  },
 };
 
 // Type: Config
@@ -291,11 +291,11 @@ const config: Config = {
 ```typescript
 const config = {
   port: 3000,
-  host: 'localhost',
+  host: "localhost",
   features: {
     analytics: true,
-    darkMode: false
-  }
+    darkMode: false,
+  },
 } satisfies Config;
 
 // Type: { port: number; host: string; features: { ... } }
@@ -308,8 +308,8 @@ const config = {
 
 ```typescript
 const routes: Record<string, RouteConfig> = {
-  home: { path: '/', handler: 'home' },
-  user: { path: '/user/:id', handler: 'user' }
+  home: { path: "/", handler: "home" },
+  user: { path: "/user/:id", handler: "user" },
 };
 
 // Type: Record<string, RouteConfig>
@@ -320,8 +320,8 @@ routes.home.path; // string (too wide)
 
 ```typescript
 const routes = {
-  home: { path: '/', handler: 'home' },
-  user: { path: '/user/:id', handler: 'user' }
+  home: { path: "/", handler: "home" },
+  user: { path: "/user/:id", handler: "user" },
 } satisfies Record<string, RouteConfig>;
 
 // Type: { home: { path: string; ... }, user: { ... } }
@@ -334,8 +334,8 @@ routes.home.path; // string (but autocomplete shows exact keys)
 
 ```typescript
 const colors = {
-  primary: '#007bff',
-  secondary: '#6c757d'
+  primary: "#007bff",
+  secondary: "#6c757d",
 } as const;
 
 // Type: { readonly primary: '#007bff'; readonly secondary: '#6c757d' }
@@ -346,8 +346,8 @@ const colors = {
 
 ```typescript
 const colors = {
-  primary: '#007bff',
-  secondary: '#6c757d'
+  primary: "#007bff",
+  secondary: "#6c757d",
 } as const satisfies Record<string, `#${string}`>;
 
 // Type: { readonly primary: '#007bff'; readonly secondary: '#6c757d' }
@@ -374,7 +374,7 @@ function tuple<T extends readonly unknown[]>(...args: T): T {
   return args;
 }
 
-const result = tuple('a', 'b', 'c');
+const result = tuple("a", "b", "c");
 // Type: (string | 'a' | 'b' | 'c')[] (widened)
 ```
 
@@ -385,7 +385,7 @@ function tuple<const T extends readonly unknown[]>(...args: T): T {
   return args;
 }
 
-const result = tuple('a', 'b', 'c');
+const result = tuple("a", "b", "c");
 // Type: ['a', 'b', 'c'] (exact)
 ```
 
@@ -400,7 +400,7 @@ function defineConfig<T extends Record<string, any>>(config: T): T {
 
 const config = defineConfig({
   port: 3000,
-  host: 'localhost'
+  host: "localhost",
 });
 // Type: { port: number; host: string } (widened)
 ```
@@ -414,7 +414,7 @@ function defineConfig<const T extends Record<string, any>>(config: T): T {
 
 const config = defineConfig({
   port: 3000,
-  host: 'localhost'
+  host: "localhost",
 });
 // Type: { readonly port: 3000; readonly host: 'localhost' } (exact)
 ```
@@ -439,16 +439,16 @@ const config = defineConfig({
 
 ```typescript
 // May work but inconsistent
-import { helper } from './utils';
-import { config } from '../config/index';
+import { helper } from "./utils";
+import { config } from "../config/index";
 ```
 
 **After:**
 
 ```typescript
 // Explicit, clear intent
-import { helper } from './utils.ts';
-import { config } from '../config/index.ts';
+import { helper } from "./utils.ts";
+import { config } from "../config/index.ts";
 
 // Emits:
 // import { helper } from './utils.js';
@@ -499,21 +499,21 @@ If issues arise:
 
 ```typescript
 // type-tests.ts
-import { expectType, expectError } from 'tsd';
+import { expectType, expectError } from "tsd";
 
 // Test inferred predicates
 function isString(x: unknown) {
-  return typeof x === 'string';
+  return typeof x === "string";
 }
 
-const value: unknown = 'hello';
+const value: unknown = "hello";
 if (isString(value)) {
   expectType<string>(value);
 }
 
 // Test satisfies
 const config = {
-  port: 3000
+  port: 3000,
 } satisfies { port: number };
 
 expectType<{ port: number }>(config);
@@ -524,8 +524,8 @@ expectError(config.unknownKey);
 
 ```typescript
 // runtime-tests.ts
-describe('Resource Management', () => {
-  it('should dispose resources automatically', async () => {
+describe("Resource Management", () => {
+  it("should dispose resources automatically", async () => {
     let disposed = false;
 
     class TestResource implements AsyncDisposable {
@@ -548,15 +548,15 @@ describe('Resource Management', () => {
 
 ```typescript
 // integration-tests.ts
-describe('Modern TypeScript Features', () => {
-  it('should work end-to-end', async () => {
+describe("Modern TypeScript Features", () => {
+  it("should work end-to-end", async () => {
     // Test using with real database
     await using db = await createConnection();
-    const result = await db.query('SELECT 1');
+    const result = await db.query("SELECT 1");
     expect(result).toBeDefined();
   });
 
-  it('should validate config with satisfies', () => {
+  it("should validate config with satisfies", () => {
     const config = loadConfig() satisfies AppConfig;
     expect(config.port).toBeGreaterThan(0);
   });

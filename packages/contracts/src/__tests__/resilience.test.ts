@@ -8,7 +8,9 @@
  * Total: 14 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "better-result";
+
 import {
   NetworkError,
   type OutfitterError,

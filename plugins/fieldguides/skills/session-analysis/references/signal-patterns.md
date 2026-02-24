@@ -9,6 +9,7 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Positive adjectives, exclamation marks, superlatives.
 
 **Examples**:
+
 - "Perfect!"
 - "Exactly what I needed"
 - "This is great work"
@@ -16,11 +17,13 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 - "Well done"
 
 **Edge cases**:
+
 - "Good enough" → Low confidence (lukewarm, not enthusiastic)
 - "That works" → Low confidence (neutral acceptance, not praise)
 - "Thanks" → Context-dependent (could be courtesy, not satisfaction)
 
 **Confidence criteria**:
+
 - **High**: Superlatives ("perfect", "excellent"), multiple exclamations, enthusiastic tone
 - **Medium**: Positive adjectives ("good", "nice") with neutral tone
 - **Low**: Minimal positive language, could be polite rather than satisfied
@@ -30,16 +33,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Building on previous work, extending scope, applying pattern elsewhere.
 
 **Examples**:
+
 - "Now do the same for the login page"
 - "Apply this pattern to all API routes"
 - "Great, next let's handle the error cases"
 
 **Edge cases**:
+
 - "Now try X instead" → Frustration (correction) if contradicts prior work
 - "Also do Y" → Continuation only if X succeeded; check for corrections first
 - "Next, fix the bug in Z" → Context switch, not continuation
 
 **Confidence criteria**:
+
 - **High**: Explicit reference to prior success + request to extend
 - **Medium**: Implied satisfaction + new related task
 - **Low**: Sequential tasks without confirmation of prior success
@@ -49,16 +55,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: User implements agent's suggestion without modification or pushback.
 
 **Examples**:
-- Agent: "Use TanStack Router" → User: *next message shows TanStack Router implementation*
+
+- Agent: "Use TanStack Router" → User: _next message shows TanStack Router implementation_
 - Agent: "Refactor to use async/await" → User: "Done, looks cleaner"
 - Agent suggests pattern → User's code follows pattern exactly
 
 **Edge cases**:
+
 - User modifies suggestion before implementing → Medium confidence (partial adoption)
 - User implements after asking clarifying questions → Still adoption (high confidence)
 - User implements weeks later → Weak adoption signal (confounded by time)
 
 **Confidence criteria**:
+
 - **High**: Immediate implementation with no modifications
 - **Medium**: Implementation after clarification or with minor adjustments
 - **Low**: Implementation significantly delayed or heavily modified
@@ -68,17 +77,20 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Approval language followed by action (merge, ship, close ticket).
 
 **Examples**:
+
 - "Looks good, merge it"
 - "Ship it"
 - "Perfect, closing this issue"
 - "LGTM" (Looks Good To Me)
 
 **Edge cases**:
+
 - "Looks good, but..." → Conditional acceptance, check for follow-up corrections
 - "Merge" without review → Context-dependent (could be trust or urgency, not satisfaction)
 - "Ship it" with sarcasm → Rare but check surrounding context for frustration
 
 **Confidence criteria**:
+
 - **High**: Explicit approval + action directive
 - **Medium**: Approval without action or action without explicit approval
 - **Low**: Ambiguous approval ("fine", "okay") that could indicate resignation
@@ -90,16 +102,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Negation words, contradiction of agent output, explicit redirection.
 
 **Examples**:
+
 - "No, I meant X not Y"
 - "That's wrong, do Z instead"
 - "Actually, use A instead of B"
 
 **Edge cases**:
+
 - "Small correction: use X" → Frustration (low confidence) if agent should have known
 - "Let's adjust to X" → Not frustration if iterating on shared work
 - "Change X to Y" → Context-dependent (correction vs. evolution)
 
 **Confidence criteria**:
+
 - **High**: Explicit negation ("no", "wrong", "don't") + correction
 - **Medium**: Implicit correction ("actually", "instead") without harsh language
 - **Low**: Neutral adjustment language that could be iteration not correction
@@ -109,17 +124,20 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Request to undo agent's changes, return to previous state.
 
 **Examples**:
+
 - "Revert that change"
 - "Go back to the original version"
 - "Undo what you just did"
 - User manually reverts agent's commit
 
 **Edge cases**:
+
 - "Let's try the original approach" → Could be exploration, not frustration
 - Revert after testing both options → Scientific method, not frustration
 - Partial revert → Medium confidence (some parts worked, some didn't)
 
 **Confidence criteria**:
+
 - **High**: Explicit revert request with no justification (implies failure)
 - **Medium**: Revert with explanation that agent's approach had issues
 - **Low**: Revert as part of A/B testing or exploration
@@ -129,16 +147,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Same request issued 2+ times with escalating specificity or frustration.
 
 **Examples**:
+
 - Message 1: "Use Bun not npm"
 - Message 2: "Again, use Bun"
 - Message 3: "I already told you to use Bun!"
 
 **Edge cases**:
+
 - Repetition after context switch → May not be frustration, could be reminder
 - Repetition with new information → Evolution, not frustration
 - Repetition across different tasks → Preference signal, not frustration
 
 **Confidence criteria**:
+
 - **High**: 3+ repetitions with escalating tone or "again"/"already told you"
 - **Medium**: 2 repetitions with no new context
 - **Low**: 2 similar requests in different contexts (could be unrelated)
@@ -148,17 +169,20 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Direct expression of dissatisfaction, questioning agent's behavior.
 
 **Examples**:
+
 - "This isn't working"
 - "Why did you do X when I said Y?"
 - "I already told you not to..."
 - "This is frustrating"
 
 **Edge cases**:
+
 - "Hmm, that's odd" → Confusion, not necessarily frustration
 - "Why X?" → Curiosity if neutral tone; frustration if accusatory
 - "Not quite" → Gentle correction, low frustration
 
 **Confidence criteria**:
+
 - **High**: Explicit frustration words ("frustrating", "annoying") or accusatory questions
 - **Medium**: Implied dissatisfaction ("not working", "this is wrong")
 - **Low**: Neutral problem statements without emotional language
@@ -170,16 +194,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Ordinal language, numbered lists, temporal connectives.
 
 **Examples**:
+
 - "First, do X. Then Y. Finally Z."
 - "Step 1: A, Step 2: B, Step 3: C"
 - "Before we start, let's..."
 
 **Edge cases**:
+
 - Single "first" without "second" → Low confidence (could be emphasis, not sequence)
 - "Then" without "first" → Continuation, not new sequence
 - Numbered list describing features (not steps) → Not workflow signal
 
 **Confidence criteria**:
+
 - **High**: Multiple ordinal markers (first, second, third) or numbered steps
 - **Medium**: Single sequence marker with clear temporal relationship
 - **Low**: Ambiguous temporal language ("before", "after") without clear sequence
@@ -189,16 +216,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Reference to completion + new direction, explicit context shift.
 
 **Examples**:
+
 - "Now that X is done, let's work on Y"
 - "Moving on to the API layer"
 - "With that complete, next is..."
 
 **Edge cases**:
+
 - "Let's do Y" without completion reference → Context switch, not stage transition
 - "After X, do Y" (pre-planning) → Sequence marker, not transition
 - "Y is next" → Future reference, not active transition
 
 **Confidence criteria**:
+
 - **High**: Explicit completion reference + new task
 - **Medium**: Implied completion + new direction
 - **Low**: New task without completion signal (could be interruption)
@@ -208,16 +238,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Consistent sequence of tool usage across multiple tasks.
 
 **Examples**:
+
 - Pattern: Read → Edit → Bash (test) appears 5+ times
 - Pattern: Glob → Grep → Read appears 3+ times for search tasks
 - Pattern: Write → Bash (validate) appears 4+ times
 
 **Edge cases**:
+
 - Same tools in different order → Not a chain, separate usage
 - Tool chain appears once → Not a pattern yet
 - Tool chain broken by user interruption → Still valid if resumes afterward
 
 **Confidence criteria**:
+
 - **High**: 5+ occurrences of same tool sequence
 - **Medium**: 3-4 occurrences with occasional variation
 - **Low**: 2 occurrences or significant variation in sequence
@@ -227,16 +260,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Abrupt topic change, new file focus, no transition language.
 
 **Examples**:
+
 - Working on auth.ts → Suddenly "Fix the database schema"
 - Discussing React components → "Now debug the API"
 - Mid-task: "Actually, let's work on something else"
 
 **Edge cases**:
+
 - Switch after completing task → Stage transition, not context switch
 - Switch with explanation → Intentional pivot, still a switch but lower friction
 - Return to previous context → Resumption, not new switch
 
 **Confidence criteria**:
+
 - **High**: Abrupt change with no transition, different domain
 - **Medium**: Change with minimal transition or related domain
 - **Low**: Change with explanation or natural task completion
@@ -248,16 +284,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Negative imperatives, explicit constraints, "don't" statements.
 
 **Examples**:
+
 - "Don't use any types"
 - "Never use npm, always use Bun"
 - "Avoid using classes"
 
 **Edge cases**:
+
 - "I wouldn't use X" → Preference, not prohibition (softer language)
 - "Don't do X unless Y" → Conditional prohibition
 - "Try not to X" → Soft prohibition (low confidence)
 
 **Confidence criteria**:
+
 - **High**: Absolute negatives ("never", "don't", "no") with no conditions
 - **Medium**: Soft negatives ("avoid", "try not to") or conditional prohibitions
 - **Low**: Implicit discouragement without explicit prohibition
@@ -267,16 +306,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Absolute language, modal verbs (must, should, always), imperatives.
 
 **Examples**:
+
 - "Always run tests before committing"
 - "You must validate input"
 - "Make sure to check for errors"
 
 **Edge cases**:
+
 - "It's good to X" → Preference, not requirement
 - "Should probably X" → Weak requirement (medium confidence)
 - "Try to X" → Suggestion, not requirement
 
 **Confidence criteria**:
+
 - **High**: Absolute modal verbs ("must", "always") or strong imperatives
 - **Medium**: Soft modal verbs ("should") or qualified requirements
 - **Low**: Suggestions ("could", "might want to") without strong language
@@ -286,16 +328,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Comparative language, subjective statements, "prefer" / "better" / "rather".
 
 **Examples**:
+
 - "I prefer TypeScript over JavaScript"
 - "It's better to use async/await"
 - "I'd rather use functional components"
 
 **Edge cases**:
+
 - "I like X" → Weak preference (low confidence)
 - "X is better" (stated as fact) → Could be requirement depending on tone
 - "Prefer X, but Y works too" → Flexible preference (medium confidence)
 
 **Confidence criteria**:
+
 - **High**: Explicit preference language ("prefer", "I'd rather") with comparison
 - **Medium**: Implied preference through evaluation ("better", "cleaner")
 - **Low**: Weak positive statements without comparison
@@ -305,16 +350,19 @@ Extended taxonomy with edge cases, disambiguation guidance, and confidence scori
 **Core indicators**: Logical connectives (if/then, when, unless), situational rules.
 
 **Examples**:
+
 - "If X then Y"
 - "When working on auth, always use Z"
 - "Unless A, do B"
 
 **Edge cases**:
+
 - "Maybe if X" → Uncertain conditional (low confidence)
 - "X or Y depending on Z" → Multiple conditionals, complex rule
 - "If X" without "then" → Incomplete conditional, infer consequence from context
 
 **Confidence criteria**:
+
 - **High**: Explicit if/then structure with clear condition and action
 - **Medium**: Implied conditional (when, unless) or incomplete structure
 - **Low**: Vague conditional ("depending on", "maybe if")

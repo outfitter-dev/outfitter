@@ -6,6 +6,7 @@
 
 import { isCancel, password, text } from "@clack/prompts";
 import { Result } from "better-result";
+
 import {
   createCancelledError,
   type PasswordPromptOptions,

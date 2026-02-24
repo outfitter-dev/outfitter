@@ -1,11 +1,24 @@
 {
   "name": "@outfitter/config",
-  "description": "XDG-compliant config loading with schema validation for Outfitter",
   "version": "0.3.3",
-  "type": "module",
+  "description": "XDG-compliant config loading with schema validation for Outfitter",
+  "keywords": [
+    "config",
+    "outfitter",
+    "typescript",
+    "xdg"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/config"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -29,7 +42,9 @@
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bunup --filter @outfitter/config",
     "lint": "biome lint ./src",
@@ -49,20 +64,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "config",
-    "xdg",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/config"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

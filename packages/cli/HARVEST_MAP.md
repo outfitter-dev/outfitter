@@ -10,18 +10,18 @@ This document catalogs CLI patterns discovered in waymark and firewatch codebase
 
 **Key files analyzed**:
 
-| File | Purpose |
-|------|---------|
-| `src/exit-codes.ts` | Standardized exit code constants |
-| `src/errors.ts` | CliError class with exit code mapping |
-| `src/program.ts` | Commander.js program builder, command registration |
-| `src/utils/output.ts` | JSON/JSONL/text rendering helpers |
-| `src/utils/stdin.ts` | stdin stream reading utilities |
-| `src/utils/terminal.ts` | TTY detection, color support detection |
-| `src/utils/flags/*.ts` | Flag parsing utilities (json, string-list, iterator) |
-| `src/utils/display/pagination.ts` | Basic pagination (slice-based) |
-| `src/utils/display/formatters/styles.ts` | Chalk-based styling utilities |
-| `src/types.ts` | GlobalOptions, CommandContext types |
+| File                                     | Purpose                                              |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `src/exit-codes.ts`                      | Standardized exit code constants                     |
+| `src/errors.ts`                          | CliError class with exit code mapping                |
+| `src/program.ts`                         | Commander.js program builder, command registration   |
+| `src/utils/output.ts`                    | JSON/JSONL/text rendering helpers                    |
+| `src/utils/stdin.ts`                     | stdin stream reading utilities                       |
+| `src/utils/terminal.ts`                  | TTY detection, color support detection               |
+| `src/utils/flags/*.ts`                   | Flag parsing utilities (json, string-list, iterator) |
+| `src/utils/display/pagination.ts`        | Basic pagination (slice-based)                       |
+| `src/utils/display/formatters/styles.ts` | Chalk-based styling utilities                        |
+| `src/types.ts`                           | GlobalOptions, CommandContext types                  |
 
 ### firewatch/apps/cli
 
@@ -29,14 +29,14 @@ This document catalogs CLI patterns discovered in waymark and firewatch codebase
 
 **Key files analyzed**:
 
-| File | Purpose |
-|------|---------|
-| `bin/fw.ts` | Entrypoint with graceful shutdown handlers |
-| `src/index.ts` | Commander.js program with extensive option parsing |
-| `src/utils/json.ts` | JSONL output with backpressure handling |
-| `src/utils/tty.ts` | TTY detection with env var overrides |
-| `src/utils/color.ts` | Lazy-initialized ansis color handling |
-| `src/commands/ack.ts` | Command example with structured output |
+| File                  | Purpose                                            |
+| --------------------- | -------------------------------------------------- |
+| `bin/fw.ts`           | Entrypoint with graceful shutdown handlers         |
+| `src/index.ts`        | Commander.js program with extensive option parsing |
+| `src/utils/json.ts`   | JSONL output with backpressure handling            |
+| `src/utils/tty.ts`    | TTY detection with env var overrides               |
+| `src/utils/color.ts`  | Lazy-initialized ansis color handling              |
+| `src/commands/ack.ts` | Command example with structured output             |
 
 ---
 
@@ -150,7 +150,7 @@ export function shouldOutputJson(
 ```typescript
 export function shouldUseColor(noColorFlag?: boolean): boolean {
   if (noColorFlag) return false;
-  if (hasNoColor()) return false;  // NO_COLOR env
+  if (hasNoColor()) return false; // NO_COLOR env
   if (hasForceColor()) return true; // FORCE_COLOR env
   if (!process.stdout.isTTY) return false;
   if (isDumbTerminal()) return false; // TERM=dumb
@@ -508,9 +508,11 @@ export async function createProgram(): Promise<Command> {
     .configureHelp({
       formatHelp: buildCustomHelpFormatter(),
     })
-    .addOption(new Option("--scope <scope>", "config scope")
-      .choices(["default", "project", "user"])
-      .default("default"))
+    .addOption(
+      new Option("--scope <scope>", "config scope")
+        .choices(["default", "project", "user"])
+        .default("default")
+    )
     .option("--config <path>", "load additional config file")
     .option("--cache", "use scan cache")
     .option("--no-input", "fail if interactive input required")
@@ -529,7 +531,9 @@ export async function createProgram(): Promise<Command> {
       else if (opts.quiet) logger.level = "error";
     });
 
-  registerCommands(program, { /* handlers */ });
+  registerCommands(program, {
+    /* handlers */
+  });
 
   return program;
 }
@@ -563,7 +567,9 @@ program
   .option("--debug", "Enable debug logging")
   .option("--no-color", "Disable color output")
   .addHelpText("after", "Examples:\n  ...")
-  .action(async (options) => { /* ... */ });
+  .action(async (options) => {
+    /* ... */
+  });
 ```
 
 **Key insight**: `enablePositionalOptions()` for better positional arg handling. Example text in help.
@@ -598,8 +604,14 @@ function setupShutdownHandlers(): void {
   };
 
   process.on("exit", shutdown);
-  process.on("SIGINT", () => { shutdown(); process.exit(0); });
-  process.on("SIGTERM", () => { shutdown(); process.exit(0); });
+  process.on("SIGINT", () => {
+    shutdown();
+    process.exit(0);
+  });
+  process.on("SIGTERM", () => {
+    shutdown();
+    process.exit(0);
+  });
   process.on("uncaughtException", (err) => {
     console.error("Uncaught exception:", err);
     shutdown();
@@ -637,26 +649,29 @@ Outfitter should generalize this pattern:
 
 ```typescript
 // @outfitter/cli output mode detection
-export function resolveOutputMode(options: {
-  json?: boolean;
-  jsonl?: boolean;
-  text?: boolean;
-}, config?: { defaultFormat?: "human" | "json" }): OutputMode {
+export function resolveOutputMode(
+  options: {
+    json?: boolean;
+    jsonl?: boolean;
+    text?: boolean;
+  },
+  config?: { defaultFormat?: "human" | "json" }
+): OutputMode {
   // Explicit flags first
   if (options.json) return "json";
   if (options.jsonl) return "jsonl";
   if (options.text) return "text";
-  
+
   // Env var override (generic pattern)
   const envJson = process.env[`${APP_PREFIX}_JSON`];
   const envJsonl = process.env[`${APP_PREFIX}_JSONL`];
   if (envJsonl === "1") return "jsonl";
   if (envJson === "1") return "json";
   if (envJsonl === "0" || envJson === "0") return "text";
-  
+
   // Config default
   if (config?.defaultFormat === "json") return "jsonl";
-  
+
   // TTY detection
   return process.stdout.isTTY ? "text" : "jsonl";
 }
@@ -668,14 +683,14 @@ export function resolveOutputMode(options: {
 // @outfitter/cli exit codes (mapped from ErrorCategory)
 export const ExitCode = {
   success: 0,
-  validation: 1,     // Bad input, invalid flags
-  not_found: 2,      // Resource not found
-  conflict: 3,       // State conflict, version mismatch
-  permission: 4,     // Auth/authz failure
-  io: 5,             // File/network/database I/O
-  transient: 6,      // Retry-able failure
-  internal: 7,       // Bug, unexpected state
-  cancelled: 8,      // User cancelled (Ctrl+C handled separately)
+  validation: 1, // Bad input, invalid flags
+  not_found: 2, // Resource not found
+  conflict: 3, // State conflict, version mismatch
+  permission: 4, // Auth/authz failure
+  io: 5, // File/network/database I/O
+  transient: 6, // Retry-able failure
+  internal: 7, // Bug, unexpected state
+  cancelled: 8, // User cancelled (Ctrl+C handled separately)
 } as const;
 ```
 
@@ -706,12 +721,12 @@ let colorEnabled: boolean | null = null;
 
 export function shouldUseColor(): boolean {
   if (colorEnabled !== null) return colorEnabled;
-  
+
   if (process.env.NO_COLOR) colorEnabled = false;
   else if (process.env.FORCE_COLOR) colorEnabled = true;
   else if (process.env.TERM === "dumb") colorEnabled = false;
   else colorEnabled = process.stdout.isTTY ?? false;
-  
+
   return colorEnabled;
 }
 
@@ -761,6 +776,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark/firewatch have offset-based pagination but no state persistence.
 
 **Outfitter implementation needed**:
+
 - State storage in `@outfitter/state` (XDG state directory)
 - Per-command cursor serialization
 - `--next` flag that loads last cursor
@@ -773,6 +789,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Neither repo implements this.
 
 **Outfitter implementation needed**:
+
 - State keyed by `(command, context)` tuple
 - Default context when not specified
 - State isolation between contexts
@@ -784,6 +801,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Neither repo implements this systematically.
 
 **Outfitter implementation needed**:
+
 - `expandFileArg()` utility that reads `@path` files
 - Integration with `collectIds()` for multi-ID collection
 - Support for `@-` reading from stdin
@@ -795,6 +813,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has workspace detection but no constrained glob expansion.
 
 **Outfitter implementation needed**:
+
 - `parseGlob()` that enforces paths stay within workspace
 - Integration with `@outfitter/file-ops` for `secureResolvePath()`
 - Error on glob patterns that escape workspace
@@ -806,6 +825,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark/firewatch use thrown exceptions.
 
 **Outfitter implementation needed**:
+
 - CLI adapter converts `Result.err()` to appropriate exit code
 - Structured error serialization for `--json` output
 - Error envelope format: `{ ok: false, error: { _tag, message, ... } }`
@@ -817,6 +837,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has formatters but no shape abstraction. Firewatch has no abstraction.
 
 **Outfitter implementation needed**:
+
 - `@outfitter/tui/render` shapes
 - `@outfitter/cli` output() function that auto-selects renderer
 - Integration with `--json`, `--jsonl`, `--tree`, `--table` flags
@@ -828,6 +849,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has some handler separation. Firewatch mixes command logic with output.
 
 **Outfitter implementation needed**:
+
 - Clear handler interface: `(input, ctx) => Promise<Result<T, E>>`
 - CLI adapter that maps flags to handler input
 - Handler knows nothing about output format
@@ -838,18 +860,18 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 Based on SPEC.md and existing patterns:
 
-| Priority | Feature | Source | Notes |
-|----------|---------|--------|-------|
-| P0 | Exit code constants | waymark | Extend with full error category mapping |
-| P0 | Output mode detection | firewatch | Generalize env var pattern |
-| P0 | TTY/color detection | both | Combine best of both |
-| P0 | JSONL with backpressure | firewatch | Critical for streaming |
-| P1 | Commander.js patterns | waymark | Option conflicts, hooks, help customization |
-| P1 | CSV parsing utilities | firewatch | Standardize include/exclude pattern |
-| P1 | Signal handlers | both | Combine with cleanup hooks |
-| P1 | stdin reading | waymark | Extend for @- convention |
-| P2 | Spinner integration | waymark | stderr-based, quiet-aware |
-| P2 | Custom help formatting | waymark | May not need for v1 |
+| Priority | Feature                 | Source    | Notes                                       |
+| -------- | ----------------------- | --------- | ------------------------------------------- |
+| P0       | Exit code constants     | waymark   | Extend with full error category mapping     |
+| P0       | Output mode detection   | firewatch | Generalize env var pattern                  |
+| P0       | TTY/color detection     | both      | Combine best of both                        |
+| P0       | JSONL with backpressure | firewatch | Critical for streaming                      |
+| P1       | Commander.js patterns   | waymark   | Option conflicts, hooks, help customization |
+| P1       | CSV parsing utilities   | firewatch | Standardize include/exclude pattern         |
+| P1       | Signal handlers         | both      | Combine with cleanup hooks                  |
+| P1       | stdin reading           | waymark   | Extend for @- convention                    |
+| P2       | Spinner integration     | waymark   | stderr-based, quiet-aware                   |
+| P2       | Custom help formatting  | waymark   | May not need for v1                         |
 
 ---
 

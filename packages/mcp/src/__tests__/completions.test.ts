@@ -4,7 +4,9 @@
  * Verifies argument autocompletion for prompt args and resource template params.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import {
   createMcpServer,
   definePrompt,

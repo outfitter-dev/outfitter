@@ -8,6 +8,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import type { BorderStyle } from "../render/borders.js";
 import type { ListStyle } from "../render/list.js";
 import type { SpinnerStyle } from "../render/spinner.js";

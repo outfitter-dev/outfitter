@@ -4,12 +4,12 @@ Create reusable instruction files in `.claude/rules/` for project conventions.
 
 ## Rules vs CLAUDE.md
 
-| Aspect | CLAUDE.md | .claude/rules/ |
-|--------|-----------|----------------|
-| Loading | Automatic at session start | On-demand via reference |
-| Content | Project setup, key commands | Reusable conventions |
-| Size | Concise (~200-500 lines) | Can be detailed |
-| Scope | This specific project | Patterns across files |
+| Aspect  | CLAUDE.md                   | .claude/rules/          |
+| ------- | --------------------------- | ----------------------- |
+| Loading | Automatic at session start  | On-demand via reference |
+| Content | Project setup, key commands | Reusable conventions    |
+| Size    | Concise (~200-500 lines)    | Can be detailed         |
+| Scope   | This specific project       | Patterns across files   |
 
 **Put in CLAUDE.md**: One-off instructions, project-specific commands, key file locations.
 
@@ -60,11 +60,11 @@ paths:
   - "src/api/**/*.ts"
   - "lib/**/*.ts"
 ---
-
 # API Development Rules
 ```
 
 **Supported glob patterns**:
+
 - `**/*.ts` — All TypeScript files
 - `src/**/*` — All files under src/
 - `*.md` — Markdown in root
@@ -84,15 +84,17 @@ Brief description of what this covers.
 ## Section 1
 
 | Pattern | Example | Notes |
-|---------|---------|-------|
-| ... | ... | ... |
+| ------- | ------- | ----- |
+| ...     | ...     | ...   |
 
 ## Section 2
 
 **Do:**
+
 - Specific guideline
 
 **Don't:**
+
 - Anti-pattern to avoid
 
 ## Examples
@@ -110,9 +112,11 @@ Reference rules explicitly — they're not auto-loaded:
 # CLAUDE.md
 
 ## Code Style
+
 Follow `.claude/rules/FORMATTING.md` for all code conventions.
 
 ## Testing
+
 See `.claude/rules/TESTING.md` for TDD patterns.
 ```
 
@@ -158,12 +162,14 @@ my-plugin/
 ## Anti-Patterns
 
 **Don't:**
+
 - Create rules for one-off instructions (use CLAUDE.md)
 - Duplicate content between CLAUDE.md and rules/
 - Create catch-all files like `EVERYTHING.md`
 - Expect rules to auto-load (they must be referenced)
 
 **Do:**
+
 - Keep each rule file focused on one topic
 - Use tables and lists for scannability
 - Reference shared rules via `@` when available

@@ -5,6 +5,7 @@
  */
 
 import { Command } from "commander";
+
 import type { CLI, CLIConfig, CommandBuilder } from "./types.js";
 
 function isCommanderHelp(error: { code?: string }): boolean {

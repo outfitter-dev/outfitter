@@ -4,18 +4,18 @@ How each tool activates and invokes skills.
 
 ## Invocation Patterns Overview
 
-| Tool | Pattern | Description |
-| ------ | --------- | ------------- |
-| Claude Code | Model-invoked | Agent autonomously decides based on request + description |
-| Claude (claude.ai) | Auto + Model | Pre-built skills auto-activate; custom skills when relevant |
-| GitHub Copilot | Model-invoked | Based on prompt + skill description |
-| VS Code (Copilot) | Model-invoked | Auto-activates, follows progressive disclosure |
-| OpenAI Codex | Explicit + Implicit | `/skills` command or `$skill` mentions, or model decides |
-| Cursor | Model-invoked | Agent determines relevance automatically |
-| Amp | Lazy-loaded | On-demand loading when relevant |
-| Letta | Tool-based | Agent calls `Skill` tool to load into memory |
-| Goose | Model-invoked | Loads skills, accesses files via file tools |
-| OpenCode | Tool-based | Skills registered as dynamic tools via plugin |
+| Tool               | Pattern             | Description                                                 |
+| ------------------ | ------------------- | ----------------------------------------------------------- |
+| Claude Code        | Model-invoked       | Agent autonomously decides based on request + description   |
+| Claude (claude.ai) | Auto + Model        | Pre-built skills auto-activate; custom skills when relevant |
+| GitHub Copilot     | Model-invoked       | Based on prompt + skill description                         |
+| VS Code (Copilot)  | Model-invoked       | Auto-activates, follows progressive disclosure              |
+| OpenAI Codex       | Explicit + Implicit | `/skills` command or `$skill` mentions, or model decides    |
+| Cursor             | Model-invoked       | Agent determines relevance automatically                    |
+| Amp                | Lazy-loaded         | On-demand loading when relevant                             |
+| Letta              | Tool-based          | Agent calls `Skill` tool to load into memory                |
+| Goose              | Model-invoked       | Loads skills, accesses files via file tools                 |
+| OpenCode           | Tool-based          | Skills registered as dynamic tools via plugin               |
 
 ## Detailed Invocation Methods
 
@@ -24,10 +24,12 @@ How each tool activates and invokes skills.
 **Type:** Model-invoked (autonomous)
 
 Claude autonomously decides to use skills based on:
+
 - Current request context
 - Skill `name` and `description` from frontmatter
 
 **Contrast with slash commands:**
+
 - Skills = model-invoked (agent decides)
 - Slash commands = user-invoked (explicit)
 
@@ -47,10 +49,12 @@ Claude autonomously decides to use skills based on:
 **Type:** Model-invoked
 
 Copilot decides activation based on:
+
 - User's prompt content
 - Skill `description` field
 
 When activated:
+
 - `SKILL.md` content injected into agent context
 
 ---
@@ -70,18 +74,22 @@ When activated:
 **Type:** Explicit + Implicit
 
 **Explicit invocation:**
+
 - `/skills` slash command — Opens skill selector
 - `$<skill-name>` mention — Reference specific skill in prompt (e.g., `$plan`, `$skill-creator`)
 
 **Implicit invocation:**
+
 - Codex decides based on skill descriptions
 - Automatic activation when task matches skill description
 
 **Surface support:**
+
 - CLI and IDE extensions support explicit invocation
 - Web and iOS don't support explicit invocation yet (but can prompt Codex to use repo skills)
 
 **Built-in skills:**
+
 - `$plan` — Research and create implementation plans
 - `$skill-creator` — Bootstrap new skills
 - `$skill-installer` — Download skills from GitHub
@@ -115,20 +123,24 @@ When activated:
 **Type:** Tool-based
 
 **Model invocation:**
+
 - Agent calls the **`Skill` tool** to load skills into memory
 - Agent decides when to load based on context
 - Skill tool commands: `load`, `unload`, `refresh`
 
 **Explicit invocation:**
+
 - Prompt: "Use the testing skill..." to force specific skill
 - `/skill` command: Extract new skill from recent work
 
 **Memory integration (Two Blocks):**
+
 - **`skills` block**: Always visible — list of available skills (names + descriptions)
 - **`loaded_skills` block**: Session state — full content of currently loaded skills
 - Both blocks are read-only (modified only via Skill tool)
 
 **Alternative access:**
+
 - Can read `.skills/<name>/SKILL.md` directly for one-time preview (without loading)
 
 ---
@@ -158,11 +170,13 @@ When activated:
 The agent decides when to use skills without explicit user action.
 
 **Pros:**
+
 - Seamless user experience
 - Agent can combine skills as needed
 - No learning curve for users
 
 **Cons:**
+
 - Less predictable
 - May miss relevant skills
 - User has less control
@@ -174,11 +188,13 @@ The agent decides when to use skills without explicit user action.
 User directly requests skill usage via commands or mentions.
 
 **Pros:**
+
 - Predictable behavior
 - User maintains control
 - Clear audit trail
 
 **Cons:**
+
 - Requires user to know available skills
 - More friction
 - May miss opportunities
@@ -190,11 +206,13 @@ User directly requests skill usage via commands or mentions.
 Skills are exposed as tools the agent can call programmatically.
 
 **Pros:**
+
 - Fits existing tool-use patterns
 - Clear invocation semantics
 - Integrates with agent memory
 
 **Cons:**
+
 - Requires tool infrastructure
 - More complex implementation
 

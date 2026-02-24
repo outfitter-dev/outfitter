@@ -24,6 +24,7 @@ Complete API documentation and advanced patterns for {YOUR_SKILL_NAME}.
 ```
 
 **Parameters**:
+
 - `param1` ({ type }): { description }
 - `param2` ({ type }, optional): { description }
 
@@ -42,6 +43,7 @@ Complete API documentation and advanced patterns for {YOUR_SKILL_NAME}.
 ```
 
 **Parameters**:
+
 - `param1` ({ type }): { description }
 - `param2` ({ type }, optional): { description }
 
@@ -71,8 +73,8 @@ Create a config file at `{ path/to/config }`:
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option    | Type     | Default   | Description     |
+| --------- | -------- | --------- | --------------- |
 | `option1` | { type } | { value } | { description } |
 | `option2` | { type } | { value } | { description } |
 | `option3` | { type } | { value } | { description } |
@@ -98,11 +100,13 @@ Create a config file at `{ path/to/config }`:
 ```
 
 **Explanation**:
+
 1. { step 1 explanation }
 2. { step 2 explanation }
 3. { step 3 explanation }
 
 **Trade-offs**:
+
 - ✅ Pros: { list }
 - ❌ Cons: { list }
 
@@ -137,10 +141,10 @@ Create a config file at `{ path/to/config }`:
 
 ### Benchmarks
 
-| Operation | Time | Memory | Notes |
-|-----------|------|--------|-------|
-| { op 1 } | { time } | { mem } | { notes } |
-| { op 2 } | { time } | { mem } | { notes } |
+| Operation | Time     | Memory  | Notes     |
+| --------- | -------- | ------- | --------- |
+| { op 1 }  | { time } | { mem } | { notes } |
+| { op 2 }  | { time } | { mem } | { notes } |
 
 ### Best Practices for Performance
 
@@ -229,8 +233,8 @@ Create a config file at `{ path/to/config }`:
 
 ### Error Codes
 
-| Code | Message | Cause | Solution |
-|------|---------|-------|----------|
+| Code     | Message | Cause     | Solution     |
+| -------- | ------- | --------- | ------------ |
 | { code } | { msg } | { cause } | { solution } |
 
 ### Glossary

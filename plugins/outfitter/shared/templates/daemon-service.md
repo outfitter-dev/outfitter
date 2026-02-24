@@ -13,7 +13,11 @@ import {
   getLockPath,
   getLogPath,
 } from "@outfitter/daemon";
-import { createLogger, createConsoleSink, createFileSink } from "@outfitter/logging";
+import {
+  createLogger,
+  createConsoleSink,
+  createFileSink,
+} from "@outfitter/logging";
 import { Result } from "@outfitter/contracts";
 
 // ============================================================================
@@ -353,8 +357,8 @@ export const healthCommand = command("health")
 
 ## XDG Paths
 
-| Function | Path | Example |
-|----------|------|---------|
-| `getLockPath(name)` | `~/.local/state/{name}/{name}.pid` | `~/.local/state/my-daemon/my-daemon.pid` |
+| Function              | Path                                | Example                                   |
+| --------------------- | ----------------------------------- | ----------------------------------------- |
+| `getLockPath(name)`   | `~/.local/state/{name}/{name}.pid`  | `~/.local/state/my-daemon/my-daemon.pid`  |
 | `getSocketPath(name)` | `~/.local/state/{name}/{name}.sock` | `~/.local/state/my-daemon/my-daemon.sock` |
-| `getLogPath(name)` | `~/.local/state/{name}/logs/` | `~/.local/state/my-daemon/logs/` |
+| `getLogPath(name)`    | `~/.local/state/{name}/logs/`       | `~/.local/state/my-daemon/logs/`          |

@@ -36,10 +36,11 @@ Match multiple tools with `|`:
 Match all tools with `*`:
 
 ```json
-{"matcher": "*"}  // Matches everything
+{ "matcher": "*" } // Matches everything
 ```
 
 **Use cases**:
+
 - Logging all tool usage
 - Global validation
 - Universal context injection
@@ -58,6 +59,7 @@ Match tools operating on specific file types with `(pattern)`:
 ```
 
 **Supported patterns**:
+
 - `*.ext` - Any file with extension
 - `path/*.ext` - Files in specific directory (relative to project)
 - `**/*.ext` - Recursive file match
@@ -85,6 +87,7 @@ Full regex support for complex matching:
 ```
 
 **Regex features**:
+
 - `|` - OR operator
 - `.` - Any character
 - `*` - Zero or more
@@ -102,7 +105,7 @@ MCP (Model Context Protocol) tools follow naming: `mcp__<server-name>__<tool-nam
 ### Match All MCP Tools
 
 ```json
-{"matcher": "mcp__.*__.*"}  // Any MCP tool from any server
+{ "matcher": "mcp__.*__.*" } // Any MCP tool from any server
 ```
 
 ### Match Specific Server

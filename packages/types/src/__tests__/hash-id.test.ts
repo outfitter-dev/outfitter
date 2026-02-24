@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import { hashId } from "../hash-id.js";
 
 describe("hashId", () => {

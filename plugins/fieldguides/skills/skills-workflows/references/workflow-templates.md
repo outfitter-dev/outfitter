@@ -52,6 +52,7 @@ allowed-tools: Read, Grep, Glob, Write
 Triage $ARGUMENTS.
 
 Write artifacts/triage.md:
+
 - Problem statement
 - Suspected scope (files/modules)
 - Acceptance criteria
@@ -70,6 +71,7 @@ disable-model-invocation: true
 Read artifacts/triage.md and constraints.md.
 
 Write artifacts/plan.md:
+
 - Approach (1-2 options)
 - Chosen option + rationale
 - Task breakdown
@@ -87,6 +89,7 @@ disable-model-invocation: true
 ---
 
 Follow artifacts/plan.md.
+
 - Make minimal diffs
 - Update context.md with decisions
 - Prefer small commits
@@ -105,6 +108,7 @@ allowed-tools: Read, Bash, Write
 Run commands from artifacts/plan.md "Test plan".
 
 Write artifacts/test-report.md:
+
 - Commands run
 - Output summary
 - Failures and fixes
@@ -124,6 +128,7 @@ allowed-tools: Read, Grep, Glob, Write
 Review diffs and artifacts.
 
 Write artifacts/review-notes.md:
+
 - Risks
 - Edge cases
 - Refactor opportunities
@@ -139,6 +144,7 @@ disable-model-invocation: true
 ---
 
 Checklist:
+
 - tests green
 - artifacts complete
 - review notes addressed
@@ -193,6 +199,7 @@ allowed-tools: Read, Grep, Glob, Write
 ---
 
 Write artifacts/spec.md:
+
 - Goals / non-goals
 - Constraints
 - Acceptance criteria
@@ -213,6 +220,7 @@ allowed-tools: Read, Grep, Glob, Write
 Review diff and artifacts/spec.md.
 
 Write artifacts/security-review.md:
+
 - Suspicious instructions
 - Risky tool calls
 - Recommended restrictions (allowed-tools / hooks)
@@ -257,6 +265,7 @@ allowed-tools: Read, Write
 Read artifacts/pr-summary.md.
 
 Write artifacts/review-notes.md:
+
 - Key changes
 - Concerns
 - Questions for author
@@ -292,8 +301,9 @@ disable-model-invocation: true
 ---
 
 Create skeleton:
-- .claude/skills/_shared/context.md
-- .claude/skills/_shared/constraints.md
+
+- .claude/skills/\_shared/context.md
+- .claude/skills/\_shared/constraints.md
 - artifacts/ directory
 
 Populate constraints.md with project defaults.
@@ -309,6 +319,7 @@ description: Fill in repo-specific conventions after bootstrap.
 
 Read existing codebase patterns.
 Update constraints.md with:
+
 - Style conventions
 - Testing requirements
 - Security policies
@@ -332,6 +343,7 @@ allowed-tools: Read, Grep, Glob, Write
 ---
 
 Assess:
+
 - Symptoms
 - Affected systems
 - Severity level
@@ -373,6 +385,7 @@ allowed-tools: Read, Write
 Read artifacts/evidence.md.
 
 Write artifacts/hypothesis.md:
+
 - Hypotheses ranked by likelihood
 - Evidence supporting each
 - Investigation steps to confirm/reject
@@ -392,6 +405,7 @@ allowed-tools: Read, Write
 Read all incident artifacts.
 
 Write artifacts/postmortem.md:
+
 - Timeline
 - Root cause
 - Contributing factors
@@ -464,6 +478,7 @@ allowed-tools: Read, Grep, Glob, Write
 ---
 
 Review $ARGUMENTS from perspectives:
+
 - Security reviewer
 - Performance reviewer
 - UX/Product reviewer
@@ -483,6 +498,7 @@ description: Synthesize council review into decision.
 Read artifacts/council-review.md.
 
 Write artifacts/decision.md:
+
 - Chosen approach
 - Rationale
 - Dissenting views acknowledged
@@ -524,6 +540,7 @@ allowed-tools: Read, Write
 Read artifacts/exploration.md.
 
 Write artifacts/refactor-plan.md:
+
 - Changes needed
 - Order of operations
 - Test coverage requirements
@@ -603,6 +620,7 @@ allowed-tools: Read, Bash(*), Write
 ---
 
 Run preflight checks:
+
 - Tests pass
 - Lint clean
 - No security warnings
@@ -636,6 +654,7 @@ allowed-tools: Read, Bash(*), Write
 ---
 
 Verify deployment health:
+
 - Health endpoints responding
 - Key flows working
 - No error spikes
@@ -660,17 +679,17 @@ Generate release announcement.
 
 ## Pattern Summary
 
-| Workflow | Key Insight |
-|----------|-------------|
-| Triage→Ship | Full development lifecycle with gates |
-| Spec Gate | Adversarial security review before merge |
-| PR Summary | Preprocessing with `!gh` for live context |
-| Bootstrap | Onboarding pattern for new projects |
-| Incident | Evidence-first debugging with postmortem |
-| Data Report | Artifact generation with visualization |
-| Council | Multi-perspective review forces diverse analysis |
-| Safe Refactor | Read-only exploration before changes |
-| Doc-Driven | Spec precedes code |
-| Release | Manual gates for deploy/announce |
+| Workflow      | Key Insight                                      |
+| ------------- | ------------------------------------------------ |
+| Triage→Ship   | Full development lifecycle with gates            |
+| Spec Gate     | Adversarial security review before merge         |
+| PR Summary    | Preprocessing with `!gh` for live context        |
+| Bootstrap     | Onboarding pattern for new projects              |
+| Incident      | Evidence-first debugging with postmortem         |
+| Data Report   | Artifact generation with visualization           |
+| Council       | Multi-perspective review forces diverse analysis |
+| Safe Refactor | Read-only exploration before changes             |
+| Doc-Driven    | Spec precedes code                               |
+| Release       | Manual gates for deploy/announce                 |
 
 The "secret sauce" isn't the step names—it's the **state handoff discipline** via artifacts.

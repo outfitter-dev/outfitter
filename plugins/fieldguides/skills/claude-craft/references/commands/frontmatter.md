@@ -31,6 +31,7 @@ description: Deploy application to target environment with health checks
 ```
 
 **Best practices**:
+
 - Keep under 80 characters
 - Action-oriented (start with verb)
 - Specific about what it does
@@ -63,6 +64,7 @@ argument-hint: <environment> [--skip-tests] [--no-notify]
 ```
 
 **Conventions**:
+
 - `<required>` - Required arguments (angle brackets)
 - `[optional]` - Optional arguments (square brackets)
 - `--flag` - Boolean flags
@@ -103,65 +105,66 @@ allowed-tools: Read, Grep, Glob, Bash(git *)
 
 **File Operations**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `Read` | Read file contents, images, PDFs, Jupyter notebooks | File content with line numbers |
-| `Write` | Create new files or overwrite existing files | Confirmation |
-| `Edit` | Make targeted string replacements in existing files | Updated file snippet |
-| `MultiEdit` | Multiple edits to a single file in one atomic operation | Updated file |
-| `NotebookEdit` | Edit, insert, or delete Jupyter notebook cells | Updated notebook |
-| `LS` | List directory contents | Directory listing |
+| Tool           | Purpose                                                 | Returns                        |
+| -------------- | ------------------------------------------------------- | ------------------------------ |
+| `Read`         | Read file contents, images, PDFs, Jupyter notebooks     | File content with line numbers |
+| `Write`        | Create new files or overwrite existing files            | Confirmation                   |
+| `Edit`         | Make targeted string replacements in existing files     | Updated file snippet           |
+| `MultiEdit`    | Multiple edits to a single file in one atomic operation | Updated file                   |
+| `NotebookEdit` | Edit, insert, or delete Jupyter notebook cells          | Updated notebook               |
+| `LS`           | List directory contents                                 | Directory listing              |
 
 **Search & Discovery**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `Grep` | Search file contents using regex patterns | Matching lines, file paths, or counts |
-| `Glob` | Find files by name/path glob patterns (e.g., `**/*.ts`) | List of matching file paths |
+| Tool   | Purpose                                                 | Returns                               |
+| ------ | ------------------------------------------------------- | ------------------------------------- |
+| `Grep` | Search file contents using regex patterns               | Matching lines, file paths, or counts |
+| `Glob` | Find files by name/path glob patterns (e.g., `**/*.ts`) | List of matching file paths           |
 
 **Execution**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `Bash` | Execute shell commands with optional timeout | Command stdout/stderr |
-| `Task` | Launch subagents for complex, parallel, or specialized work | Agent result or task ID (if background) |
-| `TaskOutput` | Retrieve output from background tasks | Task output and status |
-| `KillShell` | Terminate a running background shell process | Confirmation |
+| Tool         | Purpose                                                     | Returns                                 |
+| ------------ | ----------------------------------------------------------- | --------------------------------------- |
+| `Bash`       | Execute shell commands with optional timeout                | Command stdout/stderr                   |
+| `Task`       | Launch subagents for complex, parallel, or specialized work | Agent result or task ID (if background) |
+| `TaskOutput` | Retrieve output from background tasks                       | Task output and status                  |
+| `KillShell`  | Terminate a running background shell process                | Confirmation                            |
 
 **Context & Skills**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `Skill` | Load a skill's instructions into context | Skill content |
-| `TaskCreate` | Create tasks for tracking progress | Task ID |
-| `TaskUpdate` | Update task status (in_progress, completed) | Confirmation |
-| `TaskList` | List all tasks | Task summaries |
-| `TaskGet` | Get full task details | Task details |
+| Tool         | Purpose                                     | Returns        |
+| ------------ | ------------------------------------------- | -------------- |
+| `Skill`      | Load a skill's instructions into context    | Skill content  |
+| `TaskCreate` | Create tasks for tracking progress          | Task ID        |
+| `TaskUpdate` | Update task status (in_progress, completed) | Confirmation   |
+| `TaskList`   | List all tasks                              | Task summaries |
+| `TaskGet`    | Get full task details                       | Task details   |
 
 **Planning**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
+| Tool            | Purpose                                                  | Returns              |
+| --------------- | -------------------------------------------------------- | -------------------- |
 | `EnterPlanMode` | Transition to plan mode for complex implementation tasks | User approval prompt |
-| `ExitPlanMode` | Signal plan completion and request user approval | Plan review prompt |
+| `ExitPlanMode`  | Signal plan completion and request user approval         | Plan review prompt   |
 
 **User Interaction**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `AskUserQuestion` | Present choices or gather input with structured options | User's selection(s) or custom input |
-| `SlashCommand` | Invoke slash commands programmatically (controlled via `disable-model-invocation`) | Command result |
+| Tool              | Purpose                                                                            | Returns                             |
+| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------- |
+| `AskUserQuestion` | Present choices or gather input with structured options                            | User's selection(s) or custom input |
+| `SlashCommand`    | Invoke slash commands programmatically (controlled via `disable-model-invocation`) | Command result                      |
 
 **Web**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `WebSearch` | Search the web for current information | Search results with URLs |
-| `WebFetch` | Fetch URL content and process with AI | Processed/summarized content |
+| Tool        | Purpose                                | Returns                      |
+| ----------- | -------------------------------------- | ---------------------------- |
+| `WebSearch` | Search the web for current information | Search results with URLs     |
+| `WebFetch`  | Fetch URL content and process with AI  | Processed/summarized content |
 
 **MCP Tools**
 
 MCP (Model Context Protocol) tools follow the naming pattern `mcp__<server>__<tool>`. Examples:
+
 - `mcp__github__create_issue` - GitHub MCP server
 - `mcp__memory__search` - Memory MCP server
 - `mcp__filesystem__read` - Filesystem MCP server
@@ -201,6 +204,7 @@ allowed-tools: Read, Write, Edit, Bash(*), Grep, Glob
 ```
 
 **Behavior**:
+
 - Without `allowed-tools`: inherits conversation permissions
 - With `allowed-tools`: only listed tools allowed without asking
 - Other tools blocked or require explicit permission
@@ -231,6 +235,7 @@ model: opus
 ```
 
 **Use cases**:
+
 - Simple commands (formatting, simple lookups) -> haiku
 - Standard development tasks -> sonnet (default)
 - Complex analysis, security review -> opus
@@ -248,12 +253,14 @@ disable-model-invocation: true
 ```
 
 **When to use**:
+
 - Interactive commands requiring user input
 - Destructive operations (delete, deploy to production)
 - Commands with side effects that shouldn't be automated
 - Testing or debugging commands
 
 **Behavior**:
+
 - When `true`: Command can only be invoked explicitly by user
 - When `false` (default): Claude can invoke via SlashCommand tool
 
@@ -269,7 +276,6 @@ allowed-tools: Read, Bash(kubectl *), Bash(docker *), Bash(git *)
 model: sonnet
 disable-model-invocation: true
 ---
-
 # Deployment Pipeline
 
 Environment: $1

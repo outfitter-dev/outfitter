@@ -5,6 +5,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import {
   getSpinnerFrame,
   renderSpinner,

@@ -18,62 +18,62 @@ Development methodology fieldguides for Claude Code. TDD, debugging, architectur
 
 #### Development Methodology
 
-| Skill | Purpose |
-|-------|---------|
-| `bun-fieldguide` | Bun runtime APIs and patterns |
-| `cli-dev` | Redirect to cli-dev plugin |
-| `code-review` | Pre-commit quality gate checklist |
-| `codebase-analysis` | Evidence-based codebase investigation methodology |
-| `sanity-check` | Pushback against over-engineering |
-| `session-analysis` | Signal extraction from chat history |
-| `debugging` | Systematic root cause investigation (no fixes without understanding) |
-| `hono-fieldguide` | Type-safe Hono API development |
-| `pathfinding` | Collaborative Q&A for unclear requirements |
-| `find-patterns` | Identify and extract reusable patterns |
-| `codify` | Extract reusable patterns from conversations |
-| `performance` | Profiling and optimization |
-| `react-fieldguide` | React 18-19 TypeScript patterns |
-| `report-findings` | Structure and present research findings |
-| `research` | Multi-source technical research with citations |
-| `find-root-causes` | Systematic problem investigation methodology |
-| `prove-it-works` | End-to-end testing without mocks |
-| `security` | Security auditing and vulnerability detection |
-| `systems-design` | System design with technology selection frameworks |
-| `software-craft` | Engineering judgment and decision principles |
-| `check-status` | Comprehensive status reports across VCS, PRs, issues, CI/CD |
-| `use-subagents` | Orchestrate outfitter subagents for complex tasks |
-| `tdd-fieldguide` | Test-driven development with Red-Green-Refactor cycles |
-| `typescript-fieldguide` | TypeScript patterns and strict typing |
-| `which-tool` | Detect and select optimal CLI tools for tasks |
+| Skill                   | Purpose                                                              |
+| ----------------------- | -------------------------------------------------------------------- |
+| `bun-fieldguide`        | Bun runtime APIs and patterns                                        |
+| `cli-dev`               | Redirect to cli-dev plugin                                           |
+| `code-review`           | Pre-commit quality gate checklist                                    |
+| `codebase-analysis`     | Evidence-based codebase investigation methodology                    |
+| `sanity-check`          | Pushback against over-engineering                                    |
+| `session-analysis`      | Signal extraction from chat history                                  |
+| `debugging`             | Systematic root cause investigation (no fixes without understanding) |
+| `hono-fieldguide`       | Type-safe Hono API development                                       |
+| `pathfinding`           | Collaborative Q&A for unclear requirements                           |
+| `find-patterns`         | Identify and extract reusable patterns                               |
+| `codify`                | Extract reusable patterns from conversations                         |
+| `performance`           | Profiling and optimization                                           |
+| `react-fieldguide`      | React 18-19 TypeScript patterns                                      |
+| `report-findings`       | Structure and present research findings                              |
+| `research`              | Multi-source technical research with citations                       |
+| `find-root-causes`      | Systematic problem investigation methodology                         |
+| `prove-it-works`        | End-to-end testing without mocks                                     |
+| `security`              | Security auditing and vulnerability detection                        |
+| `systems-design`        | System design with technology selection frameworks                   |
+| `software-craft`        | Engineering judgment and decision principles                         |
+| `check-status`          | Comprehensive status reports across VCS, PRs, issues, CI/CD          |
+| `use-subagents`         | Orchestrate outfitter subagents for complex tasks                    |
+| `tdd-fieldguide`        | Test-driven development with Red-Green-Refactor cycles               |
+| `typescript-fieldguide` | TypeScript patterns and strict typing                                |
+| `which-tool`            | Detect and select optimal CLI tools for tasks                        |
 
 #### Claude Code Extensibility
 
-| Skill | Purpose |
-|-------|---------|
-| `skillcraft` | Agent Skills authoring (cross-platform spec) |
-| `claude-craft` | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
-| `claude-plugins` | Full plugin lifecycle, marketplace distribution |
+| Skill            | Purpose                                                                    |
+| ---------------- | -------------------------------------------------------------------------- |
+| `skillcraft`     | Agent Skills authoring (cross-platform spec)                               |
+| `claude-craft`   | Claude Code extensibility — agents, commands, hooks, skills, rules, config |
+| `claude-plugins` | Full plugin lifecycle, marketplace distribution                            |
 
 #### Platform Configuration
 
-| Skill | Purpose |
-|-------|---------|
+| Skill          | Purpose                        |
+| -------------- | ------------------------------ |
 | `codex-config` | OpenAI Codex CLI configuration |
 
 ### Agents (10)
 
-| Agent | Role |
-|-------|------|
+| Agent           | Role                                                                          |
+| --------------- | ----------------------------------------------------------------------------- |
 | `quartermaster` | Equips and provisions Claude Code extensions (plugins, agents, skills, hooks) |
-| `analyst` | Investigate, research, explore, identify patterns |
-| `debugger` | Debug, diagnose, troubleshoot, trace |
-| `librarian` | Find documentation, API references |
-| `reviewer` | Review, critique, check, audit |
-| `scout` | Status reports, project health, what's changed |
-| `engineer` | Build, fix, implement, refactor |
-| `skeptic` | Challenge assumptions and complexity |
-| `specialist` | Domain-specific tasks (CI/CD, deploy) |
-| `tester` | Test, validate, verify |
+| `analyst`       | Investigate, research, explore, identify patterns                             |
+| `debugger`      | Debug, diagnose, troubleshoot, trace                                          |
+| `librarian`     | Find documentation, API references                                            |
+| `reviewer`      | Review, critique, check, audit                                                |
+| `scout`         | Status reports, project health, what's changed                                |
+| `engineer`      | Build, fix, implement, refactor                                               |
+| `skeptic`       | Challenge assumptions and complexity                                          |
+| `specialist`    | Domain-specific tasks (CI/CD, deploy)                                         |
+| `tester`        | Test, validate, verify                                                        |
 
 ## Usage
 
@@ -144,13 +144,13 @@ fieldguides/
 
 This plugin uses only standard Claude Code tools:
 
-| Capability | Used | Notes |
-|------------|------|-------|
-| Filesystem | read | Reads code for analysis and review |
-| Shell | no | — |
-| Network | no | Research uses built-in WebSearch |
-| MCP | no | — |
-| Scripts | no | Instructions-only, no executable scripts |
+| Capability | Used | Notes                                    |
+| ---------- | ---- | ---------------------------------------- |
+| Filesystem | read | Reads code for analysis and review       |
+| Shell      | no   | —                                        |
+| Network    | no   | Research uses built-in WebSearch         |
+| MCP        | no   | —                                        |
+| Scripts    | no   | Instructions-only, no executable scripts |
 
 See SECURITY.md in the repository root for the full security model.
 

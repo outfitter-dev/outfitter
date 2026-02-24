@@ -7,11 +7,12 @@ allowed-tools: Read, Grep, Glob, Bash(bun *), Bash(rg *)
 
 # Debug Outfitter
 
-Systematic debugging process for @outfitter/* package issues.
+Systematic debugging process for @outfitter/\* package issues.
 
 ## Goal
 
 Investigate issues methodically and produce a structured report documenting:
+
 1. What was observed (symptoms)
 2. What was investigated (evidence)
 3. What was found (root cause)
@@ -20,6 +21,7 @@ Investigate issues methodically and produce a structured report documenting:
 ## Constraints
 
 **DO:**
+
 - Gather evidence before forming hypotheses
 - Use the diagnostic patterns in this skill
 - Reference `outfitter-atlas` for correct patterns
@@ -27,6 +29,7 @@ Investigate issues methodically and produce a structured report documenting:
 - Produce a Debug Report at the end
 
 **DON'T:**
+
 - Apply random fixes hoping something works
 - Skip the evidence collection phase
 - Leave issues undiagnosed
@@ -73,24 +76,25 @@ rg "throw new" --type ts
 
 Based on symptoms, identify the issue category:
 
-| Category | Symptoms | Common Causes |
-|----------|----------|---------------|
-| **Result Handling** | Wrong value, type errors | Missing await, reassignment breaking narrowing |
-| **MCP Issues** | Tool not appearing, invocation failing | Registration order, missing schema descriptions |
-| **CLI Output** | Wrong format, missing data | Mode detection, await on output |
-| **Exit Codes** | Wrong exit code | Not using `exitWithError`, manual `process.exit` |
-| **Logging** | Missing logs, sensitive data exposed | Wrong level, redaction disabled |
-| **Validation** | Unexpected validation errors | Schema mismatch, missing `.describe()` |
+| Category            | Symptoms                               | Common Causes                                    |
+| ------------------- | -------------------------------------- | ------------------------------------------------ |
+| **Result Handling** | Wrong value, type errors               | Missing await, reassignment breaking narrowing   |
+| **MCP Issues**      | Tool not appearing, invocation failing | Registration order, missing schema descriptions  |
+| **CLI Output**      | Wrong format, missing data             | Mode detection, await on output                  |
+| **Exit Codes**      | Wrong exit code                        | Not using `exitWithError`, manual `process.exit` |
+| **Logging**         | Missing logs, sensitive data exposed   | Wrong level, redaction disabled                  |
+| **Validation**      | Unexpected validation errors           | Schema mismatch, missing `.describe()`           |
 
 ## Stage 3: Targeted Investigation
 
 ### Result Handling Issues
 
 **Always getting error:**
+
 ```typescript
 // Check: Missing await?
-const result = getUser(id);  // ❌ Promise, not Result!
-const result = await getUser(id);  // ✅
+const result = getUser(id); // ❌ Promise, not Result!
+const result = await getUser(id); // ✅
 
 // Check: Validation failing?
 const validated = validate(input);
@@ -100,11 +104,12 @@ if (validated.isErr()) {
 ```
 
 **Type narrowing broken:**
+
 ```typescript
 // ❌ Reassigning breaks narrowing
 let result = await getUser(id);
 if (result.isOk()) {
-  result = await updateUser(result.value);  // Breaks!
+  result = await updateUser(result.value); // Breaks!
 }
 
 // ✅ Separate variables
@@ -114,6 +119,7 @@ const updateResult = await updateUser(getResult.value);
 ```
 
 **Error type lost:**
+
 ```typescript
 // Use _tag for narrowing
 if (result.isErr()) {
@@ -131,10 +137,12 @@ if (result.isErr()) {
 ### MCP Issues
 
 **Tool not appearing:**
+
 1. Verify registration happens before `start()`:
+
    ```typescript
    server.registerTool(myTool);
-   server.start();  // After registration!
+   server.start(); // After registration!
    ```
 
 2. Check schema has `.describe()` on all fields:
@@ -145,11 +153,14 @@ if (result.isErr()) {
    ```
 
 **Tool invocation failing:**
+
 1. Handler must be async:
+
    ```typescript
-   handler: async (input) => {  // Not sync!
+   handler: async (input) => {
+     // Not sync!
      return Result.ok(data);
-   }
+   };
    ```
 
 2. Must return Result:
@@ -161,6 +172,7 @@ if (result.isErr()) {
 ### CLI Output Issues
 
 **JSON not printing:**
+
 ```typescript
 // Force mode
 await output(data, { mode: "json" });
@@ -170,11 +182,12 @@ await output(data, { mode: "json" });
 // OUTFITTER_JSON=0 forces human when no explicit mode is set
 
 // Await output before exit
-await output(data);  // ✅
+await output(data); // ✅
 // process.exit(0);  // May exit before output completes
 ```
 
 **Wrong exit code:**
+
 ```typescript
 // ❌ process.exit(1);
 // ✅ exitWithError(result.error);
@@ -197,9 +210,10 @@ Exit code reference:
 ### Logging Issues
 
 **Redaction not working:**
+
 ```typescript
 const logger = createLogger({
-  redaction: { enabled: true },  // Must be true!
+  redaction: { enabled: true }, // Must be true!
   // Custom patterns
   redaction: {
     enabled: true,
@@ -209,15 +223,17 @@ const logger = createLogger({
 ```
 
 **Missing context:**
+
 ```typescript
 const requestLogger = createChildLogger(ctx.logger, {
   requestId: ctx.requestId,
   handler: "myHandler",
 });
-requestLogger.info("Processing", { data });  // Includes requestId
+requestLogger.info("Processing", { data }); // Includes requestId
 ```
 
 **Wrong level:**
+
 ```typescript
 // Hierarchy: trace < debug < info < warn < error < fatal
 // "info" hides trace and debug
@@ -230,13 +246,14 @@ const logger = createLogger({
 
 Assess confidence in your diagnosis:
 
-| Confidence | Meaning |
-|------------|---------|
-| **High** | Clear pattern violation or bug found with evidence |
-| **Medium** | Likely cause identified, may need verification |
-| **Low** | Multiple possibilities remain, needs more investigation |
+| Confidence | Meaning                                                 |
+| ---------- | ------------------------------------------------------- |
+| **High**   | Clear pattern violation or bug found with evidence      |
+| **Medium** | Likely cause identified, may need verification          |
+| **Low**    | Multiple possibilities remain, needs more investigation |
 
 Based on diagnosis, recommend:
+
 - **Code fix** — Provide specific fix with before/after
 - **Pattern guidance** — Reference correct pattern from fieldguide
 - **Escalation** — If issue is in Outfitter itself, use `outfitter-issue`
@@ -245,7 +262,7 @@ Produce a Debug Report using [TEMPLATE.md](TEMPLATE.md).
 
 ## When to Escalate
 
-If investigation reveals an issue in @outfitter/* packages themselves (not user code):
+If investigation reveals an issue in @outfitter/\* packages themselves (not user code):
 
 1. Document the issue clearly in the Debug Report
 2. Recommend using `outfitter-issue` skill to file an issue

@@ -3,6 +3,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
+
 import {
   multiselectCalls,
   resetClackMocks,

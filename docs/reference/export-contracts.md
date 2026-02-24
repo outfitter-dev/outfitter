@@ -33,11 +33,11 @@ Each workspace entry in `bunup.config.ts` can declare patterns to exclude from t
 
 Common exclusion patterns:
 
-| Pattern | Purpose |
-|---------|---------|
+| Pattern        | Purpose                                              |
+| -------------- | ---------------------------------------------------- |
 | `./internal/*` | Internal utilities (types, contracts, outfitter CLI) |
-| `./cli/*` | CLI-only entrypoints not meant for library consumers |
-| `./version` | Auto-generated version modules |
+| `./cli/*`      | CLI-only entrypoints not meant for library consumers |
+| `./version`    | Auto-generated version modules                       |
 
 ## Verification Flow
 
@@ -95,6 +95,7 @@ The key sequence for export integrity:
 
 ````markdown
 <!-- non-contractual -->
+
 ```typescript
 import { internal } from "@outfitter/contracts/internal/helpers";
 ```

@@ -245,11 +245,11 @@ If the answer is "no" or "I'm not sure", reconsider.
 
 Use this matrix for fast assessment:
 
-| Complexity | Justification Required |
-|-----------|----------------------|
-| **Low**: Standard library, proven pattern | None - proceed |
-| **Medium**: Well-known framework, common pattern | Brief rationale in code comment |
-| **High**: Custom abstraction, novel pattern | ADR with alternatives considered |
+| Complexity                                              | Justification Required           |
+| ------------------------------------------------------- | -------------------------------- |
+| **Low**: Standard library, proven pattern               | None - proceed                   |
+| **Medium**: Well-known framework, common pattern        | Brief rationale in code comment  |
+| **High**: Custom abstraction, novel pattern             | ADR with alternatives considered |
 | **Very High**: Custom infrastructure, security-critical | ADR + external review + approval |
 
 ## When in Doubt

@@ -52,6 +52,7 @@ outfitter-check/
 **Migration:**
 
 References to deprecated skills have been updated:
+
 - `kit:stack-review` → `kit:outfitter-check`
 - `kit:stack-audit` → `kit:outfitter-init`
 
@@ -94,13 +95,14 @@ outfitter-init/
     └── manual-scan.md           # Ripgrep commands
 ```
 
-**Design principle**: outfitter-init handles *workflow* (scan, plan, track progress). outfitter-fieldguide has the *patterns* (how to convert code). No duplication.
+**Design principle**: outfitter-init handles _workflow_ (scan, plan, track progress). outfitter-fieldguide has the _patterns_ (how to convert code). No duplication.
 
 **New agent**: `outfitter` — Dedicated agent for running the init workflow. Loads both `outfitter-fieldguide` and `outfitter-init` skills automatically.
 
 **Migration:**
 
 References to deprecated skill have been updated:
+
 - `kit:stack-audit` → `kit:outfitter-init`
 
 ## 1.3.0
@@ -117,7 +119,7 @@ Three skills have been consolidated into `kit:outfitter-fieldguide`:
 - `stack-templates` → merged into fieldguide templates/
 - `stack-architecture` → merged into fieldguide guides/architecture.md
 
-The new fieldguide provides a single, comprehensive reference for all @outfitter/* patterns, templates, and architecture guidance.
+The new fieldguide provides a single, comprehensive reference for all @outfitter/\* patterns, templates, and architecture guidance.
 
 #### New Documentation
 
@@ -149,6 +151,7 @@ The new fieldguide provides a single, comprehensive reference for all @outfitter
 #### Migration
 
 All references to deprecated skills have been updated:
+
 - `kit:stack-patterns` → `kit:outfitter-fieldguide`
 - `kit:stack-templates` → `kit:outfitter-fieldguide`
 - `kit:stack-architecture` → `kit:outfitter-fieldguide`
@@ -183,7 +186,6 @@ All references to deprecated skills have been updated:
 ### Minor Changes
 
 - d23cdf3: Add outfitter-stack plugin with comprehensive Stack pattern tooling
-
   - 7 skills: stack-patterns, stack-templates, stack-audit, stack-review, stack-architecture, stack-feedback, stack-debug
   - 1 agent: stacker (skill-aware routing for Stack work)
   - 2 commands: /adopt (phased adoption workflow), /audit (quick compliance check)

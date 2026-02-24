@@ -1,11 +1,25 @@
 {
   "name": "@outfitter/state",
-  "description": "Pagination cursor persistence and state management for Outfitter",
   "version": "0.2.3",
-  "type": "module",
+  "description": "Pagination cursor persistence and state management for Outfitter",
+  "keywords": [
+    "cursor",
+    "outfitter",
+    "pagination",
+    "state",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/state"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -17,7 +31,9 @@
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bunup --filter @outfitter/state",
     "lint": "biome lint ./src",
@@ -34,21 +50,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "state",
-    "pagination",
-    "cursor",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/state"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

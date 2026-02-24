@@ -5,6 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { type CLI, command, createCLI } from "../command.js";
 
 describe("createCLI()", () => {

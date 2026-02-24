@@ -69,8 +69,11 @@ Marketplaces can combine both patterns—consolidated for local plugins, distrib
 {
   "strict": false,
   "plugins": [
-    {"name": "local-plugin", "source": "./local-plugin", "version": "1.0.0"},
-    {"name": "external-plugin", "source": {"source": "github", "repo": "owner/plugin"}}
+    { "name": "local-plugin", "source": "./local-plugin", "version": "1.0.0" },
+    {
+      "name": "external-plugin",
+      "source": { "source": "github", "repo": "owner/plugin" }
+    }
   ]
 }
 ```
@@ -121,46 +124,46 @@ my-plugin/
 
 ### Required Fields
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
+| Field  | Type   | Description                               | Example              |
+| ------ | ------ | ----------------------------------------- | -------------------- |
 | `name` | string | Unique identifier (kebab-case, no spaces) | `"deployment-tools"` |
 
 ### Recommended Metadata Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | string | Semantic version (e.g., "1.0.0") |
-| `description` | string | Brief plugin description |
+| Field         | Type   | Description                      |
+| ------------- | ------ | -------------------------------- |
+| `version`     | string | Semantic version (e.g., "1.0.0") |
+| `description` | string | Brief plugin description         |
 
 ### Optional Standard Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `author` | object | Creator information |
-| `author.name` | string | Author name |
-| `author.email` | string | Author email |
-| `homepage` | string | Documentation URL |
-| `repository` | string | Source code URL |
-| `license` | string | SPDX identifier (MIT, Apache-2.0) |
-| `keywords` | array | Search tags |
-| `category` | string | Plugin category |
-| `tags` | array | Additional searchability tags |
+| Field          | Type   | Description                       |
+| -------------- | ------ | --------------------------------- |
+| `author`       | object | Creator information               |
+| `author.name`  | string | Author name                       |
+| `author.email` | string | Author email                      |
+| `homepage`     | string | Documentation URL                 |
+| `repository`   | string | Source code URL                   |
+| `license`      | string | SPDX identifier (MIT, Apache-2.0) |
+| `keywords`     | array  | Search tags                       |
+| `category`     | string | Plugin category                   |
+| `tags`         | array  | Additional searchability tags     |
 
 ### Component Configuration Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `commands` | string\|array | Custom paths to command files or directories |
-| `agents` | string\|array | Custom paths to agent files |
-| `hooks` | string\|object | Hook config path or inline config |
-| `mcpServers` | string\|object | MCP config path or inline config |
-| `lspServers` | string\|object | LSP config path or inline config |
+| Field        | Type           | Description                                  |
+| ------------ | -------------- | -------------------------------------------- |
+| `commands`   | string\|array  | Custom paths to command files or directories |
+| `agents`     | string\|array  | Custom paths to agent files                  |
+| `hooks`      | string\|object | Hook config path or inline config            |
+| `mcpServers` | string\|object | MCP config path or inline config             |
+| `lspServers` | string\|object | LSP config path or inline config             |
 
 ### Behavior Control
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `strict` | boolean | `true` | Set at marketplace level. When `false`, local plugins don't need `.claude-plugin/plugin.json`—marketplace defines all metadata. Use `false` for consolidated local plugins, `true` (or omit) for external plugins. |
+| Field    | Type    | Default | Description                                                                                                                                                                                                        |
+| -------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `strict` | boolean | `true`  | Set at marketplace level. When `false`, local plugins don't need `.claude-plugin/plugin.json`—marketplace defines all metadata. Use `false` for consolidated local plugins, `true` (or omit) for external plugins. |
 
 > **Note:** Hooks can be defined inline in plugin.json OR in a separate `hooks/hooks.json` file.
 
@@ -180,14 +183,8 @@ my-plugin/
   "license": "MIT",
   "keywords": ["enterprise", "workflow", "automation"],
   "category": "productivity",
-  "commands": [
-    "./commands/core/",
-    "./commands/enterprise/"
-  ],
-  "agents": [
-    "./agents/security-reviewer.md",
-    "./agents/compliance-checker.md"
-  ],
+  "commands": ["./commands/core/", "./commands/enterprise/"],
+  "agents": ["./agents/security-reviewer.md", "./agents/compliance-checker.md"],
   "mcpServers": {
     "database": {
       "command": "${CLAUDE_PLUGIN_ROOT}/servers/db-server",
@@ -220,12 +217,12 @@ Use {{0}}, {{1}} for parameters.
 
 ### Parameter Syntax
 
-| Syntax | Description | Example |
-|--------|-------------|---------|
-| `{{0}}` | First parameter | `/cmd value` |
-| `{{1}}` | Second parameter | `/cmd val1 val2` |
-| `{{0:name}}` | Named (documentation) | `{{0:environment}}` |
-| `{{...}}` | All remaining | `/cmd arg1 arg2 arg3` |
+| Syntax       | Description           | Example               |
+| ------------ | --------------------- | --------------------- |
+| `{{0}}`      | First parameter       | `/cmd value`          |
+| `{{1}}`      | Second parameter      | `/cmd val1 val2`      |
+| `{{0:name}}` | Named (documentation) | `{{0:environment}}`   |
+| `{{...}}`    | All remaining         | `/cmd arg1 arg2 arg3` |
 
 ### Example Command
 
@@ -237,6 +234,7 @@ description: "Deploy to specified environment"
 Deploy application to {{0:environment}}.
 
 Steps:
+
 1. Validate environment configuration
 2. Run pre-deployment checks
 3. Deploy application
@@ -273,19 +271,19 @@ Provide examples of when this agent should be used.
 
 ### Agent Frontmatter Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `description` | string | Brief explanation of what the agent does |
-| `capabilities` | array | List of tasks the agent can perform (aids discovery) |
-| `allowed-tools` | string | Comma-separated list of allowed tools (optional) |
+| Field           | Type   | Description                                          |
+| --------------- | ------ | ---------------------------------------------------- |
+| `description`   | string | Brief explanation of what the agent does             |
+| `capabilities`  | array  | List of tasks the agent can perform (aids discovery) |
+| `allowed-tools` | string | Comma-separated list of allowed tools (optional)     |
 
 ### Tool Restrictions
 
-| Restriction | Tools | Use Case |
-|-------------|-------|----------|
-| Read-only | `Read, Grep, Glob` | Analysis only |
+| Restriction    | Tools                    | Use Case            |
+| -------------- | ------------------------ | ------------------- |
+| Read-only      | `Read, Grep, Glob`       | Analysis only       |
 | With execution | `Read, Grep, Glob, Bash` | Analysis + commands |
-| No restriction | (omit field) | Full capabilities |
+| No restriction | (omit field)             | Full capabilities   |
 
 ## Event Hooks
 
@@ -328,14 +326,14 @@ my-plugin/
 
 ### Hook Types
 
-| Type | When | Use Cases |
-|------|------|-----------|
-| `PreToolUse` | Before tool | Validation, permissions |
-| `PostToolUse` | After tool | Logging, formatting |
-| `UserPromptSubmit` | Before prompt | Input validation |
-| `Stop` | After response | Cleanup, notifications |
-| `SessionStart` | Session begins | Context loading |
-| `SessionEnd` | Session ends | Cleanup |
+| Type               | When           | Use Cases               |
+| ------------------ | -------------- | ----------------------- |
+| `PreToolUse`       | Before tool    | Validation, permissions |
+| `PostToolUse`      | After tool     | Logging, formatting     |
+| `UserPromptSubmit` | Before prompt  | Input validation        |
+| `Stop`             | After response | Cleanup, notifications  |
+| `SessionStart`     | Session begins | Context loading         |
+| `SessionEnd`       | Session ends   | Cleanup                 |
 
 ### hooks/hooks.json Format
 
@@ -402,7 +400,7 @@ When using a separate file, it requires a root-level `"hooks"` wrapper:
 Allow:
 
 ```json
-{"allowed": true}
+{ "allowed": true }
 ```
 
 Block:
@@ -463,10 +461,10 @@ echo '{"allowed": true}'
 
 ### Variable Substitution
 
-| Variable | Resolves To |
-|----------|-------------|
+| Variable                | Resolves To                   |
+| ----------------------- | ----------------------------- |
 | `${CLAUDE_PLUGIN_ROOT}` | Plugin installation directory |
-| `${VAR_NAME}` | Environment variable |
+| `${VAR_NAME}`           | Environment variable          |
 
 ### Python MCP Server Example
 

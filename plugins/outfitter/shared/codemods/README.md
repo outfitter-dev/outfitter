@@ -18,7 +18,9 @@ interface CodemodResult {
   readonly errors: readonly string[];
 }
 
-export async function transform(options: CodemodOptions): Promise<CodemodResult> {
+export async function transform(
+  options: CodemodOptions
+): Promise<CodemodResult> {
   // ...
 }
 ```

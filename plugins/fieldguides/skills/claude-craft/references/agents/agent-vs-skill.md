@@ -4,15 +4,15 @@ Critical distinction—agents and skills serve different purposes.
 
 ## Comparison
 
-| Aspect | Agents | Skills |
-|--------|--------|--------|
-| **Location** | `agents/*.md` | `skills/*/SKILL.md` |
-| **Structure** | Single markdown file | Directory with resources |
-| **Invocation** | Explicit via Task tool | Automatic via context |
-| **Parameter** | `subagent_type` in Task | N/A |
-| **Scope** | Narrow, specialized | Broad capability |
-| **Trigger** | "Use X agent to..." | Automatic on keywords |
-| **Context** | Separate conversation | Main conversation |
+| Aspect         | Agents                  | Skills                   |
+| -------------- | ----------------------- | ------------------------ |
+| **Location**   | `agents/*.md`           | `skills/*/SKILL.md`      |
+| **Structure**  | Single markdown file    | Directory with resources |
+| **Invocation** | Explicit via Task tool  | Automatic via context    |
+| **Parameter**  | `subagent_type` in Task | N/A                      |
+| **Scope**      | Narrow, specialized     | Broad capability         |
+| **Trigger**    | "Use X agent to..."     | Automatic on keywords    |
+| **Context**    | Separate conversation   | Main conversation        |
 
 ## When to Use Agents
 

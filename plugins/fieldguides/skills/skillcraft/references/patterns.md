@@ -26,6 +26,7 @@ Use when multiple valid approaches exist. Claude applies judgment.
 ## Data Validation
 
 Validate user input before processing. Check for:
+
 - Required fields present
 - Data types match schema
 - Values within acceptable ranges
@@ -73,15 +74,15 @@ Do not modify the validation logic inline. If changes are needed, update scripts
 
 ### Selection Guide
 
-| Scenario | Freedom Level |
-|----------|---------------|
-| Creative writing, exploration | High |
-| Standard CRUD operations | Medium |
-| Authentication flows | Low |
-| Database migrations | Low |
-| API integrations | Medium |
-| Error message formatting | High |
-| Cryptographic operations | Low (always script) |
+| Scenario                      | Freedom Level       |
+| ----------------------------- | ------------------- |
+| Creative writing, exploration | High                |
+| Standard CRUD operations      | Medium              |
+| Authentication flows          | Low                 |
+| Database migrations           | Low                 |
+| API integrations              | Medium              |
+| Error message formatting      | High                |
+| Cryptographic operations      | Low (always script) |
 
 ---
 
@@ -176,11 +177,11 @@ Deploy applications to major cloud providers.
 
 ## Provider Selection
 
-| Provider | Best For |
-|----------|----------|
-| AWS | Enterprise, full-stack |
-| GCP | Data/ML workloads |
-| Azure | Microsoft ecosystem |
+| Provider | Best For               |
+| -------- | ---------------------- |
+| AWS      | Enterprise, full-stack |
+| GCP      | Data/ML workloads      |
+| Azure    | Microsoft ecosystem    |
 
 Choose provider based on requirements, then see specific guide.
 
@@ -206,16 +207,20 @@ Choose provider based on requirements, then see specific guide.
 Complete guide for deploying to AWS.
 
 ## Prerequisites
+
 - AWS CLI installed
 - IAM credentials configured
 
 ## Infrastructure Setup
+
 { complete AWS-specific content }
 
 ## Deployment
+
 { complete AWS-specific content }
 
 ## Troubleshooting
+
 { AWS-specific issues }
 ```
 
@@ -305,6 +310,7 @@ Files over 100 lines should include a TOC for partial reads.
 ## Quick Search
 
 Find specific metrics:
+
 ```bash
 grep -i "revenue" references/finance.md
 ```
@@ -324,11 +330,11 @@ Claude may partially read nested files, getting incomplete information.
 
 ### Topic-Based File Naming
 
-| Good | Bad | Why |
-|------|-----|-----|
-| `finance.md` | `doc1.md` | Clear domain vs opaque numbering |
-| `sales.md` | `reference2.md` | Clear domain vs generic |
-| `product.md` | `stuff.md` | Clear domain vs meaningless |
+| Good         | Bad             | Why                              |
+| ------------ | --------------- | -------------------------------- |
+| `finance.md` | `doc1.md`       | Clear domain vs opaque numbering |
+| `sales.md`   | `reference2.md` | Clear domain vs generic          |
+| `product.md` | `stuff.md`      | Clear domain vs meaningless      |
 
 ---
 
@@ -338,17 +344,18 @@ Emoji conventions from official Anthropic skills.
 
 ### Reference Type Indicators
 
-| Emoji | Meaning | Example |
-|-------|---------|---------|
-| `📋` | Guidelines/checklist | `📋 MCP Best Practices` |
-| `⚡` | Quick guide | `⚡ Quick Start` |
-| `🐍` | Python-specific | `🐍 Python Setup` |
-| `✅` | Evaluation/testing | `✅ Test Suite` |
+| Emoji | Meaning              | Example                 |
+| ----- | -------------------- | ----------------------- |
+| `📋`  | Guidelines/checklist | `📋 MCP Best Practices` |
+| `⚡`  | Quick guide          | `⚡ Quick Start`        |
+| `🐍`  | Python-specific      | `🐍 Python Setup`       |
+| `✅`  | Evaluation/testing   | `✅ Test Suite`         |
 
 **In context:**
 
 ```markdown
 Load these resources as needed:
+
 - 📋 [MCP Best Practices](references/best-practices.md)
 - ⚡ [Quick Start](references/quick-start.md)
 - 🐍 [Python Client](references/python.md)
@@ -389,11 +396,13 @@ Always use imperative/infinitive form.
 
 ```markdown
 # Good
+
 Run the script.
 Create a mapping.
 Validate the output.
 
 # Bad
+
 You should run the script.
 The script can be run.
 It's recommended to run the script.
@@ -485,38 +494,39 @@ When gerund feels awkward: `pdf-processing`, `spreadsheet-analysis`, `code-revie
 
 ### Avoid
 
-| Good | Bad | Why |
-|------|-----|-----|
-| `processing-pdfs` | `helper`, `utils` | Vague — says nothing about what the skill does |
-| `api-integration` | `data`, `files`, `code` | Too generic — could mean anything |
-| `skill-creator` | `claude-tools`, `anthropic-helper` | Reserved — `anthropic` and `claude` are reserved words |
+| Good              | Bad                                | Why                                                    |
+| ----------------- | ---------------------------------- | ------------------------------------------------------ |
+| `processing-pdfs` | `helper`, `utils`                  | Vague — says nothing about what the skill does         |
+| `api-integration` | `data`, `files`, `code`            | Too generic — could mean anything                      |
+| `skill-creator`   | `claude-tools`, `anthropic-helper` | Reserved — `anthropic` and `claude` are reserved words |
 
 ### File Naming
 
-| Good | Bad | Strategy |
-|------|-----|----------|
-| `authentication.md` | `ref1.md` | Domain topic |
-| `error-handling.md` | `DOCS.md` | Concept |
+| Good                | Bad             | Strategy         |
+| ------------------- | --------------- | ---------------- |
+| `authentication.md` | `ref1.md`       | Domain topic     |
+| `error-handling.md` | `DOCS.md`       | Concept          |
 | `aws-deployment.md` | `more_stuff.md` | Variant-specific |
-| `quick-start.md` | `NEW-FILE.md` | Purpose |
+| `quick-start.md`    | `NEW-FILE.md`   | Purpose          |
 
 ---
 
 ## Summary
 
-| Pattern | When to Use |
-|---------|-------------|
-| Degrees of Freedom | Control Claude's latitude per task type |
-| Solve Don't Punt | Scripts should handle errors, not fail to Claude |
-| Variant Organization | Multi-framework/provider skills |
-| TOC in References | Large files (>100 lines) |
-| Visual Indicators | Make reference lists scannable |
-| Imperative Voice | All instructions |
-| Gerund Naming | Skill and file names |
+| Pattern              | When to Use                                      |
+| -------------------- | ------------------------------------------------ |
+| Degrees of Freedom   | Control Claude's latitude per task type          |
+| Solve Don't Punt     | Scripts should handle errors, not fail to Claude |
+| Variant Organization | Multi-framework/provider skills                  |
+| TOC in References    | Large files (>100 lines)                         |
+| Visual Indicators    | Make reference lists scannable                   |
+| Imperative Voice     | All instructions                                 |
+| Gerund Naming        | Skill and file names                             |
 
 ## Sources
 
 Patterns derived from:
+
 - Official Anthropic skills repository (pdf, skill-creator, mcp-builder)
 - Anthropic Agent Skills Best Practices documentation
 - Production skill analysis

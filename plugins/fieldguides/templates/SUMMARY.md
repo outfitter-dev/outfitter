@@ -19,6 +19,7 @@ Complete copy-paste ready templates for all Claude Code component types, created
 - `bash-validator/` - Validate bash commands before execution (Bun/TypeScript)
 
 Each hook includes:
+
 - `hooks.json` - Configuration with matchers
 - Working script with proper error handling
 - Security best practices built-in
@@ -31,6 +32,7 @@ Each hook includes:
 - `skill-with-scripts/` - Skill with helper scripts
 
 All skills include:
+
 - Complete SKILL.md with frontmatter
 - Best practice descriptions for discovery
 - Tool restrictions examples
@@ -43,6 +45,7 @@ All skills include:
 - `documentation-generator.md` - Technical documentation specialist
 
 All agents include:
+
 - Complete role definition and process
 - Detailed workflows and best practices
 - Output format guidelines

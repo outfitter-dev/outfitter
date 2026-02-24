@@ -8,7 +8,9 @@
  * Total: 10 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "better-result";
+
 import type { EnvelopeMeta } from "../envelope.js";
 import { toEnvelope, toHttpResponse } from "../envelope.js";
 import { InternalError, NotFoundError, ValidationError } from "../errors.js";

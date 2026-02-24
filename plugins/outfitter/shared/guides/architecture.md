@@ -9,18 +9,21 @@ A systematic approach to designing transport-agnostic handler systems with Resul
 Before writing code, gather information:
 
 **Transport surfaces** — Where will this system be consumed?
+
 - CLI for human operators
 - MCP for AI agents
 - HTTP for services
 - All three?
 
 **Domain operations** — What actions does the system perform?
+
 - CRUD operations on resources
 - Complex workflows
 - Background processing
 - File transformations
 
 **Failure modes** — What can go wrong?
+
 - Invalid input (validation)
 - Missing resources (not_found)
 - Duplicate resources (conflict)
@@ -28,6 +31,7 @@ Before writing code, gather information:
 - Permission issues (permission, auth)
 
 **External dependencies** — What systems do you touch?
+
 - Databases
 - APIs
 - File system
@@ -74,18 +78,18 @@ const createUser: Handler<
 
 Every domain error maps to one of ten categories:
 
-| Domain Error | Category | Error Class | Exit | HTTP |
-|--------------|----------|-------------|------|------|
-| Invalid email format | `validation` | `ValidationError` | 1 | 400 |
-| User not found | `not_found` | `NotFoundError` | 2 | 404 |
-| Email already exists | `conflict` | `ConflictError` | 3 | 409 |
-| Can't modify other users | `permission` | `PermissionError` | 4 | 403 |
-| Database query timed out | `timeout` | `TimeoutError` | 5 | 504 |
-| API rate limit hit | `rate_limit` | `RateLimitError` | 6 | 429 |
-| Can't reach external API | `network` | `NetworkError` | 7 | 502 |
-| Unexpected null pointer | `internal` | `InternalError` | 8 | 500 |
-| Token expired | `auth` | `AuthError` | 9 | 401 |
-| User pressed Ctrl+C | `cancelled` | `CancelledError` | 130 | 499 |
+| Domain Error             | Category     | Error Class       | Exit | HTTP |
+| ------------------------ | ------------ | ----------------- | ---- | ---- |
+| Invalid email format     | `validation` | `ValidationError` | 1    | 400  |
+| User not found           | `not_found`  | `NotFoundError`   | 2    | 404  |
+| Email already exists     | `conflict`   | `ConflictError`   | 3    | 409  |
+| Can't modify other users | `permission` | `PermissionError` | 4    | 403  |
+| Database query timed out | `timeout`    | `TimeoutError`    | 5    | 504  |
+| API rate limit hit       | `rate_limit` | `RateLimitError`  | 6    | 429  |
+| Can't reach external API | `network`    | `NetworkError`    | 7    | 502  |
+| Unexpected null pointer  | `internal`   | `InternalError`   | 8    | 500  |
+| Token expired            | `auth`       | `AuthError`       | 9    | 401  |
+| User pressed Ctrl+C      | `cancelled`  | `CancelledError`  | 130  | 499  |
 
 **Design principle**: Domain errors are domain-specific; stack categories are transport-agnostic. The mapping happens once, at handler boundaries.
 
@@ -117,6 +121,7 @@ Dev dependencies:
 ```
 
 **Selection rules**:
+
 - All projects need `@outfitter/contracts` — this is non-negotiable
 - CLI apps get `@outfitter/cli` (includes terminal UI, colors, output modes)
 - MCP servers get `@outfitter/mcp` (includes typed tool wiring)
@@ -130,24 +135,25 @@ Context carries cross-cutting concerns through the handler chain:
 
 ```typescript
 interface HandlerContext {
-  logger: Logger;           // Scoped, structured logging
-  config: Config;           // Loaded configuration
-  signal?: AbortSignal;     // For cancellation
-  workspaceRoot: string;    // Resolved workspace path
-  requestId: string;        // Correlation ID for tracing
+  logger: Logger; // Scoped, structured logging
+  config: Config; // Loaded configuration
+  signal?: AbortSignal; // For cancellation
+  workspaceRoot: string; // Resolved workspace path
+  requestId: string; // Correlation ID for tracing
 }
 ```
 
 **Entry points create context**:
+
 - CLI `main()` → creates context with terminal logger
 - MCP server → creates context per tool invocation
 - HTTP handler → creates context per request
 
 **Context flows through**:
+
 - Parent handler → child handler (passed explicitly)
 - Logger gets child scopes for nested operations
 - requestId stays consistent for tracing
-
 
 ## Schema Introspection Architecture
 
@@ -189,13 +195,13 @@ Dependencies:
 
 ### Handler Inventory
 
-| Handler | Input | Output | Errors | Description |
-|---------|-------|--------|--------|-------------|
-| `getUser` | `GetUserInput` | `User` | `NotFoundError` | Fetch user by ID |
-| `createUser` | `CreateUserInput` | `User` | `ValidationError`, `ConflictError` | Create new user |
-| `updateUser` | `UpdateUserInput` | `User` | `NotFoundError`, `ValidationError` | Update user fields |
-| `deleteUser` | `DeleteUserInput` | `void` | `NotFoundError`, `PermissionError` | Remove user |
-| `listUsers` | `ListUsersInput` | `PaginatedList<User>` | — | List with pagination |
+| Handler      | Input             | Output                | Errors                             | Description          |
+| ------------ | ----------------- | --------------------- | ---------------------------------- | -------------------- |
+| `getUser`    | `GetUserInput`    | `User`                | `NotFoundError`                    | Fetch user by ID     |
+| `createUser` | `CreateUserInput` | `User`                | `ValidationError`, `ConflictError` | Create new user      |
+| `updateUser` | `UpdateUserInput` | `User`                | `NotFoundError`, `ValidationError` | Update user fields   |
+| `deleteUser` | `DeleteUserInput` | `void`                | `NotFoundError`, `PermissionError` | Remove user          |
+| `listUsers`  | `ListUsersInput`  | `PaginatedList<User>` | —                                  | List with pagination |
 
 ### Error Strategy Document
 

@@ -11,11 +11,11 @@ to an existing project — a real workflow gap.
 
 This plan redefines the command model so each command has one clear job:
 
-| Command | Job |
-|---|---|
-| `outfitter init` | Create a new project from scratch |
+| Command              | Job                                     |
+| -------------------- | --------------------------------------- |
+| `outfitter init`     | Create a new project from scratch       |
 | `outfitter scaffold` | Add a capability to an existing project |
-| `outfitter add` | Add tooling/config blocks (unchanged) |
+| `outfitter add`      | Add tooling/config blocks (unchanged)   |
 
 ## Design Rationale
 
@@ -44,16 +44,16 @@ These were resolved in a Q&A session (2026-02-12):
 
 ## Target Catalog
 
-| Target | Category | Placement | Status |
-|---|---|---|---|
-| `minimal` | Starting point | Root (init only) | Template exists as `basic` |
-| `cli` | Runnable | `apps/<name>/` | Template exists |
-| `mcp` | Runnable | `apps/<name>/` | Template exists |
-| `daemon` | Runnable | `apps/<name>/` | Template exists |
-| `api` | Runnable | `apps/<name>/` | Stub — needs template |
-| `worker` | Runnable | `apps/<name>/` | Stub — needs template |
-| `web` | Runnable | `apps/<name>/` | Stub — needs template |
-| `lib` | Library | `packages/<name>/` | Stub — needs template |
+| Target    | Category       | Placement          | Status                     |
+| --------- | -------------- | ------------------ | -------------------------- |
+| `minimal` | Starting point | Root (init only)   | Template exists as `basic` |
+| `cli`     | Runnable       | `apps/<name>/`     | Template exists            |
+| `mcp`     | Runnable       | `apps/<name>/`     | Template exists            |
+| `daemon`  | Runnable       | `apps/<name>/`     | Template exists            |
+| `api`     | Runnable       | `apps/<name>/`     | Stub — needs template      |
+| `worker`  | Runnable       | `apps/<name>/`     | Stub — needs template      |
+| `web`     | Runnable       | `apps/<name>/`     | Stub — needs template      |
+| `lib`     | Library        | `packages/<name>/` | Stub — needs template      |
 
 Stub targets should be registered in the target registry with metadata but error clearly if
 selected before their template is ready.
@@ -261,21 +261,21 @@ For migration guides (init consolidation, create retirement), also run through
 These types are defined once and referenced across multiple design documents. The canonical
 location is the source of truth — other documents reference but do not redefine these types.
 
-| Type | Canonical Doc | Module | Referenced By |
-|---|---|---|---|
-| `TargetDefinition` | TARGET-REGISTRY.md | `targets/types.ts` | SCAFFOLD-COMMAND, INIT-CONSOLIDATION |
-| `TargetId` | TARGET-REGISTRY.md | `targets/types.ts` | SCAFFOLD-COMMAND, INIT-CONSOLIDATION |
-| `PlaceholderValues` | SHARED-ENGINE.md | `engine/types.ts` | SCAFFOLD-COMMAND, POST-SCAFFOLD |
-| `ScaffoldPlan` | SHARED-ENGINE.md | `engine/types.ts` | INIT-CONSOLIDATION, SCAFFOLD-COMMAND |
-| `ScaffoldChange` | SHARED-ENGINE.md | `engine/types.ts` | INIT-CONSOLIDATION |
-| `ScaffoldResult` | SHARED-ENGINE.md | `engine/types.ts` | POST-SCAFFOLD |
-| `ScaffoldCommandResult` | SCAFFOLD-COMMAND.md | `commands/scaffold.ts` | — |
-| `ScaffoldError` | SHARED-ENGINE.md | `engine/types.ts` | SCAFFOLD-COMMAND, POST-SCAFFOLD |
-| `EngineOptions` | SHARED-ENGINE.md | `engine/types.ts` | POST-SCAFFOLD (adds `collector` in Slice 6) |
-| `Operation` | POST-SCAFFOLD.md | `engine/collector.ts` | — |
-| `OperationCollector` | POST-SCAFFOLD.md | `engine/collector.ts` | — |
-| `PostScaffoldResult` | POST-SCAFFOLD.md | `engine/post-scaffold.ts` | — |
-| `ProjectStructure` | SCAFFOLD-COMMAND.md | `commands/scaffold.ts` | — |
+| Type                    | Canonical Doc       | Module                    | Referenced By                               |
+| ----------------------- | ------------------- | ------------------------- | ------------------------------------------- |
+| `TargetDefinition`      | TARGET-REGISTRY.md  | `targets/types.ts`        | SCAFFOLD-COMMAND, INIT-CONSOLIDATION        |
+| `TargetId`              | TARGET-REGISTRY.md  | `targets/types.ts`        | SCAFFOLD-COMMAND, INIT-CONSOLIDATION        |
+| `PlaceholderValues`     | SHARED-ENGINE.md    | `engine/types.ts`         | SCAFFOLD-COMMAND, POST-SCAFFOLD             |
+| `ScaffoldPlan`          | SHARED-ENGINE.md    | `engine/types.ts`         | INIT-CONSOLIDATION, SCAFFOLD-COMMAND        |
+| `ScaffoldChange`        | SHARED-ENGINE.md    | `engine/types.ts`         | INIT-CONSOLIDATION                          |
+| `ScaffoldResult`        | SHARED-ENGINE.md    | `engine/types.ts`         | POST-SCAFFOLD                               |
+| `ScaffoldCommandResult` | SCAFFOLD-COMMAND.md | `commands/scaffold.ts`    | —                                           |
+| `ScaffoldError`         | SHARED-ENGINE.md    | `engine/types.ts`         | SCAFFOLD-COMMAND, POST-SCAFFOLD             |
+| `EngineOptions`         | SHARED-ENGINE.md    | `engine/types.ts`         | POST-SCAFFOLD (adds `collector` in Slice 6) |
+| `Operation`             | POST-SCAFFOLD.md    | `engine/collector.ts`     | —                                           |
+| `OperationCollector`    | POST-SCAFFOLD.md    | `engine/collector.ts`     | —                                           |
+| `PostScaffoldResult`    | POST-SCAFFOLD.md    | `engine/post-scaffold.ts` | —                                           |
+| `ProjectStructure`      | SCAFFOLD-COMMAND.md | `commands/scaffold.ts`    | —                                           |
 
 ## Guardrails
 

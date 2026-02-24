@@ -41,12 +41,12 @@ else → error
 
 ## Automation Value Assessment
 
-| Signal | High Value | Low Value |
-|--------|------------|-----------|
-| Frequency | Daily/weekly | Monthly/rarely |
-| Complexity | 5+ steps or flags | 1-2 steps |
-| Error rate | Users often make mistakes | Straightforward |
-| Memorability | Hard to remember options | Obvious invocation |
+| Signal       | High Value                | Low Value          |
+| ------------ | ------------------------- | ------------------ |
+| Frequency    | Daily/weekly              | Monthly/rarely     |
+| Complexity   | 5+ steps or flags         | 1-2 steps          |
+| Error rate   | Users often make mistakes | Straightforward    |
+| Memorability | Hard to remember options  | Obvious invocation |
 
 ## Evidence Threshold
 
@@ -65,15 +65,18 @@ Create `artifacts/skill-distillery/patterns.md`:
 # Patterns: {REPO_NAME}
 
 ## Workflows
+
 1. {WORKFLOW_NAME}
    - Steps: {STEP_LIST}
    - Frequency: {COMMON|OCCASIONAL|RARE}
    - Automation value: {HIGH|MEDIUM|LOW}
 
 ## Decision Points
+
 - {DECISION}: {OPTIONS}
 
 ## Boilerplate
+
 - {TEMPLATE}: {USE_CASE}
 ```
 

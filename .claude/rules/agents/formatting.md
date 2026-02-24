@@ -23,10 +23,12 @@ Bad: "Ask question wait response"
 ## Variables and Placeholders
 
 **Variables** — all caps, no spaces, curly braces:
+
 - `{VARIABLE}` — concrete placeholder to be replaced
 - Examples: `{N}`, `{REASON}`, `{BAR}`, `{NAME}`, `{FILE_PATH}`
 
 **Instructional prose** — lowercase, spaces inside braces:
+
 - `{ description of what goes here }` — guidance for what to fill in
 - Examples: `{ question text }`, `{ why it matters }`, `{ if needed }`
 
@@ -125,4 +127,3 @@ Avoid: `[path/to/filename.md](path/to/filename.md)`
 - [references/confidence.md](references/confidence.md)
 - [../rules/FORMATTING.md](../rules/FORMATTING.md)
 ```
-

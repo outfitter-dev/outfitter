@@ -13,6 +13,7 @@ import {
   truncateText,
   wrapText,
 } from "@outfitter/cli/text";
+
 import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 

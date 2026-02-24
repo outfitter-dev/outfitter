@@ -7,96 +7,117 @@ Common middleware patterns for Hono APIs.
 ### Logger
 
 ```typescript
-import { logger } from 'hono/logger';
+import { logger } from "hono/logger";
 
-app.use('*', logger());
+app.use("*", logger());
 
 // Custom log function
-app.use('*', logger((message) => {
-  console.log(`[${new Date().toISOString()}] ${message}`);
-}));
+app.use(
+  "*",
+  logger((message) => {
+    console.log(`[${new Date().toISOString()}] ${message}`);
+  })
+);
 ```
 
 ### CORS
 
 ```typescript
-import { cors } from 'hono/cors';
+import { cors } from "hono/cors";
 
 // Basic CORS
-app.use('/api/*', cors());
+app.use("/api/*", cors());
 
 // Configured CORS
-app.use('/api/*', cors({
-  origin: ['http://localhost:3000', 'https://example.com'],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  maxAge: 86400, // 24 hours
-}));
+app.use(
+  "/api/*",
+  cors({
+    origin: ["http://localhost:3000", "https://example.com"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    maxAge: 86400, // 24 hours
+  })
+);
 
 // Dynamic origin
-app.use('/api/*', cors({
-  origin: (origin) => {
-    if (origin.endsWith('.example.com')) {
-      return origin;
-    }
-    return null;
-  },
-}));
+app.use(
+  "/api/*",
+  cors({
+    origin: (origin) => {
+      if (origin.endsWith(".example.com")) {
+        return origin;
+      }
+      return null;
+    },
+  })
+);
 ```
 
 ### Compress
 
 ```typescript
-import { compress } from 'hono/compress';
+import { compress } from "hono/compress";
 
-app.use('*', compress());
+app.use("*", compress());
 ```
 
 ### Secure Headers
 
 ```typescript
-import { secureHeaders } from 'hono/secure-headers';
+import { secureHeaders } from "hono/secure-headers";
 
-app.use('*', secureHeaders());
+app.use("*", secureHeaders());
 ```
 
 ### Bearer Auth
 
 ```typescript
-import { bearerAuth } from 'hono/bearer-auth';
+import { bearerAuth } from "hono/bearer-auth";
 
-app.use('/api/*', bearerAuth({
-  token: Bun.env.API_TOKEN!,
-}));
+app.use(
+  "/api/*",
+  bearerAuth({
+    token: Bun.env.API_TOKEN!,
+  })
+);
 
 // Multiple tokens
-app.use('/api/*', bearerAuth({
-  token: [Bun.env.API_TOKEN!, Bun.env.ADMIN_TOKEN!],
-}));
+app.use(
+  "/api/*",
+  bearerAuth({
+    token: [Bun.env.API_TOKEN!, Bun.env.ADMIN_TOKEN!],
+  })
+);
 
 // Custom verification
-app.use('/api/*', bearerAuth({
-  verifyToken: async (token, c) => {
-    const user = await verifyJWT(token);
-    if (user) {
-      c.set('user', user);
-      return true;
-    }
-    return false;
-  },
-}));
+app.use(
+  "/api/*",
+  bearerAuth({
+    verifyToken: async (token, c) => {
+      const user = await verifyJWT(token);
+      if (user) {
+        c.set("user", user);
+        return true;
+      }
+      return false;
+    },
+  })
+);
 ```
 
 ### Basic Auth
 
 ```typescript
-import { basicAuth } from 'hono/basic-auth';
+import { basicAuth } from "hono/basic-auth";
 
-app.use('/admin/*', basicAuth({
-  username: 'admin',
-  password: Bun.env.ADMIN_PASSWORD!,
-}));
+app.use(
+  "/admin/*",
+  basicAuth({
+    username: "admin",
+    password: Bun.env.ADMIN_PASSWORD!,
+  })
+);
 ```
 
 ## Custom Middleware with Factory
@@ -104,31 +125,31 @@ app.use('/admin/*', basicAuth({
 ### Authentication
 
 ```typescript
-import { createFactory } from 'hono/factory';
-import { HTTPException } from 'hono/http-exception';
+import { createFactory } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
 
 type Env = {
   Variables: {
-    user: { id: string; email: string; role: 'admin' | 'user' };
+    user: { id: string; email: string; role: "admin" | "user" };
   };
 };
 
 const factory = createFactory<Env>();
 
 export const authMiddleware = factory.createMiddleware(async (c, next) => {
-  const token = c.req.header('authorization')?.replace('Bearer ', '');
+  const token = c.req.header("authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    throw new HTTPException(401, { message: 'Missing authorization token' });
+    throw new HTTPException(401, { message: "Missing authorization token" });
   }
 
   const payload = await verifyJWT(token);
 
   if (!payload) {
-    throw new HTTPException(401, { message: 'Invalid token' });
+    throw new HTTPException(401, { message: "Invalid token" });
   }
 
-  c.set('user', {
+  c.set("user", {
     id: payload.sub,
     email: payload.email,
     role: payload.role,
@@ -142,13 +163,13 @@ export const authMiddleware = factory.createMiddleware(async (c, next) => {
 
 ```typescript
 export const optionalAuth = factory.createMiddleware(async (c, next) => {
-  const token = c.req.header('authorization')?.replace('Bearer ', '');
+  const token = c.req.header("authorization")?.replace("Bearer ", "");
 
   if (token) {
     try {
       const payload = await verifyJWT(token);
       if (payload) {
-        c.set('user', {
+        c.set("user", {
           id: payload.sub,
           email: payload.email,
           role: payload.role,
@@ -166,22 +187,24 @@ export const optionalAuth = factory.createMiddleware(async (c, next) => {
 ### Role-Based Access Control
 
 ```typescript
-export const requireRole = (requiredRole: 'admin' | 'user') => {
+export const requireRole = (requiredRole: "admin" | "user") => {
   return factory.createMiddleware(async (c, next) => {
-    const user = c.get('user');
+    const user = c.get("user");
 
     if (!user) {
-      throw new HTTPException(401, { message: 'Unauthorized' });
+      throw new HTTPException(401, { message: "Unauthorized" });
     }
 
     // Admin has access to everything
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       await next();
       return;
     }
 
     if (user.role !== requiredRole) {
-      throw new HTTPException(403, { message: `${requiredRole} access required` });
+      throw new HTTPException(403, {
+        message: `${requiredRole} access required`,
+      });
     }
 
     await next();
@@ -189,22 +212,22 @@ export const requireRole = (requiredRole: 'admin' | 'user') => {
 };
 
 // Usage
-app.use('/api/admin/*', requireRole('admin'));
+app.use("/api/admin/*", requireRole("admin"));
 ```
 
 ### Resource Ownership
 
 ```typescript
-export const requireOwnership = (paramName = 'userId') => {
+export const requireOwnership = (paramName = "userId") => {
   return factory.createMiddleware(async (c, next) => {
-    const user = c.get('user');
+    const user = c.get("user");
 
     if (!user) {
-      throw new HTTPException(401, { message: 'Unauthorized' });
+      throw new HTTPException(401, { message: "Unauthorized" });
     }
 
     // Admin bypasses ownership check
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       await next();
       return;
     }
@@ -212,7 +235,7 @@ export const requireOwnership = (paramName = 'userId') => {
     const resourceUserId = c.req.param(paramName);
 
     if (user.id !== resourceUserId) {
-      throw new HTTPException(403, { message: 'Access denied' });
+      throw new HTTPException(403, { message: "Access denied" });
     }
 
     await next();
@@ -220,19 +243,19 @@ export const requireOwnership = (paramName = 'userId') => {
 };
 
 // Usage
-app.delete('/users/:userId', requireOwnership('userId'), deleteUser);
+app.delete("/users/:userId", requireOwnership("userId"), deleteUser);
 ```
 
 ### Request ID
 
 ```typescript
 export const requestIdMiddleware = factory.createMiddleware(async (c, next) => {
-  const requestId = c.req.header('x-request-id') || crypto.randomUUID();
-  c.set('requestId', requestId);
+  const requestId = c.req.header("x-request-id") || crypto.randomUUID();
+  c.set("requestId", requestId);
 
   await next();
 
-  c.res.headers.set('x-request-id', requestId);
+  c.res.headers.set("x-request-id", requestId);
 });
 ```
 
@@ -245,7 +268,7 @@ export const timingMiddleware = factory.createMiddleware(async (c, next) => {
   await next();
 
   const duration = (Bun.nanoseconds() - start) / 1_000_000;
-  c.res.headers.set('x-response-time', `${duration.toFixed(2)}ms`);
+  c.res.headers.set("x-response-time", `${duration.toFixed(2)}ms`);
 
   console.log(`${c.req.method} ${c.req.path} - ${duration.toFixed(2)}ms`);
 });
@@ -258,7 +281,7 @@ const rateLimits = new Map<string, { count: number; resetAt: number }>();
 
 export const rateLimiter = (limit: number, windowMs: number) => {
   return factory.createMiddleware(async (c, next) => {
-    const ip = c.req.header('x-forwarded-for') || 'unknown';
+    const ip = c.req.header("x-forwarded-for") || "unknown";
     const now = Date.now();
 
     const entry = rateLimits.get(ip);
@@ -271,7 +294,7 @@ export const rateLimiter = (limit: number, windowMs: number) => {
       if (entry.count > limit) {
         const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
         throw new HTTPException(429, {
-          message: 'Rate limit exceeded',
+          message: "Rate limit exceeded",
           cause: { retryAfter },
         });
       }
@@ -282,17 +305,17 @@ export const rateLimiter = (limit: number, windowMs: number) => {
 };
 
 // Usage: 100 requests per minute
-app.use('/api/*', rateLimiter(100, 60 * 1000));
+app.use("/api/*", rateLimiter(100, 60 * 1000));
 ```
 
 ### Database Connection
 
 ```typescript
-import { Database } from 'bun:sqlite';
+import { Database } from "bun:sqlite";
 
 export const dbMiddleware = factory.createMiddleware(async (c, next) => {
-  const db = new Database('app.db');
-  c.set('db', db);
+  const db = new Database("app.db");
+  c.set("db", db);
 
   try {
     await next();
@@ -306,7 +329,7 @@ class DatabasePool {
   private pool: Database[] = [];
 
   get(): Database {
-    return this.pool.pop() || new Database('app.db');
+    return this.pool.pop() || new Database("app.db");
   }
 
   release(db: Database) {
@@ -318,7 +341,7 @@ const pool = new DatabasePool();
 
 export const pooledDbMiddleware = factory.createMiddleware(async (c, next) => {
   const db = pool.get();
-  c.set('db', db);
+  c.set("db", db);
 
   try {
     await next();
@@ -335,7 +358,7 @@ const cache = new Map<string, { data: any; expiresAt: number }>();
 
 export const cacheMiddleware = (ttlMs: number) => {
   return factory.createMiddleware(async (c, next) => {
-    if (c.req.method !== 'GET') {
+    if (c.req.method !== "GET") {
       await next();
       return;
     }
@@ -361,13 +384,13 @@ export const cacheMiddleware = (ttlMs: number) => {
 };
 
 // Usage: 5 minute cache
-app.get('/api/public-data', cacheMiddleware(5 * 60 * 1000), handler);
+app.get("/api/public-data", cacheMiddleware(5 * 60 * 1000), handler);
 ```
 
 ### Request Validation
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const validateRequest = <T extends z.ZodType>(schema: T) => {
   return factory.createMiddleware(async (c, next) => {
@@ -377,7 +400,7 @@ export const validateRequest = <T extends z.ZodType>(schema: T) => {
     } catch (err) {
       if (err instanceof z.ZodError) {
         throw new HTTPException(400, {
-          message: 'Validation failed',
+          message: "Validation failed",
           cause: err.issues,
         });
       }
@@ -395,7 +418,7 @@ export const validateRequest = <T extends z.ZodType>(schema: T) => {
 // Compose multiple middleware
 const apiMiddleware = factory.createMiddleware(async (c, next) => {
   // Request ID
-  c.set('requestId', crypto.randomUUID());
+  c.set("requestId", crypto.randomUUID());
 
   // Timing start
   const start = Bun.nanoseconds();
@@ -404,12 +427,12 @@ const apiMiddleware = factory.createMiddleware(async (c, next) => {
 
   // Timing end
   const duration = (Bun.nanoseconds() - start) / 1_000_000;
-  c.res.headers.set('x-request-id', c.get('requestId'));
-  c.res.headers.set('x-response-time', `${duration.toFixed(2)}ms`);
+  c.res.headers.set("x-request-id", c.get("requestId"));
+  c.res.headers.set("x-response-time", `${duration.toFixed(2)}ms`);
 });
 
 // Apply composed middleware
-app.use('/api/*', apiMiddleware);
+app.use("/api/*", apiMiddleware);
 ```
 
 ## Conditional Middleware
@@ -426,32 +449,36 @@ export const conditionalAuth = (condition: (c: Context) => boolean) => {
 };
 
 // Skip auth for health checks
-app.use('/api/*', conditionalAuth((c) => c.req.path !== '/api/health'));
+app.use(
+  "/api/*",
+  conditionalAuth((c) => c.req.path !== "/api/health")
+);
 ```
 
 ## Middleware Order
 
 ```typescript
-const app = factory.createApp()
+const app = factory
+  .createApp()
   // Global middleware (runs for all routes)
-  .use('*', logger())
-  .use('*', requestIdMiddleware)
-  .use('*', timingMiddleware)
+  .use("*", logger())
+  .use("*", requestIdMiddleware)
+  .use("*", timingMiddleware)
 
   // API middleware
-  .use('/api/*', cors())
-  .use('/api/*', dbMiddleware)
+  .use("/api/*", cors())
+  .use("/api/*", dbMiddleware)
 
   // Public routes (before auth middleware)
-  .get('/api/health', (c) => c.json({ status: 'ok' }))
-  .post('/api/auth/login', loginHandler)
+  .get("/api/health", (c) => c.json({ status: "ok" }))
+  .post("/api/auth/login", loginHandler)
 
   // Protected routes
-  .use('/api/*', authMiddleware)
-  .get('/api/profile', profileHandler)
-  .get('/api/users', usersHandler)
+  .use("/api/*", authMiddleware)
+  .get("/api/profile", profileHandler)
+  .get("/api/users", usersHandler)
 
   // Admin routes
-  .use('/api/admin/*', requireRole('admin'))
-  .get('/api/admin/stats', statsHandler);
+  .use("/api/admin/*", requireRole("admin"))
+  .get("/api/admin/stats", statsHandler);
 ```

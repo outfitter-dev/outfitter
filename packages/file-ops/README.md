@@ -16,7 +16,7 @@ import {
   securePath,
   glob,
   withLock,
-  atomicWrite
+  atomicWrite,
 } from "@outfitter/file-ops";
 
 // Find workspace root by marker files (.git, package.json)
@@ -34,7 +34,7 @@ if (rootResult.isOk()) {
 // Find files with glob patterns
 const files = await glob("**/*.ts", {
   cwd: "/project",
-  ignore: ["node_modules/**", "**/*.test.ts"]
+  ignore: ["node_modules/**", "**/*.test.ts"],
 });
 
 // Atomic write with file locking
@@ -60,16 +60,16 @@ if (result.isOk()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option    | Type       | Default                    | Description                            |
+| --------- | ---------- | -------------------------- | -------------------------------------- |
 | `markers` | `string[]` | `[".git", "package.json"]` | Marker files/directories to search for |
-| `stopAt` | `string` | filesystem root | Stop searching at this directory |
+| `stopAt`  | `string`   | filesystem root            | Stop searching at this directory       |
 
 ```typescript
 // Custom markers for Rust or Python projects
 const result = await findWorkspaceRoot(startPath, {
   markers: ["Cargo.toml", "pyproject.toml"],
-  stopAt: "/home/user"
+  stopAt: "/home/user",
 });
 ```
 
@@ -102,12 +102,12 @@ console.log(outside); // false
 
 #### Security Model
 
-| Attack Vector | Protection |
-|--------------|------------|
-| Path traversal (`../`) | Blocked by all security functions |
-| Null bytes (`\x00`) | Rejected immediately |
-| Absolute paths | Blocked when relative expected |
-| Escape from base directory | Defense-in-depth verification |
+| Attack Vector              | Protection                        |
+| -------------------------- | --------------------------------- |
+| Path traversal (`../`)     | Blocked by all security functions |
+| Null bytes (`\x00`)        | Rejected immediately              |
+| Absolute paths             | Blocked when relative expected    |
+| Escape from base directory | Defense-in-depth verification     |
 
 #### `securePath(path, basePath)`
 
@@ -122,9 +122,9 @@ if (result.isOk()) {
 }
 
 // These all return ValidationError:
-securePath("../etc/passwd", base);      // Traversal sequence
-securePath("/etc/passwd", base);        // Absolute path
-securePath("file\x00.txt", base);       // Null byte
+securePath("../etc/passwd", base); // Traversal sequence
+securePath("/etc/passwd", base); // Absolute path
+securePath("file\x00.txt", base); // Null byte
 ```
 
 **UNSAFE pattern - never do this:**
@@ -161,8 +161,8 @@ if (result.isOk()) {
 }
 
 // Rejects dangerous segments
-resolveSafePath("/app", "..", "etc");     // Error: traversal
-resolveSafePath("/app", "/etc/passwd");   // Error: absolute segment
+resolveSafePath("/app", "..", "etc"); // Error: traversal
+resolveSafePath("/app", "/etc/passwd"); // Error: absolute segment
 ```
 
 ### Glob Patterns
@@ -178,7 +178,7 @@ const result = await glob("**/*.ts", { cwd: "/project" });
 // Exclude test files and node_modules
 const result = await glob("**/*.ts", {
   cwd: "/project",
-  ignore: ["**/*.test.ts", "**/node_modules/**"]
+  ignore: ["**/*.test.ts", "**/node_modules/**"],
 });
 
 // Include dot files
@@ -187,28 +187,28 @@ const result = await glob("**/.*", { cwd: "/project", dot: true });
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cwd` | `string` | `process.cwd()` | Base directory for matching |
-| `ignore` | `string[]` | `[]` | Patterns to exclude |
-| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
-| `dot` | `boolean` | `false` | Include dot files |
+| Option           | Type       | Default         | Description                 |
+| ---------------- | ---------- | --------------- | --------------------------- |
+| `cwd`            | `string`   | `process.cwd()` | Base directory for matching |
+| `ignore`         | `string[]` | `[]`            | Patterns to exclude         |
+| `followSymlinks` | `boolean`  | `false`         | Follow symbolic links       |
+| `dot`            | `boolean`  | `false`         | Include dot files           |
 
 **Pattern Syntax:**
 
-| Pattern | Matches |
-|---------|---------|
-| `*` | Any characters except `/` |
-| `**` | Any characters including `/` (recursive) |
-| `{a,b}` | Alternation (matches `a` or `b`) |
-| `[abc]` | Character class (matches `a`, `b`, or `c`) |
-| `!pattern` | Negation (in ignore array) |
+| Pattern    | Matches                                    |
+| ---------- | ------------------------------------------ |
+| `*`        | Any characters except `/`                  |
+| `**`       | Any characters including `/` (recursive)   |
+| `{a,b}`    | Alternation (matches `a` or `b`)           |
+| `[abc]`    | Character class (matches `a`, `b`, or `c`) |
+| `!pattern` | Negation (in ignore array)                 |
 
 ```typescript
 // Negation patterns in ignore array
 const result = await glob("src/**/*.ts", {
   cwd: "/project",
-  ignore: ["**/*.ts", "!**/index.ts"]  // Ignore all except index.ts
+  ignore: ["**/*.ts", "!**/index.ts"], // Ignore all except index.ts
 });
 ```
 
@@ -275,9 +275,9 @@ if (await isLocked("/data/file.db")) {
 
 ```typescript
 interface FileLock {
-  path: string;      // Path to the locked file
-  lockPath: string;  // Path to the .lock file
-  pid: number;       // Process ID holding the lock
+  path: string; // Path to the locked file
+  lockPath: string; // Path to the .lock file
+  pid: number; // Process ID holding the lock
   timestamp: number; // When lock was acquired
 }
 ```
@@ -299,21 +299,21 @@ if (result.isErr()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `createParentDirs` | `boolean` | `true` | Create parent directories if needed |
+| Option                | Type      | Default | Description                         |
+| --------------------- | --------- | ------- | ----------------------------------- |
+| `createParentDirs`    | `boolean` | `true`  | Create parent directories if needed |
 | `preservePermissions` | `boolean` | `false` | Keep permissions from existing file |
-| `mode` | `number` | `0o644` | File mode for new files |
+| `mode`                | `number`  | `0o644` | File mode for new files             |
 
 ```typescript
 // Preserve executable permissions
 await atomicWrite("/scripts/run.sh", newContent, {
-  preservePermissions: true
+  preservePermissions: true,
 });
 
 // Create nested directories automatically
 await atomicWrite("/data/deep/nested/file.json", content, {
-  createParentDirs: true
+  createParentDirs: true,
 });
 ```
 
@@ -325,7 +325,7 @@ Serializes and writes JSON data atomically.
 const result = await atomicWriteJson("/data/config.json", {
   name: "app",
   version: "1.0.0",
-  settings: { debug: false }
+  settings: { debug: false },
 });
 ```
 
@@ -348,12 +348,12 @@ if (result.isOk()) {
 
 **Error Types:**
 
-| Error | Functions | When |
-|-------|-----------|------|
-| `NotFoundError` | `findWorkspaceRoot`, `getRelativePath` | No workspace marker found |
-| `ValidationError` | `securePath`, `isPathSafe`, `resolveSafePath`, `atomicWriteJson` | Invalid path or data |
-| `ConflictError` | `acquireLock`, `withLock` | File already locked |
-| `InternalError` | `glob`, `releaseLock`, `withLock`, `atomicWrite` | Filesystem or system error |
+| Error             | Functions                                                        | When                       |
+| ----------------- | ---------------------------------------------------------------- | -------------------------- |
+| `NotFoundError`   | `findWorkspaceRoot`, `getRelativePath`                           | No workspace marker found  |
+| `ValidationError` | `securePath`, `isPathSafe`, `resolveSafePath`, `atomicWriteJson` | Invalid path or data       |
+| `ConflictError`   | `acquireLock`, `withLock`                                        | File already locked        |
+| `InternalError`   | `glob`, `releaseLock`, `withLock`, `atomicWrite`                 | Filesystem or system error |
 
 ## Dependencies
 

@@ -11,6 +11,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "I've co-founded five startups, raised $60M+, and shipped products to millions of users. But the engineering? Always in someone else's hands."
 
 **Why it works:**
+
 - High status established immediately (5 startups, $60M)
 - Pivots to vulnerability ("Always in someone else's hands")
 - Creates tension that the rest of the post resolves
@@ -21,6 +22,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "Bugs galore, code that was unmaintainable, and countless hours lost to ill-fated ideas."
 
 **Why it works:**
+
 - Admits failure before claiming success
 - Specific enough to be credible ("unmaintainable," "ill-fated")
 - Sets up the solution without overselling
@@ -34,6 +36,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "Recently we've seen agents waste 60,000+ tokens per documentation lookup. That's not a rounding error—that's the whole context window. BLZ returns results in 5-50ms."
 
 **Breakdown:**
+
 - **Setup:** "Recently we've seen agents waste 60,000+ tokens…"
 - **Pivot:** "That's not a rounding error—"
 - **Punch:** "that's the whole context window."
@@ -44,6 +47,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "I actually laughed out loud when I saw the result: 6 milliseconds."
 
 **Why it works:**
+
 - Personal reaction, not marketing claim
 - Specific number carries the weight
 - Reader can imagine the moment
@@ -57,6 +61,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "Uses Tantivy for full-text indexing. Think `ripgrep`, purpose-built for documentation."
 
 **Why it works:**
+
 - Names the actual technology (credibility)
 - Provides accessible analogy (ripgrep) for those who don't know Tantivy
 - "Purpose-built" signals intentional design, not hack
@@ -66,6 +71,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "BLZ isn't a totally polished, or fully baked product yet."
 
 **Why it works:**
+
 - Honest about limitations
 - "Yet" signals trajectory without overpromising
 - Builds trust through transparency
@@ -75,6 +81,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "This is my first shipped tool. Despite founding five startups, I'd never written production code that others actually use. Agents changed that."
 
 **Why it works:**
+
 - Vulnerability (never shipped code) wrapped in credibility (five startups)
 - "Agents changed that" points forward without hype
 - Reader understands the stakes were personal
@@ -88,6 +95,7 @@ Golden examples from Outfitter blog posts for pattern-matching.
 > "Context engineering—delivering the right data, at the right time, in the right shape."
 
 **Why it works:**
+
 - Introduces jargon ("context engineering")
 - Immediately defines it in plain terms
 - The three-part structure is memorable
@@ -101,6 +109,7 @@ blz get bun:304–324
 ```
 
 **Why it works:**
+
 - Concrete commands, not abstract description
 - Reader can try it immediately
 - Line numbers (304-324) signal precision
@@ -114,6 +123,7 @@ blz get bun:304–324
 > "If you're building with agents, give it a shot. The index is local, the queries are fast, and the citations are deterministic."
 
 **Why it works:**
+
 - Clear audience ("building with agents")
 - Low-commitment ask ("give it a shot")
 - Three concrete benefits, not vague promise
@@ -123,6 +133,7 @@ blz get bun:304–324
 > "Go confidently in the direction of your dreams. Live the life you've imagined."
 
 **Why it works:**
+
 - Quote earns its place (Thoreau ties to expedition theme)
 - Aspirational without being preachy
 - Leaves reader thinking, not summarizing
@@ -136,6 +147,7 @@ blz get bun:304–324
 > "Well-supplied teams build better software."
 
 **Why it works:**
+
 - Natural extension of "Outfitter" name
 - Makes a real claim (supplies → outcomes)
 - Doesn't force the metaphor
@@ -145,6 +157,7 @@ blz get bun:304–324
 > "The right provisions for the journey ahead."
 
 **Why it works:**
+
 - "Provisions" = dependencies/tools (clear mapping)
 - "Journey" = project (natural fit)
 - Would survive if you stripped the metaphor
@@ -158,6 +171,7 @@ blz get bun:304–324
 > "Traverse the codebase wilderness with your trusty CLI companion!"
 
 **Why it fails:**
+
 - "Traverse" is trying too hard
 - "Wilderness" overstates the drama
 - "Trusty companion" is cutesy
@@ -168,6 +182,7 @@ blz get bun:304–324
 > "Navigate the codebase with a CLI that knows where to look."
 
 **Why it works:**
+
 - "Navigate" is natural
 - Drops the forced drama
 - Focuses on utility
@@ -181,6 +196,7 @@ blz get bun:304–324
 > "In today's fast-paced development landscape, documentation has become increasingly important. That's why we built BLZ—a revolutionary tool that will transform how you work with docs."
 
 **What's wrong:**
+
 - "Fast-paced development landscape" = filler
 - "Increasingly important" = says nothing
 - "Revolutionary" = unearned superlative
@@ -191,6 +207,7 @@ blz get bun:304–324
 > "Agents burn through context windows searching docs. BLZ indexes them locally and returns results in milliseconds."
 
 **What's right:**
+
 - Problem stated concretely
 - Solution stated concretely
 - No wasted words
@@ -202,7 +219,9 @@ blz get bun:304–324
 Read any sentence aloud. Would you actually say this to a smart friend explaining what you built?
 
 **Fails the test:**
+
 > "We are thrilled to announce the launch of our innovative documentation solution."
 
 **Passes the test:**
+
 > "I built a thing that searches docs in 6 milliseconds. Want to try it?"

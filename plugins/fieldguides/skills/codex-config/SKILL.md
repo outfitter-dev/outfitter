@@ -17,6 +17,7 @@ Manages configuration files for OpenAI Codex CLI, including model settings, sand
 **Primary Config:** `~/.codex/config.toml`
 
 **Skills Paths (precedence, highest first):**
+
 1. `$CWD/.codex/skills/` - Current directory
 2. `$CWD/../.codex/skills/` - Parent directory
 3. `$REPO_ROOT/.codex/skills/` - Repository root
@@ -108,11 +109,11 @@ codex -c shell_environment_policy.inherit=all
 
 ## Convenience Flags
 
-| Flag | Equivalent |
-|------|------------|
-| `--full-auto` | `-a on-request --sandbox workspace-write` |
-| `--oss` | `-c model_provider=oss` (local LM Studio/Ollama) |
-| `--search` | Enable web search tool |
+| Flag          | Equivalent                                       |
+| ------------- | ------------------------------------------------ |
+| `--full-auto` | `-a on-request --sandbox workspace-write`        |
+| `--oss`       | `-c model_provider=oss` (local LM Studio/Ollama) |
+| `--search`    | Enable web search tool                           |
 
 ```bash
 codex --full-auto "implement feature"

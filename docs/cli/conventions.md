@@ -22,37 +22,33 @@ command("check")
 
 ### Core Presets (`@outfitter/cli/flags`)
 
-| Preset | Flags | Resolved Type | Default |
-|--------|-------|---------------|---------|
-| `verbosePreset()` | `-v, --verbose` | `{ verbose: boolean }` | `false` |
-| `cwdPreset()` | `--cwd <path>` | `{ cwd: string }` | `process.cwd()` |
-| `dryRunPreset()` | `--dry-run` | `{ dryRun: boolean }` | `false` |
-| `forcePreset()` | `-f, --force` | `{ force: boolean }` | `false` |
-| `interactionPreset()` | `--non-interactive`, `--no-input`, `-y, --yes` | `{ interactive: boolean; yes: boolean }` | `interactive: true` |
-| `strictPreset()` | `--strict` | `{ strict: boolean }` | `false` |
-| `colorPreset()` | `--color [mode]`, `--no-color` | `{ color: "auto" \| "always" \| "never" }` | `"auto"` |
-| `projectionPreset()` | `--fields <a,b>`, `--exclude-fields <a,b>`, `--count` | `{ fields: string[] \| undefined; excludeFields: string[] \| undefined; count: boolean }` | all `undefined`/`false` |
-| `paginationPreset(config?)` | `-l, --limit <n>`, `--next`, `--reset` | `{ limit: number; next: boolean; reset: boolean }` | `limit: 20` |
-| `timeWindowPreset(config?)` | `--since <date>`, `--until <date>` | `{ since: Date \| undefined; until: Date \| undefined }` | `undefined` |
-| `executionPreset(config?)` | `--timeout <ms>`, `--retries <n>`, `--offline` | `{ timeout: number \| undefined; retries: number; offline: boolean }` | `retries: 0` |
+| Preset                      | Flags                                                 | Resolved Type                                                                             | Default                 |
+| --------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------- |
+| `verbosePreset()`           | `-v, --verbose`                                       | `{ verbose: boolean }`                                                                    | `false`                 |
+| `cwdPreset()`               | `--cwd <path>`                                        | `{ cwd: string }`                                                                         | `process.cwd()`         |
+| `dryRunPreset()`            | `--dry-run`                                           | `{ dryRun: boolean }`                                                                     | `false`                 |
+| `forcePreset()`             | `-f, --force`                                         | `{ force: boolean }`                                                                      | `false`                 |
+| `interactionPreset()`       | `--non-interactive`, `--no-input`, `-y, --yes`        | `{ interactive: boolean; yes: boolean }`                                                  | `interactive: true`     |
+| `strictPreset()`            | `--strict`                                            | `{ strict: boolean }`                                                                     | `false`                 |
+| `colorPreset()`             | `--color [mode]`, `--no-color`                        | `{ color: "auto" \| "always" \| "never" }`                                                | `"auto"`                |
+| `projectionPreset()`        | `--fields <a,b>`, `--exclude-fields <a,b>`, `--count` | `{ fields: string[] \| undefined; excludeFields: string[] \| undefined; count: boolean }` | all `undefined`/`false` |
+| `paginationPreset(config?)` | `-l, --limit <n>`, `--next`, `--reset`                | `{ limit: number; next: boolean; reset: boolean }`                                        | `limit: 20`             |
+| `timeWindowPreset(config?)` | `--since <date>`, `--until <date>`                    | `{ since: Date \| undefined; until: Date \| undefined }`                                  | `undefined`             |
+| `executionPreset(config?)`  | `--timeout <ms>`, `--retries <n>`, `--offline`        | `{ timeout: number \| undefined; retries: number; offline: boolean }`                     | `retries: 0`            |
 
 ### Query Presets (`@outfitter/cli/query`)
 
-| Preset | Flags | Resolved Type | Default |
-|--------|-------|---------------|---------|
-| `outputModePreset(config?)` | `-o, --output <mode>` | `{ outputMode: "human" \| "json" \| "jsonl" \| "tree" \| "table" }` | `"human"` |
-| `jqPreset()` | `--jq <expr>` | `{ jq: string \| undefined }` | `undefined` |
+| Preset                      | Flags                 | Resolved Type                                                       | Default     |
+| --------------------------- | --------------------- | ------------------------------------------------------------------- | ----------- |
+| `outputModePreset(config?)` | `-o, --output <mode>` | `{ outputMode: "human" \| "json" \| "jsonl" \| "tree" \| "table" }` | `"human"`   |
+| `jqPreset()`                | `--jq <expr>`         | `{ jq: string \| undefined }`                                       | `undefined` |
 
 ## Composition
 
 Presets compose with `composePresets()`. Options are deduplicated by preset `id` (first wins).
 
 ```typescript
-const composed = composePresets(
-  verbosePreset(),
-  cwdPreset(),
-  forcePreset(),
-);
+const composed = composePresets(verbosePreset(), cwdPreset(), forcePreset());
 
 // composed.options  → all three presets' options merged
 // composed.resolve(flags) → { verbose, cwd, force }
@@ -69,15 +65,20 @@ function formatPreset(): FlagPreset<FormatFlags> {
   return createPreset({
     id: "format",
     options: [
-      { flags: "--format <type>", description: "Output format", defaultValue: "table" },
+      {
+        flags: "--format <type>",
+        description: "Output format",
+        defaultValue: "table",
+      },
     ],
     resolve: (flags) => {
       const raw = flags["format"];
       const valid = new Set(["table", "csv", "json"]);
       return {
-        format: typeof raw === "string" && valid.has(raw)
-          ? raw as FormatFlags["format"]
-          : "table",
+        format:
+          typeof raw === "string" && valid.has(raw)
+            ? (raw as FormatFlags["format"])
+            : "table",
       };
     },
   });
@@ -99,20 +100,24 @@ timeWindowPreset({ maxRange: 30 * 24 * 60 * 60 * 1000 }); // 30 days
 executionPreset({ defaultTimeout: 5000, defaultRetries: 3, maxRetries: 5 });
 
 // Output modes
-outputModePreset({ modes: ["human", "json", "table"], defaultMode: "human", includeJsonl: true });
+outputModePreset({
+  modes: ["human", "json", "table"],
+  defaultMode: "human",
+  includeJsonl: true,
+});
 ```
 
 ## Verb Conventions (`@outfitter/cli/verbs`)
 
 Standard verb families for consistent command naming:
 
-| Family | Primary | Aliases | Description |
-|--------|---------|---------|-------------|
-| `create` | `create` | `new` | Create a new resource |
-| `modify` | `modify` | `edit`, `update` | Modify a resource |
-| `remove` | `remove` | `delete`, `rm` | Remove a resource |
-| `list` | `list` | `ls` | List resources |
-| `show` | `show` | `get`, `view` | Show resource details |
+| Family   | Primary  | Aliases          | Description           |
+| -------- | -------- | ---------------- | --------------------- |
+| `create` | `create` | `new`            | Create a new resource |
+| `modify` | `modify` | `edit`, `update` | Modify a resource     |
+| `remove` | `remove` | `delete`, `rm`   | Remove a resource     |
+| `list`   | `list`   | `ls`             | List resources        |
+| `show`   | `show`   | `get`, `view`    | Show resource details |
 
 ```typescript
 import { applyVerb, resolveVerb } from "@outfitter/cli/verbs";
@@ -209,19 +214,19 @@ mycli schema init                   # Detail view for a single action
 
 ```typescript
 interface ActionManifest {
-  version: string;              // Manifest format version ("1.0.0")
-  generatedAt: string;          // ISO 8601 timestamp
-  surfaces: ActionSurface[];    // Surfaces present in registry
+  version: string; // Manifest format version ("1.0.0")
+  generatedAt: string; // ISO 8601 timestamp
+  surfaces: ActionSurface[]; // Surfaces present in registry
   actions: ActionManifestEntry[];
   errors: Record<ErrorCategory, { exit: number; http: number }>;
-  outputModes: string[];        // ["human", "json", "jsonl", "tree", "table"]
+  outputModes: string[]; // ["human", "json", "jsonl", "tree", "table"]
 }
 
 interface ActionManifestEntry {
   id: string;
   description?: string;
   surfaces: ActionSurface[];
-  input: JsonSchema;            // Zod → JSON Schema conversion
+  input: JsonSchema; // Zod → JSON Schema conversion
   output?: JsonSchema;
   cli?: { group?; command?; description?; aliases?; options? };
   mcp?: { tool?; description?; deferLoading? };
@@ -273,7 +278,7 @@ mycli schema diff --from v1 --to v2   # compare two snapshots
 
 ```typescript
 interface SurfaceMap extends ActionManifest {
-  readonly $schema: string;       // "https://outfitter.dev/surface/v1"
+  readonly $schema: string; // "https://outfitter.dev/surface/v1"
   readonly generator: "runtime" | "build";
 }
 ```
@@ -390,6 +395,7 @@ defineAction({
 ### From Ad-Hoc Flags
 
 Before:
+
 ```typescript
 options: [
   { flags: "-v, --verbose", description: "Verbose output", defaultValue: false },
@@ -402,6 +408,7 @@ mapInput: (ctx) => ({
 ```
 
 After:
+
 ```typescript
 const verbose = verbosePreset();
 const cwd = cwdPreset();

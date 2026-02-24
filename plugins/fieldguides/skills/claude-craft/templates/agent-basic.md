@@ -37,6 +37,7 @@ model: inherit
 ## Output Format
 
 For each { finding/result }:
+
 - **{ Label 1 }**: { Description }
 - **{ Label 2 }**: { Description }
 - **{ Label 3 }**: { Description }

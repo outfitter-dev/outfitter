@@ -37,12 +37,12 @@ NOT for: single occurrences, unvalidated hunches, premature abstraction
 
 Watch for these signal categories:
 
-| Category | Watch For | Indicates |
-|----------|-----------|-----------|
-| **Success** | Completion, positive feedback, repetition, efficiency | Pattern worth codifying |
-| **Frustration** | Backtracking, clarification loops, rework, confusion | Anti-pattern to document |
-| **Workflow** | Sequence consistency, decision points, quality gates | Process pattern |
-| **Orchestration** | Multi-component coordination, state management, routing | Coordination pattern |
+| Category          | Watch For                                               | Indicates                |
+| ----------------- | ------------------------------------------------------- | ------------------------ |
+| **Success**       | Completion, positive feedback, repetition, efficiency   | Pattern worth codifying  |
+| **Frustration**   | Backtracking, clarification loops, rework, confusion    | Anti-pattern to document |
+| **Workflow**      | Sequence consistency, decision points, quality gates    | Process pattern          |
+| **Orchestration** | Multi-component coordination, state management, routing | Coordination pattern     |
 
 See [signal-types.md](references/signal-types.md) for detailed taxonomy.
 
@@ -52,12 +52,12 @@ See [signal-types.md](references/signal-types.md) for detailed taxonomy.
 
 Four primary pattern types:
 
-| Type | Characteristics | Use When |
-|------|-----------------|----------|
-| **Workflow** | Sequential stages, clear transitions, quality gates | Process has ordered steps |
-| **Orchestration** | Coordinates components, manages state, routes work | Multiple actors involved |
-| **Heuristic** | Condition → action mapping, context-sensitive | Repeated decisions |
-| **Anti-Pattern** | Common mistake, causes rework, has better alternative | Preventing failures |
+| Type              | Characteristics                                       | Use When                  |
+| ----------------- | ----------------------------------------------------- | ------------------------- |
+| **Workflow**      | Sequential stages, clear transitions, quality gates   | Process has ordered steps |
+| **Orchestration** | Coordinates components, manages state, routes work    | Multiple actors involved  |
+| **Heuristic**     | Condition → action mapping, context-sensitive         | Repeated decisions        |
+| **Anti-Pattern**  | Common mistake, causes rework, has better alternative | Preventing failures       |
 
 See [pattern-types.md](references/pattern-types.md) for templates and examples.
 
@@ -68,6 +68,7 @@ See [pattern-types.md](references/pattern-types.md) for templates and examples.
 ## Codification Criteria
 
 Don't codify after first occurrence. Require:
+
 - **3+ instances** — minimum repetition to establish pattern
 - **Multiple contexts** — works across different scenarios
 - **Clear boundaries** — know when to apply vs not apply
@@ -75,30 +76,34 @@ Don't codify after first occurrence. Require:
 
 ## Quality Indicators
 
-| Strong Pattern | Weak Pattern |
-|----------------|--------------|
-| Consistent structure | Varies each use |
+| Strong Pattern         | Weak Pattern                |
+| ---------------------- | --------------------------- |
+| Consistent structure   | Varies each use             |
 | Transferable to others | Requires specific expertise |
-| Handles edge cases | Breaks on deviation |
-| Saves time/effort | Overhead exceeds value |
+| Handles edge cases     | Breaks on deviation         |
+| Saves time/effort      | Overhead exceeds value      |
 
 </evidence_thresholds>
 
 <progressive_formalization>
 
 **Observation** (1-2 instances):
+
 - Note for future reference
 - "This worked well, watch for recurrence"
 
 **Hypothesis** (3+ instances):
+
 - Draft informal guideline
 - Test consciously in next case
 
 **Codification** (validated pattern):
+
 - Create formal documentation
 - Include examples and constraints
 
 **Refinement** (ongoing):
+
 - Update based on usage
 - Add edge cases
 
@@ -121,6 +126,7 @@ Loop: Observe → Classify → Validate → Document
 <rules>
 
 ALWAYS:
+
 - Require 3+ instances before codifying
 - Validate across multiple contexts
 - Document both when to use AND when not to
@@ -128,6 +134,7 @@ ALWAYS:
 - Track pattern effectiveness over time
 
 NEVER:
+
 - Codify after single occurrence
 - Abstract without evidence
 - Ignore context-sensitivity
@@ -142,6 +149,7 @@ NEVER:
 - [pattern-types.md](references/pattern-types.md) — pattern templates and examples
 
 **Identification vs Implementation**:
+
 - This skill (`patterns`) identifies and documents patterns
 - `codify` skill implements patterns as Claude Code components (skills, commands, hooks, agents)
 

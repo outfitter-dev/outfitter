@@ -66,7 +66,9 @@ const InputSchema = z.object({
   limit: z.number().default(10).describe("Maximum number of results"),
 
   // Use enums for fixed choices
-  sortBy: z.enum(["name", "date", "relevance"]).default("relevance")
+  sortBy: z
+    .enum(["name", "date", "relevance"])
+    .default("relevance")
     .describe("Field to sort results by"),
 
   // Mark optional fields explicitly
@@ -140,7 +142,7 @@ server.registerResourceList({
 
   list: async () => {
     const users = await getAllUsers();
-    return users.map(u => ({
+    return users.map((u) => ({
       uri: `data://users/${u.id}`,
       name: u.name,
       description: u.email,
@@ -192,16 +194,16 @@ handler: async (input) => {
   }
 
   return Result.ok(item);
-}
+};
 ```
 
 ### Error Categories in MCP
 
-| Category | MCP Behavior |
-|----------|--------------|
-| validation | Tool returns error with details |
-| not_found | Tool returns error with resource info |
-| internal | Tool returns generic error, logs full error |
+| Category   | MCP Behavior                                |
+| ---------- | ------------------------------------------- |
+| validation | Tool returns error with details             |
+| not_found  | Tool returns error with resource info       |
+| internal   | Tool returns generic error, logs full error |
 
 ## Server Configuration
 

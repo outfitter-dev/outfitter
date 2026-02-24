@@ -80,11 +80,11 @@ Load `claude-craft`.
 
 **Common Triggers**:
 
-| Hook Type | Use Case |
-|-----------|----------|
-| PreToolUse | Validate before file changes |
+| Hook Type   | Use Case                        |
+| ----------- | ------------------------------- |
+| PreToolUse  | Validate before file changes    |
 | PostToolUse | Run after successful operations |
-| Stop | Cleanup on session end |
+| Stop        | Cleanup on session end          |
 
 ## Agent Authoring
 

@@ -8,6 +8,7 @@
  */
 
 import { getStringWidth } from "@outfitter/cli/text";
+
 import { renderBox } from "./box.js";
 import { getIndicator, isUnicodeSupported } from "./indicators.js";
 import { joinHorizontal, joinVertical } from "./layout.js";

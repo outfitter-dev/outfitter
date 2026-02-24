@@ -69,6 +69,7 @@ For commands in specific contexts:
 
 ```markdown
 # If command is about current file
+
 @$1
 ```
 
@@ -127,15 +128,19 @@ description: Review project configuration
 # Configuration Review
 
 ## Package
+
 @package.json
 
 ## TypeScript
+
 @tsconfig.json
 
 ## Linter
+
 @.eslintrc.json
 
 Review configuration for:
+
 - Consistency
 - Best practices
 - Potential issues
@@ -173,8 +178,9 @@ File references don't support wildcards:
 
 ```markdown
 # Not supported
-@src/**/*.ts
-@*.json
+
+@src/\*_/_.ts
+@\*.json
 ```
 
 **Workaround**: Use bash to list files, then reference individually:
@@ -198,6 +204,7 @@ Binary files produce unreadable output:
 
 ```markdown
 # Don't do this
+
 @image.png
 @compiled.wasm
 ```
@@ -317,11 +324,13 @@ If file exists:
 **Purpose**: Review the TypeScript configuration for best practices.
 
 ## File: tsconfig.json
+
 @tsconfig.json
 
 ## Analysis
 
 Focus on:
+
 - Strict mode settings
 - Path mappings
 - Module resolution
@@ -333,9 +342,11 @@ Focus on:
 Review these configurations (skip if not found):
 
 ## TypeScript
+
 @tsconfig.json
 
 ## ESLint (if present)
+
 !`[ -f .eslintrc.json ] && cat .eslintrc.json || echo "No ESLint config"`
 ```
 
@@ -345,12 +356,15 @@ Review these configurations (skip if not found):
 # Review Authentication Module
 
 ## Types
+
 @src/auth/types.ts
 
 ## Implementation
+
 @src/auth/service.ts
 
 ## Tests
+
 @src/auth/service.test.ts
 
 Review the complete auth module.
@@ -364,9 +378,11 @@ Review the complete auth module.
 
 ```markdown
 # Wrong (from user home)
+
 @~/project/file.ts
 
 # Correct (from project root)
+
 @src/file.ts
 ```
 
@@ -374,9 +390,11 @@ Review the complete auth module.
 
 ```markdown
 # Problematic
+
 @path/to/my file.ts
 
 # Better (use quotes in instructions)
+
 Analyze the file at: @"path/to/my file.ts"
 ```
 
@@ -384,8 +402,10 @@ Analyze the file at: @"path/to/my file.ts"
 
 ```markdown
 # Wrong (shell syntax)
+
 @${FILE_PATH}
 
 # Correct (command argument)
+
 @$1
 ```

@@ -8,6 +8,7 @@
  */
 
 import { join } from "node:path";
+
 import {
   InternalError,
   type OutfitterError,

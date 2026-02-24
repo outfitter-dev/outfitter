@@ -5,7 +5,11 @@ Use `@outfitter/schema` and `@outfitter/contracts` to generate introspection art
 ## Core Building Blocks
 
 ```typescript
-import { zodToJsonSchema, type ActionCapability, type CapabilitySurface } from "@outfitter/contracts";
+import {
+  zodToJsonSchema,
+  type ActionCapability,
+  type CapabilitySurface,
+} from "@outfitter/contracts";
 import {
   generateManifest,
   formatManifestMarkdown,

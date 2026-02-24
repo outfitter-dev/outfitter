@@ -9,9 +9,9 @@ metadata:
 
 # Outfitter Styleguide
 
-Craft-level guidance for Outfitter writing. This covers *how* to write — rhythm, metaphors, structural patterns.
+Craft-level guidance for Outfitter writing. This covers _how_ to write — rhythm, metaphors, structural patterns.
 
-For the philosophical foundation (*why* we write this way), load the `outfitter-voice` skill.
+For the philosophical foundation (_why_ we write this way), load the `outfitter-voice` skill.
 
 Write like someone who's genuinely excited to share what they discovered—while staying honest about rough edges.
 
@@ -56,6 +56,7 @@ Every tool we build, every word we write, should respect the reader's time:
 ## Voice vs. Tone
 
 **Voice (always present):**
+
 - Curious practitioner
 - Builder's mindset (even when learning)
 - Respectful of reader's intelligence and time
@@ -63,6 +64,7 @@ Every tool we build, every word we write, should respect the reader's time:
 - Concrete specificity over abstraction
 
 **Tone (adjust per context):**
+
 - Playful when introducing tools
 - Precise when documenting
 - Earnest when mission-driven
@@ -82,11 +84,11 @@ feature name). Otherwise, treat it as background texture: present when useful, i
 
 ### Where It Shows Up Naturally
 
-| Layer | How to Apply It |
-|-------|-----------------|
-| Product terminology (literal) | Use exact expedition terms when they are official names (commands, packages, features, docs headings). |
-| Thematic vibe (atmospheric) | Let the outdoors/exploration feel influence framing and identity, but default to direct language in body copy. |
-| Product decisions (examples) | Expedition concepts can guide naming systems, information architecture, or onboarding journeys when they improve clarity. |
+| Layer                         | How to Apply It                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Product terminology (literal) | Use exact expedition terms when they are official names (commands, packages, features, docs headings).                    |
+| Thematic vibe (atmospheric)   | Let the outdoors/exploration feel influence framing and identity, but default to direct language in body copy.            |
+| Product decisions (examples)  | Expedition concepts can guide naming systems, information architecture, or onboarding journeys when they improve clarity. |
 
 ### Practical Distinction
 
@@ -113,12 +115,12 @@ The voice is engineered for readability. Ideas are "atomized" for digital consum
 
 ### Four Sentence Types
 
-| Type | Function | Example |
-|------|----------|---------|
-| **Setup (Flow)** | Draws reader in, establishes context | "Recently we've seen agents waste 60,000+ tokens per documentation lookup…" |
-| **Pivot (Hinge)** | Connects thought to consequence; uses colons or dashes | "The result: search in 5-50ms, not 5-50 seconds." |
-| **Punch (Impact)** | Short, direct; resets attention | "That changed everything." |
-| **Aside (Meta)** | Parenthetical; adds intimacy | "…context engineering (more on that later)…" |
+| Type               | Function                                               | Example                                                                     |
+| ------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------- |
+| **Setup (Flow)**   | Draws reader in, establishes context                   | "Recently we've seen agents waste 60,000+ tokens per documentation lookup…" |
+| **Pivot (Hinge)**  | Connects thought to consequence; uses colons or dashes | "The result: search in 5-50ms, not 5-50 seconds."                           |
+| **Punch (Impact)** | Short, direct; resets attention                        | "That changed everything."                                                  |
+| **Aside (Meta)**   | Parenthetical; adds intimacy                           | "…context engineering (more on that later)…"                                |
 
 ### The Rule
 
@@ -174,15 +176,15 @@ Would you say this to a smart friend over coffee? If it sounds like marketing co
 
 ## Banned Words & Substitutes
 
-| Instead of... | Try... |
-|---------------|--------|
-| "game-changing" | describe the actual change |
-| "seamless" | "I didn't have to…" |
-| "incredible/amazing" | a concrete fact or benchmark |
-| "revolutionary" | "new capability: …" |
-| "We are excited to share" | Start with the value |
-| "best-in-class" | specific comparison |
-| "synergy" | never |
+| Instead of...             | Try...                       |
+| ------------------------- | ---------------------------- |
+| "game-changing"           | describe the actual change   |
+| "seamless"                | "I didn't have to…"          |
+| "incredible/amazing"      | a concrete fact or benchmark |
+| "revolutionary"           | "new capability: …"          |
+| "We are excited to share" | Start with the value         |
+| "best-in-class"           | specific comparison          |
+| "synergy"                 | never                        |
 
 **Rule:** One well-placed superlative lands. Three reads as marketing.
 

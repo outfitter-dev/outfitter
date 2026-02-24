@@ -23,15 +23,15 @@ class DatabaseConnection implements Disposable {
 
   query(sql: string) {
     if (!this.conn) {
-      throw new Error('Connection disposed');
+      throw new Error("Connection disposed");
     }
     return this.conn.execute(sql);
   }
 }
 
 function queryUsers() {
-  using db = new DatabaseConnection({ host: 'localhost' });
-  return db.query('SELECT * FROM users');
+  using db = new DatabaseConnection({ host: "localhost" });
+  return db.query("SELECT * FROM users");
   // Connection automatically closed, even on exception
 }
 ```
@@ -63,8 +63,12 @@ class Transaction implements AsyncDisposable {
 async function transferFunds(from: string, to: string, amount: number) {
   await using tx = new Transaction(getConnection());
 
-  await tx.execute(`UPDATE accounts SET balance = balance - ${amount} WHERE id = '${from}'`);
-  await tx.execute(`UPDATE accounts SET balance = balance + ${amount} WHERE id = '${to}'`);
+  await tx.execute(
+    `UPDATE accounts SET balance = balance - ${amount} WHERE id = '${from}'`
+  );
+  await tx.execute(
+    `UPDATE accounts SET balance = balance + ${amount} WHERE id = '${to}'`
+  );
 
   await tx.commit();
   // If commit not called, automatic rollback on dispose
@@ -148,7 +152,7 @@ class FileHandle implements Disposable {
 }
 
 function writeLog(message: string) {
-  using file = new FileHandle('/var/log/app.log', 'a');
+  using file = new FileHandle("/var/log/app.log", "a");
   file.write(`${new Date().toISOString()} ${message}\n`);
   // File automatically closed
 }
@@ -177,21 +181,21 @@ class AsyncFileHandle implements AsyncDisposable {
   }
 
   async write(data: string) {
-    if (!this.handle) throw new Error('File closed');
+    if (!this.handle) throw new Error("File closed");
     await this.handle.write(data);
   }
 
   async read(buffer: Buffer) {
-    if (!this.handle) throw new Error('File closed');
+    if (!this.handle) throw new Error("File closed");
     return this.handle.read(buffer, 0, buffer.length, null);
   }
 }
 
 async function processFile(path: string) {
-  await using file = await AsyncFileHandle.open(path, 'r');
+  await using file = await AsyncFileHandle.open(path, "r");
   const buffer = Buffer.alloc(1024);
   const { bytesRead } = await file.read(buffer);
-  return buffer.toString('utf8', 0, bytesRead);
+  return buffer.toString("utf8", 0, bytesRead);
   // File closed automatically
 }
 ```
@@ -219,7 +223,7 @@ class TempFile implements AsyncDisposable {
   }
 
   async read() {
-    return fs.promises.readFile(this.path, 'utf8');
+    return fs.promises.readFile(this.path, "utf8");
   }
 }
 
@@ -252,7 +256,7 @@ class Mutex {
 
   acquire(): MutexLock {
     if (this.locked) {
-      throw new Error('Mutex already locked (use async version)');
+      throw new Error("Mutex already locked (use async version)");
     }
     this.locked = true;
     return new MutexLock(this);
@@ -303,7 +307,7 @@ class RWLock {
 
   async acquireRead(): Promise<ReadLock> {
     while (this.writer || this.waitingWriters.length > 0) {
-      await new Promise<void>(resolve => this.waitingReaders.push(resolve));
+      await new Promise<void>((resolve) => this.waitingReaders.push(resolve));
     }
     this.readers++;
     return new ReadLock(this);
@@ -311,7 +315,7 @@ class RWLock {
 
   async acquireWrite(): Promise<WriteLock> {
     while (this.readers > 0 || this.writer) {
-      await new Promise<void>(resolve => this.waitingWriters.push(resolve));
+      await new Promise<void>((resolve) => this.waitingWriters.push(resolve));
     }
     this.writer = true;
     return new WriteLock(this);
@@ -337,7 +341,7 @@ class RWLock {
 
     // Wake all waiting readers
     const readers = this.waitingReaders.splice(0);
-    readers.forEach(r => r());
+    readers.forEach((r) => r());
   }
 }
 
@@ -367,7 +371,7 @@ class RequestContext implements AsyncDisposable {
 
   async [Symbol.asyncDispose]() {
     // Clear all timers
-    this.timers.forEach(t => clearTimeout(t));
+    this.timers.forEach((t) => clearTimeout(t));
 
     // Run cleanup functions in reverse order
     for (const cleanup of this.cleanupFns.reverse()) {
@@ -411,7 +415,7 @@ class HTTPClient implements AsyncDisposable {
   constructor(private config: ClientConfig) {
     this.agent = new https.Agent({
       keepAlive: true,
-      maxSockets: config.maxConnections
+      maxSockets: config.maxConnections,
     });
   }
 
@@ -427,9 +431,7 @@ class HTTPClient implements AsyncDisposable {
 async function fetchMultiple(urls: string[]) {
   await using client = new HTTPClient({ maxConnections: 10 });
 
-  const results = await Promise.all(
-    urls.map(url => client.request(url))
-  );
+  const results = await Promise.all(urls.map((url) => client.request(url)));
 
   return results;
   // Agent destroyed, all connections closed
@@ -447,8 +449,8 @@ async function complexOperation() {
   await using lock = await mutex.acquire();
 
   // All resources available
-  const data = await db.query('SELECT * FROM users');
-  await cache.set('users', data);
+  const data = await db.query("SELECT * FROM users");
+  await cache.set("users", data);
 
   // Resources disposed in reverse order: lock, cache, db
 }
@@ -466,10 +468,10 @@ async function conditionalCleanup(needsCache: boolean) {
   }
 
   try {
-    const data = await db.query('SELECT * FROM users');
+    const data = await db.query("SELECT * FROM users");
 
     if (cache) {
-      await cache.set('users', data);
+      await cache.set("users", data);
     }
 
     return data;
@@ -502,12 +504,10 @@ async function useResources() {
     async () => await DatabaseConnection.connect()
   );
 
-  using file = ResourceManager.create(
-    () => new FileHandle('/tmp/data', 'w')
-  );
+  using file = ResourceManager.create(() => new FileHandle("/tmp/data", "w"));
 
   // Use both resources
-  const data = await db.query('SELECT * FROM users');
+  const data = await db.query("SELECT * FROM users");
   file.write(JSON.stringify(data));
 
   // Both disposed automatically
@@ -525,7 +525,7 @@ class SafeResource implements AsyncDisposable {
       await this.cleanup();
     } catch (err) {
       // Log but don't throw from dispose
-      console.error('Cleanup error:', err);
+      console.error("Cleanup error:", err);
     }
   }
 
@@ -547,7 +547,6 @@ async function guaranteedCleanup() {
 
     // Use resource
     await processResource(resource);
-
   } catch (err) {
     // Resource still disposed via using
     throw err;

@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import {
   type Branded,
   type BrandOf,

@@ -26,6 +26,7 @@ The command runs, and output replaces the `!`backtick block.
 
 ```markdown
 ## Git Context
+
 Branch: !`git branch --show-current`
 Status: !`git status --short`
 User: !`git config user.email`
@@ -35,8 +36,9 @@ User: !`git config user.email`
 
 ```markdown
 ## Git Context
+
 Branch: main
-Status: M  src/app.ts
+Status: M src/app.ts
 ?? new-file.ts
 User: developer@example.com
 ```
@@ -104,6 +106,7 @@ export SLASH_COMMAND_TOOL_CHAR_BUDGET=30000
 ```
 
 **Exceeding budget**:
+
 - Output truncated with warning
 - Command still executes
 - Consider limiting output in command
@@ -112,15 +115,19 @@ export SLASH_COMMAND_TOOL_CHAR_BUDGET=30000
 
 ```markdown
 # Limit lines
+
 Recent commits: !`git log --oneline -10`
 
 # Truncate with head
+
 Large output: !`cat big-file.txt | head -50`
 
 # Filter relevant lines
+
 Errors only: !`bun test 2>&1 | grep -E "FAIL|Error"`
 
 # Summary instead of full
+
 Stats only: !`git diff --stat | tail -1`
 ```
 
@@ -241,8 +248,8 @@ Type: !`file "$1"`
 **Important**: Quote arguments to handle spaces:
 
 ```markdown
-!`cat "$1"`      # Correct
-!`cat $1`        # Breaks with spaces in path
+!`cat "$1"` # Correct
+!`cat $1` # Breaks with spaces in path
 ```
 
 ---
@@ -293,9 +300,11 @@ esac`
 
 ```markdown
 # Dangerous - user input directly in command
+
 !`cat $1`
 
 # Safer - validate input first
+
 !`[[ "$1" =~ ^[a-zA-Z0-9_/-]+\.ts$ ]] && cat "$1" || echo "Invalid file path"`
 ```
 
@@ -316,7 +325,6 @@ allowed-tools: Bash(git show:*), Bash(git diff:*), Bash(git log:*), Read
 description: Safe code review
 allowed-tools: Read, Grep, Glob
 ---
-
 # No bash execution - read-only review
 ```
 
@@ -328,9 +336,11 @@ allowed-tools: Read, Grep, Glob
 
 ```markdown
 # Wrong
+
 !git status
 
 # Correct
+
 !`git status`
 ```
 
@@ -338,9 +348,11 @@ allowed-tools: Read, Grep, Glob
 
 ```markdown
 # Wrong (unbalanced quotes)
+
 !`echo "Hello`
 
 # Correct
+
 !`echo "Hello"`
 ```
 
@@ -348,9 +360,11 @@ allowed-tools: Read, Grep, Glob
 
 ```markdown
 # Wrong (no quotes)
+
 !`cat $1`
 
 # Correct (quoted)
+
 !`cat "$1"`
 ```
 
@@ -358,9 +372,11 @@ allowed-tools: Read, Grep, Glob
 
 ```markdown
 # Wrong (huge output)
+
 !`cat very-large-file.log`
 
 # Correct (limited)
+
 !`tail -100 very-large-file.log`
 ```
 

@@ -16,6 +16,7 @@ import {
   ValidationError,
 } from "@outfitter/contracts";
 import { createTheme, renderTable } from "@outfitter/tui/render";
+
 import type { DemoSection } from "./registry.js";
 import { registerSection } from "./registry.js";
 

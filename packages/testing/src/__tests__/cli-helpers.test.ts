@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import { captureCLI, mockStdin } from "../cli-helpers.js";
 
 describe("captureCLI()", () => {

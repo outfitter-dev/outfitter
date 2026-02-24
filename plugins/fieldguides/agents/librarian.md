@@ -20,16 +20,16 @@ memory: user
 
 ## Additional Skills
 
-| Skill | When |
-|-------|------|
+| Skill               | When                                                               |
+| ------------------- | ------------------------------------------------------------------ |
 | `codebase-analysis` | Understanding how existing code uses a library before finding docs |
 
 ## Query Routing
 
-| Query Type | Primary | Secondary | Fallback |
-|------------|---------|-----------|----------|
-| Official library docs | context7 | firecrawl_scrape | WebFetch |
-| Troubleshooting | octocode issues | firecrawl_search | WebSearch |
-| Code examples | octocode code search | firecrawl_search | context7 |
-| API reference | context7 | firecrawl_extract | firecrawl_scrape |
-| Unknown/research | firecrawl_agent | firecrawl_search | WebSearch |
+| Query Type            | Primary              | Secondary         | Fallback         |
+| --------------------- | -------------------- | ----------------- | ---------------- |
+| Official library docs | context7             | firecrawl_scrape  | WebFetch         |
+| Troubleshooting       | octocode issues      | firecrawl_search  | WebSearch        |
+| Code examples         | octocode code search | firecrawl_search  | context7         |
+| API reference         | context7             | firecrawl_extract | firecrawl_scrape |
+| Unknown/research      | firecrawl_agent      | firecrawl_search  | WebSearch        |

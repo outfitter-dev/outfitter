@@ -6,15 +6,16 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Builder, implementer, fixer.
 
-| Skill | Load When |
-|-------|-----------|
-| software-craft | Always (core methodology) |
-| tdd-fieldguide | New features, bug fixes requiring tests |
-| bun-fieldguide | Bun runtime, package management |
-| react-fieldguide | React components, hooks, state |
-| hono-fieldguide | API routes, middleware, server |
+| Skill            | Load When                               |
+| ---------------- | --------------------------------------- |
+| software-craft   | Always (core methodology)               |
+| tdd-fieldguide   | New features, bug fixes requiring tests |
+| bun-fieldguide   | Bun runtime, package management         |
+| react-fieldguide | React components, hooks, state          |
+| hono-fieldguide  | API routes, middleware, server          |
 
 **Typical combos**:
+
 - `software-craft` + `tdd-fieldguide` (standard feature)
 - `software-craft` + `react-fieldguide` (frontend work)
 - `software-craft` + `hono-fieldguide` (API endpoint)
@@ -23,14 +24,15 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Evaluator, quality guardian.
 
-| Skill | Load When |
-|-------|-----------|
-| code-review | PR reviews, code audits |
-| performance | Performance concerns, optimization |
+| Skill          | Load When                                  |
+| -------------- | ------------------------------------------ |
+| code-review    | PR reviews, code audits                    |
+| performance    | Performance concerns, optimization         |
 | systems-design | Architecture decisions, structural changes |
-| security | Security audits, auth review |
+| security       | Security audits, auth review               |
 
 **Typical combos**:
+
 - `code-review` (standard PR review)
 - `code-review` + `systems-design` (significant refactor)
 - `code-review` + `performance` (performance-critical code)
@@ -40,18 +42,19 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Investigator, researcher.
 
-| Skill | Load When |
-|-------|-----------|
-| codebase-analysis | Understanding existing code |
-| research | External research, comparisons |
-| pathfinding | Unclear requirements, many unknowns |
-| status | Project status, progress reports |
-| report-findings | Structuring analysis output |
-| find-patterns | Analyzing code patterns |
-| codify | Extracting reusable workflows |
-| session-analysis | Mining conversation for patterns |
+| Skill             | Load When                           |
+| ----------------- | ----------------------------------- |
+| codebase-analysis | Understanding existing code         |
+| research          | External research, comparisons      |
+| pathfinding       | Unclear requirements, many unknowns |
+| status            | Project status, progress reports    |
+| report-findings   | Structuring analysis output         |
+| find-patterns     | Analyzing code patterns             |
+| codify            | Extracting reusable workflows       |
+| session-analysis  | Mining conversation for patterns    |
 
 **Typical combos**:
+
 - `codebase-analysis` + `report-findings` (codebase exploration)
 - `research` (technology comparison)
 - `pathfinding` (requirements clarification)
@@ -62,12 +65,13 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Problem solver, root cause finder.
 
-| Skill | Load When |
-|-------|-----------|
-| debugging | Always (core methodology) |
+| Skill             | Load When                      |
+| ----------------- | ------------------------------ |
+| debugging         | Always (core methodology)      |
 | codebase-analysis | Understanding surrounding code |
 
 **Typical combos**:
+
 - `debugging` (standard debugging)
 - `debugging` + `codebase-analysis` (unfamiliar codebase)
 
@@ -75,12 +79,13 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Validator, proof provider.
 
-| Skill | Load When |
-|-------|-----------|
+| Skill          | Load When                                |
+| -------------- | ---------------------------------------- |
 | prove-it-works | End-to-end validation, integration tests |
-| tdd-fieldguide | TDD workflow, test-first approach |
+| tdd-fieldguide | TDD workflow, test-first approach        |
 
 **Typical combos**:
+
 - `prove-it-works` (feature validation)
 - `tdd-fieldguide` (TDD implementation)
 
@@ -88,22 +93,24 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 
 **Identity**: Complexity challenger, assumption questioner.
 
-| Skill | Load When |
-|-------|-----------|
+| Skill        | Load When                 |
+| ------------ | ------------------------- |
 | sanity-check | Always (core methodology) |
 
 **Typical combos**:
+
 - `sanity-check` (challenge proposals)
 
 ## specialist (specialist role)
 
 **Identity**: Domain expert, infrastructure handler.
 
-| Skill | Load When |
-|-------|-----------|
+| Skill     | Load When            |
+| --------- | -------------------- |
 | (dynamic) | Based on task domain |
 
 **Examples**:
+
 - CI/CD configuration → loads relevant CI patterns
 - Design review → loads design/UX patterns
 - Accessibility audit → loads a11y patterns
@@ -116,6 +123,7 @@ Specialist loads skills dynamically based on detected domain. Other specialist a
 ### Core Methodology
 
 Always relevant for the agent's identity:
+
 - engineer: software-craft
 - debugger: debugging
 - skeptic: sanity-check
@@ -123,19 +131,23 @@ Always relevant for the agent's identity:
 ### Domain-Specific
 
 Load based on technology in use:
+
 - bun-fieldguide, react-fieldguide, hono-fieldguide
 
 ### Process-Oriented
 
 Load based on workflow stage:
+
 - tdd-fieldguide, code-review, prove-it-works
 
 ### Analysis-Oriented
 
 Load for investigation and research:
+
 - codebase-analysis, research, pathfinding
 
 ### Output-Oriented
 
 Load for structuring deliverables:
+
 - report-findings, status

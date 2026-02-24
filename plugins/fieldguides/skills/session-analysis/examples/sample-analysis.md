@@ -73,6 +73,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 ### Step 1: Scope Definition
 
 **Scope parameters**:
+
 - Message range: Messages 1-9 (complete excerpt)
 - Actors: User and Agent (both included)
 - Exclusions: Agent's implementation details (code blocks) excluded from signal extraction
@@ -187,6 +188,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Grouping by type**:
 
 **Success signals** (5 total):
+
 - Message 5: "Good" (weak praise, low confidence)
 - Message 7: "Perfect!" (explicit praise, high confidence)
 - Message 7: "apply this same pattern" (continuation, high confidence)
@@ -194,17 +196,20 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 - Message 9: "This is exactly what I needed" (fulfillment, high confidence)
 
 **Frustration signals** (3 total):
+
 - Message 3: "No, use Bun not npm" (correction, high confidence)
 - Message 3: "I prefer TypeScript over JavaScript" (correction/preference, high confidence)
 - Message 5: "you forgot to add input validation" (correction, medium confidence)
 
 **Request signals** (4 total):
+
 - Message 1: "Use JWT tokens" (requirement, high confidence)
 - Message 1: "make sure to hash passwords with bcrypt" (requirement, high confidence)
 - Message 3: "I prefer TypeScript over JavaScript for all new code" (preference, high confidence)
 - Message 5: "Always validate user input before processing" (requirement, high confidence)
 
 **Workflow signals** (1 total):
+
 - Message 9: "Let's move on to the API rate limiting next" (stage transition, high confidence)
 
 ### Step 4: Pattern Detection
@@ -216,6 +221,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Description**: Agent didn't check project preferences before starting, leading to immediate corrections.
 
 **Evidence**:
+
 - Message 3: Two corrections (Bun, TypeScript)
 - Timing: Within 5 minutes of starting
 - Resolution: Agent corrected both issues
@@ -231,6 +237,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Description**: User emphasized security best practices throughout conversation.
 
 **Evidence**:
+
 - Message 1: "hash passwords with bcrypt" (cryptographic requirement)
 - Message 5: "Always validate user input" (input validation requirement)
 - Consistency: Both messages establish security requirements
@@ -246,6 +253,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Description**: User has strong preferences for specific technologies.
 
 **Evidence**:
+
 - Message 3: "use Bun not npm" (package manager preference)
 - Message 3: "I prefer TypeScript over JavaScript for all new code" (language preference)
 - Explicitness: User stated preferences clearly when agent used wrong tools
@@ -261,6 +269,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Description**: Agent successfully resolved issues and delivered satisfactory implementation.
 
 **Evidence**:
+
 - Messages 3, 5: Corrections/frustration
 - Messages 7, 9: Explicit praise and satisfaction
 - Progression: Agent incorporated feedback and improved
@@ -276,6 +285,7 @@ Excellent work. This is exactly what I needed. Let's move on to the API rate lim
 **Description**: User wants successful patterns applied to similar features.
 
 **Evidence**:
+
 - Message 7: "apply this same pattern to the password reset endpoint"
 - Context: After successful auth implementation with JWT, TypeScript, validation
 - Pattern components: JWT tokens, TypeScript, input validation, bcrypt hashing
@@ -538,6 +548,7 @@ See JSON output below.
 **Detection method**: Single message with multiple corrections.
 
 **Process**:
+
 1. Message 3 contains two correction signals (Bun, TypeScript)
 2. Both corrections happen within 5 minutes of task start
 3. Both relate to configuration choices agent made without checking
@@ -550,6 +561,7 @@ See JSON output below.
 **Detection method**: Recurring theme across multiple messages.
 
 **Process**:
+
 1. Extract all request signals related to security
 2. Message 1: "hash passwords with bcrypt" (security)
 3. Message 5: "Always validate user input" (security)
@@ -563,6 +575,7 @@ See JSON output below.
 **Detection method**: Explicit preference statements.
 
 **Process**:
+
 1. Message 3 contains two preference/correction signals
 2. "I prefer TypeScript" = explicit preference language
 3. "use Bun not npm" = explicit tool choice
@@ -576,6 +589,7 @@ See JSON output below.
 **Detection method**: Temporal sentiment analysis.
 
 **Process**:
+
 1. Plot signals by timestamp and type
 2. T1 (9:05): Frustration (corrections)
 3. T2 (9:10): Mixed (weak success + correction)
@@ -590,6 +604,7 @@ See JSON output below.
 **Detection method**: Explicit continuation signal.
 
 **Process**:
+
 1. Message 7: "apply this same pattern to..."
 2. Explicit reference to successful approach
 3. Request to extend to similar feature
@@ -600,15 +615,18 @@ See JSON output below.
 ### Confidence Scoring Rationale
 
 **High confidence signals** (10/12):
+
 - Explicit signal keywords ("Perfect!", "No", "Always", "I prefer")
 - Clear context supporting classification
 - No ambiguity in intent
 
 **Medium confidence signals** (1/12):
+
 - "you forgot to add input validation" = correction but softer language
 - Implicit criticism rather than explicit negation
 
 **Low confidence signals** (1/12):
+
 - "Good" = weak praise, especially with qualifier "but"
 - Could be polite rather than genuinely satisfied
 

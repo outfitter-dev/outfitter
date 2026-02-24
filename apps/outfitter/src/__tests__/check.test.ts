@@ -7,6 +7,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
+
 import { runCheck } from "../commands/check.js";
 import type { Manifest } from "../manifest.js";
 

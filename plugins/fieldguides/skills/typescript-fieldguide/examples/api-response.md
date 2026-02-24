@@ -348,16 +348,21 @@ Use a thin adapter per framework while preserving the same `fetchUser` /
 ```typescript
 function toHttpStatus(error: ApiError): number {
   switch (error.type) {
-    case 'not-found': return 404;
-    case 'validation': return 400;
-    case 'unauthorized': return 401;
-    case 'server': return 500;
-    case 'network': return 502;
+    case "not-found":
+      return 404;
+    case "validation":
+      return 400;
+    case "unauthorized":
+      return 401;
+    case "server":
+      return 500;
+    case "network":
+      return 502;
   }
 }
 
 // Express route adapter
-app.get('/users/:id', async (req, res) => {
+app.get("/users/:id", async (req, res) => {
   const result = await fetchUser(req.params.id);
   if (!result.ok) {
     return res.status(toHttpStatus(result.error)).json({ error: result.error });
@@ -372,64 +377,64 @@ The same adapter approach applies to Fastify and Hono.
 
 ```typescript
 // __tests__/api.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from "vitest";
 
-describe('fetchUser', () => {
-  it('returns user on success', async () => {
+describe("fetchUser", () => {
+  it("returns user on success", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        id: 'user-1',
-        email: 'user@example.com',
-        name: 'Test User',
-        role: 'user',
-        createdAt: '2024-01-01T00:00:00Z'
-      })
+        id: "user-1",
+        email: "user@example.com",
+        name: "Test User",
+        role: "user",
+        createdAt: "2024-01-01T00:00:00Z",
+      }),
     });
 
-    const result = await fetchUser('user-1');
+    const result = await fetchUser("user-1");
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.id).toBe('user-1');
+      expect(result.value.id).toBe("user-1");
       expect(result.value.createdAt).toBeInstanceOf(Date);
     }
   });
 
-  it('returns not-found error for 404', async () => {
+  it("returns not-found error for 404", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 404,
-      statusText: 'Not Found'
+      statusText: "Not Found",
     });
 
-    const result = await fetchUser('user-1');
+    const result = await fetchUser("user-1");
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.type).toBe('not-found');
-      expect(result.error.id).toBe('user-1');
+      expect(result.error.type).toBe("not-found");
+      expect(result.error.id).toBe("user-1");
     }
   });
 
-  it('returns validation error for invalid data', async () => {
+  it("returns validation error for invalid data", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        id: 'user-1',
-        email: 'not-an-email', // Invalid
-        name: 'Test User',
-        role: 'user',
-        createdAt: '2024-01-01T00:00:00Z'
-      })
+        id: "user-1",
+        email: "not-an-email", // Invalid
+        name: "Test User",
+        role: "user",
+        createdAt: "2024-01-01T00:00:00Z",
+      }),
     });
 
-    const result = await fetchUser('user-1');
+    const result = await fetchUser("user-1");
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.type).toBe('validation');
-      expect(result.error.field).toBe('email');
+      expect(result.error.type).toBe("validation");
+      expect(result.error.field).toBe("email");
     }
   });
 });
@@ -465,7 +470,7 @@ const data: any = await response.json();
 ```typescript
 // ❌ Error not visible in return type
 if (!response.ok) {
-  throw new Error('Request failed');
+  throw new Error("Request failed");
 }
 ```
 

@@ -88,12 +88,12 @@ Ensure these are gitignored:
 
 Add these secrets to the repo's GitHub Actions settings:
 
-| Secret | Purpose |
-|--------|---------|
-| `TURBO_TOKEN` | Auth token for the cache API |
-| `TURBO_API` | `https://turbo-cache.outfitter.dev` |
-| `TURBO_TEAM` | `outfitter` |
-| `TURBO_REMOTE_CACHE_SIGNATURE_KEY` | Artifact signing key |
+| Secret                             | Purpose                             |
+| ---------------------------------- | ----------------------------------- |
+| `TURBO_TOKEN`                      | Auth token for the cache API        |
+| `TURBO_API`                        | `https://turbo-cache.outfitter.dev` |
+| `TURBO_TEAM`                       | `outfitter`                         |
+| `TURBO_REMOTE_CACHE_SIGNATURE_KEY` | Artifact signing key                |
 
 Pass them as env vars in your CI workflow:
 

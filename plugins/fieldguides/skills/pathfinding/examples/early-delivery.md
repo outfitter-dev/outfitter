@@ -39,7 +39,7 @@ Decisions:
 
 **Q1**: What's your current tech stack?
 
-*Why it matters — determines which real-time approach fits best*
+_Why it matters — determines which real-time approach fits best_
 
 ```text
 [EnterPlanMode]
@@ -94,7 +94,7 @@ Concerns:
 
 **Q2**: What scale are you expecting?
 
-*Why it matters — affects architecture complexity significantly*
+_Why it matters — affects architecture complexity significantly_
 
 ```text
 [EnterPlanMode]
@@ -166,7 +166,7 @@ Concerns:
 
 **Q3**: Should notifications persist? (history, read/unread state)
 
-*Why it matters — affects database schema and UX significantly*
+_Why it matters — affects database schema and UX significantly_
 
 ```text
 [EnterPlanMode]
@@ -223,22 +223,22 @@ Skipping to delivery at level 3. Including caveats for what's unresolved.
 
 ```typescript
 // server.ts
-import { Server } from 'socket.io';
-import { createServer } from 'http';
+import { Server } from "socket.io";
+import { createServer } from "http";
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_URL }
+  cors: { origin: process.env.CLIENT_URL },
 });
 
 // Track connected users
 const userSockets = new Map<string, string>(); // userId -> socketId
 
-io.on('connection', (socket) => {
+io.on("connection", (socket) => {
   const userId = socket.handshake.auth.userId;
   userSockets.set(userId, socket.id);
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     userSockets.delete(userId);
   });
 });
@@ -251,9 +251,9 @@ export { io, userSockets };
 
 ```typescript
 // routes/comments.ts
-import { io, userSockets } from '../server';
+import { io, userSockets } from "../server";
 
-app.post('/posts/:postId/comments', async (req, res) => {
+app.post("/posts/:postId/comments", async (req, res) => {
   const comment = await createComment(req.body);
   const post = await getPost(req.params.postId);
 
@@ -261,12 +261,12 @@ app.post('/posts/:postId/comments', async (req, res) => {
   if (post.authorId !== req.user.id) {
     const socketId = userSockets.get(post.authorId);
     if (socketId) {
-      io.to(socketId).emit('notification', {
-        type: 'comment',
+      io.to(socketId).emit("notification", {
+        type: "comment",
         postId: post.id,
         commentId: comment.id,
         fromUser: req.user.name,
-        message: `${req.user.name} commented on your post`
+        message: `${req.user.name} commented on your post`,
       });
     }
   }
@@ -279,22 +279,24 @@ app.post('/posts/:postId/comments', async (req, res) => {
 
 ```typescript
 // hooks/useNotifications.ts
-import { useEffect } from 'react';
-import { io } from 'socket.io-client';
-import { toast } from 'your-toast-library';
+import { useEffect } from "react";
+import { io } from "socket.io-client";
+import { toast } from "your-toast-library";
 
 export function useNotifications(userId: string) {
   useEffect(() => {
     const socket = io(process.env.REACT_APP_API_URL, {
-      auth: { userId }
+      auth: { userId },
     });
 
-    socket.on('notification', (data) => {
+    socket.on("notification", (data) => {
       toast(data.message);
       // Could also update a notification count in state
     });
 
-    return () => { socket.disconnect(); };
+    return () => {
+      socket.disconnect();
+    };
   }, [userId]);
 }
 ```
@@ -311,20 +313,24 @@ export function useNotifications(userId: string) {
 ## △ Caveats
 
 **Open questions**:
+
 - Notification persistence — currently lost on refresh
 - Mobile push — not addressed, would need separate implementation
 
 **Assumed decisions**:
+
 - Single server deployment — will break with multiple instances
 - No read/unread tracking — no notification history
 - Toast-only UI — no notification center
 
 **Known concerns**:
+
 - User might miss notifications if offline when sent
 - No retry mechanism for failed deliveries
 - Socket reconnection handling is minimal
 
 **Deferred items**:
+
 - Redis pub/sub for multi-server (when you scale)
 - Notification persistence in PostgreSQL (soon — improves UX)
 - Mobile push notifications (when you add mobile app)

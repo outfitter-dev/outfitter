@@ -8,6 +8,7 @@
  */
 
 import { afterEach, describe, expect, test } from "bun:test";
+
 import { runDemo } from "../commands/demo.js";
 
 type SpawnResult =

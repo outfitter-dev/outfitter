@@ -18,6 +18,7 @@ Generated: {timestamp}
 ## Visual Indicators
 
 **Status**:
+
 - `✓` success, passing, approved
 - `✗` failure, failed, rejected
 - `⏳` in-progress, pending
@@ -25,9 +26,11 @@ Generated: {timestamp}
 - `🔴` blocker, critical
 
 **Progress** (use `░▓`):
+
 - `▓▓▓░░` — 3/5 checks passing
 
 **Severity** (use `◇◆`):
+
 - `◇` minor, informational
 - `◆` moderate, needs attention
 - `◈` severe, blocking

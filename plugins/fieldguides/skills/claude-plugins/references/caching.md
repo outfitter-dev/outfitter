@@ -83,6 +83,7 @@ Reference skills by `skill-name` and invoke with the Skill tool.
 ## Best Practice
 
 **Prefer Option 3** (skill invocation) when possible. It:
+
 - Avoids caching complexity
 - Works regardless of installation method
 - Maintains clean plugin boundaries

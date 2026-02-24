@@ -35,15 +35,16 @@ NOT for: quick lookups, well-known patterns, time-critical debugging without inv
 
 Load the `maintain-tasks` skill for stage tracking. Stages advance only, never regress.
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Analyze Request | Session start | "Analyzing research request" |
-| Discover Sources | Criteria defined | "Discovering sources" |
-| Gather Information | Sources identified | "Gathering information" |
-| Synthesize Findings | Information gathered | "Synthesizing findings" |
-| Compile Report | Synthesis complete | "Compiling report" |
+| Stage               | Trigger              | activeForm                   |
+| ------------------- | -------------------- | ---------------------------- |
+| Analyze Request     | Session start        | "Analyzing research request" |
+| Discover Sources    | Criteria defined     | "Discovering sources"        |
+| Gather Information  | Sources identified   | "Gathering information"      |
+| Synthesize Findings | Information gathered | "Synthesizing findings"      |
+| Compile Report      | Synthesis complete   | "Compiling report"           |
 
 Workflow:
+
 - Start: Create "Analyze Request" as `in_progress`
 - Transition: Mark current `completed`, add next `in_progress`
 - Simple queries: Skip directly to "Gather Information" if unambiguous
@@ -57,27 +58,28 @@ Workflow:
 Five-stage systematic approach:
 
 **1. Question Stage** — Define scope
+
 - Decision to be made?
 - Evaluation parameters? (performance, maintainability, security, adoption)
 - Constraints? (timeline, expertise, infrastructure)
 
 **2. Discovery Stage** — Multi-source retrieval
 
-| Use Case | Primary | Secondary | Tertiary |
-|----------|---------|-----------|----------|
-| Official docs | context7 | octocode | firecrawl |
-| Troubleshooting | octocode issues | firecrawl community | context7 guides |
-| Code examples | octocode repos | firecrawl tutorials | context7 examples |
-| Technology eval | Parallel all | Cross-reference | Validate |
+| Use Case        | Primary         | Secondary           | Tertiary          |
+| --------------- | --------------- | ------------------- | ----------------- |
+| Official docs   | context7        | octocode            | firecrawl         |
+| Troubleshooting | octocode issues | firecrawl community | context7 guides   |
+| Code examples   | octocode repos  | firecrawl tutorials | context7 examples |
+| Technology eval | Parallel all    | Cross-reference     | Validate          |
 
 **3. Evaluation Stage** — Analyze against criteria
 
-| Criterion | Metrics |
-|-----------|---------|
-| Performance | Benchmarks, latency, throughput, memory |
+| Criterion       | Metrics                                           |
+| --------------- | ------------------------------------------------- |
+| Performance     | Benchmarks, latency, throughput, memory           |
 | Maintainability | Code complexity, docs quality, community activity |
-| Security | CVEs, audits, compliance |
-| Adoption | Downloads, production usage, industry patterns |
+| Security        | CVEs, audits, compliance                          |
+| Adoption        | Downloads, production usage, industry patterns    |
 
 **4. Comparison Stage** — Systematic tradeoff analysis
 
@@ -93,13 +95,14 @@ Primary recommendation → Alternatives → Implementation steps → Limitations
 
 Three MCP servers for multi-source research:
 
-| Tool | Best For | Key Functions |
-|------|----------|---------------|
-| **context7** | Official docs, API refs | `resolve-library-id`, `get-library-docs` |
-| **octocode** | Code examples, issues | `packageSearch`, `githubSearchCode`, `githubSearchIssues` |
-| **firecrawl** | Tutorials, benchmarks | `search`, `scrape`, `map` |
+| Tool          | Best For                | Key Functions                                             |
+| ------------- | ----------------------- | --------------------------------------------------------- |
+| **context7**  | Official docs, API refs | `resolve-library-id`, `get-library-docs`                  |
+| **octocode**  | Code examples, issues   | `packageSearch`, `githubSearchCode`, `githubSearchIssues` |
+| **firecrawl** | Tutorials, benchmarks   | `search`, `scrape`, `map`                                 |
 
 Execution patterns:
+
 - **Parallel**: Run independent queries simultaneously for speed
 - **Fallback**: context7 → octocode → firecrawl if primary fails
 - **Progressive**: Start broad, narrow based on findings
@@ -112,12 +115,12 @@ See [tool-selection.md](references/tool-selection.md) for detailed usage.
 
 Common research workflows:
 
-| Scenario | Approach |
-|----------|----------|
-| **Library Installation** | Package search → Official docs → Installation guide |
-| **Error Resolution** | Parse error → Search issues → Official troubleshooting → Community solutions |
-| **API Exploration** | Documentation ID → API reference → Real usage examples |
-| **Technology Comparison** | Parallel all sources → Cross-reference → Build matrix → Recommend |
+| Scenario                  | Approach                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| **Library Installation**  | Package search → Official docs → Installation guide                          |
+| **Error Resolution**      | Parse error → Search issues → Official troubleshooting → Community solutions |
+| **API Exploration**       | Documentation ID → API reference → Real usage examples                       |
+| **Technology Comparison** | Parallel all sources → Cross-reference → Build matrix → Recommend            |
 
 See [discovery-patterns.md](references/discovery-patterns.md) for detailed workflows.
 
@@ -149,28 +152,36 @@ Notes: { context or caveats }
 
 ```markdown
 ## Research Summary
+
 Brief overview — what investigated, sources consulted.
 
 ## Options Discovered
+
 1. **Option A** — description
 2. **Option B** — description
 
 ## Comparison Matrix
+
 | Criterion | Option A | Option B |
-|-----------|----------|----------|
+| --------- | -------- | -------- |
 
 ## Recommendation
+
 ### Primary: [Option Name]
+
 **Rationale**: reasoning + evidence
 **Confidence**: level + explanation
 
 ### Alternatives
+
 When to choose differently.
 
 ## Implementation Guidance
+
 Next steps, common pitfalls, validation.
 
 ## Sources
+
 - Official, benchmarks, case studies, community
 ```
 
@@ -179,17 +190,20 @@ Next steps, common pitfalls, validation.
 <quality>
 
 **Always include**:
+
 - Direct citations with links
 - Confidence levels and limitations
 - Context about when recommendations may not apply
 
 **Always validate**:
+
 - Version is latest stable
 - Documentation matches user context
 - Critical info cross-referenced
 - Code examples complete and runnable
 
 **Proactively flag**:
+
 - Deprecated approaches with modern alternatives
 - Missing prerequisites
 - Common pitfalls and gotchas
@@ -200,6 +214,7 @@ Next steps, common pitfalls, validation.
 <rules>
 
 ALWAYS:
+
 - Create "Analyze Request" todo at session start
 - One stage `in_progress` at a time
 - Use multi-source approach (context7, octocode, firecrawl)
@@ -208,6 +223,7 @@ ALWAYS:
 - Include confidence levels and limitations
 
 NEVER:
+
 - Skip "Analyze Request" stage without defining scope
 - Single-source when multi-source available
 - Deliver recommendations without citations
@@ -223,6 +239,7 @@ NEVER:
 - [discovery-patterns.md](references/discovery-patterns.md) — detailed research workflows
 
 **Research vs Report-Findings**:
+
 - This skill (`research`) covers the full investigation workflow using MCP tools
 - `report-findings` skill covers synthesis, source assessment, and presentation
 

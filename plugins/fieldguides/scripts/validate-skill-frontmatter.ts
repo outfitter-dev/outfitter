@@ -18,7 +18,9 @@
 
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
+
 import { parse as parseYaml } from "yaml";
+
 import {
   extractFrontmatter,
   isAllowedToolsCommaSeparated,

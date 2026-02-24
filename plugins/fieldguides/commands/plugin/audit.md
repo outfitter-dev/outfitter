@@ -24,6 +24,7 @@ $ARGUMENTS
 Run the plugin audit skill on the target path. If no path provided, use current directory.
 
 Capture:
+
 - Critical issues (blocking)
 - Warnings (should fix)
 - Info (suggestions)
@@ -42,6 +43,7 @@ Apply automatic fixes? (will show each change)
 ```
 
 Use `AskUserQuestion` with options:
+
 1. Apply all auto-fixes
 2. Review each fix individually
 3. Skip auto-fixes, show manual issues only
@@ -49,6 +51,7 @@ Use `AskUserQuestion` with options:
 ### Stage 3: Apply Fixes
 
 For each auto-fix:
+
 1. Show the proposed change
 2. Apply the fix
 3. Verify the fix worked

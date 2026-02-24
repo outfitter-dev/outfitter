@@ -7,6 +7,7 @@ Patterns for converting existing code to Outfitter Stack conventions.
 Convert throw-based error handling to Result types.
 
 **Before:**
+
 ```typescript
 async function getUser(id: string): Promise<User> {
   const user = await db.users.findById(id);
@@ -16,10 +17,14 @@ async function getUser(id: string): Promise<User> {
 ```
 
 **After:**
+
 ```typescript
 import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
-const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
+const getUser: Handler<{ id: string }, User, NotFoundError> = async (
+  input,
+  ctx
+) => {
   const user = await db.users.findById(input.id);
   if (!user) return Result.err(NotFoundError.create("user", input.id));
   return Result.ok(user);
@@ -31,6 +36,7 @@ const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx)
 Replace console calls with structured logging via context.
 
 **Before:**
+
 ```typescript
 console.log("Processing", userId);
 console.error("Failed to process", error);
@@ -38,6 +44,7 @@ console.warn("Deprecated API usage");
 ```
 
 **After:**
+
 ```typescript
 ctx.logger.info("Processing", { userId });
 ctx.logger.error("Failed to process", { error: error.message });
@@ -46,11 +53,11 @@ ctx.logger.warn("Deprecated API usage", { api: "oldEndpoint" });
 
 ### Logging Level Mapping
 
-| Console Method | Logger Method | When to Use |
-|----------------|---------------|-------------|
-| `console.log` | `ctx.logger.info` | Normal operations |
-| `console.debug` | `ctx.logger.debug` | Development debugging |
-| `console.warn` | `ctx.logger.warn` | Unexpected but handled |
+| Console Method  | Logger Method      | When to Use                  |
+| --------------- | ------------------ | ---------------------------- |
+| `console.log`   | `ctx.logger.info`  | Normal operations            |
+| `console.debug` | `ctx.logger.debug` | Development debugging        |
+| `console.warn`  | `ctx.logger.warn`  | Unexpected but handled       |
 | `console.error` | `ctx.logger.error` | Failures requiring attention |
 
 ## Hardcoded Paths to XDG
@@ -58,6 +65,7 @@ ctx.logger.warn("Deprecated API usage", { api: "oldEndpoint" });
 Replace hardcoded home directory paths with XDG-compliant paths.
 
 **Before:**
+
 ```typescript
 import os from "node:os";
 import path from "node:path";
@@ -68,6 +76,7 @@ const dataPath = path.join(os.homedir(), ".local", "share", "myapp");
 ```
 
 **After:**
+
 ```typescript
 import { getConfigDir, getCacheDir, getDataDir } from "@outfitter/config";
 import path from "node:path";
@@ -79,43 +88,43 @@ const dataPath = getDataDir("myapp");
 
 ### XDG Path Functions
 
-| Function | Default Path | Env Override |
-|----------|--------------|--------------|
-| `getConfigDir(app)` | `~/.config/{app}` | `XDG_CONFIG_HOME` |
-| `getCacheDir(app)` | `~/.cache/{app}` | `XDG_CACHE_HOME` |
-| `getDataDir(app)` | `~/.local/share/{app}` | `XDG_DATA_HOME` |
-| `getStateDir(app)` | `~/.local/state/{app}` | `XDG_STATE_HOME` |
+| Function            | Default Path           | Env Override      |
+| ------------------- | ---------------------- | ----------------- |
+| `getConfigDir(app)` | `~/.config/{app}`      | `XDG_CONFIG_HOME` |
+| `getCacheDir(app)`  | `~/.cache/{app}`       | `XDG_CACHE_HOME`  |
+| `getDataDir(app)`   | `~/.local/share/{app}` | `XDG_DATA_HOME`   |
+| `getStateDir(app)`  | `~/.local/state/{app}` | `XDG_STATE_HOME`  |
 
 ## Error Taxonomy Mapping
 
 Map existing custom errors to the 10 taxonomy categories.
 
-| Original Pattern | Outfitter Error | Category |
-|------------------|-----------------|----------|
-| `NotFoundError` | `NotFoundError` | `not_found` |
+| Original Pattern    | Outfitter Error   | Category     |
+| ------------------- | ----------------- | ------------ |
+| `NotFoundError`     | `NotFoundError`   | `not_found`  |
 | `InvalidInputError` | `ValidationError` | `validation` |
-| `DuplicateError` | `ConflictError` | `conflict` |
-| `UnauthorizedError` | `AuthError` | `auth` |
-| `ForbiddenError` | `PermissionError` | `permission` |
-| `TimeoutError` | `TimeoutError` | `timeout` |
-| `RateLimitError` | `RateLimitError` | `rate_limit` |
-| `ConnectionError` | `NetworkError` | `network` |
-| Generic `Error` | `InternalError` | `internal` |
-| `AbortError` | `CancelledError` | `cancelled` |
+| `DuplicateError`    | `ConflictError`   | `conflict`   |
+| `UnauthorizedError` | `AuthError`       | `auth`       |
+| `ForbiddenError`    | `PermissionError` | `permission` |
+| `TimeoutError`      | `TimeoutError`    | `timeout`    |
+| `RateLimitError`    | `RateLimitError`  | `rate_limit` |
+| `ConnectionError`   | `NetworkError`    | `network`    |
+| Generic `Error`     | `InternalError`   | `internal`   |
+| `AbortError`        | `CancelledError`  | `cancelled`  |
 
 ### Mapping by Error Name Keywords
 
-| Keyword in Error Name | Maps To |
-|-----------------------|---------|
-| `notfound`, `missing` | `NotFoundError` |
-| `validation`, `invalid`, `input` | `ValidationError` |
-| `conflict`, `duplicate`, `exists` | `ConflictError` |
-| `permission`, `forbidden` | `PermissionError` |
-| `timeout` | `TimeoutError` |
-| `ratelimit`, `rate`, `throttle` | `RateLimitError` |
-| `network`, `connection` | `NetworkError` |
-| `auth`, `unauthorized`, `unauthenticated` | `AuthError` |
-| `cancel`, `abort` | `CancelledError` |
+| Keyword in Error Name                     | Maps To           |
+| ----------------------------------------- | ----------------- |
+| `notfound`, `missing`                     | `NotFoundError`   |
+| `validation`, `invalid`, `input`          | `ValidationError` |
+| `conflict`, `duplicate`, `exists`         | `ConflictError`   |
+| `permission`, `forbidden`                 | `PermissionError` |
+| `timeout`                                 | `TimeoutError`    |
+| `ratelimit`, `rate`, `throttle`           | `RateLimitError`  |
+| `network`, `connection`                   | `NetworkError`    |
+| `auth`, `unauthorized`, `unauthenticated` | `AuthError`       |
+| `cancel`, `abort`                         | `CancelledError`  |
 
 ## Compatibility Layer
 
@@ -143,7 +152,9 @@ function wrapSync<T>(fn: () => T): Result<T, InternalError> {
 /**
  * Wraps an async function that may throw, returning a Result.
  */
-async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, InternalError>> {
+async function wrapAsync<T>(
+  fn: () => Promise<T>
+): Promise<Result<T, InternalError>> {
   try {
     return Result.ok(await fn());
   } catch (error) {
@@ -176,6 +187,7 @@ const data = result.value;
 Convert try-catch blocks to Result chains.
 
 **Before:**
+
 ```typescript
 async function processOrder(orderId: string): Promise<Order> {
   try {
@@ -191,8 +203,12 @@ async function processOrder(orderId: string): Promise<Order> {
 ```
 
 **After:**
+
 ```typescript
-const processOrder: Handler<{ orderId: string }, Order, OrderError> = async (input, ctx) => {
+const processOrder: Handler<{ orderId: string }, Order, OrderError> = async (
+  input,
+  ctx
+) => {
   const orderResult = await fetchOrder(input.orderId, ctx);
   if (orderResult.isErr()) return orderResult;
 

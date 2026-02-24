@@ -23,6 +23,7 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 **Steps**:
 
 1. **Rename CLAUDE.md to AGENTS.md**
+
    ```bash
    mv CLAUDE.md AGENTS.md
    ```
@@ -30,12 +31,14 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 2. **Remove tool-specific content from AGENTS.md**
 
    Move Claude-specific sections (task management, tool preferences) to `.claude/CLAUDE.md`:
+
    ```bash
    mkdir -p .claude
    # Extract Claude-specific content to .claude/CLAUDE.md
    ```
 
 3. **Create minimal CLAUDE.md**
+
    ```bash
    cat > CLAUDE.md << 'EOF'
    # CLAUDE.md
@@ -60,6 +63,7 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 **Steps**:
 
 1. **Remove the symlink**
+
    ```bash
    # Check which is the symlink
    file CLAUDE.md AGENTS.md
@@ -73,6 +77,7 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
    Review AGENTS.md for Claude-specific content and move to `.claude/CLAUDE.md`.
 
 3. **Create minimal CLAUDE.md**
+
    ```bash
    cat > CLAUDE.md << 'EOF'
    # CLAUDE.md
@@ -93,6 +98,7 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 1. **Audit for duplication**
 
    Check if content is duplicated between files:
+
    ```bash
    # Quick diff to spot similarities
    diff CLAUDE.md AGENTS.md
@@ -103,12 +109,14 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
    Project structure, commands, architecture, code style, testing, git workflow → AGENTS.md
 
 3. **Move Claude-specific content to .claude/CLAUDE.md**
+
    ```bash
    mkdir -p .claude
    # Move task management, tool preferences, etc.
    ```
 
 4. **Replace root CLAUDE.md with @-mentions**
+
    ```bash
    cat > CLAUDE.md << 'EOF'
    # CLAUDE.md
@@ -133,6 +141,7 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 2. **Keep Claude-specific content in .claude/CLAUDE.md**
 
 3. **Create minimal root CLAUDE.md**
+
    ```bash
    cat > CLAUDE.md << 'EOF'
    # CLAUDE.md
@@ -148,21 +157,21 @@ file CLAUDE.md AGENTS.md 2>/dev/null | grep -i symbolic
 
 Use this table to decide where content belongs:
 
-| Content Type | Location |
-|--------------|----------|
-| Project overview | AGENTS.md |
-| Directory structure | AGENTS.md |
-| Available commands | AGENTS.md |
-| Architecture patterns | AGENTS.md |
-| Development principles (TDD, etc.) | AGENTS.md |
-| Code style conventions | AGENTS.md |
-| Testing approach | AGENTS.md |
-| Git workflow | AGENTS.md |
-| Task management (TaskCreate, etc.) | .claude/CLAUDE.md |
-| Claude tool preferences | .claude/CLAUDE.md |
-| MCP server usage | .claude/CLAUDE.md |
-| Subagent coordination | .claude/CLAUDE.md |
-| Language-specific rules (scoped) | .claude/rules/*.md |
+| Content Type                       | Location            |
+| ---------------------------------- | ------------------- |
+| Project overview                   | AGENTS.md           |
+| Directory structure                | AGENTS.md           |
+| Available commands                 | AGENTS.md           |
+| Architecture patterns              | AGENTS.md           |
+| Development principles (TDD, etc.) | AGENTS.md           |
+| Code style conventions             | AGENTS.md           |
+| Testing approach                   | AGENTS.md           |
+| Git workflow                       | AGENTS.md           |
+| Task management (TaskCreate, etc.) | .claude/CLAUDE.md   |
+| Claude tool preferences            | .claude/CLAUDE.md   |
+| MCP server usage                   | .claude/CLAUDE.md   |
+| Subagent coordination              | .claude/CLAUDE.md   |
+| Language-specific rules (scoped)   | .claude/rules/\*.md |
 
 ## Post-Migration Verification
 
@@ -180,6 +189,7 @@ After migration, confirm:
 ### @-mention not working
 
 Ensure the path is correct and the file exists:
+
 ```bash
 # Check file exists at the path specified in @-mention
 cat .claude/CLAUDE.md
@@ -189,6 +199,7 @@ cat AGENTS.md
 ### Content showing up twice
 
 Check for duplication:
+
 ```bash
 # Look for similar content across files
 grep -r "## Commands" CLAUDE.md AGENTS.md .claude/CLAUDE.md
@@ -199,6 +210,7 @@ Remove duplicates — content should live in exactly one place.
 ### Codex not seeing conventions
 
 Critical conventions must be in AGENTS.md. Codex doesn't read:
+
 - `.claude/CLAUDE.md`
 - `.claude/rules/*.md`
 

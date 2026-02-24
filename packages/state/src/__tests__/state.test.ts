@@ -18,7 +18,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import {
   advanceCursor,
   type Cursor,

@@ -9,9 +9,11 @@
 
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+
 import { output } from "@outfitter/cli";
 import { InternalError, NotFoundError, Result } from "@outfitter/contracts";
 import { generateDocsMap } from "@outfitter/docs";
+
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { DocsMapEntryShape } from "./docs-types.js";

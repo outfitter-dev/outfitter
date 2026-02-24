@@ -13,21 +13,22 @@ Outfitter writes like it means it. We're unapologetically opinionated — not be
 
 ## Quick Reference
 
-| Principle | In Practice |
-|-----------|-------------|
-| **Opinionated** | State choices clearly. Explain why. Don't hedge. |
-| **Agent-first** | Structure for machines. Runnable examples. Typed errors. |
-| **Goal-serving** | Match voice to container. Quick starts are quick. |
-| **Clear > clever** | Personality that reinforces understanding, not obscures it. |
-| **Plain language** | Save generics for code. Use words people say. |
-| **Earned confidence** | Claims backed by examples, benchmarks, tests. |
-| **Ownership stance** | First-person "we". Possessive when it fits. |
+| Principle             | In Practice                                                 |
+| --------------------- | ----------------------------------------------------------- |
+| **Opinionated**       | State choices clearly. Explain why. Don't hedge.            |
+| **Agent-first**       | Structure for machines. Runnable examples. Typed errors.    |
+| **Goal-serving**      | Match voice to container. Quick starts are quick.           |
+| **Clear > clever**    | Personality that reinforces understanding, not obscures it. |
+| **Plain language**    | Save generics for code. Use words people say.               |
+| **Earned confidence** | Claims backed by examples, benchmarks, tests.               |
+| **Ownership stance**  | First-person "we". Possessive when it fits.                 |
 
 ## Agents at Every Step
 
 We build with agents at every step of the way, and we're explicit about it. Agents aren't an afterthought or a marketing angle — they're first-class consumers of everything we make. When we write, we're writing for Claude as much as we're writing for you.
 
 This shapes everything:
+
 - Documentation is structured for machine readability, not just human skimming
 - Rules aren't just stated — they're codified, tested, and enforced
 - Errors are typed and explicit, because agents need to handle them too
@@ -40,6 +41,7 @@ Voice is how we say things, not permission to say more.
 If someone needs a code example, give them the code example. If they need a quick answer, give them the quick answer. Don't make people scroll past your life story to get the recipe.
 
 The goal of the content determines its shape:
+
 - **Quick Start** — Get to code fast. Context comes after, if at all.
 - **Philosophy section** — Room to breathe. Explain the why.
 - **API reference** — Precision over personality. Just the facts.
@@ -51,16 +53,18 @@ Match the container. A README Quick Start and a blog post have different jobs.
 
 Default to clarity. When established conventions exist, follow them.
 
-But clever *can* be clear when it reinforces the mental model:
+But clever _can_ be clear when it reinforces the mental model:
+
 - A breadcrumb tool called "crumbs" → `crumb drop` has personality without sacrificing meaning. `crumb new` is functional, but forgettable.
 - Ranger, Firewatch, Waymark — names that evoke what they do.
 - "Done. You're building type-safe infrastructure." — confident, memorable.
 
 Clever fails when it requires translation:
+
 - Cold/Warm/Hot for stability tiers → "Cold means... frozen means... stable?" Just say Stable.
 - Jargon that sounds smart but means nothing to newcomers.
 
-The test: *Does the cleverness help you understand, or make you pause to decode?*
+The test: _Does the cleverness help you understand, or make you pause to decode?_
 
 Reinforce the vibe. Don't invent vocabulary.
 
@@ -85,6 +89,7 @@ This applies to voice too. If we claim something is simple, there's a working ex
 Outfitter takes ownership. First-person "we" when speaking as the project. Possessive when it fits: "Outfitter's shared infrastructure" not "shared infrastructure for Outfitter."
 
 We're unapologetically opinionated about:
+
 - **Correctness over convenience** — Explicit errors, strict types, tests first
 - **Agents as consumers** — Not an afterthought, a design constraint
 - **Intentional craft** — Built deliberately, not accumulated accidentally
@@ -93,9 +98,10 @@ We're not hedging. We're not "just a simple tool." We're building something with
 
 ## What This Isn't
 
-This skill is the philosophical foundation — the *why* and *how we think*.
+This skill is the philosophical foundation — the _why_ and _how we think_.
 
 It's not:
+
 - Sentence-level style guidance (load the `outfitter-styleguide` skill)
 - Documentation structure templates (load the `outfitter-documentation` skill)
 - Code style or formatting rules

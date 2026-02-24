@@ -9,6 +9,7 @@
  * Total: 10 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { renderTable } from "../render/index.js";
 
 // ============================================================================

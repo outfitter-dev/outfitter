@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { createDaemon } from "../index.js";
 
 describe("@outfitter/daemon", () => {

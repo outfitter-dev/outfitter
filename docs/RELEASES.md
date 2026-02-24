@@ -92,10 +92,10 @@ The generated `.changeset/*.md` file should be committed with your PR.
 
 ### Choosing a Bump Type
 
-| Type | When to Use | Example |
-|------|-------------|---------|
-| `patch` | Bug fixes, dependency updates, docs fixes in code | `0.1.0` -> `0.1.1` |
-| `minor` | New features, new exports, deprecations | `0.1.0` -> `0.2.0` |
+| Type    | When to Use                                               | Example            |
+| ------- | --------------------------------------------------------- | ------------------ |
+| `patch` | Bug fixes, dependency updates, docs fixes in code         | `0.1.0` -> `0.1.1` |
+| `minor` | New features, new exports, deprecations                   | `0.1.0` -> `0.2.0` |
 | `major` | Breaking API changes, removed exports, changed signatures | `0.1.0` -> `1.0.0` |
 
 ### When NOT to Add a Changeset
@@ -131,23 +131,23 @@ Canary versions use the format `{version}-canary-{datetime}` (configured in `.ch
 
 ## Workflows
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| [`canary.yml`](../.github/workflows/canary.yml) | Push to main (changeset files) | Publish `@canary` dist-tag |
-| [`release.yml`](../.github/workflows/release.yml) | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
-| [`changeset-labels.yml`](../.github/workflows/changeset-labels.yml) | PR with manual changeset | Apply release label from changeset |
+| Workflow                                                            | Trigger                            | Purpose                                               |
+| ------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| [`canary.yml`](../.github/workflows/canary.yml)                     | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
+| [`release.yml`](../.github/workflows/release.yml)                   | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
+| [`changeset-labels.yml`](../.github/workflows/changeset-labels.yml) | PR with manual changeset           | Apply release label from changeset                    |
 
 ## Release Labels
 
 Labels still exist for human categorization, but they no longer drive automation:
 
-| Label | Purpose |
-|-------|---------|
-| `release:patch` | Categorize as bug fix |
-| `release:minor` | Categorize as new feature |
-| `release:major` | Categorize as breaking change |
-| `release:none` | Skip changeset requirement in CI |
-| `autorelease` | Applied automatically to release PRs |
+| Label           | Purpose                              |
+| --------------- | ------------------------------------ |
+| `release:patch` | Categorize as bug fix                |
+| `release:minor` | Categorize as new feature            |
+| `release:major` | Categorize as breaking change        |
+| `release:none`  | Skip changeset requirement in CI     |
+| `autorelease`   | Applied automatically to release PRs |
 
 ## Troubleshooting
 
@@ -166,7 +166,7 @@ All changesets have been consumed by a previous prepare run, or none were ever a
 
 The release PR must be created with a PAT (`RELEASE_PLEASE_TOKEN`), not the default `GITHUB_TOKEN`. If CI didn't run, check that the secret is configured in the repository settings.
 
-### Published package has workspace:* in dependencies
+### Published package has workspace:\* in dependencies
 
 This means someone ran `npm publish` directly instead of using the release pipeline. The `prepublishOnly` guard should prevent this, but if it was bypassed, unpublish the version and re-release through the pipeline.
 

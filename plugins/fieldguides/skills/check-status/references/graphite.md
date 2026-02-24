@@ -65,7 +65,7 @@ Extract hierarchical branch relationships:
 interface StackNode {
   branch: string;
   prNumber?: number;
-  prStatus?: 'draft' | 'open' | 'ready' | 'merged';
+  prStatus?: "draft" | "open" | "ready" | "merged";
   commitCount: number;
   parent?: string;
   children: string[];
@@ -76,7 +76,7 @@ interface StackNode {
 
 async function getStackStructure(): Promise<StackNode[]> {
   // Parse gt log output or gt stack --json
-  const output = await exec('gt log');
+  const output = await exec("gt log");
 
   // Extract:
   // - Branch names and hierarchy
@@ -100,9 +100,7 @@ async function getStackPRs(branches: string[]): Promise<PRMetadata[]> {
   // Option 2: Query GitHub directly with PR numbers
   // Option 3: Use gt pr status --json (if available)
 
-  const prNumbers = branches
-    .map(b => extractPRNumber(b))
-    .filter(Boolean);
+  const prNumbers = branches.map((b) => extractPRNumber(b)).filter(Boolean);
 
   // Fetch details from GitHub (see github.md)
   return fetchPRDetails(prNumbers);
@@ -123,12 +121,14 @@ async function getRecentStackActivity(since: string): Promise<StackActivity> {
 
   // Filter by git commit timestamps
   for (const node of stack) {
-    const commits = await exec(`git log ${node.branch} --since="${cutoff}" --format="%H %s %cr"`);
+    const commits = await exec(
+      `git log ${node.branch} --since="${cutoff}" --format="%H %s %cr"`
+    );
     node.recentCommits = parseCommits(commits);
   }
 
   // Only show branches with activity
-  return stack.filter(n => n.recentCommits.length > 0);
+  return stack.filter((n) => n.recentCommits.length > 0);
 }
 ```
 
@@ -197,7 +197,7 @@ function linkStackToIssues(stack: StackNode[], issues: Issue[]): void {
     const issueKeys = extractIssueKeys(node.prTitle);
 
     // Find matching issues
-    node.relatedIssues = issues.filter(i => issueKeys.includes(i.key));
+    node.relatedIssues = issues.filter((i) => issueKeys.includes(i.key));
   }
 }
 ```
@@ -209,15 +209,17 @@ Show blocked/blocking relationships:
 ```typescript
 interface StackDependencies {
   branch: string;
-  blockedBy: string[];  // Parent branches not merged
-  blocking: string[];   // Child branches waiting
+  blockedBy: string[]; // Parent branches not merged
+  blocking: string[]; // Child branches waiting
 }
 
 function analyzeStackDependencies(stack: StackNode[]): StackDependencies[] {
-  return stack.map(node => ({
+  return stack.map((node) => ({
     branch: node.branch,
     blockedBy: node.parent && !isReadyToMerge(node.parent) ? [node.parent] : [],
-    blocking: node.children.filter(child => isReadyToMerge(node) && !isReadyToMerge(child))
+    blocking: node.children.filter(
+      (child) => isReadyToMerge(node) && !isReadyToMerge(child)
+    ),
   }));
 }
 ```
@@ -227,6 +229,7 @@ function analyzeStackDependencies(stack: StackNode[]): StackDependencies[] {
 ### Efficient Queries
 
 Minimize git/Graphite calls:
+
 1. Single `gt log` for stack structure
 2. Single `git log --all --since` for commit history
 3. Batch PR queries to GitHub (see github.md)
@@ -257,12 +260,12 @@ Handle common Graphite errors:
 
 ```typescript
 try {
-  const stack = await exec('gt log');
+  const stack = await exec("gt log");
 } catch (error) {
-  if (error.message.includes('not a git repository')) {
+  if (error.message.includes("not a git repository")) {
     return null; // Gracefully skip Graphite section
   }
-  if (error.message.includes('graphite not initialized')) {
+  if (error.message.includes("graphite not initialized")) {
     // Suggest: gt repo init
     return null;
   }
@@ -278,14 +281,12 @@ Combine Graphite stack structure with GitHub PR details:
 
 ```typescript
 async function enrichStackWithGitHub(stack: StackNode[]): Promise<void> {
-  const prNumbers = stack
-    .map(n => n.prNumber)
-    .filter(Boolean);
+  const prNumbers = stack.map((n) => n.prNumber).filter(Boolean);
 
   const prDetails = await fetchGitHubPRs(prNumbers); // See github.md
 
   for (const node of stack) {
-    const pr = prDetails.find(p => p.number === node.prNumber);
+    const pr = prDetails.find((p) => p.number === node.prNumber);
     if (pr) {
       node.ciStatus = pr.ciStatus;
       node.reviewStatus = pr.reviewStatus;
@@ -303,7 +304,7 @@ Link Linear issues to stack branches:
 async function linkStackToLinear(stack: StackNode[]): Promise<void> {
   // Extract all issue keys from PR titles
   const issueKeys = stack
-    .flatMap(n => extractIssueKeys(n.prTitle || ''))
+    .flatMap((n) => extractIssueKeys(n.prTitle || ""))
     .filter(Boolean);
 
   // Fetch Linear issues
@@ -311,8 +312,8 @@ async function linkStackToLinear(stack: StackNode[]): Promise<void> {
 
   // Annotate stack nodes
   for (const node of stack) {
-    const keys = extractIssueKeys(node.prTitle || '');
-    node.linearIssues = issues.filter(i => keys.includes(i.identifier));
+    const keys = extractIssueKeys(node.prTitle || "");
+    node.linearIssues = issues.filter((i) => keys.includes(i.identifier));
   }
 }
 ```
@@ -335,14 +336,14 @@ function calculateStackHealth(stack: StackNode[]): StackHealth {
   let score = 100;
   const issues: string[] = [];
 
-  const needsRestack = stack.filter(n => n.needsRestack).length;
-  const needsSubmit = stack.filter(n => n.needsSubmit).length;
-  const failingCI = stack.filter(n => n.ciStatus === 'failing').length;
-  const readyToMerge = stack.filter(n => n.prStatus === 'ready').length;
+  const needsRestack = stack.filter((n) => n.needsRestack).length;
+  const needsSubmit = stack.filter((n) => n.needsSubmit).length;
+  const failingCI = stack.filter((n) => n.ciStatus === "failing").length;
+  const readyToMerge = stack.filter((n) => n.prStatus === "ready").length;
 
   score -= needsRestack * 10; // -10 per restack needed
-  score -= needsSubmit * 5;   // -5 per submit needed
-  score -= failingCI * 20;    // -20 per failing CI
+  score -= needsSubmit * 5; // -5 per submit needed
+  score -= failingCI * 20; // -20 per failing CI
 
   if (needsRestack) issues.push(`${needsRestack} branches need restack`);
   if (needsSubmit) issues.push(`${needsSubmit} branches need submit`);
@@ -352,7 +353,7 @@ function calculateStackHealth(stack: StackNode[]): StackHealth {
     score: Math.max(0, score),
     issues,
     readyToMerge,
-    needsWork: needsRestack + needsSubmit + failingCI
+    needsWork: needsRestack + needsSubmit + failingCI,
   };
 }
 ```
@@ -422,6 +423,7 @@ gt pr submit
 ### Performance Issues
 
 Large stacks (>20 branches) can slow down:
+
 - Cache `gt log` output
 - Limit depth with `gt log --depth 10`
 - Filter to relevant branches only

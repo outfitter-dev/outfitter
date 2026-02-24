@@ -1,13 +1,25 @@
 {
   "name": "@outfitter/agents",
-  "description": "DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects",
-  "deprecated": "Use `npx outfitter add scaffolding` instead. See https://github.com/outfitter-dev/outfitter for migration guide.",
   "version": "0.1.0",
-  "type": "module",
+  "description": "DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects",
+  "keywords": [
+    "agents",
+    "ai",
+    "outfitter",
+    "scaffolding",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/agents"
+  },
   "files": [
     "dist",
     "scaffolding"
   ],
+  "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -37,6 +49,9 @@
     },
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/agents",
     "test": "bun test",
@@ -52,20 +67,5 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {},
-  "keywords": [
-    "outfitter",
-    "agents",
-    "ai",
-    "scaffolding",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/agents"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+  "deprecated": "Use `npx outfitter add scaffolding` instead. See https://github.com/outfitter-dev/outfitter for migration guide."
 }

@@ -6,7 +6,7 @@ allowed-tools: Read Grep Glob Bash(rg *)
 
 # Stack Audit
 
-Audit the specified file or directory (or current directory if not provided) for @outfitter/* pattern compliance.
+Audit the specified file or directory (or current directory if not provided) for @outfitter/\* pattern compliance.
 
 ## Target
 
@@ -50,12 +50,15 @@ Use the `stack:review` skill for detailed compliance checklist reference.
 **Issues**: X critical, Y high
 
 ### Critical
+
 - [file:line count] Issue description
 
 ### High
+
 - [file:line count] Issue description
 
 ### Fix Priority
+
 1. First priority fix
 2. Second priority fix
 ```

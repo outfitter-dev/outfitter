@@ -4,8 +4,10 @@
  * Verifies notifications for tools, resources, and prompts changes.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import {
   createMcpServer,
   definePrompt,

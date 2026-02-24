@@ -24,10 +24,10 @@ memory: user
 
 Load as needed based on investigation type:
 
-| Skill | When |
-|-------|------|
-| `pathfinding` | Requirements ambiguous, exploring ideas, planning features |
-| `codify` | Capturing repeated workflows as reusable patterns |
-| `session-analysis` | Recalling past conversations, extracting learnings |
-| `systems-design` | Understanding system structure, planning refactors |
-| `security` | Threat modeling alongside research |
+| Skill              | When                                                       |
+| ------------------ | ---------------------------------------------------------- |
+| `pathfinding`      | Requirements ambiguous, exploring ideas, planning features |
+| `codify`           | Capturing repeated workflows as reusable patterns          |
+| `session-analysis` | Recalling past conversations, extracting learnings         |
+| `systems-design`   | Understanding system structure, planning refactors         |
+| `security`         | Threat modeling alongside research                         |

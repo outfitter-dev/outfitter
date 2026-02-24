@@ -24,14 +24,14 @@ const logger = createLogger({
 
 ## Log Levels
 
-| Level | Method | Use For |
-|-------|--------|---------|
-| `trace` | `logger.trace()` | Very detailed debugging |
-| `debug` | `logger.debug()` | Development debugging |
-| `info` | `logger.info()` | Normal operations |
-| `warn` | `logger.warn()` | Unexpected but handled |
+| Level   | Method           | Use For                      |
+| ------- | ---------------- | ---------------------------- |
+| `trace` | `logger.trace()` | Very detailed debugging      |
+| `debug` | `logger.debug()` | Development debugging        |
+| `info`  | `logger.info()`  | Normal operations            |
+| `warn`  | `logger.warn()`  | Unexpected but handled       |
 | `error` | `logger.error()` | Failures requiring attention |
-| `fatal` | `logger.fatal()` | Unrecoverable failures |
+| `fatal` | `logger.fatal()` | Unrecoverable failures       |
 
 Level hierarchy: `trace` < `debug` < `info` < `warn` < `error` < `fatal`
 
@@ -66,8 +66,8 @@ const requestLogger = createChildLogger(logger, {
 });
 
 // All logs include requestId and handler
-requestLogger.info("Processing");           // Has requestId, handler
-requestLogger.debug("Validated input");     // Has requestId, handler
+requestLogger.info("Processing"); // Has requestId, handler
+requestLogger.debug("Validated input"); // Has requestId, handler
 requestLogger.info("User created", { userId }); // Has requestId, handler, userId
 ```
 
@@ -84,15 +84,16 @@ const logger = createLogger({
 });
 
 logger.info("Config", {
-  apiKey: "secret-123",     // Logged as "[REDACTED]"
-  password: "hunter2",      // Logged as "[REDACTED]"
-  email: "user@example.com" // Not redacted
+  apiKey: "secret-123", // Logged as "[REDACTED]"
+  password: "hunter2", // Logged as "[REDACTED]"
+  email: "user@example.com", // Not redacted
 });
 ```
 
 ### Default Redaction Patterns
 
 Automatically redacted:
+
 - `password`, `pwd`
 - `apiKey`, `api_key`
 - `secret`, `secretKey`
@@ -108,12 +109,7 @@ const logger = createLogger({
   name: "my-app",
   redaction: {
     enabled: true,
-    patterns: [
-      "password",
-      "apiKey",
-      "myCustomSecret",
-      "internalToken",
-    ],
+    patterns: ["password", "apiKey", "myCustomSecret", "internalToken"],
   },
 });
 ```
@@ -125,11 +121,11 @@ Nested values are also redacted:
 ```typescript
 logger.info("Request", {
   headers: {
-    authorization: "Bearer token",  // Redacted
+    authorization: "Bearer token", // Redacted
   },
   body: {
     user: {
-      password: "secret",  // Redacted
+      password: "secret", // Redacted
     },
   },
 });
@@ -143,9 +139,9 @@ logger.info("Request", {
 import { createConsoleSink } from "@outfitter/logging";
 
 const consoleSink = createConsoleSink({
-  colorize: true,           // ANSI colors
-  prettyPrint: true,        // Formatted output
-  timestampFormat: "iso",   // ISO 8601 timestamps
+  colorize: true, // ANSI colors
+  prettyPrint: true, // Formatted output
+  timestampFormat: "iso", // ISO 8601 timestamps
 });
 ```
 
@@ -156,8 +152,8 @@ import { createFileSink } from "@outfitter/logging";
 
 const fileSink = createFileSink({
   path: "/var/log/myapp/app.log",
-  maxSize: 10 * 1024 * 1024,  // 10MB
-  maxFiles: 5,                 // Keep 5 rotated files
+  maxSize: 10 * 1024 * 1024, // 10MB
+  maxFiles: 5, // Keep 5 rotated files
 });
 ```
 
@@ -168,8 +164,9 @@ const logger = createLogger({
   name: "my-app",
   level: "debug",
   sinks: [
-    createConsoleSink({ level: "info" }),     // Console: info+
-    createFileSink({                           // File: debug+
+    createConsoleSink({ level: "info" }), // Console: info+
+    createFileSink({
+      // File: debug+
       path: "/var/log/myapp/debug.log",
       level: "debug",
     }),
@@ -233,7 +230,7 @@ export function createHandlerContext() {
 
 // In handler
 const myHandler: Handler<Input, Output, Error> = async (input, ctx) => {
-  ctx.logger.info("Processing", { input });  // Includes requestId
+  ctx.logger.info("Processing", { input }); // Includes requestId
   // ...
 };
 ```

@@ -105,7 +105,6 @@ Use `<brackets>` in `argument-hint`:
 description: Create feature branch
 argument-hint: <branch-name>
 ---
-
 Create branch: feature/$1
 ```
 
@@ -275,6 +274,7 @@ If missing or invalid, explain the error and valid options.
 Issue number: $1
 
 Verify issue #$1:
+
 - Must be a number
 - Must exist in the repository
 - Must not be closed

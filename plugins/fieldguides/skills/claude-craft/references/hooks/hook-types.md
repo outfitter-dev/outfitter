@@ -15,10 +15,12 @@ Executes **before** a tool runs. Can block or modify tool execution.
 **Supports**: Both `command` and `prompt` hook types
 
 **Input fields**:
+
 - `tool_name`: Name of the tool being called
 - `tool_input`: Parameters being passed to the tool
 
 **Output capabilities**:
+
 - Block execution with exit code 2 or `permissionDecision: "deny"`
 - Modify input with `updatedInput` in JSON response
 - Ask user with `permissionDecision: "ask"`
@@ -38,6 +40,7 @@ Executes **before** a tool runs. Can block or modify tool execution.
 ```
 
 **Use cases**:
+
 - Validate bash commands before execution
 - Check file paths for security issues
 - Block dangerous operations
@@ -50,14 +53,18 @@ Executes **before** a tool runs. Can block or modify tool execution.
 
 ```json
 {
-  "PreToolUse": [{
-    "matcher": "Bash",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/validate-bash.sh",
-      "timeout": 5
-    }]
-  }]
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/validate-bash.sh",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -65,14 +72,18 @@ Executes **before** a tool runs. Can block or modify tool execution.
 
 ```json
 {
-  "PreToolUse": [{
-    "matcher": "Write|Edit",
-    "hooks": [{
-      "type": "prompt",
-      "prompt": "Analyze this file operation. Check for: 1) sensitive paths, 2) credentials in content, 3) path traversal. Tool: $TOOL_INPUT. Return {\"decision\": \"allow|deny\", \"reason\": \"...\"}",
-      "timeout": 30
-    }]
-  }]
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Analyze this file operation. Check for: 1) sensitive paths, 2) credentials in content, 3) path traversal. Tool: $TOOL_INPUT. Return {\"decision\": \"allow|deny\", \"reason\": \"...\"}",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -114,11 +125,13 @@ Executes **after** a tool completes successfully.
 **Supports**: `command` hook type only
 
 **Input fields**:
+
 - `tool_name`: Name of the tool that ran
 - `tool_input`: Parameters that were passed
 - `tool_result`: Result returned by the tool
 
 **Special variables**:
+
 - `$file`: Path to affected file (Write/Edit tools only)
 
 **Common matchers**:
@@ -131,6 +144,7 @@ Executes **after** a tool completes successfully.
 ```
 
 **Use cases**:
+
 - Auto-format code files
 - Run linters
 - Update documentation
@@ -142,14 +156,18 @@ Executes **after** a tool completes successfully.
 
 ```json
 {
-  "PostToolUse": [{
-    "matcher": "Write|Edit(*.ts|*.tsx)",
-    "hooks": [{
-      "type": "command",
-      "command": "biome check --write \"$file\"",
-      "timeout": 10
-    }]
-  }]
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit(*.ts|*.tsx)",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "biome check --write \"$file\"",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -157,14 +175,16 @@ Executes **after** a tool completes successfully.
 
 ```json
 {
-  "PostToolUse": [{
-    "matcher": "Write|Edit(*.py)",
-    "hooks": [
-      {"type": "command", "command": "black \"$file\"", "timeout": 10},
-      {"type": "command", "command": "isort \"$file\"", "timeout": 5},
-      {"type": "command", "command": "mypy \"$file\"", "timeout": 15}
-    ]
-  }]
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit(*.py)",
+      "hooks": [
+        { "type": "command", "command": "black \"$file\"", "timeout": 10 },
+        { "type": "command", "command": "isort \"$file\"", "timeout": 5 },
+        { "type": "command", "command": "mypy \"$file\"", "timeout": 15 }
+      ]
+    }
+  ]
 }
 ```
 
@@ -179,11 +199,13 @@ Executes **after** a tool fails.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - `tool_name`: Name of the tool that failed
 - `tool_input`: Parameters that were passed
 - `error`: Error information
 
 **Use cases**:
+
 - Error logging and analytics
 - Retry logic
 - Failure notifications
@@ -194,14 +216,18 @@ Executes **after** a tool fails.
 
 ```json
 {
-  "PostToolUseFailure": [{
-    "matcher": "*",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/log-failure.sh",
-      "timeout": 5
-    }]
-  }]
+  "PostToolUseFailure": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/log-failure.sh",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -216,15 +242,18 @@ Executes when a permission dialog would be shown to the user.
 **Supports**: Both `command` and `prompt` hook types
 
 **Input fields**:
+
 - `tool_name`: Tool requesting permission
 - `tool_input`: Parameters being requested
 
 **Output capabilities**:
+
 - Auto-allow with `permissionDecision: "allow"`
 - Auto-deny with `permissionDecision: "deny"`
 - Show dialog with `permissionDecision: "ask"` (default)
 
 **Use cases**:
+
 - Auto-approve known-safe operations
 - Auto-deny high-risk operations
 - Implement custom permission policies
@@ -234,14 +263,18 @@ Executes when a permission dialog would be shown to the user.
 
 ```json
 {
-  "PermissionRequest": [{
-    "matcher": "Read",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/auto-approve-reads.sh",
-      "timeout": 3
-    }]
-  }]
+  "PermissionRequest": [
+    {
+      "matcher": "Read",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/auto-approve-reads.sh",
+          "timeout": 3
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -258,11 +291,13 @@ Executes when user submits a prompt to Claude.
 **Supports**: Both `command` and `prompt` hook types
 
 **Input fields**:
+
 - `user_prompt`: The prompt text submitted
 
 **Matcher**: Always `*`
 
 **Use cases**:
+
 - Add timestamp or date context
 - Add environment information
 - Log user activity
@@ -274,14 +309,18 @@ Executes when user submits a prompt to Claude.
 
 ```json
 {
-  "UserPromptSubmit": [{
-    "matcher": "*",
-    "hooks": [{
-      "type": "command",
-      "command": "echo \"Current time: $(date '+%Y-%m-%d %H:%M:%S %Z')\"",
-      "timeout": 2
-    }]
-  }]
+  "UserPromptSubmit": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo \"Current time: $(date '+%Y-%m-%d %H:%M:%S %Z')\"",
+          "timeout": 2
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -289,14 +328,18 @@ Executes when user submits a prompt to Claude.
 
 ```json
 {
-  "UserPromptSubmit": [{
-    "matcher": "*",
-    "hooks": [{
-      "type": "command",
-      "command": "echo \"Branch: $(git branch --show-current 2>/dev/null || echo 'N/A')\"",
-      "timeout": 3
-    }]
-  }]
+  "UserPromptSubmit": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo \"Branch: $(git branch --show-current 2>/dev/null || echo 'N/A')\"",
+          "timeout": 3
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -311,6 +354,7 @@ Executes when Claude Code sends a notification.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - Notification message and metadata
 
 **Matchers** (notification types):
@@ -324,6 +368,7 @@ Executes when Claude Code sends a notification.
 ```
 
 **Use cases**:
+
 - Send to external systems (Slack, email)
 - Desktop notifications when Claude needs attention
 - Log notifications
@@ -336,13 +381,17 @@ Executes when Claude Code sends a notification.
 
 ```json
 {
-  "Notification": [{
-    "matcher": "permission_prompt",
-    "hooks": [{
-      "type": "command",
-      "command": "osascript -e 'display notification \"Claude needs permission\" with title \"Claude Code\"'"
-    }]
-  }]
+  "Notification": [
+    {
+      "matcher": "permission_prompt",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "osascript -e 'display notification \"Claude needs permission\" with title \"Claude Code\"'"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -350,14 +399,18 @@ Executes when Claude Code sends a notification.
 
 ```json
 {
-  "Notification": [{
-    "matcher": "*",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/send-to-slack.sh",
-      "timeout": 10
-    }]
-  }]
+  "Notification": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/send-to-slack.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -374,12 +427,14 @@ Executes when main Claude agent finishes responding.
 **Supports**: `command`, `prompt`, and `agent` hook types
 
 **Input fields**:
+
 - `reason`: Why the agent stopped
 - `stop_hook_active`: Boolean — `true` if this stop was triggered by a previous stop hook continuation
 
 **Matcher**: No matcher support (always fires on every stop)
 
 **Important behavior**:
+
 - Fires whenever Claude finishes responding, **not only at task completion**
 - Does **NOT** fire on user interrupts
 - `Stop` hooks defined in agent/skill frontmatter are automatically converted to `SubagentStop` events at runtime
@@ -396,6 +451,7 @@ fi
 ```
 
 **Use cases**:
+
 - Clean up temporary resources
 - Send completion notifications
 - Update external systems
@@ -407,13 +463,17 @@ fi
 
 ```json
 {
-  "Stop": [{
-    "hooks": [{
-      "type": "command",
-      "command": "echo 'Task completed at $(date +%H:%M)'",
-      "timeout": 2
-    }]
-  }]
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo 'Task completed at $(date +%H:%M)'",
+          "timeout": 2
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -421,13 +481,17 @@ fi
 
 ```json
 {
-  "Stop": [{
-    "hooks": [{
-      "type": "prompt",
-      "prompt": "Check if all tasks are complete. If not, respond with {\"ok\": false, \"reason\": \"what remains to be done\"}.",
-      "timeout": 30
-    }]
-  }]
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Check if all tasks are complete. If not, respond with {\"ok\": false, \"reason\": \"what remains to be done\"}.",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -435,13 +499,17 @@ fi
 
 ```json
 {
-  "Stop": [{
-    "hooks": [{
-      "type": "agent",
-      "prompt": "Verify that all unit tests pass. Run the test suite and check the results. $ARGUMENTS",
-      "timeout": 120
-    }]
-  }]
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "agent",
+          "prompt": "Verify that all unit tests pass. Run the test suite and check the results. $ARGUMENTS",
+          "timeout": 120
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -456,6 +524,7 @@ Executes when a subagent (Task tool) spawns.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - `agent_id`: Unique identifier for this subagent instance
 - `agent_type`: Type/name of the subagent (e.g., `Explore`, `Plan`, `general-purpose`, or custom agent name)
 
@@ -471,6 +540,7 @@ Executes when a subagent (Task tool) spawns.
 ```
 
 **Use cases**:
+
 - Track subagent spawning
 - Log subagent parameters
 - Setup resources per agent type (e.g., DB connections)
@@ -481,14 +551,18 @@ Executes when a subagent (Task tool) spawns.
 
 ```json
 {
-  "SubagentStart": [{
-    "matcher": ".*",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/log-subagent-start.sh",
-      "timeout": 2
-    }]
-  }]
+  "SubagentStart": [
+    {
+      "matcher": ".*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/log-subagent-start.sh",
+          "timeout": 2
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -496,13 +570,17 @@ Executes when a subagent (Task tool) spawns.
 
 ```json
 {
-  "SubagentStart": [{
-    "matcher": "db-agent",
-    "hooks": [{
-      "type": "command",
-      "command": "./scripts/setup-db-connection.sh"
-    }]
-  }]
+  "SubagentStart": [
+    {
+      "matcher": "db-agent",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/setup-db-connection.sh"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -517,6 +595,7 @@ Executes when a subagent (Task tool) finishes.
 **Supports**: `command`, `prompt`, and `agent` hook types
 
 **Input fields**:
+
 - `reason`: Why the subagent stopped
 - `agent_id`: Unique identifier of the subagent instance
 - `agent_type`: Type/name of the subagent
@@ -533,6 +612,7 @@ Executes when a subagent (Task tool) finishes.
 **Note**: `Stop` hooks defined in agent/skill frontmatter are automatically converted to `SubagentStop` events at runtime.
 
 **Use cases**:
+
 - Track subagent completion
 - Log subagent results
 - Cleanup resources per agent type
@@ -544,14 +624,18 @@ Executes when a subagent (Task tool) finishes.
 
 ```json
 {
-  "SubagentStop": [{
-    "matcher": ".*",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/log-subagent-stop.sh",
-      "timeout": 3
-    }]
-  }]
+  "SubagentStop": [
+    {
+      "matcher": ".*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/log-subagent-stop.sh",
+          "timeout": 3
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -559,13 +643,17 @@ Executes when a subagent (Task tool) finishes.
 
 ```json
 {
-  "SubagentStop": [{
-    "matcher": "db-agent",
-    "hooks": [{
-      "type": "command",
-      "command": "./scripts/cleanup-db-connection.sh"
-    }]
-  }]
+  "SubagentStop": [
+    {
+      "matcher": "db-agent",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./scripts/cleanup-db-connection.sh"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -582,6 +670,7 @@ Executes when session starts or resumes.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - `reason`: Start type
 
 **Matchers**:
@@ -596,6 +685,7 @@ Executes when session starts or resumes.
 **Special capability**: Persist environment variables via `$CLAUDE_ENV_FILE`
 
 **Use cases**:
+
 - Display welcome message
 - Show git status
 - Load project context
@@ -607,14 +697,18 @@ Executes when session starts or resumes.
 
 ```json
 {
-  "SessionStart": [{
-    "matcher": "startup",
-    "hooks": [{
-      "type": "command",
-      "command": "echo 'Welcome!' && git status --short",
-      "timeout": 5
-    }]
-  }]
+  "SessionStart": [
+    {
+      "matcher": "startup",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo 'Welcome!' && git status --short",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -647,6 +741,7 @@ Executes when session ends.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - `reason`: End type
 
 **Matchers** (reasons):
@@ -660,6 +755,7 @@ Executes when session ends.
 ```
 
 **Use cases**:
+
 - Clean up resources
 - Save state
 - Log session metrics
@@ -670,14 +766,18 @@ Executes when session ends.
 
 ```json
 {
-  "SessionEnd": [{
-    "matcher": "*",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/cleanup.sh",
-      "timeout": 5
-    }]
-  }]
+  "SessionEnd": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/cleanup.sh",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -692,6 +792,7 @@ Executes before conversation compacts.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - Compact trigger type
 
 **Matchers**:
@@ -702,6 +803,7 @@ Executes before conversation compacts.
 ```
 
 **Use cases**:
+
 - Backup conversation
 - Archive important context
 - Update external summaries
@@ -712,14 +814,18 @@ Executes before conversation compacts.
 
 ```json
 {
-  "PreCompact": [{
-    "matcher": "manual|auto",
-    "hooks": [{
-      "type": "command",
-      "command": "./.claude/hooks/backup-conversation.sh",
-      "timeout": 10
-    }]
-  }]
+  "PreCompact": [
+    {
+      "matcher": "manual|auto",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "./.claude/hooks/backup-conversation.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -736,11 +842,13 @@ Executes when an agent team teammate is about to go idle.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - Teammate metadata
 
 **Matcher**: No matcher support (always fires)
 
 **Use cases**:
+
 - Reassign work to idle teammates
 - Trigger coordination logic
 - Update team status
@@ -756,11 +864,13 @@ Executes when a task is being marked as completed.
 **Supports**: `command` hook type
 
 **Input fields**:
+
 - Task metadata
 
 **Matcher**: No matcher support (always fires)
 
 **Use cases**:
+
 - Validate task completion criteria
 - Trigger follow-up tasks
 - Send notifications
@@ -774,6 +884,7 @@ Prompt hooks send the hook prompt plus input data to a Claude model for judgment
 **Model**: Haiku by default. Override with the `model` field.
 
 **Response format**: The model returns JSON:
+
 - `{"ok": true}` — action proceeds
 - `{"ok": false, "reason": "explanation"}` — action is blocked, reason fed back to Claude
 
@@ -811,27 +922,28 @@ Agent hooks spawn a subagent with tool access for multi-step verification. Unlik
 ```
 
 **When to use prompt vs agent**:
+
 - **Prompt**: Hook input data alone is enough to decide
 - **Agent**: Need to verify against actual codebase state (read files, run tests)
 
 ## Hook Type Comparison
 
-| Event | Can Block | Command | Prompt | Agent | Matcher On |
-|-------|-----------|---------|--------|-------|------------|
-| PreToolUse | Yes | Yes | Yes | Yes | Tool name |
-| PostToolUse | No | Yes | No | No | Tool name |
-| PostToolUseFailure | No | Yes | No | No | Tool name |
-| PermissionRequest | Yes | Yes | Yes | No | Tool name |
-| UserPromptSubmit | No | Yes | Yes | No | (none) |
-| Notification | No | Yes | No | No | Notification type |
-| Stop | No | Yes | Yes | Yes | (none) |
-| SubagentStart | No | Yes | No | No | Agent type |
-| SubagentStop | No | Yes | Yes | No | Agent type |
-| TeammateIdle | Yes | Yes | No | No | (none) |
-| TaskCompleted | Yes | Yes | No | No | (none) |
-| SessionStart | No | Yes | No | No | Start reason |
-| SessionEnd | No | Yes | No | No | End reason |
-| PreCompact | No | Yes | No | No | Trigger type |
+| Event              | Can Block | Command | Prompt | Agent | Matcher On        |
+| ------------------ | --------- | ------- | ------ | ----- | ----------------- |
+| PreToolUse         | Yes       | Yes     | Yes    | Yes   | Tool name         |
+| PostToolUse        | No        | Yes     | No     | No    | Tool name         |
+| PostToolUseFailure | No        | Yes     | No     | No    | Tool name         |
+| PermissionRequest  | Yes       | Yes     | Yes    | No    | Tool name         |
+| UserPromptSubmit   | No        | Yes     | Yes    | No    | (none)            |
+| Notification       | No        | Yes     | No     | No    | Notification type |
+| Stop               | No        | Yes     | Yes    | Yes   | (none)            |
+| SubagentStart      | No        | Yes     | No     | No    | Agent type        |
+| SubagentStop       | No        | Yes     | Yes    | No    | Agent type        |
+| TeammateIdle       | Yes       | Yes     | No     | No    | (none)            |
+| TaskCompleted      | Yes       | Yes     | No     | No    | (none)            |
+| SessionStart       | No        | Yes     | No     | No    | Start reason      |
+| SessionEnd         | No        | Yes     | No     | No    | End reason        |
+| PreCompact         | No        | Yes     | No     | No    | Trigger type      |
 
 ## Tool Use ID Correlation
 

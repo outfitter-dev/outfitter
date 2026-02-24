@@ -10,6 +10,7 @@
 
 import { homedir } from "node:os";
 import { parseArgs } from "node:util";
+
 import { parseTimeConstraint, toISOPeriod } from "../lib/time";
 import type { GathererResult, LinearData, LinearIssue } from "../lib/types";
 

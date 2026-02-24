@@ -5,6 +5,7 @@
  * OUTFITTER_LOG_LEVEL > explicit level > environment profile > "info"
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { resolveLogLevel } from "../index.js";
 
 describe("resolveLogLevel()", () => {

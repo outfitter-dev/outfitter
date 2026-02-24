@@ -8,6 +8,7 @@
  */
 
 import { getResolvedVersions } from "@outfitter/presets";
+
 import { resolvePresetDependencyVersions } from "../engine/dependency-versions.js";
 
 const { all: resolvedVersions } = getResolvedVersions();

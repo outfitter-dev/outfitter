@@ -24,8 +24,8 @@ memory: user
 
 Load as needed based on task:
 
-| Skill | When |
-|-------|------|
-| `tdd-fieldguide` | RED-GREEN-REFACTOR cycles for new features |
-| `typescript-fieldguide` | TypeScript-specific testing patterns |
-| `debugging` | Failing tests, unexpected behavior during validation |
+| Skill                   | When                                                 |
+| ----------------------- | ---------------------------------------------------- |
+| `tdd-fieldguide`        | RED-GREEN-REFACTOR cycles for new features           |
+| `typescript-fieldguide` | TypeScript-specific testing patterns                 |
+| `debugging`             | Failing tests, unexpected behavior during validation |

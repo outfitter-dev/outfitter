@@ -5,6 +5,7 @@
  */
 
 import type { OutputMode } from "@outfitter/cli/types";
+
 import type { CliOutputMode } from "../output-mode.js";
 
 export function resolveDocsOutputMode(

@@ -49,18 +49,20 @@ Never propose solutions or "try this" without understanding root cause through s
 
 See Steps section for skill dependencies. Stages advance forward only.
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Collect Evidence | Session start | "Collecting evidence" |
-| Isolate Variables | Evidence gathered | "Isolating variables" |
-| Formulate Hypotheses | Problem isolated | "Formulating hypotheses" |
-| Test Hypothesis | Hypothesis formed | "Testing hypothesis" |
-| Verify Fix | Fix identified | "Verifying fix" |
+| Stage                | Trigger           | activeForm               |
+| -------------------- | ----------------- | ------------------------ |
+| Collect Evidence     | Session start     | "Collecting evidence"    |
+| Isolate Variables    | Evidence gathered | "Isolating variables"    |
+| Formulate Hypotheses | Problem isolated  | "Formulating hypotheses" |
+| Test Hypothesis      | Hypothesis formed | "Testing hypothesis"     |
+| Verify Fix           | Fix identified    | "Verifying fix"          |
 
 **Situational** (insert when triggered):
+
 - Iterate -> Hypothesis disproven, loops back with new hypothesis
 
 **Workflow:**
+
 - Start: "Collect Evidence" as `in_progress`
 - Transition: Mark current `completed`, add next `in_progress`
 - Failed hypothesis: Add "Iterate" task
@@ -89,34 +91,40 @@ Goal: Understand what's actually happening.
 Transition: Mark complete when you have reproduction steps and initial evidence.
 
 **Read error messages completely**
+
 - Stack traces top to bottom
 - Note file paths, line numbers, variable names
 - Look for "caused by" chains
 
 **Reproduce consistently**
+
 - Document exact trigger steps
 - Note inputs that cause vs don't cause
 - Check if intermittent (timing, race conditions)
 - Verify in clean environment
 
 **Check recent changes**
+
 - `git diff` - what changed?
 - `git log --since="yesterday"` - recent commits
 - Dependency updates
 - Config/environment changes
 
 **Gather evidence**
+
 - Add logging at key points
 - Print variable values at transformations
 - Log function entry/exit with parameters
 - Capture timestamps for timing issues
 
 **Trace data flow backward**
+
 - Where does bad value come from?
 - Track through transformations
 - Find first place it becomes wrong
 
 Red flags (return to evidence gathering):
+
 - "I think maybe X is the problem"
 - "Let's try changing Y"
 - "It might be related to Z"
@@ -131,18 +139,21 @@ Goal: Learn from working code to understand broken code.
 Transition: Mark complete when key differences identified.
 
 **Find working examples**
+
 - Search for similar functionality that works
 - `rg "pattern"` for similar patterns
 - Look for passing vs failing tests
 - Check git history for when it worked
 
 **Read references completely**
+
 - Every line, not skimming
 - Full context
 - All dependencies/imports
 - Configuration and setup
 
 **Identify every difference**
+
 - Line by line working vs broken
 - Different imports?
 - Different function signatures?
@@ -151,6 +162,7 @@ Transition: Mark complete when key differences identified.
 - Different configuration?
 
 **Understand dependencies**
+
 - Libraries/packages involved
 - Versions in use
 - External services
@@ -158,6 +170,7 @@ Transition: Mark complete when key differences identified.
 - Assumptions made
 
 Questions to answer:
+
 - Why does working version work?
 - What's fundamentally different?
 - Edge cases working version handles?
@@ -172,35 +185,41 @@ Goal: Test one specific idea with minimal change.
 Transition: Mark complete when specific, evidence-based hypothesis formed.
 
 **Form single hypothesis**
+
 - Template: "X is root cause because Y"
 - Must explain all symptoms
 - Must be testable with small change
 - Must be based on evidence from stages 1-2
 
 **Design minimal test**
+
 - Smallest change to test hypothesis
 - Change ONE variable
 - Preserve everything else
 - Make reversible
 
 **Execute and verify**
+
 - Apply change
 - Run reproduction steps
 - Observe carefully
 - Document results
 
 **Outcomes:**
+
 - Fixed: Confirm across all cases, proceed to Verify Fix
 - Not fixed: Mark complete, add "Iterate", form NEW hypothesis
 - Partially fixed: Add "Iterate" for remaining issues
 - Never: Random variations hoping one works
 
 Bad hypotheses (too vague):
+
 - "Maybe it's a race condition"
 - "Could be caching or permissions"
 - "Probably something with the database"
 
 Good hypotheses (specific, testable):
+
 - "Fails because expects number but receives string when API returns empty"
 - "Race condition: fetchData() called before initializeClient() completes"
 - "Memory leak: event listeners in useEffect never removed in cleanup"
@@ -214,18 +233,21 @@ Goal: Fix root cause permanently with verification.
 Transition: Root cause confirmed, ready for permanent fix.
 
 **Create failing test**
+
 - Write test reproducing bug
 - Verify fails before fix
 - Should pass after fix
 - Captures exact broken scenario
 
 **Implement single fix**
+
 - Address identified root cause
 - No additional "improvements"
 - No refactoring "while you're there"
 - Just fix the problem
 
 **Verify fix**
+
 - Failing test now passes
 - Existing tests still pass
 - Manual reproduction no longer triggers bug
@@ -233,11 +255,13 @@ Transition: Root cause confirmed, ready for permanent fix.
 
 **Circuit breaker**
 If 3+ fixes tried without success: STOP
+
 - Problem isn't hypothesis - problem is architecture
 - May be using wrong pattern entirely
 - Escalate or redesign
 
 **After fixing:**
+
 - Mark "Verify Fix" completed
 - Add defensive validation
 - Document root cause
@@ -296,6 +320,7 @@ Before claiming "fixed":
 <rules>
 
 ALWAYS:
+
 - Create "Collect Evidence" todo at session start
 - Follow four-stage framework
 - Update todos on stage transitions
@@ -305,6 +330,7 @@ ALWAYS:
 - Mark "Verify Fix" complete only after tests pass
 
 NEVER:
+
 - Propose fixes without understanding root cause
 - Skip evidence gathering
 - Test multiple hypotheses simultaneously

@@ -4,12 +4,12 @@ How to pass state between workflow steps without relying on conversation context
 
 ## Why File-Based State
 
-| Problem | File-Based Solution |
-|---------|---------------------|
-| Context compaction loses history | Files persist |
-| Forked skills have no conversation access | Files are accessible |
-| State scattered across messages | Single source of truth |
-| Hard to audit what happened | Artifacts are reviewable |
+| Problem                                   | File-Based Solution      |
+| ----------------------------------------- | ------------------------ |
+| Context compaction loses history          | Files persist            |
+| Forked skills have no conversation access | Files are accessible     |
+| State scattered across messages           | Single source of truth   |
+| Hard to audit what happened               | Artifacts are reviewable |
 
 ## Core Pattern
 
@@ -22,6 +22,7 @@ Skill C reads artifacts/step-b.md → ...
 ```
 
 Each skill:
+
 1. Reads previous artifact(s)
 2. Does its work
 3. Writes its own artifact
@@ -44,87 +45,112 @@ Each skill:
 ### Sections by Step Type
 
 **Triage/Analysis artifacts:**
+
 ```markdown
 ## Problem Statement
+
 {clear definition}
 
 ## Scope
+
 - Files: {list}
 - Modules: {list}
 
 ## Findings
+
 {what was discovered}
 
 ## Risks
+
 - {risk 1}
 - {risk 2}
 
 ## Next Steps
+
 - [ ] {action 1}
 - [ ] {action 2}
 ```
 
 **Plan artifacts:**
+
 ```markdown
 ## Goal
+
 {what we're trying to achieve}
 
 ## Approach
+
 {chosen approach with rationale}
 
 ## Task Breakdown
+
 1. {task 1}
 2. {task 2}
 3. {task 3}
 
 ## Test Plan
+
 - [ ] {test 1}
 - [ ] {test 2}
 
 ## Rollback Plan
+
 {how to undo if needed}
 ```
 
 **Review artifacts:**
+
 ```markdown
 ## Summary
+
 {brief assessment}
 
 ## Findings
-| Severity | Issue | Location | Recommendation |
-|----------|-------|----------|----------------|
-| {sev} | {desc} | {loc} | {rec} |
+
+| Severity | Issue  | Location | Recommendation |
+| -------- | ------ | -------- | -------------- |
+| {sev}    | {desc} | {loc}    | {rec}          |
 
 ## Concerns
+
 - {concern 1}
 - {concern 2}
 
 ## Approval
+
 - [ ] Ready to proceed
 - [ ] Needs revision
 ```
 
 **Test artifacts:**
-```markdown
+
+````markdown
 ## Commands Run
+
 ```bash
 {command 1}
 {command 2}
 ```
+````
 
 ## Results
-| Suite | Pass | Fail | Skip |
-|-------|------|------|------|
-| {name} | {n} | {n} | {n} |
+
+| Suite  | Pass | Fail | Skip |
+| ------ | ---- | ---- | ---- |
+| {name} | {n}  | {n}  | {n}  |
 
 ## Failures
+
 ### {test name}
+
 - Error: {message}
 - Fix: {resolution}
 
 ## Coverage
+
 {coverage summary}
-```
+
+````
 
 ## context.md Pattern
 
@@ -151,7 +177,7 @@ The shared context.md tracks living state across all steps:
 
 ---
 Last updated: {timestamp}
-```
+````
 
 ### Update Pattern
 
@@ -159,8 +185,9 @@ Each skill appends to decisions and updates current focus:
 
 ```markdown
 ## Decisions Made
+
 - {existing decisions}
-- Chose X over Y for {reason} — from /plan  ← NEW
+- Chose X over Y for {reason} — from /plan ← NEW
 ```
 
 ## constraints.md Pattern
@@ -171,19 +198,23 @@ Static project constraints, rarely changed:
 # Project Constraints
 
 ## Security
+
 - No secrets in code
 - All inputs validated
 - {project-specific rules}
 
 ## Style
+
 - {linting rules}
 - {naming conventions}
 
 ## Performance
+
 - {latency budgets}
 - {size limits}
 
 ## Testing
+
 - {coverage requirements}
 - {required test types}
 ```
@@ -200,6 +231,7 @@ name: ship
 # Prerequisites
 
 Check these artifacts exist and show success:
+
 - artifacts/test-report.md: all tests passing
 - artifacts/review-notes.md: no blocking issues
 - artifacts/preflight.md: all checks green
@@ -213,11 +245,13 @@ If any missing or failing, do not proceed.
 # In skill body:
 
 Before proceeding, verify:
+
 1. artifacts/plan.md exists
 2. All tasks in plan.md are checked off
 3. artifacts/test-report.md shows no failures
 
 If any check fails:
+
 - Report what's missing
 - Do not proceed
 - Suggest next step
@@ -248,10 +282,12 @@ name: final-review
 ---
 
 Read and merge:
+
 - artifacts/security/review.md
 - artifacts/performance/review.md
 
 Synthesize into artifacts/final-review.md with:
+
 - Combined findings
 - Priority ranking
 - Unified recommendation
@@ -267,17 +303,21 @@ When a step fails, artifacts capture state for recovery:
 ## Status: blocked
 
 ## Completed
+
 - [x] Task 1
 - [x] Task 2
 
 ## Blocked On
+
 - Task 3: {error message}
 
 ## Recovery Steps
+
 1. {fix suggestion}
 2. Retry /implement
 
 ## Context Preserved
+
 - Last working state at commit abc123
 - Rollback with: git checkout abc123
 ```
@@ -300,6 +340,7 @@ Helps track freshness and debugging.
 
 ```markdown
 ## Findings
+
 Issue in `src/auth/login.ts:42` — missing validation
 ```
 
@@ -315,7 +356,8 @@ Each artifact should be understandable without reading others:
 **Context**: Refactoring auth module to use JWT (from artifacts/plan.md)
 
 ## Scope Reviewed
-- src/auth/*.ts
+
+- src/auth/\*.ts
 - src/middleware/auth.ts
 ```
 

@@ -13,11 +13,21 @@ type Result<T, E> =
 type User = { readonly id: string; readonly email: string };
 
 type UserError =
-  | { readonly type: "not-found"; readonly resource: "user"; readonly id: string }
-  | { readonly type: "validation"; readonly field: string; readonly message: string }
+  | {
+      readonly type: "not-found";
+      readonly resource: "user";
+      readonly id: string;
+    }
+  | {
+      readonly type: "validation";
+      readonly field: string;
+      readonly message: string;
+    }
   | { readonly type: "network"; readonly message: string };
 
-async function getUser(input: { id: string }): Promise<Result<User, UserError>> {
+async function getUser(input: {
+  id: string;
+}): Promise<Result<User, UserError>> {
   if (!input.id) {
     return {
       ok: false,
@@ -43,7 +53,10 @@ async function getUser(input: { id: string }): Promise<Result<User, UserError>> 
 function toHttp(error: UserError): { status: number; body: unknown } {
   switch (error.type) {
     case "validation":
-      return { status: 400, body: { error: error.message, field: error.field } };
+      return {
+        status: 400,
+        body: { error: error.message, field: error.field },
+      };
     case "not-found":
       return {
         status: 404,

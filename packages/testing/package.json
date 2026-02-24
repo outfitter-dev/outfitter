@@ -1,11 +1,25 @@
 {
   "name": "@outfitter/testing",
-  "description": "Test harnesses, fixtures, and utilities for Outfitter packages",
   "version": "0.2.4",
-  "type": "module",
+  "description": "Test harnesses, fixtures, and utilities for Outfitter packages",
+  "keywords": [
+    "fixtures",
+    "harness",
+    "outfitter",
+    "testing",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/testing"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -47,7 +61,9 @@
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bunup --filter @outfitter/testing",
     "lint": "biome lint ./src",
@@ -65,21 +81,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "testing",
-    "fixtures",
-    "harness",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/testing"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

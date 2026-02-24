@@ -83,12 +83,14 @@ claude --debug
 ## Common Issues
 
 **Agent not being invoked:**
+
 - Check file location: `agents/agent-name.md`
 - Validate YAML frontmatter syntax
 - Make description more specific with trigger keywords
 - Add example conversations
 
 **Wrong agent invoked:**
+
 - Make description more distinct
 - Add specific trigger keywords
 - Include negative examples (what NOT to use it for)

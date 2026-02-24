@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+
 import { analyzeUpgrades } from "../commands/upgrade-planner.js";
 
 // =============================================================================

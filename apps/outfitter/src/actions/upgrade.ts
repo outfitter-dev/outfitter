@@ -5,6 +5,7 @@
  */
 
 import { resolve } from "node:path";
+
 import { actionCliPresets } from "@outfitter/cli/actions";
 import {
   booleanFlagPreset,
@@ -14,6 +15,7 @@ import {
 } from "@outfitter/cli/flags";
 import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
 import {
   type CliOutputMode,

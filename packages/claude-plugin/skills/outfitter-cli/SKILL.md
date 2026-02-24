@@ -56,7 +56,7 @@ export const myCommand = command("my-command")
 ```typescript
 import { output } from "@outfitter/cli";
 
-await output(data);  // Human by default
+await output(data); // Human by default
 ```
 
 ### Mode Priority
@@ -106,24 +106,24 @@ import { exitWithError } from "@outfitter/cli";
 const result = await handler(input, ctx);
 
 if (result.isErr()) {
-  exitWithError(result.error);  // Exit code from error category
+  exitWithError(result.error); // Exit code from error category
 }
 ```
 
 ### Exit Code Mapping
 
-| Category | Exit Code |
-|----------|-----------|
-| validation | 1 |
-| not_found | 2 |
-| conflict | 3 |
-| permission | 4 |
-| timeout | 5 |
-| rate_limit | 6 |
-| network | 7 |
-| internal | 8 |
-| auth | 9 |
-| cancelled | 130 |
+| Category   | Exit Code |
+| ---------- | --------- |
+| validation | 1         |
+| not_found  | 2         |
+| conflict   | 3         |
+| permission | 4         |
+| timeout    | 5         |
+| rate_limit | 6         |
+| network    | 7         |
+| internal   | 8         |
+| auth       | 9         |
+| cancelled  | 130       |
 
 ### Custom Error Output
 
@@ -179,7 +179,7 @@ if (flags.reset) {
 ```typescript
 const state = loadCursor({
   ...options,
-  maxAgeMs: 30 * 60 * 1000,  // 30 minutes
+  maxAgeMs: 30 * 60 * 1000, // 30 minutes
 });
 ```
 
@@ -223,7 +223,7 @@ export const listCommand = command("list")
 ```typescript
 import { readStdin } from "@outfitter/cli";
 
-const input = await readStdin();  // Returns string or null if no stdin
+const input = await readStdin(); // Returns string or null if no stdin
 ```
 
 ### Piped Detection

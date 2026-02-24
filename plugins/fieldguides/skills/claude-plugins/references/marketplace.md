@@ -5,6 +5,7 @@ Complete schema, hosting strategies, and team configuration for Claude Code plug
 ## What is a Marketplace?
 
 A marketplace is a catalog of plugins defined in `.claude-plugin/marketplace.json` that enables:
+
 - Plugin discovery
 - One-command installation
 - Version management
@@ -14,18 +15,18 @@ A marketplace is a catalog of plugins defined in `.claude-plugin/marketplace.jso
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Marketplace identifier (kebab-case, no spaces) |
-| `owner` | object | Maintainer information |
-| `plugins` | array | List of plugin entries |
+| Field     | Type   | Description                                    |
+| --------- | ------ | ---------------------------------------------- |
+| `name`    | string | Marketplace identifier (kebab-case, no spaces) |
+| `owner`   | object | Maintainer information                         |
+| `plugins` | array  | List of plugin entries                         |
 
 ### Owner Fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `owner.name` | Yes | Name of maintainer or team |
-| `owner.email` | No | Contact email |
+| Field         | Required | Description                |
+| ------------- | -------- | -------------------------- |
+| `owner.name`  | Yes      | Name of maintainer or team |
+| `owner.email` | No       | Contact email              |
 
 ### Reserved Names
 
@@ -43,11 +44,11 @@ Names that impersonate official marketplaces (like `official-claude-plugins` or 
 
 ### Optional Metadata
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `metadata.description` | string | Brief marketplace description |
-| `metadata.version` | string | Marketplace version |
-| `metadata.pluginRoot` | string | Documentation hint for where plugins live. Does NOT affect schema validation—always use explicit `./` prefix in source paths. |
+| Field                  | Type   | Description                                                                                                                   |
+| ---------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `metadata.description` | string | Brief marketplace description                                                                                                 |
+| `metadata.version`     | string | Marketplace version                                                                                                           |
+| `metadata.pluginRoot`  | string | Documentation hint for where plugins live. Does NOT affect schema validation—always use explicit `./` prefix in source paths. |
 
 ### Complete Example
 
@@ -129,46 +130,46 @@ The external repo should have its own `.claude-plugin/plugin.json` with metadata
 
 **Required:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Plugin identifier (kebab-case, no spaces) |
+| Field    | Type           | Description                                               |
+| -------- | -------------- | --------------------------------------------------------- |
+| `name`   | string         | Plugin identifier (kebab-case, no spaces)                 |
 | `source` | string\|object | Where to fetch plugin (relative path, GitHub, or git URL) |
 
 **Standard metadata** (optional):
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `description` | string | Brief plugin description |
-| `version` | string | Plugin version |
-| `author` | object | Author info (`name` required, `email` optional) |
-| `homepage` | string | Documentation URL |
-| `repository` | string | Source code URL |
-| `license` | string | SPDX identifier (MIT, Apache-2.0) |
-| `keywords` | array | Tags for discovery |
-| `category` | string | Plugin category |
-| `tags` | array | Additional searchability tags |
+| Field         | Type   | Description                                     |
+| ------------- | ------ | ----------------------------------------------- |
+| `description` | string | Brief plugin description                        |
+| `version`     | string | Plugin version                                  |
+| `author`      | object | Author info (`name` required, `email` optional) |
+| `homepage`    | string | Documentation URL                               |
+| `repository`  | string | Source code URL                                 |
+| `license`     | string | SPDX identifier (MIT, Apache-2.0)               |
+| `keywords`    | array  | Tags for discovery                              |
+| `category`    | string | Plugin category                                 |
+| `tags`        | array  | Additional searchability tags                   |
 
 **Behavior control:**
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `strict` | boolean | `true` | When `false`, plugins don't need their own `.claude-plugin/plugin.json`—marketplace defines everything. Use for local plugins (relative paths). When `true`, plugins must have their own manifest. |
+| Field    | Type    | Default | Description                                                                                                                                                                                        |
+| -------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `strict` | boolean | `true`  | When `false`, plugins don't need their own `.claude-plugin/plugin.json`—marketplace defines everything. Use for local plugins (relative paths). When `true`, plugins must have their own manifest. |
 
 **When to use each mode:**
 
-| Pattern | `strict` | Use when |
-|---------|----------|----------|
-| Consolidated | `false` | All plugins are local (relative paths in same repo) |
-| Distributed | `true` | Plugins are external repos that may be used elsewhere |
-| Mixed | `false` | Local plugins consolidated, external plugins own their manifests |
+| Pattern      | `strict` | Use when                                                         |
+| ------------ | -------- | ---------------------------------------------------------------- |
+| Consolidated | `false`  | All plugins are local (relative paths in same repo)              |
+| Distributed  | `true`   | Plugins are external repos that may be used elsewhere            |
+| Mixed        | `false`  | Local plugins consolidated, external plugins own their manifests |
 
 **Component configuration** (optional):
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `commands` | string\|array | Custom paths to command files or directories |
-| `agents` | string\|array | Custom paths to agent files |
-| `hooks` | string\|object | Hook configuration or path to hooks file |
+| Field        | Type           | Description                                    |
+| ------------ | -------------- | ---------------------------------------------- |
+| `commands`   | string\|array  | Custom paths to command files or directories   |
+| `agents`     | string\|array  | Custom paths to agent files                    |
+| `hooks`      | string\|object | Hook configuration or path to hooks file       |
 | `mcpServers` | string\|object | MCP server configuration or path to MCP config |
 | `lspServers` | string\|object | LSP server configuration or path to LSP config |
 
@@ -183,8 +184,8 @@ For plugins in the same repository, always use explicit `./` prefix paths:
 ```json
 {
   "plugins": [
-    {"name": "my-plugin", "source": "./my-plugin"},
-    {"name": "another", "source": "./another"}
+    { "name": "my-plugin", "source": "./my-plugin" },
+    { "name": "another", "source": "./another" }
   ]
 }
 ```
@@ -194,8 +195,8 @@ For plugins in the same repository, always use explicit `./` prefix paths:
 ```json
 {
   "plugins": [
-    {"name": "my-plugin", "source": "./packages/my-plugin"},
-    {"name": "another", "source": "./packages/another"}
+    { "name": "my-plugin", "source": "./packages/my-plugin" },
+    { "name": "another", "source": "./packages/another" }
   ]
 }
 ```
@@ -252,18 +253,18 @@ Monorepo pattern (plugin in a subdirectory):
 
 Use `path` when the plugin lives alongside application code in a monorepo. Common patterns:
 
-| Monorepo Structure | `path` Value |
-|--------------------|--------------|
-| `packages/claude-plugin/` | `./packages/claude-plugin` |
+| Monorepo Structure        | `path` Value                 |
+| ------------------------- | ---------------------------- |
+| `packages/claude-plugin/` | `./packages/claude-plugin`   |
 | `.claude-plugin/` at root | (omit — this is the default) |
-| `tools/claude-plugin/` | `./tools/claude-plugin` |
+| `tools/claude-plugin/`    | `./tools/claude-plugin`      |
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `repo` | string | Required. GitHub repository in `owner/repo` format |
-| `path` | string | Optional. Subdirectory containing `.claude-plugin/plugin.json` |
-| `ref` | string | Optional. Branch name or tag (omit to use default branch) |
-| `sha` | string | Optional. Full 40-character commit SHA for exact version pinning |
+| Field  | Type   | Description                                                      |
+| ------ | ------ | ---------------------------------------------------------------- |
+| `repo` | string | Required. GitHub repository in `owner/repo` format               |
+| `path` | string | Optional. Subdirectory containing `.claude-plugin/plugin.json`   |
+| `ref`  | string | Optional. Branch name or tag (omit to use default branch)        |
+| `sha`  | string | Optional. Full 40-character commit SHA for exact version pinning |
 
 ### Git URL
 
@@ -291,22 +292,22 @@ With specific branch or SHA pinning:
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `url` | string | Required. Full git repository URL (must end with `.git`) |
-| `path` | string | Optional. Subdirectory containing `.claude-plugin/plugin.json` |
-| `ref` | string | Optional. Branch name or tag (omit to use default branch) |
-| `sha` | string | Optional. Full 40-character commit SHA for exact version pinning |
+| Field  | Type   | Description                                                      |
+| ------ | ------ | ---------------------------------------------------------------- |
+| `url`  | string | Required. Full git repository URL (must end with `.git`)         |
+| `path` | string | Optional. Subdirectory containing `.claude-plugin/plugin.json`   |
+| `ref`  | string | Optional. Branch name or tag (omit to use default branch)        |
+| `sha`  | string | Optional. Full 40-character commit SHA for exact version pinning |
 
 ### Private Repository Authentication
 
 Claude Code supports installing plugins from private repositories. Set the appropriate authentication token in your environment:
 
-| Provider | Environment Variables | Notes |
-|----------|----------------------|-------|
-| GitHub | `GITHUB_TOKEN` or `GH_TOKEN` | Personal access token or GitHub App token |
-| GitLab | `GITLAB_TOKEN` or `GL_TOKEN` | Personal access token or project token |
-| Bitbucket | `BITBUCKET_TOKEN` | App password or repository access token |
+| Provider  | Environment Variables        | Notes                                     |
+| --------- | ---------------------------- | ----------------------------------------- |
+| GitHub    | `GITHUB_TOKEN` or `GH_TOKEN` | Personal access token or GitHub App token |
+| GitLab    | `GITLAB_TOKEN` or `GL_TOKEN` | Personal access token or project token    |
+| Bitbucket | `BITBUCKET_TOKEN`            | App password or repository access token   |
 
 Set the token in your shell configuration (`.bashrc`, `.zshrc`) or pass it when running Claude Code:
 
@@ -331,8 +332,8 @@ Authentication tokens are only used when a repository requires authentication. P
     "description": "Internal development tools"
   },
   "plugins": [
-    {"name": "deploy-tools", "source": "./plugins/deploy"},
-    {"name": "compliance", "source": "./plugins/compliance"}
+    { "name": "deploy-tools", "source": "./plugins/deploy" },
+    { "name": "compliance", "source": "./plugins/compliance" }
   ]
 }
 ```
@@ -348,9 +349,7 @@ Authentication tokens are only used when a repository requires authentication. P
     "name": "Project Team",
     "email": "project@company.com"
   },
-  "plugins": [
-    {"name": "project-workflow", "source": "./plugins/workflow"}
-  ]
+  "plugins": [{ "name": "project-workflow", "source": "./plugins/workflow" }]
 }
 ```
 
@@ -370,7 +369,7 @@ Authentication tokens are only used when a repository requires authentication. P
   "plugins": [
     {
       "name": "markdown-tools",
-      "source": {"source": "github", "repo": "user/markdown-tools"},
+      "source": { "source": "github", "repo": "user/markdown-tools" },
       "license": "MIT"
     }
   ]
@@ -514,6 +513,7 @@ done
 ### GitHub (Recommended)
 
 **Advantages:**
+
 - Version control
 - Issue tracking
 - Collaboration
@@ -521,6 +521,7 @@ done
 - Easy sharing
 
 **Setup:**
+
 1. Create repository
 2. Add `.claude-plugin/marketplace.json`
 3. Push
@@ -533,6 +534,7 @@ done
 ```
 
 **Advantages:**
+
 - Self-hosted options
 - Enterprise integration
 
@@ -543,6 +545,7 @@ done
 ```
 
 **Advantages:**
+
 - Fast iteration
 - No network required
 - Easy testing
@@ -556,9 +559,9 @@ name: Validate Marketplace
 
 on:
   push:
-    paths: ['.claude-plugin/marketplace.json']
+    paths: [".claude-plugin/marketplace.json"]
   pull_request:
-    paths: ['.claude-plugin/marketplace.json']
+    paths: [".claude-plugin/marketplace.json"]
 
 jobs:
   validate:
@@ -615,18 +618,21 @@ jobs:
 ## Troubleshooting
 
 **Marketplace not loading:**
+
 - Verify URL accessible
 - Check `.claude-plugin/marketplace.json` exists
 - Validate JSON syntax
 - Confirm access for private repos
 
 **Plugin installation failures:**
+
 - Verify source URLs accessible
 - Check plugin directories exist
 - Test sources manually
 - Review error messages
 
 **Team configuration not working:**
+
 - Verify `.claude/settings.json` syntax
 - Check marketplace sources accessible
 - Ensure folder trusted

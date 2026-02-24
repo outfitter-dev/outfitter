@@ -15,10 +15,15 @@ All primitives return composable types that work together without manual string 
 
 ```typescript
 import {
-  hstack, vstack, vstackItem,
-  createHStack, createVStack,
-  boxify, unbox,
-  DELIMITERS, DEFAULT_STACK_THEME,
+  hstack,
+  vstack,
+  vstackItem,
+  createHStack,
+  createVStack,
+  boxify,
+  unbox,
+  DELIMITERS,
+  DEFAULT_STACK_THEME,
 } from "@outfitter/tui/render/stack";
 ```
 
@@ -89,10 +94,7 @@ hstack([boxify(stack1), boxify(stack2)], { gap: 2 });
 ### Signature
 
 ```typescript
-function hstack(
-  items: Array<StackInput>,
-  options?: HStackOptions
-): string;
+function hstack(items: Array<StackInput>, options?: HStackOptions): string;
 
 function createHStack(
   items: Array<StackInput>,
@@ -102,25 +104,25 @@ function createHStack(
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `delimiter` | `DelimiterName \| string` | `"space"` | Delimiter between items |
-| `gap` | `number` | `0` | Spaces around delimiter |
-| `align` | `"top" \| "center" \| "bottom"` | `"top"` | Vertical alignment for multi-line items |
+| Option      | Type                            | Default   | Description                             |
+| ----------- | ------------------------------- | --------- | --------------------------------------- |
+| `delimiter` | `DelimiterName \| string`       | `"space"` | Delimiter between items                 |
+| `gap`       | `number`                        | `0`       | Spaces around delimiter                 |
+| `align`     | `"top" \| "center" \| "bottom"` | `"top"`   | Vertical alignment for multi-line items |
 
 ### Delimiters
 
 Named delimiters with unicode and ASCII fallbacks:
 
-| Name | Unicode | Fallback |
-|------|---------|----------|
-| `space` | ` ` | ` ` |
-| `bullet` | `•` | `*` |
-| `dot` | `·` | `.` |
-| `pipe` | `│` | `\|` |
-| `arrow` | `→` | `->` |
-| `slash` | `/` | `/` |
-| `colon` | `:` | `:` |
+| Name     | Unicode | Fallback |
+| -------- | ------- | -------- |
+| `space`  | ` `     | ` `      |
+| `bullet` | `•`     | `*`      |
+| `dot`    | `·`     | `.`      |
+| `pipe`   | `│`     | `\|`     |
+| `arrow`  | `→`     | `->`     |
+| `slash`  | `/`     | `/`      |
+| `colon`  | `:`     | `:`      |
 
 ### Examples
 
@@ -134,7 +136,10 @@ hstack(["main", "Draft", "2 hours ago"], { delimiter: "bullet", gap: 1 });
 **Multi-line with alignment:**
 
 ```typescript
-hstack(["Line1\nLine2\nLine3", "Single"], { delimiter: "pipe", align: "center" });
+hstack(["Line1\nLine2\nLine3", "Single"], {
+  delimiter: "pipe",
+  align: "center",
+});
 // → Line1│
 //   Line2│Single
 //   Line3│
@@ -158,10 +163,7 @@ hstack([box1, box2], { gap: 2 });
 ### Signature
 
 ```typescript
-function vstack(
-  items: Array<StackInput>,
-  options?: VStackOptions
-): string;
+function vstack(items: Array<StackInput>, options?: VStackOptions): string;
 
 function createVStack(
   items: Array<StackInput>,
@@ -171,22 +173,22 @@ function createVStack(
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `mode` | `VStackMode` | `"guide"` | Display mode |
-| `gap` | `number` | `0` | Blank lines between items |
-| `theme` | `Partial<StackTheme>` | `DEFAULT_STACK_THEME` | Marker/delimiter theme |
-| `guide` | `TreeGuideStyle` | `"single"` | Guide line style |
+| Option  | Type                  | Default               | Description               |
+| ------- | --------------------- | --------------------- | ------------------------- |
+| `mode`  | `VStackMode`          | `"guide"`             | Display mode              |
+| `gap`   | `number`              | `0`                   | Blank lines between items |
+| `theme` | `Partial<StackTheme>` | `DEFAULT_STACK_THEME` | Marker/delimiter theme    |
+| `guide` | `TreeGuideStyle`      | `"single"`            | Guide line style          |
 
 ### Display Modes
 
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `plain` | Simple newlines, no guides | Basic lists |
-| `guide` | Vertical guide (`│`) with markers | Branch stacks, progress flows |
-| `tree` | Tree connectors (`├`/`└`) | Hierarchies, git log style |
-| `boxed` | Each item in a bordered box | Emphasized sections |
-| `compact` | Single line per item | Dense lists |
+| Mode      | Description                       | Use Case                      |
+| --------- | --------------------------------- | ----------------------------- |
+| `plain`   | Simple newlines, no guides        | Basic lists                   |
+| `guide`   | Vertical guide (`│`) with markers | Branch stacks, progress flows |
+| `tree`    | Tree connectors (`├`/`└`)         | Hierarchies, git log style    |
+| `boxed`   | Each item in a bordered box       | Emphasized sections           |
+| `compact` | Single line per item              | Dense lists                   |
 
 ### Mode Examples
 
@@ -202,10 +204,13 @@ vstack(["Item 1", "Item 2", "Item 3"], { mode: "plain" });
 **Guide mode (default):**
 
 ```typescript
-vstack([
-  vstackItem("Header 1", ["Body line 1", "Body line 2"]),
-  vstackItem("Header 2", ["Body line"]),
-], { mode: "guide" });
+vstack(
+  [
+    vstackItem("Header 1", ["Body line 1", "Body line 2"]),
+    vstackItem("Header 2", ["Body line"]),
+  ],
+  { mode: "guide" }
+);
 // → ○ Header 1
 //   │ Body line 1
 //   │ Body line 2
@@ -217,10 +222,9 @@ vstack([
 **Tree mode:**
 
 ```typescript
-vstack([
-  vstackItem("First", ["Body 1"]),
-  vstackItem("Last", ["Body 2"]),
-], { mode: "tree" });
+vstack([vstackItem("First", ["Body 1"]), vstackItem("Last", ["Body 2"])], {
+  mode: "tree",
+});
 // → ├── First
 //   │   Body 1
 //   └── Last
@@ -245,10 +249,10 @@ vstack(["Item 1", "Item 2"], { mode: "boxed" });
 const items = [
   vstackItem("feature/auth", ["PR #190"], {
     state: "current",
-    compact: "feature/auth • Draft • 2h ago"
+    compact: "feature/auth • Draft • 2h ago",
   }),
   vstackItem("feature/api", ["PR #189"], {
-    compact: "feature/api • 1d ago"
+    compact: "feature/api • 1d ago",
   }),
 ];
 vstack(items, { mode: "compact" });
@@ -277,24 +281,24 @@ function vstackItem(
 
 ### Options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `state` | `ItemState` | Semantic state for theme-based markers |
-| `marker` | `MarkerName \| string` | Explicit marker (overrides theme) |
-| `compact` | `string` | Single-line representation for compact mode |
-| `style` | `(s: string) => string` | Styling function applied to content |
+| Option    | Type                    | Description                                 |
+| --------- | ----------------------- | ------------------------------------------- |
+| `state`   | `ItemState`             | Semantic state for theme-based markers      |
+| `marker`  | `MarkerName \| string`  | Explicit marker (overrides theme)           |
+| `compact` | `string`                | Single-line representation for compact mode |
+| `style`   | `(s: string) => string` | Styling function applied to content         |
 
 ### Semantic States
 
 States map to markers via the theme:
 
-| State | Default Marker | Unicode |
-|-------|----------------|---------|
-| `default` | `circleOutline` | `○` |
-| `current` | `circleDot` | `◉` |
-| `focused` | `pointer` | `❯` |
-| `checked` | `checkboxChecked` | `☑` |
-| `disabled` | `dash` | `–` |
+| State      | Default Marker    | Unicode |
+| ---------- | ----------------- | ------- |
+| `default`  | `circleOutline`   | `○`     |
+| `current`  | `circleDot`       | `◉`     |
+| `focused`  | `pointer`         | `❯`     |
+| `checked`  | `checkboxChecked` | `☑`     |
+| `disabled` | `dash`            | `–`     |
 
 ### Custom Theme
 
@@ -303,19 +307,22 @@ Override the default marker mapping:
 ```typescript
 const todoTheme = {
   markers: {
-    default: "checkbox",        // ☐
+    default: "checkbox", // ☐
     checked: "checkboxChecked", // ☑
-    current: "pointer",         // ❯
+    current: "pointer", // ❯
     focused: "pointer",
     disabled: "dash",
   },
 };
 
-vstack([
-  vstackItem("Buy groceries", [], { state: "checked" }),
-  vstackItem("Write code", [], { state: "current" }),
-  vstackItem("Review PR"),
-], { mode: "plain", theme: todoTheme });
+vstack(
+  [
+    vstackItem("Buy groceries", [], { state: "checked" }),
+    vstackItem("Write code", [], { state: "current" }),
+    vstackItem("Review PR"),
+  ],
+  { mode: "plain", theme: todoTheme }
+);
 // → ☑ Buy groceries
 //   ❯ Write code
 //   ☐ Review PR
@@ -326,9 +333,9 @@ vstack([
 Different vertical guide characters:
 
 ```typescript
-vstack(items, { mode: "guide", guide: "single" });  // │
-vstack(items, { mode: "guide", guide: "heavy" });   // ┃
-vstack(items, { mode: "guide", guide: "double" });  // ║
+vstack(items, { mode: "guide", guide: "single" }); // │
+vstack(items, { mode: "guide", guide: "heavy" }); // ┃
+vstack(items, { mode: "guide", guide: "double" }); // ║
 vstack(items, { mode: "guide", guide: "rounded" }); // │ (same as single)
 ```
 
@@ -342,9 +349,9 @@ Both `Box` and `StackBox` satisfy the same interface:
 
 ```typescript
 interface Renderable {
-  readonly output: string;  // Rendered content
-  readonly width: number;   // Character width
-  readonly height: number;  // Line count
+  readonly output: string; // Rendered content
+  readonly width: number; // Character width
+  readonly height: number; // Line count
 }
 ```
 
@@ -363,11 +370,11 @@ function boxify(
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `title` | `string` | — | Box title |
-| `border` | `"single" \| "double" \| "rounded" \| "heavy" \| "none"` | `"single"` | Border style |
-| `padding` | `number` | — | Internal padding |
+| Option    | Type                                                     | Default    | Description      |
+| --------- | -------------------------------------------------------- | ---------- | ---------------- |
+| `title`   | `string`                                                 | —          | Box title        |
+| `border`  | `"single" \| "double" \| "rounded" \| "heavy" \| "none"` | `"single"` | Border style     |
+| `padding` | `number`                                                 | —          | Internal padding |
 
 **Examples:**
 
@@ -401,10 +408,10 @@ function unbox(content: Renderable | string): string;
 
 ```typescript
 const stack = createVStack(["A", "B"], { mode: "plain" });
-const raw = unbox(stack);  // "A\nB"
+const raw = unbox(stack); // "A\nB"
 
 // Pass-through for strings
-unbox("already a string");  // "already a string"
+unbox("already a string"); // "already a string"
 ```
 
 ### `isRenderable(value)`
@@ -465,13 +472,12 @@ hstack([left, right], { gap: 2 });
 
 ```typescript
 const branches = [
-  vstackItem("feature/auth (current)", [
-    "PR #190 (Draft)",
-    "https://github.com/..."
-  ], { state: "current" }),
-  vstackItem("feature/api", [
-    "PR #189"
-  ]),
+  vstackItem(
+    "feature/auth (current)",
+    ["PR #190 (Draft)", "https://github.com/..."],
+    { state: "current" }
+  ),
+  vstackItem("feature/api", ["PR #189"]),
   vstackItem("main", [], { state: "disabled" }),
 ];
 
@@ -486,42 +492,42 @@ console.log(boxed.output);
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `StackInput` | `string \| StackItem \| Renderable` — Input to stack functions |
-| `StackItem` | Item with content, state, marker, compact, style |
-| `StackBox` | Alias for `Renderable` — returned by create functions |
-| `Renderable` | `{ output, width, height }` — composable block |
-| `VStackMode` | `"plain" \| "guide" \| "tree" \| "boxed" \| "compact"` |
-| `ItemState` | `"default" \| "current" \| "focused" \| "checked" \| "disabled"` |
-| `MarkerName` | Known marker names from INDICATORS |
+| Type            | Description                                                               |
+| --------------- | ------------------------------------------------------------------------- |
+| `StackInput`    | `string \| StackItem \| Renderable` — Input to stack functions            |
+| `StackItem`     | Item with content, state, marker, compact, style                          |
+| `StackBox`      | Alias for `Renderable` — returned by create functions                     |
+| `Renderable`    | `{ output, width, height }` — composable block                            |
+| `VStackMode`    | `"plain" \| "guide" \| "tree" \| "boxed" \| "compact"`                    |
+| `ItemState`     | `"default" \| "current" \| "focused" \| "checked" \| "disabled"`          |
+| `MarkerName`    | Known marker names from INDICATORS                                        |
 | `DelimiterName` | `"space" \| "bullet" \| "dot" \| "pipe" \| "arrow" \| "slash" \| "colon"` |
-| `StackTheme` | Theme configuration with markers, delimiter, guide |
-| `HStackOptions` | Options for horizontal stack |
-| `VStackOptions` | Options for vertical stack |
-| `BoxifyOptions` | Options for boxify helper |
+| `StackTheme`    | Theme configuration with markers, delimiter, guide                        |
+| `HStackOptions` | Options for horizontal stack                                              |
+| `VStackOptions` | Options for vertical stack                                                |
+| `BoxifyOptions` | Options for boxify helper                                                 |
 
 ### Constants
 
-| Constant | Description |
-|----------|-------------|
-| `DELIMITERS` | Registry of delimiters with unicode/fallback |
-| `DEFAULT_STACK_THEME` | Default theme for marker resolution |
+| Constant              | Description                                  |
+| --------------------- | -------------------------------------------- |
+| `DELIMITERS`          | Registry of delimiters with unicode/fallback |
+| `DEFAULT_STACK_THEME` | Default theme for marker resolution          |
 
 ### Functions
 
-| Function | Returns | Description |
-|----------|---------|-------------|
-| `hstack(items, options?)` | `string` | Join items horizontally |
-| `createHStack(items, options?)` | `StackBox` | Create composable horizontal stack |
-| `vstack(items, options?)` | `string` | Stack items vertically |
-| `createVStack(items, options?)` | `StackBox` | Create composable vertical stack |
-| `vstackItem(header, body?, options?)` | `StackItem` | Create a stack item |
-| `boxify(content, options?)` | `Renderable` | Wrap content in a box |
-| `unbox(content)` | `string` | Extract raw string |
-| `getDelimiter(name, forceUnicode?)` | `string` | Get delimiter character |
-| `getMarker(name, forceUnicode?)` | `string` | Get marker character |
-| `isRenderable(value)` | `boolean` | Type guard for Renderable |
+| Function                              | Returns      | Description                        |
+| ------------------------------------- | ------------ | ---------------------------------- |
+| `hstack(items, options?)`             | `string`     | Join items horizontally            |
+| `createHStack(items, options?)`       | `StackBox`   | Create composable horizontal stack |
+| `vstack(items, options?)`             | `string`     | Stack items vertically             |
+| `createVStack(items, options?)`       | `StackBox`   | Create composable vertical stack   |
+| `vstackItem(header, body?, options?)` | `StackItem`  | Create a stack item                |
+| `boxify(content, options?)`           | `Renderable` | Wrap content in a box              |
+| `unbox(content)`                      | `string`     | Extract raw string                 |
+| `getDelimiter(name, forceUnicode?)`   | `string`     | Get delimiter character            |
+| `getMarker(name, forceUnicode?)`      | `string`     | Get marker character               |
+| `isRenderable(value)`                 | `boolean`    | Type guard for Renderable          |
 
 ---
 

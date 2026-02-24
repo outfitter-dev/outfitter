@@ -21,14 +21,14 @@ Replace `@outfitter/agents` and simplify `@outfitter/tooling` by adopting a shad
 
 ## Blocks
 
-| Block | Files | Dependencies |
-|-------|-------|--------------|
-| `claude` | `.claude/settings.json`, `.claude/hooks/*` | — |
-| `biome` | `biome.json` | `ultracite` (devDep) |
-| `lefthook` | `.lefthook.yml` | `lefthook` (devDep) |
-| `bootstrap` | `scripts/bootstrap.sh` | — |
-| `scaffolding` | All of the above | All of the above |
-| `all` | Reserved for future expansion | — |
+| Block         | Files                                      | Dependencies         |
+| ------------- | ------------------------------------------ | -------------------- |
+| `claude`      | `.claude/settings.json`, `.claude/hooks/*` | —                    |
+| `biome`       | `biome.json`                               | `ultracite` (devDep) |
+| `lefthook`    | `.lefthook.yml`                            | `lefthook` (devDep)  |
+| `bootstrap`   | `scripts/bootstrap.sh`                     | —                    |
+| `scaffolding` | All of the above                           | All of the above     |
+| `all`         | Reserved for future expansion              | —                    |
 
 ## Architecture
 
@@ -87,14 +87,14 @@ interface Block {
   files: FileEntry[];
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  extends?: string[];  // for composite blocks like "scaffolding"
+  extends?: string[]; // for composite blocks like "scaffolding"
 }
 
 interface FileEntry {
-  path: string;           // destination path relative to project root
-  content: string;        // file contents (embedded)
-  executable?: boolean;   // chmod +x after copying
-  template?: boolean;     // process as template (future)
+  path: string; // destination path relative to project root
+  content: string; // file contents (embedded)
+  executable?: boolean; // chmod +x after copying
+  template?: boolean; // process as template (future)
 }
 ```
 
@@ -233,10 +233,7 @@ const REGISTRY_PATH = join(ROOT, "packages/tooling/registry/registry.json");
 const BLOCKS = {
   claude: {
     description: "Claude Code settings and hooks",
-    files: [
-      ".claude/settings.json",
-      ".claude/hooks/format-code-on-stop.sh",
-    ],
+    files: [".claude/settings.json", ".claude/hooks/format-code-on-stop.sh"],
   },
   biome: {
     description: "Biome linter/formatter configuration via Ultracite",
@@ -272,10 +269,7 @@ Add to `packages/tooling/package.json`:
     "prebuild": "bun run ../../scripts/build-registry.ts",
     "build": "bunup"
   },
-  "files": [
-    "dist",
-    "registry"
-  ]
+  "files": ["dist", "registry"]
 }
 ```
 

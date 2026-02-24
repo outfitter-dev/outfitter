@@ -31,18 +31,21 @@ Core engineering judgment framework.
 
 **Simplest thing that works**
 Start simple. Add complexity only when requirements demand.
+
 - Boring solutions for boring problems
 - Proven libraries over custom implementations
 - Progressive enhancement over rewrites
 
 **Read before write**
 Understand existing patterns before modifying.
+
 - Check how similar features implemented
 - Follow established conventions
 - Maintain consistency
 
 **Small, focused changes**
 One idea per commit, 20-100 LOC, 1-5 files.
+
 - Easy to review/understand
 - Lower bug risk
 - Simpler to revert
@@ -50,6 +53,7 @@ One idea per commit, 20-100 LOC, 1-5 files.
 
 **Security awareness**
 Don't introduce vulnerabilities.
+
 - Validate external input
 - Parameterized queries
 - Handle auth properly
@@ -57,6 +61,7 @@ Don't introduce vulnerabilities.
 
 **Know when to stop**
 Ship working code, don't gold-plate.
+
 - Implement requirements, not assumptions
 - No unrequested features
 - No speculative abstraction
@@ -72,6 +77,7 @@ Type safety across languages.
 **Hierarchy**: Correct (type-safe) - Clear (self-documenting) - Precise (not overly broad)
 
 **Key patterns**:
+
 - **Result types** - Errors explicit in signatures, not hidden in exceptions
 - **Discriminated unions** - Mutually exclusive states with discriminator field
 - **Branded types** - Distinct types for domain concepts (user ID vs product ID)
@@ -87,6 +93,7 @@ Load `typescript-fieldguide/SKILL.md` for TypeScript implementations.
 Systematic approach to engineering choices.
 
 **Understand before deciding**
+
 - What problem being solved?
 - What constraints exist?
 - What's already in codebase?
@@ -94,6 +101,7 @@ Systematic approach to engineering choices.
 
 **Consider trade-offs**
 No perfect solutions:
+
 - Speed vs robustness
 - Simplicity vs flexibility
 - Consistency vs optimization
@@ -101,6 +109,7 @@ No perfect solutions:
 
 **Recognize good-enough**
 Perfect is enemy of shipped:
+
 - Meets requirements?
 - Maintainable by team?
 - Tested adequately?
@@ -118,6 +127,7 @@ Non-obvious decisions: comment why, note trade-offs, link discussions, flag assu
 Balance autonomy with collaboration.
 
 **Proceed independently**:
+
 - Task clear and well-defined
 - Approach follows existing patterns
 - Changes small and localized
@@ -125,6 +135,7 @@ Balance autonomy with collaboration.
 - No security/data integrity risks
 
 **Ask questions**:
+
 - Requirements ambiguous
 - Multiple approaches, unclear trade-offs
 - Changes affect architecture
@@ -132,6 +143,7 @@ Balance autonomy with collaboration.
 - Unfamiliar domain/technology
 
 **Escalate immediately**:
+
 - Security vulnerabilities discovered
 - Data corruption/loss risk
 - Breaking changes to public APIs
@@ -164,6 +176,7 @@ See [code-quality-patterns.md](references/code-quality-patterns.md) for examples
 When and how to improve existing code.
 
 **Refactor when**:
+
 - Adding feature reveals poor structure
 - Code duplicated 3+ times
 - Function exceeds 50 lines
@@ -171,6 +184,7 @@ When and how to improve existing code.
 - Tests difficult to write
 
 **Don't refactor when**:
+
 - Code works and won't be touched
 - Time-critical delivery in progress
 - No test coverage to verify
@@ -178,6 +192,7 @@ When and how to improve existing code.
 - Just preference, no clear benefit
 
 **Guidelines**:
+
 - Have tests first (or write them)
 - One refactoring at a time
 - Keep tests passing throughout
@@ -191,6 +206,7 @@ When and how to improve existing code.
 Testing philosophy.
 
 **Test the right things**:
+
 - Public interfaces, not implementation
 - Edge cases and error paths
 - Critical business logic
@@ -198,11 +214,13 @@ Testing philosophy.
 - Security boundaries
 
 **Don't over-test**:
+
 - No tests for trivial getters/setters
 - Don't test framework behavior
 - Avoid brittle implementation-coupled tests
 
 **Coverage targets**:
+
 - Critical paths: 90%+
 - Business logic: 80%+
 - Utility functions: 80%+
@@ -217,17 +235,20 @@ Low coverage acceptable for: config, type definitions, framework boilerplate.
 Balance optimization with delivery.
 
 **Premature optimization is root of evil**
+
 - Make it work first
 - Make it right second
 - Make it fast only if needed
 
 **Optimize when**:
+
 - Measured performance issue exists
 - User experience degraded
 - Resource costs excessive
 - Profiler shows clear bottleneck
 
 **Before optimizing**:
+
 1. Measure current performance
 2. Set target metrics
 3. Profile to find bottleneck
@@ -300,13 +321,14 @@ Connect with other outfitter skills.
 
 **With debugging**: Senior judgment decides if worth fixing now. Debugging skill provides systematic investigation.
 
-**With dev-* skills**: Software engineering provides the "why" and "when". dev-* skills provide the "how" for specific technologies (typescript-fieldguide, react-fieldguide, hono-fieldguide, bun-fieldguide).
+**With dev-\* skills**: Software engineering provides the "why" and "when". dev-\* skills provide the "how" for specific technologies (typescript-fieldguide, react-fieldguide, hono-fieldguide, bun-fieldguide).
 
 </workflow_integration>
 
 <rules>
 
 ALWAYS:
+
 - Read `CLAUDE.md` and project rules first
 - Follow existing codebase patterns
 - Make small, focused changes
@@ -317,6 +339,7 @@ ALWAYS:
 - Ask when uncertain on high-stakes
 
 NEVER:
+
 - Add features not in requirements
 - Ignore error handling
 - Skip input validation
@@ -333,17 +356,20 @@ NEVER:
 Complements other outfitter skills:
 
 **Core Practices:**
+
 - [tdd-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/tdd-fieldguide/SKILL.md) - TDD methodology
 - [debugging/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/debugging/SKILL.md) - systematic debugging
 - [pathfinding/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/pathfinding/SKILL.md) - requirements clarification
 
 **Development Skills** (load for implementation patterns):
+
 - [typescript-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/typescript-fieldguide/SKILL.md) - TypeScript, Zod, modern features
 - [react-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/react-fieldguide/SKILL.md) - React 18-19, hooks typing
 - [hono-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/hono-fieldguide/SKILL.md) - Hono API framework
 - [bun-fieldguide/SKILL.md](${CLAUDE_PLUGIN_ROOT}/skills/bun-fieldguide/SKILL.md) - Bun runtime, SQLite, testing
 
 **Detailed Patterns:**
+
 - [type-patterns.md](references/type-patterns.md) - language-agnostic type patterns
 - [code-quality-patterns.md](references/code-quality-patterns.md) - code examples
 

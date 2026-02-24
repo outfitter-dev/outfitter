@@ -9,6 +9,7 @@ Demonstrates identifying, specifying, and implementing a heuristic pattern.
 User: "Our PRs keep getting stuck in review. When reviewed, feedback is often superficial."
 
 Investigation:
+
 - Average PR size: 450 LOC, some exceeded 1,000 LOC
 - Large PRs (>300 LOC): 2.3 comments avg, 4.2 days to merge
 - Small PRs (<200 LOC): 8.7 comments avg, 1.1 days to merge
@@ -114,12 +115,14 @@ Decision: **SKILL + HOOK** (composite)
 <rationale>
 
 SKILL because:
+
 - Provides guidance on thresholds
 - Explains rationale for limits
 - Teaches splitting strategies
 - Requires judgment on split boundaries
 
 HOOK because:
+
 - Automatically checks on pre-push
 - Warns if over threshold
 - Can block (configurable)
@@ -238,9 +241,9 @@ gt submit --stack
 
 ## Success Metrics
 
-| Metric | Before | Target |
-|--------|--------|--------|
-| Average PR size | 450 LOC | <250 LOC |
-| Review time | 3.8 days | <1.5 days |
-| Comments/PR | 3.2 | >6.0 |
-| Defect escape rate | 12% | <5% |
+| Metric             | Before   | Target    |
+| ------------------ | -------- | --------- |
+| Average PR size    | 450 LOC  | <250 LOC  |
+| Review time        | 3.8 days | <1.5 days |
+| Comments/PR        | 3.2      | >6.0      |
+| Defect escape rate | 12%      | <5%       |

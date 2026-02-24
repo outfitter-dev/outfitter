@@ -105,6 +105,7 @@ When multiple commands have the same name:
 ```
 
 **Invocation**:
+
 - `/build` - Ambiguous, may prompt for clarification
 - `/frontend/build` - Explicit
 - `/backend/build` - Explicit
@@ -226,6 +227,7 @@ Plugin commands show:
 ### Priority
 
 When same-named commands exist:
+
 1. Plugin commands
 2. Project commands (override personal)
 3. Personal commands (fallback)

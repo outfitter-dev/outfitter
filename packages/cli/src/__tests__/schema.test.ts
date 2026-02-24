@@ -1,10 +1,12 @@
 import { describe, expect, it } from "bun:test";
+
 import {
   createActionRegistry,
   defineAction,
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
+
 import {
   createSchemaCommand,
   formatManifestHuman,

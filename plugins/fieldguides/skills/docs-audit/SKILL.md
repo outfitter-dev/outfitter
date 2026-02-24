@@ -42,6 +42,7 @@ bun "$(dirname "$0")/scripts/discover-docs.ts" ${path ? `--path "${path}"` : ""}
 ```
 
 Parse the JSON output to understand:
+
 - Total documentation files in scope
 - Activity status distribution (active/recent/idle/stale/ancient)
 - Files with related code changes (potential staleness indicators)
@@ -50,11 +51,11 @@ Parse the JSON output to understand:
 
 Select files for deep analysis based on `focus` argument:
 
-| Focus | Strategy |
-|-------|----------|
-| `stale` | Prioritize files with oldest commits, especially those with recent related code changes |
-| `all` | Balanced sampling across activity statuses |
-| `recent` | Focus on recently modified docs that may have introduced errors |
+| Focus    | Strategy                                                                                |
+| -------- | --------------------------------------------------------------------------------------- |
+| `stale`  | Prioritize files with oldest commits, especially those with recent related code changes |
+| `all`    | Balanced sampling across activity statuses                                              |
+| `recent` | Focus on recently modified docs that may have introduced errors                         |
 
 Target: Select top `limit` files (default 10) for deep analysis.
 
@@ -89,6 +90,7 @@ For each selected file, perform these checks:
 Check TSDoc/JSDoc/docstring coverage for code files related to the documentation:
 
 **TypeScript/JavaScript:**
+
 ```bash
 # Find exports without TSDoc
 grep -rn "^export " --include="*.ts" --include="*.tsx" | head -20
@@ -97,18 +99,21 @@ grep -B1 "^export " --include="*.ts" --include="*.tsx" | grep -c "/\*\*"
 ```
 
 **Python:**
+
 ```bash
 # Find functions/classes without docstrings
 grep -rn "^def \|^class " --include="*.py" | head -20
 ```
 
 **Rust:**
+
 ```bash
 # Find pub items without doc comments
 grep -rn "^pub " --include="*.rs" | head -20
 ```
 
 **Go:**
+
 ```bash
 # Find exported funcs without godoc
 grep -rn "^func [A-Z]" --include="*.go" | head -20
@@ -130,15 +135,15 @@ Write the report to the generated path (e.g., `.pack/reports/202601251900-docs-a
 ```markdown
 ---
 type: docs-audit
-generated: {timestampISO}
+generated: { timestampISO }
 timestamp: "{timestamp}"
 session: "{CLAUDE_SESSION_ID}"
 session_short: "{sessionShort}"
-scope: {path or "entire repo"}
-focus: {focus}
-files_analyzed: {count}
-files_total: {total}
-status: {pass|needs-work|critical}
+scope: { path or "entire repo" }
+focus: { focus }
+files_analyzed: { count }
+files_total: { total }
+status: { pass|needs-work|critical }
 ---
 
 # Documentation Audit Report
@@ -151,34 +156,37 @@ status: {pass|needs-work|critical}
 
 ## Summary
 
-| Dimension | Status | Score |
-|-----------|--------|-------|
-| Correctness | {PASS/NEEDS WORK} | {x}/{y} files |
-| Links | {PASS/NEEDS WORK} | {valid}/{total} |
-| Docstrings | {GOOD/ACCEPTABLE/POOR} | {x}% |
-| Freshness | {CURRENT/STALE} | {stale_count} files |
+| Dimension   | Status                 | Score               |
+| ----------- | ---------------------- | ------------------- |
+| Correctness | {PASS/NEEDS WORK}      | {x}/{y} files       |
+| Links       | {PASS/NEEDS WORK}      | {valid}/{total}     |
+| Docstrings  | {GOOD/ACCEPTABLE/POOR} | {x}%                |
+| Freshness   | {CURRENT/STALE}        | {stale_count} files |
 
 ## Critical Issues (blocking)
 
 Issues that could cause user confusion or errors:
+
 - {file}: {issue description}
 
 ## Warnings (should fix)
 
 Non-blocking but should be addressed:
+
 - {file}: {issue description}
 
 ## Stale Documentation
 
 Files that may need review (old docs + recent code changes):
+
 - {file}: Last updated {days}d ago, related code changed {code_days}d ago
 
 ## Docstring Coverage by Language
 
-| Language | Coverage | Files Checked |
-|----------|----------|---------------|
-| TypeScript | {x}% | {n} |
-| Python | {x}% | {n} |
+| Language   | Coverage | Files Checked |
+| ---------- | -------- | ------------- |
+| TypeScript | {x}%     | {n}           |
+| Python     | {x}%     | {n}           |
 
 ## Recommendations
 
@@ -225,6 +233,7 @@ Reports are written to `.pack/reports/` with frontloaded timestamp:
 ```
 
 **Filename patterns:**
+
 - **Single-file**: `{timestamp}-docs-audit-{sessionShort}.md` (session for parallel disambiguation)
 - **Multi-file**: `{timestamp}-docs-audit/` (session tracked in frontmatter inside files)
 
@@ -249,20 +258,21 @@ All report artifacts include YAML frontmatter for searchability:
 
 ```yaml
 ---
-type: docs-audit           # Report type (searchable)
+type: docs-audit # Report type (searchable)
 generated: 2026-01-25T19:00:00Z
 timestamp: "202601251900"
-session: abc123-def456...  # Full session ID
-session_short: a7b3c2d1    # First 8 chars (matches filename)
-scope: docs/               # Audit scope
-focus: stale               # Focus strategy used
+session: abc123-def456... # Full session ID
+session_short: a7b3c2d1 # First 8 chars (matches filename)
+scope: docs/ # Audit scope
+focus: stale # Focus strategy used
 files_analyzed: 10
 files_total: 47
-status: needs-work         # pass | needs-work | critical
+status: needs-work # pass | needs-work | critical
 ---
 ```
 
 **Why frontmatter:**
+
 - Grep/ripgrep searchable (`rg "session: abc123"`)
 - Tooling can parse and aggregate reports
 - Enables filtering by status, scope, date range
@@ -301,6 +311,7 @@ Note: Custom filenames don't auto-include session ID prefix - use frontmatter fo
 ### Git Considerations
 
 The default `.pack/reports/` location:
+
 - Should be gitignored for ephemeral reports
 - Can be selectively committed for audit history
 - Keeps reports separate from actual documentation
@@ -309,13 +320,13 @@ The default `.pack/reports/` location:
 
 This skill uses `context: fork` to run in isolation. The token budget strategy:
 
-| Stage | Token Target | Strategy |
-|-------|--------------|----------|
-| Discovery | ~200-500 | Script output is compact JSON |
-| Prioritization | ~100 | Selection logic only |
-| Deep Analysis | ~500-2000/file | Read only selected files |
-| Docstring Check | ~500 | Grep summaries, not full files |
-| Report | ~1000 | Structured output |
+| Stage           | Token Target   | Strategy                       |
+| --------------- | -------------- | ------------------------------ |
+| Discovery       | ~200-500       | Script output is compact JSON  |
+| Prioritization  | ~100           | Selection logic only           |
+| Deep Analysis   | ~500-2000/file | Read only selected files       |
+| Docstring Check | ~500           | Grep summaries, not full files |
+| Report          | ~1000          | Structured output              |
 
 **Total target**: 15-30k tokens for a typical audit.
 
@@ -376,6 +387,7 @@ This ensures findings survive compaction even if the stage isn't complete.
 ### Resumption
 
 If context resets mid-audit:
+
 1. `TaskList` to see current state
 2. `TaskGet` on `in_progress` task to read checkpoint data
 3. Skip completed stages
@@ -388,16 +400,19 @@ If context resets mid-audit:
 Report "No markdown files found in {scope}. Consider adding documentation for your project."
 
 **Very large repos (100+ docs):**
+
 - Stick to `limit` parameter strictly
 - Focus on highest-staleness files
 - Note total count in report for context
 
 **Non-git repos:**
+
 - Skip git-based metadata (SHA, author, etc.)
 - Use file modification times as fallback
 - Note "Git metadata unavailable" in report
 
 **Mixed language repos:**
+
 - Detect languages from file extensions
 - Report coverage per detected language
 - Skip languages with no source files

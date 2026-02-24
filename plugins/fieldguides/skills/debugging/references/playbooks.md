@@ -7,12 +7,14 @@ Investigation focus and techniques by bug category.
 Crashes, exceptions, uncaught errors.
 
 **Investigation focus:**
+
 - Stack trace analysis (line, function, call chain)
 - Variable state at crash point
 - Input values that trigger crash
 - Environment differences (dev vs prod)
 
 **Common causes:**
+
 - Null/undefined access
 - Type mismatches
 - Array out of bounds
@@ -20,6 +22,7 @@ Crashes, exceptions, uncaught errors.
 - Resource exhaustion
 
 **Techniques:**
+
 - Add try-catch with detailed logging
 - Validate assumptions with assertions
 - Check null/undefined before access
@@ -30,12 +33,14 @@ Crashes, exceptions, uncaught errors.
 Wrong result, unexpected behavior.
 
 **Investigation focus:**
+
 - Expected vs actual output comparison
 - Data transformations step by step
 - Conditional logic evaluation
 - State changes over time
 
 **Common causes:**
+
 - Off-by-one errors
 - Incorrect comparison operators
 - Wrong order of operations
@@ -43,6 +48,7 @@ Wrong result, unexpected behavior.
 - State not reset between operations
 
 **Techniques:**
+
 - Print intermediate values
 - Step through with debugger
 - Write test cases for edge cases
@@ -53,6 +59,7 @@ Wrong result, unexpected behavior.
 API, database, external service issues.
 
 **Investigation focus:**
+
 - Request/response logging
 - Network traffic inspection
 - Authentication/authorization
@@ -60,6 +67,7 @@ API, database, external service issues.
 - Timing and timeouts
 
 **Common causes:**
+
 - API version mismatch
 - Authentication token expired
 - Wrong content-type headers
@@ -68,6 +76,7 @@ API, database, external service issues.
 - Rate limiting
 
 **Techniques:**
+
 - Log full request/response
 - Test with curl/httpie directly
 - Check API documentation version
@@ -79,6 +88,7 @@ API, database, external service issues.
 Works sometimes, fails others.
 
 **Investigation focus:**
+
 - What's different when it fails?
 - Timing dependencies
 - Shared state/resources
@@ -86,6 +96,7 @@ Works sometimes, fails others.
 - Concurrency issues
 
 **Common causes:**
+
 - Race conditions
 - Cache inconsistency
 - Clock/timezone issues
@@ -93,6 +104,7 @@ Works sometimes, fails others.
 - External service flakiness
 
 **Techniques:**
+
 - Add timestamps to all logs
 - Run many times to find pattern
 - Check for async operations
@@ -104,6 +116,7 @@ Works sometimes, fails others.
 Slow, memory leaks, high CPU.
 
 **Investigation focus:**
+
 - Profiling and metrics
 - Resource usage over time
 - Algorithm complexity
@@ -111,6 +124,7 @@ Slow, memory leaks, high CPU.
 - Memory allocation patterns
 
 **Common causes:**
+
 - N+1 queries
 - Inefficient algorithms
 - Memory leaks (unreleased resources)
@@ -119,6 +133,7 @@ Slow, memory leaks, high CPU.
 - Unbounded caching
 
 **Techniques:**
+
 - Profile with appropriate tools
 - Measure time/memory at checkpoints
 - Test with various data sizes

@@ -11,6 +11,7 @@ User proposes using Redux + Redux Saga for managing a 3-field contact form (name
 **Proposal**: "I want to set up Redux with Redux Saga to manage the contact form state. We'll need actions for field updates, form submission, validation errors, and API status."
 
 **Complexity Smell Detected**: Framework Overkill
+
 - Redux + Saga = ~50 LOC boilerplate for 3 fields
 - Time-travel debugging not needed for contact form
 - No complex async orchestration required
@@ -21,6 +22,7 @@ User proposes using Redux + Redux Saga for managing a 3-field contact form (name
 ### ALTERNATIVE: Propose Simpler Solutions
 
 **Response**:
+
 > ◆ **Caution**: Redux + Saga adds significant complexity for this use case. This pattern is typically used for complex apps with shared state across many components. For a single contact form, this will likely cause maintenance burden without clear benefits.
 >
 > Here are simpler alternatives that meet the requirements:
@@ -83,15 +85,16 @@ function ContactForm() {
 
 **Comparison**:
 
-| Approach | LOC | Dependencies | Learning Curve | Maintenance |
-|----------|-----|--------------|----------------|-------------|
-| Redux + Saga | ~150 | 2 libraries | High | High |
-| useState | ~30 | 0 | Low | Low |
-| React Hook Form | ~40 | 1 library | Medium | Low |
+| Approach        | LOC  | Dependencies | Learning Curve | Maintenance |
+| --------------- | ---- | ------------ | -------------- | ----------- |
+| Redux + Saga    | ~150 | 2 libraries  | High           | High        |
+| useState        | ~30  | 0            | Low            | Low         |
+| React Hook Form | ~40  | 1 library    | Medium         | Low         |
 
 ### QUESTION: Investigate Constraints
 
 **Questions to ask**:
+
 1. "Will this form state need to be shared across multiple components or pages?"
 2. "Do you need time-travel debugging or state persistence for this form?"
 3. "Is there complex async orchestration (dependent requests, polling, retry logic)?"
@@ -101,12 +104,15 @@ function ContactForm() {
 ### Likely Answers & Responses
 
 **If "We might add more forms later"**:
+
 > "Let's start with useState for this form. When we add the second form, we'll have concrete requirements and can decide if shared state management is needed. Adding Redux later is straightforward if justified."
 
 **If "I want to learn Redux"**:
+
 > "Learning Redux is valuable, but production code isn't the ideal learning environment. Consider building a Redux tutorial app separately, then apply it to work projects when requirements justify it. For this contact form, simpler patterns will ship faster and be easier to maintain."
 
 **If "We need the form data in the header component"**:
+
 > "If you need to lift state, you can pass it through props or use React Context. Here's how:
 >
 > ```typescript
@@ -137,6 +143,7 @@ function ContactForm() {
 **Context**: Contact form requires state sharing with [specific component], complex async orchestration for [specific workflow], and integration with existing Redux store managing [other domain].
 
 **Consequences**:
+
 - **Pros**: Consistent state management pattern across app, debugging with Redux DevTools
 - **Cons**: Increased boilerplate (~150 LOC vs ~30 LOC), steeper learning curve for new contributors
 - **Mitigation**: Isolate form logic in dedicated slice, document with examples
@@ -152,7 +159,7 @@ function ContactForm() {
 // If requirements change (shared state, complex validation), consider React Hook Form or Zustand.
 
 function ContactForm() {
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
   // ...
 }
 ```

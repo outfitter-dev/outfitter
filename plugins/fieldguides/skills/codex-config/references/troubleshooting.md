@@ -9,6 +9,7 @@ Common issues and solutions for Codex CLI configuration.
 **Symptoms:** Settings not applied, defaults used instead
 
 **Solutions:**
+
 1. Verify `~/.codex/config.toml` exists
 2. Check TOML syntax
 3. Use `-c` to override and test
@@ -26,6 +27,7 @@ cat ~/.codex/config.toml | toml-lint
 **Symptoms:** Tools not available, connection errors
 
 **Checklist:**
+
 1. Check command path is correct
 2. Verify API keys in env section
 3. Check `enabled = true`
@@ -44,11 +46,13 @@ codex mcp test server-name
 **Symptoms:** `$skill-name` not recognized
 
 **Checklist:**
+
 1. Verify path hierarchy
 2. Check skill directory structure
 3. Ensure SKILL.md exists in skill folder
 
 **Skills path precedence:**
+
 1. `$CWD/.codex/skills/`
 2. `$CWD/../.codex/skills/`
 3. `$REPO_ROOT/.codex/skills/`
@@ -61,6 +65,7 @@ codex mcp test server-name
 **Symptoms:** Permission denied, can't access files
 
 **Solutions:**
+
 - Use `-s workspace-write` for normal development
 - Check project trust level
 - Consider `--add-dir` for additional paths
@@ -143,6 +148,7 @@ codex mcp test graphite
 ## Log Locations
 
 Codex logs are typically in:
+
 - `~/.codex/logs/` (if logging enabled)
 - System journal (on Linux with systemd)
 

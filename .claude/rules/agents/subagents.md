@@ -54,20 +54,20 @@ YAML list of skill names the agent should auto-load. These are plugin-local name
 
 Use concise bullet-point instructions with standardized keys. Each line covers one concern. Pick relevant keys — not all are needed for every agent.
 
-| Key | Purpose | When to use |
-|-----|---------|-------------|
-| IDENTITY | Role and scope | Always — grounds the agent |
-| TASK | Primary objective | Always — what to accomplish |
-| SKILLS | Which skills to load at runtime | When agent relies on specific skills |
-| PROCESS | Workflow or methodology to follow | When a skill defines the workflow |
-| PATTERNS | Reference sources for conventions | When reusing existing patterns |
-| OUTPUT | Artifact to produce | When agent delivers a specific deliverable |
-| QUALITY | Standards and checks before delivery | When output has quality gates |
-| EDGES | Edge cases, graceful degradation | When failure modes matter |
-| ESCALATE | When to hand off or flag issues | When agent has bounded scope |
-| COLLABORATE | How to work with other agents | When part of a multi-agent workflow |
-| CONSTRAINTS | What NOT to do, boundaries | When scope needs explicit limits |
-| COMPLETION | When the job is done | When "done" isn't obvious |
+| Key         | Purpose                              | When to use                                |
+| ----------- | ------------------------------------ | ------------------------------------------ |
+| IDENTITY    | Role and scope                       | Always — grounds the agent                 |
+| TASK        | Primary objective                    | Always — what to accomplish                |
+| SKILLS      | Which skills to load at runtime      | When agent relies on specific skills       |
+| PROCESS     | Workflow or methodology to follow    | When a skill defines the workflow          |
+| PATTERNS    | Reference sources for conventions    | When reusing existing patterns             |
+| OUTPUT      | Artifact to produce                  | When agent delivers a specific deliverable |
+| QUALITY     | Standards and checks before delivery | When output has quality gates              |
+| EDGES       | Edge cases, graceful degradation     | When failure modes matter                  |
+| ESCALATE    | When to hand off or flag issues      | When agent has bounded scope               |
+| COLLABORATE | How to work with other agents        | When part of a multi-agent workflow        |
+| CONSTRAINTS | What NOT to do, boundaries           | When scope needs explicit limits           |
+| COMPLETION  | When the job is done                 | When "done" isn't obvious                  |
 
 Example using 6 keys:
 

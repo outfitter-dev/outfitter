@@ -54,12 +54,12 @@ Creates an FTS5 full-text search index.
 
 ```typescript
 interface IndexOptions {
-  path: string;                   // Path to SQLite database file
-  tableName?: string;             // FTS5 table name (default: "documents")
-  tokenizer?: TokenizerType;      // Tokenizer (default: "unicode61")
-  tool?: string;                  // Tool identifier for metadata
-  toolVersion?: string;           // Tool version for metadata
-  migrations?: IndexMigrationRegistry;  // Optional migration registry
+  path: string; // Path to SQLite database file
+  tableName?: string; // FTS5 table name (default: "documents")
+  tokenizer?: TokenizerType; // Tokenizer (default: "unicode61")
+  tool?: string; // Tool identifier for metadata
+  toolVersion?: string; // Tool version for metadata
+  migrations?: IndexMigrationRegistry; // Optional migration registry
 }
 
 const index = createIndex<MyMetadata>({
@@ -71,11 +71,11 @@ const index = createIndex<MyMetadata>({
 
 ### Tokenizer Types
 
-| Tokenizer | Use Case |
-|-----------|----------|
-| `unicode61` | Default, Unicode-aware word tokenization |
-| `porter` | English text with stemming (finds "running" when searching "run") |
-| `trigram` | Substring matching, typo tolerance |
+| Tokenizer   | Use Case                                                          |
+| ----------- | ----------------------------------------------------------------- |
+| `unicode61` | Default, Unicode-aware word tokenization                          |
+| `porter`    | English text with stemming (finds "running" when searching "run") |
+| `trigram`   | Substring matching, typo tolerance                                |
 
 ### Index Methods
 
@@ -105,9 +105,9 @@ interface Index<T = unknown> {
 
 ```typescript
 interface IndexDocument {
-  id: string;                           // Unique document ID
-  content: string;                      // Searchable text
-  metadata?: Record<string, unknown>;   // Optional metadata (stored as JSON)
+  id: string; // Unique document ID
+  content: string; // Searchable text
+  metadata?: Record<string, unknown>; // Optional metadata (stored as JSON)
 }
 
 await index.add({
@@ -125,9 +125,9 @@ await index.add({
 
 ```typescript
 interface SearchQuery {
-  query: string;    // FTS5 query string
-  limit?: number;   // Max results (default: 25)
-  offset?: number;  // Skip results for pagination (default: 0)
+  query: string; // FTS5 query string
+  limit?: number; // Max results (default: 25)
+  offset?: number; // Skip results for pagination (default: 0)
 }
 
 // Simple search
@@ -145,24 +145,24 @@ const paged = await index.search({
 
 FTS5 supports powerful query syntax:
 
-| Syntax | Example | Description |
-|--------|---------|-------------|
-| Terms | `typescript bun` | Match all terms (implicit AND) |
-| Phrase | `"error handling"` | Exact phrase match |
-| OR | `ts OR typescript` | Match either term |
-| NOT | `typescript NOT javascript` | Exclude term |
-| Prefix | `type*` | Prefix matching |
-| Grouping | `(react OR vue) AND typescript` | Complex queries |
+| Syntax   | Example                         | Description                    |
+| -------- | ------------------------------- | ------------------------------ |
+| Terms    | `typescript bun`                | Match all terms (implicit AND) |
+| Phrase   | `"error handling"`              | Exact phrase match             |
+| OR       | `ts OR typescript`              | Match either term              |
+| NOT      | `typescript NOT javascript`     | Exclude term                   |
+| Prefix   | `type*`                         | Prefix matching                |
+| Grouping | `(react OR vue) AND typescript` | Complex queries                |
 
 ### Search Results
 
 ```typescript
 interface SearchResult<T = unknown> {
-  id: string;           // Document ID
-  content: string;      // Full document content
-  score: number;        // BM25 relevance (negative; closer to 0 = better match)
-  metadata?: T;         // Document metadata
-  highlights?: string[];  // Matching snippets with <b> tags
+  id: string; // Document ID
+  content: string; // Full document content
+  score: number; // BM25 relevance (negative; closer to 0 = better match)
+  metadata?: T; // Document metadata
+  highlights?: string[]; // Matching snippets with <b> tags
 }
 
 const results = await index.search({ query: "hello world" });
@@ -232,7 +232,7 @@ interface IndexMigrationRegistry {
 }
 
 interface IndexMigrationContext {
-  db: Database;  // bun:sqlite Database instance
+  db: Database; // bun:sqlite Database instance
 }
 ```
 
@@ -242,10 +242,10 @@ Indexes store metadata for tracking provenance:
 
 ```typescript
 interface IndexMetadata {
-  version: number;      // Schema version
-  created: string;      // ISO timestamp
-  tool: string;         // Creating tool identifier
-  toolVersion: string;  // Creating tool version
+  version: number; // Schema version
+  created: string; // ISO timestamp
+  tool: string; // Creating tool identifier
+  toolVersion: string; // Creating tool version
 }
 ```
 
@@ -273,6 +273,7 @@ if (result.isErr()) {
 ```
 
 Common error scenarios:
+
 - Index closed after `close()` called
 - Invalid table name or tokenizer
 - SQLite errors (disk full, permissions)

@@ -6,6 +6,7 @@
  * API keys, and PEM private keys.
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   createLogger,
   DEFAULT_PATTERNS,

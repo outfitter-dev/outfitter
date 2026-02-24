@@ -20,11 +20,11 @@ Session continuity through structured handoffs and freeform logs.
 
 ## Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/trail:handoff` | Create structured handoff note for session continuity |
-| `/trail:log <slug>` | Create freeform timestamped log note |
-| `/trail:read [options]` | Read recent trail notes |
+| Command                 | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `/trail:handoff`        | Create structured handoff note for session continuity |
+| `/trail:log <slug>`     | Create freeform timestamped log note                  |
+| `/trail:read [options]` | Read recent trail notes                               |
 
 ## Handoff Format
 
@@ -43,6 +43,7 @@ Handoffs are the atomic unit of session continuity. Create one at the end of eac
 ## State
 
 Current state of work:
+
 - What's in progress
 - What's blocked
 - Key decisions made
@@ -147,10 +148,10 @@ This creates notes in a subdirectory: `.trail/notes/YYYY-MM-DD/<parent-session>/
 
 Pattern: `[prefix-]YYYYMMDDhhmm[-suffix].md`
 
-| Type | Prefix | Suffix | Example |
-|------|--------|--------|---------|
+| Type    | Prefix    | Suffix     | Example                            |
+| ------- | --------- | ---------- | ---------------------------------- |
 | Handoff | `handoff` | session ID | `handoff-202601221430-f4b8aa3a.md` |
-| Log | none | slug | `202601221430-api-research.md` |
+| Log     | none      | slug       | `202601221430-api-research.md`     |
 
 The timestamp (`YYYYMMDDhhmm`) is the anchor — files remain sortable and portable even if moved.
 

@@ -9,23 +9,23 @@ Type inference works for simple types; explicit typing needed for unions/null.
 ```typescript
 // Inference works
 const [count, setCount] = useState(0); // number
-const [name, setName] = useState(''); // string
+const [name, setName] = useState(""); // string
 const [items, setItems] = useState<string[]>([]); // explicit for empty arrays
 
 // Explicit for unions/null
 const [user, setUser] = useState<User | null>(null);
-const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
 // Complex initial state
 type FormData = { name: string; email: string };
 const [formData, setFormData] = useState<FormData>({
-  name: '',
-  email: '',
+  name: "",
+  email: "",
 });
 
 // Lazy initialization
 const [data, setData] = useState<Data>(() => {
-  const cached = localStorage.getItem('data');
+  const cached = localStorage.getItem("data");
   return cached ? JSON.parse(cached) : defaultData;
 });
 ```
@@ -65,7 +65,7 @@ useEffect(() => {
 // Callback ref for dynamic elements
 const callbackRef = useCallback((node: HTMLDivElement | null) => {
   if (node) {
-    node.scrollIntoView({ behavior: 'smooth' });
+    node.scrollIntoView({ behavior: "smooth" });
   }
 }, []);
 ```
@@ -77,29 +77,29 @@ Typed actions with discriminated unions.
 ```typescript
 type State = {
   count: number;
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: "idle" | "loading" | "success" | "error";
   error?: string;
 };
 
 type Action =
-  | { type: 'increment' }
-  | { type: 'decrement' }
-  | { type: 'set'; payload: number }
-  | { type: 'setStatus'; payload: State['status'] }
-  | { type: 'setError'; payload: string };
+  | { type: "increment" }
+  | { type: "decrement" }
+  | { type: "set"; payload: number }
+  | { type: "setStatus"; payload: State["status"] }
+  | { type: "setError"; payload: string };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'increment':
+    case "increment":
       return { ...state, count: state.count + 1 };
-    case 'decrement':
+    case "decrement":
       return { ...state, count: state.count - 1 };
-    case 'set':
+    case "set":
       return { ...state, count: action.payload };
-    case 'setStatus':
+    case "setStatus":
       return { ...state, status: action.payload };
-    case 'setError':
-      return { ...state, status: 'error', error: action.payload };
+    case "setError":
+      return { ...state, status: "error", error: action.payload };
     default:
       return state;
   }
@@ -108,12 +108,12 @@ function reducer(state: State, action: Action): State {
 function Component() {
   const [state, dispatch] = useReducer(reducer, {
     count: 0,
-    status: 'idle',
+    status: "idle",
   });
 
-  dispatch({ type: 'set', payload: 10 }); // Type-safe
-  dispatch({ type: 'set' }); // Error: payload required
-  dispatch({ type: 'unknown' }); // Error: invalid action type
+  dispatch({ type: "set", payload: 10 }); // Type-safe
+  dispatch({ type: "set" }); // Error: payload required
+  dispatch({ type: "unknown" }); // Error: invalid action type
 }
 ```
 
@@ -171,8 +171,8 @@ Typed context with and without default values.
 
 ```typescript
 // Context with default value
-type Theme = 'light' | 'dark';
-const ThemeContext = createContext<Theme>('light');
+type Theme = "light" | "dark";
+const ThemeContext = createContext<Theme>("light");
 
 function useTheme() {
   return useContext(ThemeContext); // Always Theme, never null
@@ -184,7 +184,7 @@ const UserContext = createContext<User | null>(null);
 
 function useUser() {
   const user = useContext(UserContext);
-  if (!user) throw new Error('useUser must be used within UserProvider');
+  if (!user) throw new Error("useUser must be used within UserProvider");
   return user; // Type narrowed to User
 }
 
@@ -201,7 +201,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 function useApp() {
   const context = useContext(AppContext);
-  if (!context) throw new Error('useApp must be used within AppProvider');
+  if (!context) throw new Error("useApp must be used within AppProvider");
   return context;
 }
 ```
@@ -225,7 +225,9 @@ function useCounter(initial: number) {
 const { count, increment } = useCounter(0);
 
 // Tuple return - positional destructuring
-function useToggle(initial = false): [boolean, () => void, () => void, () => void] {
+function useToggle(
+  initial = false
+): [boolean, () => void, () => void, () => void] {
   const [value, setValue] = useState(initial);
   const toggle = () => setValue((v) => !v);
   const setTrue = () => setValue(true);
@@ -284,7 +286,7 @@ function useFetch<T>(url: string) {
 }
 
 // Usage - T inferred from usage or explicit
-const { data } = useFetch<User[]>('/api/users');
+const { data } = useFetch<User[]>("/api/users");
 ```
 
 ## useCallback and useMemo
@@ -439,10 +441,10 @@ function useStore<T>(store: Store<T>): T {
 
 // Example: window width store
 const widthStore: Store<number> = {
-  getState: () => (typeof window !== 'undefined' ? window.innerWidth : 0),
+  getState: () => (typeof window !== "undefined" ? window.innerWidth : 0),
   subscribe: (callback) => {
-    window.addEventListener('resize', callback);
-    return () => window.removeEventListener('resize', callback);
+    window.addEventListener("resize", callback);
+    return () => window.removeEventListener("resize", callback);
   },
 };
 

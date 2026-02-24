@@ -30,7 +30,6 @@
 ### Minor Changes
 
 - 839b4e1: Extract TUI modules to `@outfitter/tui` package.
-
   - **breaking**: Removed subpath exports: `./render`, `./table`, `./list`, `./box`, `./tree`, `./borders`, `./theme`, `./streaming`, `./prompt`, `./confirm`, `./preset`, `./demo`
   - **breaking**: `confirmDestructive()` moved from `@outfitter/cli/input` to `@outfitter/tui/confirm`
   - Colors (`./colors`), text utilities (`./text`), and terminal detection (`./terminal`) remain in `@outfitter/cli`
@@ -39,7 +38,6 @@
 ### Patch Changes
 
 - d683522: Fix `--json` flag bridging to `OUTFITTER_JSON` environment variable.
-
   - **fix**: `createCLI()` now bridges `--json` (global or subcommand) into `OUTFITTER_JSON` via preAction/postAction hooks, eliminating manual `optsWithGlobals()` detection in commands (#340)
   - **chore**: Convert cross-package deps to peerDependencies (#344)
 
@@ -71,7 +69,6 @@
 ### Minor Changes
 
 - Add JSON output mode, command normalization, and prompt improvements
-
   - Normalize command signatures so argument syntax is separated from command name during registration
   - Add portable `createCLI` return type re-exported from `@outfitter/cli/command`
   - Add `--json` output mode for `init`, `add`, and `doctor` commands
@@ -98,7 +95,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -126,7 +122,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -182,14 +177,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Output utilities**
-
   - `output()` - Auto-detecting output with support for human, JSON, and JSONL modes
   - `exitWithError()` - Error formatting with category-based exit codes
   - TTY detection for automatic mode selection
   - `OUTFITTER_OUTPUT_FORMAT` environment variable support
 
 - **Input utilities**
-
   - `collectIds()` - Multi-format ID collection (space/comma-separated, `@file`, stdin)
   - `expandFileArg()` - `@file` reference expansion with size limits
   - `parseGlob()` - Glob pattern expansion using `Bun.Glob`
@@ -201,13 +194,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `confirmDestructive()` - Destructive operation confirmation with `--yes` bypass
 
 - **Pagination utilities**
-
   - `loadCursor()` - Load persisted pagination state
   - `saveCursor()` - Save pagination state to XDG state directory
   - `clearCursor()` - Clear pagination state for `--reset` support
 
 - **Error handling**
-
   - Exit code mapping from error categories (validation, not_found, permission, etc.)
   - Structured JSON error output for non-TTY environments
   - Human-readable error formatting for TTY environments

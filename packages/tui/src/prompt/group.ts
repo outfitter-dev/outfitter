@@ -6,6 +6,7 @@
 
 import type { Result } from "better-result";
 import { Result as R } from "better-result";
+
 import type { CancelledError, PromptResult } from "./types.js";
 import { createCancelledError } from "./types.js";
 
@@ -43,7 +44,9 @@ export type PromptStep<T> = () => PromptResult<T>;
  * ```
  */
 export async function promptGroup<T extends Record<string, unknown>>(
-  steps: { [K in keyof T]: PromptStep<T[K]> }
+  steps: {
+    [K in keyof T]: PromptStep<T[K]>;
+  }
 ): Promise<Result<T, CancelledError>> {
   const result: Partial<T> = {};
 

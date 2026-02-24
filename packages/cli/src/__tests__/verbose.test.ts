@@ -5,6 +5,7 @@
  * OUTFITTER_VERBOSE > explicit option > environment profile > false
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { resolveVerbose } from "../output.js";
 
 describe("resolveVerbose()", () => {

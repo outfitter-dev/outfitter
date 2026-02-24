@@ -7,6 +7,7 @@ Common agent archetypes and their characteristics.
 **Purpose:** Examine and report without modifying.
 
 **Characteristics:**
+
 - Read-only operations
 - Detailed reporting
 - Recommendations, no implementation
@@ -23,6 +24,7 @@ tools: Glob, Grep, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet
 **Purpose:** Build and modify code.
 
 **Characteristics:**
+
 - Creates/modifies code
 - Follows templates and patterns
 - Implements specifications
@@ -38,6 +40,7 @@ tools: Glob, Grep, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet
 **Purpose:** Provide feedback and suggestions.
 
 **Characteristics:**
+
 - Evaluates existing code
 - Specific, actionable feedback
 - Rates/scores quality
@@ -54,6 +57,7 @@ tools: Glob, Grep, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet
 **Purpose:** Create and manage tests.
 
 **Characteristics:**
+
 - Generates test code
 - Runs test suites
 - Analyzes coverage
@@ -70,6 +74,7 @@ tools: Glob, Grep, Read, Write, Edit, Bash, Skill, Task, TaskCreate, TaskUpdate,
 **Purpose:** Transform code from one form to another.
 
 **Characteristics:**
+
 - Systematic transformation
 - Preserves functionality
 - Gradual approach
@@ -86,6 +91,7 @@ tools: Glob, Grep, Read, Write, Edit, Skill, Task, TaskCreate, TaskUpdate, TaskL
 **Purpose:** Find information and synthesize knowledge.
 
 **Characteristics:**
+
 - Information gathering
 - Source verification
 - Synthesis and summary
@@ -102,6 +108,7 @@ tools: Glob, Grep, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet,
 **Purpose:** Handle deployment and infrastructure.
 
 **Characteristics:**
+
 - Infrastructure operations
 - Deployment procedures
 - Safety checks

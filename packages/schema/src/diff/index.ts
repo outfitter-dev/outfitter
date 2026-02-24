@@ -1,7 +1,26 @@
+/**
+ * Surface map structural diff.
+ *
+ * Canonical entrypoint for the diff submodule. Re-exports public API
+ * from sibling modules so consumers can import from "@outfitter/schema/diff".
+ *
+ * @packageDocumentation
+ */
+
 import type { SurfaceMap } from "../surface.js";
 import { diffActions } from "./actions.js";
 import { diffMetadata } from "./metadata.js";
 import type { DiffSurfaceMapsOptions, SurfaceMapDiff } from "./types.js";
+
+// eslint-disable-next-line oxc/no-barrel-file -- re-export entrypoint preserves public import path
+export { stableJson } from "./shared.js";
+export type {
+  DiffEntry,
+  DiffSurfaceMapsOptions,
+  ModifiedEntry,
+  SurfaceMapDiff,
+  SurfaceMapDiffMode,
+} from "./types.js";
 
 /**
  * Compare two surface maps and return a structured diff.

@@ -11,6 +11,7 @@
 
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
+
 import type { DocsMap, DocsMapEntry } from "./docs-map-schema.js";
 
 function isPathInsideWorkspace(

@@ -9,6 +9,7 @@ Demonstrates identifying, specifying, and implementing a workflow pattern.
 User: "I have a bug where users can't log in after password reset."
 
 Agent flow:
+
 1. Asked for error message and reproduction steps
 2. Created minimal reproduction case, confirmed bug
 3. Added logging, inspected state, reviewed recent changes
@@ -98,6 +99,7 @@ Decision: **SKILL**
 <rationale>
 
 SKILL because:
+
 - User invokes when encountering bugs
 - Requires judgment (hypothesis formation, fix validation)
 - Not specialized domain (any engineer should debug)
@@ -136,6 +138,7 @@ skills/
 ### Key Sections
 
 **Quick Start**:
+
 1. Reproduce: Create minimal, reliable reproduction
 2. Investigate: Form hypothesis using logging/debugging
 3. Validate: Implement fix, verify no regressions
@@ -158,8 +161,8 @@ Test: Change login to use bcrypt.compare()
 **Regression Test**:
 
 ```typescript
-it('allows login with new password after reset', async () => {
-  const user = await createTestUser('test@example.com');
+it("allows login with new password after reset", async () => {
+  const user = await createTestUser("test@example.com");
   await resetPassword(user.email);
   const newPassword = getLatestResetToken(user.email);
 
@@ -171,21 +174,24 @@ it('allows login with new password after reset', async () => {
 ## Anti-Patterns
 
 **Random trial and error**:
+
 - ✗ "Let me try changing this and see"
 - ✓ "Based on logs, I hypothesize X. Let me test that."
 
 **Fixing symptoms**:
+
 - ✗ "Skip password verification for reset users"
 - ✓ "Fix root cause: inconsistent hashing algorithms"
 
 **No regression test**:
+
 - ✗ Fix, commit, move on
 - ✓ Add test that fails if bug reoccurs
 
 ## Success Metrics
 
-| Metric | Before | After |
-|--------|--------|-------|
+| Metric             | Before             | After              |
+| ------------------ | ------------------ | ------------------ |
 | Time to resolution | Varies (30min–5hr) | Consistent (1–2hr) |
-| Regression rate | ~15% | <5% |
-| First-fix success | ~40% | ~75% |
+| Regression rate    | ~15%               | <5%                |
+| First-fix success  | ~40%               | ~75%               |

@@ -1,11 +1,30 @@
 {
   "name": "@outfitter/tui",
-  "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
   "version": "0.2.1",
-  "type": "module",
+  "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
+  "keywords": [
+    "bun",
+    "outfitter",
+    "prompt",
+    "rendering",
+    "spinner",
+    "table",
+    "terminal",
+    "theme",
+    "tui",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/tui"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -209,7 +228,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/tui",
     "test": "bun test",
@@ -224,11 +245,6 @@
     "@clack/prompts": "catalog:",
     "better-result": "catalog:"
   },
-  "peerDependencies": {
-    "@outfitter/cli": ">=0.3.0",
-    "@outfitter/contracts": ">=0.2.0",
-    "@outfitter/types": ">=0.2.0"
-  },
   "devDependencies": {
     "@outfitter/cli": "workspace:*",
     "@outfitter/contracts": "workspace:*",
@@ -237,28 +253,12 @@
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },
+  "peerDependencies": {
+    "@outfitter/cli": ">=0.3.0",
+    "@outfitter/contracts": ">=0.2.0",
+    "@outfitter/types": ">=0.2.0"
+  },
   "engines": {
     "bun": ">=1.3.9"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/tui"
-  },
-  "license": "MIT",
-  "keywords": [
-    "tui",
-    "terminal",
-    "rendering",
-    "typescript",
-    "bun",
-    "outfitter",
-    "table",
-    "spinner",
-    "theme",
-    "prompt"
-  ]
+  }
 }

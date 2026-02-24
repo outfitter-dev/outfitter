@@ -22,6 +22,7 @@ grep -r "authentication" .
 ### Performance Trigger
 
 **Observation:**
+
 - Command taking 30+ seconds on ~50k files
 - Task size suggests this should be much faster
 - User likely to repeat this search frequently
@@ -57,21 +58,23 @@ Decision: TRIGGER RESEARCH
 **Query:** "fast code search CLI tool 2024"
 
 **Sources checked:**
+
 1. GitHub search: `site:github.com grep alternative rust stars:>1000`
 2. awesome-cli-apps: Command-line tools > Search
 3. modern-unix list: Text search category
 
 **Candidates found:**
 
-| Tool | Language | Stars | Description |
-|------|----------|-------|-------------|
-| ripgrep (rg) | Rust | 40k | Fast recursive search, respects .gitignore |
-| ag (the silver searcher) | C | 25k | Fast grep alternative |
-| ugrep | C++ | 3k | Advanced grep with better regex |
+| Tool                     | Language | Stars | Description                                |
+| ------------------------ | -------- | ----- | ------------------------------------------ |
+| ripgrep (rg)             | Rust     | 40k   | Fast recursive search, respects .gitignore |
+| ag (the silver searcher) | C        | 25k   | Fast grep alternative                      |
+| ugrep                    | C++      | 3k    | Advanced grep with better regex            |
 
 ### Step 2: Initial Evaluation
 
 **ripgrep (rg):**
+
 - Speed: ★★★ (Rust, parallel, optimized)
 - Ergonomics: ★★★ (smart defaults, colored output)
 - Maintenance: ★★★ (active, recent commits, responsive maintainer)
@@ -79,6 +82,7 @@ Decision: TRIGGER RESEARCH
 - Adoption: ★★★ (40k stars, used by VS Code)
 
 **ag:**
+
 - Speed: ★★ (faster than grep, but slower than rg)
 - Ergonomics: ★★ (good defaults)
 - Maintenance: ★ (less active recently)
@@ -86,6 +90,7 @@ Decision: TRIGGER RESEARCH
 - Adoption: ★★ (mature, but being superseded)
 
 **ugrep:**
+
 - Speed: ★★★ (comparable to rg)
 - Ergonomics: ★★ (powerful but complex)
 - Maintenance: ★★ (active, but smaller team)
@@ -137,6 +142,7 @@ tests/auth.test.ts
 ```
 
 **Observations:**
+
 - Colored output with syntax highlighting ✓
 - Line numbers by default ✓
 - File grouping ✓
@@ -219,6 +225,7 @@ If user runs 10 searches/day:
 ### Benefits vs Trade-offs
 
 **Benefits:**
+
 1. **Speed**: 35× faster on this codebase
 2. **Smart defaults**: Respects .gitignore (cleaner results)
 3. **Better output**: Colored, grouped, line numbers
@@ -227,6 +234,7 @@ If user runs 10 searches/day:
 6. **Type filtering**: `--type ts` for language-specific searches
 
 **Trade-offs:**
+
 1. **Different flags**: Some grep flags have different names
 2. **Muscle memory**: Need to learn rg-specific options
 3. **POSIX compatibility**: Regex flavor differs from POSIX grep
@@ -236,21 +244,25 @@ If user runs 10 searches/day:
 ### Confidence Assessment
 
 **Adoption:** ✓ HIGH
+
 - 40k+ GitHub stars
 - Used by major projects (VS Code, GitHub search)
 - Active community and development
 
 **Maintenance:** ✓ HIGH
+
 - Last commit: 2 weeks ago
 - Responsive maintainer (burntsushi)
 - Clear roadmap and changelog
 
 **Installation:** ✓ HIGH
+
 - `brew install ripgrep` works
 - Also available via apt, cargo, chocolatey
 - Binary releases for all platforms
 
 **Quality:** ✓ HIGH
+
 - Extensive test suite
 - Well-documented
 - Proven in production
@@ -261,7 +273,7 @@ If user runs 10 searches/day:
 
 ### Presentation to User
 
-```
+````
 Found: ripgrep (rg) — Fast line-oriented recursive search tool
 
 Performance:
@@ -280,7 +292,7 @@ Benefits:
 Installation:
 ```bash
 brew install ripgrep
-```
+````
 
 Example (replaces your current command):
 
@@ -296,10 +308,12 @@ rg -i "authentication"
 ```
 
 Trade-offs:
+
 - Some flag differences from grep (e.g., -r is default, not needed)
 - Different regex flavor (PCRE2 vs POSIX) - rarely an issue
 
 Confidence: HIGH
+
 - 40k+ GitHub stars, widely adopted
 - Used as search backend in VS Code and GitHub
 - Active maintenance by respected developer
@@ -378,7 +392,7 @@ change your mind. For now, I'll continue using grep.
 
 [Internal note: rg available but user prefers grep - respect preference]
 
-```
+````
 
 ## Stage 5: Outcome
 
@@ -401,7 +415,7 @@ grep "authentication"
 Speed improvement: 35×
 User satisfaction: High (immediate feedback: "Wow, much faster!")
 Workflow impact: Positive (cleaner output, faster iteration)
-```
+````
 
 ### Follow-up Actions
 
@@ -413,12 +427,14 @@ Workflow impact: Positive (cleaner output, faster iteration)
 ### Lessons Learned
 
 **What worked:**
+
 - Clear performance measurement (28.4s → 0.8s)
 - Real-world testing on user's actual codebase
 - Showing immediate benefit (cleaner results, no node_modules noise)
 - Offering trial period option
 
 **What could improve:**
+
 - Could have shown advanced features (--stats, --json output)
 - Could have mentioned integration with fzf for interactive search
 - Could have demonstrated multi-line search patterns
@@ -426,6 +442,7 @@ Workflow impact: Positive (cleaner output, faster iteration)
 ### Long-term Impact
 
 **2 weeks later:**
+
 - User now using rg for all searches
 - Discovered `--stats` flag, using for codebase metrics
 - Shared rg with team, 3 other developers adopted it

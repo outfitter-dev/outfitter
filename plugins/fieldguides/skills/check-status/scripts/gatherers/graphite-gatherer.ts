@@ -10,6 +10,7 @@
  */
 
 import { parseArgs } from "node:util";
+
 import { parseTimeConstraint, toGitSince } from "../lib/time";
 import type {
   GathererResult,

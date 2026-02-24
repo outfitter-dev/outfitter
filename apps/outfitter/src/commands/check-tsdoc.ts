@@ -11,6 +11,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
+
 import { Result, ValidationError } from "@outfitter/contracts";
 import type {
   CoverageLevel,
@@ -18,6 +19,7 @@ import type {
   PackageCoverage,
   TsDocCheckResult,
 } from "@outfitter/tooling";
+
 import type { CliOutputMode } from "../output-mode.js";
 import { applyJq } from "./jq-utils.js";
 

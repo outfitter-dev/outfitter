@@ -7,6 +7,7 @@
  * - isUnicodeSupported function
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   getIndicator,
   getProgressIndicator,

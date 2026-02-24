@@ -101,9 +101,9 @@ function detectAdoption(agentMessage, userResponse) {
   for (const suggestion of agentSuggestions) {
     const match = findMatchingAction(suggestion, userActions);
     if (match && match.similarity > 0.8) {
-      return { signal: 'adoption', confidence: 'high' };
+      return { signal: "adoption", confidence: "high" };
     } else if (match && match.similarity > 0.5) {
-      return { signal: 'adoption', confidence: 'medium' };
+      return { signal: "adoption", confidence: "medium" };
     }
   }
 
@@ -172,10 +172,12 @@ Detection algorithm:
 function normalizeIntent(message) {
   // Remove politeness/filler
   let normalized = message.toLowerCase();
-  normalized = normalized.replace(/\b(please|thanks|thank you)\b/g, '');
+  normalized = normalized.replace(/\b(please|thanks|thank you)\b/g, "");
 
   // Extract core imperative
-  const imperatives = normalized.match(/\b(use|do|make|add|implement|fix)\s+\w+/g);
+  const imperatives = normalized.match(
+    /\b(use|do|make|add|implement|fix)\s+\w+/g
+  );
 
   // Extract prohibitions
   const prohibitions = normalized.match(/\bdon't\s+\w+/g);
@@ -234,11 +236,11 @@ function analyzeTone(message) {
   const capsCount = capsWords ? capsWords.length : 0;
 
   // Frustration score
-  const score = (negativeWordCount * 0.3) + (questionCount * 0.2) + (capsCount * 0.5);
+  const score = negativeWordCount * 0.3 + questionCount * 0.2 + capsCount * 0.5;
 
-  if (score > 1.5) return 'high';
-  if (score > 0.7) return 'medium';
-  return 'low';
+  if (score > 1.5) return "high";
+  if (score > 0.7) return "medium";
+  return "low";
 }
 ```
 
@@ -273,13 +275,15 @@ function detectSequence(message) {
   // Check for numbered list
   const numberedItems = message.match(/^\d+\.\s+.+$/gm);
   if (numberedItems && numberedItems.length >= 2) {
-    return { signal: 'sequence', confidence: 'high', items: numberedItems };
+    return { signal: "sequence", confidence: "high", items: numberedItems };
   }
 
   // Check for ordinal markers
-  const ordinals = message.match(/\b(first|second|third|then|next|finally)\b/gi);
+  const ordinals = message.match(
+    /\b(first|second|third|then|next|finally)\b/gi
+  );
   if (ordinals && ordinals.length >= 2) {
-    return { signal: 'sequence', confidence: 'medium', markers: ordinals };
+    return { signal: "sequence", confidence: "medium", markers: ordinals };
   }
 
   return null;
@@ -352,7 +356,7 @@ function extractToolChains(agentMessages) {
   for (const seq of sequences) {
     for (let n = 2; n <= Math.min(5, seq.length); n++) {
       for (let i = 0; i <= seq.length - n; i++) {
-        const gram = seq.slice(i, i + n).join(' → ');
+        const gram = seq.slice(i, i + n).join(" → ");
         ngrams[gram] = (ngrams[gram] || 0) + 1;
       }
     }
@@ -364,7 +368,7 @@ function extractToolChains(agentMessages) {
     .map(([gram, count]) => ({
       chain: gram,
       frequency: count,
-      confidence: count >= 5 ? 'high' : count >= 3 ? 'medium' : 'low'
+      confidence: count >= 5 ? "high" : count >= 3 ? "medium" : "low",
     }));
 
   return chains;
@@ -430,13 +434,13 @@ If prohibition suspected:
 ```javascript
 function classifyRequirement(message) {
   if (/\b(must|always|required)\b/i.test(message)) {
-    return { strength: 'strong', confidence: 'high' };
+    return { strength: "strong", confidence: "high" };
   }
   if (/\b(should|need\s+to|make\s+sure)\b/i.test(message)) {
-    return { strength: 'moderate', confidence: 'medium' };
+    return { strength: "moderate", confidence: "medium" };
   }
   if (/\b(could|might\s+want\s+to|consider)\b/i.test(message)) {
-    return { strength: 'weak', confidence: 'low' };
+    return { strength: "weak", confidence: "low" };
   }
   return null;
 }
@@ -472,10 +476,14 @@ function isSubjective(statement) {
   const firstPerson = /\b(I|my|me)\b/i.test(statement);
 
   // Check for subjective language
-  const subjective = /\b(prefer|like|rather|think|believe|feel)\b/i.test(statement);
+  const subjective = /\b(prefer|like|rather|think|believe|feel)\b/i.test(
+    statement
+  );
 
   // Check for evaluative language
-  const evaluative = /\b(better|worse|best|worst|cleaner|messier)\b/i.test(statement);
+  const evaluative = /\b(better|worse|best|worst|cleaner|messier)\b/i.test(
+    statement
+  );
 
   return firstPerson || subjective || evaluative;
 }
@@ -490,36 +498,38 @@ Identify where user messages begin and end, separating from agent messages and t
 ```javascript
 function classifyActor(message) {
   // Check for role markers
-  if (message.role === 'user') return 'user';
-  if (message.role === 'assistant') return 'agent';
+  if (message.role === "user") return "user";
+  if (message.role === "assistant") return "agent";
 
   // Fallback to content analysis
-  if (/<function_calls>/i.test(message.content)) return 'agent';
-  if (/<function_results>/i.test(message.content)) return 'tool';
+  if (/<function_calls>/i.test(message.content)) return "agent";
+  if (/<function_results>/i.test(message.content)) return "tool";
 
   // Default to user for ambiguous cases
-  return 'user';
+  return "user";
 }
 ```
 
 ### Message Filtering
 
-```javascript
+````javascript
 function filterMessages(conversation, options = {}) {
   const {
-    actors = ['user', 'agent'],
+    actors = ["user", "agent"],
     excludeToolOutput = true,
     excludeCodeBlocks = false,
     minLength = 0,
   } = options;
 
   return conversation
-    .filter(msg => actors.includes(classifyActor(msg)))
-    .filter(msg => !excludeToolOutput || !msg.content.includes('<function_results>'))
-    .filter(msg => !excludeCodeBlocks || !msg.content.includes('```'))
-    .filter(msg => msg.content.length >= minLength);
+    .filter((msg) => actors.includes(classifyActor(msg)))
+    .filter(
+      (msg) => !excludeToolOutput || !msg.content.includes("<function_results>")
+    )
+    .filter((msg) => !excludeCodeBlocks || !msg.content.includes("```"))
+    .filter((msg) => msg.content.length >= minLength);
 }
-```
+````
 
 ## Multi-Turn Pattern Recognition
 
@@ -534,9 +544,9 @@ function detectEscalation(messages) {
 
   for (const topic of topics) {
     // Check if frustration increases over time
-    const frustrationScores = topic.messages.map(msg => {
+    const frustrationScores = topic.messages.map((msg) => {
       const signals = extractSignals(msg);
-      return signals.filter(s => s.type === 'frustration').length;
+      return signals.filter((s) => s.type === "frustration").length;
     });
 
     // Check for monotonic increase
@@ -550,10 +560,10 @@ function detectEscalation(messages) {
 
     if (isEscalating && frustrationScores.length >= 2) {
       return {
-        pattern: 'escalation',
+        pattern: "escalation",
         topic: topic.name,
         messages: topic.messages,
-        confidence: frustrationScores.length >= 3 ? 'high' : 'medium'
+        confidence: frustrationScores.length >= 3 ? "high" : "medium",
       };
     }
   }
@@ -575,7 +585,7 @@ function clusterByTopic(messages) {
     // Find existing cluster with matching keywords
     let matched = false;
     for (const cluster of clusters) {
-      const overlap = keywords.filter(k => cluster.keywords.includes(k));
+      const overlap = keywords.filter((k) => cluster.keywords.includes(k));
       if (overlap.length / keywords.length > 0.3) {
         cluster.messages.push(msg);
         cluster.keywords = [...new Set([...cluster.keywords, ...keywords])];
@@ -587,9 +597,9 @@ function clusterByTopic(messages) {
     // Create new cluster if no match
     if (!matched) {
       clusters.push({
-        name: keywords[0] || 'unnamed',
+        name: keywords[0] || "unnamed",
         keywords,
-        messages: [msg]
+        messages: [msg],
       });
     }
   }
@@ -599,13 +609,25 @@ function clusterByTopic(messages) {
 
 function extractKeywords(message) {
   // Remove stop words and extract nouns/verbs
-  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for']);
+  const stopWords = new Set([
+    "the",
+    "a",
+    "an",
+    "and",
+    "or",
+    "but",
+    "in",
+    "on",
+    "at",
+    "to",
+    "for",
+  ]);
 
   const words = message.content
     .toLowerCase()
-    .replace(/[^\w\s]/g, '')
+    .replace(/[^\w\s]/g, "")
     .split(/\s+/)
-    .filter(w => w.length > 3 && !stopWords.has(w));
+    .filter((w) => w.length > 3 && !stopWords.has(w));
 
   // Return top 5 most frequent words
   const freq = {};
@@ -631,14 +653,14 @@ function applyRecencyWeight(signals, halfLifeDays = 7) {
   const now = Date.now();
   const halfLifeMs = halfLifeDays * 24 * 60 * 60 * 1000;
 
-  return signals.map(signal => {
+  return signals.map((signal) => {
     const age = now - signal.timestamp;
     const weight = Math.pow(0.5, age / halfLifeMs);
 
     return {
       ...signal,
       weight,
-      weightedConfidence: signal.confidence * weight
+      weightedConfidence: signal.confidence * weight,
     };
   });
 }
@@ -670,7 +692,7 @@ function resolveContradictions(signals) {
   }
 
   // Filter out superseded signals
-  return signals.filter(s => !s.superseded);
+  return signals.filter((s) => !s.superseded);
 }
 
 function findContradictions(signals) {
@@ -689,10 +711,12 @@ function findContradictions(signals) {
 
 function areContradictory(signal1, signal2) {
   // Example: "Use X" vs. "Don't use X"
-  if (signal1.type === 'request' && signal2.type === 'request') {
+  if (signal1.type === "request" && signal2.type === "request") {
     // Extract actions
     const action1 = signal1.quote.match(/\b(use|do|make|add)\s+(\w+)/i);
-    const action2 = signal2.quote.match(/\b(don't|never|avoid)\s+(use|do|make|add)?\s*(\w+)/i);
+    const action2 = signal2.quote.match(
+      /\b(don't|never|avoid)\s+(use|do|make|add)?\s*(\w+)/i
+    );
 
     if (action1 && action2 && action1[2] === action2[3]) {
       return true; // Contradiction: "use X" vs. "don't use X"
@@ -722,7 +746,7 @@ class IncrementalAnalyzer {
     const newMessages = messages.slice(this.lastAnalyzedIndex);
 
     // Extract signals from new messages
-    const newSignals = newMessages.flatMap(msg => extractSignals(msg));
+    const newSignals = newMessages.flatMap((msg) => extractSignals(msg));
     this.signals.push(...newSignals);
 
     // Update patterns with new signals
@@ -733,7 +757,7 @@ class IncrementalAnalyzer {
 
     return {
       signals: this.signals,
-      patterns: this.patterns
+      patterns: this.patterns,
     };
   }
 
@@ -751,7 +775,8 @@ Cache expensive operations like topic clustering and keyword extraction.
 
 ```javascript
 class AnalysisCache {
-  constructor(ttlMs = 5 * 60 * 1000) { // 5 minute TTL
+  constructor(ttlMs = 5 * 60 * 1000) {
+    // 5 minute TTL
     this.cache = new Map();
     this.ttl = ttlMs;
   }
@@ -771,7 +796,7 @@ class AnalysisCache {
   set(key, value) {
     this.cache.set(key, {
       value,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -806,7 +831,7 @@ If signal extraction fails for a message, continue with remaining messages.
 function extractSignalsSafe(messages) {
   const results = {
     signals: [],
-    errors: []
+    errors: [],
   };
 
   for (const msg of messages) {
@@ -816,7 +841,7 @@ function extractSignalsSafe(messages) {
     } catch (error) {
       results.errors.push({
         message_id: msg.id,
-        error: error.message
+        error: error.message,
       });
       // Continue with next message
     }
@@ -832,7 +857,7 @@ Validate extracted signals before adding to results.
 
 ```javascript
 function validateSignal(signal) {
-  const required = ['type', 'subtype', 'message_id', 'quote', 'confidence'];
+  const required = ["type", "subtype", "message_id", "quote", "confidence"];
 
   for (const field of required) {
     if (!(field in signal)) {
@@ -840,7 +865,7 @@ function validateSignal(signal) {
     }
   }
 
-  const validTypes = ['success', 'frustration', 'workflow', 'request'];
+  const validTypes = ["success", "frustration", "workflow", "request"];
   if (!validTypes.includes(signal.type)) {
     throw new Error(`Invalid signal type: ${signal.type}`);
   }

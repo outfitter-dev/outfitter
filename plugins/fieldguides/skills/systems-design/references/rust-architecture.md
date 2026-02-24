@@ -3,6 +3,7 @@
 ## When to Choose Rust
 
 **Strong fit:**
+
 - Performance-critical services (compute-heavy, low-latency)
 - Resource-constrained environments
 - Systems programming needs
@@ -10,6 +11,7 @@
 - Concurrent processing with correctness guarantees
 
 **May not be worth it:**
+
 - Prototype/MVP stage (slower iteration)
 - Small team without Rust experience
 - Standard CRUD API (TS faster to develop)
@@ -19,14 +21,14 @@
 
 ### Web services
 
-| Component | Recommendation |
-|-----------|----------------|
-| Runtime | `tokio` (async runtime, de facto standard) |
+| Component     | Recommendation                                           |
+| ------------- | -------------------------------------------------------- |
+| Runtime       | `tokio` (async runtime, de facto standard)               |
 | Web framework | `axum` (modern, type-safe) or `actix-web` (mature, fast) |
-| Database | `sqlx` (compile-time checked), `diesel` (full ORM) |
-| Serialization | `serde` + `serde_json`, `bincode` for binary |
-| Observability | `tracing` + `tracing-subscriber` |
-| Errors | `thiserror` (libraries), `anyhow` (applications) |
+| Database      | `sqlx` (compile-time checked), `diesel` (full ORM)       |
+| Serialization | `serde` + `serde_json`, `bincode` for binary             |
+| Observability | `tracing` + `tracing-subscriber`                         |
+| Errors        | `thiserror` (libraries), `anyhow` (applications)         |
 
 ### Project structure
 
@@ -50,12 +52,12 @@ my-service/
 
 ## Tradeoffs vs TypeScript
 
-| Aspect | Rust | TypeScript |
-|--------|------|------------|
-| Memory | 5-10x lower | Higher |
-| Execution | 2-10x faster | Slower |
-| Bug detection | Compile-time (null, races) | Runtime possible |
-| GC pauses | None | Yes |
-| Development speed | Slower (borrow checker) | Faster iteration |
-| Ecosystem | Smaller for web | Massive (npm) |
-| Hiring | Harder | Easy |
+| Aspect            | Rust                       | TypeScript       |
+| ----------------- | -------------------------- | ---------------- |
+| Memory            | 5-10x lower                | Higher           |
+| Execution         | 2-10x faster               | Slower           |
+| Bug detection     | Compile-time (null, races) | Runtime possible |
+| GC pauses         | None                       | Yes              |
+| Development speed | Slower (borrow checker)    | Faster iteration |
+| Ecosystem         | Smaller for web            | Massive (npm)    |
+| Hiring            | Harder                     | Easy             |

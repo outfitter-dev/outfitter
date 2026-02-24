@@ -32,12 +32,12 @@ fd '^test.*\.ts$'            # Regex pattern
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install fd` |
-| Cargo | `cargo install fd-find` |
-| apt | `apt install fd-find` |
-| dnf | `dnf install fd-find` |
+| Method   | Command                 |
+| -------- | ----------------------- |
+| Homebrew | `brew install fd`       |
+| Cargo    | `cargo install fd-find` |
+| apt      | `apt install fd-find`   |
+| dnf      | `dnf install fd-find`   |
 
 [GitHub](https://github.com/sharkdp/fd)
 
@@ -74,12 +74,12 @@ rg --no-ignore pattern       # Include ignored files
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install ripgrep` |
-| Cargo | `cargo install ripgrep` |
-| apt | `apt install ripgrep` |
-| dnf | `dnf install ripgrep` |
+| Method   | Command                 |
+| -------- | ----------------------- |
+| Homebrew | `brew install ripgrep`  |
+| Cargo    | `cargo install ripgrep` |
+| apt      | `apt install ripgrep`   |
+| dnf      | `dnf install ripgrep`   |
 
 [GitHub](https://github.com/BurntSushi/ripgrep)
 
@@ -111,11 +111,11 @@ sg --pattern '$A == null' --rewrite '$A === null'  # Refactor
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install ast-grep` |
-| Cargo | `cargo install ast-grep` |
-| npm | `npm install -g @ast-grep/cli` |
+| Method   | Command                        |
+| -------- | ------------------------------ |
+| Homebrew | `brew install ast-grep`        |
+| Cargo    | `cargo install ast-grep`       |
+| npm      | `npm install -g @ast-grep/cli` |
 
 [GitHub](https://github.com/ast-grep/ast-grep) | [Docs](https://ast-grep.github.io/)
 
@@ -150,11 +150,11 @@ curl api.com/data | jq '.results[0]'  # Parse API response
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
+| Method   | Command           |
+| -------- | ----------------- |
 | Homebrew | `brew install jq` |
-| apt | `apt install jq` |
-| dnf | `dnf install jq` |
+| apt      | `apt install jq`  |
+| dnf      | `dnf install jq`  |
 
 [GitHub](https://github.com/jqlang/jq) | [Docs](https://jqlang.github.io/jq/)
 
@@ -190,12 +190,12 @@ bat file1.ts file2.ts        # View multiple files
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install bat` |
-| Cargo | `cargo install bat` |
-| apt | `apt install bat` |
-| dnf | `dnf install bat` |
+| Method   | Command             |
+| -------- | ------------------- |
+| Homebrew | `brew install bat`  |
+| Cargo    | `cargo install bat` |
+| apt      | `apt install bat`   |
+| dnf      | `dnf install bat`   |
 
 [GitHub](https://github.com/sharkdp/bat)
 
@@ -230,12 +230,12 @@ eza --icons                  # Show file icons
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install eza` |
-| Cargo | `cargo install eza` |
-| apt | `apt install eza` |
-| dnf | `dnf install eza` |
+| Method   | Command             |
+| -------- | ------------------- |
+| Homebrew | `brew install eza`  |
+| Cargo    | `cargo install eza` |
+| apt      | `apt install eza`   |
+| dnf      | `dnf install eza`   |
 
 [GitHub](https://github.com/eza-community/eza)
 
@@ -275,12 +275,12 @@ diff -u file1 file2 | delta
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install git-delta` |
-| Cargo | `cargo install git-delta` |
-| apt | `apt install git-delta` |
-| dnf | `dnf install git-delta` |
+| Method   | Command                   |
+| -------- | ------------------------- |
+| Homebrew | `brew install git-delta`  |
+| Cargo    | `cargo install git-delta` |
+| apt      | `apt install git-delta`   |
+| dnf      | `dnf install git-delta`   |
 
 [GitHub](https://github.com/dandavison/delta)
 
@@ -315,11 +315,11 @@ zoxide query proj            # Query without jumping
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
-| Homebrew | `brew install zoxide` |
-| Cargo | `cargo install zoxide` |
-| apt | `apt install zoxide` |
+| Method   | Command                |
+| -------- | ---------------------- |
+| Homebrew | `brew install zoxide`  |
+| Cargo    | `cargo install zoxide` |
+| apt      | `apt install zoxide`   |
 
 **Post-install:** Add to shell config:
 
@@ -373,11 +373,11 @@ rg pattern | fzf             # Fuzzy search through grep results
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
+| Method   | Command            |
+| -------- | ------------------ |
 | Homebrew | `brew install fzf` |
-| apt | `apt install fzf` |
-| dnf | `dnf install fzf` |
+| apt      | `apt install fzf`  |
+| dnf      | `dnf install fzf`  |
 
 **Post-install:** Enable key bindings:
 
@@ -436,12 +436,12 @@ http --session=user1 GET api.example.com/profile  # Reuses auth
 
 #### Installation
 
-| Method | Command |
-|--------|---------|
+| Method   | Command               |
+| -------- | --------------------- |
 | Homebrew | `brew install httpie` |
-| pip | `pip install httpie` |
-| apt | `apt install httpie` |
-| dnf | `dnf install httpie` |
+| pip      | `pip install httpie`  |
+| apt      | `apt install httpie`  |
+| dnf      | `dnf install httpie`  |
 
 [GitHub](https://github.com/httpie/cli) | [Docs](https://httpie.io/docs/cli)
 
@@ -451,18 +451,18 @@ http --session=user1 GET api.example.com/profile  # Reuses auth
 
 Quick reference for choosing between tools:
 
-| Task | Legacy | Modern | Speed Gain |
-|------|--------|--------|------------|
-| Find files | find | fd | 8× |
-| Search text | grep | ripgrep | 10–100× |
-| Search code structure | - | ast-grep | N/A |
-| Parse JSON | - | jq | N/A |
-| View files | cat | bat | Similar |
-| List files | ls | eza | Similar |
-| Git diffs | git diff | git-delta | Similar |
-| Navigate dirs | cd | zoxide | 10× fewer keystrokes |
-| Fuzzy search | - | fzf | N/A |
-| HTTP requests | curl | httpie | Similar |
+| Task                  | Legacy   | Modern    | Speed Gain           |
+| --------------------- | -------- | --------- | -------------------- |
+| Find files            | find     | fd        | 8×                   |
+| Search text           | grep     | ripgrep   | 10–100×              |
+| Search code structure | -        | ast-grep  | N/A                  |
+| Parse JSON            | -        | jq        | N/A                  |
+| View files            | cat      | bat       | Similar              |
+| List files            | ls       | eza       | Similar              |
+| Git diffs             | git diff | git-delta | Similar              |
+| Navigate dirs         | cd       | zoxide    | 10× fewer keystrokes |
+| Fuzzy search          | -        | fzf       | N/A                  |
+| HTTP requests         | curl     | httpie    | Similar              |
 
 **Speed Gain:** Approximate performance improvement or ergonomic benefit
 

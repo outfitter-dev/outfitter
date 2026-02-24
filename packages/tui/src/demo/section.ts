@@ -8,6 +8,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import {
   type CaseMode,
   renderHeading,

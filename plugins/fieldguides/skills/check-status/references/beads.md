@@ -5,6 +5,7 @@ Local issue tracking with dependency awareness. Complements remote platforms (Gi
 ## Overview
 
 Beads provides:
+
 - Local-first issue tracking (no remote dependency)
 - Dependency graphs between issues
 - Status workflow (open → in_progress → blocked → closed)
@@ -22,6 +23,7 @@ bd stats
 ```
 
 Returns project-level metrics:
+
 - Total issues, open/closed counts
 - In-progress and blocked counts
 - Ready items (unblocked, actionable)
@@ -78,6 +80,7 @@ bd show <issue-id>                # Full details with dependencies
 ```
 
 Returns:
+
 - Full description, design notes, acceptance criteria
 - Blocking/blocked-by relationships
 - Activity history
@@ -88,19 +91,19 @@ Returns:
 
 ```typescript
 interface BeadsIssue {
-  id: string;                     // e.g., "AG-1", "BLZ-42"
+  id: string; // e.g., "AG-1", "BLZ-42"
   title: string;
   description?: string;
-  status: 'open' | 'in_progress' | 'blocked' | 'closed';
-  issue_type: 'bug' | 'feature' | 'task' | 'epic' | 'chore';
-  priority: 0 | 1 | 2 | 3 | 4;    // 1=urgent, 4=low, 0=unset
+  status: "open" | "in_progress" | "blocked" | "closed";
+  issue_type: "bug" | "feature" | "task" | "epic" | "chore";
+  priority: 0 | 1 | 2 | 3 | 4; // 1=urgent, 4=low, 0=unset
   assignee?: string;
   labels: string[];
-  created_at: string;             // ISO 8601
-  updated_at: string;             // ISO 8601
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
   closed_at?: string;
-  dependency_count: number;       // Issues blocking this
-  dependent_count: number;        // Issues this blocks
+  dependency_count: number; // Issues blocking this
+  dependent_count: number; // Issues this blocks
 }
 
 interface BeadsStats {
@@ -109,8 +112,8 @@ interface BeadsStats {
   in_progress: number;
   blocked: number;
   closed: number;
-  ready: number;                  // Unblocked and actionable
-  average_lead_time?: number;     // Days from open to close
+  ready: number; // Unblocked and actionable
+  average_lead_time?: number; // Days from open to close
 }
 ```
 
@@ -124,9 +127,7 @@ function filterByTime(issues: BeadsIssue[], hoursBack: number): BeadsIssue[] {
   const cutoff = new Date();
   cutoff.setHours(cutoff.getHours() - hoursBack);
 
-  return issues.filter(issue =>
-    new Date(issue.updated_at) >= cutoff
-  );
+  return issues.filter((issue) => new Date(issue.updated_at) >= cutoff);
 }
 
 // Example: last 24 hours
@@ -144,8 +145,8 @@ async function gatherBeadsData(timeHours: number = 24) {
 
   // 2. Get in-progress work
   const inProgress = await bd.list({
-    status: 'in_progress',
-    limit: 10
+    status: "in_progress",
+    limit: 10,
   });
 
   // 3. Get ready items (actionable)
@@ -156,8 +157,8 @@ async function gatherBeadsData(timeHours: number = 24) {
 
   // 5. Get recently closed (for velocity)
   const closed = await bd.list({
-    status: 'closed',
-    limit: 10
+    status: "closed",
+    limit: 10,
   });
   const recentlyClosed = filterByTime(closed, timeHours);
 
@@ -192,28 +193,29 @@ Recently Closed ({recentlyClosed.length}):
 
 ### Priority Labels
 
-| Priority | Label | Indicator |
-|----------|-------|-----------|
-| 1 | urgent | 🔴 |
-| 2 | high | 🟠 |
-| 3 | normal | 🟡 |
-| 4 | low | ⚪ |
-| 0 | unset | — |
+| Priority | Label  | Indicator |
+| -------- | ------ | --------- |
+| 1        | urgent | 🔴        |
+| 2        | high   | 🟠        |
+| 3        | normal | 🟡        |
+| 4        | low    | ⚪        |
+| 0        | unset  | —         |
 
 ### Status Indicators
 
-| Status | Indicator |
-|--------|-----------|
-| open | ◯ |
-| in_progress | ◐ |
-| blocked | ⛔ |
-| closed | ✓ |
+| Status      | Indicator |
+| ----------- | --------- |
+| open        | ◯         |
+| in_progress | ◐         |
+| blocked     | ⛔        |
+| closed      | ✓         |
 
 ## Cross-Referencing
 
 ### With GitHub PRs
 
 Match beads issue IDs in PR titles/branches:
+
 - PR title: "AG-123: Implement feature" → links to beads AG-123
 - Branch: `ag-123-feature` → links to beads AG-123
 
@@ -221,7 +223,7 @@ Match beads issue IDs in PR titles/branches:
 function linkPRToBeads(prTitle: string, beadsIssues: BeadsIssue[]) {
   const match = prTitle.match(/^([A-Z]+-\d+):/);
   if (match) {
-    return beadsIssues.find(i => i.id === match[1]);
+    return beadsIssues.find((i) => i.id === match[1]);
   }
   return null;
 }
@@ -240,6 +242,7 @@ Query: Check `external_ref` for Linear correlation.
 ### With Graphite Stacks
 
 Match branch names to beads issues:
+
 - Branch: `ag-123-feature` → beads issue AG-123
 - Stack contains multiple branches → multiple linked issues
 
@@ -261,13 +264,13 @@ bd where-am-i
 
 When using beads via MCP server:
 
-| Tool | Purpose |
-|------|---------|
-| `beads__stats` | Project metrics overview |
-| `beads__list` | Query issues with filters |
-| `beads__ready` | Unblocked, actionable items |
+| Tool             | Purpose                         |
+| ---------------- | ------------------------------- |
+| `beads__stats`   | Project metrics overview        |
+| `beads__list`    | Query issues with filters       |
+| `beads__ready`   | Unblocked, actionable items     |
 | `beads__blocked` | Blocked items with dependencies |
-| `beads__show` | Single issue details |
+| `beads__show`    | Single issue details            |
 
 **Context**: Call `beads__set_context` with workspace root before other operations.
 
@@ -278,15 +281,16 @@ When using beads via MCP server:
 try {
   const stats = await bd.stats();
 } catch (e) {
-  if (e.message.includes('not initialized')) {
+  if (e.message.includes("not initialized")) {
     // Skip beads section, note in output
-    return { available: false, reason: 'Beads not initialized' };
+    return { available: false, reason: "Beads not initialized" };
   }
   throw e;
 }
 ```
 
 **Common errors**:
+
 - "Beads not initialized" → `.beads/` doesn't exist
 - "No context set" → call `set_context` first
 - "Issue not found" → invalid issue ID
@@ -309,11 +313,11 @@ try {
 
 ## Integration Points
 
-| Source | Correlation | Use Case |
-|--------|-------------|----------|
-| GitHub PRs | Issue ID in title/branch | Link PRs to tracked work |
-| Graphite stacks | Branch naming | Show stack progress per issue |
-| Linear | external_ref field | Bridge local ↔ team tracking |
+| Source          | Correlation              | Use Case                      |
+| --------------- | ------------------------ | ----------------------------- |
+| GitHub PRs      | Issue ID in title/branch | Link PRs to tracked work      |
+| Graphite stacks | Branch naming            | Show stack progress per issue |
+| Linear          | external_ref field       | Bridge local ↔ team tracking  |
 
 ## Troubleshooting
 
@@ -325,6 +329,7 @@ bd init --prefix=PROJ             # Custom prefix (e.g., PROJ-1)
 ```
 
 **"No issues found"**
+
 - Check workspace context: `bd where-am-i`
 - Verify `.beads/` exists in expected location
 
@@ -335,5 +340,6 @@ bd set-context /path/to/project   # Set correct workspace
 ```
 
 **Stale data**
+
 - Beads data is local — always fresh
 - No caching concerns unlike remote APIs

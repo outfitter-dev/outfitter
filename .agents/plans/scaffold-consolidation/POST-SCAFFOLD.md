@@ -9,6 +9,7 @@
 ### What happens after files are written today
 
 **`init` command** (`apps/outfitter/src/commands/init.ts`):
+
 - `runInit()` returns `Result<InitResult, InitError>` where `InitResult` contains only `blocksAdded`
 - No dependency installation (`bun install`) runs
 - No git initialization runs
@@ -16,6 +17,7 @@
 - JSON mode outputs a structured object with `nextSteps: ["bun install", "bun run dev"]`
 
 **`create` command** (`apps/outfitter/src/commands/create.ts`):
+
 - `runCreate()` returns `Result<CreateResult, CreateError>` with structure, rootDir, projectDir, preset, packageName, blocksAdded
 - No dependency installation runs
 - No git initialization runs
@@ -23,12 +25,14 @@
 - JSON mode outputs `nextSteps: ["bun install", "bun run build", "bun run test"]`
 
 **`add` command** (`apps/outfitter/src/commands/add.ts`):
+
 - Has a `dryRun: boolean` field on `AddInput` -- the only existing dry-run support
 - When `dryRun` is true: file existence checks still run (so created/skipped/overwritten are accurate), but `writeFile()` calls are skipped and `updatePackageJson()` skips writes and `stampBlock()` is skipped
 - `printAddResults()` prefixes output with `[dry-run] Would` when dry-run is active
 - JSON output includes `dryRun: boolean` field
 
 **Summary of gaps**:
+
 1. No post-scaffold automation exists anywhere -- users must manually run `bun install` and `git init`
 2. Dry-run exists only in `add`, not in `init` or `create`
 3. Next-steps are hardcoded strings, not derived from what was actually scaffolded
@@ -41,6 +45,7 @@ The manifest (`apps/outfitter/src/manifest.ts`) tracks installed blocks at `.out
 ### CLI rendering primitives available
 
 From `@outfitter/cli`:
+
 - `output()` -- mode-aware output (human/json/jsonl) with backpressure
 - `exitWithError()` -- error formatting + exit code mapping
 - `renderList()` -- bullet/number/checkbox/dash lists with nesting
@@ -123,7 +128,11 @@ async function runPostScaffold(
 
   if (!options.skipInstall) {
     if (options.dryRun) {
-      collector?.add({ type: "install", command: "bun install", cwd: options.rootDir });
+      collector?.add({
+        type: "install",
+        command: "bun install",
+        cwd: options.rootDir,
+      });
       installResult = "skipped"; // dry-run: report as skipped
     } else {
       const result = await runBunInstall(options.rootDir);
@@ -151,7 +160,11 @@ async function runPostScaffold(
         collector?.add({ type: "git", action: "init", cwd: options.rootDir });
       }
       if (!options.skipCommit) {
-        collector?.add({ type: "git", action: "add-all", cwd: options.rootDir });
+        collector?.add({
+          type: "git",
+          action: "add-all",
+          cwd: options.rootDir,
+        });
         collector?.add({
           type: "git",
           action: "commit",
@@ -168,7 +181,9 @@ async function runPostScaffold(
         gitInitResult = initResult.isOk() ? "success" : "failed";
         if (initResult.isErr()) {
           gitError = initResult.error;
-          process.stderr.write(`Warning: git init failed: ${initResult.error}\n`);
+          process.stderr.write(
+            `Warning: git init failed: ${initResult.error}\n`
+          );
         }
       }
 
@@ -184,7 +199,9 @@ async function runPostScaffold(
         gitCommitResult = commitResult.isOk() ? "success" : "failed";
         if (commitResult.isErr()) {
           gitError = commitResult.error;
-          process.stderr.write(`Warning: git commit failed: ${commitResult.error}\n`);
+          process.stderr.write(
+            `Warning: git commit failed: ${commitResult.error}\n`
+          );
         }
       }
     }
@@ -221,10 +238,11 @@ interface GitState {
 
 function detectGitState(dir: string): GitState {
   try {
-    const result = Bun.spawnSync(
-      ["git", "rev-parse", "--show-toplevel"],
-      { cwd: dir, stdout: "pipe", stderr: "pipe" }
-    );
+    const result = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], {
+      cwd: dir,
+      stdout: "pipe",
+      stderr: "pipe",
+    });
 
     if (result.exitCode !== 0) {
       return { isRepo: false };
@@ -233,12 +251,14 @@ function detectGitState(dir: string): GitState {
     const gitRoot = result.stdout.toString().trim();
 
     // Check for uncommitted changes
-    const statusResult = Bun.spawnSync(
-      ["git", "status", "--porcelain"],
-      { cwd: dir, stdout: "pipe", stderr: "pipe" }
-    );
+    const statusResult = Bun.spawnSync(["git", "status", "--porcelain"], {
+      cwd: dir,
+      stdout: "pipe",
+      stderr: "pipe",
+    });
 
-    const hasChanges = statusResult.exitCode === 0 &&
+    const hasChanges =
+      statusResult.exitCode === 0 &&
       statusResult.stdout.toString().trim().length > 0;
 
     return { isRepo: true, gitRoot, hasChanges };
@@ -262,7 +282,9 @@ async function runBunInstall(cwd: string): Promise<Result<void, string>> {
     const exitCode = await proc.exited;
     if (exitCode !== 0) {
       const stderr = await new Response(proc.stderr).text();
-      return Result.err(stderr.trim() || `bun install exited with code ${exitCode}`);
+      return Result.err(
+        stderr.trim() || `bun install exited with code ${exitCode}`
+      );
     }
 
     return Result.ok(undefined);
@@ -302,7 +324,9 @@ async function runGitCommit(
     });
 
     if (addResult.exitCode !== 0) {
-      return Result.err(`git add failed: ${addResult.stderr.toString().trim()}`);
+      return Result.err(
+        `git add failed: ${addResult.stderr.toString().trim()}`
+      );
     }
 
     // Create commit
@@ -313,7 +337,9 @@ async function runGitCommit(
     });
 
     if (commitResult.exitCode !== 0) {
-      return Result.err(`git commit failed: ${commitResult.stderr.toString().trim()}`);
+      return Result.err(
+        `git commit failed: ${commitResult.stderr.toString().trim()}`
+      );
     }
 
     return Result.ok(undefined);
@@ -387,6 +413,7 @@ function computeNextSteps(
 ### `renderNextSteps()` output format
 
 Human mode:
+
 ```
 Next steps:
   cd my-project
@@ -395,26 +422,32 @@ Next steps:
 ```
 
 JSON mode (included in the parent result object):
+
 ```json
 {
-  "nextSteps": ["cd my-project", "bun run dev", "# Add commands in src/commands/"]
+  "nextSteps": [
+    "cd my-project",
+    "bun run dev",
+    "# Add commands in src/commands/"
+  ]
 }
 ```
 
 ### Flag specification
 
-| Flag | Applies to | Default | Description |
-|------|-----------|---------|-------------|
-| `--skip-install` | `init`, `scaffold` | `false` | Skip `bun install` after scaffolding |
+| Flag                | Applies to         | Default | Description                                                    |
+| ------------------- | ------------------ | ------- | -------------------------------------------------------------- |
+| `--skip-install`    | `init`, `scaffold` | `false` | Skip `bun install` after scaffolding                           |
 | `--install-timeout` | `init`, `scaffold` | `60000` | Timeout for `bun install` in ms. Warn and continue on timeout. |
-| `--skip-git` | `init` only | `false` | Skip both `git init` and initial commit |
-| `--skip-commit` | `init` only | `false` | Run `git init` but skip the initial commit |
+| `--skip-git`        | `init` only        | `false` | Skip both `git init` and initial commit                        |
+| `--skip-commit`     | `init` only        | `false` | Run `git init` but skip the initial commit                     |
 
 `scaffold` does not run git init/commit because it operates inside an existing project. It may add a targeted `git add` of the new files in the future, but that is out of scope for Slice 5.
 
 ### Error resilience model
 
 Each phase is wrapped in its own try/catch. Failures are:
+
 1. Reported to stderr immediately (human-readable warning)
 2. Recorded in `PostScaffoldResult` for programmatic consumers
 3. Non-blocking -- the next phase always runs
@@ -442,6 +475,7 @@ Notice that "bun install" appears in next-steps because the install failed. If i
 The dry-run system uses an **operation collector** pattern rather than the inline-conditional approach used in `add.ts` today. The collector accumulates a plan of all operations that would execute, then renders the plan without side effects.
 
 This is cleaner than the inline approach because:
+
 1. The engine code does not need `if (!dryRun)` scattered throughout
 2. The operation plan is a first-class data structure that can be rendered, serialized, or diffed
 3. It naturally composes across init + scaffold + post-scaffold
@@ -450,15 +484,33 @@ This is cleaner than the inline approach because:
 
 ```typescript
 type Operation =
-  | { type: "file-create"; path: string; source: "template" | "block" | "generated" }
-  | { type: "file-overwrite"; path: string; source: "template" | "block" | "generated" }
+  | {
+      type: "file-create";
+      path: string;
+      source: "template" | "block" | "generated";
+    }
+  | {
+      type: "file-overwrite";
+      path: string;
+      source: "template" | "block" | "generated";
+    }
   | { type: "file-skip"; path: string; reason: string }
   | { type: "dir-create"; path: string }
-  | { type: "dependency-add"; name: string; version: string; section: "dependencies" | "devDependencies" | "peerDependencies" }
+  | {
+      type: "dependency-add";
+      name: string;
+      version: string;
+      section: "dependencies" | "devDependencies" | "peerDependencies";
+    }
   | { type: "dependency-skip"; name: string; reason: string }
   | { type: "block-add"; name: string; files: readonly string[] }
   | { type: "config-inject"; target: string; description: string }
-  | { type: "git"; action: "init" | "add-all" | "commit"; message?: string; cwd: string }
+  | {
+      type: "git";
+      action: "init" | "add-all" | "commit";
+      message?: string;
+      cwd: string;
+    }
   | { type: "install"; command: string; cwd: string }
   | { type: "manifest-stamp"; block: string; version: string };
 ```
@@ -501,7 +553,10 @@ class OperationCollector {
   }
 
   /** Convert to a JSON-serializable structure */
-  toJSON(): { operations: readonly Operation[]; summary: Record<string, number> } {
+  toJSON(): {
+    operations: readonly Operation[];
+    summary: Record<string, number>;
+  } {
     return {
       operations: this.operations,
       summary: this.countByType(),
@@ -548,11 +603,23 @@ function copyTemplateFiles(
     if (isCollecting(ctx)) {
       // Dry-run: record what would happen
       if (exists && !ctx.force) {
-        ctx.collector!.add({ type: "file-skip", path: targetPath, reason: "exists" });
+        ctx.collector!.add({
+          type: "file-skip",
+          path: targetPath,
+          reason: "exists",
+        });
       } else if (exists) {
-        ctx.collector!.add({ type: "file-overwrite", path: targetPath, source: "template" });
+        ctx.collector!.add({
+          type: "file-overwrite",
+          path: targetPath,
+          source: "template",
+        });
       } else {
-        ctx.collector!.add({ type: "file-create", path: targetPath, source: "template" });
+        ctx.collector!.add({
+          type: "file-create",
+          path: targetPath,
+          source: "template",
+        });
       }
       continue;
     }
@@ -586,20 +653,44 @@ async function addBlocks(
         const targetPath = join(targetDir, file.path);
         const exists = existsSync(targetPath);
         if (exists && !ctx.force) {
-          ctx.collector!.add({ type: "file-skip", path: targetPath, reason: "exists" });
+          ctx.collector!.add({
+            type: "file-skip",
+            path: targetPath,
+            reason: "exists",
+          });
         } else if (exists) {
-          ctx.collector!.add({ type: "file-overwrite", path: targetPath, source: "block" });
+          ctx.collector!.add({
+            type: "file-overwrite",
+            path: targetPath,
+            source: "block",
+          });
         } else {
-          ctx.collector!.add({ type: "file-create", path: targetPath, source: "block" });
+          ctx.collector!.add({
+            type: "file-create",
+            path: targetPath,
+            source: "block",
+          });
         }
       }
 
       // Record dependency additions
       for (const [name, version] of Object.entries(block.dependencies ?? {})) {
-        ctx.collector!.add({ type: "dependency-add", name, version, section: "dependencies" });
+        ctx.collector!.add({
+          type: "dependency-add",
+          name,
+          version,
+          section: "dependencies",
+        });
       }
-      for (const [name, version] of Object.entries(block.devDependencies ?? {})) {
-        ctx.collector!.add({ type: "dependency-add", name, version, section: "devDependencies" });
+      for (const [name, version] of Object.entries(
+        block.devDependencies ?? {}
+      )) {
+        ctx.collector!.add({
+          type: "dependency-add",
+          name,
+          version,
+          section: "devDependencies",
+        });
       }
 
       ctx.collector!.add({
@@ -612,7 +703,12 @@ async function addBlocks(
     }
 
     // Execute mode: run the add
-    const result = await runAdd({ block: blockName, force: ctx.force, dryRun: false, cwd: targetDir });
+    const result = await runAdd({
+      block: blockName,
+      force: ctx.force,
+      dryRun: false,
+      cwd: targetDir,
+    });
     // ...
   }
 }
@@ -642,9 +738,9 @@ async function renderOperationPlan(
   const fileCreates = ops.filter((op) => op.type === "file-create") as Array<
     Extract<Operation, { type: "file-create" }>
   >;
-  const fileOverwrites = ops.filter((op) => op.type === "file-overwrite") as Array<
-    Extract<Operation, { type: "file-overwrite" }>
-  >;
+  const fileOverwrites = ops.filter(
+    (op) => op.type === "file-overwrite"
+  ) as Array<Extract<Operation, { type: "file-overwrite" }>>;
   const fileSkips = ops.filter((op) => op.type === "file-skip") as Array<
     Extract<Operation, { type: "file-skip" }>
   >;
@@ -710,7 +806,9 @@ async function renderOperationPlan(
   if (installOps.length > 0 || gitOps.length > 0) {
     lines.push("  Post-scaffold:");
     for (const op of installOps) {
-      lines.push(`    $ ${(op as Extract<Operation, { type: "install" }>).command}`);
+      lines.push(
+        `    $ ${(op as Extract<Operation, { type: "install" }>).command}`
+      );
     }
     for (const op of gitOps) {
       const gitOp = op as Extract<Operation, { type: "git" }>;
@@ -729,9 +827,11 @@ async function renderOperationPlan(
   const summary = collector.countByType();
   const parts: string[] = [];
   if (summary["file-create"]) parts.push(`${summary["file-create"]} create`);
-  if (summary["file-overwrite"]) parts.push(`${summary["file-overwrite"]} overwrite`);
+  if (summary["file-overwrite"])
+    parts.push(`${summary["file-overwrite"]} overwrite`);
   if (summary["file-skip"]) parts.push(`${summary["file-skip"]} skip`);
-  if (summary["dependency-add"]) parts.push(`${summary["dependency-add"]} deps`);
+  if (summary["dependency-add"])
+    parts.push(`${summary["dependency-add"]} deps`);
 
   if (parts.length > 0) {
     lines.push(`  Total: ${parts.join(", ")}`);
@@ -785,13 +885,35 @@ async function renderOperationPlan(
 ```json
 {
   "operations": [
-    { "type": "file-create", "path": "/abs/path/package.json", "source": "template" },
-    { "type": "file-create", "path": "/abs/path/tsconfig.json", "source": "template" },
-    { "type": "dependency-add", "name": "@biomejs/biome", "version": "^2.3.12", "section": "devDependencies" },
-    { "type": "block-add", "name": "scaffolding", "files": [".claude/settings.json", "biome.json", "..."] },
+    {
+      "type": "file-create",
+      "path": "/abs/path/package.json",
+      "source": "template"
+    },
+    {
+      "type": "file-create",
+      "path": "/abs/path/tsconfig.json",
+      "source": "template"
+    },
+    {
+      "type": "dependency-add",
+      "name": "@biomejs/biome",
+      "version": "^2.3.12",
+      "section": "devDependencies"
+    },
+    {
+      "type": "block-add",
+      "name": "scaffolding",
+      "files": [".claude/settings.json", "biome.json", "..."]
+    },
     { "type": "install", "command": "bun install", "cwd": "/abs/path" },
     { "type": "git", "action": "init", "cwd": "/abs/path" },
-    { "type": "git", "action": "commit", "message": "init: scaffold with outfitter", "cwd": "/abs/path" },
+    {
+      "type": "git",
+      "action": "commit",
+      "message": "init: scaffold with outfitter",
+      "cwd": "/abs/path"
+    },
     { "type": "manifest-stamp", "block": "scaffolding", "version": "0.2.1" }
   ],
   "summary": {
@@ -904,7 +1026,9 @@ The existing `add` command's dry-run can be migrated to use `OperationCollector`
 
 ```typescript
 // Current signature (preserved for backward compat)
-export async function runAdd(input: AddInput): Promise<Result<AddBlockResult, AddError>>;
+export async function runAdd(
+  input: AddInput
+): Promise<Result<AddBlockResult, AddError>>;
 
 // Internal: engine calls this with collector
 export async function runAddWithCollector(
@@ -919,15 +1043,15 @@ However, for Slice 6 we keep the existing `runAdd` working as-is. The collector 
 
 All new code lives in the outfitter app:
 
-| File | Purpose |
-|------|---------|
-| `apps/outfitter/src/engine/post-scaffold.ts` | `runPostScaffold()`, shell helpers, `computeNextSteps()` |
-| `apps/outfitter/src/engine/git.ts` | `detectGitState()`, `runGitInit()`, `runGitCommit()` |
-| `apps/outfitter/src/engine/collector.ts` | `OperationCollector` class, `Operation` type |
-| `apps/outfitter/src/engine/render-plan.ts` | `renderOperationPlan()` |
-| `apps/outfitter/src/__tests__/post-scaffold.test.ts` | Post-scaffold automation tests |
-| `apps/outfitter/src/__tests__/collector.test.ts` | Operation collector tests |
-| `apps/outfitter/src/__tests__/render-plan.test.ts` | Dry-run rendering tests |
+| File                                                 | Purpose                                                  |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| `apps/outfitter/src/engine/post-scaffold.ts`         | `runPostScaffold()`, shell helpers, `computeNextSteps()` |
+| `apps/outfitter/src/engine/git.ts`                   | `detectGitState()`, `runGitInit()`, `runGitCommit()`     |
+| `apps/outfitter/src/engine/collector.ts`             | `OperationCollector` class, `Operation` type             |
+| `apps/outfitter/src/engine/render-plan.ts`           | `renderOperationPlan()`                                  |
+| `apps/outfitter/src/__tests__/post-scaffold.test.ts` | Post-scaffold automation tests                           |
+| `apps/outfitter/src/__tests__/collector.test.ts`     | Operation collector tests                                |
+| `apps/outfitter/src/__tests__/render-plan.test.ts`   | Dry-run rendering tests                                  |
 
 The engine directory is established in Slice 1 (shared engine extraction). Slices 5 and 6 add to it.
 

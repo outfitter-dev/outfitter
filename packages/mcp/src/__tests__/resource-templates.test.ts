@@ -4,7 +4,9 @@
  * Verifies URI template support with RFC 6570 Level 1 matching.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import {
   createMcpServer,
   defineResource,

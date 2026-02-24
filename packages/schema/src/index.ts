@@ -14,7 +14,7 @@ export {
   type ModifiedEntry,
   type SurfaceMapDiff,
   type SurfaceMapDiffMode,
-} from "./diff.js";
+} from "./diff/index.js";
 export {
   type ActionManifest,
   type ActionManifestEntry,

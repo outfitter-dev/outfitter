@@ -37,11 +37,11 @@ const defaults = getEnvironmentDefaults("development");
 
 Default profiles:
 
-| Setting | `development` | `production` | `test` |
-|---------|---------------|--------------|--------|
-| `logLevel` | `"debug"` | `null` | `null` |
-| `verbose` | `true` | `false` | `false` |
-| `errorDetail` | `"full"` | `"message"` | `"full"` |
+| Setting       | `development` | `production` | `test`   |
+| ------------- | ------------- | ------------ | -------- |
+| `logLevel`    | `"debug"`     | `null`       | `null`   |
+| `verbose`     | `true`        | `false`      | `false`  |
+| `errorDetail` | `"full"`      | `"message"`  | `"full"` |
 
 ## Migration Steps
 

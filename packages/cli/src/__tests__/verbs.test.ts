@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { applyVerb, resolveVerb, VERB_FAMILIES } from "../verbs.js";
 
 describe("VERB_FAMILIES", () => {

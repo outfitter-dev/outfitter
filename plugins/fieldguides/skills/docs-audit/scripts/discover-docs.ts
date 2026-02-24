@@ -18,6 +18,7 @@
 
 import { stat } from "node:fs/promises";
 import { parseArgs } from "node:util";
+
 import { $ } from "bun";
 
 /**

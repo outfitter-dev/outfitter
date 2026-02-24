@@ -23,6 +23,7 @@ export function processInput(input: string): ValidatedInput { ... }
 ```
 
 **Check coverage:**
+
 ```bash
 # Count exports
 EXPORTS=$(grep -c "^export " src/**/*.ts)
@@ -104,6 +105,7 @@ func ProcessInput(input string) (ValidatedInput, error) { ... }
 - [ ] **License** - License type or link
 
 **Nice to have:**
+
 - [ ] Badges (build status, version, etc.)
 - [ ] Table of contents (for long READMEs)
 - [ ] Contributing guidelines or link
@@ -152,11 +154,13 @@ func ProcessInput(input string) (ValidatedInput, error) { ... }
 ## Cross-Reference Completeness
 
 ### Internal Links
+
 - [ ] All mentioned features link to their docs
 - [ ] Related concepts are cross-linked
 - [ ] No dead internal links
 
 ### External Links
+
 - [ ] Dependencies link to their docs
 - [ ] Standards link to specifications
 - [ ] Tools link to official sites
@@ -164,12 +168,14 @@ func ProcessInput(input string) (ValidatedInput, error) { ... }
 ## Example Completeness
 
 ### Code Examples Should Include
+
 - [ ] Necessary imports
 - [ ] Variable declarations with types
 - [ ] Error handling (where appropriate)
 - [ ] Expected output (for non-obvious cases)
 
 ### Example Types Needed
+
 - [ ] **Minimal** - Simplest possible usage
 - [ ] **Typical** - Common real-world usage
 - [ ] **Advanced** - Complex scenarios (if applicable)
@@ -184,9 +190,9 @@ func ProcessInput(input string) (ValidatedInput, error) { ... }
 
 ## Severity Classification
 
-| Severity | Criteria | Example |
-|----------|----------|---------|
+| Severity     | Criteria                        | Example                                             |
+| ------------ | ------------------------------- | --------------------------------------------------- |
 | **Critical** | Core functionality undocumented | No installation instructions, main API undocumented |
-| **High** | Important features undocumented | Missing error handling docs, no config reference |
-| **Medium** | Nice-to-have sections missing | No contributing guide, missing advanced examples |
-| **Low** | Polish items | Missing badges, no table of contents |
+| **High**     | Important features undocumented | Missing error handling docs, no config reference    |
+| **Medium**   | Nice-to-have sections missing   | No contributing guide, missing advanced examples    |
+| **Low**      | Polish items                    | Missing badges, no table of contents                |

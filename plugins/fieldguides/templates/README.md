@@ -48,14 +48,15 @@ claude
 
 Located in `slash-commands/`:
 
-| Template | Use Case | Features |
-|----------|----------|----------|
-| `simple.md` | Basic command with no args | Simple prompt template |
-| `with-args.md` | Command with arguments | `$1`, `$2`, `$ARGUMENTS` |
-| `with-bash.md` | Command executing bash | `!` prefix for bash execution |
-| `with-files.md` | Command reading files | `@` prefix for file references |
+| Template        | Use Case                   | Features                       |
+| --------------- | -------------------------- | ------------------------------ |
+| `simple.md`     | Basic command with no args | Simple prompt template         |
+| `with-args.md`  | Command with arguments     | `$1`, `$2`, `$ARGUMENTS`       |
+| `with-bash.md`  | Command executing bash     | `!` prefix for bash execution  |
+| `with-files.md` | Command reading files      | `@` prefix for file references |
 
 **Quick reference**:
+
 - **Arguments**: `$1`, `$2`, `$ARGUMENTS`
 - **Bash execution**: `!`git status``
 - **File references**: `@src/file.ts`
@@ -65,14 +66,15 @@ Located in `slash-commands/`:
 
 Located in `hooks/`:
 
-| Template | Hook Type | Use Case |
-|----------|-----------|----------|
-| `post-tool-use-formatter/` | PostToolUse | Auto-format files after Write/Edit |
-| `pre-tool-use-validator/` | PreToolUse | Validate operations before execution |
-| `user-prompt-context/` | UserPromptSubmit | Add context to every prompt |
-| `bash-validator/` | PreToolUse | Validate bash commands (Bun/TypeScript) |
+| Template                   | Hook Type        | Use Case                                |
+| -------------------------- | ---------------- | --------------------------------------- |
+| `post-tool-use-formatter/` | PostToolUse      | Auto-format files after Write/Edit      |
+| `pre-tool-use-validator/`  | PreToolUse       | Validate operations before execution    |
+| `user-prompt-context/`     | UserPromptSubmit | Add context to every prompt             |
+| `bash-validator/`          | PreToolUse       | Validate bash commands (Bun/TypeScript) |
 
 **Each hook template includes**:
+
 - `hooks.json` - Configuration with matchers
 - Script file - Working implementation (Bash or TypeScript)
 - Security best practices built-in
@@ -110,13 +112,14 @@ chmod +x .claude/hooks/format.sh
 
 Located in `skills/`:
 
-| Template | Complexity | Use Case |
-|----------|------------|----------|
-| `simple-skill/` | Simple | Single-file skill |
-| `multi-file-skill/` | Complex | Skill with reference docs |
-| `skill-with-scripts/` | Advanced | Skill using helper scripts |
+| Template              | Complexity | Use Case                   |
+| --------------------- | ---------- | -------------------------- |
+| `simple-skill/`       | Simple     | Single-file skill          |
+| `multi-file-skill/`   | Complex    | Skill with reference docs  |
+| `skill-with-scripts/` | Advanced   | Skill using helper scripts |
 
 **Skill template features**:
+
 - Complete `SKILL.md` with frontmatter
 - Best practices for descriptions
 - Tool restrictions examples
@@ -143,13 +146,14 @@ claude
 
 Located in `agents/`:
 
-| Template | Specialization | Use Case |
-|----------|---------------|----------|
-| `code-reviewer.md` | Code review | Security, performance, quality analysis |
-| `test-specialist.md` | Testing | TDD, test writing, coverage analysis |
-| `documentation-generator.md` | Documentation | API docs, guides, architecture docs |
+| Template                     | Specialization | Use Case                                |
+| ---------------------------- | -------------- | --------------------------------------- |
+| `code-reviewer.md`           | Code review    | Security, performance, quality analysis |
+| `test-specialist.md`         | Testing        | TDD, test writing, coverage analysis    |
+| `documentation-generator.md` | Documentation  | API docs, guides, architecture docs     |
 
 **Agent template features**:
+
 - Complete role definition
 - Detailed process workflows
 - Best practices and patterns
@@ -193,8 +197,8 @@ Replace these in all templates:
 description: Brief description (shown in /help)
 argument-hint: <arg1> [optional-arg2]
 allowed-tools: Bash(git *), Read, Write
-model: claude-3-5-haiku-20241022  # Optional: specific model
-disable-model-invocation: false    # Optional: prevent SlashCommand tool
+model: claude-3-5-haiku-20241022 # Optional: specific model
+disable-model-invocation: false # Optional: prevent SlashCommand tool
 ---
 ```
 
@@ -204,8 +208,8 @@ disable-model-invocation: false    # Optional: prevent SlashCommand tool
 ---
 name: skill-name
 description: What the skill does and when to use it. Include trigger keywords.
-allowed-tools: Read, Grep, Glob  # Optional: restrict tools
-version: 1.0.0                    # Optional: version tracking
+allowed-tools: Read, Grep, Glob # Optional: restrict tools
+version: 1.0.0 # Optional: version tracking
 ---
 ```
 
@@ -217,7 +221,7 @@ description: What this agent specializes in
 capabilities:
   - Capability 1
   - Capability 2
-allowed-tools: Read, Write, Edit  # Optional: restrict tools
+allowed-tools: Read, Write, Edit # Optional: restrict tools
 ---
 ```
 
@@ -236,6 +240,7 @@ description: Extract text and tables from PDF files, fill forms, merge documents
 #### 2. Include Working Examples
 
 Always provide code examples that:
+
 - Actually work (test them!)
 - Are realistic (not just `foo`/`bar`)
 - Include comments explaining non-obvious parts
@@ -339,12 +344,15 @@ allowed-tools: Bash(git *), Read
 # Recent Changes Review
 
 ## Context
+
 Recent commits: !`git log --oneline -5`
 Uncommitted changes: !`git diff`
 Current branch: !`git branch --show-current`
 
 ## Task
+
 Review the changes above and summarize:
+
 1. What changed
 2. Potential issues
 3. Suggested improvements
@@ -390,9 +398,11 @@ In `SKILL.md`:
 
 ```markdown
 ## Quick Start
+
 [Essential info here]
 
 ## Advanced Usage
+
 See [REFERENCE.md](REFERENCE.md) for complete API documentation.
 See [EXAMPLES.md](EXAMPLES.md) for real-world examples.
 ```
@@ -404,6 +414,7 @@ See [EXAMPLES.md](EXAMPLES.md) for real-world examples.
 **Problem**: `/my-command` not recognized
 
 **Solutions**:
+
 1. Check file location: `.claude/commands/my-command.md`
 2. Check filename: lowercase, no spaces, `.md` extension
 3. Restart Claude Code
@@ -413,6 +424,7 @@ See [EXAMPLES.md](EXAMPLES.md) for real-world examples.
 **Problem**: Hook doesn't execute
 
 **Solutions**:
+
 1. Verify matcher syntax in `settings.json`
 2. Check script is executable: `chmod +x script.sh`
 3. Test script manually with sample input
@@ -423,6 +435,7 @@ See [EXAMPLES.md](EXAMPLES.md) for real-world examples.
 **Problem**: Skill doesn't trigger when expected
 
 **Solutions**:
+
 1. Check description is specific with trigger keywords
 2. Verify YAML frontmatter syntax (no tabs!)
 3. Enable debug mode: `claude --debug`
@@ -461,15 +474,19 @@ allowed-tools: Bash(git *), Bash(docker *), Read
 # Deploy Command
 
 ## Context
+
 Git status: !`git status`
 Docker images: !`docker images | head -5`
 
 ## Validation
+
 Current environment: $1
 Config file: @.env.$1
 
 ## Task
+
 Deploy to $1 environment with:
+
 1. Run tests
 2. Build Docker image
 3. Deploy to cluster

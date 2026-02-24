@@ -4,28 +4,28 @@ Guides and reference documentation for the Outfitter monorepo.
 
 ## Contents
 
-| Document | Description |
-|----------|-------------|
-| [Architecture](./ARCHITECTURE.md) | Package tiers, dependency graph, boundary conventions, design decisions |
-| [Releases](./RELEASES.md) | Changesets, canary publishing, stable release workflow |
-| [Getting Started](./getting-started.md) | Build your first CLI, MCP server, or daemon |
-| [Migration](./migration.md) | Adopting Outfitter, upgrading between versions |
+| Document                                | Description                                                             |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| [Architecture](./ARCHITECTURE.md)       | Package tiers, dependency graph, boundary conventions, design decisions |
+| [Releases](./RELEASES.md)               | Changesets, canary publishing, stable release workflow                  |
+| [Getting Started](./getting-started.md) | Build your first CLI, MCP server, or daemon                             |
+| [Migration](./migration.md)             | Adopting Outfitter, upgrading between versions                          |
 
 ### CLI
 
-| Document | Description |
-|----------|-------------|
+| Document                            | Description                                                        |
+| ----------------------------------- | ------------------------------------------------------------------ |
 | [Conventions](./cli/conventions.md) | Flag presets, verb conventions, schema introspection, queryability |
 
 ### Reference
 
-| Document | Description |
-|----------|-------------|
-| [Patterns](./reference/patterns.md) | Handlers, Result types, error taxonomy, validation |
-| [Result API](./reference/result-api.md) | Complete API surface for `Result<T, E>` |
-| [Result Cookbook](./reference/result-cookbook.md) | Generator-based composition with `Result.gen()` |
-| [Export Contracts](./reference/export-contracts.md) | Package export verification pipeline and tooling |
-| [TUI Stacks](./reference/tui-stacks.md) | Composable hstack/vstack primitives for CLI layouts |
+| Document                                                      | Description                                           |
+| ------------------------------------------------------------- | ----------------------------------------------------- |
+| [Patterns](./reference/patterns.md)                           | Handlers, Result types, error taxonomy, validation    |
+| [Result API](./reference/result-api.md)                       | Complete API surface for `Result<T, E>`               |
+| [Result Cookbook](./reference/result-cookbook.md)             | Generator-based composition with `Result.gen()`       |
+| [Export Contracts](./reference/export-contracts.md)           | Package export verification pipeline and tooling      |
+| [TUI Stacks](./reference/tui-stacks.md)                       | Composable hstack/vstack primitives for CLI layouts   |
 | [`.outfitter/` Directory](./reference/outfitter-directory.md) | Project directory conventions, contents, git strategy |
 
 ## Packages

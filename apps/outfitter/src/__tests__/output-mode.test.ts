@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
 const originalJson = process.env["OUTFITTER_JSON"];

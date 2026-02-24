@@ -1,11 +1,25 @@
 {
   "name": "@outfitter/contracts",
-  "description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
   "version": "0.4.1",
-  "type": "module",
+  "description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
+  "keywords": [
+    "contracts",
+    "errors",
+    "outfitter",
+    "result",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/contracts"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -119,7 +133,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/contracts",
     "lint": "biome lint ./src",
@@ -136,21 +152,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "contracts",
-    "errors",
-    "result",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/contracts"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

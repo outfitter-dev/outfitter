@@ -22,10 +22,12 @@ description: Security expert for all issues
 ## Scope
 
 **I handle:**
+
 - ✅ Security vulnerability detection
 - ✅ Secure coding recommendations
 
 **I don't handle:**
+
 - ❌ Implementation of fixes
 - ❌ Performance optimization
 ```
@@ -38,6 +40,7 @@ description: Security expert for all issues
 ## Output Format
 
 **For each finding:**
+
 - Severity: critical|high|medium|low
 - Location: file:line
 - Description: What's vulnerable
@@ -52,6 +55,7 @@ description: Security expert for all issues
 ## Safety Protocol
 
 Before modifying production:
+
 1. ✅ Backup verified
 2. ✅ Tested in staging
 3. ✅ Rollback plan ready
@@ -66,10 +70,12 @@ Before modifying production:
 ## Example Tasks
 
 **Good:**
+
 - "Review auth.service.ts for security issues"
 - "Check JWT implementation"
 
 **Not ideal:**
+
 - "Review everything" (too broad)
 - "Fix bugs" (not my role)
 ```
@@ -178,6 +184,7 @@ description: |
 
 ```markdown
 # ❌ Does too much
+
 - Reviews code
 - Fixes issues
 - Writes tests
@@ -185,6 +192,7 @@ description: |
 - Monitors production
 
 # ✅ Focused
+
 - Reviews code for security issues
 - Reports findings with severity
 - Suggests remediation

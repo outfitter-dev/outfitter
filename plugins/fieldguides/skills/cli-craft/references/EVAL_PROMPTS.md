@@ -4,12 +4,12 @@ Use these to verify an agent is applying CLI best practices (not just "making so
 
 ## Scoring rubric
 
-- *Pass*:
+- _Pass_:
   - Produces a clear CLI contract (commands, flags, IO, exit codes, examples).
   - Explicitly addresses stdout/stderr, exit codes, help behavior, and interactivity.
   - Includes stable scripting output modes (`--json`/`--plain`) when relevant.
   - Avoids secret leaks (no secrets via flags/env).
-- *Strong pass*:
+- _Strong pass_:
   - Uses the checklist and/or the audit script.
   - Highlights trade-offs and backwards-compatibility risks.
   - Provides ready-to-ship help output and error message patterns.

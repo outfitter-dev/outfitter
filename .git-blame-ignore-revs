@@ -1,0 +1,5 @@
+# Mechanical reformats — ignore in git blame
+# See: https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignoring-commits-in-the-blame-view
+
+# oxfmt migration (biome → oxlint/oxfmt)
+47fc715563d6f5359d4feb198f742660d73ee91e

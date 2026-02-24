@@ -12,7 +12,7 @@ TypeScript 5.5+ automatically infers type predicates from boolean-returning func
 
 ```typescript
 function isString(value: unknown): value is string {
-  return typeof value === 'string';
+  return typeof value === "string";
 }
 ```
 
@@ -20,7 +20,7 @@ function isString(value: unknown): value is string {
 
 ```typescript
 function isString(value: unknown) {
-  return typeof value === 'string';
+  return typeof value === "string";
 }
 // TypeScript infers: value is string
 ```
@@ -37,7 +37,7 @@ function isString(value: unknown) {
 ```typescript
 // typeof checks
 function isNumber(x: unknown) {
-  return typeof x === 'number';
+  return typeof x === "number";
 }
 
 // instanceof checks
@@ -52,14 +52,14 @@ function isDefined<T>(x: T | undefined) {
 
 // Property existence
 function hasId(x: unknown) {
-  return typeof x === 'object' && x !== null && 'id' in x;
+  return typeof x === "object" && x !== null && "id" in x;
 }
 
 // Discriminated union narrowing
-type Action = { type: 'add' } | { type: 'remove' };
+type Action = { type: "add" } | { type: "remove" };
 
 function isAddAction(action: Action) {
-  return action.type === 'add';
+  return action.type === "add";
 }
 ```
 
@@ -80,12 +80,12 @@ function isNotNull<T>(x: T | null): x is T {
 function isValidUser(user: unknown): user is User {
   // Complex validation logic
   return (
-    typeof user === 'object' &&
+    typeof user === "object" &&
     user !== null &&
-    'id' in user &&
-    'name' in user &&
-    typeof user.id === 'number' &&
-    typeof user.name === 'string'
+    "id" in user &&
+    "name" in user &&
+    typeof user.id === "number" &&
+    typeof user.name === "string"
   );
 }
 ```
@@ -163,33 +163,35 @@ Native support for iterator helpers with proper typing.
 const numbers = [1, 2, 3, 4, 5];
 
 // map
-const doubled = numbers.values()
-  .map(x => x * 2)
+const doubled = numbers
+  .values()
+  .map((x) => x * 2)
   .toArray();
 // [2, 4, 6, 8, 10]
 
 // filter
-const evens = numbers.values()
-  .filter(x => x % 2 === 0)
+const evens = numbers
+  .values()
+  .filter((x) => x % 2 === 0)
   .toArray();
 // [2, 4]
 
 // take
-const firstThree = numbers.values()
-  .take(3)
-  .toArray();
+const firstThree = numbers.values().take(3).toArray();
 // [1, 2, 3]
 
 // drop
-const skipTwo = numbers.values()
-  .drop(2)
-  .toArray();
+const skipTwo = numbers.values().drop(2).toArray();
 // [3, 4, 5]
 
 // flatMap
-const nested = [[1, 2], [3, 4]];
-const flat = nested.values()
-  .flatMap(x => x)
+const nested = [
+  [1, 2],
+  [3, 4],
+];
+const flat = nested
+  .values()
+  .flatMap((x) => x)
   .toArray();
 // [1, 2, 3, 4]
 ```
@@ -199,9 +201,9 @@ const flat = nested.values()
 ```typescript
 const result = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   .values()
-  .filter(x => x % 2 === 0)  // [2, 4, 6, 8, 10]
-  .map(x => x * 2)            // [4, 8, 12, 16, 20]
-  .take(3)                    // [4, 8, 12]
+  .filter((x) => x % 2 === 0) // [2, 4, 6, 8, 10]
+  .map((x) => x * 2) // [4, 8, 12, 16, 20]
+  .take(3) // [4, 8, 12]
   .toArray();
 ```
 
@@ -216,9 +218,7 @@ function* fibonacci() {
   }
 }
 
-const first10Fibs = fibonacci()
-  .take(10)
-  .toArray();
+const first10Fibs = fibonacci().take(10).toArray();
 // [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
 ```
 
@@ -263,11 +263,11 @@ Support for non-identifier module names:
 
 ```typescript
 // Import from path with special characters
-import data from './data-file.json' with { type: 'json' };
+import data from "./data-file.json" with { type: "json" };
 
 // Dynamic import with type assertion
-const module = await import('./special-module', {
-  with: { type: 'json' }
+const module = await import("./special-module", {
+  with: { type: "json" },
 });
 ```
 
@@ -301,12 +301,12 @@ New compiler option for rewriting import extensions.
 
 ```typescript
 // Source (.ts file)
-import { helper } from './utils.ts';
-import { config } from '../config/index.ts';
+import { helper } from "./utils.ts";
+import { config } from "../config/index.ts";
 
 // Emitted (.js file)
-import { helper } from './utils.js';
-import { config } from '../config/index.js';
+import { helper } from "./utils.js";
+import { config } from "../config/index.js";
 ```
 
 **Benefits:**
@@ -357,7 +357,7 @@ function createPair<T, U>(first: T, second: U) {
   return [first, second] as const;
 }
 
-const pair = createPair(1, 'hello');
+const pair = createPair(1, "hello");
 // TS 5.7: readonly [first: 1, second: 'hello']
 // TS 5.6: readonly [1, 'hello']
 ```
@@ -408,7 +408,7 @@ function processArray(arr: number[]) {
     "exactOptionalPropertyTypes": true,
 
     // New in 5.5
-    "verbatimModuleSyntax": true  // Preserve exact import/export syntax
+    "verbatimModuleSyntax": true // Preserve exact import/export syntax
   }
 }
 ```
@@ -419,8 +419,8 @@ function processArray(arr: number[]) {
 {
   "compilerOptions": {
     // New in 5.6
-    "noUncheckedSideEffectImports": true,  // Enforce import usage
-    "allowImportingTsExtensions": true     // Allow .ts in imports (with bundler)
+    "noUncheckedSideEffectImports": true, // Enforce import usage
+    "allowImportingTsExtensions": true // Allow .ts in imports (with bundler)
   }
 }
 ```
@@ -431,7 +431,7 @@ function processArray(arr: number[]) {
 {
   "compilerOptions": {
     // New in 5.7
-    "rewriteRelativeImportExtensions": true,  // .ts → .js in output
+    "rewriteRelativeImportExtensions": true, // .ts → .js in output
 
     // Recommended combination for ESM
     "module": "ESNext",
@@ -451,7 +451,7 @@ function processArray(arr: number[]) {
    ```typescript
    // May cause issues if relying on manual predicates
    function check(x: unknown) {
-     return typeof x === 'string';
+     return typeof x === "string";
    }
    // Now inferred as type predicate automatically
    ```
@@ -462,7 +462,7 @@ function processArray(arr: number[]) {
    // Some previously allowed code may now error
    let value: string | null = null;
    if (Math.random() > 0.5) {
-     value = 'hello';
+     value = "hello";
    }
    // Error: value might still be null
    ```
@@ -474,7 +474,7 @@ function processArray(arr: number[]) {
    ```json
    {
      "compilerOptions": {
-       "target": "ES2015"  // Minimum for iterator helpers
+       "target": "ES2015" // Minimum for iterator helpers
      }
    }
    ```
@@ -483,7 +483,7 @@ function processArray(arr: number[]) {
 
    ```typescript
    // Now requires explicit side-effect imports
-   import './styles.css';  // Must keep for side effects
+   import "./styles.css"; // Must keep for side effects
    ```
 
 ### TypeScript 5.7 Breaking Changes
@@ -492,9 +492,9 @@ function processArray(arr: number[]) {
 
    ```typescript
    // Source must use .ts extension
-   import { x } from './mod.ts';  // Required
+   import { x } from "./mod.ts"; // Required
 
-   import { x } from './mod';  // May error with rewriteRelativeImportExtensions
+   import { x } from "./mod"; // May error with rewriteRelativeImportExtensions
    ```
 
 2. **Stricter Readonly Initialization**
@@ -511,18 +511,18 @@ function processArray(arr: number[]) {
 
 ## Feature Compatibility Matrix
 
-| Feature                            | TS Version | Runtime Requirement    | Transpile Target |
-| ---------------------------------- | ---------- | ---------------------- | ---------------- |
-| Inferred Type Predicates           | 5.5+       | Any                    | Any              |
-| Regex Checking                     | 5.5+       | Any                    | Any              |
-| Iterator Helpers                   | 5.6+       | ES2015+                | ES2015+          |
-| `noUncheckedSideEffectImports`     | 5.6+       | Any                    | Any              |
-| Path Rewriting                     | 5.7+       | ESM (Node 16+, bundler | ESNext           |
-| Readonly Init Checks               | 5.7+       | Any                    | Any              |
-| `using`/`await using` (earlier)    | 5.2+       | ES2022+ or polyfill    | ES2022+          |
-| `satisfies` (earlier)              | 4.9+       | Any                    | Any              |
-| Const Type Parameters (earlier)    | 5.0+       | Any                    | Any              |
-| Template Literal Types (earlier)   | 4.1+       | Any (compile-time)     | Any              |
+| Feature                          | TS Version | Runtime Requirement    | Transpile Target |
+| -------------------------------- | ---------- | ---------------------- | ---------------- |
+| Inferred Type Predicates         | 5.5+       | Any                    | Any              |
+| Regex Checking                   | 5.5+       | Any                    | Any              |
+| Iterator Helpers                 | 5.6+       | ES2015+                | ES2015+          |
+| `noUncheckedSideEffectImports`   | 5.6+       | Any                    | Any              |
+| Path Rewriting                   | 5.7+       | ESM (Node 16+, bundler | ESNext           |
+| Readonly Init Checks             | 5.7+       | Any                    | Any              |
+| `using`/`await using` (earlier)  | 5.2+       | ES2022+ or polyfill    | ES2022+          |
+| `satisfies` (earlier)            | 4.9+       | Any                    | Any              |
+| Const Type Parameters (earlier)  | 5.0+       | Any                    | Any              |
+| Template Literal Types (earlier) | 4.1+       | Any (compile-time)     | Any              |
 
 ## Migration Checklist
 

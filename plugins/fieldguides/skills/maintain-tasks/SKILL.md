@@ -10,14 +10,15 @@ Tasks are your **working memory that survives compaction**. Use them to maintain
 
 ## Tasks vs Issue Trackers
 
-| Tool | Purpose | Scope |
-|------|---------|-------|
-| **Tasks** | Session/project working memory | Current effort, active coordination |
+| Tool              | Purpose                         | Scope                                |
+| ----------------- | ------------------------------- | ------------------------------------ |
+| **Tasks**         | Session/project working memory  | Current effort, active coordination  |
 | **Linear/GitHub** | Team-visible project management | Cross-session, multi-person tracking |
 
 Tasks are NOT a replacement for filing issues. They are your **local execution state** — what you're doing now, what comes next, who (which agent) is responsible.
 
 **Sync pattern:**
+
 1. Pull work from Linear/GitHub into Tasks for execution
 2. Work through Tasks within the session
 3. Update Linear/GitHub at completion boundaries
@@ -94,6 +95,7 @@ After compaction, dependencies tell you what's actionable (no blockers) vs what'
 ### Before Compaction
 
 As context fills, ensure Tasks reflect:
+
 - What's done (completed tasks)
 - What's active (single `in_progress` task)
 - What's discovered (new tasks from implementation)
@@ -111,11 +113,13 @@ ActiveForm: Present continuous for spinner ("Implementing auth flow")
 ```
 
 **Subject format:** `[agent-name] Verb the thing`
+
 - `[engineer] Implement JWT refresh logic`
 - `[reviewer] Audit auth module for vulnerabilities`
 - `[analyst] Research rate limiting approaches`
 
 **Description includes:**
+
 - Enough context for the assigned agent to proceed independently
 - Clear done criteria
 - Dependencies or blockers if not captured in `blockedBy`
@@ -152,23 +156,25 @@ Tasks 1 and 2 can run in parallel; Task 3 waits for both.
 
 ## Anti-Patterns
 
-| Anti-Pattern | Why It Fails | Better Approach |
-|--------------|--------------|-----------------|
-| No agent assignment | Lost after compaction | Always prefix with `[agent]` |
-| Vague subjects | Can't recover intent | Specific, actionable subjects |
-| Batching completions | State becomes stale | Mark done immediately |
-| Skipping for "quick" tasks | Consistency matters | If 3+ steps, use Tasks |
-| No dependencies | Unclear sequence | Encode with `blockedBy` |
+| Anti-Pattern               | Why It Fails          | Better Approach               |
+| -------------------------- | --------------------- | ----------------------------- |
+| No agent assignment        | Lost after compaction | Always prefix with `[agent]`  |
+| Vague subjects             | Can't recover intent  | Specific, actionable subjects |
+| Batching completions       | State becomes stale   | Mark done immediately         |
+| Skipping for "quick" tasks | Consistency matters   | If 3+ steps, use Tasks        |
+| No dependencies            | Unclear sequence      | Encode with `blockedBy`       |
 
 ## Rules
 
 ALWAYS:
+
 - Assign subagent explicitly in task subject: `[agent] Task description`
 - Use dependencies to encode sequence
 - Mark `in_progress` before starting, `completed` when done
 - Check TaskList after compaction to recover state
 
 NEVER:
+
 - Use Tasks as a replacement for Linear/GitHub issues
 - Leave multiple tasks `in_progress` simultaneously
 - Skip agent assignment ("the main agent will figure it out")

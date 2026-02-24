@@ -11,6 +11,7 @@ Update documentation to reflect new patterns and APIs.
 ## Files to Update
 
 {{#each DOC_FILES}}
+
 ### {{this.file}}
 
 - **Type:** {{this.type}}
@@ -19,8 +20,9 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
-{{/each}}
+      {{/each}}
 
 ---
 
@@ -28,7 +30,7 @@ Update documentation to reflect new patterns and APIs.
 
 ## README Updates
 
-- [ ] Update installation instructions (add @outfitter/* packages)
+- [ ] Update installation instructions (add @outfitter/\* packages)
 - [ ] Update API examples (Result types, not exceptions)
 - [ ] Update error handling section
 - [ ] Add migration notes for consumers (if library)
@@ -46,9 +48,9 @@ const ctx = createContext();
 const result = await getUser({ id: "123" }, ctx);
 
 if (result.isOk()) {
-  console.log(result.value);
+console.log(result.value);
 } else {
-  console.error(result.error.message);
+console.error(result.error.message);
 }
 \`\`\`
 ```

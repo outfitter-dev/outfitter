@@ -14,23 +14,29 @@ Templates for documenting security findings and audit reports.
 **Severity**: Critical/High/Medium/Low
 
 ### Location
+
 - File: {FILE_PATH}
 - Lines: {LINE_RANGE}
 - Function: {FUNCTION_NAME}
 
 ### Description
+
 {CLEAR_EXPLANATION}
 
 ### Impact
+
 {WHAT_ATTACKER_COULD_DO}
 
 ### Proof of Concept
+
 {CODE_OR_STEPS_TO_EXPLOIT}
 
 ### Remediation
+
 {SPECIFIC_FIX_WITH_CODE}
 
 ### References
+
 - OWASP: {URL}
 - CWE: {URL}
 ```
@@ -65,7 +71,7 @@ Overall security posture: {STRONG/ADEQUATE/NEEDS_IMPROVEMENT/CRITICAL}
 ## Risk Summary
 
 | Severity | Count |
-|----------|-------|
+| -------- | ----- |
 | Critical | {N}   |
 | High     | {N}   |
 | Medium   | {N}   |
@@ -74,12 +80,15 @@ Overall security posture: {STRONG/ADEQUATE/NEEDS_IMPROVEMENT/CRITICAL}
 ## Key Findings
 
 ### 1. {MOST_CRITICAL_FINDING}
+
 Brief description and impact.
 
 ### 2. {SECOND_FINDING}
+
 Brief description and impact.
 
 ### 3. {THIRD_FINDING}
+
 Brief description and impact.
 
 ## Detailed Findings
@@ -89,25 +98,31 @@ Brief description and impact.
 ## Recommendations
 
 ### Immediate (Critical/High)
+
 1. {ACTION_ITEM}
 2. {ACTION_ITEM}
 
 ### Short-term (Medium)
+
 1. {ACTION_ITEM}
 
 ### Long-term (Low / Hardening)
+
 1. {ACTION_ITEM}
 
 ## Scope & Methodology
 
 ### In Scope
+
 - {COMPONENT_1}
 - {COMPONENT_2}
 
 ### Out of Scope
+
 - {EXCLUDED_ITEM}
 
 ### Methodology
+
 - Threat modeling (STRIDE)
 - Code review
 - Dependency scanning
@@ -155,12 +170,14 @@ LIKELIHOOD Med  Low    Med    High
 ```
 
 Factors affecting likelihood:
+
 - Skill required to exploit
 - Access required (unauth vs auth vs admin)
 - Attack complexity
 - User interaction needed
 
 Factors affecting impact:
+
 - Confidentiality (data exposure)
 - Integrity (data modification)
 - Availability (service disruption)

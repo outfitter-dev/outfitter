@@ -31,6 +31,7 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 ```
 
 **Key Takeaways**:
+
 - { learning point 1 }
 - { learning point 2 }
 
@@ -85,6 +86,7 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 ```
 
 **Explanation**:
+
 1. { explanation of step 1 }
 2. { explanation of step 2 }
 3. { explanation of step 3 }
@@ -114,6 +116,7 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 ```
 
 **Key Points**:
+
 - { error handling insight 1 }
 - { error handling insight 2 }
 
@@ -167,8 +170,9 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 { detailed description of what should happen }
 
 **Trade-offs and Considerations**:
+
 - ✅ **Advantages**: { list }
-- ⚠️  **Considerations**: { list }
+- ⚠️ **Considerations**: { list }
 - 🔧 **Customization Options**: { list }
 
 ---
@@ -183,7 +187,7 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 [NAIVE_CODE]
 ```
 
-*Performance*: { benchmark }
+_Performance_: { benchmark }
 
 **Optimized Implementation** (faster):
 
@@ -191,9 +195,10 @@ Real-world examples and use cases for {YOUR_SKILL_NAME}.
 [OPTIMIZED_CODE]
 ```
 
-*Performance*: { benchmark }
+_Performance_: { benchmark }
 
 **Explanation of Optimizations**:
+
 1. { optimization 1 and why it helps }
 2. { optimization 2 and why it helps }
 3. { optimization 3 and why it helps }
@@ -293,7 +298,7 @@ jobs:
 [WRONG_CODE]
 ```
 
-*Why this is wrong*: { explanation }
+_Why this is wrong_: { explanation }
 
 **Correct Approach** ✅:
 
@@ -301,7 +306,7 @@ jobs:
 [CORRECT_CODE]
 ```
 
-*Why this is better*: { explanation }
+_Why this is better_: { explanation }
 
 ---
 
@@ -322,11 +327,13 @@ jobs:
 ```
 
 **Migration Steps**:
+
 1. { step 1 }
 2. { step 2 }
 3. { step 3 }
 
 **Benefits**:
+
 - { benefit 1 }
 - { benefit 2 }
 - { benefit 3 }
@@ -379,6 +386,7 @@ Examples from real-world usage:
 ## Contributing Examples
 
 Have a great example? Contribute it by:
+
 1. { step 1 }
 2. { step 2 }
 3. { step 3 }

@@ -1,6 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+
 import { Command } from "commander";
+
 import { executeCheckCommand } from "../commands/check.js";
 import { executeExportCommand } from "../commands/export.js";
 import { executeSyncCommand } from "../commands/sync.js";

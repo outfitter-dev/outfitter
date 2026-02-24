@@ -12,6 +12,7 @@ as the default CLI integration path.
 ## CLI Actions
 
 {{#each CLI_COMMANDS}}
+
 ### {{this.name}}
 
 - **Handler:** `{{this.handler}}`
@@ -87,6 +88,7 @@ export const {{this.name}}Action = defineAction({
 ## MCP Tools
 
 {{#each MCP_TOOLS}}
+
 ### {{this.name}}
 
 - **Handler:** `{{this.handler}}`

@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import {
   createActionRegistry,
   defineAction,
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
-import { diffSurfaceMaps } from "../diff.js";
+
+import { diffSurfaceMaps } from "../diff/index.js";
 import {
   generateSurfaceMap,
   readSurfaceMap,

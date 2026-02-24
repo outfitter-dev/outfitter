@@ -10,6 +10,7 @@ import {
   validateInput,
 } from "@outfitter/contracts";
 import { Command } from "commander";
+
 import { composePresets } from "./flags.js";
 import { createSchemaCommand, type SchemaCommandOptions } from "./schema.js";
 import type { FlagPreset } from "./types.js";

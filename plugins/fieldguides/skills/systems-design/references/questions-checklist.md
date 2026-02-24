@@ -44,6 +44,7 @@
 ## Technology Selection
 
 For each choice ask:
+
 - Why this over alternatives? (specific reasons, not "popular")
 - What production experience exists? (internal or external)
 - Operational complexity?
@@ -55,6 +56,7 @@ For each choice ask:
 ## Risk Assessment
 
 For each decision:
+
 - Blast radius if this fails?
 - Rollback strategy?
 - How will we detect problems?

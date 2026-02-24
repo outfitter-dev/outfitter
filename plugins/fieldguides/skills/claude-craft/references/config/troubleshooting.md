@@ -162,6 +162,7 @@ echo '{"allowDevTools": true}' > "$env:APPDATA\Claude\developer_settings.json"
 ### Debug Network Issues
 
 With DevTools enabled:
+
 1. Open DevTools (`Cmd+Opt+Shift+i`)
 2. Go to Network tab
 3. Look for failed MCP connections

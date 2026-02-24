@@ -22,6 +22,7 @@
  */
 
 import { statSync } from "node:fs";
+
 import { Glob } from "bun";
 
 interface Violation {

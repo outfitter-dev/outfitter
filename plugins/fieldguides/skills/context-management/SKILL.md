@@ -30,12 +30,14 @@ NOT for: simple single-turn tasks, quick Q&A, tasks completing in one response
 Claude Code operates in a ~128K token context window that compacts automatically as it fills. When compaction happens:
 
 **What survives**:
+
 - Task state (full task list persists)
 - Tool results (summarized)
 - User messages (recent ones)
 - System instructions
 
 **What disappears**:
+
 - Your reasoning and analysis
 - Intermediate exploration results
 - File contents you read (unless in tool results)
@@ -53,14 +55,14 @@ Tasks are not just a tracker — they're your **persistent memory layer**. Use T
 
 ### What Goes in Tasks
 
-| Category | Example |
-|----------|---------|
-| Current work | `Implementing auth refresh flow` (status: in_progress) |
-| Completed work | `JWT validation logic added to middleware` (status: completed) |
-| Discovered work | `Handle token expiry edge case` (status: pending) |
-| Key decisions | Embed in task description: "Using RS256 per security review" |
-| Agent handoffs | `[reviewer] Review auth implementation` + metadata: `{agentId: "abc123"}` |
-| Blockers | Create blocker task, use `blockedBy` field |
+| Category        | Example                                                                   |
+| --------------- | ------------------------------------------------------------------------- |
+| Current work    | `Implementing auth refresh flow` (status: in_progress)                    |
+| Completed work  | `JWT validation logic added to middleware` (status: completed)            |
+| Discovered work | `Handle token expiry edge case` (status: pending)                         |
+| Key decisions   | Embed in task description: "Using RS256 per security review"              |
+| Agent handoffs  | `[reviewer] Review auth implementation` + metadata: `{agentId: "abc123"}` |
+| Blockers        | Create blocker task, use `blockedBy` field                                |
 
 ### Task Discipline
 
@@ -320,6 +322,7 @@ For single-session work, Tasks alone suffice.
 <rules>
 
 ALWAYS:
+
 - Use Tasks for any work over 2-3 steps
 - `TaskUpdate` before significant actions
 - Mark completed immediately, not batched
@@ -329,6 +332,7 @@ ALWAYS:
 - Run pre-compaction checklist when context fills
 
 NEVER:
+
 - Rely on conversation history surviving compaction
 - Keep large research results in main context (delegate or summarize)
 - Have multiple `in_progress` tasks simultaneously

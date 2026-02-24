@@ -17,6 +17,7 @@ Rigorous performance measurement techniques for reliable optimization decisions.
 ### 1. Define Success Criteria
 
 **Before benchmarking, specify:**
+
 - Target metric (latency, throughput, memory)
 - Acceptable threshold (e.g., P95 < 100ms)
 - Minimum improvement to justify change (e.g., 20% faster)
@@ -24,12 +25,14 @@ Rigorous performance measurement techniques for reliable optimization decisions.
 ### 2. Choose Workload
 
 **Representative data:**
+
 - Production dataset sample
 - Realistic data distribution
 - Edge cases included
 - Sufficient size (not trivially small)
 
 **Load patterns:**
+
 - Typical request rate
 - Burst scenarios
 - Concurrent users/requests
@@ -38,12 +41,14 @@ Rigorous performance measurement techniques for reliable optimization decisions.
 ### 3. Isolate Environment
 
 **Eliminate interference:**
+
 - Close unnecessary applications
 - Disable background services
 - Stop cron jobs during testing
 - Use dedicated hardware if critical
 
 **System configuration:**
+
 - Document CPU, RAM, OS version
 - Pin process to specific cores (avoid migration)
 - Disable CPU frequency scaling
@@ -52,11 +57,13 @@ Rigorous performance measurement techniques for reliable optimization decisions.
 ### 4. Warm Up
 
 **JIT compilation:**
+
 - Run warm-up iterations before measurement
 - Allow JIT to optimize hot paths
 - Discard initial slow runs
 
 **Caching:**
+
 - Decide: cold cache or warm cache testing
 - Document cache state
 - Be consistent across runs
@@ -66,6 +73,7 @@ Rigorous performance measurement techniques for reliable optimization decisions.
 ### Multiple Runs
 
 **Never trust single measurement:**
+
 - Run at least 10-30 iterations
 - More iterations for high-variance operations
 - Discard outliers (carefully, document why)
@@ -88,11 +96,13 @@ Range: 38.1ms - 54.3ms
 ### Statistical Significance
 
 **Use t-test or Mann-Whitney U test:**
+
 - Null hypothesis: no difference between implementations
 - Reject if p-value < 0.05 (95% confidence)
 - Higher confidence (p < 0.01) for critical changes
 
 **Effect size:**
+
 - Report percentage improvement: `(old - new) / old * 100%`
 - Cohen's d for standardized effect size
 - Confidence interval around improvement estimate
@@ -104,34 +114,38 @@ Range: 38.1ms - 54.3ms
 **microbench (recommended):**
 
 ```typescript
-import { bench, run } from 'mitata'
+import { bench, run } from "mitata";
 
-bench('fast implementation', () => {
+bench("fast implementation", () => {
   // code to benchmark
-})
+});
 
-bench('slow implementation', () => {
+bench("slow implementation", () => {
   // code to benchmark
-})
+});
 
-await run()
+await run();
 ```
 
 **Benchmark.js:**
 
 ```typescript
-import Benchmark from 'benchmark'
+import Benchmark from "benchmark";
 
-const suite = new Benchmark.Suite()
+const suite = new Benchmark.Suite();
 
 suite
-  .add('implementation A', () => { /* code */ })
-  .add('implementation B', () => { /* code */ })
-  .on('cycle', (event) => console.log(String(event.target)))
-  .on('complete', function() {
-    console.log('Fastest is ' + this.filter('fastest').map('name'))
+  .add("implementation A", () => {
+    /* code */
   })
-  .run({ async: true })
+  .add("implementation B", () => {
+    /* code */
+  })
+  .on("cycle", (event) => console.log(String(event.target)))
+  .on("complete", function () {
+    console.log("Fastest is " + this.filter("fastest").map("name"));
+  })
+  .run({ async: true });
 ```
 
 ### Rust
@@ -162,6 +176,7 @@ criterion_main!(benches);
 ```
 
 **cargo bench output:**
+
 - Automatic outlier detection
 - Statistical analysis included
 - Regression detection across runs
@@ -196,6 +211,7 @@ Statistical significance: p < 0.001
 ### A/B Comparison
 
 **Concurrent testing:**
+
 - Run both implementations with same data
 - Randomize order to avoid bias
 - Use same hardware/environment
@@ -237,15 +253,15 @@ Slope: 0.12ms per item
 
 ```typescript
 // Bad: result never used, might be optimized away
-bench('compute', () => {
-  compute_expensive()
-})
+bench("compute", () => {
+  compute_expensive();
+});
 
 // Good: use black_box or assert result
-bench('compute', () => {
-  const result = compute_expensive()
-  assert(result !== undefined) // forces computation
-})
+bench("compute", () => {
+  const result = compute_expensive();
+  assert(result !== undefined); // forces computation
+});
 ```
 
 ```rust
@@ -259,11 +275,13 @@ b.iter(|| black_box(expensive_function()));
 ### Memory Effects
 
 **Cache effects distort results:**
+
 - Small dataset fits in L1 cache (unrealistic)
 - Repeated access to same data (cache hot)
 - Sequential access vs random (cache friendly)
 
 **Mitigation:**
+
 - Use realistic data sizes
 - Randomize access patterns
 - Clear caches between runs
@@ -272,11 +290,13 @@ b.iter(|| black_box(expensive_function()));
 ### Timing Overhead
 
 **Measurement affects result:**
+
 - Timer resolution too coarse (use nanoseconds)
 - Timer overhead significant for fast operations
 - Loop overhead in benchmark
 
 **Mitigation:**
+
 - Batch operations for fast functions
 - Subtract timer overhead from results
 - Use high-resolution timers
@@ -284,11 +304,13 @@ b.iter(|| black_box(expensive_function()));
 ### Confirmation Bias
 
 **Expecting improvement, find it:**
+
 - Cherry-picking favorable runs
 - Ignoring variance in results
 - Stopping when desired result appears
 
 **Mitigation:**
+
 - Pre-register hypothesis and methodology
 - Use automated statistical tests
 - Report all results, not just favorable
@@ -296,19 +318,22 @@ b.iter(|| black_box(expensive_function()));
 
 ## Documentation Template
 
-```markdown
+````markdown
 ## Performance Benchmark: {OPERATION}
 
 ### Goal
+
 {PERFORMANCE_GOAL}
 
 ### Environment
+
 - Hardware: {CPU, RAM, DISK}
 - OS: {VERSION}
 - Runtime: {LANGUAGE_VERSION}
 - Date: {YYYY-MM-DD}
 
 ### Methodology
+
 - Workload: {DESCRIPTION}
 - Data size: {SIZE}
 - Iterations: {N}
@@ -316,6 +341,7 @@ b.iter(|| black_box(expensive_function()));
 - Cache state: {COLD/WARM}
 
 ### Baseline (commit {SHA})
+
 ```text
 Mean:   {X}ms
 Median: {X}ms
@@ -323,6 +349,7 @@ P95:    {X}ms
 P99:    {X}ms
 Std:    {X}ms
 ```
+````
 
 ### Optimized (commit {SHA})
 
@@ -368,3 +395,4 @@ Std:    {X}ms
 - Reproduce results on different hardware
 - Document assumptions and limitations
 - Update benchmarks as codebase evolves
+```

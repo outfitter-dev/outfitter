@@ -13,12 +13,12 @@ Combines two object schemas. Both must be object schemas.
 ```typescript
 const UserBase = z.object({
   id: z.string(),
-  email: z.string().email()
+  email: z.string().email(),
 });
 
 const UserExtended = z.object({
   name: z.string(),
-  age: z.number()
+  age: z.number(),
 });
 
 const FullUser = UserBase.merge(UserExtended);
@@ -30,6 +30,7 @@ type FullUser = z.infer<typeof FullUser>;
 **Use merge when**: combining two complete, standalone schemas.
 
 **Properties**:
+
 - Creates new schema (doesn't modify originals)
 - Later schema wins on conflicts
 - Type-safe at compile time
@@ -40,12 +41,12 @@ type FullUser = z.infer<typeof FullUser>;
 ```typescript
 const Schema1 = z.object({
   name: z.string(),
-  value: z.number()
+  value: z.number(),
 });
 
 const Schema2 = z.object({
   value: z.string(), // Different type!
-  extra: z.boolean()
+  extra: z.boolean(),
 });
 
 const Merged = Schema1.merge(Schema2);
@@ -60,12 +61,12 @@ Sugar for merge with inline object definition.
 ```typescript
 const UserBase = z.object({
   id: z.string(),
-  email: z.string().email()
+  email: z.string().email(),
 });
 
 const FullUser = UserBase.extend({
   name: z.string(),
-  age: z.number()
+  age: z.number(),
 });
 // Equivalent to UserBase.merge(z.object({ name, age }))
 ```
@@ -77,16 +78,18 @@ const FullUser = UserBase.extend({
 ```typescript
 // ✅ extend — adding to one schema
 const User = BaseUser.extend({
-  createdAt: z.date()
+  createdAt: z.date(),
 });
 
 // ✅ merge — combining two existing schemas
 const FullProfile = UserSchema.merge(AddressSchema);
 
 // ❌ Awkward — creating schema just to merge
-const User = BaseUser.merge(z.object({
-  createdAt: z.date()
-}));
+const User = BaseUser.merge(
+  z.object({
+    createdAt: z.date(),
+  })
+);
 ```
 
 ## pick() and omit()
@@ -105,7 +108,7 @@ const User = z.object({
   passwordHash: z.string(),
   role: z.enum(["admin", "user"]),
   createdAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
 });
 
 // Public user (only safe fields)
@@ -113,14 +116,14 @@ const PublicUser = User.pick({
   id: true,
   email: true,
   name: true,
-  role: true
+  role: true,
 });
 // { id, email, name, role }
 
 // Login credentials
 const Credentials = User.pick({
   email: true,
-  passwordHash: true
+  passwordHash: true,
 });
 // { email, passwordHash }
 
@@ -136,14 +139,14 @@ Exclude specific fields from schema.
 ```typescript
 // Everything except password
 const UserWithoutPassword = User.omit({
-  passwordHash: true
+  passwordHash: true,
 });
 // { id, email, name, role, createdAt, updatedAt }
 
 // Without timestamps
 const UserCore = User.omit({
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 });
 // { id, email, name, passwordHash, role }
 
@@ -172,13 +175,14 @@ const User = z.object({
   passwordHash: z.string(),
   internalNote: z.string(),
   createdAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
 });
 
 // First remove internal fields, then remove password
-const PublicUser = User
-  .omit({ passwordHash: true, internalNote: true })
-  .omit({ createdAt: true, updatedAt: true });
+const PublicUser = User.omit({ passwordHash: true, internalNote: true }).omit({
+  createdAt: true,
+  updatedAt: true,
+});
 // { id, email, name }
 
 // Or in one step
@@ -186,7 +190,7 @@ const PublicUser2 = User.omit({
   passwordHash: true,
   internalNote: true,
   createdAt: true,
-  updatedAt: true
+  updatedAt: true,
 });
 ```
 
@@ -202,7 +206,7 @@ Make all (or specific) fields optional.
 const User = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 // All fields optional
@@ -211,7 +215,7 @@ const PartialUser = User.partial();
 
 // Specific fields optional
 const UserWithOptionalName = User.partial({
-  name: true
+  name: true,
 });
 // { id: string, email: string, name?: string }
 
@@ -224,7 +228,7 @@ type PartialUser = z.infer<typeof PartialUser>;
 const CreateUser = z.object({
   email: z.string().email(),
   name: z.string(),
-  role: z.enum(["admin", "user"])
+  role: z.enum(["admin", "user"]),
 });
 
 // All fields optional for updates
@@ -245,7 +249,7 @@ Make all (or specific) fields required.
 const UserDraft = z.object({
   id: z.string().optional(),
   email: z.string().email().optional(),
-  name: z.string().optional()
+  name: z.string().optional(),
 });
 
 // All required
@@ -254,7 +258,7 @@ const User = UserDraft.required();
 
 // Specific fields required
 const UserWithRequiredEmail = UserDraft.required({
-  email: true
+  email: true,
 });
 // { id?: string, email: string, name?: string }
 
@@ -272,9 +276,9 @@ const User = z.object({
     name: z.string(),
     address: z.object({
       street: z.string(),
-      city: z.string()
-    })
-  })
+      city: z.string(),
+    }),
+  }),
 });
 
 // Shallow partial — only top level optional
@@ -309,13 +313,13 @@ Removes unknown properties silently.
 ```typescript
 const User = z.object({
   id: z.string(),
-  name: z.string()
+  name: z.string(),
 });
 
 const data = {
   id: "123",
   name: "John",
-  extra: "ignored" // Will be removed
+  extra: "ignored", // Will be removed
 };
 
 const user = User.parse(data);
@@ -330,15 +334,17 @@ const user = User.parse(data);
 Allows unknown properties through.
 
 ```typescript
-const User = z.object({
-  id: z.string(),
-  name: z.string()
-}).passthrough();
+const User = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+  })
+  .passthrough();
 
 const data = {
   id: "123",
   name: "John",
-  extra: "kept"
+  extra: "kept",
 };
 
 const user = User.parse(data);
@@ -346,6 +352,7 @@ const user = User.parse(data);
 ```
 
 **Use passthrough for**:
+
 - Proxying data
 - Migrations (keep fields you'll validate later)
 - When exact shape unknown but want to preserve data
@@ -355,15 +362,17 @@ const user = User.parse(data);
 Throws error if unknown properties present.
 
 ```typescript
-const User = z.object({
-  id: z.string(),
-  name: z.string()
-}).strict();
+const User = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+  })
+  .strict();
 
 const data = {
   id: "123",
   name: "John",
-  extra: "error!" // Will cause validation error
+  extra: "error!", // Will cause validation error
 };
 
 const result = User.safeParse(data);
@@ -381,7 +390,7 @@ const result = User.safeParse(data);
 const Schema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string()
+  email: z.string(),
 });
 
 // Pick creates new schema, resets to default strip() mode
@@ -391,10 +400,7 @@ const Picked = Schema.pick({ id: true, name: true });
 const StrictPicked = Schema.pick({ id: true, name: true }).strict();
 
 // Or chain everything
-const Result = Schema
-  .omit({ email: true })
-  .strict()
-  .partial();
+const Result = Schema.omit({ email: true }).strict().partial();
 ```
 
 ## Reusable Schema Patterns
@@ -406,20 +412,20 @@ const Result = Schema
 const EntityBase = z.object({
   id: z.string().uuid(),
   createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date()
+  updatedAt: z.coerce.date(),
 });
 
 // User entity
 const UserEntity = EntityBase.extend({
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 // Post entity
 const PostEntity = EntityBase.extend({
   title: z.string(),
   content: z.string(),
-  authorId: z.string().uuid()
+  authorId: z.string().uuid(),
 });
 
 // All entities share id, createdAt, updatedAt
@@ -431,12 +437,12 @@ const PostEntity = EntityBase.extend({
 const UserCore = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(100),
-  role: z.enum(["admin", "user"])
+  role: z.enum(["admin", "user"]),
 });
 
 // Create — all fields required, plus password
 const CreateUser = UserCore.extend({
-  password: z.string().min(8)
+  password: z.string().min(8),
 });
 
 // Update — all fields optional
@@ -446,17 +452,15 @@ const UpdateUser = UserCore.partial().refine(
 );
 
 // Response — includes ID and timestamps, excludes password
-const UserResponse = UserCore
-  .extend({
-    id: z.string().uuid(),
-    createdAt: z.coerce.date()
-  })
-  .omit({ password: true });
+const UserResponse = UserCore.extend({
+  id: z.string().uuid(),
+  createdAt: z.coerce.date(),
+}).omit({ password: true });
 
 // Summary — minimal fields
 const UserSummary = UserResponse.pick({
   id: true,
-  name: true
+  name: true,
 });
 
 type CreateUser = z.infer<typeof CreateUser>;
@@ -472,7 +476,7 @@ type UserSummary = z.infer<typeof UserSummary>;
 const ProductBase = z.object({
   id: z.string(),
   name: z.string(),
-  price: z.number().positive()
+  price: z.number().positive(),
 });
 
 // Physical product
@@ -482,29 +486,29 @@ const PhysicalProduct = ProductBase.extend({
   dimensions: z.object({
     length: z.number(),
     width: z.number(),
-    height: z.number()
-  })
+    height: z.number(),
+  }),
 });
 
 // Digital product
 const DigitalProduct = ProductBase.extend({
   type: z.literal("digital"),
   downloadUrl: z.string().url(),
-  fileSize: z.number().positive()
+  fileSize: z.number().positive(),
 });
 
 // Service product
 const ServiceProduct = ProductBase.extend({
   type: z.literal("service"),
   duration: z.number().positive(), // in minutes
-  capacity: z.number().int().positive()
+  capacity: z.number().int().positive(),
 });
 
 // Union of all product types
 const Product = z.discriminatedUnion("type", [
   PhysicalProduct,
   DigitalProduct,
-  ServiceProduct
+  ServiceProduct,
 ]);
 
 type Product = z.infer<typeof Product>;
@@ -523,19 +527,19 @@ const PhoneField = z.string().regex(/^\+?1?\d{10,14}$/);
 // Use in multiple schemas
 const UserSignup = z.object({
   email: EmailField,
-  password: PasswordField
+  password: PasswordField,
 });
 
 const UserProfile = z.object({
   id: UuidField,
   email: EmailField,
-  phone: PhoneField.optional()
+  phone: PhoneField.optional(),
 });
 
 const BlogPost = z.object({
   id: UuidField,
   slug: SlugField,
-  authorId: UuidField
+  authorId: UuidField,
 });
 ```
 
@@ -548,8 +552,14 @@ type UserId = Brand<string, "UserId">;
 type ProductId = Brand<string, "ProductId">;
 
 // Schema that validates and brands
-const UserIdSchema = z.string().uuid().transform((val) => val as UserId);
-const ProductIdSchema = z.string().uuid().transform((val) => val as ProductId);
+const UserIdSchema = z
+  .string()
+  .uuid()
+  .transform((val) => val as UserId);
+const ProductIdSchema = z
+  .string()
+  .uuid()
+  .transform((val) => val as ProductId);
 
 // Use in larger schemas
 const Order = z.object({
@@ -558,9 +568,9 @@ const Order = z.object({
   items: z.array(
     z.object({
       productId: ProductIdSchema,
-      quantity: z.number().int().positive()
+      quantity: z.number().int().positive(),
     })
-  )
+  ),
 });
 
 type Order = z.infer<typeof Order>;
@@ -577,24 +587,24 @@ type Order = z.infer<typeof Order>;
 
 ```typescript
 const BaseConfig = z.object({
-  mode: z.enum(["development", "production"])
+  mode: z.enum(["development", "production"]),
 });
 
 const DevelopmentConfig = BaseConfig.extend({
   mode: z.literal("development"),
   debugLevel: z.number().int().min(0).max(5),
-  hotReload: z.boolean()
+  hotReload: z.boolean(),
 });
 
 const ProductionConfig = BaseConfig.extend({
   mode: z.literal("production"),
   cacheEnabled: z.boolean(),
-  maxConnections: z.number().int().positive()
+  maxConnections: z.number().int().positive(),
 });
 
 const Config = z.discriminatedUnion("mode", [
   DevelopmentConfig,
-  ProductionConfig
+  ProductionConfig,
 ]);
 
 type Config = z.infer<typeof Config>;
@@ -610,8 +620,8 @@ function createPaginatedSchema<T extends z.ZodType>(itemSchema: T) {
       page: z.number().int().min(1),
       limit: z.number().int().min(1),
       total: z.number().int().min(0),
-      totalPages: z.number().int().min(0)
-    })
+      totalPages: z.number().int().min(0),
+    }),
   });
 }
 
@@ -637,7 +647,7 @@ const CategorySchema: z.ZodType<Category> = z.lazy(() =>
     id: z.string(),
     name: z.string(),
     parent: CategorySchema.optional(),
-    children: z.array(CategorySchema)
+    children: z.array(CategorySchema),
   })
 );
 
@@ -653,11 +663,11 @@ const category = CategorySchema.parse({
         {
           id: "3",
           name: "Grandchild",
-          children: []
-        }
-      ]
-    }
-  ]
+          children: [],
+        },
+      ],
+    },
+  ],
 });
 ```
 
@@ -675,28 +685,31 @@ const Schema = Schema1.merge(Schema2);
 // ✅ For unions, use discrimination
 const Combined = z.discriminatedUnion("type", [
   Schema1.extend({ type: z.literal("a") }),
-  Schema2.extend({ type: z.literal("b") })
+  Schema2.extend({ type: z.literal("b") }),
 ]);
 ```
 
 ### Dynamic schema composition
 
 ```typescript
-function createUserSchema(options: { withPassword?: boolean; withRole?: boolean }) {
+function createUserSchema(options: {
+  withPassword?: boolean;
+  withRole?: boolean;
+}) {
   let schema = z.object({
     email: z.string().email(),
-    name: z.string()
+    name: z.string(),
   });
 
   if (options.withPassword) {
     schema = schema.extend({
-      password: z.string().min(8)
+      password: z.string().min(8),
     });
   }
 
   if (options.withRole) {
     schema = schema.extend({
-      role: z.enum(["admin", "user"])
+      role: z.enum(["admin", "user"]),
     });
   }
 
@@ -708,7 +721,7 @@ const SignupSchema = createUserSchema({ withPassword: true });
 const ProfileUpdateSchema = createUserSchema({ withRole: true });
 const AdminCreateUserSchema = createUserSchema({
   withPassword: true,
-  withRole: true
+  withRole: true,
 });
 ```
 
@@ -720,7 +733,7 @@ const AdminCreateUserSchema = createUserSchema({
 // ✅ Always export both
 export const UserSchema = z.object({
   id: z.string(),
-  name: z.string()
+  name: z.string(),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -752,18 +765,18 @@ function validateUser(data: unknown) {
 // ❌ Duplication
 const CreateUser = z.object({
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 const UpdateUser = z.object({
   email: z.string().email().optional(),
-  name: z.string().optional()
+  name: z.string().optional(),
 });
 
 // ✅ Composition
 const UserFields = z.object({
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 const CreateUser = UserFields;
@@ -776,13 +789,13 @@ const UpdateUser = UserFields.partial();
 // ❌ Hard to narrow
 const Response = z.union([
   z.object({ data: z.string() }),
-  z.object({ error: z.string() })
+  z.object({ error: z.string() }),
 ]);
 
 // ✅ Type-safe discrimination
 const Response = z.discriminatedUnion("status", [
   z.object({ status: z.literal("success"), data: z.string() }),
-  z.object({ status: z.literal("error"), error: z.string() })
+  z.object({ status: z.literal("error"), error: z.string() }),
 ]);
 ```
 
@@ -792,7 +805,7 @@ const Response = z.discriminatedUnion("status", [
 // Defaults applied after validation
 const Config = z.object({
   port: z.number().int().default(3000),
-  host: z.string().default("localhost")
+  host: z.string().default("localhost"),
 });
 
 Config.parse({}); // { port: 3000, host: "localhost" }

@@ -4,6 +4,7 @@ import type {
   AnyActionSpec,
 } from "@outfitter/contracts";
 import { DEFAULT_REGISTRY_SURFACES } from "@outfitter/contracts";
+
 import { defineTool } from "./server.js";
 import type { ToolDefinition } from "./types.js";
 

@@ -32,6 +32,7 @@ NOT for: quick sanity checks, trivial typo fixes, formatting-only changes
 ## During Review
 
 Emit findings as discovered:
+
 - **{SEVERITY}** `{FILE_PATH}:{LINE}` — { issue description }
 - **Impact:** { consequences if shipped }
 - **Fix:** { concrete remediation }
@@ -41,6 +42,7 @@ Emit findings as discovered:
 **Review Complete**
 
 **Findings Summary:**
+
 - ◈ Severe: {COUNT} — blocking issues
 - ◆ Moderate: {COUNT} — should fix before merge
 - ◇ Minor: {COUNT} — consider addressing
@@ -142,6 +144,7 @@ Emit findings as discovered:
 ## 1. Announce (activeForm: Announcing review)
 
 Emit starting protocol:
+
 - Scope of review
 - Focus areas
 - Checklist approach (full or targeted)
@@ -149,6 +152,7 @@ Emit starting protocol:
 ## 2. Checklist (activeForm: Running checklist review)
 
 Systematically verify each category:
+
 - Type Safety → Error Handling → Security → Testing → Quality → Docs → Performance
 - Flag violations immediately with severity
 - Note clean areas briefly
@@ -156,6 +160,7 @@ Systematically verify each category:
 ## 3. Deep Dive (activeForm: Investigating findings)
 
 For each finding:
+
 - Verify it's actually a problem (not false positive)
 - Assess severity and impact
 - Determine concrete fix
@@ -164,6 +169,7 @@ For each finding:
 ## 4. Summarize (activeForm: Compiling review summary)
 
 Emit completion protocol:
+
 - Findings count by severity
 - Recommendation (ship / fix blockers / rework)
 - Detailed findings list
@@ -206,6 +212,7 @@ Example:
 <severity_guidance>
 
 **◈ Severe (blocking):**
+
 - Security vulnerabilities
 - Data loss risks
 - Runtime crashes in common paths
@@ -213,6 +220,7 @@ Example:
 - Test failures or missing critical tests
 
 **◆ Moderate (should fix):**
+
 - Type safety violations
 - Unhandled error cases
 - Poor error messages
@@ -221,6 +229,7 @@ Example:
 - Missing documentation for public APIs
 
 **◇ Minor (consider addressing):**
+
 - Code style inconsistencies
 - Overly complex but functional code
 - Minor performance optimizations
@@ -243,6 +252,7 @@ Loop: Scan → Verify → Document → Next category
 7. **Deliver findings** — completion protocol with detailed list
 
 At each finding:
+
 - Verify it's actually a problem
 - Assess impact if shipped
 - Determine concrete fix
@@ -255,18 +265,21 @@ At each finding:
 Before completing review:
 
 **Check coverage:**
+
 - ✓ All checklist categories verified?
 - ✓ Both happy path and error paths reviewed?
 - ✓ Tests examined for actual assertions?
 - ✓ Security-sensitive areas given extra scrutiny?
 
 **Check findings quality:**
+
 - ✓ Severity accurately assessed?
 - ✓ Impact clearly explained?
 - ✓ Fix actionable and concrete?
 - ✓ False positives eliminated?
 
 **Check recommendation:**
+
 - ✓ Aligned with findings severity?
 - ✓ Blockers clearly marked?
 - ✓ Path forward unambiguous?
@@ -276,6 +289,7 @@ Before completing review:
 <rules>
 
 ALWAYS:
+
 - Announce review start with scope and focus
 - Run systematic checklist, don't skip categories
 - Emit findings as discovered, don't batch at end
@@ -286,6 +300,7 @@ ALWAYS:
 - Consider patterns (single issue or systemic?)
 
 NEVER:
+
 - Skip checklist review for "quick check"
 - Assume code is safe without verification
 - Flag style preferences as blockers
@@ -300,9 +315,11 @@ NEVER:
 <references>
 
 Core methodology:
+
 - [checklist.md](references/checklist.md) — extended checklist details, examples, severity guidance
 
 Related skills:
+
 - codebase-analysis — evidence-based investigation (foundation for review)
 - debugging — structured bug investigation
 

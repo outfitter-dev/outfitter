@@ -34,7 +34,7 @@ Use TSDoc syntax. Do not include JSDoc-style `{type}` annotations — TypeScript
 
 ### Exported function
 
-```typescript
+````typescript
 /**
  * Load configuration from XDG-compliant paths with schema validation.
  *
@@ -54,7 +54,7 @@ export async function loadConfig<T>(
   appName: string,
   schema: ZodSchema<T>,
 ): Promise<Result<T, ConfigError>> { ... }
-```
+````
 
 ### Exported interface
 
@@ -72,15 +72,16 @@ export interface CheckExportsOptions {
 
 ```typescript
 /** Handler function that processes input and returns a Result. */
-export type Handler<TInput, TOutput, TError extends OutfitterError = OutfitterError> = (
-  input: TInput,
-  ctx: HandlerContext,
-) => Promise<Result<TOutput, TError>>;
+export type Handler<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+> = (input: TInput, ctx: HandlerContext) => Promise<Result<TOutput, TError>>;
 ```
 
 ### Package entry point (`index.ts`)
 
-```typescript
+````typescript
 /**
  * @outfitter/config
  *
@@ -93,7 +94,7 @@ export type Handler<TInput, TOutput, TError extends OutfitterError = OutfitterEr
  *
  * @packageDocumentation
  */
-```
+````
 
 ## Exemplary Packages
 

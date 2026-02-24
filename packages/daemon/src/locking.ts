@@ -8,7 +8,9 @@
  */
 
 import { unlink } from "node:fs/promises";
+
 import type { Result } from "@outfitter/contracts";
+
 import { LockError } from "./errors.js";
 
 // ============================================================================

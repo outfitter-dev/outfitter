@@ -15,23 +15,25 @@ type: workflow
 description: Red-Green-Refactor cycle
 
 stages:
+
 - name: Red
-    actions: [understand requirement, write failing test, confirm failure]
-    exit_criteria: test fails with clear assertion
+  actions: [understand requirement, write failing test, confirm failure]
+  exit_criteria: test fails with clear assertion
 
 - name: Green
-    actions: [write minimal implementation, run until pass]
-    exit_criteria: test passes
+  actions: [write minimal implementation, run until pass]
+  exit_criteria: test passes
 
 - name: Refactor
-    actions: [improve quality, extract duplicates, re-run tests]
-    exit_criteria: clean code, all tests pass
+  actions: [improve quality, extract duplicates, re-run tests]
+  exit_criteria: clean code, all tests pass
 
 triggers:
+
 - implementing new feature
 - fixing bug with test coverage
 
-```
+````
 
 Component: Skill (requires judgment on test design)
 Composite: Add `/tdd` command for scaffolding
@@ -64,7 +66,7 @@ triggers:
   - bug report received
   - unexpected behavior
   - CI test failure
-```
+````
 
 Component: Skill (requires investigative judgment)
 Composite: Add Hook to enforce regression test
@@ -77,27 +79,29 @@ type: workflow
 description: Comprehensive PR review process
 
 stages:
+
 - name: Context
-    actions: [read description, understand problem, review discussion]
-    exit_criteria: clear understanding of intent
+  actions: [read description, understand problem, review discussion]
+  exit_criteria: clear understanding of intent
 
 - name: Code Review
-    actions: [check correctness, verify tests, assess readability]
-    exit_criteria: quality assessment
+  actions: [check correctness, verify tests, assess readability]
+  exit_criteria: quality assessment
 
 - name: Testing
-    actions: [checkout locally, run tests, manual testing]
-    exit_criteria: confidence in implementation
+  actions: [checkout locally, run tests, manual testing]
+  exit_criteria: confidence in implementation
 
 - name: Feedback
-    actions: [specific comments, highlight positives, approve/request changes]
-    exit_criteria: review decision
+  actions: [specific comments, highlight positives, approve/request changes]
+  exit_criteria: review decision
 
 triggers:
+
 - PR ready for review
 - review requested
 
-```
+````
 
 Component: Skill (requires judgment on code quality)
 Composite: Add Command `/code-review` for automated checks
@@ -112,7 +116,7 @@ steps:
   - open terminal
   - type git status
   - press enter
-```
+````
 
 Too vague:
 
@@ -178,26 +182,28 @@ type: orchestration
 description: Deploy services with dependency ordering
 
 tools:
+
 - tool: Docker
-    role: container management
+  role: container management
 - tool: Kubernetes
-    role: orchestration
+  role: orchestration
 - tool: Health endpoints
-    role: verification
+  role: verification
 
 sequence:
-  1. Build container images
-  2. Push to registry
-  3. Deploy database migrations
-  4. Wait for database health
-  5. Deploy backend
-  6. Wait for backend health
-  7. Deploy frontend
-  8. Verify end-to-end
+
+1. Build container images
+2. Push to registry
+3. Deploy database migrations
+4. Wait for database health
+5. Deploy backend
+6. Wait for backend health
+7. Deploy frontend
+8. Verify end-to-end
 
 rollback: Revert in reverse dependency order
 
-```
+````
 
 Component: Skill (manual with judgment) or Command (if automated)
 </example>
@@ -225,7 +231,7 @@ sequence:
 triggers:
   - post-commit hook
   - pre-push hook (batch)
-```
+````
 
 Component: Hook (event-driven, automated)
 </example>
@@ -237,14 +243,16 @@ type: orchestration
 description: Run tests in parallel, aggregate results
 
 tools:
+
 - tool: Bash
-    role: process management
+  role: process management
 - tool: Test runner
-    role: execution
+  role: execution
 - tool: JSON parser
-    role: result aggregation
+  role: result aggregation
 
 coordination:
+
 - Split tests into groups
 - Execute in parallel
 - Monitor for failures
@@ -252,11 +260,12 @@ coordination:
 - Generate unified report
 
 parallelization:
+
 - Group by file/module
 - Limit to CPU count
 - Kill all on fast-fail
 
-```
+````
 
 Component: Command (automated with standard inputs)
 </example>
@@ -270,7 +279,7 @@ coordination:
   - run git status
   - then run git diff
   - then run git log
-```
+````
 
 Tight coupling:
 
@@ -310,8 +319,7 @@ heuristic_aspects:
   - Full suite on main
   - Parallel for large suites
 
-coordination:
-  Lint → Type Check → Unit → Integration → Deploy
+coordination: Lint → Type Check → Unit → Integration → Deploy
 
 decision_logic:
   - if: branch == main
@@ -343,27 +351,29 @@ action: Recommend splitting if over threshold
 rationale: Large PRs = slower review + lower quality feedback
 
 thresholds:
-  ideal: 100-250 LOC
-  acceptable: 250-300 LOC
-  warning: 300-500 LOC
-  must_split: 500+ LOC
+ideal: 100-250 LOC
+acceptable: 250-300 LOC
+warning: 300-500 LOC
+must_split: 500+ LOC
 
 exceptions:
+
 - Mechanical changes (formatting, renames)
 - Lockfile updates
 - Batch refactoring with clear pattern
 
 rules:
-- condition: LOC < 100
-    action: Consider if PR is complete
-- condition: LOC 100-250
-    action: Ideal, proceed
-- condition: LOC 300-500
-    action: Strongly recommend splitting
-- condition: LOC > 500
-    action: Must split unless mechanical
 
-```
+- condition: LOC < 100
+  action: Consider if PR is complete
+- condition: LOC 100-250
+  action: Ideal, proceed
+- condition: LOC 300-500
+  action: Strongly recommend splitting
+- condition: LOC > 500
+  action: Must split unless mechanical
+
+````
 
 Component: Hook (pre-push check) + Skill (splitting guidance)
 </example>
@@ -406,7 +416,7 @@ red_flags:
   - No updates in 12+ months
   - Security vulnerabilities
   - Frequent breaking changes
-```
+````
 
 Component: Skill (requires judgment)
 </example>
@@ -418,29 +428,29 @@ type: heuristic
 description: Choose error handling by type/context
 
 classifications:
-  expected_recoverable:
-    examples: [network timeout, file not found, validation]
-    strategy: Return Result type, let caller decide
+expected_recoverable:
+examples: [network timeout, file not found, validation]
+strategy: Return Result type, let caller decide
 
-  expected_unrecoverable:
-    examples: [config error, db connection at startup]
-    strategy: Fail fast with clear message
+expected_unrecoverable:
+examples: [config error, db connection at startup]
+strategy: Fail fast with clear message
 
-  unexpected:
-    examples: [null pointer, index out of bounds]
-    strategy: Panic/throw, capture in boundary
+unexpected:
+examples: [null pointer, index out of bounds]
+strategy: Panic/throw, capture in boundary
 
-  degraded:
-    examples: [cache miss, optional feature unavailable]
-    strategy: Log warning, use fallback
+degraded:
+examples: [cache miss, optional feature unavailable]
+strategy: Log warning, use fallback
 
 recovery:
-  retry: Transient errors, exponential backoff
-  fallback: Optional enhancement unavailable
-  compensate: Partial success, undo completed steps
-  propagate: Caller has better context
+retry: Transient errors, exponential backoff
+fallback: Optional enhancement unavailable
+compensate: Partial success, undo completed steps
+propagate: Caller has better context
 
-```
+````
 
 Component: Skill (embedded guidance)
 </example>
@@ -453,7 +463,7 @@ Too rigid:
 condition: Function > 10 lines
 action: Must split
 # Ignores complexity, cohesion, readability
-```
+````
 
 Cargo cult:
 
@@ -496,8 +506,7 @@ rules:
   - condition: coverage < 80%
     action: warn, show uncovered
 
-workflow:
-  1. Analyze changed files
+workflow: 1. Analyze changed files
   2. Select test scope
   3. Execute in priority order
   4. Report with actionable feedback
@@ -518,6 +527,7 @@ Patterns evolve as needs grow:
 5. Intelligent Orchestration (Agent + Skills) → Decides what to run
 
 Recognition triggers:
+
 - Manual → Workflow: User repeatedly asks "how do I..."
 - Workflow → Command: Fully automatable with known inputs
 - Command → Hook: Run at predictable times

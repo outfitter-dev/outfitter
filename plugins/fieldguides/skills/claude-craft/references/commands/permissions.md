@@ -19,6 +19,7 @@ allowed-tools: Read, Grep, Glob, Bash(git *)
 ### Without `allowed-tools`
 
 Commands inherit tool permissions from the conversation:
+
 - Claude may ask for permission to use new tools
 - User can approve/deny as normal
 - No automatic restrictions
@@ -26,6 +27,7 @@ Commands inherit tool permissions from the conversation:
 ### With `allowed-tools`
 
 Only listed tools are available without asking:
+
 - Tools in the list work immediately
 - Unlisted tools are blocked or require permission
 - Overrides conversation settings for this command
@@ -36,23 +38,23 @@ Only listed tools are available without asking:
 
 Tools are case-sensitive. Use exact names:
 
-| Tool | Purpose |
-|------|---------|
-| `Read` | Read file contents |
-| `Write` | Create/overwrite files |
-| `Edit` | Modify existing files |
-| `Grep` | Search file contents |
-| `Glob` | Find files by pattern |
-| `Bash` | Execute shell commands |
-| `Task` | Create subagent tasks |
-| `Skill` | Invoke skills |
-| `TaskCreate` | Create tasks |
-| `TaskUpdate` | Update task status |
-| `TaskList` | List tasks |
-| `TaskGet` | Get task details |
-| `WebSearch` | Search the web |
-| `WebFetch` | Fetch web content |
-| `SlashCommand` | Invoke other commands |
+| Tool           | Purpose                |
+| -------------- | ---------------------- |
+| `Read`         | Read file contents     |
+| `Write`        | Create/overwrite files |
+| `Edit`         | Modify existing files  |
+| `Grep`         | Search file contents   |
+| `Glob`         | Find files by pattern  |
+| `Bash`         | Execute shell commands |
+| `Task`         | Create subagent tasks  |
+| `Skill`        | Invoke skills          |
+| `TaskCreate`   | Create tasks           |
+| `TaskUpdate`   | Update task status     |
+| `TaskList`     | List tasks             |
+| `TaskGet`      | Get task details       |
+| `WebSearch`    | Search the web         |
+| `WebFetch`     | Fetch web content      |
+| `SlashCommand` | Invoke other commands  |
 
 ---
 
@@ -206,12 +208,14 @@ allowed-tools: Bash(bun run test:*), Bash(bun run lint:*), Bash(bun run build:*)
 ### Command vs Skill
 
 If command invokes a skill:
+
 - Skill's tool restrictions may also apply
 - Most restrictive wins
 
 ### Subagent Permissions
 
 If using `Task` tool:
+
 - Subagent inherits command's permissions
 - Unless subagent has its own restrictions
 
@@ -325,6 +329,7 @@ No modifications will be made.
 ### 3. Test Thoroughly
 
 Before sharing with team:
+
 - Test with expected inputs
 - Verify blocked operations fail gracefully
 - Check edge cases

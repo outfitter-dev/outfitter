@@ -45,7 +45,6 @@
 ### Minor Changes
 
 - Add JSONC config file support
-
   - Add JSONC (JSON with Comments) parsing for config files
   - Add `.jsonc` to config file discovery preference order
 
@@ -65,7 +64,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -90,7 +88,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

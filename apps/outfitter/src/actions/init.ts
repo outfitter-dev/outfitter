@@ -18,6 +18,7 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
+
 import type { InitOptions } from "../commands/init.js";
 import { printInitResults, runInit } from "../commands/init.js";
 import {

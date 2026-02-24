@@ -8,7 +8,9 @@
  * Total: 12 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { z } from "zod";
+
 import { createValidator, validateInput } from "../validation.js";
 
 // ============================================================================

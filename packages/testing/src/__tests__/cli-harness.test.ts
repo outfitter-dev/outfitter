@@ -11,6 +11,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import { createCliHarness } from "../cli-harness.js";
 
 // ============================================================================

@@ -1,6 +1,7 @@
 ---
 description: Generate comprehensive status report across VCS, PRs, issues, and CI/CD
-argument-hint: [time range and/or services: graphite, github, linear, beads, all]
+argument-hint:
+  [time range and/or services: graphite, github, linear, beads, all]
 ---
 
 # Situation Report

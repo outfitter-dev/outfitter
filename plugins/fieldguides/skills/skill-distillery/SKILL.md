@@ -76,15 +76,15 @@ Trigger: User says "quick", repo has < 5 main commands, or clear single purpose.
 
 Load the `maintain-tasks` skill for stage tracking. Stages advance only.
 
-| Stage | Skill | activeForm |
-|-------|-------|------------|
-| 1. Discovery | `research` | "Researching external docs" |
-| 2. Recon | `codebase-analysis` | "Analyzing target repo" |
-| 3. Patterns | `find-patterns` | "Extracting patterns" |
-| 4. Mapping | `codify` | "Mapping to components" |
-| 5. Authoring | `skillcraft` | "Creating components" |
-| 6. Packaging | `claude-plugins` | "Packaging plugin" |
-| 7. Audit | `claude-plugins` | "Validating plugin" |
+| Stage        | Skill               | activeForm                  |
+| ------------ | ------------------- | --------------------------- |
+| 1. Discovery | `research`          | "Researching external docs" |
+| 2. Recon     | `codebase-analysis` | "Analyzing target repo"     |
+| 3. Patterns  | `find-patterns`     | "Extracting patterns"       |
+| 4. Mapping   | `codify`            | "Mapping to components"     |
+| 5. Authoring | `skillcraft`        | "Creating components"       |
+| 6. Packaging | `claude-plugins`    | "Packaging plugin"          |
+| 7. Audit     | `claude-plugins`    | "Validating plugin"         |
 
 <workflow>
 
@@ -139,21 +139,25 @@ See [stage-7-audit.md](references/stage-7-audit.md) for details.
 Key decisions during engineering process:
 
 **Which patterns to automate?**
+
 - High frequency + medium complexity = best ROI
 - Low frequency + high complexity = consider if audience is technical
 - One-off patterns = skip
 
 **Skills vs Commands?**
+
 - Multi-step, needs guidance → Skill
 - Quick action, obvious usage → Command
 - User entry point to skill → Both (command loads skill)
 
 **Include agents?**
+
 - Only for complex repos with orchestration needs
 - Most plugins don't need custom agents
 - Consider if existing agents (analyst, engineer) suffice
 
 **Quick mode vs full pipeline?**
+
 - Single-purpose tool → Quick mode
 - Complex tool with many features → Full pipeline
 - Unclear → Start with recon, decide after
@@ -163,6 +167,7 @@ Key decisions during engineering process:
 <rules>
 
 ALWAYS:
+
 - Start with discovery before touching code
 - Track artifacts at each stage
 - Validate patterns have 3+ use cases before creating components
@@ -170,6 +175,7 @@ ALWAYS:
 - Run audit before declaring complete
 
 NEVER:
+
 - Skip recon stage (even for familiar repos)
 - Create agents without clear orchestration need
 - Package without audit validation
@@ -180,6 +186,7 @@ NEVER:
 <references>
 
 Stage guides:
+
 - [overview.md](references/overview.md) — quick reference
 - [stage-1-discovery.md](references/stage-1-discovery.md) — external research
 - [stage-2-recon.md](references/stage-2-recon.md) — codebase analysis
@@ -191,6 +198,7 @@ Stage guides:
 - [repo-types.md](references/repo-types.md) — CLI vs Library vs MCP patterns
 
 Skills loaded:
+
 - `research` — external discovery methodology
 - `codebase-analysis` — repo analysis approach
 - `find-patterns` — pattern extraction

@@ -6,15 +6,15 @@
 
 ## Status Dashboard
 
-| Stage | Status | Progress | Blocked By |
-|-------|--------|----------|------------|
-| 1. Foundation | ⬜ Not Started | 0/4 | — |
-| 2. Handlers | ⬜ Not Started | 0/{{HANDLER_COUNT}} | Foundation |
-| 3. Errors | ⬜ Not Started | 0/{{ERROR_CLASS_COUNT}} | Handlers |
-| 4. Paths | ⬜ Not Started | 0/{{PATH_COUNT}} | — |
-| 5. Adapters | ⬜ Not Started | 0/{{ADAPTER_COUNT}} | Handlers |
-| 6. Documents | ⬜ Not Started | 0/{{DOC_COUNT}} | All |
-| 99. Unknowns | ⬜ Review | 0/{{UNKNOWN_COUNT}} | — |
+| Stage         | Status         | Progress                | Blocked By |
+| ------------- | -------------- | ----------------------- | ---------- |
+| 1. Foundation | ⬜ Not Started | 0/4                     | —          |
+| 2. Handlers   | ⬜ Not Started | 0/{{HANDLER_COUNT}}     | Foundation |
+| 3. Errors     | ⬜ Not Started | 0/{{ERROR_CLASS_COUNT}} | Handlers   |
+| 4. Paths      | ⬜ Not Started | 0/{{PATH_COUNT}}        | —          |
+| 5. Adapters   | ⬜ Not Started | 0/{{ADAPTER_COUNT}}     | Handlers   |
+| 6. Documents  | ⬜ Not Started | 0/{{DOC_COUNT}}         | All        |
+| 99. Unknowns  | ⬜ Review      | 0/{{UNKNOWN_COUNT}}     | —          |
 
 **Status Key:** ⬜ Not Started · 🟡 In Progress · ✅ Complete · 🔴 Blocked · ⏭️ Skipped
 
@@ -60,19 +60,19 @@
 
 ## Progress Log
 
-| Date | Stage | Work Done | Notes |
-|------|-------|-----------|-------|
-| {{DATE}} | — | Generated migration plan | Initial scan |
+| Date     | Stage | Work Done                | Notes        |
+| -------- | ----- | ------------------------ | ------------ |
+| {{DATE}} | —     | Generated migration plan | Initial scan |
 
 ## Decisions
 
 | Decision | Rationale | Date |
-|----------|-----------|------|
+| -------- | --------- | ---- |
 
 ## Blockers
 
 | Blocker | Stage | Status | Resolution |
-|---------|-------|--------|------------|
+| ------- | ----- | ------ | ---------- |
 
 ## Completion Criteria
 

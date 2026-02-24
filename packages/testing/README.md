@@ -93,6 +93,7 @@ const config = createConfig({
 ```
 
 Notes:
+
 - Arrays are replaced, not merged.
 - `undefined` override values are ignored (defaults remain).
 
@@ -198,7 +199,7 @@ const server: McpServer = {
     },
   ],
   async invoke(toolName, input) {
-    const tool = this.tools.find(t => t.name === toolName);
+    const tool = this.tools.find((t) => t.name === toolName);
     if (!tool) throw new Error(`Tool not found: ${toolName}`);
     return tool.handler(input);
   },
@@ -260,7 +261,11 @@ Import specific modules directly for smaller bundles:
 
 ```typescript
 // Just fixtures
-import { createFixture, withTempDir, withEnv } from "@outfitter/testing/fixtures";
+import {
+  createFixture,
+  withTempDir,
+  withEnv,
+} from "@outfitter/testing/fixtures";
 ```
 
 All harness utilities are available from the main package export:
@@ -273,29 +278,29 @@ import { createCliHarness, createMcpHarness } from "@outfitter/testing";
 
 ### Fixtures
 
-| Export | Description |
-|--------|-------------|
-| `createFixture<T>(defaults)` | Create a fixture factory with deep merge support |
-| `withTempDir<T>(fn)` | Run callback with auto-cleaned temp directory |
-| `withEnv<T>(vars, fn)` | Run callback with temporary environment variables |
+| Export                       | Description                                       |
+| ---------------------------- | ------------------------------------------------- |
+| `createFixture<T>(defaults)` | Create a fixture factory with deep merge support  |
+| `withTempDir<T>(fn)`         | Run callback with auto-cleaned temp directory     |
+| `withEnv<T>(vars, fn)`       | Run callback with temporary environment variables |
 
 ### CLI Harness
 
-| Export | Description |
-|--------|-------------|
-| `createCliHarness(command)` | Create a CLI test harness |
-| `CliHarness` | Interface for CLI harness |
-| `CliResult` | Interface for command execution result |
+| Export                      | Description                            |
+| --------------------------- | -------------------------------------- |
+| `createCliHarness(command)` | Create a CLI test harness              |
+| `CliHarness`                | Interface for CLI harness              |
+| `CliResult`                 | Interface for command execution result |
 
 ### MCP Harness
 
-| Export | Description |
-|--------|-------------|
-| `createMcpHarness(server)` | Create an MCP test harness |
-| `McpHarness` | Interface for MCP harness |
-| `McpServer` | Interface for MCP server |
-| `McpTool` | Interface for tool definition |
-| `McpToolHandler` | Type for tool handler functions |
+| Export                     | Description                     |
+| -------------------------- | ------------------------------- |
+| `createMcpHarness(server)` | Create an MCP test harness      |
+| `McpHarness`               | Interface for MCP harness       |
+| `McpServer`                | Interface for MCP server        |
+| `McpTool`                  | Interface for tool definition   |
+| `McpToolHandler`           | Type for tool handler functions |
 
 ## Related Packages
 

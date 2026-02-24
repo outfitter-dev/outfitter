@@ -1,5 +1,5 @@
 ---
-name: {{SKILL_NAME}}
+name: { { SKILL_NAME } }
 description: "{{WHAT_IT_DOES}}. Use when {{WHEN_TO_USE}}."
 ---
 

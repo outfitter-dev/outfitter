@@ -12,6 +12,7 @@ version: 1.0.0
 ## Overview
 
 This skill provides automated {CAPABILITY} using helper scripts:
+
 - **Feature 1**: { description }
 - **Feature 2**: { description }
 - **Feature 3**: { description }
@@ -37,6 +38,7 @@ The main script is located at `scripts/{script-name}.sh`:
 **When to use**: { description of scenario }
 
 **Steps**:
+
 1. Run the helper script:
 
    ```bash
@@ -81,6 +83,7 @@ The main script is located at `scripts/{script-name}.sh`:
 ```
 
 **Arguments**:
+
 - `arg1`: { description }
 - `arg2` (optional): { description }
 
@@ -107,6 +110,7 @@ The main script is located at `scripts/{script-name}.sh`:
 ```
 
 **Options**:
+
 - `--option1`: { description }
 - `--option2`: { description }
 
@@ -155,6 +159,7 @@ When this skill is activated:
 ### Error Handling
 
 All scripts follow these conventions:
+
 - **Exit code 0**: Success
 - **Exit code 1**: General error
 - **Exit code 2**: Invalid arguments
@@ -163,6 +168,7 @@ All scripts follow these conventions:
 ### Environment Variables
 
 Scripts may use these environment variables:
+
 - `VAR_1`: { description }
 - `VAR_2`: { description }
 - `VAR_3`: { description }
@@ -254,6 +260,7 @@ direnv allow
 ## Requirements
 
 **System Requirements**:
+
 - { requirement 1 }
 - { requirement 2 }
 
@@ -276,11 +283,11 @@ skill-directory/
 
 ## Security Considerations
 
-- ⚠️  Scripts run with your user permissions
-- ⚠️  Always review scripts before running
-- ⚠️  Validate all inputs to prevent injection
-- ⚠️  Use quotes around variables: `"$VAR"`
-- ⚠️  Never commit secrets to scripts
+- ⚠️ Scripts run with your user permissions
+- ⚠️ Always review scripts before running
+- ⚠️ Validate all inputs to prevent injection
+- ⚠️ Use quotes around variables: `"$VAR"`
+- ⚠️ Never commit secrets to scripts
 
 ## Related Skills
 

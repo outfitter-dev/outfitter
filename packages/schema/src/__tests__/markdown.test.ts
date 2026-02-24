@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import type { ActionManifest } from "../manifest.js";
 import { formatManifestMarkdown } from "../markdown.js";
 

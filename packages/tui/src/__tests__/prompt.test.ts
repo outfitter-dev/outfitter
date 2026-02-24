@@ -8,6 +8,7 @@
  * Total: 6 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { validators } from "../prompt/validators.js";
 
 // ============================================================================

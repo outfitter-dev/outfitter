@@ -9,6 +9,7 @@
  * Total: 9 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { renderTree, TREE_GUIDES } from "../render/tree.js";
 
 // ============================================================================

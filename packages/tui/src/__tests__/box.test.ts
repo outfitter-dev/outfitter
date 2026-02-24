@@ -11,6 +11,7 @@
  * Total: 12 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { createBox, renderBox } from "../render/index.js";
 
 // ============================================================================

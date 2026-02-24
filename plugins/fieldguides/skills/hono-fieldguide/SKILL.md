@@ -37,12 +37,12 @@ Type inference flows through method chain. Break chain = lose types.
 ```typescript
 // ✅ Chained routes preserve types
 const app = new Hono()
-  .get('/users', (c) => c.json({ users: [] }))
-  .get('/users/:id', (c) => {
-    const id = c.req.param('id'); // Typed!
+  .get("/users", (c) => c.json({ users: [] }))
+  .get("/users/:id", (c) => {
+    const id = c.req.param("id"); // Typed!
     return c.json({ id });
   })
-  .post('/users', async (c) => {
+  .post("/users", async (c) => {
     const body = await c.req.json();
     return c.json({ created: true }, 201);
   });
@@ -54,8 +54,8 @@ export type AppType = typeof app; // Full route types!
 
 ```typescript
 const app = new Hono();
-app.get('/users', handler1);  // Types LOST!
-app.post('/users', handler2);
+app.get("/users", handler1); // Types LOST!
+app.post("/users", handler2);
 ```
 
 **Path parameters** — typed automatically:
@@ -70,30 +70,29 @@ app.post('/users', handler2);
 **Query parameters** — use Zod for validation:
 
 ```typescript
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
 const QuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });
 
-const app = new Hono()
-  .get('/search', zValidator('query', QuerySchema), (c) => {
-    const { page, limit } = c.req.valid('query'); // Fully typed!
-    return c.json({ page, limit });
-  });
+const app = new Hono().get("/search", zValidator("query", QuerySchema), (c) => {
+  const { page, limit } = c.req.valid("query"); // Fully typed!
+  return c.json({ page, limit });
+});
 ```
 
 **Middleware in chain:**
 
 ```typescript
 const app = new Hono()
-  .use('*', logger())
-  .use('/api/*', cors())
-  .get('/api/public', (c) => c.json({ public: true }))
-  .use('/api/admin/*', authMiddleware)
-  .get('/api/admin/users', (c) => c.json({ users: [] }));
+  .use("*", logger())
+  .use("/api/*", cors())
+  .get("/api/public", (c) => c.json({ public: true }))
+  .use("/api/admin/*", authMiddleware)
+  .get("/api/admin/users", (c) => c.json({ users: [] }));
 ```
 
 </route_chaining>
@@ -105,12 +104,12 @@ Use `createFactory<Env>()` to type context variables across middleware and route
 <factory_pattern>
 
 ```typescript
-import { createFactory } from 'hono/factory';
-import type { Database } from 'bun:sqlite';
+import { createFactory } from "hono/factory";
+import type { Database } from "bun:sqlite";
 
 type Env = {
   Variables: {
-    user: { id: string; role: 'admin' | 'user' };
+    user: { id: string; role: "admin" | "user" };
     requestId: string;
     db: Database;
   };
@@ -120,25 +119,26 @@ const factory = createFactory<Env>();
 
 // Typed middleware
 const authMiddleware = factory.createMiddleware(async (c, next) => {
-  const token = c.req.header('authorization')?.replace('Bearer ', '');
-  if (!token) throw new HTTPException(401, { message: 'Unauthorized' });
+  const token = c.req.header("authorization")?.replace("Bearer ", "");
+  if (!token) throw new HTTPException(401, { message: "Unauthorized" });
 
   const user = await verifyToken(token);
-  c.set('user', user); // Type-checked!
+  c.set("user", user); // Type-checked!
   await next();
 });
 
 // Typed handlers
 const getProfile = factory.createHandlers((c) => {
-  const user = c.get('user'); // Typed: { id: string; role: 'admin' | 'user' }
+  const user = c.get("user"); // Typed: { id: string; role: 'admin' | 'user' }
   return c.json({ user });
 });
 
 // Assemble app
-const app = factory.createApp()
-  .use('*', dbMiddleware)
-  .use('/api/*', authMiddleware)
-  .get('/api/profile', ...getProfile);
+const app = factory
+  .createApp()
+  .use("*", dbMiddleware)
+  .use("/api/*", authMiddleware)
+  .get("/api/profile", ...getProfile);
 
 export type AppType = typeof app;
 ```
@@ -147,18 +147,20 @@ export type AppType = typeof app;
 
 ```typescript
 // routes/users.ts
-export const usersRoute = factory.createApp()
-  .get('/', (c) => c.json({ users: [] }))
-  .post('/', zValidator('json', CreateUserSchema), async (c) => {
-    const data = c.req.valid('json');
+export const usersRoute = factory
+  .createApp()
+  .get("/", (c) => c.json({ users: [] }))
+  .post("/", zValidator("json", CreateUserSchema), async (c) => {
+    const data = c.req.valid("json");
     return c.json({ created: true }, 201);
   });
 
 // index.ts
-const app = factory.createApp()
-  .use('*', dbMiddleware)
-  .route('/users', usersRoute)
-  .route('/posts', postsRoute);
+const app = factory
+  .createApp()
+  .use("*", dbMiddleware)
+  .route("/users", usersRoute)
+  .route("/posts", postsRoute);
 ```
 
 See [factory-pattern.md](references/factory-pattern.md) for advanced patterns.
@@ -170,13 +172,13 @@ See [factory-pattern.md](references/factory-pattern.md) for advanced patterns.
 <error_handling>
 
 ```typescript
-import { HTTPException } from 'hono/http-exception';
+import { HTTPException } from "hono/http-exception";
 
 // Throw typed errors
-app.get('/users/:id', async (c) => {
-  const user = await findUser(c.req.param('id'));
+app.get("/users/:id", async (c) => {
+  const user = await findUser(c.req.param("id"));
   if (!user) {
-    throw new HTTPException(404, { message: 'User not found' });
+    throw new HTTPException(404, { message: "User not found" });
   }
   return c.json({ user });
 });
@@ -189,7 +191,7 @@ class NotFoundError extends HTTPException {
 }
 
 class UnauthorizedError extends HTTPException {
-  constructor(message = 'Unauthorized') {
+  constructor(message = "Unauthorized") {
     super(401, { message });
   }
 }
@@ -200,16 +202,22 @@ app.onError((err, c) => {
     return c.json({ error: err.message }, err.status);
   }
   if (err instanceof ZodError) {
-    return c.json({
-      error: 'Validation failed',
-      issues: err.issues.map(i => ({ path: i.path.join('.'), message: i.message }))
-    }, 400);
+    return c.json(
+      {
+        error: "Validation failed",
+        issues: err.issues.map((i) => ({
+          path: i.path.join("."),
+          message: i.message,
+        })),
+      },
+      400
+    );
   }
-  const isDev = Bun.env.NODE_ENV !== 'production';
-  return c.json({ error: isDev ? err.message : 'Internal server error' }, 500);
+  const isDev = Bun.env.NODE_ENV !== "production";
+  return c.json({ error: isDev ? err.message : "Internal server error" }, 500);
 });
 
-app.notFound((c) => c.json({ error: 'Not found', path: c.req.path }, 404));
+app.notFound((c) => c.json({ error: "Not found", path: c.req.path }, 404));
 ```
 
 See [error-handling.md](references/error-handling.md) for patterns.
@@ -221,49 +229,53 @@ See [error-handling.md](references/error-handling.md) for patterns.
 <zod_openapi>
 
 ```typescript
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { swaggerUI } from '@hono/swagger-ui';
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { swaggerUI } from "@hono/swagger-ui";
 
-const UserSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string().min(1).max(100),
-}).openapi('User');
+const UserSchema = z
+  .object({
+    id: z.string().uuid(),
+    email: z.string().email(),
+    name: z.string().min(1).max(100),
+  })
+  .openapi("User");
 
 const route = createRoute({
-  method: 'get',
-  path: '/users/{id}',
+  method: "get",
+  path: "/users/{id}",
   request: {
     params: z.object({ id: z.string().uuid() }),
   },
   responses: {
     200: {
-      content: { 'application/json': { schema: UserSchema } },
-      description: 'User found',
+      content: { "application/json": { schema: UserSchema } },
+      description: "User found",
     },
     404: {
-      content: { 'application/json': { schema: z.object({ error: z.string() }) } },
-      description: 'User not found',
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "User not found",
     },
   },
-  tags: ['Users'],
-  summary: 'Get user by ID',
+  tags: ["Users"],
+  summary: "Get user by ID",
 });
 
 const app = new OpenAPIHono();
 
 app.openapi(route, (c) => {
-  const { id } = c.req.valid('param'); // Typed!
-  const user = db.query('SELECT * FROM users WHERE id = ?').get(id);
-  if (!user) return c.json({ error: 'User not found' }, 404);
+  const { id } = c.req.valid("param"); // Typed!
+  const user = db.query("SELECT * FROM users WHERE id = ?").get(id);
+  if (!user) return c.json({ error: "User not found" }, 404);
   return c.json(user, 200);
 });
 
 // Swagger UI
-app.get('/docs', swaggerUI({ url: '/openapi.json' }));
-app.doc('/openapi.json', {
-  openapi: '3.1.0',
-  info: { title: 'API', version: '1.0.0' },
+app.get("/docs", swaggerUI({ url: "/openapi.json" }));
+app.doc("/openapi.json", {
+  openapi: "3.1.0",
+  info: { title: "API", version: "1.0.0" },
 });
 ```
 
@@ -278,37 +290,40 @@ See [zod-openapi.md](references/zod-openapi.md) for complete patterns.
 ```typescript
 // Server
 const app = new Hono()
-  .get('/posts', (c) => c.json({ posts: [] }))
-  .get('/posts/:id', (c) => c.json({ id: c.req.param('id') }))
-  .post('/posts', zValidator('json', CreatePostSchema), async (c) => {
-    const data = c.req.valid('json');
-    return c.json({ id: '123', ...data }, 201);
+  .get("/posts", (c) => c.json({ posts: [] }))
+  .get("/posts/:id", (c) => c.json({ id: c.req.param("id") }))
+  .post("/posts", zValidator("json", CreatePostSchema), async (c) => {
+    const data = c.req.valid("json");
+    return c.json({ id: "123", ...data }, 201);
   });
 
 export type AppType = typeof app;
 
 // Client
-import { hc } from 'hono/client';
-import type { AppType } from './server';
+import { hc } from "hono/client";
+import type { AppType } from "./server";
 
-const client = hc<AppType>('http://localhost:3000');
+const client = hc<AppType>("http://localhost:3000");
 
 // GET request
 const res = await client.posts.$get();
 const data = await res.json(); // Typed: { posts: any[] }
 
 // GET with params
-const res2 = await client.posts[':id'].$get({ param: { id: '123' } });
+const res2 = await client.posts[":id"].$get({ param: { id: "123" } });
 
 // POST request
 const res3 = await client.posts.$post({
-  json: { title: 'Hello', content: 'World' }
+  json: { title: "Hello", content: "World" },
 });
 
 // With headers
-const res4 = await client.posts.$get({}, {
-  headers: { Authorization: 'Bearer token' }
-});
+const res4 = await client.posts.$get(
+  {},
+  {
+    headers: { Authorization: "Bearer token" },
+  }
+);
 ```
 
 </rpc_client>
@@ -318,17 +333,19 @@ const res4 = await client.posts.$get({}, {
 <testing>
 
 ```typescript
-import { describe, expect, test, beforeEach, afterEach } from 'bun:test';
-import { testClient } from 'hono/testing';
-import { Database } from 'bun:sqlite';
-import app from './server';
+import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { testClient } from "hono/testing";
+import { Database } from "bun:sqlite";
+import app from "./server";
 
-describe('API Tests', () => {
+describe("API Tests", () => {
   let db: Database;
 
   beforeEach(() => {
-    db = new Database(':memory:');
-    db.run('CREATE TABLE posts (id TEXT PRIMARY KEY, title TEXT, content TEXT)');
+    db = new Database(":memory:");
+    db.run(
+      "CREATE TABLE posts (id TEXT PRIMARY KEY, title TEXT, content TEXT)"
+    );
   });
 
   afterEach(() => {
@@ -337,31 +354,34 @@ describe('API Tests', () => {
 
   const client = testClient(app);
 
-  test('GET /posts returns posts', async () => {
+  test("GET /posts returns posts", async () => {
     const res = await client.posts.$get();
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data).toHaveProperty('posts');
+    expect(data).toHaveProperty("posts");
   });
 
-  test('POST /posts creates post', async () => {
+  test("POST /posts creates post", async () => {
     const res = await client.posts.$post({
-      json: { title: 'Test', content: 'Content' }
+      json: { title: "Test", content: "Content" },
     });
     expect(res.status).toBe(201);
     const data = await res.json();
-    expect(data).toMatchObject({ title: 'Test' });
+    expect(data).toMatchObject({ title: "Test" });
   });
 
-  test('Protected route requires auth', async () => {
+  test("Protected route requires auth", async () => {
     const res = await client.api.profile.$get();
     expect(res.status).toBe(401);
   });
 
-  test('Protected route accepts valid token', async () => {
-    const res = await client.api.profile.$get({}, {
-      headers: { Authorization: 'Bearer valid-token' }
-    });
+  test("Protected route accepts valid token", async () => {
+    const res = await client.api.profile.$get(
+      {},
+      {
+        headers: { Authorization: "Bearer valid-token" },
+      }
+    );
     expect(res.status).toBe(200);
   });
 });
@@ -377,25 +397,28 @@ See [testing-patterns.md](examples/testing-patterns.md) for complete patterns.
 
 ```typescript
 // Logging
-import { logger } from 'hono/logger';
-app.use('*', logger());
+import { logger } from "hono/logger";
+app.use("*", logger());
 
 // CORS
-import { cors } from 'hono/cors';
-app.use('/api/*', cors({
-  origin: ['http://localhost:3000'],
-  credentials: true,
-}));
+import { cors } from "hono/cors";
+app.use(
+  "/api/*",
+  cors({
+    origin: ["http://localhost:3000"],
+    credentials: true,
+  })
+);
 
 // Rate limiting
 const rateLimiter = factory.createMiddleware(async (c, next) => {
-  const ip = c.req.header('x-forwarded-for') || 'unknown';
+  const ip = c.req.header("x-forwarded-for") || "unknown";
   const key = `rate:${ip}`;
   const count = await cache.incr(key);
 
   if (count === 1) await cache.expire(key, 60);
   if (count > 100) {
-    throw new HTTPException(429, { message: 'Rate limit exceeded' });
+    throw new HTTPException(429, { message: "Rate limit exceeded" });
   }
 
   await next();
@@ -403,9 +426,9 @@ const rateLimiter = factory.createMiddleware(async (c, next) => {
 
 // Request ID
 const requestId = factory.createMiddleware(async (c, next) => {
-  c.set('requestId', crypto.randomUUID());
+  c.set("requestId", crypto.randomUUID());
   await next();
-  c.res.headers.set('x-request-id', c.get('requestId'));
+  c.res.headers.set("x-request-id", c.get("requestId"));
 });
 ```
 
@@ -416,6 +439,7 @@ const requestId = factory.createMiddleware(async (c, next) => {
 ## Rules
 
 **ALWAYS:**
+
 - Chain routes for type inference → `.get().post().put()`
 - Export `type AppType = typeof app` for RPC client
 - Use `createFactory<Env>()` for typed context variables
@@ -424,6 +448,7 @@ const requestId = factory.createMiddleware(async (c, next) => {
 - Test with `testClient` for type safety
 
 **NEVER:**
+
 - Break method chain with variable assignment between routes
 - Use `any` types — let Hono infer or define explicitly
 - Use `JSON.parse(await c.req.text())` — use `c.req.json()` or Zod validator
@@ -431,6 +456,7 @@ const requestId = factory.createMiddleware(async (c, next) => {
 - Expose stack traces in production
 
 **When Type Errors Occur:**
+
 - Check route chaining not broken
 - Verify `export type AppType` matches actual app
 - Ensure middleware uses `createFactory` for context types
@@ -443,16 +469,19 @@ const requestId = factory.createMiddleware(async (c, next) => {
 ## References
 
 **Examples:**
+
 - [typed-routes.md](examples/typed-routes.md) — Complete route chaining examples
 - [testing-patterns.md](examples/testing-patterns.md) — Testing with testClient
 
 **References:**
+
 - [factory-pattern.md](references/factory-pattern.md) — Context typing with createFactory
 - [zod-openapi.md](references/zod-openapi.md) — OpenAPI integration patterns
 - [error-handling.md](references/error-handling.md) — HTTPException and error patterns
 - [middleware.md](references/middleware.md) — Auth, logging, CORS patterns
 
 **External:**
+
 - Hono: <https://hono.dev>
 - @hono/zod-openapi: <https://github.com/honojs/middleware/tree/main/packages/zod-openapi>
 

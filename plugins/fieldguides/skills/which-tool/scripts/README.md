@@ -112,7 +112,13 @@ Each checker module exports a function that returns `Promise<ToolCheckResult[]>`
 1. Add category to `types.ts`:
 
 ```typescript
-export type Category = "search" | "json" | "viewers" | "navigation" | "http" | "new-category";
+export type Category =
+  | "search"
+  | "json"
+  | "viewers"
+  | "navigation"
+  | "http"
+  | "new-category";
 ```
 
 2. Create checker module `checkers/new-category.ts`:

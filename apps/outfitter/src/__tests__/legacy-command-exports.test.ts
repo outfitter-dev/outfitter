@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
+
 import { Command } from "commander";
+
 import { doctorCommand } from "../commands/doctor.js";
 import { initCommand } from "../commands/init.js";
 import { scaffoldCommand } from "../commands/scaffold.js";

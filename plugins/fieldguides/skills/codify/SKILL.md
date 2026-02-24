@@ -27,11 +27,11 @@ NOT for: one-off tasks, simple questions, well-documented existing patterns
 
 <pattern_types>
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| Workflow | Multi-step sequences | Debug → Test → Fix → Verify |
-| Orchestration | Tool coordination | Git + Linear + PR automation |
-| Heuristic | Decision rules | "When X, do Y because Z" |
+| Type          | Purpose              | Example                      |
+| ------------- | -------------------- | ---------------------------- |
+| Workflow      | Multi-step sequences | Debug → Test → Fix → Verify  |
+| Orchestration | Tool coordination    | Git + Linear + PR automation |
+| Heuristic     | Decision rules       | "When X, do Y because Z"     |
 
 Workflows: Step-by-step processes with defined stages and transitions.
 Orchestration: Tool combinations that work together for a goal.
@@ -58,6 +58,7 @@ Is it a multi-step process with stages?
 ```
 
 Composites:
+
 - Skill + Command: Skill holds logic, command provides entry point
 - Skill + Hook: Skill holds logic, hook triggers automatically
 - Agent + Skill: Agent orchestrates, skill provides methodology
@@ -72,15 +73,15 @@ Pattern spec format (YAML):
 name: pattern-name
 type: workflow | orchestration | heuristic
 trigger: when to apply
-stages:  # workflow
+stages: # workflow
   - name: stage-name
     actions: [...]
     exit_criteria: condition
-tools:   # orchestration
+tools: # orchestration
   - tool: name
     role: purpose
     sequence: order
-rules:   # heuristic
+rules: # heuristic
   - condition: when
     action: what
     rationale: why
@@ -126,13 +127,13 @@ Task stages:
 
 SRVDS criteria — all must pass:
 
-| Check | Question | Red Flag |
-|-------|----------|----------|
-| Specific | Clear trigger + scope? | "Sometimes useful" |
-| Repeatable | Works across contexts? | One-off solution |
-| Valuable | Worth the overhead? | Saves < 5 minutes |
-| Documented | Can others understand? | Tribal knowledge |
-| Scoped | Single responsibility? | Kitchen sink |
+| Check      | Question               | Red Flag           |
+| ---------- | ---------------------- | ------------------ |
+| Specific   | Clear trigger + scope? | "Sometimes useful" |
+| Repeatable | Works across contexts? | One-off solution   |
+| Valuable   | Worth the overhead?    | Saves < 5 minutes  |
+| Documented | Can others understand? | Tribal knowledge   |
+| Scoped     | Single responsibility? | Kitchen sink       |
 
 Skip if: < 3 occurrences, context-dependent, simpler inline
 
@@ -151,6 +152,7 @@ Skip if: < 3 occurrences, context-dependent, simpler inline
 <rules>
 
 ALWAYS:
+
 - Identify pattern type before choosing component
 - Validate all SRVDS criteria
 - Start with minimal implementation
@@ -158,6 +160,7 @@ ALWAYS:
 - Test pattern in at least 2 contexts
 
 NEVER:
+
 - Codify after single occurrence
 - Create Agent when Skill suffices
 - Skip quality validation
@@ -173,12 +176,14 @@ NEVER:
 - [examples/](examples/) — captured pattern examples
 
 **Identification vs Implementation**:
+
 - `find-patterns` skill identifies and documents patterns
 - This skill (`codify`) implements patterns as Claude Code components
 
 Use `find-patterns` first to identify what's worth capturing. Use `codify` to turn identified patterns into skills, commands, hooks, or agents.
 
 **Component skills** (loaded during implementation):
+
 - `claude-craft` — agents, commands, hooks, skills, rules, and config
 
 </references>

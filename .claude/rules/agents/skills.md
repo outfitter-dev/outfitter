@@ -12,6 +12,7 @@ paths:
 ## XML Tags
 
 Use XML tags for structural sections in skill files:
+
 - `<when_to_use>` — trigger conditions
 - `<confidence>` — confidence levels/tracking
 - `<stages>` — workflow stages
@@ -43,9 +44,9 @@ GitHub rendering: Add blank lines after opening tags and before closing tags. Wi
 
 When referencing skills in documentation, use specific language based on skill type:
 
-| Skill Type | Language | Example |
-|------------|----------|---------|
-| Standard | "Load the skill" | Load the `skillcraft` skill |
+| Skill Type                                             | Language              | Example                                        |
+| ------------------------------------------------------ | --------------------- | ---------------------------------------------- |
+| Standard                                               | "Load the skill"      | Load the `skillcraft` skill                    |
 | Delegated (`context: fork` + `agent: general-purpose`) | "Delegate by loading" | Delegate by loading the `security-audit` skill |
 
 Standard skills load instructions into the current context. The agent continues with those instructions available.
@@ -58,9 +59,11 @@ Never link to SKILL.md files. Always use the load/delegate pattern.
 
 ```markdown
 # Wrong
+
 See [skillcraft](../skillcraft/SKILL.md) for patterns.
 
 # Right
+
 Load the `skillcraft` skill for patterns.
 ```
 
@@ -74,8 +77,8 @@ Use a `## Steps` section for composable skill workflows. Place immediately after
 1. Load the `prerequisite-skill` skill
 2. { main action for this skill }
 3. If { condition }, load the `conditional-skill` skill
-...
-9. { final action or output }
+   ...
+4. { final action or output }
 ```
 
 Pattern rules:
@@ -143,13 +146,13 @@ Claude Code's preprocessor executes `` !`command` `` syntax in SKILL.md files �
 
 ### The `<bang>` convention
 
-Use `` <bang> `` as a stand-in for ``!`` when referencing the preprocessing syntax in `SKILL.md` files as examples. Agents should interpret `` <bang> `` as ``!`` in context.
+Use `<bang>` as a stand-in for `!` when referencing the preprocessing syntax in `SKILL.md` files as examples. Agents should interpret `<bang>` as `!` in context.
 
-| File type | Preprocessing | Convention |
-|-----------|--------------|------------|
-| SKILL.md | Active (always) | Use `` !`command` `` |
-| References, EXAMPLES.md | None | Literal ``!`` encouraged (good demos) |
-| Command files (`commands/*.md`) | Intentional | Literal ``!`` required |
+| File type                       | Preprocessing   | Convention                          |
+| ------------------------------- | --------------- | ----------------------------------- |
+| SKILL.md                        | Active (always) | Use `` !`command` ``                |
+| References, EXAMPLES.md         | None            | Literal `!` encouraged (good demos) |
+| Command files (`commands/*.md`) | Intentional     | Literal `!` required                |
 
 ### `metadata.preprocess: true`
 

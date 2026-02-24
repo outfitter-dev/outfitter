@@ -4,8 +4,10 @@
  * Verifies progress reporting for long-running operations.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import {
   createMcpServer,
   defineTool,

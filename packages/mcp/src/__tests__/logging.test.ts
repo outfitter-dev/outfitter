@@ -4,6 +4,7 @@
  * Verifies log level mapping, level filtering, and sendLogMessage integration.
  */
 import { describe, expect, it } from "bun:test";
+
 import { createMcpServer, mapLogLevelToMcp, shouldEmitLog } from "../index.js";
 
 describe("MCP Logging", () => {

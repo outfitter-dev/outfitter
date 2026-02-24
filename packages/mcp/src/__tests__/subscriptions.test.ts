@@ -4,6 +4,7 @@
  * Verifies URI subscription tracking and notifications.
  */
 import { describe, expect, it } from "bun:test";
+
 import { createMcpServer } from "../index.js";
 
 describe("Resource Subscriptions", () => {

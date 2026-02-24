@@ -8,9 +8,7 @@ Deep dive into type utilities, guards, and template literal patterns.
 
 ```typescript
 type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object
-    ? DeepReadonly<T[P]>
-    : T[P];
+  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
 };
 
 type User = {
@@ -32,7 +30,7 @@ type ImmutableUser = DeepReadonly<User>;
 type UserSummary = Partial<User>;
 
 // ✅ Precise — only what's needed
-type UserSummary = DeepReadonly<Pick<User, 'id' | 'email'>>;
+type UserSummary = DeepReadonly<Pick<User, "id" | "email">>;
 ```
 
 ### NonNullable Refinement
@@ -62,7 +60,10 @@ function map<T, U>(option: Option<T>, fn: (value: T) => U): Option<U> {
   return { some: true, value: fn(option.value) };
 }
 
-function flatMap<T, U>(option: Option<T>, fn: (value: T) => Option<U>): Option<U> {
+function flatMap<T, U>(
+  option: Option<T>,
+  fn: (value: T) => Option<U>
+): Option<U> {
   if (!option.some) return option;
   return fn(option.value);
 }
@@ -78,7 +79,7 @@ function getOrElse<T>(option: Option<T>, defaultValue: T): T {
 
 ```typescript
 function isString(value: unknown): value is string {
-  return typeof value === 'string';
+  return typeof value === "string";
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -87,7 +88,7 @@ function isStringArray(value: unknown): value is string[] {
 
 function process(data: unknown) {
   if (isStringArray(data)) {
-    return data.map(s => s.toUpperCase());
+    return data.map((s) => s.toUpperCase());
   }
 }
 ```
@@ -96,8 +97,8 @@ function process(data: unknown) {
 
 ```typescript
 function assertIsString(value: unknown): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new TypeError('Value must be a string');
+  if (typeof value !== "string") {
+    throw new TypeError("Value must be a string");
   }
 }
 
@@ -112,11 +113,14 @@ function process(data: unknown) {
 ```typescript
 function isUser(value: unknown): value is User {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    'id' in value && typeof value.id === 'string' &&
-    'email' in value && typeof value.email === 'string' &&
-    'name' in value && typeof value.name === 'string'
+    "id" in value &&
+    typeof value.id === "string" &&
+    "email" in value &&
+    typeof value.email === "string" &&
+    "name" in value &&
+    typeof value.name === "string"
   );
 }
 ```
@@ -124,17 +128,15 @@ function isUser(value: unknown): value is User {
 ### Discriminated Union Guards
 
 ```typescript
-type Action =
-  | { type: 'add'; value: number }
-  | { type: 'remove' };
+type Action = { type: "add"; value: number } | { type: "remove" };
 
-function isAddAction(action: Action): action is { type: 'add'; value: number } {
-  return action.type === 'add';
+function isAddAction(action: Action): action is { type: "add"; value: number } {
+  return action.type === "add";
 }
 
 // TS 5.5+ infers this automatically
 function isAddActionInferred(action: Action) {
-  return action.type === 'add';
+  return action.type === "add";
 }
 ```
 
@@ -147,7 +149,7 @@ type Route = `/${string}`;
 type UserRoute = `/user/${string}`;
 type ApiRoute = `/api/v${number}/${string}`;
 
-const validRoute: Route = '/home'; // ✅
+const validRoute: Route = "/home"; // ✅
 // const invalid: Route = 'home'; // ❌ Missing leading slash
 ```
 
@@ -155,10 +157,10 @@ const validRoute: Route = '/home'; // ✅
 
 ```typescript
 // Built-in utilities
-type Upper = Uppercase<'hello'>; // 'HELLO'
-type Lower = Lowercase<'HELLO'>; // 'hello'
-type Cap = Capitalize<'hello'>; // 'Hello'
-type Uncap = Uncapitalize<'Hello'>; // 'hello'
+type Upper = Uppercase<"hello">; // 'HELLO'
+type Lower = Lowercase<"HELLO">; // 'hello'
+type Cap = Capitalize<"hello">; // 'Hello'
+type Uncap = Uncapitalize<"Hello">; // 'hello'
 ```
 
 ### Pattern Extraction
@@ -168,10 +170,10 @@ type ExtractRouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
     ? Param | ExtractRouteParams<`/${Rest}`>
     : T extends `${string}:${infer Param}`
-    ? Param
-    : never;
+      ? Param
+      : never;
 
-type Params = ExtractRouteParams<'/user/:id/post/:postId'>;
+type Params = ExtractRouteParams<"/user/:id/post/:postId">;
 // 'id' | 'postId'
 ```
 
@@ -182,13 +184,10 @@ type RouteParams<T extends string> =
   T extends `${infer Start}:${infer Param}/${infer Rest}`
     ? { [K in Param | keyof RouteParams<Rest>]: string }
     : T extends `${infer Start}:${infer Param}`
-    ? { [K in Param]: string }
-    : {};
+      ? { [K in Param]: string }
+      : {};
 
-function buildRoute<T extends string>(
-  path: T,
-  params: RouteParams<T>
-): string {
+function buildRoute<T extends string>(path: T, params: RouteParams<T>): string {
   let result = path as string;
   for (const [key, value] of Object.entries(params)) {
     result = result.replace(`:${key}`, value);
@@ -196,21 +195,21 @@ function buildRoute<T extends string>(
   return result;
 }
 
-buildRoute('/user/:id/post/:postId', { id: '123', postId: '456' }); // ✅
+buildRoute("/user/:id/post/:postId", { id: "123", postId: "456" }); // ✅
 // buildRoute('/user/:id', { postId: '456' }); // ❌ Type error
 ```
 
 ### CSS-in-JS Type Safety
 
 ```typescript
-type CSSProperty = 'margin' | 'padding' | 'border';
-type CSSDirection = 'Top' | 'Right' | 'Bottom' | 'Left';
+type CSSProperty = "margin" | "padding" | "border";
+type CSSDirection = "Top" | "Right" | "Bottom" | "Left";
 type CSSDirectionalProperty = `${CSSProperty}${CSSDirection}`;
 // 'marginTop' | 'marginRight' | ... | 'borderLeft'
 
 const styles: Partial<Record<CSSDirectionalProperty, string>> = {
-  marginTop: '10px',
-  paddingLeft: '5px'
+  marginTop: "10px",
+  paddingLeft: "5px",
 };
 ```
 
@@ -240,7 +239,7 @@ class UserBuilder {
     const { id, email, name } = this.data;
 
     if (!id || !email || !name) {
-      throw new Error('Missing required user fields');
+      throw new Error("Missing required user fields");
     }
 
     return { id, email, name };
@@ -248,9 +247,9 @@ class UserBuilder {
 }
 
 const user = UserBuilder.create()
-  .withId('123')
-  .withEmail('user@example.com')
-  .withName('John Doe')
+  .withId("123")
+  .withEmail("user@example.com")
+  .withName("John Doe")
   .build();
 ```
 

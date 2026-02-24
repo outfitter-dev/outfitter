@@ -24,9 +24,9 @@ memory: user
 
 Load as needed based on review scope:
 
-| Skill | When |
-|-------|------|
-| `security` | Auth/authz review, input validation, threat modeling, OWASP patterns |
-| `performance` | Profiling, bottleneck analysis, optimization validation |
-| `architecture` | Design review, technology evaluation, scalability assessment |
-| `codebase-analysis` | Need to understand context before reviewing unfamiliar code |
+| Skill               | When                                                                 |
+| ------------------- | -------------------------------------------------------------------- |
+| `security`          | Auth/authz review, input validation, threat modeling, OWASP patterns |
+| `performance`       | Profiling, bottleneck analysis, optimization validation              |
+| `architecture`      | Design review, technology evaluation, scalability assessment         |
+| `codebase-analysis` | Need to understand context before reviewing unfamiliar code          |

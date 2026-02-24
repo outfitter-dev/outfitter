@@ -102,10 +102,7 @@ type Handler<
   TInput,
   TOutput,
   TError extends OutfitterError = OutfitterError,
-> = (
-  input: TInput,
-  ctx: HandlerContext
-) => Promise<Result<TOutput, TError>>;
+> = (input: TInput, ctx: HandlerContext) => Promise<Result<TOutput, TError>>;
 ```
 
 CLI and MCP are thin adapters over shared handlers. Handlers know nothing about output format or transport.
@@ -118,17 +115,17 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 
 **What an action provides**:
 
-| Field | Purpose |
-|-------|---------|
-| `id` | Unique identifier (e.g. `check.tsdoc`) |
-| `surfaces` | Where the action is exposed (`cli`, `mcp`) |
-| `input` | Zod schema for validated input |
-| `output` | Zod schema for output shape |
-| `cli.group` | CLI group command (e.g. `check`) |
-| `cli.command` | Subcommand name (e.g. `tsdoc`) |
-| `cli.options` | Flag definitions |
-| `cli.mapInput` | Maps CLI args/flags to handler input |
-| `handler` | Pure function returning `Result<T, E>` |
+| Field          | Purpose                                    |
+| -------------- | ------------------------------------------ |
+| `id`           | Unique identifier (e.g. `check.tsdoc`)     |
+| `surfaces`     | Where the action is exposed (`cli`, `mcp`) |
+| `input`        | Zod schema for validated input             |
+| `output`       | Zod schema for output shape                |
+| `cli.group`    | CLI group command (e.g. `check`)           |
+| `cli.command`  | Subcommand name (e.g. `tsdoc`)             |
+| `cli.options`  | Flag definitions                           |
+| `cli.mapInput` | Maps CLI args/flags to handler input       |
+| `handler`      | Pure function returning `Result<T, E>`     |
 
 **Introspection**: `outfitter schema` shows all registered actions. `outfitter schema <action-id> --output json` returns the full schema including input/output shapes.
 
@@ -148,18 +145,18 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 
 10 error categories with mapped exit codes and HTTP status:
 
-| Category | Exit | HTTP |
-|----------|------|------|
-| validation | 1 | 400 |
-| not_found | 2 | 404 |
-| conflict | 3 | 409 |
-| permission | 4 | 403 |
-| timeout | 5 | 504 |
-| rate_limit | 6 | 429 |
-| network | 7 | 502 |
-| internal | 8 | 500 |
-| auth | 9 | 401 |
-| cancelled | 130 | 499 |
+| Category   | Exit | HTTP |
+| ---------- | ---- | ---- |
+| validation | 1    | 400  |
+| not_found  | 2    | 404  |
+| conflict   | 3    | 409  |
+| permission | 4    | 403  |
+| timeout    | 5    | 504  |
+| rate_limit | 6    | 429  |
+| network    | 7    | 502  |
+| internal   | 8    | 500  |
+| auth       | 9    | 401  |
+| cancelled  | 130  | 499  |
 
 ## Environment Configuration
 
@@ -167,24 +164,24 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 
 Set `OUTFITTER_ENV` to configure default behavior across all packages. Defaults to `"production"` when unset or invalid.
 
-| Setting | `development` | `production` | `test` |
-|---------|--------------|-------------|--------|
-| logLevel | `"debug"` | `null` | `null` |
-| verbose | `true` | `false` | `false` |
-| errorDetail | `"full"` | `"message"` | `"full"` |
+| Setting     | `development` | `production` | `test`   |
+| ----------- | ------------- | ------------ | -------- |
+| logLevel    | `"debug"`     | `null`       | `null`   |
+| verbose     | `true`        | `false`      | `false`  |
+| errorDetail | `"full"`      | `"message"`  | `"full"` |
 
 - `logLevel: null` means no logging by default (MCP won't forward, logging falls through to `"info"`)
 - `errorDetail: "full"` includes stack traces; `"message"` shows only the error message
 
 ### Environment Variables
 
-| Variable | Purpose | Values |
-|----------|---------|--------|
-| `OUTFITTER_ENV` | Environment profile | `development`, `production`, `test` |
+| Variable              | Purpose                           | Values                                        |
+| --------------------- | --------------------------------- | --------------------------------------------- |
+| `OUTFITTER_ENV`       | Environment profile               | `development`, `production`, `test`           |
 | `OUTFITTER_LOG_LEVEL` | Override log level (all packages) | `debug`, `info`, `warning`, `error`, `silent` |
-| `OUTFITTER_VERBOSE` | Override CLI verbosity | `0`, `1` |
-| `OUTFITTER_JSON` | Force JSON output | `0`, `1` |
-| `OUTFITTER_JSONL` | Force JSONL output | `0`, `1` |
+| `OUTFITTER_VERBOSE`   | Override CLI verbosity            | `0`, `1`                                      |
+| `OUTFITTER_JSON`      | Force JSON output                 | `0`, `1`                                      |
+| `OUTFITTER_JSONL`     | Force JSONL output                | `0`, `1`                                      |
 
 ### Precedence
 
@@ -223,14 +220,14 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 
 ### Blessed Dependencies
 
-| Concern | Package |
-|---------|---------|
-| Result type | `better-result` (`^2.5.1`) |
-| Schema validation | `zod` (`^4.3.5`) |
-| CLI parsing | `commander` (`^14.0.2`) |
-| Logging | `@logtape/logtape` (`^2.0.0`) |
-| MCP protocol | `@modelcontextprotocol/sdk` (`^1.12.1`) |
-| Prompts | `@clack/prompts` |
+| Concern           | Package                                 |
+| ----------------- | --------------------------------------- |
+| Result type       | `better-result` (`^2.5.1`)              |
+| Schema validation | `zod` (`^4.3.5`)                        |
+| CLI parsing       | `commander` (`^14.0.2`)                 |
+| Logging           | `@logtape/logtape` (`^2.0.0`)           |
+| MCP protocol      | `@modelcontextprotocol/sdk` (`^1.12.1`) |
+| Prompts           | `@clack/prompts`                        |
 
 ## Code Style
 

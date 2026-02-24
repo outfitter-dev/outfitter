@@ -10,31 +10,31 @@
 
 ### 1.1 Capabilities create Has That init Lacks
 
-| Capability | create location | Status in init |
-|---|---|---|
-| Interactive preset selection (`@clack/prompts select`) | `resolveInput()` L674-688 | Missing -- init is fully non-interactive |
-| `--preset` flag (named presets: basic/cli/mcp/daemon) | `CreateOptions.preset` | Missing -- init uses `--template` |
-| `--structure single\|workspace` flag | `CreateOptions.structure` | Missing |
-| `--workspace-name` flag | `CreateOptions.workspaceName` | Missing |
-| `-y, --yes` skip-all-prompts flag | `CreateOptions.yes` | Missing |
-| Workspace root scaffolding (`scaffoldWorkspaceRoot`) | `create.ts` L560-626 | Missing |
-| Package placement under `packages/<name>/` | `runCreate()` L791-793 | Missing |
-| Create planner/plan execution model | `create/planner.ts`, `executePlan()` | Missing -- init does direct template copy |
-| Interactive package name prompt | `resolveInput()` L659-668 | Missing |
-| Interactive structure prompt | `resolveInput()` L691-712 | Missing |
-| Interactive tooling prompt | `resolveInput()` L715-726 | Missing |
-| Interactive local dependency prompt | `resolveInput()` L728-739 | Missing |
-| Interactive workspace name prompt | `resolveInput()` L742-758 | Missing |
+| Capability                                             | create location                      | Status in init                            |
+| ------------------------------------------------------ | ------------------------------------ | ----------------------------------------- |
+| Interactive preset selection (`@clack/prompts select`) | `resolveInput()` L674-688            | Missing -- init is fully non-interactive  |
+| `--preset` flag (named presets: basic/cli/mcp/daemon)  | `CreateOptions.preset`               | Missing -- init uses `--template`         |
+| `--structure single\|workspace` flag                   | `CreateOptions.structure`            | Missing                                   |
+| `--workspace-name` flag                                | `CreateOptions.workspaceName`        | Missing                                   |
+| `-y, --yes` skip-all-prompts flag                      | `CreateOptions.yes`                  | Missing                                   |
+| Workspace root scaffolding (`scaffoldWorkspaceRoot`)   | `create.ts` L560-626                 | Missing                                   |
+| Package placement under `packages/<name>/`             | `runCreate()` L791-793               | Missing                                   |
+| Create planner/plan execution model                    | `create/planner.ts`, `executePlan()` | Missing -- init does direct template copy |
+| Interactive package name prompt                        | `resolveInput()` L659-668            | Missing                                   |
+| Interactive structure prompt                           | `resolveInput()` L691-712            | Missing                                   |
+| Interactive tooling prompt                             | `resolveInput()` L715-726            | Missing                                   |
+| Interactive local dependency prompt                    | `resolveInput()` L728-739            | Missing                                   |
+| Interactive workspace name prompt                      | `resolveInput()` L742-758            | Missing                                   |
 
 ### 1.2 Capabilities init Has That create Lacks
 
-| Capability | init location | Notes |
-|---|---|---|
-| `-b, --bin` flag | `InitOptions.bin` | create derives bin from project name only |
-| `author` placeholder resolution (git config) | `resolveAuthor()` L274-300 | create has no author field |
-| `--json` output flag | `initCommand()` L796 | create has no --json support |
-| Subcommands (`init cli`, `init mcp`, `init daemon`) | `initCommand()` L843-942 | create uses `--preset` instead |
-| Standalone template validation | `validateTemplate()` L183-196 | create delegates to planner |
+| Capability                                          | init location                 | Notes                                     |
+| --------------------------------------------------- | ----------------------------- | ----------------------------------------- |
+| `-b, --bin` flag                                    | `InitOptions.bin`             | create derives bin from project name only |
+| `author` placeholder resolution (git config)        | `resolveAuthor()` L274-300    | create has no author field                |
+| `--json` output flag                                | `initCommand()` L796          | create has no --json support              |
+| Subcommands (`init cli`, `init mcp`, `init daemon`) | `initCommand()` L843-942      | create uses `--preset` instead            |
+| Standalone template validation                      | `validateTemplate()` L183-196 | create delegates to planner               |
 
 ### 1.3 Shared Logic (Duplicated)
 
@@ -59,52 +59,53 @@ These functions are nearly identical between `create.ts` and `init.ts` and shoul
 
 ### 2.1 create Flags -> init
 
-| create flag | init equivalent | Migration |
-|---|---|---|
-| `-n, --name <name>` | `-n, --name <name>` | Already exists, no change |
-| `-p, --preset <preset>` | `--preset <preset>` | **New flag on init** -- replaces `--template` semantically |
-| `-s, --structure <mode>` | `--structure <mode>` | **New flag on init** |
-| `--workspace-name <name>` | `--workspace-name <name>` | **New flag on init** |
-| `--local` | `--local` | Already exists, no change |
-| `--workspace` (alias for --local) | `--workspace` | Already exists, no change |
-| `-f, --force` | `-f, --force` | Already exists, no change |
-| `--with <blocks>` | `--with <blocks>` | Already exists, no change |
-| `--no-tooling` | `--no-tooling` | Already exists, no change |
-| `-y, --yes` | `-y, --yes` | **New flag on init** |
+| create flag                       | init equivalent           | Migration                                                  |
+| --------------------------------- | ------------------------- | ---------------------------------------------------------- |
+| `-n, --name <name>`               | `-n, --name <name>`       | Already exists, no change                                  |
+| `-p, --preset <preset>`           | `--preset <preset>`       | **New flag on init** -- replaces `--template` semantically |
+| `-s, --structure <mode>`          | `--structure <mode>`      | **New flag on init**                                       |
+| `--workspace-name <name>`         | `--workspace-name <name>` | **New flag on init**                                       |
+| `--local`                         | `--local`                 | Already exists, no change                                  |
+| `--workspace` (alias for --local) | `--workspace`             | Already exists, no change                                  |
+| `-f, --force`                     | `-f, --force`             | Already exists, no change                                  |
+| `--with <blocks>`                 | `--with <blocks>`         | Already exists, no change                                  |
+| `--no-tooling`                    | `--no-tooling`            | Already exists, no change                                  |
+| `-y, --yes`                       | `-y, --yes`               | **New flag on init**                                       |
 
 ### 2.2 init Flags -- Disposition
 
-| init flag | Disposition | Notes |
-|---|---|---|
-| `-n, --name <name>` | Stays | Unchanged |
-| `-b, --bin <name>` | Stays | create never had this; init keeps it |
+| init flag                   | Disposition    | Notes                                                            |
+| --------------------------- | -------------- | ---------------------------------------------------------------- |
+| `-n, --name <name>`         | Stays          | Unchanged                                                        |
+| `-b, --bin <name>`          | Stays          | create never had this; init keeps it                             |
 | `-t, --template <template>` | **Deprecated** | Warning + passthrough to `--preset`. Kept for one major version. |
-| `-f, --force` | Stays | Unchanged |
-| `--local` | Stays | Unchanged |
-| `--workspace` (alias) | Stays | Unchanged |
-| `--with <blocks>` | Stays | Unchanged |
-| `--no-tooling` | Stays | Unchanged |
-| `--json` | Stays | create never had this; init keeps it |
+| `-f, --force`               | Stays          | Unchanged                                                        |
+| `--local`                   | Stays          | Unchanged                                                        |
+| `--workspace` (alias)       | Stays          | Unchanged                                                        |
+| `--with <blocks>`           | Stays          | Unchanged                                                        |
+| `--no-tooling`              | Stays          | Unchanged                                                        |
+| `--json`                    | Stays          | create never had this; init keeps it                             |
 
 ### 2.3 New Flags on init (from create)
 
-| Flag | Type | Default | Description |
-|---|---|---|---|
-| `--preset <preset>` | `string` (enum) | `"minimal"` (was `"basic"`) | Target preset: `minimal`, `cli`, `mcp`, `daemon` |
-| `--structure <mode>` | `"single" \| "workspace"` | `"single"` | Project structure |
-| `--workspace-name <name>` | `string` | directory name | Workspace root package name (only when structure=workspace) |
-| `-y, --yes` | `boolean` | `false` | Skip all interactive prompts, use defaults |
+| Flag                      | Type                      | Default                     | Description                                                 |
+| ------------------------- | ------------------------- | --------------------------- | ----------------------------------------------------------- |
+| `--preset <preset>`       | `string` (enum)           | `"minimal"` (was `"basic"`) | Target preset: `minimal`, `cli`, `mcp`, `daemon`            |
+| `--structure <mode>`      | `"single" \| "workspace"` | `"single"`                  | Project structure                                           |
+| `--workspace-name <name>` | `string`                  | directory name              | Workspace root package name (only when structure=workspace) |
+| `-y, --yes`               | `boolean`                 | `false`                     | Skip all interactive prompts, use defaults                  |
 
 ### 2.4 Preset/Template Mapping
 
-| Old value | New value | Notes |
-|---|---|---|
-| `--template basic` | `--preset minimal` | "basic" renamed to "minimal" per plan |
-| `--template cli` | `--preset cli` | Same |
-| `--template mcp` | `--preset mcp` | Same |
-| `--template daemon` | `--preset daemon` | Same |
+| Old value           | New value          | Notes                                 |
+| ------------------- | ------------------ | ------------------------------------- |
+| `--template basic`  | `--preset minimal` | "basic" renamed to "minimal" per plan |
+| `--template cli`    | `--preset cli`     | Same                                  |
+| `--template mcp`    | `--preset mcp`     | Same                                  |
+| `--template daemon` | `--preset daemon`  | Same                                  |
 
 When `--template` is used:
+
 1. Emit deprecation warning: `"--template is deprecated; use --preset instead"`
 2. Map `basic` -> `minimal`
 3. Pass through to `--preset` logic
@@ -117,32 +118,33 @@ When `--template` is used:
 
 Prompts run in order when `--yes` is not set. Each can be pre-filled via flags.
 
-| Order | Prompt | Type | Pre-fill flag | Default |
-|---|---|---|---|---|
-| 1 | "Project package name" | `text` | `--name` | directory name |
-| 2 | "Select a preset" | `select` | `--preset` | `basic` |
-| 3 | "Project structure" | `select` | `--structure` | `single` |
-| 4 | "Add default tooling blocks?" | `confirm` | `--no-tooling` | `true` |
-| 5 | "Use workspace:* for @outfitter dependencies?" | `confirm` | `--local` | `false` |
-| 6 | "Workspace package name" (only if structure=workspace) | `text` | `--workspace-name` | directory name |
+| Order | Prompt                                                 | Type      | Pre-fill flag      | Default        |
+| ----- | ------------------------------------------------------ | --------- | ------------------ | -------------- |
+| 1     | "Project package name"                                 | `text`    | `--name`           | directory name |
+| 2     | "Select a preset"                                      | `select`  | `--preset`         | `basic`        |
+| 3     | "Project structure"                                    | `select`  | `--structure`      | `single`       |
+| 4     | "Add default tooling blocks?"                          | `confirm` | `--no-tooling`     | `true`         |
+| 5     | "Use workspace:\* for @outfitter dependencies?"        | `confirm` | `--local`          | `false`        |
+| 6     | "Workspace package name" (only if structure=workspace) | `text`    | `--workspace-name` | directory name |
 
 ### 3.2 Consolidated init Prompt Flow
 
 The consolidated init will use the same prompt order, but:
+
 - Replace "Select a preset" options with the target registry entries (ready targets only)
 - Default preset changes from `basic` to `minimal`
 - Add a `--bin` prompt if the preset is `cli` or `daemon` (binary targets)
 - Skip prompts that subcommands implicitly answer
 
-| Order | Prompt | Type | Pre-fill flag | Default | Skipped when |
-|---|---|---|---|---|---|
-| 1 | "Project package name" | `text` | `--name` | directory name | `--yes` or `--name` provided |
-| 2 | "Select a preset" | `select` | `--preset` | `minimal` | `--yes`, `--preset`, or subcommand (`init cli`) |
-| 3 | "Project structure" | `select` | `--structure` | `single` | `--yes` or `--structure` provided |
-| 4 | "Binary name" | `text` | `--bin` | project name | `--yes`, non-binary preset, or `--bin` provided |
-| 5 | "Add default tooling blocks?" | `confirm` | `--no-tooling` / `--with` | `true` | `--yes`, `--no-tooling`, or `--with` provided |
-| 6 | "Use workspace:* for @outfitter dependencies?" | `confirm` | `--local` | `false` | `--yes` or `--local` provided |
-| 7 | "Workspace package name" | `text` | `--workspace-name` | directory name | structure != workspace, or `--yes` |
+| Order | Prompt                                          | Type      | Pre-fill flag             | Default        | Skipped when                                    |
+| ----- | ----------------------------------------------- | --------- | ------------------------- | -------------- | ----------------------------------------------- |
+| 1     | "Project package name"                          | `text`    | `--name`                  | directory name | `--yes` or `--name` provided                    |
+| 2     | "Select a preset"                               | `select`  | `--preset`                | `minimal`      | `--yes`, `--preset`, or subcommand (`init cli`) |
+| 3     | "Project structure"                             | `select`  | `--structure`             | `single`       | `--yes` or `--structure` provided               |
+| 4     | "Binary name"                                   | `text`    | `--bin`                   | project name   | `--yes`, non-binary preset, or `--bin` provided |
+| 5     | "Add default tooling blocks?"                   | `confirm` | `--no-tooling` / `--with` | `true`         | `--yes`, `--no-tooling`, or `--with` provided   |
+| 6     | "Use workspace:\* for @outfitter dependencies?" | `confirm` | `--local`                 | `false`        | `--yes` or `--local` provided                   |
+| 7     | "Workspace package name"                        | `text`    | `--workspace-name`        | directory name | structure != workspace, or `--yes`              |
 
 ### 3.3 Non-Interactive Flow (`--yes`)
 
@@ -162,12 +164,12 @@ workspace   = --workspace-name ?? basename(targetDir)  [only if structure=worksp
 
 Subcommands (`init cli`, `init mcp`, `init daemon`) continue to work and implicitly set `--preset`:
 
-| Subcommand | Equivalent | Notes |
-|---|---|---|
-| `outfitter init cli my-app` | `outfitter init my-app --preset cli` | Subcommand sets preset, no preset prompt |
-| `outfitter init mcp my-app` | `outfitter init my-app --preset mcp` | Same |
-| `outfitter init daemon my-app` | `outfitter init my-app --preset daemon` | Same |
-| `outfitter init my-app` | Interactive -- prompts for preset | No implicit preset |
+| Subcommand                     | Equivalent                              | Notes                                    |
+| ------------------------------ | --------------------------------------- | ---------------------------------------- |
+| `outfitter init cli my-app`    | `outfitter init my-app --preset cli`    | Subcommand sets preset, no preset prompt |
+| `outfitter init mcp my-app`    | `outfitter init my-app --preset mcp`    | Same                                     |
+| `outfitter init daemon my-app` | `outfitter init my-app --preset daemon` | Same                                     |
+| `outfitter init my-app`        | Interactive -- prompts for preset       | No implicit preset                       |
 
 When a subcommand is used, the preset selection prompt is skipped. All other prompts still apply
 (or can be skipped with `--yes`).
@@ -185,24 +187,24 @@ outfitter init mcp [directory] [options]
 outfitter init daemon [directory] [options]
 ```
 
-| Flag | Short | Type | Default | Description |
-|---|---|---|---|---|
-| `--name` | `-n` | `string` | dir name | Package name |
-| `--bin` | `-b` | `string` | project name | Binary name (binary presets only) |
-| `--preset` | `-p` | `enum` | `minimal` | Target preset |
-| `--structure` | `-s` | `single\|workspace` | `single` | Project structure |
-| `--workspace-name` | | `string` | dir name | Workspace root package name |
-| `--local` | | `boolean` | `false` | Use workspace:* for @outfitter deps |
-| `--workspace` | | `boolean` | `false` | Alias for --local |
-| `--force` | `-f` | `boolean` | `false` | Overwrite existing files |
-| `--with` | | `string` | | Comma-separated tooling blocks |
-| `--no-tooling` | | `boolean` | `false` | Skip default tooling blocks |
-| `--yes` | `-y` | `boolean` | `false` | Skip prompts, use defaults |
-| `--template` | `-t` | `string` | | **DEPRECATED** -- maps to --preset |
-| `--json` | | `boolean` | `false` | Force JSON output (existing, unchanged) |
-| `--skip-install` | | `boolean` | `false` | Skip `bun install` after scaffolding *(added in Slice 5)* |
-| `--skip-git` | | `boolean` | `false` | Skip `git init` and initial commit *(added in Slice 5)* |
-| `--skip-commit` | | `boolean` | `false` | Skip initial commit only *(added in Slice 5)* |
+| Flag               | Short | Type                | Default      | Description                                               |
+| ------------------ | ----- | ------------------- | ------------ | --------------------------------------------------------- |
+| `--name`           | `-n`  | `string`            | dir name     | Package name                                              |
+| `--bin`            | `-b`  | `string`            | project name | Binary name (binary presets only)                         |
+| `--preset`         | `-p`  | `enum`              | `minimal`    | Target preset                                             |
+| `--structure`      | `-s`  | `single\|workspace` | `single`     | Project structure                                         |
+| `--workspace-name` |       | `string`            | dir name     | Workspace root package name                               |
+| `--local`          |       | `boolean`           | `false`      | Use workspace:\* for @outfitter deps                      |
+| `--workspace`      |       | `boolean`           | `false`      | Alias for --local                                         |
+| `--force`          | `-f`  | `boolean`           | `false`      | Overwrite existing files                                  |
+| `--with`           |       | `string`            |              | Comma-separated tooling blocks                            |
+| `--no-tooling`     |       | `boolean`           | `false`      | Skip default tooling blocks                               |
+| `--yes`            | `-y`  | `boolean`           | `false`      | Skip prompts, use defaults                                |
+| `--template`       | `-t`  | `string`            |              | **DEPRECATED** -- maps to --preset                        |
+| `--json`           |       | `boolean`           | `false`      | Force JSON output (existing, unchanged)                   |
+| `--skip-install`   |       | `boolean`           | `false`      | Skip `bun install` after scaffolding _(added in Slice 5)_ |
+| `--skip-git`       |       | `boolean`           | `false`      | Skip `git init` and initial commit _(added in Slice 5)_   |
+| `--skip-commit`    |       | `boolean`           | `false`      | Skip initial commit only _(added in Slice 5)_             |
 
 ### 4.2 Consolidated InitOptions Type
 
@@ -318,40 +320,40 @@ user never passed `--template`.
 
 #### Source Files
 
-| File | Line(s) | Reference Type |
-|---|---|---|
-| `apps/outfitter/src/commands/create.ts` | entire file | Command implementation -- **DELETE** |
-| `apps/outfitter/src/create/index.ts` | entire file | Create planner barrel -- **KEEP** (rename to target registry in Slice 0) |
-| `apps/outfitter/src/create/planner.ts` | entire file | Planner logic -- **KEEP** (evolves into shared engine) |
-| `apps/outfitter/src/create/presets.ts` | entire file | Preset definitions -- **KEEP** (evolves into target registry) |
-| `apps/outfitter/src/create/types.ts` | entire file | Types -- **KEEP** (evolves with registry) |
-| `apps/outfitter/src/actions.ts` | L28-30, L91-107, L202-231, L328-401, L810 | Action definition + registration -- **REMOVE createAction, resolveCreateOptions** |
-| `apps/outfitter/src/index.ts` | L13-21, L54-65 | Public API exports -- **REMOVE create exports or alias to init** |
-| `apps/outfitter/src/__tests__/create.test.ts` | entire file | Tests -- **MIGRATE to init.test.ts** |
-| `apps/outfitter/src/__tests__/actions.test.ts` | L11-84 | Action mapping tests -- **MIGRATE to init action tests** |
-| `apps/outfitter/src/__tests__/index.test.ts` | L17, L32-37, L46-58 | Smoke tests -- **UPDATE exports** |
+| File                                           | Line(s)                                   | Reference Type                                                                    |
+| ---------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------- |
+| `apps/outfitter/src/commands/create.ts`        | entire file                               | Command implementation -- **DELETE**                                              |
+| `apps/outfitter/src/create/index.ts`           | entire file                               | Create planner barrel -- **KEEP** (rename to target registry in Slice 0)          |
+| `apps/outfitter/src/create/planner.ts`         | entire file                               | Planner logic -- **KEEP** (evolves into shared engine)                            |
+| `apps/outfitter/src/create/presets.ts`         | entire file                               | Preset definitions -- **KEEP** (evolves into target registry)                     |
+| `apps/outfitter/src/create/types.ts`           | entire file                               | Types -- **KEEP** (evolves with registry)                                         |
+| `apps/outfitter/src/actions.ts`                | L28-30, L91-107, L202-231, L328-401, L810 | Action definition + registration -- **REMOVE createAction, resolveCreateOptions** |
+| `apps/outfitter/src/index.ts`                  | L13-21, L54-65                            | Public API exports -- **REMOVE create exports or alias to init**                  |
+| `apps/outfitter/src/__tests__/create.test.ts`  | entire file                               | Tests -- **MIGRATE to init.test.ts**                                              |
+| `apps/outfitter/src/__tests__/actions.test.ts` | L11-84                                    | Action mapping tests -- **MIGRATE to init action tests**                          |
+| `apps/outfitter/src/__tests__/index.test.ts`   | L17, L32-37, L46-58                       | Smoke tests -- **UPDATE exports**                                                 |
 
 #### package.json Exports
 
-| Export path | Disposition |
-|---|---|
+| Export path         | Disposition                                               |
+| ------------------- | --------------------------------------------------------- |
 | `./commands/create` | **REMOVE** (or keep as re-export of init for one version) |
-| `./create` | **KEEP** -- target registry / planner module |
-| `./create/planner` | **KEEP** |
-| `./create/presets` | **KEEP** |
-| `./create/types` | **KEEP** |
+| `./create`          | **KEEP** -- target registry / planner module              |
+| `./create/planner`  | **KEEP**                                                  |
+| `./create/presets`  | **KEEP**                                                  |
+| `./create/types`    | **KEEP**                                                  |
 
 #### Documentation Files
 
-| File | Reference | Action |
-|---|---|---|
-| `README.md` L10 | `bunx outfitter create my-project ...` | **UPDATE** to `outfitter init` |
-| `apps/outfitter/README.md` L21, 39, 49-76, 197-230 | Full command reference + programmatic API | **UPDATE** -- remove create section, update init section, update API examples |
-| `docs/GETTING-STARTED.md` L17 | Quick Start example | **UPDATE** to `outfitter init` |
-| `docs/PILOT-KIT-FIRST-ADOPTION.md` | Multiple references | **UPDATE** all `outfitter create` -> `outfitter init` |
-| `docs/ADOPTION-IA.md` L31-33, 80, 124-142 | Adoption docs | **UPDATE** |
-| `AGENTS.md` | No direct `outfitter create` reference | No change needed |
-| `.agents/plans/scaffold-consolidation/PLAN.md` L207 | Plan doc | Self-referential -- no update needed |
+| File                                                | Reference                                 | Action                                                                        |
+| --------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `README.md` L10                                     | `bunx outfitter create my-project ...`    | **UPDATE** to `outfitter init`                                                |
+| `apps/outfitter/README.md` L21, 39, 49-76, 197-230  | Full command reference + programmatic API | **UPDATE** -- remove create section, update init section, update API examples |
+| `docs/GETTING-STARTED.md` L17                       | Quick Start example                       | **UPDATE** to `outfitter init`                                                |
+| `docs/PILOT-KIT-FIRST-ADOPTION.md`                  | Multiple references                       | **UPDATE** all `outfitter create` -> `outfitter init`                         |
+| `docs/ADOPTION-IA.md` L31-33, 80, 124-142           | Adoption docs                             | **UPDATE**                                                                    |
+| `AGENTS.md`                                         | No direct `outfitter create` reference    | No change needed                                                              |
+| `.agents/plans/scaffold-consolidation/PLAN.md` L207 | Plan doc                                  | Self-referential -- no update needed                                          |
 
 #### Plugin Files
 
@@ -387,26 +389,26 @@ Implementation: Register a stub `create` action in the action registry that alwa
 
 ### 6.3 Test Migration
 
-| create test | Migrated init test | Changes needed |
-|---|---|---|
-| "scaffolds a single-package preset" | "scaffolds a single-package preset via --preset" | Change `runCreate` -> `runInit`, add `yes: true`, map `preset` -> `preset` |
-| "scaffolds a workspace layout with project under packages/" | "scaffolds a workspace layout with project under packages/" | Change `runCreate` -> `runInit`, add `yes: true` |
-| "supports local workspace dependency rewriting" | "supports local workspace dependency rewriting (workspace mode)" | Already tested in init for single mode; add workspace variant |
-| "does not overwrite existing template files without force" | Already covered by init force tests | Verify coverage |
-| "stamps manifest with blocks after successful create" | "stamps manifest with blocks after successful init (workspace)" | Test workspace manifest path |
-| "does not create manifest when noTooling is true" | Already covered by init test | Verify coverage |
-| "stamps manifest in project directory for workspace layout" | "stamps manifest in project directory for workspace layout" | Direct migration |
-| "stamps manifest with custom blocks from --with flag" | Already covered by init test | Verify coverage |
+| create test                                                 | Migrated init test                                               | Changes needed                                                             |
+| ----------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| "scaffolds a single-package preset"                         | "scaffolds a single-package preset via --preset"                 | Change `runCreate` -> `runInit`, add `yes: true`, map `preset` -> `preset` |
+| "scaffolds a workspace layout with project under packages/" | "scaffolds a workspace layout with project under packages/"      | Change `runCreate` -> `runInit`, add `yes: true`                           |
+| "supports local workspace dependency rewriting"             | "supports local workspace dependency rewriting (workspace mode)" | Already tested in init for single mode; add workspace variant              |
+| "does not overwrite existing template files without force"  | Already covered by init force tests                              | Verify coverage                                                            |
+| "stamps manifest with blocks after successful create"       | "stamps manifest with blocks after successful init (workspace)"  | Test workspace manifest path                                               |
+| "does not create manifest when noTooling is true"           | Already covered by init test                                     | Verify coverage                                                            |
+| "stamps manifest in project directory for workspace layout" | "stamps manifest in project directory for workspace layout"      | Direct migration                                                           |
+| "stamps manifest with custom blocks from --with flag"       | Already covered by init test                                     | Verify coverage                                                            |
 
 Action mapping tests (`actions.test.ts`):
 
-| create action test | Migrated test | Changes |
-|---|---|---|
-| "maps create --no-tooling to noTooling=true" | "maps init --no-tooling to noTooling=true" | Change action id `"create"` -> `"init"` |
-| "maps create --tooling to noTooling=false" | "maps init --tooling to noTooling=false" | Same |
-| "does not force create noTooling when flag omitted" | "does not force init noTooling when flag omitted" | Same |
-| "preserves create local as undefined" | "preserves init local as undefined" | Same |
-| "maps create local/workspace aliases" | "maps init local/workspace aliases" | Same |
+| create action test                                  | Migrated test                                     | Changes                                 |
+| --------------------------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| "maps create --no-tooling to noTooling=true"        | "maps init --no-tooling to noTooling=true"        | Change action id `"create"` -> `"init"` |
+| "maps create --tooling to noTooling=false"          | "maps init --tooling to noTooling=false"          | Same                                    |
+| "does not force create noTooling when flag omitted" | "does not force init noTooling when flag omitted" | Same                                    |
+| "preserves create local as undefined"               | "preserves init local as undefined"               | Same                                    |
+| "maps create local/workspace aliases"               | "maps init local/workspace aliases"               | Same                                    |
 
 ### 6.4 Draft Changeset Entry
 
@@ -428,12 +430,14 @@ muscle memory.
 **Detection hint**: `grep -r "outfitter create" scripts/ docs/ .github/`
 
 **Rewrite guidance**:
+
 - `outfitter create my-app --preset cli --yes` -> `outfitter init my-app --preset cli --yes`
 - `outfitter create my-app --structure workspace` -> `outfitter init my-app --structure workspace`
 - `runCreate(options)` -> `runInit(options)` (programmatic API)
 - `import { runCreate } from "outfitter"` -> `import { runInit } from "outfitter"`
 
 **Verification steps**:
+
 1. Run `outfitter init my-test --preset cli --yes` and verify project scaffolds correctly
 2. Run `outfitter create` and verify helpful migration error appears
 3. Check CI scripts for any `outfitter create` invocations
@@ -471,17 +475,24 @@ export async function runInit(
     return Result.err(new InitError(targetResult.error.message));
   }
   const target = targetResult.value;
-  const projectDir = input.structure === "workspace"
-    ? join(input.rootDir, resolvePlacement(target), deriveProjectName(input.packageName))
-    : input.rootDir;
+  const projectDir =
+    input.structure === "workspace"
+      ? join(
+          input.rootDir,
+          resolvePlacement(target),
+          deriveProjectName(input.packageName)
+        )
+      : input.rootDir;
 
   // 4. Check for existing files
   if (input.structure === "single") {
     if (hasPackageJson(input.rootDir) && !options.force) {
-      return Result.err(new InitError(
-        `Directory '${input.rootDir}' already has a package.json. ` +
-        `Use --force to overwrite, or use 'outfitter add' for existing projects.`
-      ));
+      return Result.err(
+        new InitError(
+          `Directory '${input.rootDir}' already has a package.json. ` +
+            `Use --force to overwrite, or use 'outfitter add' for existing projects.`
+        )
+      );
     }
   }
 
@@ -489,7 +500,7 @@ export async function runInit(
   const planResult = planCreateProject({
     name: input.packageName,
     targetDir: projectDir,
-    preset: mapPresetToLegacy(input.preset),  // bridge until planner uses registry
+    preset: mapPresetToLegacy(input.preset), // bridge until planner uses registry
     includeTooling: input.includeTooling,
     local: input.local,
     year: resolveYear(),
@@ -507,7 +518,7 @@ export async function runInit(
       input.rootDir,
       workspaceName,
       deriveProjectName(input.packageName),
-      options.force,
+      options.force
     );
     if (wsResult.isErr()) return wsResult;
   }
@@ -563,14 +574,14 @@ async function resolveInitInput(
       return Result.err(new InitError("Project name must not be empty"));
     }
 
-    const preset = options.presetOverride
-      ?? options.presetFromFlags
-      ?? "minimal";
+    const preset =
+      options.presetOverride ?? options.presetFromFlags ?? "minimal";
     const structure = options.structure ?? "single";
     const blocksOverride = parseBlocks(options.with);
-    const workspaceName = structure === "workspace"
-      ? (options.workspaceName ?? defaultName).trim() || defaultName
-      : undefined;
+    const workspaceName =
+      structure === "workspace"
+        ? (options.workspaceName ?? defaultName).trim() || defaultName
+        : undefined;
 
     return Result.ok({
       rootDir,
@@ -589,39 +600,50 @@ async function resolveInitInput(
   intro("Outfitter init");
 
   // Prompt 1: Package name
-  const packageNameValue = options.name
-    ?? await promptText({
+  const packageNameValue =
+    options.name ??
+    (await promptText({
       message: "Project package name",
       placeholder: defaultName,
       initialValue: defaultName,
       validate: nonEmpty("Project name is required"),
-    });
+    }));
   if (isCancelled(packageNameValue)) return cancelledResult();
 
   // Prompt 2: Preset (skipped if subcommand or --preset flag)
-  const presetValue = options.presetOverride
-    ?? options.presetFromFlags
-    ?? await promptSelect<InitPresetId>({
+  const presetValue =
+    options.presetOverride ??
+    options.presetFromFlags ??
+    (await promptSelect<InitPresetId>({
       message: "Select a preset",
-      options: getReadyTargets().map(t => ({
+      options: getReadyTargets().map((t) => ({
         value: t.id,
         label: t.id,
         hint: t.description,
       })),
       initialValue: "minimal",
-    });
+    }));
   if (isCancelled(presetValue)) return cancelledResult();
 
   // Prompt 3: Structure
-  const structureValue = options.structure
-    ?? await promptSelect<InitStructure>({
+  const structureValue =
+    options.structure ??
+    (await promptSelect<InitStructure>({
       message: "Project structure",
       options: [
-        { value: "single", label: "Single package", hint: "One package in the target directory" },
-        { value: "workspace", label: "Workspace", hint: "Root workspace with project under packages/" },
+        {
+          value: "single",
+          label: "Single package",
+          hint: "One package in the target directory",
+        },
+        {
+          value: "workspace",
+          label: "Workspace",
+          hint: "Root workspace with project under packages/",
+        },
       ],
       initialValue: "single",
-    });
+    }));
   if (isCancelled(structureValue)) return cancelledResult();
 
   // Prompt 4: Bin name (only for binary presets)
@@ -629,45 +651,49 @@ async function resolveInitInput(
   const isBinaryPreset = ["cli", "daemon"].includes(presetValue);
   if (isBinaryPreset) {
     const projectName = deriveProjectName(packageNameValue.trim());
-    binName = options.bin
-      ?? await promptText({
+    binName =
+      options.bin ??
+      (await promptText({
         message: "Binary name",
         placeholder: projectName,
         initialValue: projectName,
-      });
+      }));
     if (isCancelled(binName)) return cancelledResult();
   }
 
   // Prompt 5: Tooling
-  const includeTooling = options.noTooling !== undefined
-    ? !options.noTooling
-    : options.with !== undefined
-      ? true  // --with implies tooling
-      : await promptConfirm({
-          message: "Add default tooling blocks?",
-          initialValue: true,
-        });
+  const includeTooling =
+    options.noTooling !== undefined
+      ? !options.noTooling
+      : options.with !== undefined
+        ? true // --with implies tooling
+        : await promptConfirm({
+            message: "Add default tooling blocks?",
+            initialValue: true,
+          });
   if (isCancelled(includeTooling)) return cancelledResult();
 
   // Prompt 6: Local dependencies
-  const localValue = options.local !== undefined
-    ? options.local
-    : await promptConfirm({
-        message: "Use workspace:* for @outfitter dependencies?",
-        initialValue: false,
-      });
+  const localValue =
+    options.local !== undefined
+      ? options.local
+      : await promptConfirm({
+          message: "Use workspace:* for @outfitter dependencies?",
+          initialValue: false,
+        });
   if (isCancelled(localValue)) return cancelledResult();
 
   // Prompt 7: Workspace name (only if workspace structure)
   let workspaceName: string | undefined;
   if (structureValue === "workspace") {
-    workspaceName = options.workspaceName
-      ?? await promptText({
+    workspaceName =
+      options.workspaceName ??
+      (await promptText({
         message: "Workspace package name",
         placeholder: defaultName,
         initialValue: defaultName,
         validate: nonEmpty("Workspace name is required"),
-      });
+      }));
     if (isCancelled(workspaceName)) return cancelledResult();
     workspaceName = workspaceName.trim();
   }
@@ -717,7 +743,9 @@ This function is temporary. After Slice 0 lands and the planner is updated to us
 ### 7.4 Deprecation Warning for `--template`
 
 ```typescript
-function resolvePresetFromFlags(options: InitOptions): InitPresetId | undefined {
+function resolvePresetFromFlags(
+  options: InitOptions
+): InitPresetId | undefined {
   // --preset takes priority
   if (options.preset) {
     return options.preset;
@@ -730,10 +758,10 @@ function resolvePresetFromFlags(options: InitOptions): InitPresetId | undefined 
     // Emit deprecation warning to stderr (does not affect JSON output)
     console.error(
       `Warning: --template is deprecated and will be removed in the next major version.\n` +
-      `  Use --preset instead: outfitter init --preset ${mapped}\n` +
-      (options.template === "basic"
-        ? `  Note: "basic" has been renamed to "minimal".\n`
-        : "")
+        `  Use --preset instead: outfitter init --preset ${mapped}\n` +
+        (options.template === "basic"
+          ? `  Note: "basic" has been renamed to "minimal".\n`
+          : "")
     );
 
     // Validate the mapped value
@@ -824,17 +852,17 @@ function createConsolidatedInitAction(options: {
   includeTemplateOption: boolean;
 }) {
   const actionOptions: ActionCliOption[] = [
-    ...commonInitOptions,               // name, bin, force, local, workspace, with, no-tooling
-    structureOption,                     // NEW: --structure
-    workspaceNameOption,                 // NEW: --workspace-name
-    yesOption,                           // NEW: --yes
+    ...commonInitOptions, // name, bin, force, local, workspace, with, no-tooling
+    structureOption, // NEW: --structure
+    workspaceNameOption, // NEW: --workspace-name
+    yesOption, // NEW: --yes
   ];
 
   if (options.includePresetOption) {
-    actionOptions.push(presetOption);    // NEW: --preset
+    actionOptions.push(presetOption); // NEW: --preset
   }
   if (options.includeTemplateOption) {
-    actionOptions.push(templateOption);  // DEPRECATED: --template
+    actionOptions.push(templateOption); // DEPRECATED: --template
   }
 
   return defineAction({
@@ -847,20 +875,20 @@ function createConsolidatedInitAction(options: {
       command: options.command,
       description: options.description,
       options: actionOptions,
-      mapInput: (context) => resolveConsolidatedInitOptions(
-        context,
-        options.presetOverride,
-      ),
+      mapInput: (context) =>
+        resolveConsolidatedInitOptions(context, options.presetOverride),
     },
     handler: async (input) => {
       const { outputMode, ...initInput } = input;
       const outputOptions = outputMode ? { mode: outputMode } : undefined;
       const result = await runInit(initInput);
       if (result.isErr()) {
-        return Result.err(new InternalError({
-          message: result.error.message,
-          context: { action: options.id },
-        }));
+        return Result.err(
+          new InternalError({
+            message: result.error.message,
+            context: { action: options.id },
+          })
+        );
       }
       await printInitResults(result.value, outputOptions);
       return Result.ok(result.value);
@@ -870,37 +898,45 @@ function createConsolidatedInitAction(options: {
 
 // Registration:
 outfitterActions
-  .add(createConsolidatedInitAction({
-    id: "init",
-    description: "Create a new Outfitter project",
-    command: "[directory]",
-    includePresetOption: true,
-    includeTemplateOption: true,  // deprecated, kept for compat
-  }))
-  .add(createConsolidatedInitAction({
-    id: "init.cli",
-    description: "Create a new CLI project",
-    command: "cli [directory]",
-    presetOverride: "cli",
-    includePresetOption: false,
-    includeTemplateOption: false,
-  }))
-  .add(createConsolidatedInitAction({
-    id: "init.mcp",
-    description: "Create a new MCP server",
-    command: "mcp [directory]",
-    presetOverride: "mcp",
-    includePresetOption: false,
-    includeTemplateOption: false,
-  }))
-  .add(createConsolidatedInitAction({
-    id: "init.daemon",
-    description: "Create a new daemon project",
-    command: "daemon [directory]",
-    presetOverride: "daemon",
-    includePresetOption: false,
-    includeTemplateOption: false,
-  }));
+  .add(
+    createConsolidatedInitAction({
+      id: "init",
+      description: "Create a new Outfitter project",
+      command: "[directory]",
+      includePresetOption: true,
+      includeTemplateOption: true, // deprecated, kept for compat
+    })
+  )
+  .add(
+    createConsolidatedInitAction({
+      id: "init.cli",
+      description: "Create a new CLI project",
+      command: "cli [directory]",
+      presetOverride: "cli",
+      includePresetOption: false,
+      includeTemplateOption: false,
+    })
+  )
+  .add(
+    createConsolidatedInitAction({
+      id: "init.mcp",
+      description: "Create a new MCP server",
+      command: "mcp [directory]",
+      presetOverride: "mcp",
+      includePresetOption: false,
+      includeTemplateOption: false,
+    })
+  )
+  .add(
+    createConsolidatedInitAction({
+      id: "init.daemon",
+      description: "Create a new daemon project",
+      command: "daemon [directory]",
+      presetOverride: "daemon",
+      includePresetOption: false,
+      includeTemplateOption: false,
+    })
+  );
 ```
 
 ---
@@ -916,6 +952,7 @@ This slice (2) depends on Slice 1 (shared engine) completing first. Specifically
 - The `scaffoldWorkspaceRoot` function from `create.ts` should already be in the shared engine
 
 If Slice 1 is not yet complete, the consolidation can still proceed by:
+
 1. Copying the workspace scaffolding functions from `create.ts` into `init.ts` temporarily
 2. Marking them with `// TODO: extract to shared engine in Slice 1` comments
 3. Replacing after Slice 1 lands
@@ -958,7 +995,7 @@ After this slice is complete, all of the following must pass:
 - [ ] `outfitter init my-app --preset cli -b my-bin --yes` -- custom binary name
 - [ ] `outfitter init my-app --preset cli --no-tooling --yes` -- no blocks added
 - [ ] `outfitter init my-app --preset cli --with claude,biome --yes` -- custom blocks
-- [ ] `outfitter init my-app --preset cli --local --yes` -- workspace:* rewriting
+- [ ] `outfitter init my-app --preset cli --local --yes` -- workspace:\* rewriting
 - [ ] `outfitter create` -- **still works** (not yet retired, untouched in this slice)
 - [ ] All existing `init.test.ts` tests pass without modification
 - [ ] All create test scenarios have equivalent init tests

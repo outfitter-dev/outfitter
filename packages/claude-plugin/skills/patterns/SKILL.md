@@ -7,11 +7,12 @@ allowed-tools: Read Grep Glob
 
 # Outfitter Stack Patterns
 
-Primary reference for @outfitter/* package conventions.
+Primary reference for @outfitter/\* package conventions.
 
 ## Handler Contract
 
 Handlers are pure functions that:
+
 - Accept typed input and context
 - Return `Result<TOutput, TError>`
 - Know nothing about transport (CLI flags, HTTP headers, MCP tool schemas)
@@ -28,7 +29,10 @@ type Handler<TInput, TOutput, TError extends OutfitterError> = (
 ```typescript
 import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
-export const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
+export const getUser: Handler<{ id: string }, User, NotFoundError> = async (
+  input,
+  ctx
+) => {
   ctx.logger.debug("Fetching user", { userId: input.id });
   const user = await db.users.findById(input.id);
 
@@ -54,9 +58,9 @@ const err = Result.err(NotFoundError.create("user", "123"));
 
 // Check
 if (result.isOk()) {
-  console.log(result.value);  // TypeScript knows T
+  console.log(result.value); // TypeScript knows T
 } else {
-  console.log(result.error);  // TypeScript knows E
+  console.log(result.error); // TypeScript knows E
 }
 
 // Pattern match
@@ -66,33 +70,37 @@ const message = result.match({
 });
 
 // Combine
-const combined = combine2(result1, result2);  // tuple or first error
+const combined = combine2(result1, result2); // tuple or first error
 ```
 
 ## Error Taxonomy
 
 Ten categories map to exit codes and HTTP status:
 
-| Category | Exit | HTTP | When to Use |
-|----------|------|------|-------------|
-| `validation` | 1 | 400 | Invalid input, schema failures |
-| `not_found` | 2 | 404 | Resource doesn't exist |
-| `conflict` | 3 | 409 | Already exists, version mismatch |
-| `permission` | 4 | 403 | Forbidden action |
-| `timeout` | 5 | 504 | Operation took too long |
-| `rate_limit` | 6 | 429 | Too many requests |
-| `network` | 7 | 502 | Connection failures |
-| `internal` | 8 | 500 | Unexpected errors, bugs |
-| `auth` | 9 | 401 | Authentication required |
-| `cancelled` | 130 | 499 | User interrupted (Ctrl+C) |
+| Category     | Exit | HTTP | When to Use                      |
+| ------------ | ---- | ---- | -------------------------------- |
+| `validation` | 1    | 400  | Invalid input, schema failures   |
+| `not_found`  | 2    | 404  | Resource doesn't exist           |
+| `conflict`   | 3    | 409  | Already exists, version mismatch |
+| `permission` | 4    | 403  | Forbidden action                 |
+| `timeout`    | 5    | 504  | Operation took too long          |
+| `rate_limit` | 6    | 429  | Too many requests                |
+| `network`    | 7    | 502  | Connection failures              |
+| `internal`   | 8    | 500  | Unexpected errors, bugs          |
+| `auth`       | 9    | 401  | Authentication required          |
+| `cancelled`  | 130  | 499  | User interrupted (Ctrl+C)        |
 
 ```typescript
-import { ValidationError, NotFoundError, getExitCode } from "@outfitter/contracts";
+import {
+  ValidationError,
+  NotFoundError,
+  getExitCode,
+} from "@outfitter/contracts";
 
 ValidationError.create("email", "invalid");
 NotFoundError.create("user", "user-123");
 
-getExitCode(error.category);   // 2 for not_found
+getExitCode(error.category); // 2 for not_found
 getStatusCode(error.category); // 404 for not_found
 ```
 
@@ -114,7 +122,7 @@ const validateInput = createValidator(InputSchema);
 // In handler
 const inputResult = validateInput(rawInput);
 if (inputResult.isErr()) return inputResult;
-const input = inputResult.value;  // typed as z.infer<typeof InputSchema>
+const input = inputResult.value; // typed as z.infer<typeof InputSchema>
 ```
 
 ## Context
@@ -125,38 +133,38 @@ const input = inputResult.value;  // typed as z.infer<typeof InputSchema>
 import { createContext } from "@outfitter/contracts";
 
 const ctx = createContext({
-  logger: myLogger,           // structured logger
-  config: resolvedConfig,     // merged configuration
-  signal: controller.signal,  // cancellation
+  logger: myLogger, // structured logger
+  config: resolvedConfig, // merged configuration
+  signal: controller.signal, // cancellation
   workspaceRoot: "/project",
 });
 
 // ctx.requestId is auto-generated UUIDv7 for tracing
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `requestId` | `string` | Auto-generated UUIDv7 |
-| `logger` | `Logger` | Structured logger |
-| `config` | `ResolvedConfig` | Merged config |
-| `signal` | `AbortSignal` | Cancellation signal |
-| `workspaceRoot` | `string` | Project root |
-| `cwd` | `string` | Current directory |
+| Field           | Type             | Description           |
+| --------------- | ---------------- | --------------------- |
+| `requestId`     | `string`         | Auto-generated UUIDv7 |
+| `logger`        | `Logger`         | Structured logger     |
+| `config`        | `ResolvedConfig` | Merged config         |
+| `signal`        | `AbortSignal`    | Cancellation signal   |
+| `workspaceRoot` | `string`         | Project root          |
+| `cwd`           | `string`         | Current directory     |
 
 ## Bun-First APIs
 
 Prefer Bun-native APIs:
 
-| Need | Bun API |
-|------|---------|
-| Hashing | `Bun.hash()` |
-| Globbing | `Bun.Glob` |
-| Semver | `Bun.semver` |
-| Shell | `Bun.$` |
-| Colors | `Bun.color()` |
-| String width | `Bun.stringWidth()` |
-| SQLite | `bun:sqlite` |
-| UUID v7 | `Bun.randomUUIDv7()` |
+| Need         | Bun API              |
+| ------------ | -------------------- |
+| Hashing      | `Bun.hash()`         |
+| Globbing     | `Bun.Glob`           |
+| Semver       | `Bun.semver`         |
+| Shell        | `Bun.$`              |
+| Colors       | `Bun.color()`        |
+| String width | `Bun.stringWidth()`  |
+| SQLite       | `bun:sqlite`         |
+| UUID v7      | `Bun.randomUUIDv7()` |
 
 ## References
 

@@ -13,6 +13,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+
 import {
   generatePackageListSection,
   replaceSentinelSection,

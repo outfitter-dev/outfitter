@@ -1,4 +1,5 @@
 import { NotFoundError, Result, ValidationError } from "@outfitter/contracts";
+
 import type {
   TargetCategory,
   TargetDefinition,

@@ -6,16 +6,17 @@ Codex CLI-specific implementation details for Agent Skills. For cross-platform c
 
 Codex loads skills from multiple locations with this precedence order (higher overrides lower):
 
-| Scope | Location | Use Case |
-| ----- | -------- | -------- |
-| `REPO` | `$CWD/.codex/skills` | Project-specific skills in current directory |
-| `REPO` | `$CWD/../.codex/skills` | Parent folder skills (when in Git repo) |
-| `REPO` | `$REPO_ROOT/.codex/skills` | Repository root skills |
-| `USER` | `$CODEX_HOME/skills` (default: `~/.codex/skills`) | User's personal skills |
-| `ADMIN` | `/etc/codex/skills` | System/admin skills |
-| `SYSTEM` | Bundled with Codex | Built-in skills |
+| Scope    | Location                                          | Use Case                                     |
+| -------- | ------------------------------------------------- | -------------------------------------------- |
+| `REPO`   | `$CWD/.codex/skills`                              | Project-specific skills in current directory |
+| `REPO`   | `$CWD/../.codex/skills`                           | Parent folder skills (when in Git repo)      |
+| `REPO`   | `$REPO_ROOT/.codex/skills`                        | Repository root skills                       |
+| `USER`   | `$CODEX_HOME/skills` (default: `~/.codex/skills`) | User's personal skills                       |
+| `ADMIN`  | `/etc/codex/skills`                               | System/admin skills                          |
+| `SYSTEM` | Bundled with Codex                                | Built-in skills                              |
 
 **Key behaviors:**
+
 - Skills with the same name from higher precedence scopes overwrite lower ones
 - Skills are discovered at startup by scanning these paths
 - Restart Codex after installing new skills to load them
@@ -75,14 +76,15 @@ description: "Helps with files"
 
 Codex uses `AGENTS.md` for project instructions, separate from skills:
 
-| Aspect | AGENTS.md | Skills |
-| ------ | --------- | ------ |
-| **Loading** | Always loaded per-session | Loaded on-demand when invoked |
-| **Purpose** | Project-wide context and rules | Task-specific capabilities |
-| **Scope** | Per-repository | Personal, project, or system |
-| **Location** | Repository root or `~/.codex/` | `skills/` directories |
+| Aspect       | AGENTS.md                      | Skills                        |
+| ------------ | ------------------------------ | ----------------------------- |
+| **Loading**  | Always loaded per-session      | Loaded on-demand when invoked |
+| **Purpose**  | Project-wide context and rules | Task-specific capabilities    |
+| **Scope**    | Per-repository                 | Personal, project, or system  |
+| **Location** | Repository root or `~/.codex/` | `skills/` directories         |
 
 **AGENTS.md discovery order:**
+
 1. `~/.codex/AGENTS.override.md` (or `AGENTS.md`)
 2. Repository root `AGENTS.md`
 3. Nested `AGENTS.override.md` in subdirectories
@@ -91,11 +93,11 @@ Codex uses `AGENTS.md` for project instructions, separate from skills:
 
 Codex includes utility skills:
 
-| Skill | Purpose |
-| ----- | ------- |
-| `$skill-creator` | Creates new skills interactively |
+| Skill              | Purpose                            |
+| ------------------ | ---------------------------------- |
+| `$skill-creator`   | Creates new skills interactively   |
 | `$skill-installer` | Downloads skills from GitHub repos |
-| `$create-plan` | Experimental planning skill |
+| `$create-plan`     | Experimental planning skill        |
 
 ### Skill Installer
 
@@ -116,11 +118,13 @@ allowed-tools: Bash(git:*), Bash(jq:*), Read
 ```
 
 **Status:**
+
 - Marked as "experimental" in the Agent Skills spec
 - "Support for this field may vary between agent implementations"
 - No explicit Codex documentation on implementation
 
 **Alternative controls in Codex:**
+
 - Global `sandbox_mode` setting
 - Global `approval_policy` setting
 - MCP servers support `enabled_tools` and `disabled_tools` arrays
@@ -137,6 +141,7 @@ skills-ref validate ./my-skill
 ```
 
 Checks:
+
 - YAML frontmatter validity
 - Name/description constraints
 - Naming conventions
@@ -185,6 +190,7 @@ Skills are only discovered at startup. After adding a new skill, restart the CLI
 **Check description triggers:**
 
 The description is the primary trigger for implicit invocation. Ensure it includes:
+
 - What the skill does
 - "Use when..." conditions
 - Keywords users would naturally say
@@ -210,22 +216,23 @@ grep -P "\t" SKILL.md
 ```
 
 **Common issues:**
+
 - Tabs instead of spaces
 - Missing quotes around special characters
 - Missing closing `---` delimiter
 
 ## Differences from Claude Code
 
-| Feature | Codex CLI | Claude Code |
-| ------- | --------- | ----------- |
-| **Skill loading** | Feature flag required | Built-in support |
-| **Discovery paths** | 6 scopes with precedence | Plugin system + `.claude/skills/` |
-| **Invocation** | `$skill-name` syntax | Skill tool, natural language |
-| **Project instructions** | `AGENTS.md` | `CLAUDE.md` |
-| **Restart required** | Yes, after adding skills | No, skills reload on `/clear` |
-| **Tool restrictions** | `allowed-tools` (experimental) | `allowed-tools` (functional) |
-| **Built-in creator** | `$skill-creator` | Manual or via outfitter plugin |
-| **Debug mode** | Log files | `claude --debug` |
+| Feature                  | Codex CLI                      | Claude Code                       |
+| ------------------------ | ------------------------------ | --------------------------------- |
+| **Skill loading**        | Feature flag required          | Built-in support                  |
+| **Discovery paths**      | 6 scopes with precedence       | Plugin system + `.claude/skills/` |
+| **Invocation**           | `$skill-name` syntax           | Skill tool, natural language      |
+| **Project instructions** | `AGENTS.md`                    | `CLAUDE.md`                       |
+| **Restart required**     | Yes, after adding skills       | No, skills reload on `/clear`     |
+| **Tool restrictions**    | `allowed-tools` (experimental) | `allowed-tools` (functional)      |
+| **Built-in creator**     | `$skill-creator`               | Manual or via outfitter plugin    |
+| **Debug mode**           | Log files                      | `claude --debug`                  |
 
 ## Quick Reference
 

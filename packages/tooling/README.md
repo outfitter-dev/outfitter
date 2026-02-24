@@ -15,6 +15,7 @@ bun add -D @outfitter/tooling
 ```
 
 Peer dependencies (optional):
+
 - `ultracite` — Biome wrapper for formatting/linting
 - `lefthook` — Git hooks
 - `markdownlint-cli2` — Markdown linting
@@ -50,6 +51,7 @@ bunx @outfitter/tooling fix src/
 ### `tooling upgrade-bun [version]`
 
 Upgrade Bun version across the project. Updates:
+
 - `.bun-version`
 - `engines.bun` in all package.json files
 - `@types/bun` dependency versions (leaves "latest" alone)
@@ -71,11 +73,13 @@ bunx @outfitter/tooling upgrade-bun 1.4.0 --no-install
 TDD-aware pre-push strict verification hook. Detects RED phase branches and skips verification by design.
 
 RED phase branches follow these patterns:
+
 - `*-tests` (e.g., `feature/auth-tests`)
 - `*/tests` (e.g., `feature/auth/tests`)
 - `*_tests` (e.g., `feature/auth_tests`)
 
 Verification order:
+
 1. Run `verify:ci` if present.
 2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
 
@@ -207,6 +211,7 @@ extends:
 ```
 
 Default hooks:
+
 - **pre-commit**: Runs ultracite on staged files, typechecks
 - **pre-push**: Runs TDD-aware strict verification via `tooling pre-push`
 
@@ -224,6 +229,7 @@ cp node_modules/@outfitter/tooling/.markdownlint-cli2.jsonc .
 The tooling package includes a registry of composable config blocks for the `outfitter` CLI scaffolding system.
 
 Available blocks:
+
 - `claude` — Claude Code settings and hooks
 - `biome` — Biome/Ultracite configuration
 - `lefthook` — Git hooks configuration
@@ -245,13 +251,13 @@ bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
 
 ## Exports
 
-| Export | Description |
-|--------|-------------|
-| `./biome.json` | Biome configuration preset |
-| `./tsconfig.preset.json` | TypeScript preset (general) |
-| `./tsconfig.preset.bun.json` | TypeScript preset (Bun) |
-| `./lefthook.yml` | Lefthook hooks configuration |
-| `./.markdownlint-cli2.jsonc` | markdownlint configuration |
+| Export                       | Description                  |
+| ---------------------------- | ---------------------------- |
+| `./biome.json`               | Biome configuration preset   |
+| `./tsconfig.preset.json`     | TypeScript preset (general)  |
+| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)      |
+| `./lefthook.yml`             | Lefthook hooks configuration |
+| `./.markdownlint-cli2.jsonc` | markdownlint configuration   |
 
 ## Related
 

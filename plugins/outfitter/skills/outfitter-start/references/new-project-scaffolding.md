@@ -19,6 +19,7 @@ ls CLAUDE.md SPEC.md PLAN.md README.md 2>/dev/null
 ```
 
 **If context files exist**, read them and look for keywords:
+
 - "CLI", "command-line", "tool" → suggest `cli` preset
 - "MCP", "server", "tools for AI" → suggest `mcp` preset
 - "daemon", "background", "service" → suggest `daemon` preset
@@ -114,22 +115,22 @@ outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
 
 ### Available Presets
 
-| Preset | Creates |
-|----------|---------|
-| `minimal` | Library with src/index.ts, Result types |
-| `cli` | CLI app with commands/, config loading, output contract |
-| `mcp` | MCP server with typed tools, action registry |
-| `daemon` | Daemon + CLI control, IPC, health checks |
+| Preset    | Creates                                                 |
+| --------- | ------------------------------------------------------- |
+| `minimal` | Library with src/index.ts, Result types                 |
+| `cli`     | CLI app with commands/, config loading, output contract |
+| `mcp`     | MCP server with typed tools, action registry            |
+| `daemon`  | Daemon + CLI control, IPC, health checks                |
 
 ### Available Tooling Blocks
 
-| Block | Contents |
-|-------|----------|
-| `scaffolding` | All blocks below (default) |
-| `claude` | `.claude/settings.json`, format-on-stop hook |
-| `biome` | `biome.json`, ultracite dependency |
-| `lefthook` | `.lefthook.yml`, lefthook dependency |
-| `bootstrap` | `scripts/bootstrap.sh` |
+| Block         | Contents                                     |
+| ------------- | -------------------------------------------- |
+| `scaffolding` | All blocks below (default)                   |
+| `claude`      | `.claude/settings.json`, format-on-stop hook |
+| `biome`       | `biome.json`, ultracite dependency           |
+| `lefthook`    | `.lefthook.yml`, lefthook dependency         |
+| `bootstrap`   | `scripts/bootstrap.sh`                       |
 
 ## Post-Scaffolding
 

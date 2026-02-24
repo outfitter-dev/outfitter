@@ -15,15 +15,15 @@ Research into scaffolding patterns from two successful projects, compared agains
 
 **Key architecture:**
 
-| Layer | Implementation |
-|-------|---------------|
-| CLI framework | Commander.js |
-| Registry schema | Zod with multiple item types |
-| Code transformation | ts-morph AST pipeline |
-| Project detection | File and dependency heuristics |
-| Dependency resolution | Recursive tree traversal with dedup |
-| Build | pnpm + Turborepo, registry compiled to static JSON |
-| Update mechanism | `diff` command (user-controlled updates) |
+| Layer                 | Implementation                                     |
+| --------------------- | -------------------------------------------------- |
+| CLI framework         | Commander.js                                       |
+| Registry schema       | Zod with multiple item types                       |
+| Code transformation   | ts-morph AST pipeline                              |
+| Project detection     | File and dependency heuristics                     |
+| Dependency resolution | Recursive tree traversal with dedup                |
+| Build                 | pnpm + Turborepo, registry compiled to static JSON |
+| Update mechanism      | `diff` command (user-controlled updates)           |
 
 ### create-better-t-stack - "Virtual Filesystem + Embedded Templates"
 
@@ -36,14 +36,14 @@ Research into scaffolding patterns from two successful projects, compared agains
 
 **Key architecture:**
 
-| Layer | Implementation |
-|-------|---------------|
-| CLI framework | oRPC + trpc-cli |
-| Template engine | Handlebars |
-| Template storage | Build-time embedded map |
-| VFS | `memfs` |
-| Schema validation | Zod v4 |
-| Testing | Programmatic API smoke tests |
+| Layer             | Implementation               |
+| ----------------- | ---------------------------- |
+| CLI framework     | oRPC + trpc-cli              |
+| Template engine   | Handlebars                   |
+| Template storage  | Build-time embedded map      |
+| VFS               | `memfs`                      |
+| Schema validation | Zod v4                       |
+| Testing           | Programmatic API smoke tests |
 
 ---
 
@@ -51,16 +51,16 @@ Research into scaffolding patterns from two successful projects, compared agains
 
 Before adopting anything, we should anchor on what already exists.
 
-| Capability | Current state |
-|---|---|
-| Deterministic planning (`planCreateProject()`) | Already strong |
-| Block/registry + manifest stamping | Already strong |
-| Drift detection (`outfitter check`) | Already strong |
-| Programmatic scaffolding API | Already present (`runCreate`, `runInit`) |
-| `create` and `init` command surfaces | Both currently first-class |
-| Post-scaffold automation (`bun install`, git setup) | Missing |
-| Dry-run for scaffolding (`create` and `init`) | Missing today (`add` and `migrate` already have it) |
-| Shared scaffolding engine between `create` and `init` | Missing (duplication exists) |
+| Capability                                            | Current state                                       |
+| ----------------------------------------------------- | --------------------------------------------------- |
+| Deterministic planning (`planCreateProject()`)        | Already strong                                      |
+| Block/registry + manifest stamping                    | Already strong                                      |
+| Drift detection (`outfitter check`)                   | Already strong                                      |
+| Programmatic scaffolding API                          | Already present (`runCreate`, `runInit`)            |
+| `create` and `init` command surfaces                  | Both currently first-class                          |
+| Post-scaffold automation (`bun install`, git setup)   | Missing                                             |
+| Dry-run for scaffolding (`create` and `init`)         | Missing today (`add` and `migrate` already have it) |
+| Shared scaffolding engine between `create` and `init` | Missing (duplication exists)                        |
 
 ---
 
@@ -70,10 +70,10 @@ Before adopting anything, we should anchor on what already exists.
 
 Keep this split into two independent knobs:
 
-| Track | Default behavior | Opt-out | Guardrails |
-|---|---|---|---|
-| Dependency install | Run `bun install` | `--skip-install` | Surface failures clearly and continue to next-steps output |
-| Git bootstrap | Run git setup for fresh directories | `--skip-git`, `--skip-commit` | Only run when not already in a repo |
+| Track              | Default behavior                    | Opt-out                       | Guardrails                                                 |
+| ------------------ | ----------------------------------- | ----------------------------- | ---------------------------------------------------------- |
+| Dependency install | Run `bun install`                   | `--skip-install`              | Surface failures clearly and continue to next-steps output |
+| Git bootstrap      | Run git setup for fresh directories | `--skip-git`, `--skip-commit` | Only run when not already in a repo                        |
 
 This gives immediate time savings while avoiding brittle "one big shell chain" behavior.
 
@@ -169,13 +169,13 @@ If external registries become a goal, ship protocol + trust controls together:
 
 ## Patterns That Do Not Apply Yet
 
-| Pattern | Why not now |
-|---|---|
-| Handlebars templating everywhere | Current placeholder model is sufficient for present template complexity |
-| Full compatibility matrix engine | Presets are limited and mostly independent today |
-| Build-time template embedding | Lower ROI at current template count |
-| MCP browsing for scaffolding registry | Useful later, not urgent at current scale |
-| Public telemetry/analytics | Not required at this stage |
+| Pattern                               | Why not now                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| Handlebars templating everywhere      | Current placeholder model is sufficient for present template complexity |
+| Full compatibility matrix engine      | Presets are limited and mostly independent today                        |
+| Build-time template embedding         | Lower ROI at current template count                                     |
+| MCP browsing for scaffolding registry | Useful later, not urgent at current scale                               |
+| Public telemetry/analytics            | Not required at this stage                                              |
 
 ---
 
@@ -183,29 +183,29 @@ If external registries become a goal, ship protocol + trust controls together:
 
 ### Now (high impact, low to medium effort)
 
-| Item | Effort | Risk | Acceptance criteria |
-|---|---|---|---|
-| Post-scaffold automation | S | M | `create` and `init` run install by default, opt-out flags exist, failures surface clearly |
-| Scaffolding dry-run | M | M | `create --dry-run` and `init --dry-run` show deterministic operation plan and perform no writes |
-| Direct `init` deprecation | S | L | `init` prints deprecation warning, internal migration guide published, usage inventory created |
-| Internal agent migration guide | S | L | One reusable guide template adopted for all scaffold behavior changes |
-| Changelog-first migration policy | S | L | Changelog template includes impact/action fields and is used for scaffold changes |
+| Item                             | Effort | Risk | Acceptance criteria                                                                             |
+| -------------------------------- | ------ | ---- | ----------------------------------------------------------------------------------------------- |
+| Post-scaffold automation         | S      | M    | `create` and `init` run install by default, opt-out flags exist, failures surface clearly       |
+| Scaffolding dry-run              | M      | M    | `create --dry-run` and `init --dry-run` show deterministic operation plan and perform no writes |
+| Direct `init` deprecation        | S      | L    | `init` prints deprecation warning, internal migration guide published, usage inventory created  |
+| Internal agent migration guide   | S      | L    | One reusable guide template adopted for all scaffold behavior changes                           |
+| Changelog-first migration policy | S      | L    | Changelog template includes impact/action fields and is used for scaffold changes               |
 
 ### Next (medium effort, structural improvements)
 
-| Item | Effort | Risk | Acceptance criteria |
-|---|---|---|---|
-| Shared scaffolding engine extraction | M | M | `create` and `init` use shared module for file/template operations |
-| `$schema` support | S | L | Manifest/config has schema reference and validation/docs are updated |
-| Reproducible command output | S | L | Scaffold output and JSON mode include canonical recreate command |
+| Item                                 | Effort | Risk | Acceptance criteria                                                  |
+| ------------------------------------ | ------ | ---- | -------------------------------------------------------------------- |
+| Shared scaffolding engine extraction | M      | M    | `create` and `init` use shared module for file/template operations   |
+| `$schema` support                    | S      | L    | Manifest/config has schema reference and validation/docs are updated |
+| Reproducible command output          | S      | L    | Scaffold output and JSON mode include canonical recreate command     |
 
 ### Later (strategic)
 
-| Item | Effort | Risk | Acceptance criteria |
-|---|---|---|---|
-| VFS layer | L | M | Generation and tests can run in memory with explicit write phase |
-| Open registry protocol + trust model | L | H | External source support ships with integrity and trust controls |
-| AST transforms for advanced customization | L | M | Only added when templates require structural rewrites |
+| Item                                      | Effort | Risk | Acceptance criteria                                              |
+| ----------------------------------------- | ------ | ---- | ---------------------------------------------------------------- |
+| VFS layer                                 | L      | M    | Generation and tests can run in memory with explicit write phase |
+| Open registry protocol + trust model      | L      | H    | External source support ships with integrity and trust controls  |
+| AST transforms for advanced customization | L      | M    | Only added when templates require structural rewrites            |
 
 ---
 

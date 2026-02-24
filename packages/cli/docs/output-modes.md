@@ -4,11 +4,11 @@ CLI commands default to human-readable output. Machine-readable formats are opt-
 
 ## Available Modes
 
-| Mode | Flag | Description |
-|------|------|-------------|
+| Mode    | Flag             | Description                                   |
+| ------- | ---------------- | --------------------------------------------- |
 | `human` | `--output human` | Formatted text for terminal display (default) |
-| `json` | `--output json` | Single JSON object or array |
-| `jsonl` | `--output jsonl` | Newline-delimited JSON (one object per line) |
+| `json`  | `--output json`  | Single JSON object or array                   |
+| `jsonl` | `--output jsonl` | Newline-delimited JSON (one object per line)  |
 
 ## Selecting a Mode
 

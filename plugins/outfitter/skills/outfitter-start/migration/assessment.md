@@ -41,35 +41,36 @@ Is this a new project with no existing code?
 
 ### By Count
 
-| Finding | Count | Effort |
-|---------|-------|--------|
-| Throw statements | 0 | None |
-| | 1-5 | Low |
-| | 6-15 | Medium |
-| | 16+ | High |
-| Try-catch blocks | 0-3 | Low |
-| | 4-10 | Medium |
-| | 11+ | High |
-| Custom error classes | 0-2 | Low |
-| | 3-5 | Medium |
-| | 6+ | High |
+| Finding              | Count | Effort |
+| -------------------- | ----- | ------ |
+| Throw statements     | 0     | None   |
+|                      | 1-5   | Low    |
+|                      | 6-15  | Medium |
+|                      | 16+   | High   |
+| Try-catch blocks     | 0-3   | Low    |
+|                      | 4-10  | Medium |
+|                      | 11+   | High   |
+| Custom error classes | 0-2   | Low    |
+|                      | 3-5   | Medium |
+|                      | 6+    | High   |
 
 ### By Complexity
 
-| Pattern | Complexity | Notes |
-|---------|------------|-------|
-| Simple throw | Low | Direct conversion to Result.err() |
-| Conditional throw | Low | Map condition to error type |
-| Try-catch with rethrow | Medium | Need to trace error flow |
-| Nested try-catch | High | May need restructuring |
-| Promise.all with throws | High | Need Result-aware alternative |
-| Third-party library throws | Medium | Requires wrapper pattern |
+| Pattern                    | Complexity | Notes                             |
+| -------------------------- | ---------- | --------------------------------- |
+| Simple throw               | Low        | Direct conversion to Result.err() |
+| Conditional throw          | Low        | Map condition to error type       |
+| Try-catch with rethrow     | Medium     | Need to trace error flow          |
+| Nested try-catch           | High       | May need restructuring            |
+| Promise.all with throws    | High       | Need Result-aware alternative     |
+| Third-party library throws | Medium     | Requires wrapper pattern          |
 
 ## Scope Indicators
 
 ### High-Priority Conversion Candidates
 
 Functions that:
+
 - Are called from multiple places
 - Handle user input
 - Interact with external services
@@ -113,13 +114,13 @@ rg "(homedir\(\)|os\.homedir|~/\.)" --type ts -c
 
 ### Scope Summary
 
-| Category | Count | Effort |
-|----------|-------|--------|
-| Throw statements | X | Low/Medium/High |
-| Try-catch blocks | X | Low/Medium/High |
-| Console logging | X | Low/Medium/High |
-| Custom errors | X | Low/Medium/High |
-| Path patterns | X | Low/Medium/High |
+| Category         | Count | Effort          |
+| ---------------- | ----- | --------------- |
+| Throw statements | X     | Low/Medium/High |
+| Try-catch blocks | X     | Low/Medium/High |
+| Console logging  | X     | Low/Medium/High |
+| Custom errors    | X     | Low/Medium/High |
+| Path patterns    | X     | Low/Medium/High |
 
 ### Recommended Approach
 

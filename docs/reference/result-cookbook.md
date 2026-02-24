@@ -57,7 +57,9 @@ const syncUser = (externalId: string) =>
     // Result.await wraps Promise<Result> for yielding
     const external = yield* Result.await(fetchExternalUser(externalId));
     const local = yield* Result.await(upsertUser(external));
-    const settings = yield* Result.await(syncSettings(local.id, external.preferences));
+    const settings = yield* Result.await(
+      syncSettings(local.id, external.preferences)
+    );
     return Result.ok({ user: local, settings });
   });
 
@@ -112,7 +114,9 @@ When composing operations with different error types, normalize them.
 ```typescript
 // Each function returns a different error type
 declare function parseConfig(raw: string): Result<Config, ParseError>;
-declare function validateConfig(config: Config): Result<Config, ValidationError>;
+declare function validateConfig(
+  config: Config
+): Result<Config, ValidationError>;
 declare function applyConfig(config: Config): Result<void, ApplyError>;
 
 // Without normalization - union grows
@@ -127,13 +131,14 @@ const loose = Result.gen(function* () {
 // With normalization via mapError
 const tight = Result.gen(function* () {
   const parsed = yield* parseConfig(raw).mapError(
-    (e) => new ConfigError({ message: `Parse: ${e.message}`, phase: "parse" }),
+    (e) => new ConfigError({ message: `Parse: ${e.message}`, phase: "parse" })
   );
   const validated = yield* validateConfig(parsed).mapError(
-    (e) => new ConfigError({ message: `Validate: ${e.message}`, phase: "validate" }),
+    (e) =>
+      new ConfigError({ message: `Validate: ${e.message}`, phase: "validate" })
   );
   yield* applyConfig(validated).mapError(
-    (e) => new ConfigError({ message: `Apply: ${e.message}`, phase: "apply" }),
+    (e) => new ConfigError({ message: `Apply: ${e.message}`, phase: "apply" })
   );
   return Result.ok(validated);
 });
@@ -161,7 +166,9 @@ const loadDashboard = async (userId: string) => {
 
 // Or inside a gen block
 const dashboard = Result.gen(async function* () {
-  const [user, settings, notifications] = yield* Result.await(loadDashboard(userId));
+  const [user, settings, notifications] = yield* Result.await(
+    loadDashboard(userId)
+  );
   return Result.ok({ user, settings, notifications });
 });
 ```
@@ -207,7 +214,7 @@ export const updateProfile: Handler<
         userId: user.id,
         displayName: validated,
         updatedAt: new Date(),
-      }),
+      })
     );
 
     ctx.logger.info("Profile updated", { userId: user.id });
@@ -249,17 +256,17 @@ function myHandler(): Result<Output, ErrorA | ErrorB> {
 const user = yield getUser(id);
 
 // Right - yield* unwraps the Result
-const user = yield* getUser(id);
+const user = yield * getUser(id);
 ```
 
 ### Forgetting Result.await for async
 
 ```typescript
 // Wrong - Promise<Result> can't be yielded directly
-const user = yield* fetchUser(id);
+const user = yield * fetchUser(id);
 
 // Right - wrap async Results
-const user = yield* Result.await(fetchUser(id));
+const user = yield * Result.await(fetchUser(id));
 ```
 
 ### Returning raw values

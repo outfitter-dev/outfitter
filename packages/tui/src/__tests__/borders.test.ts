@@ -9,6 +9,7 @@
  * Total: 12 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   BORDERS,
   type BorderCharacters,

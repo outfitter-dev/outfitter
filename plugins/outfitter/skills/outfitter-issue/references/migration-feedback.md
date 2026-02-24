@@ -4,12 +4,12 @@ When migrating existing code to Outfitter Stack, you may discover issues that ar
 
 ## Migration-Specific Categories
 
-| Category | When to Use |
-|----------|-------------|
-| `migration-pattern` | Common migration scenario lacks guidance |
+| Category            | When to Use                                   |
+| ------------------- | --------------------------------------------- |
+| `migration-pattern` | Common migration scenario lacks guidance      |
 | `conversion-helper` | Need a utility to convert from legacy pattern |
-| `compatibility` | Breaking change or compatibility concern |
-| `migration-docs` | Migration documentation gap |
+| `compatibility`     | Breaking change or compatibility concern      |
+| `migration-docs`    | Migration documentation gap                   |
 
 ## Migration Context Template
 

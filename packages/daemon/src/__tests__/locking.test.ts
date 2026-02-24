@@ -16,6 +16,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { writeFile as fsWriteFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import {
   acquireDaemonLock,
   isDaemonAlive,

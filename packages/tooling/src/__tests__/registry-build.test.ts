@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+
 import { REGISTRY_CONFIG } from "../registry/build.js";
 import { RegistrySchema } from "../registry/schema.js";
 

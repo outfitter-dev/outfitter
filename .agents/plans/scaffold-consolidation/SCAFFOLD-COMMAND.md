@@ -18,22 +18,22 @@ outfitter scaffold <target> [name]
 
 ### Arguments
 
-| Argument | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `target` | Yes | -- | Target type from registry (cli, mcp, daemon, api, worker, web, lib) |
-| `name` | No | Target id | Package directory name. For scoped names (`@org/foo`), the directory uses `foo`. |
+| Argument | Required | Default   | Description                                                                      |
+| -------- | -------- | --------- | -------------------------------------------------------------------------------- |
+| `target` | Yes      | --        | Target type from registry (cli, mcp, daemon, api, worker, web, lib)              |
+| `name`   | No       | Target id | Package directory name. For scoped names (`@org/foo`), the directory uses `foo`. |
 
 ### Flags
 
-| Flag | Short | Type | Default | Description |
-|------|-------|------|---------|-------------|
-| `--force` | `-f` | boolean | `false` | Overwrite existing files |
-| `--skip-install` | -- | boolean | `false` | Skip `bun install` after scaffolding |
-| `--dry-run` | -- | boolean | `false` | Show what would happen without executing (Slice 6) |
-| `--with <blocks>` | -- | string | Target default | Comma-separated tooling blocks to add |
-| `--no-tooling` | -- | boolean | `false` | Skip default tooling blocks for the target |
-| `--local` | -- | boolean | `false` | Use `workspace:*` for `@outfitter` dependencies |
-| `--json` | -- | boolean | `false` | Output as JSON |
+| Flag              | Short | Type    | Default        | Description                                        |
+| ----------------- | ----- | ------- | -------------- | -------------------------------------------------- |
+| `--force`         | `-f`  | boolean | `false`        | Overwrite existing files                           |
+| `--skip-install`  | --    | boolean | `false`        | Skip `bun install` after scaffolding               |
+| `--dry-run`       | --    | boolean | `false`        | Show what would happen without executing (Slice 6) |
+| `--with <blocks>` | --    | string  | Target default | Comma-separated tooling blocks to add              |
+| `--no-tooling`    | --    | boolean | `false`        | Skip default tooling blocks for the target         |
+| `--local`         | --    | boolean | `false`        | Use `workspace:*` for `@outfitter` dependencies    |
+| `--json`          | --    | boolean | `false`        | Output as JSON                                     |
 
 ### Examples
 
@@ -68,16 +68,24 @@ possible states:
 
 ```typescript
 type ProjectStructure =
-  | { readonly kind: "workspace"; readonly rootDir: string; readonly workspacePatterns: readonly string[] }
-  | { readonly kind: "single-package"; readonly rootDir: string; readonly packageJson: PackageJsonData }
+  | {
+      readonly kind: "workspace";
+      readonly rootDir: string;
+      readonly workspacePatterns: readonly string[];
+    }
+  | {
+      readonly kind: "single-package";
+      readonly rootDir: string;
+      readonly packageJson: PackageJsonData;
+    }
   | { readonly kind: "none" };
 ```
 
-| State | Detection | Next Step |
-|-------|-----------|-----------|
-| **workspace** | `package.json` with `workspaces` field found (walking up from cwd) | Scaffold directly into workspace |
-| **single-package** | `package.json` exists at cwd but no `workspaces` field, and no workspace root found above | Auto-convert to workspace, then scaffold |
-| **none** | No `package.json` found at cwd or above | Auto-adopt flow: create manifest, then scaffold |
+| State              | Detection                                                                                 | Next Step                                       |
+| ------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **workspace**      | `package.json` with `workspaces` field found (walking up from cwd)                        | Scaffold directly into workspace                |
+| **single-package** | `package.json` exists at cwd but no `workspaces` field, and no workspace root found above | Auto-convert to workspace, then scaffold        |
+| **none**           | No `package.json` found at cwd or above                                                   | Auto-adopt flow: create manifest, then scaffold |
 
 ### 2.2 Detection Algorithm
 
@@ -99,6 +107,7 @@ detectProjectStructure(cwd: string):
 
 The existing `detectWorkspaceRoot()` in `apps/outfitter/src/commands/update-workspace.ts`
 already handles:
+
 - Walking up from cwd
 - Checking for `workspaces` field in package.json (both array and object formats)
 - Checking for `pnpm-workspace.yaml`
@@ -160,10 +169,10 @@ resolveTarget(targetId: string):
 
 ### 4.3 Placement Rules
 
-| Category | Placement | Rationale |
-|----------|-----------|-----------|
-| `runnable` (cli, mcp, daemon, api, worker, web) | `apps/<name>/` | Has entrypoint, runs independently |
-| `library` (lib) | `packages/<name>/` | Consumed by other packages, no direct execution |
+| Category                                        | Placement          | Rationale                                       |
+| ----------------------------------------------- | ------------------ | ----------------------------------------------- |
+| `runnable` (cli, mcp, daemon, api, worker, web) | `apps/<name>/`     | Has entrypoint, runs independently              |
+| `library` (lib)                                 | `packages/<name>/` | Consumed by other packages, no direct execution |
 
 ---
 
@@ -350,6 +359,7 @@ The conversion uses a staging directory to make the operation atomic-ish. If som
 mid-conversion, the staging directory still contains the original files and can be moved back.
 
 Why staging instead of in-place renames:
+
 - Avoids conflicts between source and destination within the same directory tree
 - Makes rollback possible: if step 5e fails, move staging back to rootDir
 - Node.js `fs.rename()` is atomic within the same filesystem
@@ -383,11 +393,11 @@ directory has not been removed.
 The workspace root package.json differs from the existing `buildWorkspaceRootPackageJson` in
 `create.ts` in several ways:
 
-| Concern | Current (create.ts) | New (scaffold) |
-|---------|-------------------|----------------|
-| Workspaces | `["packages/*"]` only | `["apps/*", "packages/*"]` |
-| Scripts | Point to single `packages/<name>` | Use `--filter '*'` for all packages |
-| Name | User-provided workspace name | Derived from existing package or directory |
+| Concern    | Current (create.ts)               | New (scaffold)                             |
+| ---------- | --------------------------------- | ------------------------------------------ |
+| Workspaces | `["packages/*"]` only             | `["apps/*", "packages/*"]`                 |
+| Scripts    | Point to single `packages/<name>` | Use `--filter '*'` for all packages        |
+| Name       | User-provided workspace name      | Derived from existing package or directory |
 
 The new version is more general because it supports both `apps/` and `packages/` from the start.
 
@@ -421,7 +431,9 @@ interface PostScaffoldContext {
 }
 
 /** Hook function signature */
-type PostScaffoldHook = (ctx: PostScaffoldContext) => Promise<Result<void, Error>>;
+type PostScaffoldHook = (
+  ctx: PostScaffoldContext
+) => Promise<Result<void, Error>>;
 ```
 
 ### 7.3 Hook Execution
@@ -439,17 +451,19 @@ runPostScaffoldHook(templateDir: string, ctx: PostScaffoldContext):
 ### 7.4 Example Hooks
 
 **MCP target**: Could generate a default tool registration file:
+
 ```typescript
 // templates/mcp/hooks/post-scaffold.ts
-export default async function(ctx: PostScaffoldContext) {
+export default async function (ctx: PostScaffoldContext) {
   // Register a sample tool in the MCP action registry
 }
 ```
 
 **Daemon target**: Could set up systemd/launchd service template:
+
 ```typescript
 // templates/daemon/hooks/post-scaffold.ts
-export default async function(ctx: PostScaffoldContext) {
+export default async function (ctx: PostScaffoldContext) {
   // Create a platform-appropriate service definition
 }
 ```
@@ -466,13 +480,14 @@ engine needs to behave differently in each mode.
 When scaffolding into a workspace, these root-level files from the template are skipped because
 the workspace root owns them:
 
-| File | Reason |
-|------|--------|
-| `.gitignore` | Workspace root has its own |
-| `.lefthook.yml` | Git hooks configured at workspace root |
+| File                           | Reason                                 |
+| ------------------------------ | -------------------------------------- |
+| `.gitignore`                   | Workspace root has its own             |
+| `.lefthook.yml`                | Git hooks configured at workspace root |
 | `biome.json` (root-level only) | Workspace root has shared biome config |
 
 Files that are NOT skipped:
+
 - `package.json` — each package needs its own
 - `tsconfig.json` — each package needs its own
 - `src/` and all subdirectories — the package's source code
@@ -544,7 +559,6 @@ interface ScaffoldCommandResult {
 async function runScaffold(
   options: ScaffoldOptions
 ): Promise<Result<ScaffoldCommandResult, ScaffoldError>> {
-
   // 1. Resolve target from registry
   const targetResult = resolveTarget(options.target);
   if (targetResult.isErr()) return targetResult;
@@ -626,7 +640,9 @@ async function runScaffold(
     const installResult = await runInstall(rootDir);
     if (installResult.isErr()) {
       // Warn but don't fail — installation issues shouldn't block output
-      console.warn(`Warning: bun install failed: ${installResult.error.message}`);
+      console.warn(
+        `Warning: bun install failed: ${installResult.error.message}`
+      );
     }
   }
 
@@ -660,11 +676,21 @@ interface PackageJsonData {
 }
 
 type ProjectStructure =
-  | { readonly kind: "workspace"; readonly rootDir: string; readonly workspacePatterns: readonly string[] }
-  | { readonly kind: "single-package"; readonly rootDir: string; readonly packageJson: PackageJsonData }
+  | {
+      readonly kind: "workspace";
+      readonly rootDir: string;
+      readonly workspacePatterns: readonly string[];
+    }
+  | {
+      readonly kind: "single-package";
+      readonly rootDir: string;
+      readonly packageJson: PackageJsonData;
+    }
   | { readonly kind: "none" };
 
-function detectProjectStructure(cwd: string): Result<ProjectStructure, ScaffoldError> {
+function detectProjectStructure(
+  cwd: string
+): Result<ProjectStructure, ScaffoldError> {
   const resolvedCwd = resolve(cwd);
   const pkgPath = join(resolvedCwd, "package.json");
 
@@ -703,7 +729,11 @@ function detectProjectStructure(cwd: string): Result<ProjectStructure, ScaffoldE
 
   // Check if cwd is inside a workspace
   const wsResult = detectWorkspaceRoot(resolvedCwd);
-  if (wsResult.isOk() && wsResult.value !== null && wsResult.value !== resolvedCwd) {
+  if (
+    wsResult.isOk() &&
+    wsResult.value !== null &&
+    wsResult.value !== resolvedCwd
+  ) {
     const rootPkgPath = join(wsResult.value, "package.json");
     const rootPkg = readPackageJson(rootPkgPath);
     if (rootPkg && hasWorkspacesField(rootPkg)) {
@@ -742,37 +772,49 @@ async function convertToWorkspace(
   scaffoldName: string,
   options: ScaffoldOptions
 ): Promise<Result<ConversionResult, ScaffoldError>> {
-
   // 1. Safety: ensure we're not inside another workspace
   const parentWs = detectWorkspaceRoot(dirname(rootDir));
   if (parentWs.isOk() && parentWs.value !== null) {
-    return Result.err(new ScaffoldError(
-      `Cannot convert to workspace: already inside workspace at '${parentWs.value}'`
-    ));
+    return Result.err(
+      new ScaffoldError(
+        `Cannot convert to workspace: already inside workspace at '${parentWs.value}'`
+      )
+    );
   }
 
   // 2. Determine existing package placement
   const existingCategory = detectExistingCategory(existingPkg);
-  const existingPlacement = existingCategory === "runnable" ? "apps" : "packages";
+  const existingPlacement =
+    existingCategory === "runnable" ? "apps" : "packages";
   const existingName = deriveProjectName(existingPkg.name ?? basename(rootDir));
 
   // 3. Check for name collision with scaffold target
   const newPlacement = target.placement;
   if (existingPlacement === newPlacement && existingName === scaffoldName) {
-    return Result.err(new ScaffoldError(
-      `Cannot scaffold '${scaffoldName}': existing package would be placed ` +
-      `at the same location (${newPlacement}/${scaffoldName}/). ` +
-      `Use a different name: outfitter scaffold ${target.id} <name>`
-    ));
+    return Result.err(
+      new ScaffoldError(
+        `Cannot scaffold '${scaffoldName}': existing package would be placed ` +
+          `at the same location (${newPlacement}/${scaffoldName}/). ` +
+          `Use a different name: outfitter scaffold ${target.id} <name>`
+      )
+    );
   }
 
   // 4. Collect files to move
   const entries = readdirSync(rootDir);
-  const PRESERVE_AT_ROOT = new Set([".git", "node_modules", ".outfitter", "bun.lock"]);
-  const toMove = entries.filter(e => !PRESERVE_AT_ROOT.has(e));
+  const PRESERVE_AT_ROOT = new Set([
+    ".git",
+    "node_modules",
+    ".outfitter",
+    "bun.lock",
+  ]);
+  const toMove = entries.filter((e) => !PRESERVE_AT_ROOT.has(e));
 
   // 5. Stage files
-  const stagingDir = join(dirname(rootDir), `.outfitter-staging-${process.pid}`);
+  const stagingDir = join(
+    dirname(rootDir),
+    `.outfitter-staging-${process.pid}`
+  );
   try {
     mkdirSync(stagingDir, { recursive: true });
 
@@ -803,7 +845,11 @@ async function convertToWorkspace(
     // 9. Create/update root .gitignore
     const gitignorePath = join(rootDir, ".gitignore");
     if (!existsSync(gitignorePath)) {
-      writeFileSync(gitignorePath, "node_modules\n**/dist\n.outfitter-staging-*\n", "utf-8");
+      writeFileSync(
+        gitignorePath,
+        "node_modules\n**/dist\n.outfitter-staging-*\n",
+        "utf-8"
+      );
     }
 
     // 10. Clean up bun.lock
@@ -813,7 +859,6 @@ async function convertToWorkspace(
     if (existsSync(lockPath)) {
       unlinkSync(lockPath);
     }
-
   } catch (error) {
     // Recovery: move staging back if it exists
     if (existsSync(stagingDir)) {
@@ -823,10 +868,12 @@ async function convertToWorkspace(
         // Recovery failed — tell user
       }
     }
-    return Result.err(new ScaffoldError(
-      `Workspace conversion failed: ${error instanceof Error ? error.message : "Unknown error"}. ` +
-      `Check .outfitter-staging-${process.pid} for original files.`
-    ));
+    return Result.err(
+      new ScaffoldError(
+        `Workspace conversion failed: ${error instanceof Error ? error.message : "Unknown error"}. ` +
+          `Check .outfitter-staging-${process.pid} for original files.`
+      )
+    );
   }
 
   return Result.ok({
@@ -855,15 +902,16 @@ async function scaffoldIntoWorkspace(
   name: string,
   options: ScaffoldOptions
 ): Promise<Result<IntoWorkspaceResult, ScaffoldError>> {
-
   // 1. Compute target directory
   const targetDir = join(rootDir, target.placement, name);
 
   // 2. Check for existing directory
   if (existsSync(targetDir) && !options.force) {
-    return Result.err(new ScaffoldError(
-      `'${target.placement}/${name}/' already exists. Use --force to overwrite.`
-    ));
+    return Result.err(
+      new ScaffoldError(
+        `'${target.placement}/${name}/' already exists. Use --force to overwrite.`
+      )
+    );
   }
 
   // 3. Ensure workspace patterns cover the placement directory
@@ -873,9 +921,11 @@ async function scaffoldIntoWorkspace(
   const templatesDir = getTemplatesDir();
   const templatePath = join(templatesDir, target.templateDir);
   if (!existsSync(templatePath)) {
-    return Result.err(new ScaffoldError(
-      `Template '${target.templateDir}' not found in ${templatesDir}`
-    ));
+    return Result.err(
+      new ScaffoldError(
+        `Template '${target.templateDir}' not found in ${templatesDir}`
+      )
+    );
   }
 
   // 5. Compute placeholder values
@@ -902,7 +952,10 @@ async function scaffoldIntoWorkspace(
   const baseWrittenPaths = new Set<string>();
   if (existsSync(basePath)) {
     const baseResult = copyTemplateFiles(
-      basePath, targetDir, values, options.force,
+      basePath,
+      targetDir,
+      values,
+      options.force,
       { writtenPaths: baseWrittenPaths, skipFilter }
     );
     if (baseResult.isErr()) return baseResult;
@@ -910,7 +963,10 @@ async function scaffoldIntoWorkspace(
 
   //    Layer 2: Target-specific template (overlays base)
   const templateResult = copyTemplateFiles(
-    templatePath, targetDir, values, options.force,
+    templatePath,
+    targetDir,
+    values,
+    options.force,
     { allowOverwrite: true, overwritablePaths: baseWrittenPaths, skipFilter }
   );
   if (templateResult.isErr()) return templateResult;
@@ -929,11 +985,18 @@ async function scaffoldIntoWorkspace(
   let blocksAdded: AddBlockResult | undefined;
   if (!options.noTooling) {
     const blockNames = options.withBlocks
-      ? options.withBlocks.split(",").map(b => b.trim()).filter(Boolean)
+      ? options.withBlocks
+          .split(",")
+          .map((b) => b.trim())
+          .filter(Boolean)
       : [...target.defaultBlocks];
 
     if (blockNames.length > 0) {
-      const blocksResult = await addBlocks(targetDir, blockNames, options.force);
+      const blocksResult = await addBlocks(
+        targetDir,
+        blockNames,
+        options.force
+      );
       if (blocksResult.isErr()) return blocksResult;
       blocksAdded = blocksResult.value;
     }
@@ -970,6 +1033,7 @@ async function scaffoldIntoWorkspace(
 **Scenario**: `outfitter scaffold mcp` when `apps/mcp/` already exists.
 
 **Behavior**:
+
 - Without `--force`: error with message `'apps/mcp/' already exists. Use --force to overwrite.`
 - With `--force`: overwrite files in the existing directory. Existing files not in the template
   are preserved (template copy is additive, not destructive).
@@ -980,6 +1044,7 @@ async function scaffoldIntoWorkspace(
 **Scenario**: Single-package CLI project, user runs `outfitter scaffold cli`.
 
 **Behavior**:
+
 - Existing package detected as runnable, moved to `apps/<existing-name>/`
 - New CLI scaffolded to `apps/cli/` (or `apps/<name>` if name provided)
 - Both exist in the workspace. User may intend to have multiple CLIs.
@@ -991,6 +1056,7 @@ async function scaffoldIntoWorkspace(
 **Scenario**: Single-package library project, user runs `outfitter scaffold lib utils`.
 
 **Behavior**:
+
 - Existing package detected as library, moved to `packages/<existing-name>/`
 - New lib scaffolded to `packages/utils/`
 - Both coexist in `packages/`.
@@ -1006,6 +1072,7 @@ async function scaffoldIntoWorkspace(
 ```
 
 **Behavior**:
+
 - The scaffold command does NOT try to match existing conventions.
 - It adds `apps/*` or `packages/*` to the workspaces array as needed.
 - The user's existing `src/*` packages are untouched.
@@ -1018,6 +1085,7 @@ async function scaffoldIntoWorkspace(
 **Scenario**: Conversion fails after moving files to staging but before creating workspace root.
 
 **Recovery steps**:
+
 1. Check for `.outfitter-staging-<pid>` directory
 2. If found, move contents back to rootDir
 3. Remove any partially created workspace directories (apps/, packages/)
@@ -1033,6 +1101,7 @@ via `git checkout .` if the project was committed.
 **Scenario**: User cwd is `apps/my-cli/` within a workspace, runs `outfitter scaffold mcp`.
 
 **Behavior**:
+
 - `detectProjectStructure` walks up from cwd, finds workspace root
 - Scaffolds into the workspace root (not relative to cwd)
 - New package placed at `<workspace-root>/apps/mcp/`
@@ -1042,6 +1111,7 @@ via `git checkout .` if the project was committed.
 **Scenario**: `outfitter scaffold mcp --dry-run` on a single-package project.
 
 **Behavior**: The entire operation (conversion + scaffold) is simulated. Output shows:
+
 ```
 Would convert to workspace:
   Move ./ -> apps/my-cli/
@@ -1147,20 +1217,41 @@ const scaffoldAction = defineAction({
   input: scaffoldInputSchema,
   cli: {
     command: "scaffold <target> [name]",
-    description: "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
+    description:
+      "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
     options: [
-      { flags: "-f, --force", description: "Overwrite existing files", defaultValue: false },
-      { flags: "--skip-install", description: "Skip bun install", defaultValue: false },
-      { flags: "--dry-run", description: "Preview changes without executing", defaultValue: false },
-      { flags: "--with <blocks>", description: "Comma-separated tooling blocks to add" },
+      {
+        flags: "-f, --force",
+        description: "Overwrite existing files",
+        defaultValue: false,
+      },
+      {
+        flags: "--skip-install",
+        description: "Skip bun install",
+        defaultValue: false,
+      },
+      {
+        flags: "--dry-run",
+        description: "Preview changes without executing",
+        defaultValue: false,
+      },
+      {
+        flags: "--with <blocks>",
+        description: "Comma-separated tooling blocks to add",
+      },
       { flags: "--no-tooling", description: "Skip default tooling blocks" },
-      { flags: "--local", description: "Use workspace:* for @outfitter dependencies" },
+      {
+        flags: "--local",
+        description: "Use workspace:* for @outfitter dependencies",
+      },
     ],
     mapInput: (context) => ({
       target: context.args[0] as string,
       name: context.args[1] as string | undefined,
       force: Boolean(context.flags["force"]),
-      skipInstall: Boolean(context.flags["skip-install"] ?? context.flags["skipInstall"]),
+      skipInstall: Boolean(
+        context.flags["skip-install"] ?? context.flags["skipInstall"]
+      ),
       dryRun: Boolean(context.flags["dry-run"] ?? context.flags["dryRun"]),
       withBlocks: resolveStringFlag(context.flags["with"]),
       noTooling: resolveNoToolingFlag(context.flags),
@@ -1174,10 +1265,12 @@ const scaffoldAction = defineAction({
     const result = await runScaffold(scaffoldInput);
 
     if (result.isErr()) {
-      return Result.err(new InternalError({
-        message: result.error.message,
-        context: { action: "scaffold" },
-      }));
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "scaffold" },
+        })
+      );
     }
 
     await printScaffoldResults(result.value, { mode: outputMode });
@@ -1222,39 +1315,39 @@ tightly coupled.
 
 ### 14.1 Unit Tests
 
-| Function | Tests |
-|----------|-------|
+| Function                 | Tests                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------ |
 | `detectProjectStructure` | none/single/workspace detection, nested workspace detection, inside workspace member |
-| `detectExistingCategory` | bin field -> runnable, MCP deps -> runnable, default -> library |
-| `resolveTarget` | valid target, stub target, unknown target, non-scaffoldable target |
-| `ensureWorkspacePattern` | pattern already present, pattern missing, non-standard patterns |
-| `shouldSkipFile` | standalone mode skips nothing, workspace-member mode skips root configs |
+| `detectExistingCategory` | bin field -> runnable, MCP deps -> runnable, default -> library                      |
+| `resolveTarget`          | valid target, stub target, unknown target, non-scaffoldable target                   |
+| `ensureWorkspacePattern` | pattern already present, pattern missing, non-standard patterns                      |
+| `shouldSkipFile`         | standalone mode skips nothing, workspace-member mode skips root configs              |
 
 ### 14.2 Integration Tests
 
 All integration tests use temp directories and clean up after themselves (matching existing
 test patterns in `create.test.ts`).
 
-| Scenario | Assertion |
-|----------|-----------|
+| Scenario                             | Assertion                                                       |
+| ------------------------------------ | --------------------------------------------------------------- |
 | Scaffold MCP into existing workspace | `apps/mcp/` created, package.json valid, template files present |
-| Scaffold lib into workspace | `packages/<name>/` created, not `apps/` |
-| Scaffold into single-package project | Converted to workspace, both packages present |
-| Scaffold with name collision | Error returned, no filesystem changes |
-| Scaffold stub target | Error with "not yet available" message |
-| Scaffold minimal | Error with "use init" message |
-| Post-scaffold hook execution | Hook ran, context passed correctly |
-| Workspace pattern auto-update | Pattern added to root package.json |
-| Force overwrite existing target | Files overwritten, no error |
-| Category detection: CLI project | Detected as runnable, placed in apps/ |
-| Category detection: plain lib | Detected as library, placed in packages/ |
+| Scaffold lib into workspace          | `packages/<name>/` created, not `apps/`                         |
+| Scaffold into single-package project | Converted to workspace, both packages present                   |
+| Scaffold with name collision         | Error returned, no filesystem changes                           |
+| Scaffold stub target                 | Error with "not yet available" message                          |
+| Scaffold minimal                     | Error with "use init" message                                   |
+| Post-scaffold hook execution         | Hook ran, context passed correctly                              |
+| Workspace pattern auto-update        | Pattern added to root package.json                              |
+| Force overwrite existing target      | Files overwritten, no error                                     |
+| Category detection: CLI project      | Detected as runnable, placed in apps/                           |
+| Category detection: plain lib        | Detected as library, placed in packages/                        |
 
 ### 14.3 Recovery Tests
 
-| Scenario | Assertion |
-|----------|-----------|
-| Conversion fails mid-operation | Staging directory exists, original files recoverable |
-| Staging directory cleaned up on success | No `.outfitter-staging-*` directories remain |
+| Scenario                                | Assertion                                            |
+| --------------------------------------- | ---------------------------------------------------- |
+| Conversion fails mid-operation          | Staging directory exists, original files recoverable |
+| Staging directory cleaned up on success | No `.outfitter-staging-*` directories remain         |
 
 ---
 

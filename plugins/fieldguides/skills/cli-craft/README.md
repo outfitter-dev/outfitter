@@ -12,11 +12,13 @@ Design and review command-line interfaces with human-first UX and UNIX composabi
 ## Attribution
 
 This skill is adapted primarily from [Command Line Interface Guidelines](https://clig.dev/) (CC BY-SA 4.0):
+
 - Authors: Aanand Prasad, Ben Firshman, Carl Tashian, Eva Parish
 - Design: Mark Hurrell
 - Repository: <https://github.com/cli-guidelines/cli-guidelines>
 
 Additional sources:
+
 - [POSIX Utility Conventions](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html)
 - [GNU Coding Standards](https://www.gnu.org/prep/standards/)
 - [Heroku CLI Style Guide](https://devcenter.heroku.com/articles/cli-style-guide)
@@ -26,7 +28,7 @@ Additional sources:
 
 ## License
 
-**Documentation** (SKILL.md, references/, templates/*.md): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+**Documentation** (SKILL.md, references/, templates/\*.md): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 **Scripts** (scripts/): MIT License
 

@@ -27,8 +27,8 @@ if (result.updatesAvailable === 0) {
 }
 
 // Categorize updates
-const breaking = result.packages.filter(p => p.breaking && p.updateAvailable);
-const safe = result.packages.filter(p => !p.breaking && p.updateAvailable);
+const breaking = result.packages.filter((p) => p.breaking && p.updateAvailable);
+const safe = result.packages.filter((p) => !p.breaking && p.updateAvailable);
 ```
 
 ### Phase 2: Apply Safe Updates
@@ -85,6 +85,7 @@ for each guide in result.guides:
 #### Change Type Actions
 
 **`moved`** — Import path changed:
+
 ```typescript
 // Before
 import { renderTable } from "@outfitter/cli/render";
@@ -95,6 +96,7 @@ import { renderTable } from "@outfitter/tui/render";
 Use Grep to find all occurrences of `change.from`, replace with `change.to`.
 
 **`renamed`** — Export name changed:
+
 ```typescript
 // Before
 import { formatOutput } from "@outfitter/cli";
@@ -131,6 +133,7 @@ If tests fail:
 5. Re-run tests
 
 Repeat up to 3 times. If still failing, escalate with:
+
 - The test failure output
 - Which migration step was being applied
 - What you tried to fix it

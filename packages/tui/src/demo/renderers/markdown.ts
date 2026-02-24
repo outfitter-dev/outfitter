@@ -5,6 +5,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import { renderMarkdown } from "../../render/markdown.js";
 import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";

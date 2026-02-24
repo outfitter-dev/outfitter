@@ -1669,11 +1669,13 @@ Use LLM to analyze file operations:
     "PreToolUse": [
       {
         "matcher": "Write|Edit",
-        "hooks": [{
-          "type": "prompt",
-          "prompt": "Analyze this file operation for security issues:\n\n$TOOL_INPUT\n\nCheck for:\n1. Sensitive paths (/etc, ~/.ssh, .env files)\n2. Credentials or API keys in content\n3. Path traversal attempts (..)\n4. Executable file creation\n\nRespond with JSON: {\"decision\": \"allow|deny\", \"reason\": \"brief explanation\"}",
-          "timeout": 30
-        }]
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Analyze this file operation for security issues:\n\n$TOOL_INPUT\n\nCheck for:\n1. Sensitive paths (/etc, ~/.ssh, .env files)\n2. Credentials or API keys in content\n3. Path traversal attempts (..)\n4. Executable file creation\n\nRespond with JSON: {\"decision\": \"allow|deny\", \"reason\": \"brief explanation\"}",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
@@ -1690,11 +1692,13 @@ Evaluate command safety with reasoning:
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{
-          "type": "prompt",
-          "prompt": "Evaluate if this bash command is safe to execute:\n\n$TOOL_INPUT\n\nConsider:\n1. Could it delete important files?\n2. Could it expose secrets?\n3. Could it modify system configuration?\n4. Is it appropriate for a development environment?\n\nRespond: {\"decision\": \"allow|deny\", \"reason\": \"...\"}",
-          "timeout": 30
-        }]
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if this bash command is safe to execute:\n\n$TOOL_INPUT\n\nConsider:\n1. Could it delete important files?\n2. Could it expose secrets?\n3. Could it modify system configuration?\n4. Is it appropriate for a development environment?\n\nRespond: {\"decision\": \"allow|deny\", \"reason\": \"...\"}",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
@@ -1711,11 +1715,13 @@ Verify work quality before stopping:
     "Stop": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "prompt",
-          "prompt": "Review the completed task. Consider:\n1. Were all requirements addressed?\n2. Were tests added or updated?\n3. Is there any unfinished work?\n4. Should the user be informed of anything?\n\nProvide a brief summary if there are concerns.",
-          "timeout": 30
-        }]
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the completed task. Consider:\n1. Were all requirements addressed?\n2. Were tests added or updated?\n3. Is there any unfinished work?\n4. Should the user be informed of anything?\n\nProvide a brief summary if there are concerns.",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
@@ -1750,19 +1756,27 @@ Comprehensive hook examples using Python with UV for dependency management.
 
 ```json
 {
-  "UserPromptSubmit": [{
-    "hooks": [{
-      "type": "command",
-      "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
-    }]
-  }],
-  "PreToolUse": [{
-    "matcher": "Bash",
-    "hooks": [{
-      "type": "command",
-      "command": "uv run .claude/hooks/pre_tool_use.py"
-    }]
-  }]
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "uv run .claude/hooks/pre_tool_use.py"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -1773,6 +1787,7 @@ Comprehensive hook examples using Python with UV for dependency management.
 Complete Claude Code configuration with hooks, skills, agents, and GitHub Actions.
 
 **Features**:
+
 - Auto-format code on file changes
 - Run tests when test files change
 - Type-check TypeScript
@@ -1784,14 +1799,18 @@ Complete Claude Code configuration with hooks, skills, agents, and GitHub Action
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "Edit|Write",
-      "hooks": [{
-        "type": "command",
-        "command": "[ \"$(git branch --show-current)\" != \"main\" ] || exit 2",
-        "timeout": 5
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(git branch --show-current)\" != \"main\" ] || exit 2",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -1807,30 +1826,42 @@ GitButler provides hooks for automatic branch and commit management.
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "but claude pre-tool",
-        "timeout": 5
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "but claude post-tool",
-        "timeout": 5
-      }]
-    }],
-    "Stop": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "but claude stop",
-        "timeout": 10
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "but claude pre-tool",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "but claude post-tool",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "but claude stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -1857,9 +1888,8 @@ hooks:
     - matcher: "Write|Edit(*.ts)"
       hooks:
         - type: command
-          command: "eslint --fix \"$file\""
+          command: 'eslint --fix "$file"'
 ---
-
 # Secure Coding Skill
 
 When active, this skill validates all code changes for security issues.
@@ -1879,7 +1909,6 @@ hooks:
         - type: prompt
           prompt: "Summarize the code review findings and severity levels."
 ---
-
 # Code Reviewer Agent
 
 Performs thorough code review with summarized findings.
@@ -1898,7 +1927,6 @@ hooks:
         - type: command
           command: "./.claude/hooks/validate-deploy.sh"
 ---
-
 # Deploy Command
 
 Deploys the specified component to staging with pre-flight checks.

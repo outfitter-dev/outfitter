@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { command } from "../command.js";
 import { dryRunPreset, forcePreset, verbosePreset } from "../flags.js";
 

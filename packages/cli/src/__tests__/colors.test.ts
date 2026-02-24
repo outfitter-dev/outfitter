@@ -12,6 +12,7 @@
  * Total: 12 tests
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import {
   ANSI,
   applyColor,

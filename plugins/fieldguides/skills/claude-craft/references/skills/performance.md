@@ -7,12 +7,12 @@ Token impact and optimization strategies for Claude Code skills.
 Every skill activation loads the full SKILL.md into context.
 
 | SKILL.md Size | Approximate Tokens |
-|---------------|-------------------|
-| 100 lines | ~700 tokens |
-| 300 lines | ~2,000 tokens |
-| 500 lines | ~3,500 tokens |
-| 1,000 lines | ~7,000 tokens |
-| 1,500 lines | ~10,000 tokens |
+| ------------- | ------------------ |
+| 100 lines     | ~700 tokens        |
+| 300 lines     | ~2,000 tokens      |
+| 500 lines     | ~3,500 tokens      |
+| 1,000 lines   | ~7,000 tokens      |
+| 1,500 lines   | ~10,000 tokens     |
 
 **Rule**: Keep SKILL.md under 500 lines. Use progressive disclosure for details.
 
@@ -30,6 +30,7 @@ skill-name/
 ```
 
 **Loading pattern**:
+
 1. SKILL.md loads on activation (~2,000 tokens)
 2. References load only when explicitly needed
 3. Examples load only for clarification
@@ -51,18 +52,19 @@ allowed-tools: Read Grep Glob
 
 ### When to Fork
 
-| Scenario | Recommendation |
-|----------|----------------|
-| Verbose intermediate work | Fork (keeps main context clean) |
-| Parallel independent tasks | Fork (run simultaneously) |
-| Building on conversation | Inherit (needs prior context) |
-| Simple one-shot task | Either (fork slightly cleaner) |
+| Scenario                   | Recommendation                  |
+| -------------------------- | ------------------------------- |
+| Verbose intermediate work  | Fork (keeps main context clean) |
+| Parallel independent tasks | Fork (run simultaneously)       |
+| Building on conversation   | Inherit (needs prior context)   |
+| Simple one-shot task       | Either (fork slightly cleaner)  |
 
 Fork trades context sharing for isolation. Each fork starts fresh.
 
 ### Fork Overhead
 
 Each forked skill invocation:
+
 - Loads skill instructions fresh
 - No conversation history
 - Returns only final output

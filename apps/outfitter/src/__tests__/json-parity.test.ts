@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+
 import { resolveOutputModeFromContext } from "../output-mode.js";
 
 // Capture original env state to restore after each test

@@ -4,12 +4,12 @@ Claude Code preprocesses `!`command`` syntax — executing shell commands and in
 
 ## Where Preprocessing Runs
 
-| Context | Preprocessed | Notes |
-|---------|-------------|-------|
-| Command files (`commands/*.md`) | Yes | Intentional — the core feature |
-| SKILL.md files | Yes | Dangerous — examples will execute |
-| Reference files, EXAMPLES.md | No | Safe for literal examples |
-| Rules, CLAUDE.md, agents | No | Not preprocessed |
+| Context                         | Preprocessed | Notes                             |
+| ------------------------------- | ------------ | --------------------------------- |
+| Command files (`commands/*.md`) | Yes          | Intentional — the core feature    |
+| SKILL.md files                  | Yes          | Dangerous — examples will execute |
+| Reference files, EXAMPLES.md    | No           | Safe for literal examples         |
+| Rules, CLAUDE.md, agents        | No           | Not preprocessed                  |
 
 Preprocessing runs on the raw text before markdown parsing. Code fences (```), double backtick quoting, and other markdown constructs do not prevent execution. There is no escape mechanism — `\!` does not work.
 
@@ -25,11 +25,11 @@ Add an HTML comment near `<bang>` usage explaining the convention:
 
 ### Where to use what
 
-| File type | Write | Why |
-|-----------|-------|-----|
-| SKILL.md | `` <bang>`command` `` | Prevents accidental execution |
-| References, EXAMPLES.md | `!`command`` | Literal — safe and good for copy-paste |
-| Command files | `!`command`` | Intentional execution |
+| File type               | Write                 | Why                                    |
+| ----------------------- | --------------------- | -------------------------------------- |
+| SKILL.md                | `` <bang>`command` `` | Prevents accidental execution          |
+| References, EXAMPLES.md | `!`command``          | Literal — safe and good for copy-paste |
+| Command files           | `!`command``          | Intentional execution                  |
 
 ## Examples
 
@@ -44,6 +44,7 @@ allowed-tools: Bash(git *)
 ---
 
 ## Current State
+
 Branch: !`git branch --show-current`
 Status: !`git status --short`
 Recent: !`git log --oneline -5`
@@ -134,6 +135,7 @@ Code fences do NOT prevent preprocessing in SKILL.md files.
 
 ```markdown
 # WRONG — backslash escaping does not work
+
 Branch: \!`git branch --show-current`
 ```
 
@@ -143,8 +145,9 @@ There is no escape mechanism. Use `<bang>` instead.
 
 ```markdown
 # WRONG — double backticks don't prevent preprocessing
-| Feature | Syntax |
-|---------|--------|
+
+| Feature        | Syntax           |
+| -------------- | ---------------- |
 | Bash execution | `` !`command` `` |
 ```
 
@@ -166,6 +169,7 @@ bun plugins/fieldguides/skills/skillcheck/scripts/lint-preprocessing.ts plugins/
 ```
 
 The linter:
+
 - Scans all `SKILL.md` files recursively
 - Skips files with `metadata.preprocess: true`
 - Reports file, line, column, and matched pattern

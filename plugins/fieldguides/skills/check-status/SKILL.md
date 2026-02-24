@@ -31,6 +31,7 @@ NOT for: deep-dive into specific items, real-time monitoring, single-source quer
 3. **Present** - format for scanning with actionable insights
 
 Key principles:
+
 - Multi-source integration (VCS + code review + issues + CI)
 - Time-aware filtering (natural language -> query params)
 - Stack-aware organization (group by branch hierarchy)
@@ -44,6 +45,7 @@ Key principles:
 **Stage 1: Parse Constraints**
 
 Extract time from natural language:
+
 - "last X hours" -> `-Xh`
 - "past X days" / "last X days" -> `-Xd`
 - "yesterday" -> `-1d`
@@ -67,6 +69,7 @@ Skip unavailable sources gracefully.
 **Stage 3: Aggregate**
 
 Cross-reference and organize:
+
 - Group PRs by stack position (if stack-aware)
 - Filter all by time constraint
 - Correlate issues with PRs/branches
@@ -76,6 +79,7 @@ Cross-reference and organize:
 **Stage 4: Present**
 
 Format for scanning:
+
 - Hierarchical sections (VCS -> PRs -> Issues -> CI)
 - Visual indicators (`✓` `✗` `⏳` for status)
 - Relative timestamps for recency
@@ -89,16 +93,20 @@ See [templates.md](references/templates.md) for section formats.
 <data_sources>
 
 **VCS** - stack visualization, commit history, working dir state
+
 - Stack-aware (Graphite, git-stack): hierarchical branch relationships
 - Standard git: branch, log, remote tracking
 
 **Code Review** - PRs/MRs, CI checks, reviews, comments
+
 - Platforms: GitHub, GitLab, Bitbucket, Gerrit
 
 **Issues** - recent updates, metadata, repo relationships
+
 - Platforms: Linear, Jira, GitHub Issues, GitLab Issues
 
 **CI/CD** - runs, success/failure, timing, errors
+
 - Platforms: GitHub Actions, GitLab CI, CircleCI, Jenkins
 
 Tool-specific: [graphite.md](references/graphite.md), [github.md](references/github.md), [linear.md](references/linear.md), [beads.md](references/beads.md)
@@ -108,32 +116,37 @@ Tool-specific: [graphite.md](references/graphite.md), [github.md](references/git
 <aggregation>
 
 **Cross-Referencing**:
+
 1. PRs to branches (by name)
 2. Issues to PRs (by ID in title/body)
 3. CI runs to PRs (by number/SHA)
 4. Issues to repos (by reference)
 
 **Stack-Aware Organization**:
+
 - Group PRs by hierarchy
 - Show parent/child relationships
 - Indicate current position
 - Highlight blockers in stack order
 
 **Filtering**:
+
 - Time: apply to all sources, use most recent update
 - Status: prioritize action-needed, open before closed
 
 **Relative Timestamps**:
+
 - < 1 hour: "X minutes ago"
 - < 24 hours: "X hours ago"
 - < 7 days: "X days ago"
-- >= 7 days: "X weeks ago" or absolute
+- > = 7 days: "X weeks ago" or absolute
 
 </aggregation>
 
 <presentation>
 
 **Visual Indicators**:
+
 - `✓` success | `✗` failure | `⏳` pending | `⏸` draft | `🔴` blocker
 - `▓▓▓░░` progress (3/5)
 - `◇` minor | `◆` moderate | `◈` severe
@@ -180,6 +193,7 @@ See [implementation.md](references/implementation.md) for script structure and p
 **Required**: VCS tool (git, gt, jj), shell access
 
 **Optional** (graceful degradation):
+
 - Code review CLI (gh, glab)
 - Issue tracker MCP/API
 - CI/CD platform API
@@ -191,6 +205,7 @@ Works with ANY available subset.
 <rules>
 
 ALWAYS:
+
 - Parse time constraints before queries
 - Execute queries in parallel
 - Handle missing sources gracefully
@@ -200,6 +215,7 @@ ALWAYS:
 - Format for scanning
 
 NEVER:
+
 - Fail entirely if one source unavailable
 - Block on slow queries (use timeouts)
 - Expose credentials
@@ -210,12 +226,14 @@ NEVER:
 <integration>
 
 **As session starter**:
+
 1. Generate report (understand state)
 2. Identify attention-needed items
 3. Plan work (prioritize by blockers)
 4. Return periodically (track progress)
 
 **Cross-skill references**:
+
 - Failing CI -> [debugging](${CLAUDE_PLUGIN_ROOT}/skills/debugging/SKILL.md)
 - Before planning -> use report for context
 - When blocked -> check dependencies
@@ -227,16 +245,19 @@ NEVER:
 <references>
 
 Tool integrations:
+
 - [graphite.md](references/graphite.md) - Graphite stack and PR queries
 - [github.md](references/github.md) - GitHub CLI patterns
 - [linear.md](references/linear.md) - Linear MCP integration
 - [beads.md](references/beads.md) - Local issue tracking
 
 Implementation:
+
 - [templates.md](references/templates.md) - Output templates and formatting
 - [implementation.md](references/implementation.md) - Patterns, scripts, anti-patterns
 
 Examples:
+
 - [EXAMPLES.md](EXAMPLES.md) - Usage examples and sample output
 
 Formatting:

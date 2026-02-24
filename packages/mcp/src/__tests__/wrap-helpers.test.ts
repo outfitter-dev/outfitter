@@ -2,6 +2,7 @@
  * Tests for wrapToolResult and wrapToolError exports.
  */
 import { describe, expect, it } from "bun:test";
+
 import { wrapToolError, wrapToolResult } from "../index.js";
 
 describe("wrapToolResult()", () => {

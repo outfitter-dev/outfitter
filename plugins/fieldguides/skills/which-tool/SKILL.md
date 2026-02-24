@@ -30,6 +30,7 @@ bun /Users/mg/Developer/outfitter/agents/outfitter/skills/which-tool/scripts/ind
 ```
 
 Parse output to determine:
+
 - Available modern tools
 - Missing tools that could enhance workflow
 - System context (OS, package managers)
@@ -42,20 +43,21 @@ Cache results per session — no need to re-run unless tool availability changes
 
 Map task to best available tool:
 
-| Task | Preferred | Fallback | Legacy | Notes |
-|------|-----------|----------|--------|-------|
-| Find files by name | `fd` | - | `find` | fd: faster, better defaults |
-| Search file contents | `rg` | - | `grep` | rg: respects .gitignore, faster |
-| AST-aware code search | `sg` | `rg` | `grep` | sg: structure-aware queries |
-| Process JSON | `jq` | - | `python`/`node` | jq: domain-specific language |
-| View file with syntax | `bat` | - | `cat` | bat: syntax highlighting, git diff |
-| List directory | `eza` | - | `ls` | eza: modern output, icons |
-| View git diff | `delta` | - | `git diff` | delta: side-by-side, syntax highlighting |
-| Navigate directories | `zoxide` | - | `cd` | zoxide: frecency-based jumping |
-| Fuzzy select | `fzf` | - | - | fzf: interactive filtering |
-| HTTP requests | `httpie` | - | `curl` | httpie: human-friendly syntax |
+| Task                  | Preferred | Fallback | Legacy          | Notes                                    |
+| --------------------- | --------- | -------- | --------------- | ---------------------------------------- |
+| Find files by name    | `fd`      | -        | `find`          | fd: faster, better defaults              |
+| Search file contents  | `rg`      | -        | `grep`          | rg: respects .gitignore, faster          |
+| AST-aware code search | `sg`      | `rg`     | `grep`          | sg: structure-aware queries              |
+| Process JSON          | `jq`      | -        | `python`/`node` | jq: domain-specific language             |
+| View file with syntax | `bat`     | -        | `cat`           | bat: syntax highlighting, git diff       |
+| List directory        | `eza`     | -        | `ls`            | eza: modern output, icons                |
+| View git diff         | `delta`   | -        | `git diff`      | delta: side-by-side, syntax highlighting |
+| Navigate directories  | `zoxide`  | -        | `cd`            | zoxide: frecency-based jumping           |
+| Fuzzy select          | `fzf`     | -        | -               | fzf: interactive filtering               |
+| HTTP requests         | `httpie`  | -        | `curl`          | httpie: human-friendly syntax            |
 
 Selection algorithm:
+
 1. Check detection results for preferred tool
 2. If available → use with optimal flags
 3. If unavailable → check fallback column
@@ -69,15 +71,18 @@ Selection algorithm:
 When preferred tool unavailable:
 
 **Minor improvement** (preferred 10–30% better):
+
 - Use next best option silently
 - Don't interrupt workflow
 
 **Significant improvement** (preferred 2x+ better):
+
 - Use fallback
 - Surface suggestion: `◇ Alternative: {TOOL} would be {BENEFIT} — install with {COMMAND}`
 - Continue without blocking
 
 **Critical gap** (task extremely tedious with fallback):
+
 - Surface suggestion: `◆ Caution: {TOOL} recommended for this task — {FALLBACK} will be slow/limited`
 - Offer choice: install now, proceed anyway, defer task
 
@@ -88,6 +93,7 @@ Never block on missing tools — graceful degradation always.
 <research>
 
 Trigger research when:
+
 - Tool taking 3x+ longer than expected for task size
 - User explicitly asks for better approach
 - Task seems like it should have specialized tool
@@ -95,6 +101,7 @@ Trigger research when:
 - New tool category needed (not in selection table)
 
 Research workflow:
+
 1. Search for `{TASK} CLI tool 2025` or `{TASK} CLI tool 2024`
 2. Check GitHub trending in relevant category
 3. Evaluate candidates:
@@ -105,6 +112,7 @@ Research workflow:
    - Compatibility: OS support, integration
 
 Present findings:
+
 - Tool name + one-line description
 - Key advantages over current approach
 - Installation command
@@ -173,6 +181,7 @@ node -e "console.log(JSON.parse(require('fs').readFileSync(0, 'utf-8')).field)"
 <rules>
 
 ALWAYS:
+
 - Run detection script before recommending specific tools
 - Use selection table to map task to best available tool
 - Provide fallback when suggesting tools that might not be installed
@@ -180,6 +189,7 @@ ALWAYS:
 - Trigger research when tool underperforms expectations
 
 NEVER:
+
 - Assume a tool is installed without checking detection results
 - Block workflow on missing non-essential tools
 - Recommend abandonware or unmaintained tools

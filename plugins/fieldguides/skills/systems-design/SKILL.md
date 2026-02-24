@@ -25,18 +25,20 @@ NOT for: trivial tech choices, premature optimization, undocumented requirements
 
 Load the `maintain-tasks` skill for stage tracking. Stages advance only, never regress.
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Discovery | Session start | "Gathering requirements" |
-| Codebase Analysis | Requirements clear | "Analyzing codebase" |
-| Constraint Evaluation | Codebase understood | "Evaluating constraints" |
-| Solution Design | Constraints mapped | "Designing solutions" |
-| Documentation | Design selected | "Documenting architecture" |
+| Stage                 | Trigger             | activeForm                 |
+| --------------------- | ------------------- | -------------------------- |
+| Discovery             | Session start       | "Gathering requirements"   |
+| Codebase Analysis     | Requirements clear  | "Analyzing codebase"       |
+| Constraint Evaluation | Codebase understood | "Evaluating constraints"   |
+| Solution Design       | Constraints mapped  | "Designing solutions"      |
+| Documentation         | Design selected     | "Documenting architecture" |
 
 Situational (insert before Documentation when triggered):
+
 - Review & Refinement → feedback cycles on complex designs
 
 Edge cases:
+
 - Small questions: skip to Solution Design
 - Greenfield: skip Codebase Analysis
 - No ADR needed: skip Documentation
@@ -53,6 +55,7 @@ Task format:
 ```
 
 Workflow:
+
 - Start: Create Discovery as `in_progress`
 - Transition: Mark current `completed`, add next `in_progress`
 - High start: skip to Solution Design for clear problems
@@ -67,6 +70,7 @@ Workflow:
 Favor battle-tested over bleeding-edge without strong justification.
 
 Checklist:
+
 - 3+ years production at scale?
 - Strong community + active maintenance?
 - Available experienced practitioners?
@@ -79,6 +83,7 @@ Red flags: "Early adopters" without time budget, "Written in X" without benchmar
 Each abstraction must provide 10x value.
 
 Questions:
+
 - What specific problem does this solve?
 - Can we solve with existing tools/patterns?
 - Maintenance burden (docs, onboarding, debugging)?
@@ -89,6 +94,7 @@ Questions:
 Small, focused modules with clear contracts, single responsibilities.
 
 Checklist:
+
 - Single, well-defined purpose?
 - Describe in one sentence without "and"?
 - Dependencies explicit and minimal?
@@ -100,6 +106,7 @@ Checklist:
 No system ships without metrics, tracing, alerting.
 
 Required every service:
+
 - Metrics: RED (Rate, Errors, Duration) for all endpoints
 - Tracing: distributed traces with correlation IDs
 - Logging: structured logs with context
@@ -111,6 +118,7 @@ Required every service:
 Use contemporary proven patterns for greenfield, respect legacy constraints.
 
 Patterns (2025):
+
 - TypeScript strict mode for type safety
 - Rust for performance-critical services
 - Container deployment (Docker, K8s)
@@ -125,6 +133,7 @@ Legacy respect: document why legacy exists, plan incremental migration, don't re
 Design for change with clear upgrade paths.
 
 Practices:
+
 - Version all APIs with deprecation policies
 - Feature flags for gradual rollouts
 - Design with migration paths in mind
@@ -158,6 +167,7 @@ Load [design-patterns.md](references/design-patterns.md) for detailed guidance.
 **Service Decomposition**
 
 Monolith first. Extract when hitting specific pain:
+
 - Different scaling needs
 - Different deployment cadences
 - Team boundaries
@@ -167,11 +177,11 @@ Microservices: yes for 10+ engineers, clear domains, independent scaling. No for
 
 **Communication**
 
-| Pattern | Use when | Tradeoffs |
-|---------|----------|-----------|
-| Sync (REST, gRPC) | Immediate response needed | Tight coupling, cascading failures |
-| Async (queues, streams) | Eventual consistency OK | Complexity, ordering challenges |
-| Event-driven | Decoupling, audit trail | Event versioning, consistency |
+| Pattern                 | Use when                  | Tradeoffs                          |
+| ----------------------- | ------------------------- | ---------------------------------- |
+| Sync (REST, gRPC)       | Immediate response needed | Tight coupling, cascading failures |
+| Async (queues, streams) | Eventual consistency OK   | Complexity, ordering challenges    |
+| Event-driven            | Decoupling, audit trail   | Event versioning, consistency      |
 
 **Data Management**
 
@@ -191,13 +201,13 @@ Load [scalability.md](references/scalability.md) for detailed guidance.
 
 **Bottleneck Solutions**:
 
-| Resource | Solutions |
-|----------|-----------|
-| Database | Indexing, read replicas, caching, sharding |
-| CPU | Horizontal scale, algorithm optimization, async |
-| Memory | Profiling, streaming, data structure optimization |
-| Network | Compression, CDN, HTTP/2, gRPC |
-| I/O | SSD, batching, async I/O, caching |
+| Resource | Solutions                                         |
+| -------- | ------------------------------------------------- |
+| Database | Indexing, read replicas, caching, sharding        |
+| CPU      | Horizontal scale, algorithm optimization, async   |
+| Memory   | Profiling, streaming, data structure optimization |
+| Network  | Compression, CDN, HTTP/2, gRPC                    |
+| I/O      | SSD, batching, async I/O, caching                 |
 
 **Scaling Strategies**: Vertical (simple, limited), horizontal (stateless required), caching layers (L1/L2/L3), database scaling (replicas, sharding, pooling).
 
@@ -221,13 +231,13 @@ Load [rust-architecture.md](references/rust-architecture.md) for detailed guidan
 
 Load [common-patterns.md](references/common-patterns.md) for detailed guidance.
 
-| Pattern | Purpose |
-|---------|---------|
-| API Gateway | Single entry, routing, auth, rate limiting |
-| BFF | Per-client backends with optimized data shapes |
-| Circuit Breaker | Fail fast when downstream unhealthy |
-| Saga | Distributed transactions across services |
-| Strangler Fig | Gradual legacy migration via proxy |
+| Pattern         | Purpose                                        |
+| --------------- | ---------------------------------------------- |
+| API Gateway     | Single entry, routing, auth, rate limiting     |
+| BFF             | Per-client backends with optimized data shapes |
+| Circuit Breaker | Fail fast when downstream unhealthy            |
+| Saga            | Distributed transactions across services       |
+| Strangler Fig   | Gradual legacy migration via proxy             |
 
 </common_patterns_summary>
 
@@ -236,6 +246,7 @@ Load [common-patterns.md](references/common-patterns.md) for detailed guidance.
 Load [implementation-guidance.md](references/implementation-guidance.md) for detailed guidance.
 
 **Phased Delivery**:
+
 - MVP (2-4 wks): Core workflow, simplest architecture, validate problem-solution fit
 - Beta (4-8 wks): Key features, monitoring, automated deploy, validate product-market fit
 - Production (8-12 wks): Full features, reliability, auto-scaling, DR
@@ -252,6 +263,7 @@ Load [implementation-guidance.md](references/implementation-guidance.md) for det
 Load [adr-template.md](references/adr-template.md) for the full template.
 
 ADR structure:
+
 - Status, Date, Deciders, Context
 - Decision
 - Alternatives Considered (with pros/cons/why not)
@@ -283,23 +295,27 @@ Load [questions-checklist.md](references/questions-checklist.md) for the full ch
 Use `EnterPlanMode` when presenting options — enables keyboard navigation.
 
 Structure:
+
 - Prose above tool: context, reasoning, recommendation
 - Inside tool: 2-3 options with tradeoffs + "Something else"
 - User selects: number, modifications, or combo
 
 After user choice:
+
 - Restate decision
 - List implications
 - Surface concerns if any
 - Ask clarifying questions if gaps remain
 
 Before documenting:
+
 - Verify all options considered
 - Confirm rationale is clear
 - Check success metrics defined
 - Validate migration path if applicable
 
 At Documentation stage:
+
 - Create ADR if architectural decision
 - Skip if simple tech choice
 - Mark stage complete after delivery
@@ -309,6 +325,7 @@ At Documentation stage:
 <rules>
 
 ALWAYS:
+
 - Create Discovery todo at session start
 - Update todos at stage transitions
 - Ask clarifying questions about requirements and constraints before proposing
@@ -319,6 +336,7 @@ ALWAYS:
 - Account for budget and timeline constraints
 
 NEVER:
+
 - Recommend bleeding-edge tech without strong justification
 - Over-engineer solutions for current scale
 - Skip constraint analysis (budget, timeline, team, existing systems)
@@ -334,6 +352,7 @@ NEVER:
 **Core**:
 
 **Deep Dives**:
+
 - [technology-selection.md](references/technology-selection.md) — database, framework, infrastructure selection
 - [design-patterns.md](references/design-patterns.md) — service decomposition, communication, data management
 - [scalability.md](references/scalability.md) — performance modeling, bottlenecks, scaling strategies

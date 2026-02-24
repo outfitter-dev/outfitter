@@ -16,6 +16,7 @@ import {
   type SerializedTool,
   type ToolDefinition,
 } from "@outfitter/mcp";
+
 import { loadFixture } from "./fixtures.js";
 
 // ============================================================================

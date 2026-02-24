@@ -10,15 +10,14 @@ Track items the scanner couldn't categorize or that need human judgment.
 
 ## Review Priority
 
-| Priority | Meaning |
-|----------|---------|
-| 🔴 High | Blocks other work, needs immediate decision |
-| 🟡 Medium | Should resolve before Documents stage |
-| 🟢 Low | Can defer or skip with documentation |
+| Priority  | Meaning                                     |
+| --------- | ------------------------------------------- |
+| 🔴 High   | Blocks other work, needs immediate decision |
+| 🟡 Medium | Should resolve before Documents stage       |
+| 🟢 Low    | Can defer or skip with documentation        |
 
 ## Unknowns
 
-
 ### {{this.id}}: {{this.title}}
 
 - **File:** `{{this.file}}:{{this.line}}`
@@ -28,7 +27,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -49,7 +52,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -70,7 +77,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -91,7 +102,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -112,7 +127,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -133,7 +152,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -154,7 +177,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -175,7 +202,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -196,7 +227,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -217,7 +252,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -238,7 +277,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Context
 
 ```typescript
-{{this.code}}
+{
+  {
+    this.code;
+  }
+}
 ```
 
 #### Why Unknown
@@ -249,12 +292,11 @@ Track items the scanner couldn't categorize or that need human judgment.
 
 {{#each this.options}}
 {{@index}}. {{this}}
-
 
 #### Decision
 
 - [ ] Reviewed
-- [ ] Decision: _____________
+- [ ] Decision: ******\_******
 - [ ] Implemented
 
 ---
@@ -310,14 +352,12 @@ Errors that don't map cleanly to taxonomy:
 
 ## Resolution Log
 
-| ID | Decision | Rationale | Date |
-|----|----------|-----------|------|
+| ID  | Decision | Rationale | Date |
+| --- | -------- | --------- | ---- |
 
 ## Stack Feedback
 
 Issues discovered that should be reported to outfitter-dev/stack:
-
-
 
 Use `stack:migration-feedback` skill to create GitHub issues.
 
@@ -330,5 +370,3 @@ Use `stack:migration-feedback` skill to create GitHub issues.
 - [ ] Remaining items documented for future
 
 ## Notes
-
-

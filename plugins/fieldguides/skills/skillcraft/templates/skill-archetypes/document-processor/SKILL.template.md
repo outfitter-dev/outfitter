@@ -16,6 +16,7 @@ bun run scripts/process.ts extract input.{{ext}}
 ```
 
 **Output formats:**
+
 - `--json` — Structured JSON (default)
 - `--text` — Plain text
 - `--markdown` — Markdown formatted
@@ -61,11 +62,11 @@ done
 
 ## Error Handling
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| File not found | Invalid path | Check file exists and path is correct |
-| Parse error | Corrupted file | Verify file is valid {{FORMAT}} |
-| Permission denied | Read/write access | Check file permissions |
+| Error             | Cause             | Solution                              |
+| ----------------- | ----------------- | ------------------------------------- |
+| File not found    | Invalid path      | Check file exists and path is correct |
+| Parse error       | Corrupted file    | Verify file is valid {{FORMAT}}       |
+| Permission denied | Read/write access | Check file permissions                |
 
 ## Tips
 

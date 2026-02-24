@@ -23,7 +23,7 @@ Well-documented code lets agents work faster with fewer mistakes.
 
 ## Function Documentation
 
-```typescript
+````typescript
 /**
  * Authenticates user and returns session token.
  *
@@ -43,7 +43,7 @@ export async function authenticate(
 ): Promise<SessionToken> {
   // ...
 }
-```
+````
 
 ## Interface Documentation
 
@@ -63,13 +63,13 @@ export interface User {
   /** Display name shown in UI */
   name: string;
   /** Access level - defaults to 'user' on creation */
-  role: 'admin' | 'user' | 'guest';
+  role: "admin" | "user" | "guest";
 }
 ```
 
 ## Type Documentation
 
-```typescript
+````typescript
 /**
  * Result of a validation operation.
  *
@@ -89,23 +89,23 @@ export interface User {
 export type ValidationResult<T, E = ValidationError> =
   | { readonly valid: true; readonly data: T }
   | { readonly valid: false; readonly errors: E[] };
-```
+````
 
 ## Common TSDoc Tags
 
-| Tag | Purpose | Example |
-|-----|---------|---------|
-| `@param` | Document parameter | `@param id - User's unique identifier` |
-| `@returns` | Document return value | `@returns The created user object` |
-| `@throws` | Document exceptions | `@throws {NotFoundError} User not found` |
-| `@example` | Provide usage example | Code block with typical usage |
-| `@remarks` | Additional context | Edge cases, related info |
-| `@typeParam` | Document generic params | `@typeParam T - The data type` |
-| `@see` | Reference related APIs | `@see {@link createUser}` |
-| `@deprecated` | Mark deprecated | `@deprecated Use newMethod instead` |
-| `@default` | Document default value | `@default 'user'` |
-| `@since` | Version introduced | `@since 2.0.0` |
-| `@beta` | Mark as beta | API may change |
+| Tag           | Purpose                 | Example                                  |
+| ------------- | ----------------------- | ---------------------------------------- |
+| `@param`      | Document parameter      | `@param id - User's unique identifier`   |
+| `@returns`    | Document return value   | `@returns The created user object`       |
+| `@throws`     | Document exceptions     | `@throws {NotFoundError} User not found` |
+| `@example`    | Provide usage example   | Code block with typical usage            |
+| `@remarks`    | Additional context      | Edge cases, related info                 |
+| `@typeParam`  | Document generic params | `@typeParam T - The data type`           |
+| `@see`        | Reference related APIs  | `@see {@link createUser}`                |
+| `@deprecated` | Mark deprecated         | `@deprecated Use newMethod instead`      |
+| `@default`    | Document default value  | `@default 'user'`                        |
+| `@since`      | Version introduced      | `@since 2.0.0`                           |
+| `@beta`       | Mark as beta            | API may change                           |
 
 ## Inline Comments
 
@@ -114,11 +114,12 @@ Use inline comments for non-obvious logic:
 ```typescript
 function calculateDiscount(order: Order): number {
   // Loyalty discount: 5% after 10 orders, 10% after 50
-  const loyaltyMultiplier = order.customerOrderCount > 50
-    ? 0.10
-    : order.customerOrderCount > 10
-      ? 0.05
-      : 0;
+  const loyaltyMultiplier =
+    order.customerOrderCount > 50
+      ? 0.1
+      : order.customerOrderCount > 10
+        ? 0.05
+        : 0;
 
   // Holiday promotion takes precedence over loyalty
   if (order.holidayPromoApplied) {
@@ -131,7 +132,7 @@ function calculateDiscount(order: Order): number {
 
 ## Class Documentation
 
-```typescript
+````typescript
 /**
  * Connection pool for database operations.
  *
@@ -176,7 +177,7 @@ export class ConnectionPool implements Disposable {
    */
   [Symbol.dispose](): void {}
 }
-```
+````
 
 ## Constant and Enum Documentation
 
@@ -227,9 +228,9 @@ Place at top of file:
  * @packageDocumentation
  */
 
-export * from './authenticate';
-export * from './session';
-export * from './tokens';
+export * from "./authenticate";
+export * from "./session";
+export * from "./tokens";
 ```
 
 ## Anti-Patterns
@@ -261,7 +262,7 @@ function getUser(id: UserId): User | undefined {}
 ```typescript
 // Bad - caller doesn't know this throws
 function parseConfig(path: string): Config {
-  const content = fs.readFileSync(path, 'utf-8'); // throws
+  const content = fs.readFileSync(path, "utf-8"); // throws
   return JSON.parse(content); // throws
 }
 

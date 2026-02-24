@@ -22,6 +22,7 @@
 
 import { existsSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+
 import { spawn } from "bun";
 
 const SCRIPTS_DIR = dirname(new URL(import.meta.url).pathname);

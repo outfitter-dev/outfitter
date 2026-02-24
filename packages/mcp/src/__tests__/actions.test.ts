@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import {
   createActionRegistry,
   createContext,
@@ -6,6 +7,7 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { buildMcpTools } from "../actions.js";
 
 describe("buildMcpTools", () => {

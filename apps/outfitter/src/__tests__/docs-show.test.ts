@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+
 import { outfitterActions } from "../actions.js";
 
 describe("docs.show action", () => {

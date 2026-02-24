@@ -11,7 +11,9 @@
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, relative, resolve } from "node:path";
+
 import { Result } from "better-result";
+
 import {
   isPathInsideWorkspace,
   relativeToWorkspace,

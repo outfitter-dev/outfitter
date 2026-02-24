@@ -6,6 +6,7 @@
 
 import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { runDemo } from "../commands/demo.js";
 import {
   type CliOutputMode,

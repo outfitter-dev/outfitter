@@ -7,6 +7,7 @@ Use the task tools to track work across context windows.
 ### Creating Tasks
 
 Use `TaskCreate` for multi-step work:
+
 - `subject`: Imperative form ("Run tests")
 - `activeForm`: Present continuous ("Running tests")
 - `description`: Detailed requirements

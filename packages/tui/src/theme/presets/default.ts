@@ -8,6 +8,7 @@
  */
 
 import { ANSI } from "@outfitter/cli/colors";
+
 import { BORDERS } from "../../render/borders.js";
 import type { VisualTheme } from "../types.js";
 

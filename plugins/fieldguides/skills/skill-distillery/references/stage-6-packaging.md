@@ -167,6 +167,7 @@ Or if the plugin lives in a separate repo:
 **Avoid version pinning** — Omit `ref` and `sha` unless specifically requested. Pinned versions get stale quickly and require marketplace updates for every plugin release. Let the marketplace pull from default branch.
 
 Only pin when:
+
 - Plugin has breaking changes between versions
 - Stability is critical (enterprise/production)
 - User explicitly requests it

@@ -7,6 +7,7 @@ How to delegate work to preserve main conversation context.
 ## The Context Problem
 
 Main conversation context is ~128K tokens. Every operation consumes it:
+
 - Reading a file: file contents enter context
 - Search results: matches enter context
 - Reasoning: your analysis consumes tokens
@@ -16,17 +17,17 @@ Subagents run in **isolated contexts**. When they complete, only their final out
 
 ## Delegation Decision Matrix
 
-| Task Type | Delegate? | Agent | Why |
-|-----------|-----------|-------|-----|
-| Read 1-2 files | No | Main | Already focused |
-| Read 5+ files | Yes | Explore | Preserves main context |
-| Codebase search | Yes | Explore | Returns summary, not raw results |
-| Security review | Yes | reviewer | Specialized + isolated |
-| Performance analysis | Yes | analyst | Research-heavy |
-| Simple edit | No | Main | Quick, in-context |
-| Multi-file refactor | Yes | engineer | Coordinates changes |
-| Test validation | Yes | tester | Isolated execution |
-| User Q&A | No | Main | Needs conversation history |
+| Task Type            | Delegate? | Agent    | Why                              |
+| -------------------- | --------- | -------- | -------------------------------- |
+| Read 1-2 files       | No        | Main     | Already focused                  |
+| Read 5+ files        | Yes       | Explore  | Preserves main context           |
+| Codebase search      | Yes       | Explore  | Returns summary, not raw results |
+| Security review      | Yes       | reviewer | Specialized + isolated           |
+| Performance analysis | Yes       | analyst  | Research-heavy                   |
+| Simple edit          | No        | Main     | Quick, in-context                |
+| Multi-file refactor  | Yes       | engineer | Coordinates changes              |
+| Test validation      | Yes       | tester   | Isolated execution               |
+| User Q&A             | No        | Main     | Needs conversation history       |
 
 ## Pattern: Research Delegation
 
@@ -113,6 +114,7 @@ Agent preserves its full context across invocations. Main agent stays lean.
 Not everything should be delegated:
 
 **Keep in main**:
+
 - Direct user interaction
 - Final synthesis and decisions
 - Coordination logic
@@ -120,6 +122,7 @@ Not everything should be delegated:
 - Simple, quick operations
 
 **Delegate**:
+
 - Exploratory research
 - Multi-file analysis
 - Specialized reviews

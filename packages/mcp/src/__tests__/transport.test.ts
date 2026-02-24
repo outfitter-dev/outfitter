@@ -5,10 +5,12 @@
  * and supports runtime registration of resources/prompts.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { createMcpServer, defineTool } from "../index.js";
 import { createSdkServer } from "../transport.js";
 

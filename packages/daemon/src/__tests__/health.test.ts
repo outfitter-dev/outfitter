@@ -11,7 +11,9 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import { createHealthChecker, type HealthCheck } from "../health.js";
 
 // ============================================================================

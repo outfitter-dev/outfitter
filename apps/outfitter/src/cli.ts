@@ -11,11 +11,13 @@
  */
 
 import { readFileSync } from "node:fs";
+
 import { exitWithError } from "@outfitter/cli";
 import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
 import { createContext, generateRequestId } from "@outfitter/contracts";
 import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
 import { outfitterActions } from "./actions.js";
 import { createRepoCommand } from "./commands/repo.js";
 

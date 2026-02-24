@@ -21,10 +21,10 @@ memory: user
 
 Load as needed based on domain:
 
-| Skill | When |
-|-------|------|
-| `pathfinding` | Exploring unfamiliar domains, unclear requirements |
-| `research` | Gathering information before implementation |
-| `security` | Security audits, vulnerability scanning |
-| `performance` | Optimization, profiling, benchmarking |
-| `tdd-fieldguide` | Creating testable configurations |
+| Skill            | When                                               |
+| ---------------- | -------------------------------------------------- |
+| `pathfinding`    | Exploring unfamiliar domains, unclear requirements |
+| `research`       | Gathering information before implementation        |
+| `security`       | Security audits, vulnerability scanning            |
+| `performance`    | Optimization, profiling, benchmarking              |
+| `tdd-fieldguide` | Creating testable configurations                   |

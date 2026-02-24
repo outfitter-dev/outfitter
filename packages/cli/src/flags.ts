@@ -5,6 +5,7 @@
  */
 
 import type { ActionCliOption } from "@outfitter/contracts";
+
 import type {
   BooleanFlagPresetConfig,
   ColorFlags,

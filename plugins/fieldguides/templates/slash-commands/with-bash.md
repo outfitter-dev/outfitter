@@ -13,6 +13,7 @@ Recent commits: !`git log --oneline -5`
 
 {YOUR_BASH_COMMANDS}
 Examples:
+
 - Git diff: !`git diff --staged`
 - Git status: !`git status`
 - File listing: !`ls -la src/`
@@ -25,6 +26,7 @@ Examples:
 
 Example:
 Based on the staged changes shown above, create a single commit with:
+
 1. Clear, concise commit message (max 50 chars)
 2. Detailed body explaining the changes
 3. Reference any related issues
