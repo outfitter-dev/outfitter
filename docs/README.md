@@ -54,7 +54,7 @@ freshness with `bun run docs:check:readme-sentinel`.
 | [`@outfitter/schema`](../packages/schema/) | Schema introspection, surface map generation, and drift detection for Outfitter |
 | [`@outfitter/state`](../packages/state/) | Pagination cursor persistence and state management for Outfitter |
 | [`@outfitter/testing`](../packages/testing/) | Test harnesses, fixtures, and utilities for Outfitter packages |
-| [`@outfitter/tooling`](../packages/tooling/) | Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint) |
+| [`@outfitter/tooling`](../packages/tooling/) | Dev tooling configuration presets for Outfitter projects (oxlint/oxfmt, typescript, lefthook, markdownlint) |
 | [`@outfitter/tui`](../packages/tui/) | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
 | [`@outfitter/types`](../packages/types/) | Branded types, type guards, and type utilities for Outfitter |
 <!-- END:GENERATED:PACKAGE_LIST -->

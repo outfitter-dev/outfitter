@@ -201,7 +201,7 @@ describe("init command file creation", () => {
     const tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
     expect(tsconfig.extends).toBeUndefined();
 
-    expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, ".oxlintrc.json"))).toBe(false);
 
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
@@ -335,12 +335,16 @@ describe("init command file creation", () => {
     });
 
     expect(result.isOk()).toBe(true);
-    expect(existsSync(join(tempDir, "biome.json"))).toBe(true);
-    expect(existsSync(join(tempDir, "apps", "cli", "biome.json"))).toBe(false);
-    expect(existsSync(join(tempDir, "apps", "mcp", "biome.json"))).toBe(false);
-    expect(existsSync(join(tempDir, "packages", "core", "biome.json"))).toBe(
+    expect(existsSync(join(tempDir, ".oxlintrc.json"))).toBe(true);
+    expect(existsSync(join(tempDir, "apps", "cli", ".oxlintrc.json"))).toBe(
       false
     );
+    expect(existsSync(join(tempDir, "apps", "mcp", ".oxlintrc.json"))).toBe(
+      false
+    );
+    expect(
+      existsSync(join(tempDir, "packages", "core", ".oxlintrc.json"))
+    ).toBe(false);
   });
 
   test("creates src directory structure", async () => {
@@ -1005,7 +1009,7 @@ describe("init command registry blocks", () => {
       expect(result.value.blocksAdded?.created).toContain(
         ".claude/settings.json"
       );
-      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(".oxlintrc.json");
     }
   });
 
@@ -1024,7 +1028,7 @@ describe("init command registry blocks", () => {
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeUndefined();
     }
-    expect(existsSync(join(tempDir, "biome.json"))).toBe(false);
+    expect(existsSync(join(tempDir, ".oxlintrc.json"))).toBe(false);
     expect(existsSync(join(tempDir, ".lefthook.yml"))).toBe(false);
     expect(existsSync(join(tempDir, ".claude"))).toBe(false);
   });
@@ -1053,7 +1057,7 @@ describe("init command registry blocks", () => {
     expect(existsSync(settingsPath)).toBe(true);
   });
 
-  test("adds biome block with biome.json file", async () => {
+  test("adds linter block with oxlint config files", async () => {
     const { runInit } = await import("../commands/init.js");
 
     const result = await runInit({
@@ -1061,19 +1065,19 @@ describe("init command registry blocks", () => {
       name: "test-project",
       preset: "minimal",
       force: false,
-      with: "biome",
+      with: "linter",
     });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeDefined();
-      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(".oxlintrc.json");
       // Note: ultracite is already in SHARED_DEV_DEPS so it won't be in the added list
     }
 
-    // Verify biome.json was created
-    const biomePath = join(tempDir, "biome.json");
-    expect(existsSync(biomePath)).toBe(true);
+    // Verify .oxlintrc.json was created
+    const oxlintPath = join(tempDir, ".oxlintrc.json");
+    expect(existsSync(oxlintPath)).toBe(true);
   });
 
   test("adds multiple blocks from comma-separated list", async () => {
@@ -1084,7 +1088,7 @@ describe("init command registry blocks", () => {
       name: "test-project",
       preset: "minimal",
       force: false,
-      with: "claude,biome",
+      with: "claude,linter",
     });
 
     expect(result.isOk()).toBe(true);
@@ -1094,7 +1098,7 @@ describe("init command registry blocks", () => {
       expect(result.value.blocksAdded?.created).toContain(
         ".claude/settings.json"
       );
-      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(".oxlintrc.json");
     }
   });
 
@@ -1116,7 +1120,7 @@ describe("init command registry blocks", () => {
       expect(result.value.blocksAdded?.created).toContain(
         ".claude/settings.json"
       );
-      expect(result.value.blocksAdded?.created).toContain("biome.json");
+      expect(result.value.blocksAdded?.created).toContain(".oxlintrc.json");
       expect(result.value.blocksAdded?.created).toContain(
         "scripts/bootstrap.sh"
       );
@@ -1228,7 +1232,7 @@ describe("init command manifest stamping", () => {
       name: "test-project",
       preset: "minimal",
       force: false,
-      with: "claude,biome",
+      with: "claude,linter",
     });
 
     expect(result.isOk()).toBe(true);
@@ -1240,6 +1244,6 @@ describe("init command manifest stamping", () => {
     const manifest = JSON.parse(raw) as Manifest;
     expect(manifest.version).toBe(1);
     expect(manifest.blocks["claude"]).toBeDefined();
-    expect(manifest.blocks["biome"]).toBeDefined();
+    expect(manifest.blocks["linter"]).toBeDefined();
   });
 });

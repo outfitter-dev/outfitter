@@ -72,9 +72,11 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("all blocks current returns 0 drift count", async () => {
-    // Write the canonical registry content for biome
-    const biomeContent = getRegistryFileContent("biome", "biome.json");
-    writeFileSync(join(testDir, "biome.json"), biomeContent);
+    // Write the canonical registry content for linter (both files)
+    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     // Get tooling version
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
@@ -83,7 +85,7 @@ describe("runCheck", () => {
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -106,8 +108,8 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("drifted block detected returns correct classification", async () => {
-    // Write modified content for biome
-    writeFileSync(join(testDir, "biome.json"), '{"modified": true}');
+    // Write modified content for linter
+    writeFileSync(join(testDir, ".oxlintrc.json"), '{"modified": true}');
 
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
@@ -115,7 +117,7 @@ describe("runCheck", () => {
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -128,8 +130,8 @@ describe("runCheck", () => {
     if (result.isOk()) {
       expect(result.value.driftedCount).toBe(1);
       expect(result.value.currentCount).toBe(0);
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
-      expect(biomeBlock?.status).toBe("drifted");
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock?.status).toBe("drifted");
     }
   });
 
@@ -141,11 +143,11 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // Manifest says biome is installed, but no biome.json file exists
+    // Manifest says linter is installed, but no .oxlintrc.json file exists
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -157,8 +159,8 @@ describe("runCheck", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.missingCount).toBe(1);
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
-      expect(biomeBlock?.status).toBe("missing");
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock?.status).toBe("missing");
     }
   });
 
@@ -167,18 +169,35 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("no manifest falls back to file-presence heuristic", async () => {
-    // Write a biome.json with canonical content but no manifest
-    const biomeContent = getRegistryFileContent("biome", "biome.json");
-    writeFileSync(join(testDir, "biome.json"), biomeContent);
+    // Write linter block files with canonical content but no manifest
+    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     const result = await runCheck({ cwd: testDir });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      // Should detect biome block via file presence
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
-      expect(biomeBlock).toBeDefined();
-      expect(biomeBlock?.status).toBe("current");
+      // Should detect linter block via file presence
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock).toBeDefined();
+      expect(linterBlock?.status).toBe("current");
+      expect(result.value.totalChecked).toBeGreaterThan(0);
+    }
+  });
+
+  test("no manifest detects linter from oxfmt marker and reports drift", async () => {
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+
+    const result = await runCheck({ cwd: testDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock).toBeDefined();
+      expect(linterBlock?.status).toBe("drifted");
       expect(result.value.totalChecked).toBeGreaterThan(0);
     }
   });
@@ -188,12 +207,15 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("JSON structural comparison ignores formatting differences", async () => {
-    // Write biome.json with different formatting but same structure
-    const biomeContent = getRegistryFileContent("biome", "biome.json");
-    const parsed = JSON.parse(biomeContent);
+    // Write .oxlintrc.json with different formatting but same structure
+    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    const parsed = JSON.parse(oxlintContent);
     // Re-serialize with different formatting (spaces instead of tabs, sorted differently)
     const reformatted = JSON.stringify(parsed, null, "  ");
-    writeFileSync(join(testDir, "biome.json"), reformatted);
+    writeFileSync(join(testDir, ".oxlintrc.json"), reformatted);
+    // Write .oxfmtrc.jsonc with canonical content
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
@@ -201,7 +223,7 @@ describe("runCheck", () => {
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -212,9 +234,9 @@ describe("runCheck", () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
       // Should be current because structurally identical
-      expect(biomeBlock?.status).toBe("current");
+      expect(linterBlock?.status).toBe("current");
       expect(result.value.driftedCount).toBe(0);
     }
   });
@@ -227,9 +249,11 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // Write canonical content for biome
-    const biomeContent = getRegistryFileContent("biome", "biome.json");
-    writeFileSync(join(testDir, "biome.json"), biomeContent);
+    // Write canonical content for linter (both files)
+    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     // Write drifted content for lefthook
     writeFileSync(join(testDir, ".lefthook.yml"), "modified: true");
@@ -237,7 +261,7 @@ describe("runCheck", () => {
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -248,14 +272,14 @@ describe("runCheck", () => {
       },
     });
 
-    const result = await runCheck({ cwd: testDir, block: "biome" });
+    const result = await runCheck({ cwd: testDir, block: "linter" });
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      // Should only check biome, not lefthook
+      // Should only check linter, not lefthook
       expect(result.value.totalChecked).toBe(1);
       expect(result.value.blocks).toHaveLength(1);
-      expect(result.value.blocks[0]?.name).toBe("biome");
+      expect(result.value.blocks[0]?.name).toBe("linter");
       expect(result.value.blocks[0]?.status).toBe("current");
     }
   });
@@ -269,12 +293,12 @@ describe("runCheck", () => {
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
     // Write modified content
-    writeFileSync(join(testDir, "biome.json"), '{"custom": "config"}');
+    writeFileSync(join(testDir, ".oxlintrc.json"), '{"custom": "config"}');
 
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -285,12 +309,16 @@ describe("runCheck", () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
-      expect(biomeBlock?.status).toBe("drifted");
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock?.status).toBe("drifted");
       // In verbose mode, drifted files should have a populated driftedFiles array
-      expect(biomeBlock?.driftedFiles).toBeDefined();
-      expect(biomeBlock?.driftedFiles?.length).toBeGreaterThan(0);
-      expect(biomeBlock?.driftedFiles?.[0]?.path).toBe("biome.json");
+      expect(linterBlock?.driftedFiles).toBeDefined();
+      expect(linterBlock?.driftedFiles?.length).toBeGreaterThan(0);
+      expect(
+        linterBlock?.driftedFiles?.some(
+          (file) => file.path === ".oxlintrc.json"
+        )
+      ).toBe(true);
     }
   });
 
@@ -302,9 +330,11 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // biome: current (canonical content)
-    const biomeContent = getRegistryFileContent("biome", "biome.json");
-    writeFileSync(join(testDir, "biome.json"), biomeContent);
+    // linter: current (canonical content — both files)
+    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     // lefthook: drifted (modified content)
     writeFileSync(join(testDir, ".lefthook.yml"), "modified: true");
@@ -314,7 +344,7 @@ describe("runCheck", () => {
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
-        biome: {
+        linter: {
           installedFrom: toolingPkg.version,
           installedAt: "2026-02-10T00:00:00.000Z",
         },
@@ -338,13 +368,13 @@ describe("runCheck", () => {
       expect(result.value.driftedCount).toBe(1);
       expect(result.value.missingCount).toBe(1);
 
-      const biomeBlock = result.value.blocks.find((b) => b.name === "biome");
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
       const lefthookBlock = result.value.blocks.find(
         (b) => b.name === "lefthook"
       );
       const claudeBlock = result.value.blocks.find((b) => b.name === "claude");
 
-      expect(biomeBlock?.status).toBe("current");
+      expect(linterBlock?.status).toBe("current");
       expect(lefthookBlock?.status).toBe("drifted");
       expect(claudeBlock?.status).toBe("missing");
     }

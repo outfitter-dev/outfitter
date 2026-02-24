@@ -314,7 +314,7 @@ function stripJsoncComments(content: string): string {
  * Used as fallback when no manifest exists.
  */
 const BLOCK_FILE_MARKERS: Record<string, string[]> = {
-  biome: ["biome.json"],
+  linter: [".oxlintrc.json", ".oxfmtrc.jsonc"],
   lefthook: [".lefthook.yml"],
   claude: [".claude/settings.json"],
   markdownlint: [".markdownlint-cli2.jsonc"],
