@@ -14,6 +14,9 @@ const TOOLING_PRESET_PATHS = new Set([
   ".claude/hooks/format-code-on-stop.sh",
   ".lefthook.yml",
   ".markdownlint-cli2.jsonc",
+  ".oxlintrc.json",
+  ".oxfmtrc.jsonc",
+  // Keep legacy Biome config support for older preset snapshots.
   "biome.json",
   "scripts/bootstrap.sh",
 ]);
