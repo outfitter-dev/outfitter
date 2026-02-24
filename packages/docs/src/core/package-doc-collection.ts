@@ -10,8 +10,13 @@
 
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
-import { extname, isAbsolute, join, relative, resolve } from "node:path";
+import { extname, join, relative, resolve } from "node:path";
 import { Result } from "better-result";
+import {
+  isPathInsideWorkspace,
+  relativeToWorkspace,
+  toPosixPath,
+} from "./path-utils.js";
 
 interface DiscoveredPackage {
   readonly packageDirName: string;
@@ -52,25 +57,6 @@ export interface CollectPackageDocsOptions {
   readonly outputRoot: string;
   readonly packagesRoot: string;
   readonly workspaceRoot: string;
-}
-
-function toPosixPath(path: string): string {
-  return path.split("\\").join("/");
-}
-
-function relativeToWorkspace(
-  workspaceRoot: string,
-  absolutePath: string
-): string {
-  return toPosixPath(relative(workspaceRoot, absolutePath));
-}
-
-function isPathInsideWorkspace(
-  workspaceRoot: string,
-  absolutePath: string
-): boolean {
-  const rel = relative(workspaceRoot, absolutePath);
-  return rel === "" || !(rel.startsWith("..") || isAbsolute(rel));
 }
 
 function toOutputRelativePath(relativePath: string): string {
