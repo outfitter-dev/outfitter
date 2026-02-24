@@ -191,7 +191,14 @@ function createRegistryConfig(): RegistryBuildConfig {
       linter: {
         description:
           "Linter and formatter configuration (oxlint/oxfmt) via Ultracite",
-        files: [".oxlintrc.json", ".oxfmtrc.jsonc"],
+        files: [
+          "packages/tooling/configs/.oxlintrc.json",
+          "packages/tooling/configs/.oxfmtrc.jsonc",
+        ],
+        remap: {
+          "packages/tooling/configs/.oxlintrc.json": ".oxlintrc.json",
+          "packages/tooling/configs/.oxfmtrc.jsonc": ".oxfmtrc.jsonc",
+        },
         devDependencies: {
           ultracite: resolveVersion(versions, "ultracite"),
           oxlint: resolveVersion(versions, "oxlint"),
