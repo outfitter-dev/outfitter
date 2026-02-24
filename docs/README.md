@@ -46,6 +46,7 @@ freshness with `bun run docs:check:readme-sentinel`.
 | [`@outfitter/contracts`](../packages/contracts/) | Result/Error patterns, error taxonomy, and handler contracts for Outfitter |
 | [`@outfitter/daemon`](../packages/daemon/) | Daemon lifecycle, IPC, and health checks for Outfitter |
 | [`@outfitter/docs`](../packages/docs/) | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows |
+| [`@outfitter/oxlint-plugin`](../packages/oxlint-plugin/) | Custom lint rules for Outfitter architecture and safety conventions |
 | [`@outfitter/file-ops`](../packages/file-ops/) | Workspace detection, secure path handling, and file locking for Outfitter |
 | [`@outfitter/index`](../packages/index/) | SQLite FTS5 full-text search indexing for Outfitter |
 | [`@outfitter/logging`](../packages/logging/) | Structured logging via logtape with redaction support for Outfitter |
