@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
+
 import { Command } from "commander";
+
 import { applyDemoRootFlags, resolveDemoRootFlags } from "../cli-root-flags.js";
 
 describe("demo root flag presets", () => {

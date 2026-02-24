@@ -29,11 +29,13 @@ Complex task arrives
 ```
 
 **Plan subagent benefits**:
+
 - Runs in isolated context — doesn't consume main conversation tokens
 - Can read many files without bloating orchestrator context
 - Returns concise plan for execution
 
 **When to use Plan subagent**:
+
 - Task touches multiple domains (auth + performance + testing)
 - Unknown codebase area — needs exploration first
 - Sequence of agents matters (dependencies between steps)
@@ -42,6 +44,7 @@ Complex task arrives
 ## Context Management
 
 For long-running orchestration, load the `context-management` skill. It teaches:
+
 - Using Tasks as survivable state (persists across compaction)
 - Delegating to subagents to preserve main context
 - Pre-compaction checklists to capture progress
@@ -55,16 +58,16 @@ Coordination uses **roles** (what function is needed) mapped to **agents** (who 
 
 ### Baselayer Agents
 
-| Role | Agent | Purpose |
-|------|-------|---------|
-| coding | **engineer** | Build, implement, fix, refactor |
-| reviewing | **reviewer** | Evaluate code, PRs, architecture, security |
-| research | **analyst** | Investigate, research, explore |
-| debugging | **debugger** | Diagnose issues, trace problems |
-| testing | **tester** | Validate, prove, verify behavior |
-| challenging | **skeptic** | Challenge complexity, question assumptions |
-| specialist | **specialist** | Domain expertise (CI/CD, design, accessibility, etc.) |
-| patterns | **analyst** | Extract reusable patterns from work |
+| Role        | Agent          | Purpose                                               |
+| ----------- | -------------- | ----------------------------------------------------- |
+| coding      | **engineer**   | Build, implement, fix, refactor                       |
+| reviewing   | **reviewer**   | Evaluate code, PRs, architecture, security            |
+| research    | **analyst**    | Investigate, research, explore                        |
+| debugging   | **debugger**   | Diagnose issues, trace problems                       |
+| testing     | **tester**     | Validate, prove, verify behavior                      |
+| challenging | **skeptic**    | Challenge complexity, question assumptions            |
+| specialist  | **specialist** | Domain expertise (CI/CD, design, accessibility, etc.) |
+| patterns    | **analyst**    | Extract reusable patterns from work                   |
 
 ### Other Available Agents
 
@@ -75,6 +78,7 @@ Additional agents may be available in your environment (user-defined, plugin-pro
 3. Fall back to outfitter agents when no better option exists
 
 Examples of role substitution:
+
 - **coding** → `senior-engineer`, `developer`, `engineer`
 - **reviewing** → `security-auditor`, `code-reviewer`, `reviewer`
 - **research** → `research-engineer`, `docs-librarian`, `analyst`
@@ -154,40 +158,40 @@ research (scope) → debugging (root cause) → coding (fix) → testing (verify
 
 ### Coding Role
 
-| Task | Skills |
-|------|--------|
-| New feature | software-craft, tdd-fieldguide |
-| Bug fix | debugging → software-craft |
-| Refactor | software-craft + sanity-check |
-| API endpoint | hono-fieldguide, software-craft |
+| Task            | Skills                           |
+| --------------- | -------------------------------- |
+| New feature     | software-craft, tdd-fieldguide   |
+| Bug fix         | debugging → software-craft       |
+| Refactor        | software-craft + sanity-check    |
+| API endpoint    | hono-fieldguide, software-craft  |
 | React component | react-fieldguide, software-craft |
-| AI feature | software-craft |
+| AI feature      | software-craft                   |
 
 ### Reviewing Role
 
-| Task | Skills |
-|------|--------|
-| PR review | code-review |
-| Architecture review | systems-design |
-| Performance audit | performance |
-| Security audit | security |
-| Pre-merge check | code-review + prove-it-works |
+| Task                | Skills                       |
+| ------------------- | ---------------------------- |
+| PR review           | code-review                  |
+| Architecture review | systems-design               |
+| Performance audit   | performance                  |
+| Security audit      | security                     |
+| Pre-merge check     | code-review + prove-it-works |
 
 ### Research Role
 
-| Task | Skills |
-|------|--------|
-| Codebase exploration | codebase-analysis |
-| Research question | research |
-| Unclear requirements | pathfinding |
-| Status report | status, report-findings |
+| Task                 | Skills                  |
+| -------------------- | ----------------------- |
+| Codebase exploration | codebase-analysis       |
+| Research question    | research                |
+| Unclear requirements | pathfinding             |
+| Status report        | status, report-findings |
 
 ### Testing Role
 
-| Task | Skills |
-|------|--------|
-| Feature validation | prove-it-works |
-| TDD implementation | tdd-fieldguide |
+| Task                | Skills         |
+| ------------------- | -------------- |
+| Feature validation  | prove-it-works |
+| TDD implementation  | tdd-fieldguide |
 | Integration testing | prove-it-works |
 
 ## Advanced Execution Patterns
@@ -246,6 +250,7 @@ Continue long-running work across invocations:
 Agent preserves full context from previous execution.
 
 **Use cases**:
+
 - Multi-stage research spanning topics
 - Iterative refinement without re-explaining context
 - Long debugging sessions with incremental discoveries
@@ -257,7 +262,7 @@ Override model for specific needs:
 ```json
 {
   "subagent_type": "analyst",
-  "model": "haiku"  // Fast, cheap for exploration
+  "model": "haiku" // Fast, cheap for exploration
 }
 ```
 

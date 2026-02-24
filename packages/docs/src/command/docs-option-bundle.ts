@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+
 import type { Command } from "commander";
 
 export type DocsMdxMode = "strict" | "lossy";

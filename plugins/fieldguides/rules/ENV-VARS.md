@@ -4,11 +4,11 @@ Claude Code exposes environment variables for plugins to reference paths and con
 
 ## Quick Reference
 
-| Variable | Available In | Purpose |
-|----------|-------------|---------|
-| `${CLAUDE_PLUGIN_ROOT}` | plugin.json config | Plugin installation directory |
-| `$CLAUDE_PROJECT_DIR` | Hook scripts (runtime) | User's project root |
-| `$file` | PostToolUse hooks | Affected file path |
+| Variable                | Available In           | Purpose                       |
+| ----------------------- | ---------------------- | ----------------------------- |
+| `${CLAUDE_PLUGIN_ROOT}` | plugin.json config     | Plugin installation directory |
+| `$CLAUDE_PROJECT_DIR`   | Hook scripts (runtime) | User's project root           |
+| `$file`                 | PostToolUse hooks      | Affected file path            |
 
 ## The Key Distinction
 
@@ -46,13 +46,17 @@ done
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "Write",
-      "hooks": [{
-        "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate.sh"
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate.sh"
+          }
+        ]
+      }
+    ]
   }
 }
 ```

@@ -49,7 +49,6 @@
 
 - a1ae604: Add `check-changeset` CI gate that fails when PRs touch package source without a changeset.
 - 573c6d3: Improve repo-maintenance bootstrap and boundary enforcement support.
-
   - Add source-first module loading for docs command execution in monorepo development (with dist fallback)
   - Remove `@outfitter/docs-core` runnable CLI surface and route prebuild docs sync through canonical `outfitter repo` command flow
   - Update boundary-invocation check fixtures and migration support for canonical repo command usage
@@ -71,7 +70,6 @@
 ### Minor Changes
 
 - First npm publish — dev tooling presets and CLI
-
   - Biome preset with Outfitter-specific rules
   - TypeScript presets (strict base + Bun variant)
   - Lefthook git hooks preset (pre-commit + pre-push)
@@ -86,7 +84,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -101,7 +98,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

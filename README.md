@@ -49,45 +49,45 @@ Three tiers, one goal: shared infrastructure that works for humans and machines.
 
 APIs everything else depends on.
 
-| Package | What it does |
-|---------|--------------|
+| Package                | What it does                                   |
+| ---------------------- | ---------------------------------------------- |
 | `@outfitter/contracts` | Result/Error patterns and the handler contract |
-| `@outfitter/types` | Type utilities and branded types |
+| `@outfitter/types`     | Type utilities and branded types               |
 
 ### Runtime (Active)
 
 The building blocks for applications.
 
-| Package | What it does |
-|---------|--------------|
-| `@outfitter/cli` | CLI framework with human/JSON output modes, terminal rendering |
-| `@outfitter/mcp` | MCP server framework with typed tools |
-| `@outfitter/config` | Config loading that respects XDG paths |
-| `@outfitter/logging` | Structured logging with automatic redaction |
-| `@outfitter/file-ops` | Path security, atomic writes, file locking |
-| `@outfitter/index` | SQLite full-text search (FTS5) with WAL mode |
-| `@outfitter/daemon` | Daemon lifecycle, health checks, IPC |
-| `@outfitter/state` | Pagination cursors and ephemeral state |
-| `@outfitter/schema` | Schema introspection, surface maps, drift detection |
-| `@outfitter/tui` | Terminal UI rendering -- tables, lists, boxes, trees, spinners, themes, prompts, streaming |
+| Package               | What it does                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `@outfitter/cli`      | CLI framework with human/JSON output modes, terminal rendering                             |
+| `@outfitter/mcp`      | MCP server framework with typed tools                                                      |
+| `@outfitter/config`   | Config loading that respects XDG paths                                                     |
+| `@outfitter/logging`  | Structured logging with automatic redaction                                                |
+| `@outfitter/file-ops` | Path security, atomic writes, file locking                                                 |
+| `@outfitter/index`    | SQLite full-text search (FTS5) with WAL mode                                               |
+| `@outfitter/daemon`   | Daemon lifecycle, health checks, IPC                                                       |
+| `@outfitter/state`    | Pagination cursors and ephemeral state                                                     |
+| `@outfitter/schema`   | Schema introspection, surface maps, drift detection                                        |
+| `@outfitter/tui`      | Terminal UI rendering -- tables, lists, boxes, trees, spinners, themes, prompts, streaming |
 
 ### Tooling (Early)
 
 Developer-facing tools built on the runtime.
 
-| Package | What it does |
-|---------|--------------|
-| `outfitter` | Umbrella CLI for scaffolding projects |
-| `@outfitter/testing` | Test harnesses for CLI and MCP |
+| Package              | What it does                          |
+| -------------------- | ------------------------------------- |
+| `outfitter`          | Umbrella CLI for scaffolding projects |
+| `@outfitter/testing` | Test harnesses for CLI and MCP        |
 
 ## Documentation
 
-| Guide | When to read it |
-|-------|-----------------|
-| [Getting Started](docs/getting-started.md) | Build your first CLI, MCP server, or daemon |
-| [Patterns](docs/reference/patterns.md) | Understand handlers, Result types, error taxonomy |
-| [Architecture](docs/ARCHITECTURE.md) | How packages fit together |
-| [Migration](docs/migration.md) | Adopting Outfitter or upgrading versions |
+| Guide                                      | When to read it                                   |
+| ------------------------------------------ | ------------------------------------------------- |
+| [Getting Started](docs/getting-started.md) | Build your first CLI, MCP server, or daemon       |
+| [Patterns](docs/reference/patterns.md)     | Understand handlers, Result types, error taxonomy |
+| [Architecture](docs/ARCHITECTURE.md)       | How packages fit together                         |
+| [Migration](docs/migration.md)             | Adopting Outfitter or upgrading versions          |
 
 ## Development
 

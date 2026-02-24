@@ -10,8 +10,10 @@
 
 import { existsSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
+
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
+
 import { readMigrationDocsWithMetadata } from "./upgrade.js";
 
 // =============================================================================

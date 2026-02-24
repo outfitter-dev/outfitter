@@ -15,8 +15,4 @@ export type {
 	Registry,
 	RegistryBuildConfig,
 } from "./schema.js";
-export {
-	BlockSchema,
-	FileEntrySchema,
-	RegistrySchema,
-} from "./schema.js";
+export { BlockSchema, FileEntrySchema, RegistrySchema } from "./schema.js";

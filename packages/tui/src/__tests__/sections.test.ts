@@ -8,6 +8,7 @@
  * Total: 13 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { renderHeading } from "../render/heading.js";
 import { renderSeparator } from "../render/separator.js";
 

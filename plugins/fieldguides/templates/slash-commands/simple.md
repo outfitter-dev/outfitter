@@ -8,6 +8,7 @@ description: {YOUR_DESCRIPTION} (e.g., "Review code for best practices and poten
 
 Example:
 Review the following code for:
+
 - Code quality and readability
 - Potential bugs or edge cases
 - Performance considerations

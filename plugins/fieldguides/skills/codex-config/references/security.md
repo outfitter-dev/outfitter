@@ -4,11 +4,11 @@ Sandbox modes, approval policies, and security best practices.
 
 ## Sandbox Modes
 
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `read-only` | No write access | Safe exploration, code review |
-| `workspace-write` | Write to workspace only | Normal development |
-| `danger-full-access` | Full system access | Trusted operations only |
+| Mode                 | Description             | Use Case                      |
+| -------------------- | ----------------------- | ----------------------------- |
+| `read-only`          | No write access         | Safe exploration, code review |
+| `workspace-write`    | Write to workspace only | Normal development            |
+| `danger-full-access` | Full system access      | Trusted operations only       |
 
 ### Usage
 
@@ -26,12 +26,12 @@ sandbox_mode = "workspace-write"  # Default for all sessions
 
 ## Approval Policies
 
-| Policy | Behavior |
-|--------|----------|
-| `untrusted` | Only trusted commands (ls, cat, sed) run without approval |
-| `on-failure` | All commands run; approval only if command fails |
-| `on-request` | Model decides when to ask |
-| `never` | Never ask for approval |
+| Policy       | Behavior                                                  |
+| ------------ | --------------------------------------------------------- |
+| `untrusted`  | Only trusted commands (ls, cat, sed) run without approval |
+| `on-failure` | All commands run; approval only if command fails          |
+| `on-request` | Model decides when to ask                                 |
+| `never`      | Never ask for approval                                    |
 
 ### Usage
 
@@ -58,6 +58,7 @@ Set trust levels per project:
 ```
 
 **Trust levels:**
+
 - `trusted` - Full permissions within sandbox
 - `untrusted` - Stricter command approval
 
@@ -98,11 +99,11 @@ include_only = ["PATH", "HOME", "USER", "EDITOR", "TERM"]
 
 ## Convenience Flags
 
-| Flag | Equivalent |
-|------|------------|
-| `--full-auto` | `-a on-request --sandbox workspace-write` |
-| `-s read-only` | `--sandbox read-only` |
-| `-a never` | `--approval-policy never` |
+| Flag           | Equivalent                                |
+| -------------- | ----------------------------------------- |
+| `--full-auto`  | `-a on-request --sandbox workspace-write` |
+| `-s read-only` | `--sandbox read-only`                     |
+| `-a never`     | `--approval-policy never`                 |
 
 ## Best Practices
 

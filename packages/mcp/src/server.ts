@@ -16,6 +16,7 @@ import {
   type Sink,
 } from "@outfitter/logging";
 import type { z } from "zod";
+
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
 import { zodToJsonSchema } from "./schema.js";
 import {

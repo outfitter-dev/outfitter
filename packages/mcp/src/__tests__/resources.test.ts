@@ -4,7 +4,9 @@
  * Verifies that resources can have read handlers that return content.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import { createMcpServer, defineResource } from "../index.js";
 
 describe("Resource Read Handlers", () => {

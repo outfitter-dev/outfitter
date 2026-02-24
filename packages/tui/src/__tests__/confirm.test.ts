@@ -5,6 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+
 // Must import after clack mock is set up
 import { confirmDestructive } from "../confirm.js";
 import {

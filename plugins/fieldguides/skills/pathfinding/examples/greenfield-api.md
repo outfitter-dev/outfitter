@@ -31,7 +31,7 @@ Unknowns:
 
 **Q1**: Before we dive in — what kind of session are you looking for?
 
-*Why it matters — sets the right depth and pace*
+_Why it matters — sets the right depth and pace_
 
 ```text
 [EnterPlanMode]
@@ -63,7 +63,7 @@ Decisions:
 
 **Q2**: What's this API for?
 
-*Why it matters — determines data model, auth strategy, and scaling approach*
+_Why it matters — determines data model, auth strategy, and scaling approach_
 
 ```text
 [EnterPlanMode]
@@ -109,7 +109,7 @@ Decisions:
 
 **Q3**: What's the core loop users will do most often?
 
-*Why it matters — shapes the data model and API surface*
+_Why it matters — shapes the data model and API surface_
 
 ```text
 [EnterPlanMode]
@@ -166,7 +166,7 @@ Concerns:
 
 **Q4**: How should users authenticate?
 
-*Why it matters — affects security model, user experience, and implementation complexity*
+_Why it matters — affects security model, user experience, and implementation complexity_
 
 ```text
 [EnterPlanMode]

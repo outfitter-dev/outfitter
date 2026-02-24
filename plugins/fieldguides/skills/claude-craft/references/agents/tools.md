@@ -16,17 +16,20 @@ name: code-reviewer
 description: ...
 model: inherit
 ---
+
 # No tools field — inherits full access
 ```
 
 ## When to Restrict
 
 Only restrict when:
+
 - Agent's purpose is explicitly read-only
 - Specific safety concern exists
 - Want to prevent accidental modifications
 
 **Don't restrict when:**
+
 - Agent needs flexibility to complete task
 - Being "cautious" without specific reason
 

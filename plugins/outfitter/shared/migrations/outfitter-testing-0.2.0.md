@@ -53,6 +53,7 @@ Like `@outfitter/logging`, the testing package no longer uses top-level `node:*`
 ### Import types from the root
 
 **Before** (importing from submodules):
+
 ```typescript
 import { createCliHarness } from "@outfitter/testing/cli-harness";
 import { createMcpHarness } from "@outfitter/testing/mcp-harness";
@@ -60,6 +61,7 @@ import type { CliHarness } from "@outfitter/testing/cli-harness";
 ```
 
 **After** (import from root):
+
 ```typescript
 import {
   createCliHarness,

@@ -9,7 +9,7 @@ argument-hint: "<description of the issue>"
 
 # Outfitter Issue
 
-Submit issues to `outfitter-dev/outfitter` when you discover problems with @outfitter/* packages.
+Submit issues to `outfitter-dev/outfitter` when you discover problems with @outfitter/\* packages.
 
 ## Steps
 
@@ -53,13 +53,13 @@ bun ./scripts/create-issue.ts --type bug --title "..." --package "..."
 
 ### Issue Types
 
-| Type | When to Use | Required Fields |
-|------|-------------|-----------------|
-| `bug` | Something broke | package, description, actual |
-| `enhancement` | Feature request | package, description, useCase |
-| `docs` | Documentation gap | package, description, gap |
-| `dx` | Poor developer experience | package, description, current |
-| `unclear-pattern` | Confusing guidance | package, description, context |
+| Type              | When to Use               | Required Fields               |
+| ----------------- | ------------------------- | ----------------------------- |
+| `bug`             | Something broke           | package, description, actual  |
+| `enhancement`     | Feature request           | package, description, useCase |
+| `docs`            | Documentation gap         | package, description, gap     |
+| `dx`              | Poor developer experience | package, description, current |
+| `unclear-pattern` | Confusing guidance        | package, description, context |
 
 For migration-specific feedback, see [references/migration-feedback.md](references/migration-feedback.md).
 
@@ -72,6 +72,7 @@ bun ./scripts/create-issue.ts --type bug
 ## Labels
 
 All issues created via this skill get:
+
 - Category label (`bug`, `feature`, `documentation`, etc.)
 - `feedback` — marks it as community feedback
 - `source/agent` — indicates it came from an agent session

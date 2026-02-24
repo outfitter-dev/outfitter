@@ -7,6 +7,7 @@ Deep patterns for using Tasks as your persistent state layer.
 ## Why Tasks Matter for Context Management
 
 Tasks survive context compaction. When context resets, you lose:
+
 - Your reasoning chains
 - Files you read
 - Intermediate conclusions
@@ -187,6 +188,7 @@ Status: pending
 ## When to TaskCreate
 
 Add tasks when you discover:
+
 - **New files** to process
 - **New concerns** to address
 - **Follow-up investigations** from findings
@@ -203,6 +205,7 @@ completed    → Done (mark immediately)
 ```
 
 If blocked:
+
 1. `TaskCreate` for the blocker
 2. Use `addBlockedBy` to link
 3. Either keep blocked task `in_progress` or revert to `pending`
@@ -211,6 +214,7 @@ If blocked:
 ## Visibility Goal
 
 **Anyone reading your task list should understand:**
+
 - What you're currently doing (in_progress task)
 - What remains to be done (pending tasks)
 - What you've completed (completed tasks with descriptions)

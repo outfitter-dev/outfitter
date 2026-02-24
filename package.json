@@ -2,12 +2,12 @@
   "name": "outfitter",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "workspaces": [
     "packages/*",
     "apps/*",
     "plugins/*"
   ],
+  "type": "module",
   "scripts": {
     "prebuild": "./scripts/prebuild.sh",
     "verify:ci": "bun run verify:ci:checks && bun run test",
@@ -55,12 +55,21 @@
     "publish:rc": "bun run scripts/publish-rc.ts",
     "prepare": "lefthook install"
   },
+  "dependencies": {
+    "@clack/prompts": "^1.0.1",
+    "@types/node": "^25.3.0",
+    "smol-toml": "^1.6.0",
+    "yaml": "^2.8.2",
+    "zod": "^4.3.5"
+  },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@changesets/cli": "^2.29.8",
     "@outfitter/presets": "workspace:*",
     "bunup": "^0.16.29",
     "lefthook": "^2.1.1",
+    "oxfmt": "0.35.0",
+    "oxlint": "1.50.0",
     "turbo": "^2.8.10",
     "typedoc": "^0.28.17",
     "typedoc-plugin-coverage": "^4.0.2",
@@ -68,11 +77,11 @@
     "typescript": "^5.9.3",
     "ultracite": "7.2.3"
   },
-  "packageManager": "bun@1.3.9",
   "engines": {
-    "node": ">=24.0.0",
-    "bun": ">=1.3.9"
+    "bun": ">=1.3.9",
+    "node": ">=24.0.0"
   },
+  "packageManager": "bun@1.3.9",
   "catalog": {
     "@biomejs/biome": "2.4.4",
     "@clack/prompts": "^1.0.1",
@@ -84,6 +93,8 @@
     "bunup": "^0.16.29",
     "commander": "^14.0.2",
     "lefthook": "^2.1.1",
+    "oxfmt": "0.35.0",
+    "oxlint": "1.50.0",
     "smol-toml": "^1.6.0",
     "typescript": "^5.9.3",
     "ultracite": "7.2.3",
@@ -91,13 +102,8 @@
     "zod": "^4.3.5"
   },
   "trustedDependencies": [
-    "@biomejs/biome"
-  ],
-  "dependencies": {
-    "@clack/prompts": "^1.0.1",
-    "@types/node": "^25.3.0",
-    "smol-toml": "^1.6.0",
-    "yaml": "^2.8.2",
-    "zod": "^4.3.5"
-  }
+    "@biomejs/biome",
+    "oxfmt",
+    "oxlint"
+  ]
 }

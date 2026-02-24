@@ -148,12 +148,15 @@ packages/docs/
 ### Standalone (`@outfitter/docs`)
 
 1. `docs sync`
+
 - Materialize docs outputs (initially package mirror)
 
 2. `docs check`
+
 - Verify generated docs are up to date (CI-friendly non-zero on drift)
 
 3. `docs export --target llms|llms-full|agent|packages`
+
 - Explicit export actions for automation pipelines
 
 ### Embedded (host CLI)
@@ -180,13 +183,13 @@ interface DocsConfig {
   rootDir?: string;
   sources: {
     packages: {
-      include: string[];         // e.g. ["packages/*"]
-      readme: string;            // default "README.md"
-      includeMd: boolean;        // true
-      includeMdx: boolean;       // true (parse mode dependent)
-      includeDocsDir: boolean;   // true
-      exclude: string[];         // ["CHANGELOG.md"] etc.
-      publishableOnly: boolean;  // true
+      include: string[]; // e.g. ["packages/*"]
+      readme: string; // default "README.md"
+      includeMd: boolean; // true
+      includeMdx: boolean; // true (parse mode dependent)
+      includeDocsDir: boolean; // true
+      exclude: string[]; // ["CHANGELOG.md"] etc.
+      publishableOnly: boolean; // true
     };
     docs?: {
       include: string[];
@@ -216,10 +219,12 @@ We will treat MDX as first-class input but support output targets that do not un
 ### Modes
 
 1. `strict`
+
 - Unsupported MDX constructs fail generation.
 - Best for controlled pipelines/CI where fidelity is required.
 
 2. `lossy`
+
 - Best-effort transform to markdown/plain text.
 - Emit warnings for dropped/altered constructs.
 - Best for LLM and plain-text channels.
@@ -383,18 +388,23 @@ This yields near-identical behavior across Outfitter-based projects while preser
 ## Risks and Mitigations
 
 1. Risk: scope creep into “full docs platform” too early.
+
 - Mitigation: phase-gate features; ship OS-107 slice first.
 
 2. Risk: MDX conversion complexity.
+
 - Mitigation: strict/lossy modes and explicit unsupported-policy.
 
 3. Risk: path rewrite regressions.
+
 - Mitigation: fixture-driven tests and golden snapshots.
 
 4. Risk: generated artifacts causing noisy diffs.
+
 - Mitigation: deterministic sorting/formatting and check mode.
 
 5. Risk: confusion between `tooling` and docs responsibilities.
+
 - Mitigation: docs domain ownership in `@outfitter/docs*`; `tooling` only integrates as consumer.
 
 ## Open Questions to Resolve Before Phase 1 Completion

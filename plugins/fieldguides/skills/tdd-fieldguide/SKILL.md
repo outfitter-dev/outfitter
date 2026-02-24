@@ -26,12 +26,12 @@ NOT for: exploratory coding, UI prototypes, static config, trivial glue code
 
 Load the `maintain-tasks` skill for stage tracking. Advance through RED-GREEN-REFACTOR cycle.
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Red | Session start / cycle restart | "Writing failing test" |
-| Green | Test written and failing | "Implementing code" |
-| Refactor | Tests passing | "Refactoring code" |
-| Verify | Refactor complete | "Verifying implementation" |
+| Stage    | Trigger                       | activeForm                 |
+| -------- | ----------------------------- | -------------------------- |
+| Red      | Session start / cycle restart | "Writing failing test"     |
+| Green    | Test written and failing      | "Implementing code"        |
+| Refactor | Tests passing                 | "Refactoring code"         |
+| Verify   | Refactor complete             | "Verifying implementation" |
 
 Task format:
 
@@ -43,12 +43,14 @@ Task format:
 ```
 
 Workflow:
+
 - Start: Create "Red" stage `in_progress`
 - Transition: Mark current `completed`, add next `in_progress`
 - After each stage: Run tests before advancing
 - Multiple cycles: Return to "Red" for next feature
 
 Edge cases:
+
 - Good existing tests: Start at "Refactor" after confirming pass
 - Bug fix: Start at "Red" with failing test reproducing bug
 - No regression: Tests must continue passing through all stages
@@ -67,6 +69,7 @@ Fails  Passes   Quality
 Each cycle: 5-15 min. Longer = step too large, decompose.
 
 Philosophy:
+
 - Red-Green-Refactor as primary workflow
 - Test quality over quantity - behavior, not implementation
 - Incremental progress - small focused cycles
@@ -79,6 +82,7 @@ Philosophy:
 Write tests defining desired behavior before implementation exists.
 
 Guidelines:
+
 - 3-5 related tests fully specifying one feature
 - Type system makes invalid states unrepresentable
 - Each test = one specific behavior
@@ -88,21 +92,33 @@ Guidelines:
 TypeScript:
 
 ```typescript
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from "bun:test";
 
-describe('UserAuthentication', () => {
-  test('authenticates with valid credentials', async () => {
-    const result = await authenticate({ email: 'user@example.com', password: 'SecurePass123!' })
-    expect(result).toMatchObject({ type: 'success', user: expect.objectContaining({ email: 'user@example.com' }) })
-  })
+describe("UserAuthentication", () => {
+  test("authenticates with valid credentials", async () => {
+    const result = await authenticate({
+      email: "user@example.com",
+      password: "SecurePass123!",
+    });
+    expect(result).toMatchObject({
+      type: "success",
+      user: expect.objectContaining({ email: "user@example.com" }),
+    });
+  });
 
-  test('rejects invalid credentials', async () => {
-    const result = await authenticate({ email: 'wrong@example.com', password: 'wrong' })
-    expect(result).toMatchObject({ type: 'error', code: 'INVALID_CREDENTIALS' })
-  })
+  test("rejects invalid credentials", async () => {
+    const result = await authenticate({
+      email: "wrong@example.com",
+      password: "wrong",
+    });
+    expect(result).toMatchObject({
+      type: "error",
+      code: "INVALID_CREDENTIALS",
+    });
+  });
 
-  test.todo('implements rate limiting after failed attempts')
-})
+  test.todo("implements rate limiting after failed attempts");
+});
 ```
 
 Rust:
@@ -137,6 +153,7 @@ Transition: Mark "Red" `completed`, create "Green" `in_progress`
 Implement minimum code to make tests pass.
 
 Guidelines:
+
 - Focus on passing tests, not perfect code
 - Explicit types where aids clarity
 - Straightforward solutions first
@@ -146,15 +163,20 @@ Guidelines:
 TypeScript:
 
 ```typescript
-type AuthResult = { type: 'success'; user: User } | { type: 'error'; code: string }
+type AuthResult =
+  | { type: "success"; user: User }
+  | { type: "error"; code: string };
 
-async function authenticate(creds: { email: string; password: string }): Promise<AuthResult> {
-  if (!creds.password) return { type: 'error', code: 'MISSING_PASSWORD' }
-  const user = await findUserByEmail(creds.email)
-  if (!user) return { type: 'error', code: 'INVALID_CREDENTIALS' }
-  const match = await comparePassword(creds.password, user.passwordHash)
-  if (!match) return { type: 'error', code: 'INVALID_CREDENTIALS' }
-  return { type: 'success', user }
+async function authenticate(creds: {
+  email: string;
+  password: string;
+}): Promise<AuthResult> {
+  if (!creds.password) return { type: "error", code: "MISSING_PASSWORD" };
+  const user = await findUserByEmail(creds.email);
+  if (!user) return { type: "error", code: "INVALID_CREDENTIALS" };
+  const match = await comparePassword(creds.password, user.passwordHash);
+  if (!match) return { type: "error", code: "INVALID_CREDENTIALS" };
+  return { type: "success", user };
 }
 ```
 
@@ -184,6 +206,7 @@ Transition: Mark "Green" `completed`, create "Refactor" `in_progress`
 Enhance code quality without changing behavior. Tests must continue passing.
 
 Guidelines:
+
 - Extract common patterns into well-named functions
 - Apply SOLID principles where appropriate
 - Improve types: discriminated unions, branded types
@@ -194,14 +217,18 @@ TypeScript:
 
 ```typescript
 // Extract validation
-function validateCredentials(creds: { email: string; password: string }): AuthResult | null {
-  if (!creds.password) return { type: 'error', code: 'MISSING_PASSWORD' }
-  if (!isValidEmail(creds.email)) return { type: 'error', code: 'INVALID_EMAIL' }
-  return null
+function validateCredentials(creds: {
+  email: string;
+  password: string;
+}): AuthResult | null {
+  if (!creds.password) return { type: "error", code: "MISSING_PASSWORD" };
+  if (!isValidEmail(creds.email))
+    return { type: "error", code: "INVALID_EMAIL" };
+  return null;
 }
 
 // Branded types for safety
-type Email = string & { readonly __brand: 'Email' }
+type Email = string & { readonly __brand: "Email" };
 ```
 
 Rust:
@@ -254,19 +281,21 @@ tests/fixtures/                 # Test data
 
 <quality>
 
-| Metric | Target |
-|--------|--------|
-| Line coverage | >=80% (90% critical paths) |
-| Mutation score | >=75% |
-| Unit test time | <5s |
+| Metric         | Target                     |
+| -------------- | -------------------------- |
+| Line coverage  | >=80% (90% critical paths) |
+| Mutation score | >=75%                      |
+| Unit test time | <5s                        |
 
 Test characteristics:
+
 - Single clear assertion per test
 - No execution order dependencies
 - Descriptive names forming sentences
 - Behavior focus, not implementation
 
 Smells to avoid:
+
 - Setup longer than test
 - Multiple unrelated assertions
 - Coupling to implementation details
@@ -291,14 +320,17 @@ Example:
 
 ```typescript
 // 1. Failing test
-test('handles division by zero gracefully', () => {
-  expect(divide(10, 0)).toMatchObject({ type: 'error', code: 'DIVISION_BY_ZERO' })
-})
+test("handles division by zero gracefully", () => {
+  expect(divide(10, 0)).toMatchObject({
+    type: "error",
+    code: "DIVISION_BY_ZERO",
+  });
+});
 
 // 3. Fix
 function divide(a: number, b: number): Result {
-  if (b === 0) return { type: 'error', code: 'DIVISION_BY_ZERO' }
-  return { type: 'success', value: a / b }
+  if (b === 0) return { type: "error", code: "DIVISION_BY_ZERO" };
+  return { type: "success", value: a / b };
 }
 ```
 
@@ -307,6 +339,7 @@ function divide(a: number, b: number): Result {
 <rules>
 
 ALWAYS:
+
 - Track progress with Tasks (load `maintain-tasks` skill)
 - Write tests before implementation (RED first)
 - Run tests after each stage
@@ -317,6 +350,7 @@ ALWAYS:
 - Each test = one reason to fail
 
 NEVER:
+
 - Skip to implementation without tests
 - Change test behavior during refactoring
 - Test implementation details or private methods

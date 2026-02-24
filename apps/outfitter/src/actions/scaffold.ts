@@ -8,6 +8,7 @@ import { actionCliPresets } from "@outfitter/cli/actions";
 import { dryRunPreset, forcePreset } from "@outfitter/cli/flags";
 import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { printScaffoldResults, runScaffold } from "../commands/scaffold.js";
 import {
   type CliOutputMode,

@@ -11,6 +11,7 @@ User proposes building a custom authentication system from scratch instead of us
 **Proposal**: "I'm going to build our own authentication system. We'll need password hashing with bcrypt, JWT token generation, refresh token rotation, email verification, password reset flows, and session management."
 
 **Complexity Smell Detected**: Build vs Buy
+
 - Auth is security-critical with many edge cases
 - Battle-tested solutions exist (Auth0, Clerk, BetterAuth, Lucia)
 - Custom auth requires ongoing security maintenance
@@ -21,6 +22,7 @@ User proposes building a custom authentication system from scratch instead of us
 ### ALTERNATIVE: Propose Simpler Solutions
 
 **Response**:
+
 > ◈ **Hazard**: Building custom authentication is high-risk. Auth has numerous security considerations: timing attacks, token expiry edge cases, secure password reset flows, account enumeration prevention, brute force protection, and more. Professional auth services employ security teams to handle these. Custom implementations frequently have vulnerabilities.
 >
 > I strongly recommend using a proven auth solution. Here are options by use case:
@@ -51,6 +53,7 @@ export default async function Dashboard() {
 ```
 
 **Benefits**:
+
 - Setup: ~15 minutes
 - Built-in UI components
 - Social login, MFA, user management
@@ -60,30 +63,31 @@ export default async function Dashboard() {
 **Option 2: BetterAuth (Self-hosted, full control)**
 
 ```typescript
-import { betterAuth } from 'better-auth'
+import { betterAuth } from "better-auth";
 
 export const auth = betterAuth({
   database: db,
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true
+    requireEmailVerification: true,
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
-    }
-  }
-})
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    },
+  },
+});
 
 // Middleware
 export async function middleware(request: Request) {
-  const session = await auth.getSession(request)
-  if (!session) return redirect('/login')
+  const session = await auth.getSession(request);
+  if (!session) return redirect("/login");
 }
 ```
 
 **Benefits**:
+
 - Self-hosted (full data control)
 - Type-safe, modern DX
 - Handles security edge cases
@@ -93,24 +97,25 @@ export async function middleware(request: Request) {
 **Option 3: Lucia (Minimal, framework-agnostic)**
 
 ```typescript
-import { Lucia } from 'lucia'
-import { BetterSqlite3Adapter } from '@lucia-auth/adapter-sqlite'
+import { Lucia } from "lucia";
+import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 
-const adapter = new BetterSqlite3Adapter(db)
+const adapter = new BetterSqlite3Adapter(db);
 export const lucia = new Lucia(adapter, {
   sessionCookie: {
     attributes: {
-      secure: process.env.NODE_ENV === 'production'
-    }
-  }
-})
+      secure: process.env.NODE_ENV === "production",
+    },
+  },
+});
 
 // Usage
-const session = await lucia.createSession(userId, {})
-const sessionCookie = lucia.createSessionCookie(session.id)
+const session = await lucia.createSession(userId, {});
+const sessionCookie = lucia.createSessionCookie(session.id);
 ```
 
 **Benefits**:
+
 - Lightweight core
 - Framework flexibility
 - Session management only (pair with password hashing library)
@@ -118,16 +123,17 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 
 **Comparison**:
 
-| Approach | Setup Time | Security Maintenance | Features | Cost |
-|----------|-----------|---------------------|----------|------|
-| Custom Auth | 40+ hours | Ongoing, high-risk | As implemented | Developer time |
-| Clerk | 15 min | None (managed) | Comprehensive | Free → $25/mo |
-| BetterAuth | 2 hours | Low (library maintained) | Comprehensive | $0 (self-hosted) |
-| Lucia | 4 hours | Medium (some assembly) | Core features | $0 |
+| Approach    | Setup Time | Security Maintenance     | Features       | Cost             |
+| ----------- | ---------- | ------------------------ | -------------- | ---------------- |
+| Custom Auth | 40+ hours  | Ongoing, high-risk       | As implemented | Developer time   |
+| Clerk       | 15 min     | None (managed)           | Comprehensive  | Free → $25/mo    |
+| BetterAuth  | 2 hours    | Low (library maintained) | Comprehensive  | $0 (self-hosted) |
+| Lucia       | 4 hours    | Medium (some assembly)   | Core features  | $0               |
 
 ### QUESTION: Investigate Constraints
 
 **Critical questions**:
+
 1. "What specific requirement makes existing auth solutions insufficient?"
 2. "Do you have a security team to review and maintain the auth system?"
 3. "Are you prepared for the ongoing maintenance burden when security vulnerabilities are discovered?"
@@ -138,10 +144,13 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 ### Likely Answers & Responses
 
 **If "We need full control over user data"**:
+
 > "BetterAuth and Lucia are self-hosted - you maintain complete control over user data in your own database. Clerk also offers self-hosted enterprise options. Control doesn't require building from scratch."
 
 **If "We have unique requirements for { specific flow }"**:
+
 > "What's the specific requirement? Most auth providers support custom flows:
+>
 > - **Custom fields**: Clerk metadata, BetterAuth custom schema
 > - **Custom verification**: Email/SMS hooks available
 > - **Multi-tenancy**: Built into most providers
@@ -150,18 +159,21 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 > Can you describe the unique flow? Let's verify it truly requires custom auth."
 
 **If "Auth services are too expensive"**:
+
 > "Let's compare costs:
 >
-> | Solution | Monthly Cost | Developer Time Saved |
-> |----------|--------------|---------------------|
-> | Clerk Free | $0 (up to 10k users) | 40+ hours initial + ongoing |
-> | BetterAuth | $0 (self-hosted) | 38 hours initial + reduced ongoing |
-> | Custom | $0 infrastructure | 0 saved, high ongoing risk |
+> | Solution   | Monthly Cost         | Developer Time Saved               |
+> | ---------- | -------------------- | ---------------------------------- |
+> | Clerk Free | $0 (up to 10k users) | 40+ hours initial + ongoing        |
+> | BetterAuth | $0 (self-hosted)     | 38 hours initial + reduced ongoing |
+> | Custom     | $0 infrastructure    | 0 saved, high ongoing risk         |
 >
 > Even at $25/month, Clerk pays for itself in saved developer time within the first week. Security vulnerabilities in custom auth can cost far more in remediation and reputation damage."
 
 **If "I want to learn how auth works"**:
+
 > "Learning auth internals is valuable, but production systems aren't ideal learning environments. Consider:
+>
 > 1. Build a learning project with custom auth to understand the concepts
 > 2. Read auth library source code (Lucia is excellent for this)
 > 3. Use a proven solution for production
@@ -169,7 +181,9 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 > Auth mistakes in production can leak user data. The learning value isn't worth the security risk."
 
 **If "We're already partially built"**:
+
 > "How far along? If you're:
+>
 > - **Week 1-2**: Still early enough to migrate to proven solution
 > - **Using bcrypt + JWT**: Most auth libraries support migration from existing password hashes
 > - **In production**: Assess security posture, plan migration timeline
@@ -186,11 +200,13 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 **Decision**: Build custom authentication system
 
 **Context**:
+
 - Requirement: [SPECIFIC UNIQUE REQUIREMENT THAT CANNOT BE MET BY EXISTING SOLUTIONS]
 - Constraints: [e.g., Regulatory requirement for specific implementation, air-gapped environment]
 - Team: Security expert [NAME] will review and maintain
 
 **Security Measures**:
+
 - [ ] Security audit by external firm before production
 - [ ] Penetration testing quarterly
 - [ ] Automated security scanning in CI/CD
@@ -205,11 +221,13 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 - [ ] Brute force protection
 
 **Alternatives Considered**:
+
 - Clerk: Rejected because [specific reason]
 - BetterAuth: Rejected because [specific reason]
 - Lucia: Rejected because [specific reason]
 
 **Consequences**:
+
 - **Pros**: [specific benefits that justify the risk]
 - **Cons**: High maintenance burden, security liability, slower feature velocity
 - **Mitigation**: Dedicated security resources, regular audits
@@ -230,12 +248,12 @@ const sessionCookie = lucia.createSessionCookie(session.id)
 // Migration from custom auth: BetterAuth supports importing existing bcrypt password hashes.
 // Review security: https://better-auth.com/docs/security
 
-import { betterAuth } from 'better-auth'
+import { betterAuth } from "better-auth";
 
 export const auth = betterAuth({
   database: db,
   // ... configuration
-})
+});
 ```
 
 ## Outcome
@@ -268,6 +286,7 @@ export const auth = betterAuth({
 ## When Custom Auth Might Be Justified
 
 Rare scenarios where custom auth is appropriate:
+
 - Air-gapped military/government systems
 - Regulatory requirement for specific implementation (must verify with legal)
 - Integration with legacy enterprise auth system with no standard protocol

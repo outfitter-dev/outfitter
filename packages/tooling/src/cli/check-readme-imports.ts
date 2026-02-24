@@ -9,6 +9,7 @@
  */
 
 import { resolve } from "node:path";
+
 import type { ExportMap } from "./check-exports.js";
 
 export type { ExportMap };

@@ -28,6 +28,7 @@ Structured tools for common CRUD operations. Use these as the default:
 Single tool with an `action` parameter. Supports: `search`, `get`, `update`, `comment`, `create`, `graphql`, `help`.
 
 Use this when:
+
 - Typed tools don't cover the operation
 - You need custom GraphQL queries or mutations
 - You need to discover team keys or workflow states (`action: "help"`)
@@ -59,6 +60,7 @@ Typed tools (`save_status_update`) can post project status updates, but GraphQL 
 ```
 
 **Health enum values** (must be unquoted — they're GraphQL enums, not strings):
+
 - `onTrack`
 - `atRisk`
 - `offTrack`
@@ -179,6 +181,7 @@ Need to do X with Linear
 GraphQL enums must not be quoted. `health: onTrack` not `health: "onTrack"`. Quoting produces a "cannot represent non-enum value" error.
 
 Other enum fields that follow this pattern:
+
 - Issue relation type: `blocks`, `duplicate`, `related`
 - Priority: `urgent`, `high`, `medium`, `low`, `none`
 
@@ -189,6 +192,7 @@ The `comment` action on `mcp__linear__linear` passes `\n` as literal backslash-n
 ### Markdown in body fields
 
 The `body` field accepts markdown. When embedding in GraphQL strings:
+
 - Escape double quotes: `\"`
 - Use `\\n` for newlines (escaped once for JSON, once for the GraphQL string)
 
@@ -199,6 +203,7 @@ Linear's storage wraps URLs in angle brackets internally: `[text](<url>)`. This 
 ### Team keys and workflow states
 
 Use `action: "help"` on `mcp__linear__linear` to discover:
+
 - Available teams and their keys (e.g., `OS` for Stack)
 - Workflow states per team (e.g., `Backlog`, `Todo`, `In Progress`, `Done`)
 

@@ -64,7 +64,7 @@ const shared = composePresets(
   forcePreset(),
   queryPreset(),
   outputPreset(),
-  paginationPreset(),
+  paginationPreset()
 );
 
 defineAction({
@@ -91,6 +91,7 @@ Core presets to know:
 `output()` defaults to human mode. Structured output is explicit.
 
 Priority:
+
 1. explicit `mode` option
 2. `OUTFITTER_JSONL=1`
 3. `OUTFITTER_JSON=1`
@@ -108,10 +109,12 @@ Use `exitWithError()` to keep error output and exit codes aligned to taxonomy.
 ## `@outfitter/tui` Usage Guidance
 
 Prefer raw `output()` when:
+
 - response is primarily machine-consumed
 - automation and stable JSON contracts are the priority
 
 Use `@outfitter/tui` when:
+
 - humans need dense visual summaries (tables/trees)
 - long-running operations benefit from spinners/stream updates
 - interactive prompts are needed

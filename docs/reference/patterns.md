@@ -5,6 +5,7 @@ Common conventions and idioms used across Outfitter packages. These patterns ens
 ## Handler Contract
 
 The handler contract is the core abstraction. Handlers are pure functions that:
+
 - Accept typed input and context
 - Return `Result<TOutput, TError>`
 - Know nothing about transport (CLI flags, HTTP headers, etc.)
@@ -16,16 +17,18 @@ type Handler<
   TInput,
   TOutput,
   TError extends OutfitterError = OutfitterError,
-> = (
-  input: TInput,
-  ctx: HandlerContext
-) => Promise<Result<TOutput, TError>>;
+> = (input: TInput, ctx: HandlerContext) => Promise<Result<TOutput, TError>>;
 ```
 
 ### Example
 
 ```typescript
-import { Result, NotFoundError, type Handler, type HandlerContext } from "@outfitter/contracts";
+import {
+  Result,
+  NotFoundError,
+  type Handler,
+  type HandlerContext,
+} from "@outfitter/contracts";
 
 interface GetUserInput {
   id: string;
@@ -37,7 +40,10 @@ interface User {
   email: string;
 }
 
-export const getUser: Handler<GetUserInput, User, NotFoundError> = async (input, ctx) => {
+export const getUser: Handler<GetUserInput, User, NotFoundError> = async (
+  input,
+  ctx
+) => {
   ctx.logger.debug("Fetching user", { userId: input.id });
 
   const user = await db.users.findById(input.id);
@@ -61,13 +67,13 @@ export const getUser: Handler<GetUserInput, User, NotFoundError> = async (input,
 
 Structured logs are for diagnostics. User-facing output belongs to the transport adapter.
 
-| Context | Use | Why |
-| --- | --- | --- |
-| Handler internals | `ctx.logger` | Structured traces with redaction |
-| CLI success output | `@outfitter/cli` `output()` | Respects `--json/--jsonl` modes |
-| CLI errors | `exitWithError()` | Typed formatting + exit codes |
-| MCP tool output | `Result.ok(data)` | Transport-agnostic responses |
-| MCP diagnostics | `ctx.logger` | Structured traces for debugging |
+| Context            | Use                         | Why                              |
+| ------------------ | --------------------------- | -------------------------------- |
+| Handler internals  | `ctx.logger`                | Structured traces with redaction |
+| CLI success output | `@outfitter/cli` `output()` | Respects `--json/--jsonl` modes  |
+| CLI errors         | `exitWithError()`           | Typed formatting + exit codes    |
+| MCP tool output    | `Result.ok(data)`           | Transport-agnostic responses     |
+| MCP diagnostics    | `ctx.logger`                | Structured traces for debugging  |
 
 At the boundary (CLI/MCP/HTTP), create a logger once and inject it via `createContext({ logger })`.
 
@@ -177,7 +183,7 @@ import { getExitCode, getStatusCode } from "@outfitter/contracts";
 
 const error = NotFoundError.create("user", "123");
 
-getExitCode(error.category);   // 2
+getExitCode(error.category); // 2
 getStatusCode(error.category); // 404
 ```
 
@@ -186,7 +192,10 @@ getStatusCode(error.category); // 404
 ```typescript
 switch (error._tag) {
   case "ValidationError":
-    return { status: 400, body: { error: error.message, context: error.context } };
+    return {
+      status: 400,
+      body: { error: error.message, context: error.context },
+    };
   case "NotFoundError":
     return { status: 404, body: { error: `${error.resourceType} not found` } };
   case "AuthError":
@@ -264,10 +273,11 @@ const result = validateInput(UserInputSchema, rawInput);
 ### In Handlers
 
 ```typescript
-export const createUser: Handler<unknown, User, ValidationError | ConflictError> = async (
-  rawInput,
-  ctx
-) => {
+export const createUser: Handler<
+  unknown,
+  User,
+  ValidationError | ConflictError
+> = async (rawInput, ctx) => {
   // Validate first
   const inputResult = validateUserInput(rawInput);
   if (inputResult.isErr()) {
@@ -291,26 +301,26 @@ export const createUser: Handler<unknown, User, ValidationError | ConflictError>
 import { createContext, type HandlerContext } from "@outfitter/contracts";
 
 const ctx = createContext({
-  logger: myLogger,           // Optional, defaults to no-op
-  config: resolvedConfig,     // Optional
-  signal: controller.signal,  // Optional, for cancellation
-  workspaceRoot: "/project",  // Optional
-  cwd: process.cwd(),         // Optional, defaults to process.cwd()
-  env: process.env,           // Optional
+  logger: myLogger, // Optional, defaults to no-op
+  config: resolvedConfig, // Optional
+  signal: controller.signal, // Optional, for cancellation
+  workspaceRoot: "/project", // Optional
+  cwd: process.cwd(), // Optional, defaults to process.cwd()
+  env: process.env, // Optional
 });
 ```
 
 ### Context Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `requestId` | `string` | Auto-generated UUIDv7 for tracing |
-| `logger` | `Logger` | Structured logger instance |
-| `config` | `ResolvedConfig` | Merged configuration |
-| `signal` | `AbortSignal` | Cancellation signal |
-| `workspaceRoot` | `string` | Project root directory |
-| `cwd` | `string` | Current working directory |
-| `env` | `Record<string, string \| undefined>` | Environment variables |
+| Field           | Type                                  | Description                       |
+| --------------- | ------------------------------------- | --------------------------------- |
+| `requestId`     | `string`                              | Auto-generated UUIDv7 for tracing |
+| `logger`        | `Logger`                              | Structured logger instance        |
+| `config`        | `ResolvedConfig`                      | Merged configuration              |
+| `signal`        | `AbortSignal`                         | Cancellation signal               |
+| `workspaceRoot` | `string`                              | Project root directory            |
+| `cwd`           | `string`                              | Current working directory         |
+| `env`           | `Record<string, string \| undefined>` | Environment variables             |
 
 ### Request ID Tracing
 
@@ -490,14 +500,14 @@ const logger = createLogger({
 
 ### Log Levels
 
-| Level | Use For |
-|-------|---------|
-| `trace` | Very detailed debugging |
-| `debug` | Development debugging |
-| `info` | Normal operations |
-| `warn` | Unexpected but handled |
+| Level   | Use For                      |
+| ------- | ---------------------------- |
+| `trace` | Very detailed debugging      |
+| `debug` | Development debugging        |
+| `info`  | Normal operations            |
+| `warn`  | Unexpected but handled       |
 | `error` | Failures requiring attention |
-| `fatal` | Unrecoverable failures |
+| `fatal` | Unrecoverable failures       |
 
 ### Structured Metadata
 
@@ -526,8 +536,8 @@ Sensitive data is automatically redacted:
 
 ```typescript
 logger.info("Config loaded", {
-  apiKey: "secret-key-123",  // Logged as "[REDACTED]"
-  database: { password: "secret" },  // Nested values also redacted
+  apiKey: "secret-key-123", // Logged as "[REDACTED]"
+  database: { password: "secret" }, // Nested values also redacted
 });
 ```
 
@@ -553,12 +563,12 @@ const safePath = result.value; // Guaranteed within workspace
 
 ### What Gets Blocked
 
-| Input | Result |
-|-------|--------|
-| `../etc/passwd` | `ValidationError` (traversal) |
-| `/etc/passwd` | `ValidationError` (absolute) |
-| `file\x00.txt` | `ValidationError` (null byte) |
-| `data/file.json` | OK, returns absolute path |
+| Input            | Result                        |
+| ---------------- | ----------------------------- |
+| `../etc/passwd`  | `ValidationError` (traversal) |
+| `/etc/passwd`    | `ValidationError` (absolute)  |
+| `file\x00.txt`   | `ValidationError` (null byte) |
+| `data/file.json` | OK, returns absolute path     |
 
 ### Atomic Writes
 

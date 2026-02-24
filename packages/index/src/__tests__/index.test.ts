@@ -12,7 +12,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import {
   createIndex,
   type Index,

@@ -51,9 +51,9 @@ Example detection check:
 ```typescript
 async function checkTool(name: string): Promise<boolean> {
   try {
-    const proc = Bun.spawn(['which', name], {
-      stdout: 'pipe',
-      stderr: 'pipe',
+    const proc = Bun.spawn(["which", name], {
+      stdout: "pipe",
+      stderr: "pipe",
     });
 
     const exitCode = await proc.exited;
@@ -75,6 +75,7 @@ DETECTION_RESULTS=$(bun /path/to/script)
 ```
 
 Agent parses JSON to determine:
+
 - Which preferred tools are available
 - Which tasks need fallback
 - What to suggest installing for significant improvements
@@ -82,6 +83,7 @@ Agent parses JSON to determine:
 ## Caching Strategy
 
 Run once per session:
+
 - First tool selection → run detection, cache results
 - Subsequent selections → use cached results
 - Detection refresh → only if tool installation occurs mid-session
@@ -91,40 +93,49 @@ Run once per session:
 ### Core Tools (check these)
 
 **File operations**:
+
 - fd (preferred) / find (fallback)
 - bat (preferred) / cat (fallback)
 - eza (preferred) / ls (fallback)
 
 **Search**:
+
 - rg (preferred) / grep (fallback)
 - sg (preferred for AST) / rg (fallback)
 
 **Data processing**:
+
 - jq (preferred) / node/python (fallback)
 
 **Version control**:
+
 - delta (preferred) / git diff (fallback)
 
 **Navigation**:
+
 - zoxide (preferred) / cd (fallback)
 - fzf (no direct fallback)
 
 **Network**:
+
 - httpie (preferred) / curl (fallback)
 
 ### Package Managers (detect for install suggestions)
 
 **macOS**:
+
 - brew (primary)
 - port (alternative)
 
 **Linux**:
+
 - apt (Debian/Ubuntu)
 - dnf (Fedora/RHEL)
 - pacman (Arch)
 - zypper (openSUSE)
 
 **Cross-platform**:
+
 - cargo (Rust tools: rg, fd, bat, etc.)
 - npm (JavaScript tools)
 - pipx (Python tools)
@@ -132,6 +143,7 @@ Run once per session:
 ## Error Handling
 
 Script should:
+
 - Never fail/throw — return partial results if some checks fail
 - Log warnings for unexpected errors
 - Provide empty arrays for unavailable categories
@@ -140,6 +152,7 @@ Script should:
 ## Future Enhancements
 
 Potential additions:
+
 - Version checking (some tools require minimum version)
 - Performance profiling (measure actual tool speed)
 - Configuration detection (is tool already configured?)

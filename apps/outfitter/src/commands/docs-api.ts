@@ -9,10 +9,12 @@
  */
 
 import { relative } from "node:path";
+
 import { output } from "@outfitter/cli";
 import { InternalError, Result, ValidationError } from "@outfitter/contracts";
 import type { TsDocCheckResult } from "@outfitter/tooling";
 import { createTheme } from "@outfitter/tui/render";
+
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import { runCheckTsdoc } from "./check-tsdoc.js";

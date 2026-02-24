@@ -7,6 +7,7 @@
  */
 
 import type { Result, StorageError } from "@outfitter/contracts";
+
 import type { IndexMigrationRegistry } from "./migrations.js";
 
 // ============================================================================

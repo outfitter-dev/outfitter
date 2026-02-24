@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { buildSyncedExports, shortAlias, sortExports } from "../sync-exports";
 
 describe("shortAlias", () => {

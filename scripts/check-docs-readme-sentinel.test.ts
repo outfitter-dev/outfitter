@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { checkDocsReadmeSentinelContent } from "./check-docs-readme-sentinel";
 
 function wrapSentinel(content: string): string {

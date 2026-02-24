@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { AssertionError } from "../errors.js";
 import {
   assertDefined,

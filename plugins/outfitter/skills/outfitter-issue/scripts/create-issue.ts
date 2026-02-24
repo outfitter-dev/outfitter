@@ -16,6 +16,7 @@
  */
 
 import { parseArgs } from "node:util";
+
 import { type IssueTemplate, templates, templateTypes } from "../templates";
 
 const REPO = "outfitter-dev/outfitter";

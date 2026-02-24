@@ -13,6 +13,7 @@ User reports: "Cache occasionally returns stale data. Works most of the time, bu
 ### Read Error Description
 
 No error messages — behavior is wrong but silent:
+
 - Expected: Updated value from cache
 - Actual: Old value returned (intermittently)
 - Frequency: ~5% of requests after update
@@ -20,6 +21,7 @@ No error messages — behavior is wrong but silent:
 ### Reproduce Consistently
 
 Initial attempts fail — bug is intermittent:
+
 - Sometimes works correctly
 - Sometimes returns stale data
 - No obvious pattern
@@ -107,7 +109,10 @@ Check how other cache operations handle this:
 
 ```typescript
 // Working example - authentication cache
-export async function updateAuthCache(userId: string, token: string): Promise<void> {
+export async function updateAuthCache(
+  userId: string,
+  token: string
+): Promise<void> {
   const key = `auth:${userId}`;
 
   // Atomic operation - no race window
@@ -125,8 +130,8 @@ The optimization commit (f8d3c21):
 
 ```typescript
 export function updateCache(key: string, value: any): void {
-  cache.set(key, value);        // Synchronous
-  invalidateRelated(key);       // Synchronous
+  cache.set(key, value); // Synchronous
+  invalidateRelated(key); // Synchronous
   // Both complete before function returns
 }
 ```
@@ -135,8 +140,8 @@ export function updateCache(key: string, value: any): void {
 
 ```typescript
 export async function updateCache(key: string, value: any): Promise<void> {
-  await cache.set(key, value);      // Async - completes
-  await invalidateRelated(key);     // Async - still pending
+  await cache.set(key, value); // Async - completes
+  await invalidateRelated(key); // Async - still pending
   // Function returns here, but invalidation still running
 }
 ```
@@ -144,11 +149,13 @@ export async function updateCache(key: string, value: any): Promise<void> {
 ### Identify Differences
 
 Working code:
+
 - Single atomic operation
 - No race window
 - Consistent state
 
 Broken code:
+
 - Two-step process
 - Race window between set and invalidate
 - Inconsistent state possible
@@ -178,6 +185,7 @@ Broken code:
 **Hypothesis**: "Cache returns stale data because the async optimization (f8d3c21) introduced a race window. When `updateCache` sets a value but hasn't yet invalidated related entries, concurrent `getCache` calls can read the new value while related entries are still stale, causing those stale entries to be returned instead."
 
 Evidence:
+
 - Timeline shows `getCache` called during race window
 - Worked before async optimization
 - Fails ~8% of time (when timing hits race window)
@@ -196,7 +204,7 @@ export async function updateCache(key: string, value: any): Promise<void> {
   await cache.set(key, value);
 
   // TESTING: Widen race window
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 
   await invalidateRelated(key);
 }
@@ -251,24 +259,24 @@ Run 100 times:
 ### Create Failing Test
 
 ```typescript
-describe('updateCache race condition', () => {
-  it('prevents stale data during concurrent update and read', async () => {
+describe("updateCache race condition", () => {
+  it("prevents stale data during concurrent update and read", async () => {
     // Setup initial data
-    await cache.set('user:123', 'old-value');
-    await cache.set('related:123', 'old-related');
+    await cache.set("user:123", "old-value");
+    await cache.set("related:123", "old-related");
 
     // Simulate race: update and read concurrently
     const [updateResult, readResult] = await Promise.all([
-      updateCache('user:123', 'new-value'),
-      getCache('user:123'),
+      updateCache("user:123", "new-value"),
+      getCache("user:123"),
     ]);
 
     // Read should either see old (before update) or new (after update)
     // but never a mix of new + stale related
-    const finalValue = await getCache('user:123');
+    const finalValue = await getCache("user:123");
 
-    expect(finalValue).not.toBe('old-related'); // Should not see stale
-    expect(['old-value', 'new-value']).toContain(finalValue);
+    expect(finalValue).not.toBe("old-related"); // Should not see stale
+    expect(["old-value", "new-value"]).toContain(finalValue);
   });
 });
 ```
@@ -285,7 +293,8 @@ export async function updateCache(key: string, value: any): Promise<void> {
   const updateId = crypto.randomUUID();
 
   // Set all values atomically with transaction
-  await cache.multi()
+  await cache
+    .multi()
     .set(key, value)
     .set(`${key}:updateId`, updateId)
     .invalidate(getRelatedKeys(key))
@@ -309,6 +318,7 @@ done
 ```
 
 All tests pass:
+
 - Race condition test passes
 - Existing tests pass
 - Load test shows no performance degradation
@@ -331,7 +341,8 @@ All tests pass:
 export async function updateCache(key: string, value: any): Promise<void> {
   const updateId = crypto.randomUUID();
 
-  await cache.multi()
+  await cache
+    .multi()
     .set(key, value)
     .set(`${key}:updateId`, updateId)
     .invalidate(getRelatedKeys(key))
@@ -378,11 +389,13 @@ export async function getCache(key: string): Promise<any> {
 **Root cause**: Async optimization introduced race window between setting value and invalidating related entries. Concurrent reads during this window could read new value but get stale related data.
 
 **The fix**:
+
 1. Use cache transactions (multi/exec) for atomic updates
 2. All updates and invalidations complete atomically
 3. Added monitoring to detect inconsistencies
 
 **Prevention**:
+
 - Use atomic operations for multi-step cache updates
 - Test concurrent operations explicitly
 - Add timing logs to expose race conditions

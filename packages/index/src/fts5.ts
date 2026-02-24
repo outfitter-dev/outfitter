@@ -9,8 +9,10 @@
 import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+
 import type { StorageError } from "@outfitter/contracts";
 import { Result } from "@outfitter/contracts";
+
 import type { IndexMigrationContext } from "./migrations.js";
 import type {
   Index,

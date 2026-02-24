@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "../commands/shared-deps.js";
 import {
   applyResolvedDependencyVersions,

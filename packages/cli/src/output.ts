@@ -10,6 +10,7 @@ import {
   safeStringify as contractsSafeStringify,
   exitCodeMap,
 } from "@outfitter/contracts";
+
 import type { OutputMode, OutputOptions } from "./types.js";
 
 // =============================================================================

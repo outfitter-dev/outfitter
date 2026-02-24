@@ -1,11 +1,24 @@
 {
   "name": "@outfitter/types",
-  "description": "Branded types, type guards, and type utilities for Outfitter",
   "version": "0.2.3",
-  "type": "module",
+  "description": "Branded types, type guards, and type utilities for Outfitter",
+  "keywords": [
+    "branded",
+    "outfitter",
+    "types",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/types"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -59,7 +72,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/types",
     "test": "bun test",
@@ -74,20 +89,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "types",
-    "branded",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/types"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

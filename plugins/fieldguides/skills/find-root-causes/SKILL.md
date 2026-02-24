@@ -38,12 +38,12 @@ NOT for: known issues with documented fixes, simple configuration errors, routin
 
 This skill extends `debugging` with formal RCA practices:
 
-| Aspect | Debugging | Root Cause Analysis |
-|--------|-----------|---------------------|
-| Scope | Fix the immediate issue | Understand why it happened |
-| Output | Working code | RCA report + prevention |
-| Documentation | Investigation notes | Formal templates |
-| Goal | Resolution | Prevention of recurrence |
+| Aspect        | Debugging               | Root Cause Analysis        |
+| ------------- | ----------------------- | -------------------------- |
+| Scope         | Fix the immediate issue | Understand why it happened |
+| Output        | Working code            | RCA report + prevention    |
+| Documentation | Investigation notes     | Formal templates           |
+| Goal          | Resolution              | Prevention of recurrence   |
 
 Use `debugging` for day-to-day bug fixes. Use `find-root-causes` for incidents requiring formal investigation and documentation.
 
@@ -53,11 +53,11 @@ Use `debugging` for day-to-day bug fixes. Use `find-root-causes` for incidents r
 
 Three core techniques for narrowing to root cause:
 
-| Technique | When to Use | Method |
-|-----------|-------------|--------|
-| **Binary Search** | Large problem space, ordered changes | Bisect the change range |
-| **Variable Isolation** | Multiple variables, need causation | Control all but one |
-| **Process of Elimination** | Finite set of possible causes | Rule out systematically |
+| Technique                  | When to Use                          | Method                  |
+| -------------------------- | ------------------------------------ | ----------------------- |
+| **Binary Search**          | Large problem space, ordered changes | Bisect the change range |
+| **Variable Isolation**     | Multiple variables, need causation   | Control all but one     |
+| **Process of Elimination** | Finite set of possible causes        | Rule out systematically |
 
 See [elimination-techniques.md](references/elimination-techniques.md) for detailed methods and examples.
 
@@ -92,13 +92,13 @@ See [documentation-templates.md](references/documentation-templates.md) for full
 
 <common_pitfalls>
 
-| Trap | Counter |
-|------|---------|
-| "I already looked at that" | Re-examine with fresh evidence |
-| "That can't be the issue" | Test anyway, let evidence decide |
-| "We need to fix this quickly" | Methodical investigation is faster |
-| Confirmation bias | Actively seek disconfirming evidence |
-| Correlation = causation | Test direct causal mechanism |
+| Trap                          | Counter                              |
+| ----------------------------- | ------------------------------------ |
+| "I already looked at that"    | Re-examine with fresh evidence       |
+| "That can't be the issue"     | Test anyway, let evidence decide     |
+| "We need to fix this quickly" | Methodical investigation is faster   |
+| Confirmation bias             | Actively seek disconfirming evidence |
+| Correlation = causation       | Test direct causal mechanism         |
 
 See [pitfalls.md](references/pitfalls.md) for detailed resistance patterns and recovery.
 
@@ -107,6 +107,7 @@ See [pitfalls.md](references/pitfalls.md) for detailed resistance patterns and r
 <rules>
 
 ALWAYS:
+
 - Load debugging skill for systematic investigation methodology
 - Use elimination techniques to narrow root cause
 - Document investigation trail as you go
@@ -115,6 +116,7 @@ ALWAYS:
 - Identify contributing factors, not just root cause
 
 NEVER:
+
 - Skip formal documentation for incidents
 - Stop at "what happened" without "why"
 - Propose fixes without understanding root cause

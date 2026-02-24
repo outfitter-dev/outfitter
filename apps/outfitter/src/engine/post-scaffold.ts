@@ -1,5 +1,7 @@
 import { relative } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import type { OperationCollector } from "./collector.js";
 
 type ScaffoldOrigin = "init" | "scaffold";

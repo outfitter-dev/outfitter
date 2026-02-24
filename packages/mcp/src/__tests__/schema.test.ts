@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { z } from "zod";
+
 import { zodToJsonSchema } from "../schema.js";
 
 describe("zodToJsonSchema required detection", () => {

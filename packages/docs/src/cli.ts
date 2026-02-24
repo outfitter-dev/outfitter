@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { Command } from "commander";
+
 import { createDocsCommand } from "./command/create-docs-command.js";
 import { VERSION } from "./version.js";
 

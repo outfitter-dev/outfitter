@@ -7,20 +7,20 @@ Comprehensive test patterns for TypeScript/Bun and Rust.
 ### Basic Test Structure
 
 ```typescript
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from "bun:test";
 
-describe('Module or Feature Name', () => {
-  test('describes specific behavior', () => {
+describe("Module or Feature Name", () => {
+  test("describes specific behavior", () => {
     // Arrange
-    const input = createTestInput()
+    const input = createTestInput();
 
     // Act
-    const result = functionUnderTest(input)
+    const result = functionUnderTest(input);
 
     // Assert
-    expect(result).toBe(expected)
-  })
-})
+    expect(result).toBe(expected);
+  });
+});
 ```
 
 ### Discriminated Unions for Test Scenarios
@@ -29,35 +29,35 @@ Use discriminated unions to make test scenarios type-safe:
 
 ```typescript
 type TestScenario =
-  | { type: 'success'; input: ValidInput; expected: Output }
-  | { type: 'error'; input: InvalidInput; expectedError: ErrorCode }
-  | { type: 'edge-case'; input: EdgeInput; expected: Output }
+  | { type: "success"; input: ValidInput; expected: Output }
+  | { type: "error"; input: InvalidInput; expectedError: ErrorCode }
+  | { type: "edge-case"; input: EdgeInput; expected: Output };
 
 test.each<TestScenario>([
   {
-    type: 'success',
+    type: "success",
     input: { value: 100 },
     expected: { result: 100 },
   },
   {
-    type: 'error',
+    type: "error",
     input: { value: -1 },
-    expectedError: 'NEGATIVE_VALUE',
+    expectedError: "NEGATIVE_VALUE",
   },
   {
-    type: 'edge-case',
+    type: "edge-case",
     input: { value: 0 },
     expected: { result: 0 },
   },
-])('handles $type scenario', async (scenario) => {
-  const result = await processValue(scenario.input)
+])("handles $type scenario", async (scenario) => {
+  const result = await processValue(scenario.input);
 
-  if (scenario.type === 'success' || scenario.type === 'edge-case') {
-    expect(result).toEqual(scenario.expected)
+  if (scenario.type === "success" || scenario.type === "edge-case") {
+    expect(result).toEqual(scenario.expected);
   } else {
-    expect(result.error).toBe(scenario.expectedError)
+    expect(result.error).toBe(scenario.expectedError);
   }
-})
+});
 ```
 
 ### Type-Safe Test Builders
@@ -67,41 +67,41 @@ Create fluent builders for complex test data:
 ```typescript
 class UserBuilder {
   private data: Partial<User> = {
-    id: 'test-id',
-    email: 'test@example.com',
-    role: 'user',
-    createdAt: new Date('2024-01-01'),
-  }
+    id: "test-id",
+    email: "test@example.com",
+    role: "user",
+    createdAt: new Date("2024-01-01"),
+  };
 
   withId(id: string): this {
-    this.data.id = id
-    return this
+    this.data.id = id;
+    return this;
   }
 
   withEmail(email: string): this {
-    this.data.email = email
-    return this
+    this.data.email = email;
+    return this;
   }
 
   withRole(role: UserRole): this {
-    this.data.role = role
-    return this
+    this.data.role = role;
+    return this;
   }
 
   asAdmin(): this {
-    return this.withRole('admin')
+    return this.withRole("admin");
   }
 
   build(): User {
-    return this.data as User
+    return this.data as User;
   }
 }
 
 // Usage
 const adminUser = new UserBuilder()
-  .withEmail('admin@example.com')
+  .withEmail("admin@example.com")
   .asAdmin()
-  .build()
+  .build();
 ```
 
 Generic builder for flexibility:
@@ -111,23 +111,23 @@ class Builder<T> {
   constructor(private defaults: T) {}
 
   with<K extends keyof T>(key: K, value: T[K]): this {
-    this.defaults = { ...this.defaults, [key]: value }
-    return this
+    this.defaults = { ...this.defaults, [key]: value };
+    return this;
   }
 
   build(): T {
-    return { ...this.defaults }
+    return { ...this.defaults };
   }
 }
 
 // Usage
 const userBuilder = new Builder<User>({
-  id: 'test-id',
-  email: 'test@example.com',
-  role: 'user',
-})
+  id: "test-id",
+  email: "test@example.com",
+  role: "user",
+});
 
-const admin = userBuilder.with('role', 'admin').build()
+const admin = userBuilder.with("role", "admin").build();
 ```
 
 ### Const Assertions for Test Data
@@ -136,17 +136,17 @@ Type-safe test data with const assertions:
 
 ```typescript
 const validInputs = [
-  { input: 'hello', expected: 'HELLO' },
-  { input: 'world', expected: 'WORLD' },
-  { input: '', expected: '' },
-] as const
+  { input: "hello", expected: "HELLO" },
+  { input: "world", expected: "WORLD" },
+  { input: "", expected: "" },
+] as const;
 
 test.each(validInputs)(
-  'transforms $input to $expected',
+  "transforms $input to $expected",
   ({ input, expected }) => {
-    expect(transform(input)).toBe(expected)
+    expect(transform(input)).toBe(expected);
   }
-)
+);
 ```
 
 ### Async Testing Patterns
@@ -154,41 +154,41 @@ test.each(validInputs)(
 Promise rejection:
 
 ```typescript
-test('rejects with error for invalid input', async () => {
-  const promise = fetchUser('invalid-id')
+test("rejects with error for invalid input", async () => {
+  const promise = fetchUser("invalid-id");
 
-  await expect(promise).rejects.toThrow(UserNotFoundError)
-  await expect(promise).rejects.toThrow('User not found')
-})
+  await expect(promise).rejects.toThrow(UserNotFoundError);
+  await expect(promise).rejects.toThrow("User not found");
+});
 ```
 
 Async/await with error handling:
 
 ```typescript
-test('handles async errors gracefully', async () => {
-  const result = await processData('invalid').catch(err => ({
+test("handles async errors gracefully", async () => {
+  const result = await processData("invalid").catch((err) => ({
     error: err.message,
-  }))
+  }));
 
-  expect(result.error).toBe('Invalid data')
-})
+  expect(result.error).toBe("Invalid data");
+});
 ```
 
 Timeout handling:
 
 ```typescript
-test('times out slow operations', async () => {
-  const promise = slowOperation()
+test("times out slow operations", async () => {
+  const promise = slowOperation();
 
   await expect(
     Promise.race([
       promise,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout')), 100)
+        setTimeout(() => reject(new Error("Timeout")), 100)
       ),
     ])
-  ).rejects.toThrow('Timeout')
-})
+  ).rejects.toThrow("Timeout");
+});
 ```
 
 ### Mocking with Bun
@@ -196,23 +196,23 @@ test('times out slow operations', async () => {
 Module mocking:
 
 ```typescript
-import { mock } from 'bun:test'
+import { mock } from "bun:test";
 
 // Mock entire module
-mock.module('./database', () => ({
+mock.module("./database", () => ({
   query: mock(() => Promise.resolve({ rows: [] })),
   connect: mock(() => Promise.resolve()),
-}))
+}));
 
 // Use in test
-test('handles database errors', async () => {
-  const { query } = await import('./database')
+test("handles database errors", async () => {
+  const { query } = await import("./database");
 
-  query.mockImplementationOnce(() => Promise.reject(new Error('DB Error')))
+  query.mockImplementationOnce(() => Promise.reject(new Error("DB Error")));
 
-  const result = await fetchUsers()
-  expect(result.error).toBe('DB Error')
-})
+  const result = await fetchUsers();
+  expect(result.error).toBe("DB Error");
+});
 ```
 
 Function mocking:
@@ -220,15 +220,15 @@ Function mocking:
 ```typescript
 const mockFetch = mock(async (url: string) => ({
   ok: true,
-  json: async () => ({ data: 'test' }),
-}))
+  json: async () => ({ data: "test" }),
+}));
 
-test('fetches data successfully', async () => {
-  const result = await fetchData('https://api.example.com', mockFetch)
+test("fetches data successfully", async () => {
+  const result = await fetchData("https://api.example.com", mockFetch);
 
-  expect(mockFetch).toHaveBeenCalledWith('https://api.example.com')
-  expect(result.data).toBe('test')
-})
+  expect(mockFetch).toHaveBeenCalledWith("https://api.example.com");
+  expect(result.data).toBe("test");
+});
 ```
 
 ### Snapshot Testing
@@ -236,21 +236,21 @@ test('fetches data successfully', async () => {
 Simple snapshots:
 
 ```typescript
-test('serializes user correctly', () => {
-  const user = new UserBuilder().build()
+test("serializes user correctly", () => {
+  const user = new UserBuilder().build();
 
-  expect(JSON.stringify(user, null, 2)).toMatchSnapshot()
-})
+  expect(JSON.stringify(user, null, 2)).toMatchSnapshot();
+});
 ```
 
 Inline snapshots:
 
 ```typescript
-test('formats error message', () => {
-  const error = new ValidationError('Invalid email')
+test("formats error message", () => {
+  const error = new ValidationError("Invalid email");
 
-  expect(error.message).toMatchInlineSnapshot(`"Invalid email"`)
-})
+  expect(error.message).toMatchInlineSnapshot(`"Invalid email"`);
+});
 ```
 
 ### Parameterized Tests
@@ -263,21 +263,21 @@ test.each([
   [2, 4],
   [3, 9],
   [4, 16],
-])('square(%i) returns %i', (input, expected) => {
-  expect(square(input)).toBe(expected)
-})
+])("square(%i) returns %i", (input, expected) => {
+  expect(square(input)).toBe(expected);
+});
 ```
 
 Object-based parameterization:
 
 ```typescript
 test.each([
-  { input: 5, expected: 25, description: 'positive number' },
-  { input: -3, expected: 9, description: 'negative number' },
-  { input: 0, expected: 0, description: 'zero' },
-])('square($input) for $description', ({ input, expected }) => {
-  expect(square(input)).toBe(expected)
-})
+  { input: 5, expected: 25, description: "positive number" },
+  { input: -3, expected: 9, description: "negative number" },
+  { input: 0, expected: 0, description: "zero" },
+])("square($input) for $description", ({ input, expected }) => {
+  expect(square(input)).toBe(expected);
+});
 ```
 
 ### Focused Testing
@@ -286,17 +286,17 @@ Run specific tests:
 
 ```typescript
 // Only run this test
-test.only('current feature under development', () => {
+test.only("current feature under development", () => {
   // Fast feedback during active development
-})
+});
 
 // Skip slow tests during TDD
-test.skip('slow integration test', () => {
+test.skip("slow integration test", () => {
   // Run in CI but not during rapid TDD cycles
-})
+});
 
 // Mark test as work in progress
-test.todo('implement rate limiting')
+test.todo("implement rate limiting");
 ```
 
 ### Parallel Test Execution
@@ -304,22 +304,22 @@ test.todo('implement rate limiting')
 Run independent tests in parallel:
 
 ```typescript
-describe.concurrent('Independent Operations', () => {
-  test('operation 1', async () => {
-    const result = await independentOp1()
-    expect(result).toBeDefined()
-  })
+describe.concurrent("Independent Operations", () => {
+  test("operation 1", async () => {
+    const result = await independentOp1();
+    expect(result).toBeDefined();
+  });
 
-  test('operation 2', async () => {
-    const result = await independentOp2()
-    expect(result).toBeDefined()
-  })
+  test("operation 2", async () => {
+    const result = await independentOp2();
+    expect(result).toBeDefined();
+  });
 
-  test('operation 3', async () => {
-    const result = await independentOp3()
-    expect(result).toBeDefined()
-  })
-})
+  test("operation 3", async () => {
+    const result = await independentOp3();
+    expect(result).toBeDefined();
+  });
+});
 ```
 
 ### Error Testing Patterns
@@ -327,24 +327,24 @@ describe.concurrent('Independent Operations', () => {
 Exception testing:
 
 ```typescript
-test('throws error for invalid input', () => {
-  expect(() => processData(null)).toThrow(ValidationError)
-  expect(() => processData(null)).toThrow('Input cannot be null')
-})
+test("throws error for invalid input", () => {
+  expect(() => processData(null)).toThrow(ValidationError);
+  expect(() => processData(null)).toThrow("Input cannot be null");
+});
 ```
 
 Error result testing:
 
 ```typescript
-test('returns error result for invalid input', () => {
-  const result = processData(null)
+test("returns error result for invalid input", () => {
+  const result = processData(null);
 
-  expect(result.type).toBe('error')
-  if (result.type === 'error') {
-    expect(result.code).toBe('INVALID_INPUT')
-    expect(result.message).toContain('null')
+  expect(result.type).toBe("error");
+  if (result.type === "error") {
+    expect(result.code).toBe("INVALID_INPUT");
+    expect(result.message).toContain("null");
   }
-})
+});
 ```
 
 ## Rust Patterns
@@ -529,7 +529,7 @@ fn rejects_invalid_credentials() {
 
 Executable documentation:
 
-```rust
+````rust
 /// Authenticates a user with credentials.
 ///
 /// # Examples
@@ -564,7 +564,7 @@ Executable documentation:
 pub fn authenticate(credentials: &Credentials) -> Result<AuthResult, AuthError> {
     // Implementation
 }
-```
+````
 
 ### Snapshot Testing
 
@@ -726,26 +726,30 @@ async fn test_user_registration_flow() {
 ❌ Bad:
 
 ```typescript
-test('processes order', () => {
-  const user = { id: '1', email: 'test@example.com', role: 'user', /* 10 more fields */ }
-  const product = { id: 'p1', name: 'Widget', price: 100, /* 8 more fields */ }
-  const cart = { items: [{ product, quantity: 2 }], /* 5 more fields */ }
-  const payment = { method: 'card', /* 6 more fields */ }
+test("processes order", () => {
+  const user = {
+    id: "1",
+    email: "test@example.com",
+    role: "user" /* 10 more fields */,
+  };
+  const product = { id: "p1", name: "Widget", price: 100 /* 8 more fields */ };
+  const cart = { items: [{ product, quantity: 2 }] /* 5 more fields */ };
+  const payment = { method: "card" /* 6 more fields */ };
 
-  const result = processOrder(user, cart, payment)
-  expect(result.total).toBe(200)
-})
+  const result = processOrder(user, cart, payment);
+  expect(result.total).toBe(200);
+});
 ```
 
 ✓ Good:
 
 ```typescript
-test('processes order', () => {
-  const order = new OrderBuilder().withQuantity(2).withPrice(100).build()
+test("processes order", () => {
+  const order = new OrderBuilder().withQuantity(2).withPrice(100).build();
 
-  const result = processOrder(order)
-  expect(result.total).toBe(200)
-})
+  const result = processOrder(order);
+  expect(result.total).toBe(200);
+});
 ```
 
 ### Test Smell: Multiple Unrelated Assertions
@@ -753,27 +757,27 @@ test('processes order', () => {
 ❌ Bad:
 
 ```typescript
-test('user management', () => {
-  expect(createUser('test@example.com')).toBeDefined()
-  expect(findUser('1')).toEqual({ id: '1' })
-  expect(deleteUser('1')).toBe(true)
-})
+test("user management", () => {
+  expect(createUser("test@example.com")).toBeDefined();
+  expect(findUser("1")).toEqual({ id: "1" });
+  expect(deleteUser("1")).toBe(true);
+});
 ```
 
 ✓ Good:
 
 ```typescript
-test('creates user with valid email', () => {
-  expect(createUser('test@example.com')).toBeDefined()
-})
+test("creates user with valid email", () => {
+  expect(createUser("test@example.com")).toBeDefined();
+});
 
-test('finds user by id', () => {
-  expect(findUser('1')).toEqual({ id: '1' })
-})
+test("finds user by id", () => {
+  expect(findUser("1")).toEqual({ id: "1" });
+});
 
-test('deletes user successfully', () => {
-  expect(deleteUser('1')).toBe(true)
-})
+test("deletes user successfully", () => {
+  expect(deleteUser("1")).toBe(true);
+});
 ```
 
 ### Test Smell: Testing Implementation Details
@@ -781,24 +785,24 @@ test('deletes user successfully', () => {
 ❌ Bad:
 
 ```typescript
-test('caches results internally', () => {
-  const service = new UserService()
-  service.fetchUser('1')
+test("caches results internally", () => {
+  const service = new UserService();
+  service.fetchUser("1");
 
-  expect(service._cache.has('1')).toBe(true) // Testing private implementation
-})
+  expect(service._cache.has("1")).toBe(true); // Testing private implementation
+});
 ```
 
 ✓ Good:
 
 ```typescript
-test('returns cached user on second fetch', async () => {
-  const service = new UserService()
-  const spy = mock.fn()
+test("returns cached user on second fetch", async () => {
+  const service = new UserService();
+  const spy = mock.fn();
 
-  await service.fetchUser('1', spy)
-  await service.fetchUser('1', spy)
+  await service.fetchUser("1", spy);
+  await service.fetchUser("1", spy);
 
-  expect(spy).toHaveBeenCalledTimes(1) // Testing observable behavior
-})
+  expect(spy).toHaveBeenCalledTimes(1); // Testing observable behavior
+});
 ```

@@ -13,6 +13,7 @@ Install dependencies and create shared infrastructure (context, logger).
 ### 1.1 Install Dependencies
 
 - [ ] Install core packages
+
   ```bash
   bun add @outfitter/contracts @outfitter/logging @outfitter/config
   ```
@@ -29,6 +30,7 @@ Install dependencies and create shared infrastructure (context, logger).
 ### 1.2 Create Logger
 
 - [ ] Create `src/logger.ts`
+
   ```typescript
   import { createLogger, createConsoleSink } from "@outfitter/logging";
 
@@ -43,6 +45,7 @@ Install dependencies and create shared infrastructure (context, logger).
 ### 1.3 Create Context Factory
 
 - [ ] Create `src/context.ts`
+
   ```typescript
   import { createContext } from "@outfitter/contracts";
   import { logger } from "./logger";
@@ -54,6 +57,7 @@ Install dependencies and create shared infrastructure (context, logger).
 ### 1.4 Verify Setup
 
 - [ ] Create smoke test
+
   ```typescript
   import { describe, it, expect } from "bun:test";
   import { createAppContext } from "../context";
@@ -77,5 +81,3 @@ Install dependencies and create shared infrastructure (context, logger).
 - [ ] Smoke test passing
 
 ## Notes
-
-

@@ -35,18 +35,19 @@ const box = createBox(
 
 ### External Library Patterns
 
-| Library | Approach | Propagation | API Style |
-|---------|----------|-------------|-----------|
-| **Lipgloss** (Go) | Explicit calculation | None | Functional |
-| **Ink** (React) | Yoga flexbox engine | Automatic | JSX/React |
-| **FTXUI** (C++) | `flex` decorator | Through element tree | Functional |
-| **CSS** | Container queries | Explicit containment | Declarative |
+| Library           | Approach             | Propagation          | API Style   |
+| ----------------- | -------------------- | -------------------- | ----------- |
+| **Lipgloss** (Go) | Explicit calculation | None                 | Functional  |
+| **Ink** (React)   | Yoga flexbox engine  | Automatic            | JSX/React   |
+| **FTXUI** (C++)   | `flex` decorator     | Through element tree | Functional  |
+| **CSS**           | Container queries    | Explicit containment | Declarative |
 
 **Key Insight**: Libraries targeting static output (Lipgloss) use explicit calculation. Interactive TUIs (Ink, FTXUI) use layout engines for dynamic resize.
 
 ### Relevant to Our Use Case
 
 `@outfitter/cli` generates **static output** (not interactive TUI). This aligns with Lipgloss's approach:
+
 - Calculate dimensions before rendering
 - No need for constraint solver
 - Explicit is often clearer than magic
@@ -70,10 +71,14 @@ export function getContentWidth(options: BoxOptions): number;
 /**
  * Calculate total overhead (borders + padding).
  */
-export function getBoxOverhead(options: BoxOptions): { horizontal: number; vertical: number };
+export function getBoxOverhead(options: BoxOptions): {
+  horizontal: number;
+  vertical: number;
+};
 ```
 
 **Usage**:
+
 ```typescript
 const boxOpts: BoxOptions = { width: 40, padding: 1, border: "single" };
 const available = getContentWidth(boxOpts); // → 36
@@ -97,13 +102,13 @@ type WidthMode = "text" | "full" | number;
 type WidthMode = "text" | "full" | "container" | number | `${number}%`;
 ```
 
-| Mode | Behavior |
-|------|----------|
-| `"text"` | Fit to text content |
-| `"full"` | Terminal width (`process.stdout.columns`) |
-| `"container"` | Available width from layout context |
-| `number` | Fixed character width |
-| `"50%"` | Percentage of container/terminal |
+| Mode          | Behavior                                  |
+| ------------- | ----------------------------------------- |
+| `"text"`      | Fit to text content                       |
+| `"full"`      | Terminal width (`process.stdout.columns`) |
+| `"container"` | Available width from layout context       |
+| `number`      | Fixed character width                     |
+| `"50%"`       | Percentage of container/terminal          |
 
 **Requires**: Layout context to resolve `"container"` and percentages.
 
@@ -129,16 +134,20 @@ function resolveWidth(mode: WidthMode, ctx?: LayoutContext): number;
 ```
 
 **Usage**:
+
 ```typescript
 // Explicit context passing
 const ctx = createLayoutContext({ width: 40, padding: 1 });
 const progress = renderProgress(0.5, { width: "container" }, ctx);
 
 // Or with createBox helper
-const box = createBox([
-  renderHeading("Status", { width: "container" }),
-  renderProgress(0.5, { width: "container" }),
-], { width: 40, padding: 1 });
+const box = createBox(
+  [
+    renderHeading("Status", { width: "container" }),
+    renderProgress(0.5, { width: "container" }),
+  ],
+  { width: 40, padding: 1 }
+);
 ```
 
 **Implementation Options**:
@@ -170,6 +179,7 @@ Phase 3: Optional LayoutContext           ← If explicit proves painful
 ### Implementation Notes (Phase 1)
 
 **Internal Function Handling**: `normalizePadding()` and `normalizeBorders()` are currently internal to `box.ts`. For Phase 1:
+
 - Export these from `box.ts` (minimal API surface expansion)
 - Re-export via `index.ts` for consistency
 
@@ -236,19 +246,16 @@ export function getBoxOverhead(options: BoxOptions): {
  * Width specification for components.
  */
 export type WidthMode =
-  | "text"       // Fit to text content
-  | "full"       // Terminal width
-  | "container"  // Available container width (requires context)
-  | number       // Fixed character width
-  | `${number}%` // Percentage of container/terminal
+  | "text" // Fit to text content
+  | "full" // Terminal width
+  | "container" // Available container width (requires context)
+  | number // Fixed character width
+  | `${number}%`; // Percentage of container/terminal
 
 /**
  * Resolve width mode to actual character width.
  */
-export function resolveWidth(
-  mode: WidthMode,
-  ctx?: LayoutContext
-): number {
+export function resolveWidth(mode: WidthMode, ctx?: LayoutContext): number {
   if (typeof mode === "number") return mode;
 
   if (mode === "full") {
@@ -317,10 +324,7 @@ const progress = renderProgress(0.5, { width: 20 });
 const boxOpts = { width: 40, padding: 1 };
 const available = getContentWidth(boxOpts);
 
-const box = createBox(
-  renderProgress(0.5, { width: available }),
-  boxOpts
-);
+const box = createBox(renderProgress(0.5, { width: available }), boxOpts);
 ```
 
 ### Container-Relative Style (Phase 2+)
@@ -329,37 +333,41 @@ const box = createBox(
 // Use "container" mode with context
 const ctx = createLayoutContext({ width: 40, padding: 1 });
 
-const box = createBox([
-  renderHeading("Status", { width: "container" }, ctx),
-  renderProgress(0.5, { width: "container" }, ctx),
-], { width: 40, padding: 1 });
+const box = createBox(
+  [
+    renderHeading("Status", { width: "container" }, ctx),
+    renderProgress(0.5, { width: "container" }, ctx),
+  ],
+  { width: 40, padding: 1 }
+);
 ```
 
 ## Trade-offs
 
 ### Explicit Calculation (Phase 1)
 
-| Pro | Con |
-|-----|-----|
-| Simple to understand | Repetitive calculation |
-| No API changes | Easy to forget |
-| Backward compatible | Can still exceed bounds |
-| Easy to debug | Boilerplate |
+| Pro                  | Con                     |
+| -------------------- | ----------------------- |
+| Simple to understand | Repetitive calculation  |
+| No API changes       | Easy to forget          |
+| Backward compatible  | Can still exceed bounds |
+| Easy to debug        | Boilerplate             |
 
 ### Layout Context (Phase 3)
 
-| Pro | Con |
-|-----|-----|
-| Automatic propagation | New concept to learn |
-| Can't exceed bounds | Requires passing context |
-| DRY - calculate once | More complex API |
-| Enables "container" mode | Harder to debug |
+| Pro                      | Con                      |
+| ------------------------ | ------------------------ |
+| Automatic propagation    | New concept to learn     |
+| Can't exceed bounds      | Requires passing context |
+| DRY - calculate once     | More complex API         |
+| Enables "container" mode | Harder to debug          |
 
 ## Decision
 
 **Recommended**: Start with Phase 1 (explicit utilities), evaluate need for Phase 2-3 based on real usage.
 
 **Rationale**:
+
 1. Follows "simplest thing that works" principle
 2. No breaking changes
 3. Can add context later if explicit proves painful
@@ -371,9 +379,9 @@ const box = createBox([
 2. Should components validate width against container and warn/clamp?
 3. Should we support height constraints too, or width-only for now?
 4. How should tables handle container width (sum of columns)?
-   - *Note*: Tables may remain explicit-only since their width model (sum of columns) differs from single-value components. Phase 2-3 may offer a `getTableContentWidth()` helper but not automatic context propagation.
+   - _Note_: Tables may remain explicit-only since their width model (sum of columns) differs from single-value components. Phase 2-3 may offer a `getTableContentWidth()` helper but not automatic context propagation.
 5. Should `ProgressOptions.width` accept `WidthMode` (breaking change) or remain `number` (explicit calculation only)?
-   - *Note*: This affects whether Phase 2's convenience features reduce boilerplate for the motivating example.
+   - _Note_: This affects whether Phase 2's convenience features reduce boilerplate for the motivating example.
 
 ## References
 

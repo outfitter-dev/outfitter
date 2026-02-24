@@ -11,6 +11,7 @@
 import { exitWithError } from "@outfitter/cli";
 import { createCLI } from "@outfitter/cli/command";
 import { Command } from "commander";
+
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
 import { runCheckBoundaryInvocations } from "./check-boundary-invocations.js";

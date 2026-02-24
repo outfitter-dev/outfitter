@@ -11,6 +11,7 @@
  * - Pagination Support
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   InternalError,
   NotFoundError,
@@ -19,6 +20,7 @@ import {
 } from "@outfitter/contracts";
 import { createLogger, type LogRecord, type Sink } from "@outfitter/logging";
 import { z } from "zod";
+
 import {
   createMcpServer,
   defineResource,

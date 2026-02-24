@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+
 import {
   generatePackageListSection,
   replaceSentinelSection,

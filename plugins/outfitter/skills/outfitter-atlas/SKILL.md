@@ -6,7 +6,7 @@ description: "Generates patterns, templates, and guides for @outfitter/* package
 
 # Outfitter Atlas
 
-Your trail map for building with @outfitter/* packages. This guide covers the patterns, the templates, and—just as importantly—the *why* behind it all.
+Your trail map for building with @outfitter/* packages. This guide covers the patterns, the templates, and—just as importantly—the *why\* behind it all.
 
 ## Why We Built This
 
@@ -17,6 +17,7 @@ We kept solving the same problems across projects: config loading, error handlin
 The patterns assume you're building tools that **agents will consume**—structured output, typed errors, predictable behavior. Humans benefit too; agents just make the stakes clearer.
 
 When an AI agent calls your CLI or MCP tool, it needs:
+
 - **Structured output** it can parse (JSON when explicitly requested)
 - **Typed errors** with categories it can reason about (retry? abort? ask user?)
 - **Predictable exit codes** for scripting and automation
@@ -30,10 +31,10 @@ Traditional error handling (`throw`/`catch`) loses context, breaks type safety, 
 
 ```typescript
 const error = NotFoundError.create("user", "user-123");
-error._tag;        // "NotFoundError" — for pattern matching
-error.category;    // "not_found" — maps to exit code 2, HTTP 404
-error.message;     // Human-readable
-error.toJSON();    // Serializes cleanly for agents
+error._tag; // "NotFoundError" — for pattern matching
+error.category; // "not_found" — maps to exit code 2, HTTP 404
+error.message; // Human-readable
+error.toJSON(); // Serializes cleanly for agents
 ```
 
 Ten categories cover all failure modes. Each maps to exit codes (CLI) and HTTP status (API/MCP). Agents can make retry decisions without parsing error strings.
@@ -46,17 +47,17 @@ Tests define behavior; implementations follow. The workflow:
 2. **Green**: Minimal code to pass
 3. **Refactor**: Improve while staying green
 
-The test proves the behavior exists. A failing test proves it doesn't—*yet*.
+The test proves the behavior exists. A failing test proves it doesn't—_yet_.
 
 ### One Definition, Many Derivations
 
 Types, schemas, and contracts have exactly one source:
 
-| Concern | Source of Truth | Derives |
-|---------|-----------------|---------|
-| Input validation | Zod schema | TypeScript types, JSON Schema |
-| Error categories | `ErrorCategory` type | Exit codes, HTTP status |
-| CLI flag names | Handler input types | MCP tool parameters |
+| Concern          | Source of Truth      | Derives                       |
+| ---------------- | -------------------- | ----------------------------- |
+| Input validation | Zod schema           | TypeScript types, JSON Schema |
+| Error categories | `ErrorCategory` type | Exit codes, HTTP status       |
+| CLI flag names   | Handler input types  | MCP tool parameters           |
 
 If two things must stay in sync, one derives from the other.
 
@@ -64,14 +65,14 @@ If two things must stay in sync, one derives from the other.
 
 Bun APIs before npm packages—faster, zero-dependency:
 
-| Need | Use |
-|------|-----|
-| Hashing | `Bun.hash()` |
-| Globbing | `Bun.Glob` |
-| Semver | `Bun.semver` |
-| Shell | `Bun.$` |
-| SQLite | `bun:sqlite` |
-| UUID v7 | `Bun.randomUUIDv7()` |
+| Need     | Use                  |
+| -------- | -------------------- |
+| Hashing  | `Bun.hash()`         |
+| Globbing | `Bun.Glob`           |
+| Semver   | `Bun.semver`         |
+| Shell    | `Bun.$`              |
+| SQLite   | `bun:sqlite`         |
+| UUID v7  | `Bun.randomUUIDv7()` |
 
 ## The Core Idea
 
@@ -85,6 +86,7 @@ type Handler<TInput, TOutput, TError extends OutfitterError> = (
 ```
 
 This buys you:
+
 - **Testability** — Call the function directly, no transport mocking
 - **Reusability** — Same handler serves CLI, MCP, HTTP
 - **Type Safety** — Input, output, and error types are explicit
@@ -114,22 +116,22 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 
 ```
 
-| Package | What It Does | Reach For When... |
-|---------|--------------|-------------------|
-| `@outfitter/contracts` | Result types, errors, Handler contract | Always. This is the foundation. |
-| `@outfitter/types` | Type utilities, collection helpers | You need type manipulation |
-| `@outfitter/cli` | Commands, output modes, formatting | Building CLI applications |
-| `@outfitter/mcp` | Server framework, tool registration | Building AI agent tools |
-| `@outfitter/config` | XDG paths, config loading | You have configuration |
-| `@outfitter/logging` | Structured logging, redaction | You need logging (you do) |
-| `@outfitter/daemon` | Lifecycle, IPC, health checks | Building background services |
-| `@outfitter/file-ops` | Atomic writes, locking, secure paths | File operations that matter |
-| `@outfitter/state` | Pagination, cursor state | Paginated data |
-| `@outfitter/index` | SQLite FTS5, WAL mode, BM25 ranking | Full-text search indexing |
-| `@outfitter/schema` | Schema introspection, surface maps, drift detection | CLI/MCP parity docs and CI drift checks |
-| `@outfitter/tui` | Terminal UI rendering primitives and prompts | Rich terminal UX (tables, trees, prompts, streaming) |
-| `@outfitter/testing` | Test harnesses, fixtures | Testing (always) |
-| `@outfitter/tooling` | Biome, TypeScript, Lefthook presets | Project setup (dev dependency) |
+| Package                | What It Does                                        | Reach For When...                                    |
+| ---------------------- | --------------------------------------------------- | ---------------------------------------------------- |
+| `@outfitter/contracts` | Result types, errors, Handler contract              | Always. This is the foundation.                      |
+| `@outfitter/types`     | Type utilities, collection helpers                  | You need type manipulation                           |
+| `@outfitter/cli`       | Commands, output modes, formatting                  | Building CLI applications                            |
+| `@outfitter/mcp`       | Server framework, tool registration                 | Building AI agent tools                              |
+| `@outfitter/config`    | XDG paths, config loading                           | You have configuration                               |
+| `@outfitter/logging`   | Structured logging, redaction                       | You need logging (you do)                            |
+| `@outfitter/daemon`    | Lifecycle, IPC, health checks                       | Building background services                         |
+| `@outfitter/file-ops`  | Atomic writes, locking, secure paths                | File operations that matter                          |
+| `@outfitter/state`     | Pagination, cursor state                            | Paginated data                                       |
+| `@outfitter/index`     | SQLite FTS5, WAL mode, BM25 ranking                 | Full-text search indexing                            |
+| `@outfitter/schema`    | Schema introspection, surface maps, drift detection | CLI/MCP parity docs and CI drift checks              |
+| `@outfitter/tui`       | Terminal UI rendering primitives and prompts        | Rich terminal UX (tables, trees, prompts, streaming) |
+| `@outfitter/testing`   | Test harnesses, fixtures                            | Testing (always)                                     |
+| `@outfitter/tooling`   | Biome, TypeScript, Lefthook presets                 | Project setup (dev dependency)                       |
 
 ## Trail Map: Designing a System
 
@@ -172,19 +174,19 @@ const createUser: Handler<unknown, User, ValidationError | ConflictError>;
 
 Ten categories. Memorize the exit codes—you'll use them.
 
-| Category | Exit | HTTP | Class | When |
-|----------|------|------|-------|------|
-| `validation` | 1 | 400 | `ValidationError` | Bad input, schema failures |
-| `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
-| `conflict` | 3 | 409 | `AlreadyExistsError` | Resource already exists |
-| `conflict` | 3 | 409 | `ConflictError` | Version mismatch, concurrent modification |
-| `permission` | 4 | 403 | `PermissionError` | Forbidden action |
-| `timeout` | 5 | 504 | `TimeoutError` | Took too long |
-| `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests |
-| `network` | 7 | 502 | `NetworkError` | Connection failures |
-| `internal` | 8 | 500 | `InternalError` | Bugs, unexpected errors |
-| `auth` | 9 | 401 | `AuthError` | Authentication required |
-| `cancelled` | 130 | 499 | `CancelledError` | User hit Ctrl+C |
+| Category     | Exit | HTTP | Class                | When                                      |
+| ------------ | ---- | ---- | -------------------- | ----------------------------------------- |
+| `validation` | 1    | 400  | `ValidationError`    | Bad input, schema failures                |
+| `not_found`  | 2    | 404  | `NotFoundError`      | Resource doesn't exist                    |
+| `conflict`   | 3    | 409  | `AlreadyExistsError` | Resource already exists                   |
+| `conflict`   | 3    | 409  | `ConflictError`      | Version mismatch, concurrent modification |
+| `permission` | 4    | 403  | `PermissionError`    | Forbidden action                          |
+| `timeout`    | 5    | 504  | `TimeoutError`       | Took too long                             |
+| `rate_limit` | 6    | 429  | `RateLimitError`     | Too many requests                         |
+| `network`    | 7    | 502  | `NetworkError`       | Connection failures                       |
+| `internal`   | 8    | 500  | `InternalError`      | Bugs, unexpected errors                   |
+| `auth`       | 9    | 401  | `AuthError`          | Authentication required                   |
+| `cancelled`  | 130  | 499  | `CancelledError`     | User hit Ctrl+C                           |
 
 ### 4. Pick Your Packages
 
@@ -206,40 +208,40 @@ Decide:
 
 Deeper dives into specific topics.
 
-| Guide | What's Covered | Location |
-|-------|----------------|----------|
-| **Getting Started** | First handler, CLI + MCP adapters | [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md) |
-| **Architecture Design** | 5-step process, templates, constraints | [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md) |
+| Guide                   | What's Covered                         | Location                                                                            |
+| ----------------------- | -------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Getting Started**     | First handler, CLI + MCP adapters      | [guides/getting-started.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/getting-started.md) |
+| **Architecture Design** | 5-step process, templates, constraints | [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md)       |
 
 ## Pattern Deep Dives
 
 When you need the details, not just the overview.
 
-| Pattern | What's Covered | Location |
-|---------|----------------|----------|
-| **Handler Contract** | Input, context, Result | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) |
-| **Error Taxonomy** | 10 categories, exit/HTTP mapping | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) |
-| **Result Utilities** | Creating, checking, transforming | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md) |
-| **CLI Patterns** | Commands, output modes, pagination | [patterns/cli.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/cli.md) |
-| **MCP Patterns** | Tools, resources, prompts | [patterns/mcp.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/mcp.md) |
-| **Daemon Patterns** | Lifecycle, IPC, health checks | [patterns/daemon.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/daemon.md) |
-| **File Operations** | Atomic writes, locking, paths | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md) |
-| **Logging** | Structured logging, redaction | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md) |
-| **Testing** | Harnesses, fixtures, mocks | [patterns/testing.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/testing.md) |
-| **Converting Code** | Migrating to the stack | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
-| **Schema Introspection** | Manifest generation, surface maps, drift detection | [patterns/schema.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/schema.md) |
+| Pattern                  | What's Covered                                     | Location                                                                      |
+| ------------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Handler Contract**     | Input, context, Result                             | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md)       |
+| **Error Taxonomy**       | 10 categories, exit/HTTP mapping                   | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md)         |
+| **Result Utilities**     | Creating, checking, transforming                   | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md)       |
+| **CLI Patterns**         | Commands, output modes, pagination                 | [patterns/cli.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/cli.md)               |
+| **MCP Patterns**         | Tools, resources, prompts                          | [patterns/mcp.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/mcp.md)               |
+| **Daemon Patterns**      | Lifecycle, IPC, health checks                      | [patterns/daemon.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/daemon.md)         |
+| **File Operations**      | Atomic writes, locking, paths                      | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md)     |
+| **Logging**              | Structured logging, redaction                      | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md)       |
+| **Testing**              | Harnesses, fixtures, mocks                         | [patterns/testing.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/testing.md)       |
+| **Converting Code**      | Migrating to the stack                             | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
+| **Schema Introspection** | Manifest generation, surface maps, drift detection | [patterns/schema.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/schema.md)         |
 
 ## Templates: Just Add Code
 
 Copy, paste, customize.
 
-| Template | For | Location |
-|----------|-----|----------|
-| **Handler** | Transport-agnostic business logic | [templates/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler.md) |
-| **Handler Test** | Testing handlers with Bun | [templates/handler-test.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler-test.md) |
-| **CLI Command** | Commander.js wrapper | [templates/cli-command.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/cli-command.md) |
-| **MCP Tool** | Zod-schema tool definition | [templates/mcp-tool.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/mcp-tool.md) |
-| **Daemon Service** | Background service with IPC | [templates/daemon-service.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/daemon-service.md) |
+| Template           | For                               | Location                                                                                |
+| ------------------ | --------------------------------- | --------------------------------------------------------------------------------------- |
+| **Handler**        | Transport-agnostic business logic | [templates/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler.md)               |
+| **Handler Test**   | Testing handlers with Bun         | [templates/handler-test.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/handler-test.md)     |
+| **CLI Command**    | Commander.js wrapper              | [templates/cli-command.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/cli-command.md)       |
+| **MCP Tool**       | Zod-schema tool definition        | [templates/mcp-tool.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/mcp-tool.md)             |
+| **Daemon Service** | Background service with IPC       | [templates/daemon-service.md](${CLAUDE_PLUGIN_ROOT}/shared/templates/daemon-service.md) |
 
 ## Quick Start
 

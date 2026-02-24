@@ -10,6 +10,7 @@
  * Total: 11 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   getSpinnerFrame,
   renderSpinner,

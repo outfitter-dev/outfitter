@@ -29,48 +29,48 @@ Starting confidence: `▓░░░░` → Writing tests to define interface
 **Created**: `src/auth/authenticate.test.ts`
 
 ```typescript
-import { describe, test, expect } from 'bun:test'
-import { authenticate } from './authenticate'
+import { describe, test, expect } from "bun:test";
+import { authenticate } from "./authenticate";
 
-describe('authenticate', () => {
+describe("authenticate", () => {
   const validCreds = {
-    email: 'user@example.com',
-    password: 'ValidPass123!',
-  } as const
+    email: "user@example.com",
+    password: "ValidPass123!",
+  } as const;
 
-  test('returns success result with valid credentials', async () => {
-    const result = await authenticate(validCreds)
+  test("returns success result with valid credentials", async () => {
+    const result = await authenticate(validCreds);
 
-    expect(result.type).toBe('success')
-    if (result.type === 'success') {
-      expect(result.user.email).toBe(validCreds.email)
+    expect(result.type).toBe("success");
+    if (result.type === "success") {
+      expect(result.user.email).toBe(validCreds.email);
     }
-  })
+  });
 
-  test('returns error result with invalid credentials', async () => {
+  test("returns error result with invalid credentials", async () => {
     const result = await authenticate({
-      email: 'wrong@example.com',
-      password: 'wrong',
-    })
+      email: "wrong@example.com",
+      password: "wrong",
+    });
 
-    expect(result.type).toBe('error')
-    if (result.type === 'error') {
-      expect(result.code).toBe('INVALID_CREDENTIALS')
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.code).toBe("INVALID_CREDENTIALS");
     }
-  })
+  });
 
-  test('returns error result with empty password', async () => {
+  test("returns error result with empty password", async () => {
     const result = await authenticate({
-      email: 'user@example.com',
-      password: '',
-    })
+      email: "user@example.com",
+      password: "",
+    });
 
-    expect(result.type).toBe('error')
-    if (result.type === 'error') {
-      expect(result.code).toBe('MISSING_PASSWORD')
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.code).toBe("MISSING_PASSWORD");
     }
-  })
-})
+  });
+});
 ```
 
 **Run tests**: `bun test`
@@ -106,63 +106,69 @@ Confidence: `▓▓░░░` → Implementing minimal solution
 
 ```typescript
 type User = {
-  id: string
-  email: string
-  passwordHash: string
-}
+  id: string;
+  email: string;
+  passwordHash: string;
+};
 
 type AuthSuccess = {
-  type: 'success'
-  user: User
-}
+  type: "success";
+  user: User;
+};
 
 type AuthError = {
-  type: 'error'
-  code: 'INVALID_CREDENTIALS' | 'MISSING_PASSWORD'
-}
+  type: "error";
+  code: "INVALID_CREDENTIALS" | "MISSING_PASSWORD";
+};
 
-type AuthResult = AuthSuccess | AuthError
+type AuthResult = AuthSuccess | AuthError;
 
 // Minimal mock database
 const users: User[] = [
   {
-    id: '1',
-    email: 'user@example.com',
-    passwordHash: '$2a$10$hashedValidPass123!',
+    id: "1",
+    email: "user@example.com",
+    passwordHash: "$2a$10$hashedValidPass123!",
   },
-]
+];
 
 async function findUserByEmail(email: string): Promise<User | undefined> {
-  return users.find(u => u.email === email)
+  return users.find((u) => u.email === email);
 }
 
-async function comparePassword(password: string, hash: string): Promise<boolean> {
+async function comparePassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
   // Simplified for testing - in production use bcrypt
-  return password === 'ValidPass123!' && hash === '$2a$10$hashedValidPass123!'
+  return password === "ValidPass123!" && hash === "$2a$10$hashedValidPass123!";
 }
 
 export async function authenticate(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): Promise<AuthResult> {
   // Check password not empty
   if (!credentials.password) {
-    return { type: 'error', code: 'MISSING_PASSWORD' }
+    return { type: "error", code: "MISSING_PASSWORD" };
   }
 
   // Find user
-  const user = await findUserByEmail(credentials.email)
+  const user = await findUserByEmail(credentials.email);
   if (!user) {
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
   // Verify password
-  const passwordMatch = await comparePassword(credentials.password, user.passwordHash)
+  const passwordMatch = await comparePassword(
+    credentials.password,
+    user.passwordHash
+  );
   if (!passwordMatch) {
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
-  return { type: 'success', user }
+  return { type: "success", user };
 }
 ```
 
@@ -195,6 +201,7 @@ All tests pass — implementation complete.
 Confidence: `▓▓▓░░` → Improving structure and types
 
 Observations:
+
 - Types scattered throughout file
 - Password comparison hardcoded
 - No clear separation of concerns
@@ -204,80 +211,83 @@ Observations:
 ```typescript
 // Extract types to top
 type User = {
-  id: string
-  email: string
-  passwordHash: string
-}
+  id: string;
+  email: string;
+  passwordHash: string;
+};
 
 type AuthSuccess = {
-  type: 'success'
-  user: User
-}
+  type: "success";
+  user: User;
+};
 
 type AuthError = {
-  type: 'error'
-  code: 'INVALID_CREDENTIALS' | 'MISSING_PASSWORD' | 'INVALID_EMAIL'
-}
+  type: "error";
+  code: "INVALID_CREDENTIALS" | "MISSING_PASSWORD" | "INVALID_EMAIL";
+};
 
-type AuthResult = AuthSuccess | AuthError
+type AuthResult = AuthSuccess | AuthError;
 
 // Extract validation
 function validateCredentials(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): AuthError | null {
   if (!credentials.password) {
-    return { type: 'error', code: 'MISSING_PASSWORD' }
+    return { type: "error", code: "MISSING_PASSWORD" };
   }
-  if (!credentials.email.includes('@')) {
-    return { type: 'error', code: 'INVALID_EMAIL' }
+  if (!credentials.email.includes("@")) {
+    return { type: "error", code: "INVALID_EMAIL" };
   }
-  return null
+  return null;
 }
 
 // Mock database (unchanged)
 const users: User[] = [
   {
-    id: '1',
-    email: 'user@example.com',
-    passwordHash: '$2a$10$hashedValidPass123!',
+    id: "1",
+    email: "user@example.com",
+    passwordHash: "$2a$10$hashedValidPass123!",
   },
-]
+];
 
 async function findUserByEmail(email: string): Promise<User | undefined> {
-  return users.find(u => u.email === email)
+  return users.find((u) => u.email === email);
 }
 
 // Extract password verification
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
+async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
   // Simplified for testing - in production use bcrypt
-  return password === 'ValidPass123!' && hash === '$2a$10$hashedValidPass123!'
+  return password === "ValidPass123!" && hash === "$2a$10$hashedValidPass123!";
 }
 
 // Cleaner main function
 export async function authenticate(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): Promise<AuthResult> {
   // Validate input
-  const validationError = validateCredentials(credentials)
+  const validationError = validateCredentials(credentials);
   if (validationError) {
-    return validationError
+    return validationError;
   }
 
   // Find user
-  const user = await findUserByEmail(credentials.email)
+  const user = await findUserByEmail(credentials.email);
   if (!user) {
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
   // Verify password
-  const isValid = await verifyPassword(credentials.password, user.passwordHash)
+  const isValid = await verifyPassword(credentials.password, user.passwordHash);
   if (!isValid) {
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
-  return { type: 'success', user }
+  return { type: "success", user };
 }
 ```
 
@@ -356,31 +366,31 @@ Starting new cycle for email validation edge cases.
 Add tests for email validation edge cases:
 
 ```typescript
-describe('authenticate - email validation', () => {
-  test('returns error for invalid email format', async () => {
+describe("authenticate - email validation", () => {
+  test("returns error for invalid email format", async () => {
     const result = await authenticate({
-      email: 'not-an-email',
-      password: 'ValidPass123!',
-    })
+      email: "not-an-email",
+      password: "ValidPass123!",
+    });
 
-    expect(result.type).toBe('error')
-    if (result.type === 'error') {
-      expect(result.code).toBe('INVALID_EMAIL')
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.code).toBe("INVALID_EMAIL");
     }
-  })
+  });
 
-  test('returns error for empty email', async () => {
+  test("returns error for empty email", async () => {
     const result = await authenticate({
-      email: '',
-      password: 'ValidPass123!',
-    })
+      email: "",
+      password: "ValidPass123!",
+    });
 
-    expect(result.type).toBe('error')
-    if (result.type === 'error') {
-      expect(result.code).toBe('INVALID_EMAIL')
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.code).toBe("INVALID_EMAIL");
     }
-  })
-})
+  });
+});
 ```
 
 **Run tests**: `bun test`
@@ -405,19 +415,19 @@ Update validation to handle empty email:
 
 ```typescript
 function validateCredentials(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): AuthError | null {
   if (!credentials.email) {
-    return { type: 'error', code: 'INVALID_EMAIL' }
+    return { type: "error", code: "INVALID_EMAIL" };
   }
   if (!credentials.password) {
-    return { type: 'error', code: 'MISSING_PASSWORD' }
+    return { type: "error", code: "MISSING_PASSWORD" };
   }
-  if (!credentials.email.includes('@')) {
-    return { type: 'error', code: 'INVALID_EMAIL' }
+  if (!credentials.email.includes("@")) {
+    return { type: "error", code: "INVALID_EMAIL" };
   }
-  return null
+  return null;
 }
 ```
 
@@ -439,20 +449,20 @@ Extract email validation to dedicated function:
 
 ```typescript
 function isValidEmail(email: string): boolean {
-  return email.length > 0 && email.includes('@')
+  return email.length > 0 && email.includes("@");
 }
 
 function validateCredentials(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): AuthError | null {
   if (!isValidEmail(credentials.email)) {
-    return { type: 'error', code: 'INVALID_EMAIL' }
+    return { type: "error", code: "INVALID_EMAIL" };
   }
   if (!credentials.password) {
-    return { type: 'error', code: 'MISSING_PASSWORD' }
+    return { type: "error", code: "MISSING_PASSWORD" };
   }
-  return null
+  return null;
 }
 ```
 
@@ -477,40 +487,40 @@ Implementing rate limiting for failed authentication attempts.
 Add tests for rate limiting:
 
 ```typescript
-describe('authenticate - rate limiting', () => {
-  test('allows authentication after successful login', async () => {
+describe("authenticate - rate limiting", () => {
+  test("allows authentication after successful login", async () => {
     const validCreds = {
-      email: 'user@example.com',
-      password: 'ValidPass123!',
-    }
+      email: "user@example.com",
+      password: "ValidPass123!",
+    };
 
-    const result1 = await authenticate(validCreds)
-    const result2 = await authenticate(validCreds)
+    const result1 = await authenticate(validCreds);
+    const result2 = await authenticate(validCreds);
 
-    expect(result1.type).toBe('success')
-    expect(result2.type).toBe('success')
-  })
+    expect(result1.type).toBe("success");
+    expect(result2.type).toBe("success");
+  });
 
-  test('blocks authentication after 3 failed attempts', async () => {
+  test("blocks authentication after 3 failed attempts", async () => {
     const invalidCreds = {
-      email: 'user@example.com',
-      password: 'wrong',
-    }
+      email: "user@example.com",
+      password: "wrong",
+    };
 
     // 3 failed attempts
-    await authenticate(invalidCreds)
-    await authenticate(invalidCreds)
-    await authenticate(invalidCreds)
+    await authenticate(invalidCreds);
+    await authenticate(invalidCreds);
+    await authenticate(invalidCreds);
 
     // 4th attempt should be rate limited
-    const result = await authenticate(invalidCreds)
+    const result = await authenticate(invalidCreds);
 
-    expect(result.type).toBe('error')
-    if (result.type === 'error') {
-      expect(result.code).toBe('RATE_LIMITED')
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.code).toBe("RATE_LIMITED");
     }
-  })
-})
+  });
+});
 ```
 
 **Run tests**: `bun test` — Rate limit tests fail as expected
@@ -523,59 +533,63 @@ Implement basic rate limiting:
 
 ```typescript
 type AuthError = {
-  type: 'error'
-  code: 'INVALID_CREDENTIALS' | 'MISSING_PASSWORD' | 'INVALID_EMAIL' | 'RATE_LIMITED'
-}
+  type: "error";
+  code:
+    | "INVALID_CREDENTIALS"
+    | "MISSING_PASSWORD"
+    | "INVALID_EMAIL"
+    | "RATE_LIMITED";
+};
 
 // Track failed attempts
-const failedAttempts = new Map<string, number>()
+const failedAttempts = new Map<string, number>();
 
 function incrementFailedAttempts(email: string): void {
-  const current = failedAttempts.get(email) || 0
-  failedAttempts.set(email, current + 1)
+  const current = failedAttempts.get(email) || 0;
+  failedAttempts.set(email, current + 1);
 }
 
 function resetFailedAttempts(email: string): void {
-  failedAttempts.delete(email)
+  failedAttempts.delete(email);
 }
 
 function isRateLimited(email: string): boolean {
-  const attempts = failedAttempts.get(email) || 0
-  return attempts >= 3
+  const attempts = failedAttempts.get(email) || 0;
+  return attempts >= 3;
 }
 
 export async function authenticate(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): Promise<AuthResult> {
   // Check rate limiting first
   if (isRateLimited(credentials.email)) {
-    return { type: 'error', code: 'RATE_LIMITED' }
+    return { type: "error", code: "RATE_LIMITED" };
   }
 
   // Validate input
-  const validationError = validateCredentials(credentials)
+  const validationError = validateCredentials(credentials);
   if (validationError) {
-    return validationError
+    return validationError;
   }
 
   // Find user
-  const user = await findUserByEmail(credentials.email)
+  const user = await findUserByEmail(credentials.email);
   if (!user) {
-    incrementFailedAttempts(credentials.email)
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    incrementFailedAttempts(credentials.email);
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
   // Verify password
-  const isValid = await verifyPassword(credentials.password, user.passwordHash)
+  const isValid = await verifyPassword(credentials.password, user.passwordHash);
   if (!isValid) {
-    incrementFailedAttempts(credentials.email)
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    incrementFailedAttempts(credentials.email);
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
   // Reset on success
-  resetFailedAttempts(credentials.email)
-  return { type: 'success', user }
+  resetFailedAttempts(credentials.email);
+  return { type: "success", user };
 }
 ```
 
@@ -591,22 +605,22 @@ Extract rate limiting to separate module for testability:
 
 ```typescript
 export class RateLimiter {
-  private attempts = new Map<string, number>()
+  private attempts = new Map<string, number>();
 
   constructor(private maxAttempts: number = 3) {}
 
   increment(key: string): void {
-    const current = this.attempts.get(key) || 0
-    this.attempts.set(key, current + 1)
+    const current = this.attempts.get(key) || 0;
+    this.attempts.set(key, current + 1);
   }
 
   reset(key: string): void {
-    this.attempts.delete(key)
+    this.attempts.delete(key);
   }
 
   isLimited(key: string): boolean {
-    const attempts = this.attempts.get(key) || 0
-    return attempts >= this.maxAttempts
+    const attempts = this.attempts.get(key) || 0;
+    return attempts >= this.maxAttempts;
   }
 }
 ```
@@ -614,30 +628,30 @@ export class RateLimiter {
 Update `authenticate.ts` to use class:
 
 ```typescript
-import { RateLimiter } from './rate-limiter'
+import { RateLimiter } from "./rate-limiter";
 
-const rateLimiter = new RateLimiter(3)
+const rateLimiter = new RateLimiter(3);
 
 export async function authenticate(credentials: {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }): Promise<AuthResult> {
   // Check rate limiting first
   if (rateLimiter.isLimited(credentials.email)) {
-    return { type: 'error', code: 'RATE_LIMITED' }
+    return { type: "error", code: "RATE_LIMITED" };
   }
 
   // ... rest unchanged ...
 
   // On failure
   if (!isValid) {
-    rateLimiter.increment(credentials.email)
-    return { type: 'error', code: 'INVALID_CREDENTIALS' }
+    rateLimiter.increment(credentials.email);
+    return { type: "error", code: "INVALID_CREDENTIALS" };
   }
 
   // On success
-  rateLimiter.reset(credentials.email)
-  return { type: 'success', user }
+  rateLimiter.reset(credentials.email);
+  return { type: "success", user };
 }
 ```
 
@@ -655,6 +669,7 @@ bun x stryker run
 ```
 
 Results:
+
 - Coverage: 94.8%
 - Mutation score: 78.3%
 - All tests passing
@@ -670,17 +685,20 @@ Coverage: 94.8% line coverage
 Mutation: 78.3% mutation score
 
 Features implemented:
+
 1. Basic authentication with email/password
 2. Email validation
 3. Rate limiting for failed attempts
 
 Code quality:
+
 - All types explicit
 - Functions single-purpose
 - Tests cover happy path and edge cases
 - Mutation testing verifies test quality
 
 Next steps:
+
 - Add integration tests with real database
 - Implement actual bcrypt password hashing
 - Add time-based rate limit expiration

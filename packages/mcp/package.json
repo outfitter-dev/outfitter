@@ -1,11 +1,25 @@
 {
   "name": "@outfitter/mcp",
-  "description": "MCP server framework with typed tools for Outfitter",
   "version": "0.4.2",
-  "type": "module",
+  "description": "MCP server framework with typed tools for Outfitter",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "outfitter",
+    "tools",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/mcp"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -59,7 +73,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bunup --filter @outfitter/mcp",
     "lint": "biome lint ./src",
@@ -73,11 +89,6 @@
     "@modelcontextprotocol/sdk": "catalog:",
     "zod": "catalog:"
   },
-  "peerDependencies": {
-    "@outfitter/config": ">=0.3.0",
-    "@outfitter/contracts": ">=0.2.0",
-    "@outfitter/logging": ">=0.3.0"
-  },
   "devDependencies": {
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
@@ -85,20 +96,9 @@
     "@types/bun": "catalog:",
     "typescript": "catalog:"
   },
-  "keywords": [
-    "outfitter",
-    "mcp",
-    "model-context-protocol",
-    "tools",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/mcp"
-  },
-  "publishConfig": {
-    "access": "public"
+  "peerDependencies": {
+    "@outfitter/config": ">=0.3.0",
+    "@outfitter/contracts": ">=0.2.0",
+    "@outfitter/logging": ">=0.3.0"
   }
 }

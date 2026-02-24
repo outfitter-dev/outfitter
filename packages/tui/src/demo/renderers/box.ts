@@ -5,6 +5,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import { createBox, renderBox } from "../../render/box.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
 import { demoSection } from "../section.js";

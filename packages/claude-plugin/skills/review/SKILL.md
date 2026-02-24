@@ -7,7 +7,7 @@ allowed-tools: Read Grep Glob Bash(rg *)
 
 # Stack Compliance Review
 
-Audit code for @outfitter/* pattern compliance.
+Audit code for @outfitter/\* pattern compliance.
 
 ## Quick Audit
 
@@ -54,13 +54,13 @@ if (result.isErr()) { ... }
 - [ ] `category` matches use case
 - [ ] `_tag` used for pattern matching
 
-| Category | Use For |
-|----------|---------|
-| `validation` | Invalid input, schema failures |
-| `not_found` | Resource doesn't exist |
-| `conflict` | Already exists, version mismatch |
-| `permission` | Forbidden action |
-| `internal` | Unexpected errors, bugs |
+| Category     | Use For                          |
+| ------------ | -------------------------------- |
+| `validation` | Invalid input, schema failures   |
+| `not_found`  | Resource doesn't exist           |
+| `conflict`   | Already exists, version mismatch |
+| `permission` | Forbidden action                 |
+| `internal`   | Unexpected errors, bugs          |
 
 ### Logging
 
@@ -77,7 +77,7 @@ logger.info("Config: " + JSON.stringify(config));
 
 // GOOD
 ctx.logger.info("Processing", { userId: user.id });
-ctx.logger.debug("Config loaded", { config });  // redaction enabled
+ctx.logger.debug("Config loaded", { config }); // redaction enabled
 ```
 
 ### Path Safety
@@ -92,7 +92,7 @@ ctx.logger.debug("Config loaded", { config });  // redaction enabled
 ```typescript
 // BAD
 const configPath = path.join(os.homedir(), ".myapp", "config.json");
-const userFile = path.join(baseDir, userInput);  // traversal risk!
+const userFile = path.join(baseDir, userInput); // traversal risk!
 
 // GOOD
 const configDir = getConfigDir("myapp");
@@ -139,12 +139,12 @@ rg "Handler<.*> = async \(input\)" --type ts
 
 ## Severity Levels
 
-| Level | Examples |
-|-------|----------|
+| Level        | Examples                                                     |
+| ------------ | ------------------------------------------------------------ |
 | **Critical** | Thrown exceptions, unvalidated paths, missing error handling |
-| **High** | Console logging, hardcoded paths, missing context |
-| **Medium** | Missing type annotations, non-atomic writes |
-| **Low** | Style issues, missing documentation |
+| **High**     | Console logging, hardcoded paths, missing context            |
+| **Medium**   | Missing type annotations, non-atomic writes                  |
+| **Low**      | Style issues, missing documentation                          |
 
 ## Report Format
 
@@ -155,12 +155,15 @@ rg "Handler<.*> = async \(input\)" --type ts
 **Issues**: X critical, Y high, Z medium
 
 ### Critical
+
 1. [file:line] Issue description
 
 ### High
+
 1. [file:line] Issue description
 
 ### Recommendations
+
 - Recommendation with fix
 ```
 

@@ -2,7 +2,9 @@
  * Tests for Result utilities
  */
 import { describe, expect, it, vi } from "bun:test";
+
 import { Result } from "better-result";
+
 import {
   combine2,
   combine3,

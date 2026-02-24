@@ -85,6 +85,7 @@ Claude Code includes built-in agents you should understand before creating custo
 - **Purpose**: Complex research, multi-step operations, code modifications
 
 **When used:**
+
 - Tasks requiring both exploration AND modification
 - Complex reasoning across multiple files
 - When multiple strategies may be needed
@@ -96,6 +97,7 @@ Claude Code includes built-in agents you should understand before creating custo
 - **Purpose**: Research during plan mode
 
 **When used:**
+
 - Automatically in plan mode when Claude needs to research codebase
 - Only used in plan mode (prevents infinite nesting)
 
@@ -107,6 +109,7 @@ Claude Code includes built-in agents you should understand before creating custo
 - **Purpose**: Fast file discovery and code exploration
 
 **Thoroughness levels:**
+
 - `quick` — Basic searches
 - `medium` — Moderate exploration
 - `very thorough` — Comprehensive analysis
@@ -114,11 +117,13 @@ Claude Code includes built-in agents you should understand before creating custo
 ### When to Create Custom vs Use Built-in
 
 **Use built-in agents when:**
+
 - Task is general code exploration (Explore)
 - Task is general implementation (General-purpose)
 - You're in plan mode (Plan)
 
 **Create custom agents when:**
+
 - You need specialized domain expertise
 - You want consistent output formats
 - You need specific tool restrictions
@@ -135,6 +140,7 @@ description: |
 ```
 
 **Effective phrases:**
+
 - "Use PROACTIVELY"
 - "MUST BE USED when..."
 - "Automatically invoke for..."
@@ -149,6 +155,7 @@ Explicit user-facing syntax for chaining agents:
 ```
 
 Claude will:
+
 1. Invoke code-analyzer agent
 2. Collect results
 3. Invoke optimizer agent with context from first agent

@@ -58,6 +58,7 @@ You are a security expert specializing in identifying vulnerabilities in web app
 ## Expertise Areas
 
 ### OWASP Top 10
+
 - A01: Broken Access Control
 - A02: Cryptographic Failures
 - A03: Injection
@@ -72,20 +73,24 @@ You are a security expert specializing in identifying vulnerabilities in web app
 ## Analysis Process
 
 ### Step 1: Reconnaissance
+
 1. Identify application type
 2. Determine technology stack
 3. Map entry points
 4. Identify sensitive data flows
 
 ### Step 2: Vulnerability Detection
+
 Check for injection, authentication, authorization, and data protection issues.
 
 ### Step 3: Severity Assessment
+
 Rate findings as Critical (9.0-10.0), High (7.0-8.9), Medium (4.0-6.9), or Low (0.1-3.9).
 
 ## Output Format
 
 For each vulnerability:
+
 - **ID**: VULN-001
 - **Severity**: critical|high|medium|low
 - **Category**: OWASP category
@@ -121,15 +126,19 @@ You specialize in authentication and authorization security.
 ## Review Checklist
 
 ### Password Security
+
 - [ ] Minimum 12+ characters, bcrypt/Argon2 hashing, rate limiting
 
 ### Token Security
+
 - [ ] JWT signature validation, expiration, refresh rotation, no sensitive payload data
 
 ### Session Security
+
 - [ ] Secure ID generation, regeneration after login, httpOnly/secure/sameSite cookies
 
 ### OAuth 2.0 / OIDC
+
 - [ ] PKCE for public clients, state parameter, redirect URI validation
 ```
 
@@ -158,6 +167,7 @@ model: inherit
 # TDD Specialist
 
 ## TDD Cycle
+
 1. **Red**: Write failing test
 2. **Green**: Minimal code to pass
 3. **Refactor**: Improve while green
@@ -167,14 +177,15 @@ model: inherit
 import { describe, it, expect, beforeEach } from 'bun:test';
 
 describe('Module', () => {
-  describe('method', () => {
-    it('handles success case', async () => { /* Arrange-Act-Assert */ });
-    it('handles error case', async () => { });
-    it('handles edge case', async () => { });
-  });
+describe('method', () => {
+it('handles success case', async () => { /_ Arrange-Act-Assert _/ });
+it('handles error case', async () => { });
+it('handles edge case', async () => { });
+});
 });
 
 ## Coverage Goals
+
 - Unit: 80-90%, Integration: 60-70%, Critical paths: 100%
 ```
 
@@ -203,12 +214,14 @@ model: inherit
 # Code Quality Reviewer
 
 ## Quality Dimensions
+
 - **Readability**: Clear naming, logical structure, appropriate comments
 - **Maintainability**: Low coupling, high cohesion, single responsibility
 - **Testability**: Dependency injection, pure functions, clear interfaces
 - **Performance**: Time/space complexity, resource usage
 
 ## Code Smells to Check
+
 - Long methods (>50 lines), large classes (>500 lines)
 - Deep nesting, switch statements, duplicate code
 - Feature envy, inappropriate intimacy
@@ -239,6 +252,7 @@ model: inherit
 # Kubernetes Deployment Specialist
 
 ## Process
+
 1. Pre-flight checks (cluster, nodes, resources)
 2. Manifest generation (deployment, service, configmap)
 3. Deployment execution (apply, rollout status)
@@ -271,6 +285,7 @@ model: inherit
 # Documentation Researcher
 
 ## Source Priority
+
 1. Official documentation sites
 2. Official GitHub repositories
 3. Official API references
@@ -337,12 +352,15 @@ allowed-tools: Bash(git *), Bash(gh *)
 Issue: #$1
 
 ## Issue Details
+
 !`gh issue view $1 --json title,body,labels`
 
 ## Current State
+
 Branch: !`git branch --show-current`
 
 ## Action
+
 1. Ensure clean working directory
 2. Pull latest from main
 3. Create feature/$1 branch
@@ -547,7 +565,11 @@ Generate and execute commit immediately.
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/john/Documents"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/john/Documents"
+      ]
     }
   }
 }
@@ -560,7 +582,11 @@ Generate and execute commit immediately.
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/john/Projects"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/john/Projects"
+      ]
     },
     "postgres": {
       "command": "npx",
@@ -617,6 +643,7 @@ Generate and execute commit immediately.
 ### Cross-Platform Paths
 
 Use absolute paths per platform:
+
 - **macOS**: `/Users/john/tools-server`
 - **Windows**: `C:/Users/john/tools-server`
 - **Linux**: `/home/john/tools-server`

@@ -5,6 +5,7 @@
  */
 
 import { Command } from "commander";
+
 import { createCLI as createCLIImpl } from "./cli.js";
 import type {
   CLI,

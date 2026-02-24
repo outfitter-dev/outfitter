@@ -1,4 +1,5 @@
 import { Result } from "better-result";
+
 import { type OutfitterError, TimeoutError } from "./errors.js";
 
 /**

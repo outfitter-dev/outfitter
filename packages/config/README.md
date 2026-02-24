@@ -59,11 +59,13 @@ if (result.isOk()) {
 ```
 
 **Parameters:**
+
 - `appName` - Application name for XDG directory lookup
 - `schema` - Zod schema for validation
 - `options.searchPaths` - Custom search paths (overrides XDG defaults)
 
 **Search Order:**
+
 1. Custom `searchPaths` if provided
 2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
 3. `~/.config/{appName}/config.{ext}`
@@ -88,6 +90,7 @@ const result = resolveConfig(AppSchema, {
 ```
 
 **Parameters:**
+
 - `schema` - Zod schema for validation
 - `sources` - Configuration sources to merge
 
@@ -113,6 +116,7 @@ if (result.isOk()) {
 ```
 
 **Parameters:**
+
 - `content` - Raw file content
 - `filename` - Filename (extension determines parser)
 
@@ -179,6 +183,7 @@ const merged = deepMerge(defaults, overrides);
 ```
 
 **Merge Behavior:**
+
 - Recursively merges nested plain objects
 - Arrays are replaced (not concatenated)
 - `null` explicitly replaces the target value
@@ -194,10 +199,10 @@ Configuration sources for multi-layer resolution.
 
 ```typescript
 interface ConfigSources<T> {
-  defaults?: Partial<T>;  // Lowest precedence
-  file?: Partial<T>;      // From config file
-  env?: Partial<T>;       // Environment variables
-  flags?: Partial<T>;     // CLI flags (highest)
+  defaults?: Partial<T>; // Lowest precedence
+  file?: Partial<T>; // From config file
+  env?: Partial<T>; // Environment variables
+  flags?: Partial<T>; // CLI flags (highest)
 }
 ```
 
@@ -207,7 +212,7 @@ Options for `loadConfig()`.
 
 ```typescript
 interface LoadConfigOptions {
-  searchPaths?: string[];  // Custom search paths
+  searchPaths?: string[]; // Custom search paths
 }
 ```
 
@@ -256,11 +261,11 @@ const prodDefaults = getEnvironmentDefaults("production");
 // { logLevel: null, verbose: false, errorDetail: "message" }
 ```
 
-| Setting | `development` | `production` | `test` |
-|---------|--------------|-------------|--------|
-| logLevel | `"debug"` | `null` | `null` |
-| verbose | `true` | `false` | `false` |
-| errorDetail | `"full"` | `"message"` | `"full"` |
+| Setting     | `development` | `production` | `test`   |
+| ----------- | ------------- | ------------ | -------- |
+| logLevel    | `"debug"`     | `null`       | `null`   |
+| verbose     | `true`        | `false`      | `false`  |
+| errorDetail | `"full"`      | `"message"`  | `"full"` |
 
 ### Types
 
@@ -286,12 +291,12 @@ interface EnvironmentDefaults {
 
 This package follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) for locating configuration files.
 
-| Variable | macOS/Linux Default | Purpose |
-|----------|---------------------|---------|
-| `XDG_CONFIG_HOME` | `~/.config` | User-specific configuration |
-| `XDG_DATA_HOME` | `~/.local/share` | User-specific data files |
-| `XDG_CACHE_HOME` | `~/.cache` | Non-essential cached data |
-| `XDG_STATE_HOME` | `~/.local/state` | Persistent state (logs, history) |
+| Variable          | macOS/Linux Default | Purpose                          |
+| ----------------- | ------------------- | -------------------------------- |
+| `XDG_CONFIG_HOME` | `~/.config`         | User-specific configuration      |
+| `XDG_DATA_HOME`   | `~/.local/share`    | User-specific data files         |
+| `XDG_CACHE_HOME`  | `~/.cache`          | Non-essential cached data        |
+| `XDG_STATE_HOME`  | `~/.local/state`    | Persistent state (logs, history) |
 
 ---
 
@@ -317,13 +322,13 @@ Higher precedence sources override lower ones. Nested objects are deep-merged.
 
 ## Supported File Formats
 
-| Extension | Parser | Notes |
-|-----------|--------|-------|
-| `.toml` | smol-toml | Preferred for configuration |
-| `.yaml`, `.yml` | yaml | YAML anchors/aliases supported |
-| `.json` | JSON.parse | Strict parsing |
-| `.jsonc` | json5 | JSON with comments and trailing commas |
-| `.json5` | json5 | Comments and trailing commas allowed |
+| Extension       | Parser     | Notes                                  |
+| --------------- | ---------- | -------------------------------------- |
+| `.toml`         | smol-toml  | Preferred for configuration            |
+| `.yaml`, `.yml` | yaml       | YAML anchors/aliases supported         |
+| `.json`         | JSON.parse | Strict parsing                         |
+| `.jsonc`        | json5      | JSON with comments and trailing commas |
+| `.json5`        | json5      | Comments and trailing commas allowed   |
 
 ---
 

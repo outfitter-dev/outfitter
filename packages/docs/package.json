@@ -1,11 +1,27 @@
 {
   "name": "@outfitter/docs",
-  "description": "Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows",
   "version": "0.1.2",
-  "type": "module",
+  "description": "Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows",
+  "keywords": [
+    "cli",
+    "docs",
+    "outfitter",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/docs"
+  },
+  "bin": {
+    "outfitter-docs": "./dist/cli.js"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -53,10 +69,9 @@
     },
     "./package.json": "./package.json"
   },
-  "bin": {
-    "outfitter-docs": "./dist/cli.js"
+  "publishConfig": {
+    "access": "public"
   },
-  "sideEffects": false,
   "scripts": {
     "build": "bunup --filter @outfitter/docs",
     "lint": "biome lint ./src",
@@ -74,20 +89,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "docs",
-    "cli",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/docs"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

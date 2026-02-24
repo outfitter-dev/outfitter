@@ -80,39 +80,39 @@ Packages are organized into tiers based on stability and dependency direction. H
 
 APIs locked, breaking changes rare. All other packages depend on these.
 
-| Package | Purpose |
-|---------|---------|
+| Package                | Purpose                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
 | `@outfitter/contracts` | Result/Error patterns, error taxonomy, handler contract, adapters |
-| `@outfitter/types` | Branded types, type guards, utility types |
+| `@outfitter/types`     | Branded types, type guards, utility types                         |
 
 ### Runtime Tier (Active)
 
 APIs evolving based on usage. These implement the core functionality.
 
-| Package | Purpose |
-|---------|---------|
-| `@outfitter/cli` | Typed CLI framework with output modes, input parsing, pagination, terminal rendering (`/render`, `/terminal` subpaths) |
-| `@outfitter/config` | XDG-compliant config loading with Zod validation |
-| `@outfitter/logging` | Structured logging via logtape with redaction |
-| `@outfitter/file-ops` | Workspace detection, path security, file locking, atomic writes |
-| `@outfitter/state` | Pagination cursors, ephemeral state management |
-| `@outfitter/mcp` | MCP server framework with typed tools |
-| `@outfitter/index` | SQLite FTS5 indexing with WAL mode |
-| `@outfitter/daemon` | Daemon lifecycle, IPC, health checks |
-| `@outfitter/schema` | Schema introspection, surface map generation, drift detection, and markdown reference output (`/diff`, `/manifest`, `/markdown`, `/surface` subpaths) |
-| `@outfitter/tui` | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
-| `@outfitter/testing` | Test harnesses for CLI and MCP |
+| Package               | Purpose                                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@outfitter/cli`      | Typed CLI framework with output modes, input parsing, pagination, terminal rendering (`/render`, `/terminal` subpaths)                                |
+| `@outfitter/config`   | XDG-compliant config loading with Zod validation                                                                                                      |
+| `@outfitter/logging`  | Structured logging via logtape with redaction                                                                                                         |
+| `@outfitter/file-ops` | Workspace detection, path security, file locking, atomic writes                                                                                       |
+| `@outfitter/state`    | Pagination cursors, ephemeral state management                                                                                                        |
+| `@outfitter/mcp`      | MCP server framework with typed tools                                                                                                                 |
+| `@outfitter/index`    | SQLite FTS5 indexing with WAL mode                                                                                                                    |
+| `@outfitter/daemon`   | Daemon lifecycle, IPC, health checks                                                                                                                  |
+| `@outfitter/schema`   | Schema introspection, surface map generation, drift detection, and markdown reference output (`/diff`, `/manifest`, `/markdown`, `/surface` subpaths) |
+| `@outfitter/tui`      | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming                                                          |
+| `@outfitter/testing`  | Test harnesses for CLI and MCP                                                                                                                        |
 
 ### Tooling Tier (Early)
 
 APIs will change, not production-ready. Developer-facing tools built on the runtime packages.
 
-| Package | Purpose |
-|---------|---------|
-| `outfitter` | Umbrella CLI for scaffolding projects |
+| Package              | Purpose                                                            |
+| -------------------- | ------------------------------------------------------------------ |
+| `outfitter`          | Umbrella CLI for scaffolding projects                              |
 | `@outfitter/presets` | Scaffold presets and shared dependency versions (catalog-resolved) |
-| `@outfitter/docs` | Docs CLI, core assembly, freshness checks, and host adapter |
-| `@outfitter/tooling` | Dev tooling presets and CLI workflows |
+| `@outfitter/docs`    | Docs CLI, core assembly, freshness checks, and host adapter        |
+| `@outfitter/tooling` | Dev tooling presets and CLI workflows                              |
 
 ### Deprecated Packages
 
@@ -226,7 +226,9 @@ switch (error._tag) {
   case "NotFoundError":
     return res.status(404).json({ error: error.message });
   case "ValidationError":
-    return res.status(400).json({ error: error.message, context: error.context });
+    return res
+      .status(400)
+      .json({ error: error.message, context: error.context });
   // TypeScript ensures all cases are handled
 }
 ```
@@ -246,12 +248,12 @@ The handler contract (`Handler<TInput, TOutput, TError extends OutfitterError = 
 
 The [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) provides predictable, user-configurable paths:
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `XDG_CONFIG_HOME` | `~/.config` | Configuration files |
-| `XDG_DATA_HOME` | `~/.local/share` | Persistent data |
-| `XDG_CACHE_HOME` | `~/.cache` | Regenerable cache |
-| `XDG_STATE_HOME` | `~/.local/state` | Logs, history, cursors |
+| Variable          | Default          | Purpose                |
+| ----------------- | ---------------- | ---------------------- |
+| `XDG_CONFIG_HOME` | `~/.config`      | Configuration files    |
+| `XDG_DATA_HOME`   | `~/.local/share` | Persistent data        |
+| `XDG_CACHE_HOME`  | `~/.cache`       | Regenerable cache      |
+| `XDG_STATE_HOME`  | `~/.local/state` | Logs, history, cursors |
 
 This keeps user home directories clean and makes paths predictable for both humans and agents.
 
@@ -259,11 +261,11 @@ This keeps user home directories clean and makes paths predictable for both huma
 
 Each surface (CLI, MCP, API) has different concerns:
 
-| Surface | Input | Output | Errors |
-|---------|-------|--------|--------|
-| CLI | Flags, args, stdin | stdout/stderr, exit codes | Human-readable |
-| MCP | Tool call JSON | Tool response JSON | Structured |
-| API | HTTP request | HTTP response | Status codes |
+| Surface | Input              | Output                    | Errors         |
+| ------- | ------------------ | ------------------------- | -------------- |
+| CLI     | Flags, args, stdin | stdout/stderr, exit codes | Human-readable |
+| MCP     | Tool call JSON     | Tool response JSON        | Structured     |
+| API     | HTTP request       | HTTP response             | Status codes   |
 
 Adapters translate between surface-specific formats and the unified handler contract. The handler never knows which surface invoked it.
 
@@ -293,18 +295,18 @@ import { getEnvironment } from "@outfitter/config";
 
 Ten error categories cover all failure modes:
 
-| Category | Exit | HTTP | When to Use |
-|----------|------|------|-------------|
-| `validation` | 1 | 400 | Invalid input, schema failures |
-| `not_found` | 2 | 404 | Resource doesn't exist |
-| `conflict` | 3 | 409 | Resource already exists, version mismatch |
-| `permission` | 4 | 403 | Forbidden action |
-| `timeout` | 5 | 504 | Operation took too long |
-| `rate_limit` | 6 | 429 | Too many requests |
-| `network` | 7 | 502 | Connection failures |
-| `internal` | 8 | 500 | Unexpected errors, bugs |
-| `auth` | 9 | 401 | Authentication required |
-| `cancelled` | 130 | 499 | User interrupted (Ctrl+C) |
+| Category     | Exit | HTTP | When to Use                               |
+| ------------ | ---- | ---- | ----------------------------------------- |
+| `validation` | 1    | 400  | Invalid input, schema failures            |
+| `not_found`  | 2    | 404  | Resource doesn't exist                    |
+| `conflict`   | 3    | 409  | Resource already exists, version mismatch |
+| `permission` | 4    | 403  | Forbidden action                          |
+| `timeout`    | 5    | 504  | Operation took too long                   |
+| `rate_limit` | 6    | 429  | Too many requests                         |
+| `network`    | 7    | 502  | Connection failures                       |
+| `internal`   | 8    | 500  | Unexpected errors, bugs                   |
+| `auth`       | 9    | 401  | Authentication required                   |
+| `cancelled`  | 130  | 499  | User interrupted (Ctrl+C)                 |
 
 Exit code 130 follows Unix convention (128 + SIGINT).
 
@@ -332,13 +334,13 @@ From the monorepo root, call app entrypoints (for monorepo workflows) or package
 
 User-facing verbs we standardize around:
 
-| Verb | Purpose | Status |
-|------|---------|--------|
-| `init` | Create or bootstrap a project | Implemented |
-| `setup` | Opinionated setup wrapper for common defaults | Planned |
-| `add` | Add capabilities or tooling blocks | Implemented |
-| `check` | Validate project health and policy conformance | Implemented |
-| `fix` | Apply safe automated fixes for checkable issues | Planned |
+| Verb    | Purpose                                         | Status      |
+| ------- | ----------------------------------------------- | ----------- |
+| `init`  | Create or bootstrap a project                   | Implemented |
+| `setup` | Opinionated setup wrapper for common defaults   | Planned     |
+| `add`   | Add capabilities or tooling blocks              | Implemented |
+| `check` | Validate project health and policy conformance  | Implemented |
+| `fix`   | Apply safe automated fixes for checkable issues | Planned     |
 
 Repository maintenance operations are namespaced under `outfitter repo check|sync|export <subject>`. Current subjects: `docs`, `exports`, `readme`, `registry`, `changeset`, `tree`, `boundary-invocations`.
 

@@ -45,12 +45,14 @@ logger.info("User logged in", { userId: "123", method: "oauth" });
 If you were importing Node.js built-in modules at the top level alongside `@outfitter/logging`, the package no longer relies on top-level `node:*` imports. This improves compatibility with edge runtimes.
 
 **Before:**
+
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";
 // Package internally used: import { Console } from "node:console";
 ```
 
 **After:**
+
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";
 // Package uses runtime-safe console access

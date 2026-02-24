@@ -1,4 +1,5 @@
 import type { Result } from "better-result";
+
 import { generateRequestId } from "./context.js";
 import {
   type OutfitterError,

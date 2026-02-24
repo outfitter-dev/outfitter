@@ -1,4 +1,5 @@
 import type { Result } from "better-result";
+
 import type { OutfitterError } from "./errors.js";
 import type { Logger } from "./logging.js";
 

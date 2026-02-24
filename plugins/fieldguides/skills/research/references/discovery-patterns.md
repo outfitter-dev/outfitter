@@ -40,6 +40,7 @@ context7.get-library-docs(id, topic="installation")
 **3. Installation Synthesis**
 
 Compress findings into:
+
 - Prerequisites (runtime, dependencies)
 - Installation commands
 - Framework-specific integration
@@ -51,6 +52,7 @@ Compress findings into:
 ## Installation: {Library}
 
 **Prerequisites**:
+
 - {runtime requirement}
 - {peer dependencies}
 
@@ -66,6 +68,7 @@ Compress findings into:
 {how to confirm successful installation}
 
 **Common Issues**:
+
 - {issue} → {solution}
 ```
 
@@ -125,6 +128,7 @@ firecrawl.search(error_message)
 **5. Synthesis**
 
 Rank solutions by:
+
 - Source authority (official > community)
 - Recency (newer often better)
 - Vote count/acceptance
@@ -141,6 +145,7 @@ Rank solutions by:
 {step-by-step fix}
 
 **Alternative Solutions**:
+
 1. {alternative approach}
 2. {alternative approach}
 
@@ -148,6 +153,7 @@ Rank solutions by:
 {how to avoid this in future}
 
 **Sources**:
+
 - [GitHub Issue](url)
 - [Stack Overflow](url)
 ```
@@ -216,9 +222,11 @@ octocode.githubSearchCode("import { functionName } from 'library'")
 \`\`\`
 
 **Common Patterns**:
+
 - {pattern}: {when to use}
 
 **Gotchas**:
+
 - {common mistake}
 ```
 
@@ -250,6 +258,7 @@ firecrawl: Benchmarks, case studies, reviews
 **2. Cross-Reference**
 
 Compare across sources:
+
 - Feature claims vs reality
 - Performance benchmarks
 - Community health indicators
@@ -257,16 +266,17 @@ Compare across sources:
 
 **3. Build Matrix**
 
-| Criterion | Option A | Option B | Option C |
-|-----------|----------|----------|----------|
-| Performance | {metric} | {metric} | {metric} |
-| Learning curve | {level} | {level} | {level} |
-| Ecosystem | {size} | {size} | {size} |
-| Maintenance | {status} | {status} | {status} |
+| Criterion      | Option A | Option B | Option C |
+| -------------- | -------- | -------- | -------- |
+| Performance    | {metric} | {metric} | {metric} |
+| Learning curve | {level}  | {level}  | {level}  |
+| Ecosystem      | {size}   | {size}   | {size}   |
+| Maintenance    | {status} | {status} | {status} |
 
 **4. Recommend**
 
 Based on:
+
 - User's stated priorities
 - Evidence from research
 - Trade-off analysis
@@ -277,6 +287,7 @@ Based on:
 ## Comparison: {Category}
 
 **Options Evaluated**:
+
 1. {Option A} — {brief description}
 2. {Option B} — {brief description}
 
@@ -290,9 +301,11 @@ Based on:
 **Rationale**: {why this option wins for this context}
 
 **When to Choose Alternative**:
+
 - Choose {Option B} when {condition}
 
 **Sources**:
+
 - {source list}
 ```
 
@@ -341,6 +354,7 @@ octocode.githubSearchCode("{pattern}")
 **4. Contextualize**
 
 Filter recommendations by:
+
 - User's stack/constraints
 - Scale requirements
 - Team expertise
@@ -363,13 +377,16 @@ Filter recommendations by:
 \`\`\`
 
 **Avoid**:
+
 - {anti-pattern} — {why}
 
 **Context Matters**:
+
 - For {context A}: {variation}
 - For {context B}: {variation}
 
 **Sources**:
+
 - [Official Guide](url)
 - [Expert Article](url)
 ```

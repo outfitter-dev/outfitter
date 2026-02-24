@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import type { Command } from "commander";
+
 import { createDocsCommand } from "../command/create-docs-command.js";
 import {
   DOCS_COMMON_OPTION_FLAGS,

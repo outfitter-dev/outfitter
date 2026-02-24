@@ -10,16 +10,17 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ## XDG Directory Reference
 
-| Function | Path | Purpose |
-|----------|------|---------|
-| `getConfigDir(name)` | `~/.config/{name}` | Configuration files |
-| `getCacheDir(name)` | `~/.cache/{name}` | Cache files |
-| `getDataDir(name)` | `~/.local/share/{name}` | Persistent data |
-| `getStateDir(name)` | `~/.local/state/{name}` | Runtime state |
+| Function             | Path                    | Purpose             |
+| -------------------- | ----------------------- | ------------------- |
+| `getConfigDir(name)` | `~/.config/{name}`      | Configuration files |
+| `getCacheDir(name)`  | `~/.cache/{name}`       | Cache files         |
+| `getDataDir(name)`   | `~/.local/share/{name}` | Persistent data     |
+| `getStateDir(name)`  | `~/.local/state/{name}` | Runtime state       |
 
 ## Files to Migrate
 
 {{#each PATH_FILES}}
+
 ### {{this.file}}
 
 - **Line:** {{this.line}}
@@ -34,10 +35,18 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
@@ -63,6 +72,7 @@ const validatePath = (userPath: string, baseDir: string) => {
 ```
 
 **Security checks:**
+
 - Path traversal (`../`)
 - Symlink following
 - Base directory escape

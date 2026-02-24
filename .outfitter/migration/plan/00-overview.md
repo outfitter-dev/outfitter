@@ -6,15 +6,15 @@
 
 ## Status Dashboard
 
-| Stage | Status | Progress | Blocked By |
-|-------|--------|----------|------------|
-| 1. Foundation | ⬜ Not Started | 0/4 | — |
-| 2. Handlers | ⬜ Not Started | 0/0 | Foundation |
-| 3. Errors | ⬜ Not Started | 0/2 | Handlers |
-| 4. Paths | ⬜ Not Started | 0/16 | — |
-| 5. Adapters | ⬜ Not Started | 0/0 | Handlers |
-| 6. Documents | ⬜ Not Started | 0/154 | All |
-| 99. Unknowns | ⬜ Review | 0/11 | — |
+| Stage         | Status         | Progress | Blocked By |
+| ------------- | -------------- | -------- | ---------- |
+| 1. Foundation | ⬜ Not Started | 0/4      | —          |
+| 2. Handlers   | ⬜ Not Started | 0/0      | Foundation |
+| 3. Errors     | ⬜ Not Started | 0/2      | Handlers   |
+| 4. Paths      | ⬜ Not Started | 0/16     | —          |
+| 5. Adapters   | ⬜ Not Started | 0/0      | Handlers   |
+| 6. Documents  | ⬜ Not Started | 0/154    | All        |
+| 99. Unknowns  | ⬜ Review      | 0/11     | —          |
 
 **Status Key:** ⬜ Not Started · 🟡 In Progress · ✅ Complete · 🔴 Blocked · ⏭️ Skipped
 
@@ -60,19 +60,19 @@
 
 ## Progress Log
 
-| Date | Stage | Work Done | Notes |
-|------|-------|-----------|-------|
-| 2026-01-27 | — | Generated migration plan | Initial scan |
+| Date       | Stage | Work Done                | Notes        |
+| ---------- | ----- | ------------------------ | ------------ |
+| 2026-01-27 | —     | Generated migration plan | Initial scan |
 
 ## Decisions
 
 | Decision | Rationale | Date |
-|----------|-----------|------|
+| -------- | --------- | ---- |
 
 ## Blockers
 
 | Blocker | Stage | Status | Resolution |
-|---------|-------|--------|------------|
+| ------- | ----- | ------ | ---------- |
 
 ## Completion Criteria
 

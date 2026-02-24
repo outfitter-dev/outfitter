@@ -10,15 +10,44 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ## XDG Directory Reference
 
-| Function | Path | Purpose |
-|----------|------|---------|
-| `getConfigDir(name)` | `~/.config/{name}` | Configuration files |
-| `getCacheDir(name)` | `~/.cache/{name}` | Cache files |
-| `getDataDir(name)` | `~/.local/share/{name}` | Persistent data |
-| `getStateDir(name)` | `~/.local/state/{name}` | Runtime state |
+| Function             | Path                    | Purpose             |
+| -------------------- | ----------------------- | ------------------- |
+| `getConfigDir(name)` | `~/.config/{name}`      | Configuration files |
+| `getCacheDir(name)`  | `~/.cache/{name}`       | Cache files         |
+| `getDataDir(name)`   | `~/.local/share/{name}` | Persistent data     |
+| `getStateDir(name)`  | `~/.local/state/{name}` | Runtime state       |
 
 ## Files to Migrate
 
+### {{this.file}}
+
+- **Line:** {{this.line}}
+- **Current:** `{{this.current}}`
+- **Pattern:** {{this.pattern}}
+
+#### Migration
+
+- [ ] Replace with XDG function
+- [ ] Add `securePath()` if user-provided
+- [ ] Update tests
+
+```typescript
+// Before
+{
+  {
+    this.beforeCode;
+  }
+}
+
+// After
+{
+  {
+    this.afterCode;
+  }
+}
+```
+
+---
 
 ### {{this.file}}
 
@@ -34,14 +63,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -57,14 +93,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -80,14 +123,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -103,14 +153,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -126,14 +183,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -149,14 +213,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -172,14 +243,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -195,14 +273,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -218,14 +303,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -241,14 +333,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -264,14 +363,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -287,14 +393,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -310,14 +423,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -333,14 +453,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
 
 ### {{this.file}}
 
@@ -356,38 +483,21 @@ Replace hardcoded paths with XDG-compliant paths and add path security.
 
 ```typescript
 // Before
-{{this.beforeCode}}
+{
+  {
+    this.beforeCode;
+  }
+}
 
 // After
-{{this.afterCode}}
+{
+  {
+    this.afterCode;
+  }
+}
 ```
 
 ---
-
-
-### {{this.file}}
-
-- **Line:** {{this.line}}
-- **Current:** `{{this.current}}`
-- **Pattern:** {{this.pattern}}
-
-#### Migration
-
-- [ ] Replace with XDG function
-- [ ] Add `securePath()` if user-provided
-- [ ] Update tests
-
-```typescript
-// Before
-{{this.beforeCode}}
-
-// After
-{{this.afterCode}}
-```
-
----
-
-
 
 ## Path Security
 
@@ -406,6 +516,7 @@ const validatePath = (userPath: string, baseDir: string) => {
 ```
 
 **Security checks:**
+
 - Path traversal (`../`)
 - Symlink following
 - Base directory escape
@@ -458,5 +569,3 @@ await fs.readFile(pathResult.value);
 - [ ] No hardcoded absolute paths
 
 ## Notes
-
-

@@ -141,142 +141,140 @@ import type {
  * Every scaffold target is defined here. Both `init` and `scaffold` resolve
  * targets from this map. Order matters — it determines prompt display order.
  */
-export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> =
-  new Map<TargetId, TargetDefinition>([
-    [
-      "minimal",
-      {
-        id: "minimal",
-        description: "Minimal Bun + TypeScript project",
-        category: "library",
-        placement: "packages",
-        templateDir: "minimal",
-        defaultBlocks: ["scaffolding"],
-        status: "ready",
-        scope: "init-only",
-      },
-    ],
-    [
-      "cli",
-      {
-        id: "cli",
-        description: "CLI application with Outfitter command ergonomics",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "cli",
-        defaultBlocks: ["scaffolding"],
-        status: "ready",
-        scope: "both",
-      },
-    ],
-    [
-      "mcp",
-      {
-        id: "mcp",
-        description: "MCP server with typed tools and action registry",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "mcp",
-        defaultBlocks: ["scaffolding"],
-        status: "ready",
-        scope: "both",
-      },
-    ],
-    [
-      "daemon",
-      {
-        id: "daemon",
-        description: "Background daemon with control CLI",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "daemon",
-        defaultBlocks: ["scaffolding"],
-        status: "ready",
-        scope: "both",
-      },
-    ],
-    [
-      "api",
-      {
-        id: "api",
-        description: "HTTP API server (Hono)",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "api",
-        defaultBlocks: ["scaffolding"],
-        status: "stub",
-        scope: "both",
-      },
-    ],
-    [
-      "worker",
-      {
-        id: "worker",
-        description: "Background job worker",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "worker",
-        defaultBlocks: ["scaffolding"],
-        status: "stub",
-        scope: "both",
-      },
-    ],
-    [
-      "web",
-      {
-        id: "web",
-        description: "Web application (TanStack Start)",
-        category: "runnable",
-        placement: "apps",
-        templateDir: "web",
-        defaultBlocks: ["scaffolding"],
-        status: "stub",
-        scope: "both",
-      },
-    ],
-    [
-      "lib",
-      {
-        id: "lib",
-        description: "Shared library package",
-        category: "library",
-        placement: "packages",
-        templateDir: "lib",
-        defaultBlocks: ["scaffolding"],
-        status: "stub",
-        scope: "both",
-      },
-    ],
-  ]);
+export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> = new Map<
+  TargetId,
+  TargetDefinition
+>([
+  [
+    "minimal",
+    {
+      id: "minimal",
+      description: "Minimal Bun + TypeScript project",
+      category: "library",
+      placement: "packages",
+      templateDir: "minimal",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "init-only",
+    },
+  ],
+  [
+    "cli",
+    {
+      id: "cli",
+      description: "CLI application with Outfitter command ergonomics",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "cli",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "both",
+    },
+  ],
+  [
+    "mcp",
+    {
+      id: "mcp",
+      description: "MCP server with typed tools and action registry",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "mcp",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "both",
+    },
+  ],
+  [
+    "daemon",
+    {
+      id: "daemon",
+      description: "Background daemon with control CLI",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "daemon",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "both",
+    },
+  ],
+  [
+    "api",
+    {
+      id: "api",
+      description: "HTTP API server (Hono)",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "api",
+      defaultBlocks: ["scaffolding"],
+      status: "stub",
+      scope: "both",
+    },
+  ],
+  [
+    "worker",
+    {
+      id: "worker",
+      description: "Background job worker",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "worker",
+      defaultBlocks: ["scaffolding"],
+      status: "stub",
+      scope: "both",
+    },
+  ],
+  [
+    "web",
+    {
+      id: "web",
+      description: "Web application (TanStack Start)",
+      category: "runnable",
+      placement: "apps",
+      templateDir: "web",
+      defaultBlocks: ["scaffolding"],
+      status: "stub",
+      scope: "both",
+    },
+  ],
+  [
+    "lib",
+    {
+      id: "lib",
+      description: "Shared library package",
+      category: "library",
+      placement: "packages",
+      templateDir: "lib",
+      defaultBlocks: ["scaffolding"],
+      status: "stub",
+      scope: "both",
+    },
+  ],
+]);
 
 // ---------------------------------------------------------------------------
 // Derived constants (computed once from the registry)
 // ---------------------------------------------------------------------------
 
 /** All target IDs in registry order. */
-export const TARGET_IDS: readonly TargetId[] = [
-  ...TARGET_REGISTRY.keys(),
-];
+export const TARGET_IDS: readonly TargetId[] = [...TARGET_REGISTRY.keys()];
 
 /** Only targets whose templates are ready. */
 export const READY_TARGET_IDS: readonly TargetId[] = TARGET_IDS.filter(
-  (id) => TARGET_REGISTRY.get(id)!.status === "ready",
+  (id) => TARGET_REGISTRY.get(id)!.status === "ready"
 );
 
 /** Targets available in `init` (ready + init-scoped). */
-export const INIT_TARGET_IDS: readonly TargetId[] = TARGET_IDS.filter(
-  (id) => {
-    const t = TARGET_REGISTRY.get(id)!;
-    return t.status === "ready" && t.scope !== "scaffold-only";
-  },
-);
+export const INIT_TARGET_IDS: readonly TargetId[] = TARGET_IDS.filter((id) => {
+  const t = TARGET_REGISTRY.get(id)!;
+  return t.status === "ready" && t.scope !== "scaffold-only";
+});
 
 /** Targets available in `scaffold` (ready + scaffold-scoped). */
 export const SCAFFOLD_TARGET_IDS: readonly TargetId[] = TARGET_IDS.filter(
   (id) => {
     const t = TARGET_REGISTRY.get(id)!;
     return t.status === "ready" && t.scope !== "init-only";
-  },
+  }
 );
 
 // ---------------------------------------------------------------------------
@@ -288,9 +286,7 @@ export const SCAFFOLD_TARGET_IDS: readonly TargetId[] = TARGET_IDS.filter(
  *
  * Returns `NotFoundError` if the ID is not in the registry.
  */
-export function getTarget(
-  id: string,
-): Result<TargetDefinition, NotFoundError> {
+export function getTarget(id: string): Result<TargetDefinition, NotFoundError> {
   const target = TARGET_REGISTRY.get(id as TargetId);
   if (!target) {
     return Result.err(
@@ -298,7 +294,7 @@ export function getTarget(
         message: `Unknown target '${id}'. Available targets: ${TARGET_IDS.join(", ")}`,
         resourceType: "target",
         resourceId: id,
-      }),
+      })
     );
   }
   return Result.ok(target);
@@ -311,7 +307,7 @@ export function getTarget(
  * if the target exists but is a stub.
  */
 export function getReadyTarget(
-  id: string,
+  id: string
 ): Result<TargetDefinition, NotFoundError | ValidationError> {
   const targetResult = getTarget(id);
   if (targetResult.isErr()) {
@@ -327,7 +323,7 @@ export function getReadyTarget(
           `It is planned but the template has not been implemented. ` +
           `Ready targets: ${READY_TARGET_IDS.join(", ")}`,
         field: "target",
-      }),
+      })
     );
   }
 
@@ -340,7 +336,7 @@ export function getReadyTarget(
  * Validates both readiness and scope.
  */
 export function getInitTarget(
-  id: string,
+  id: string
 ): Result<TargetDefinition, NotFoundError | ValidationError> {
   const readyResult = getReadyTarget(id);
   if (readyResult.isErr()) {
@@ -355,7 +351,7 @@ export function getInitTarget(
           `Target '${id}' cannot be used with init. ` +
           `Use 'outfitter scaffold ${id}' instead.`,
         field: "target",
-      }),
+      })
     );
   }
 
@@ -368,7 +364,7 @@ export function getInitTarget(
  * Validates both readiness and scope.
  */
 export function getScaffoldTarget(
-  id: string,
+  id: string
 ): Result<TargetDefinition, NotFoundError | ValidationError> {
   const readyResult = getReadyTarget(id);
   if (readyResult.isErr()) {
@@ -383,7 +379,7 @@ export function getScaffoldTarget(
           `Target '${id}' cannot be scaffolded into an existing project. ` +
           `It is only available for new project creation via 'outfitter init'.`,
         field: "target",
-      }),
+      })
     );
   }
 
@@ -398,7 +394,7 @@ export function getScaffoldTarget(
  * to create the package directory.
  */
 export function resolvePlacement(
-  target: TargetDefinition,
+  target: TargetDefinition
 ): "apps" | "packages" {
   return target.placement;
 }
@@ -457,16 +453,16 @@ export {
 
 ## Target Catalog (Full Reference)
 
-| ID | Category | Placement | Template Dir | Scope | Status | Template Files |
-|---|---|---|---|---|---|---|
-| `minimal` | library | `packages/` | `minimal` | init-only | ready | Renamed from `basic`. Same files: `src/index.ts`, `package.json`, `tsconfig.json`, `.gitignore`, `.lefthook.yml` |
-| `cli` | runnable | `apps/` | `cli` | both | ready | `src/cli.ts`, `src/program.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md` |
-| `mcp` | runnable | `apps/` | `mcp` | both | ready | `src/server.ts`, `src/mcp.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md` |
-| `daemon` | runnable | `apps/` | `daemon` | both | ready | `src/daemon.ts`, `src/daemon-main.ts`, `src/cli.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md` |
-| `api` | runnable | `apps/` | `api` | both | stub | -- |
-| `worker` | runnable | `apps/` | `worker` | both | stub | -- |
-| `web` | runnable | `apps/` | `web` | both | stub | -- |
-| `lib` | library | `packages/` | `lib` | both | stub | -- |
+| ID        | Category | Placement   | Template Dir | Scope     | Status | Template Files                                                                                                                                                 |
+| --------- | -------- | ----------- | ------------ | --------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `minimal` | library  | `packages/` | `minimal`    | init-only | ready  | Renamed from `basic`. Same files: `src/index.ts`, `package.json`, `tsconfig.json`, `.gitignore`, `.lefthook.yml`                                               |
+| `cli`     | runnable | `apps/`     | `cli`        | both      | ready  | `src/cli.ts`, `src/program.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md`                      |
+| `mcp`     | runnable | `apps/`     | `mcp`        | both      | ready  | `src/server.ts`, `src/mcp.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md`                       |
+| `daemon`  | runnable | `apps/`     | `daemon`     | both      | ready  | `src/daemon.ts`, `src/daemon-main.ts`, `src/cli.ts`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`, `.gitignore`, `.lefthook.yml`, `README.md` |
+| `api`     | runnable | `apps/`     | `api`        | both      | stub   | --                                                                                                                                                             |
+| `worker`  | runnable | `apps/`     | `worker`     | both      | stub   | --                                                                                                                                                             |
+| `web`     | runnable | `apps/`     | `web`        | both      | stub   | --                                                                                                                                                             |
+| `lib`     | library  | `packages/` | `lib`        | both      | stub   | --                                                                                                                                                             |
 
 ### Design Notes on `minimal`
 
@@ -520,10 +516,12 @@ import { getInitTarget } from "../targets/index.js";
 
 const targetResult = getInitTarget(input.preset);
 if (targetResult.isErr()) {
-  return Result.err(new ValidationError({
-    message: targetResult.error.message,
-    field: "preset",
-  }));
+  return Result.err(
+    new ValidationError({
+      message: targetResult.error.message,
+      field: "preset",
+    })
+  );
 }
 const target = targetResult.value;
 ```
@@ -629,6 +627,7 @@ function getReadyTarget(id):
 ```
 
 Stub errors are caught early -- before any filesystem operations. The error includes:
+
 1. What the user asked for
 2. Why it failed (template not implemented)
 3. What they can use instead (ready targets list)
@@ -787,7 +786,7 @@ The `init.cli`, `init.mcp`, `init.daemon` subcommand actions change from:
 createInitAction({
   id: "init.cli",
   templateOverride: "cli",
-})
+});
 ```
 
 To:
@@ -795,8 +794,8 @@ To:
 ```typescript
 createInitAction({
   id: "init.cli",
-  targetOverride: "cli",   // resolved through registry
-})
+  targetOverride: "cli", // resolved through registry
+});
 ```
 
 The `templateOverride` parameter becomes `targetOverride`. Inside `createInitAction`, the
@@ -838,16 +837,16 @@ export interface CreatePresetDefinition {
 
 The target registry is a strict superset:
 
-| Preset field | Target field | Notes |
-|---|---|---|
-| `id` | `id` | Same concept, expanded union |
-| `template` | `templateDir` | Renamed for clarity |
-| `summary` | `description` | Renamed for consistency |
-| `defaultBlocks` | `defaultBlocks` | Same |
-| -- | `category` | New: runnable vs library |
-| -- | `placement` | New: apps/ vs packages/ |
-| -- | `status` | New: ready vs stub |
-| -- | `scope` | New: init-only, scaffold-only, both |
+| Preset field    | Target field    | Notes                               |
+| --------------- | --------------- | ----------------------------------- |
+| `id`            | `id`            | Same concept, expanded union        |
+| `template`      | `templateDir`   | Renamed for clarity                 |
+| `summary`       | `description`   | Renamed for consistency             |
+| `defaultBlocks` | `defaultBlocks` | Same                                |
+| --              | `category`      | New: runnable vs library            |
+| --              | `placement`     | New: apps/ vs packages/             |
+| --              | `status`        | New: ready vs stub                  |
+| --              | `scope`         | New: init-only, scaffold-only, both |
 
 The `create/presets.ts` module is not deleted in this slice. It continues to work for the
 `create` command. In Slice 2, either:
@@ -876,7 +875,7 @@ export function getTarget(id: string): Result<TargetDefinition, NotFoundError> {
         message: `Unknown target '${id}'. Available targets: ${TARGET_IDS.join(", ")}`,
         resourceType: "target",
         resourceId: id,
-      }),
+      })
     );
   }
   return Result.ok(target);

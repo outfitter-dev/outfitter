@@ -18,6 +18,7 @@ Check sources in this order:
 ### Step 1: Scope Definition
 
 Before searching, clarify:
+
 - What specific questions need answers?
 - What time range is relevant?
 - What level of detail is needed?
@@ -25,6 +26,7 @@ Before searching, clarify:
 ### Step 2: Gather Information
 
 For each source:
+
 1. Search with specific queries
 2. Extract relevant facts
 3. Note the source URL and date
@@ -32,6 +34,7 @@ For each source:
 ### Step 3: Synthesize
 
 Combine findings into {{OUTPUT_FORMAT}}:
+
 - Lead with key findings
 - Support claims with citations
 - Note conflicting information
@@ -45,22 +48,27 @@ Combine findings into {{OUTPUT_FORMAT}}:
 
 ```markdown
 ## Key Findings
+
 - [Finding 1](source_url)
 - [Finding 2](source_url)
 
 ## Details
 
 ### Topic Area 1
+
 [Detailed findings with inline citations]
 
 ### Topic Area 2
+
 [Detailed findings with inline citations]
 
 ## Gaps & Limitations
+
 - [What couldn't be determined]
 - [Areas needing more research]
 
 ## Sources
+
 - [Source 1 Title](url) — accessed YYYY-MM-DD
 - [Source 2 Title](url) — accessed YYYY-MM-DD
 ```
@@ -74,6 +82,7 @@ For multiple sources supporting one claim: `[claim](source1)` `[2](source2)`
 ## Quality Checks
 
 Before delivering:
+
 - [ ] All claims have citations
 - [ ] Sources are authoritative and recent
 - [ ] Conflicting information is noted

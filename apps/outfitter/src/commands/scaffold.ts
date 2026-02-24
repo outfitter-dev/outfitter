@@ -16,11 +16,13 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
+
 import { exitWithError, output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
+
 import { OperationCollector } from "../engine/collector.js";
 import {
   buildWorkspaceRootPackageJson,

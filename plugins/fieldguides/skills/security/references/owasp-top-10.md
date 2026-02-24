@@ -52,16 +52,16 @@ GET /api/invoices/1004
 
 ```typescript
 // SECURE — verify ownership before returning
-app.get('/api/invoices/:id', authenticate, async (req, res) => {
+app.get("/api/invoices/:id", authenticate, async (req, res) => {
   const invoice = await db.getInvoice(req.params.id);
 
   if (!invoice) {
-    return res.status(404).json({ error: 'Not found' });
+    return res.status(404).json({ error: "Not found" });
   }
 
   // Verify user owns resource or is admin
   if (invoice.customerId !== req.user.id && !req.user.isAdmin) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   res.json(invoice);
@@ -90,10 +90,10 @@ fetch('/api/admin/users').then(r => r.json())  // No server-side check!
 
 ```typescript
 // SECURE — enforce on server
-app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
+app.get("/api/admin/users", authenticate, requireAdmin, async (req, res) => {
   // Server validates role on every request
   if (!req.user.isAdmin) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   const users = await db.getAllUsers();
@@ -103,7 +103,7 @@ app.get('/api/admin/users', authenticate, requireAdmin, async (req, res) => {
 // Middleware
 function requireAdmin(req, res, next) {
   if (!req.user?.isAdmin) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: "Forbidden" });
   }
   next();
 }
@@ -113,31 +113,32 @@ function requireAdmin(req, res, next) {
 
 ```typescript
 // VULNERABLE — allows all origins
-app.use(cors({
-  origin: '*',
-  credentials: true  // Allows any site to make authenticated requests!
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true, // Allows any site to make authenticated requests!
+  })
+);
 ```
 
 **Remediation**:
 
 ```typescript
 // SECURE — explicit allowlist
-const allowedOrigins = [
-  'https://app.example.com',
-  'https://admin.example.com',
-];
+const allowedOrigins = ["https://app.example.com", "https://admin.example.com"];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 ```
 
 ---
@@ -167,33 +168,33 @@ Previously known as Sensitive Data Exposure. Focuses on failures related to cryp
 
 ```typescript
 // VULNERABLE — MD5 is broken
-const hash = crypto.createHash('md5').update(password).digest('hex');
+const hash = crypto.createHash("md5").update(password).digest("hex");
 
 // VULNERABLE — SHA1 is deprecated
-const hash = crypto.createHash('sha1').update(password).digest('hex');
+const hash = crypto.createHash("sha1").update(password).digest("hex");
 
 // VULNERABLE — no salt (rainbow tables)
-const hash = crypto.createHash('sha256').update(password).digest('hex');
+const hash = crypto.createHash("sha256").update(password).digest("hex");
 ```
 
 **Remediation**:
 
 ```typescript
 // SECURE — bcrypt with sufficient cost
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
-const saltRounds = 12;  // Minimum 10, increase as hardware improves
+const saltRounds = 12; // Minimum 10, increase as hardware improves
 const hash = await bcrypt.hash(password, saltRounds);
 
 // Verification
 const isValid = await bcrypt.compare(inputPassword, storedHash);
 
 // ALTERNATIVE — Argon2 (winner of Password Hashing Competition)
-import argon2 from 'argon2';
+import argon2 from "argon2";
 
 const hash = await argon2.hash(password, {
-  type: argon2.argon2id,  // Resistant to GPU and side-channel attacks
-  memoryCost: 2 ** 16,    // 64 MiB
+  type: argon2.argon2id, // Resistant to GPU and side-channel attacks
+  memoryCost: 2 ** 16, // 64 MiB
   timeCost: 3,
   parallelism: 1,
 });
@@ -203,9 +204,9 @@ const hash = await argon2.hash(password, {
 
 ```typescript
 // VULNERABLE — secrets in code
-const API_KEY = 'sk-1234567890abcdef';
-const DB_PASSWORD = 'admin123';
-const JWT_SECRET = 'mysecret';
+const API_KEY = "sk-1234567890abcdef";
+const DB_PASSWORD = "admin123";
+const JWT_SECRET = "mysecret";
 
 // Committed to Git — now in history forever!
 ```
@@ -220,45 +221,45 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Validate at startup
 if (!API_KEY || !DB_PASSWORD || !JWT_SECRET) {
-  throw new Error('Missing required environment variables');
+  throw new Error("Missing required environment variables");
 }
 
 // .env (add to .gitignore!)
-API_KEY=sk-real-key-here
-DB_PASSWORD=strong-password-here
-JWT_SECRET=long-random-string-here
+API_KEY = sk - real - key - here;
+DB_PASSWORD = strong - password - here;
+JWT_SECRET = long - random - string - here;
 
 // .env.example (commit this)
-API_KEY=your_api_key_here
-DB_PASSWORD=your_db_password_here
-JWT_SECRET=your_jwt_secret_here
+API_KEY = your_api_key_here;
+DB_PASSWORD = your_db_password_here;
+JWT_SECRET = your_jwt_secret_here;
 ```
 
 **Weak Encryption Algorithm**:
 
 ```typescript
 // VULNERABLE — DES is broken
-const cipher = crypto.createCipher('des', key);
+const cipher = crypto.createCipher("des", key);
 
 // VULNERABLE — ECB mode (patterns leak)
-const cipher = crypto.createCipheriv('aes-256-ecb', key, null);
+const cipher = crypto.createCipheriv("aes-256-ecb", key, null);
 
 // VULNERABLE — no authentication (malleable)
-const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
 ```
 
 **Remediation**:
 
 ```typescript
 // SECURE — AES-256-GCM (authenticated encryption)
-const algorithm = 'aes-256-gcm';
-const key = crypto.randomBytes(32);  // 256 bits
-const iv = crypto.randomBytes(16);   // 128 bits
+const algorithm = "aes-256-gcm";
+const key = crypto.randomBytes(32); // 256 bits
+const iv = crypto.randomBytes(16); // 128 bits
 
 // Encryption
 const cipher = crypto.createCipheriv(algorithm, key, iv);
-let encrypted = cipher.update(plaintext, 'utf8', 'hex');
-encrypted += cipher.final('hex');
+let encrypted = cipher.update(plaintext, "utf8", "hex");
+encrypted += cipher.final("hex");
 const authTag = cipher.getAuthTag();
 
 // Store: iv + authTag + encrypted
@@ -266,8 +267,8 @@ const authTag = cipher.getAuthTag();
 // Decryption
 const decipher = crypto.createDecipheriv(algorithm, key, iv);
 decipher.setAuthTag(authTag);
-let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-decrypted += decipher.final('utf8');
+let decrypted = decipher.update(encrypted, "hex", "utf8");
+decrypted += decipher.final("utf8");
 ```
 
 **Insufficient Entropy**:
@@ -276,19 +277,19 @@ decrypted += decipher.final('utf8');
 // VULNERABLE — predictable
 const sessionId = Math.random().toString(36);
 const resetToken = Date.now().toString(36);
-const apiKey = userId + '-' + Math.floor(Math.random() * 1000000);
+const apiKey = userId + "-" + Math.floor(Math.random() * 1000000);
 ```
 
 **Remediation**:
 
 ```typescript
 // SECURE — cryptographically secure random
-const sessionId = crypto.randomBytes(32).toString('hex');  // 64 hex chars
-const resetToken = crypto.randomBytes(32).toString('base64url');
-const apiKey = crypto.randomBytes(24).toString('base64url');
+const sessionId = crypto.randomBytes(32).toString("hex"); // 64 hex chars
+const resetToken = crypto.randomBytes(32).toString("base64url");
+const apiKey = crypto.randomBytes(24).toString("base64url");
 
 // For UUIDs
-const uuid = crypto.randomUUID();  // UUIDv4
+const uuid = crypto.randomUUID(); // UUIDv4
 ```
 
 ---
@@ -353,11 +354,11 @@ userEmail: ' OR 1=1--
 
 ```typescript
 // SECURE — parameterized queries (prepared statements)
-const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
+const query = "SELECT * FROM users WHERE email = ? AND password = ?";
 const [rows] = await db.execute(query, [userEmail, passwordHash]);
 
 // PostgreSQL — numbered placeholders
-const query = 'SELECT * FROM users WHERE email = $1 AND password = $2';
+const query = "SELECT * FROM users WHERE email = $1 AND password = $2";
 const result = await pool.query(query, [userEmail, passwordHash]);
 
 // ORM — use safe methods
@@ -398,32 +399,32 @@ POST /login
 
 ```typescript
 // SECURE — type validation
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   // Ensure inputs are strings
-  if (typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'Invalid input' });
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Invalid input" });
   }
 
-  const user = await db.collection('users').findOne({
+  const user = await db.collection("users").findOne({
     email: email,
     password: await hashPassword(password),
   });
 });
 
 // BETTER — schema validation
-import { z } from 'zod';
+import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   const result = loginSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({ error: 'Invalid input' });
+    return res.status(400).json({ error: "Invalid input" });
   }
 
   const { email, password } = result.data;
@@ -452,28 +453,28 @@ convert ; rm -rf / output.png
 
 ```typescript
 // SECURE — use parameterized API
-import { execFile } from 'child_process';
+import { execFile } from "child_process";
 
 const filename = req.query.file;
 
 // Validate filename
 if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
-  return res.status(400).json({ error: 'Invalid filename' });
+  return res.status(400).json({ error: "Invalid filename" });
 }
 
 // Use execFile with array arguments (no shell)
-execFile('convert', [filename, 'output.png'], (err, stdout) => {
+execFile("convert", [filename, "output.png"], (err, stdout) => {
   if (err) {
-    logger.error('Conversion failed', err);
-    return res.status(500).json({ error: 'Conversion failed' });
+    logger.error("Conversion failed", err);
+    return res.status(500).json({ error: "Conversion failed" });
   }
   // Process output
 });
 
 // BETTER — use library instead of shell command
-import sharp from 'sharp';
+import sharp from "sharp";
 
-await sharp(filename).toFile('output.png');
+await sharp(filename).toFile("output.png");
 ```
 
 **XSS (Cross-Site Scripting)**:
@@ -482,15 +483,15 @@ await sharp(filename).toFile('output.png');
 <!-- VULNERABLE — direct HTML insertion -->
 <div id="greeting"></div>
 <script>
-  const name = new URLSearchParams(window.location.search).get('name');
-  document.getElementById('greeting').innerHTML = `Hello ${name}!`;
+  const name = new URLSearchParams(window.location.search).get("name");
+  document.getElementById("greeting").innerHTML = `Hello ${name}!`;
 </script>
 
 <!-- ATTACK -->
-?name=<img src=x onerror=alert(document.cookie)>
+?name=<img src="x" onerror="alert(document.cookie)" />
 
 <!-- RESULTS IN -->
-<div id="greeting">Hello <img src=x onerror=alert(document.cookie)>!</div>
+<div id="greeting">Hello <img src="x" onerror="alert(document.cookie)" />!</div>
 <!-- Executes JavaScript! -->
 ```
 
@@ -500,21 +501,21 @@ await sharp(filename).toFile('output.png');
 <!-- SECURE — use textContent -->
 <div id="greeting"></div>
 <script>
-  const name = new URLSearchParams(window.location.search).get('name');
-  document.getElementById('greeting').textContent = `Hello ${name}!`;
+  const name = new URLSearchParams(window.location.search).get("name");
+  document.getElementById("greeting").textContent = `Hello ${name}!`;
 </script>
 
 <!-- For rich content — sanitize -->
 <div id="content"></div>
 <script>
-  import DOMPurify from 'dompurify';
+  import DOMPurify from "dompurify";
 
   const userContent = getUserContent();
   const clean = DOMPurify.sanitize(userContent, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a'],
-    ALLOWED_ATTR: ['href'],
+    ALLOWED_TAGS: ["b", "i", "em", "strong", "a"],
+    ALLOWED_ATTR: ["href"],
   });
-  document.getElementById('content').innerHTML = clean;
+  document.getElementById("content").innerHTML = clean;
 </script>
 ```
 
@@ -554,12 +555,12 @@ New category focusing on risks related to design and architectural flaws. Requir
 
 ```typescript
 // VULNERABLE — no rate limiting
-app.post('/api/login', async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await authenticateUser(email, password);
 
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(401).json({ error: "Invalid credentials" });
   }
 
   res.json({ token: generateToken(user) });
@@ -573,7 +574,7 @@ app.post('/api/login', async (req, res) => {
 
 ```typescript
 // SECURE — rate limiting with exponential backoff
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -583,12 +584,12 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
   handler: (req, res) => {
     res.status(429).json({
-      error: 'Too many login attempts, please try again later',
+      error: "Too many login attempts, please try again later",
     });
   },
 });
 
-app.post('/api/login', loginLimiter, async (req, res) => {
+app.post("/api/login", loginLimiter, async (req, res) => {
   // Authentication logic
 });
 
@@ -596,7 +597,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes
 
-app.post('/api/login', async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   const account = await getAccount(email);
@@ -604,7 +605,7 @@ app.post('/api/login', async (req, res) => {
   // Check if locked
   if (account.lockedUntil && account.lockedUntil > Date.now()) {
     return res.status(429).json({
-      error: 'Account locked. Try again later.',
+      error: "Account locked. Try again later.",
     });
   }
 
@@ -617,11 +618,11 @@ app.post('/api/login', async (req, res) => {
     if (account.failedAttempts >= MAX_FAILED_ATTEMPTS) {
       account.lockedUntil = Date.now() + LOCKOUT_DURATION;
       await saveAccount(account);
-      return res.status(429).json({ error: 'Account locked' });
+      return res.status(429).json({ error: "Account locked" });
     }
 
     await saveAccount(account);
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(401).json({ error: "Invalid credentials" });
   }
 
   // Reset on success
@@ -637,13 +638,13 @@ app.post('/api/login', async (req, res) => {
 
 ```typescript
 // VULNERABLE — time-of-check to time-of-use
-app.post('/api/transfer', async (req, res) => {
+app.post("/api/transfer", async (req, res) => {
   const { from, to, amount } = req.body;
 
   const balance = await getBalance(from);
 
   if (balance < amount) {
-    return res.status(400).json({ error: 'Insufficient funds' });
+    return res.status(400).json({ error: "Insufficient funds" });
   }
 
   // RACE CONDITION — balance could be spent between check and update
@@ -730,35 +731,37 @@ ALTER TABLE accounts ADD CONSTRAINT positive_balance CHECK (balance >= 0);
 **Security Headers**:
 
 ```typescript
-import helmet from 'helmet';
+import helmet from "helmet";
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  },
-}));
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 
 // Additional headers
 app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   next();
 });
 ```
@@ -863,23 +866,23 @@ See main SKILL.md for authentication patterns.
 ```typescript
 // VULNERABLE — deserialize untrusted data
 const userData = JSON.parse(req.cookies.user);
-const obj = deserialize(req.body.data);  // Arbitrary code execution!
+const obj = deserialize(req.body.data); // Arbitrary code execution!
 ```
 
 **Remediation**:
 
 ```typescript
 // SECURE — validate structure
-import { z } from 'zod';
+import { z } from "zod";
 
 const userSchema = z.object({
   id: z.string().uuid(),
-  role: z.enum(['user', 'admin']),
+  role: z.enum(["user", "admin"]),
 });
 
 const result = userSchema.safeParse(JSON.parse(req.cookies.user));
 if (!result.success) {
-  throw new Error('Invalid user data');
+  throw new Error("Invalid user data");
 }
 ```
 
@@ -905,20 +908,20 @@ if (!result.success) {
 
 ```typescript
 // Log security events
-logger.info('User login', {
+logger.info("User login", {
   userId: user.id,
   ip: req.ip,
-  userAgent: req.headers['user-agent'],
+  userAgent: req.headers["user-agent"],
   timestamp: new Date().toISOString(),
 });
 
-logger.warn('Failed login attempt', {
-  email: req.body.email,  // Don't log password!
+logger.warn("Failed login attempt", {
+  email: req.body.email, // Don't log password!
   ip: req.ip,
   attempts: failedAttempts,
 });
 
-logger.error('Unauthorized access attempt', {
+logger.error("Unauthorized access attempt", {
   userId: req.user.id,
   resource: req.path,
   method: req.method,
@@ -926,11 +929,11 @@ logger.error('Unauthorized access attempt', {
 });
 
 // NEVER log sensitive data
-logger.info('User data', {
+logger.info("User data", {
   email: user.email,
-  password: '[REDACTED]',
-  ssn: '[REDACTED]',
-  creditCard: '[REDACTED]',
+  password: "[REDACTED]",
+  ssn: "[REDACTED]",
+  creditCard: "[REDACTED]",
 });
 ```
 
@@ -971,20 +974,20 @@ app.get('/api/fetch', async (req, res) => {
 
 ```typescript
 // SECURE — allowlist of domains
-const ALLOWED_DOMAINS = ['api.example.com', 'cdn.example.com'];
+const ALLOWED_DOMAINS = ["api.example.com", "cdn.example.com"];
 
-app.get('/api/fetch', async (req, res) => {
+app.get("/api/fetch", async (req, res) => {
   const url = new URL(req.query.url);
 
   // Validate domain
   if (!ALLOWED_DOMAINS.includes(url.hostname)) {
-    return res.status(403).json({ error: 'Domain not allowed' });
+    return res.status(403).json({ error: "Domain not allowed" });
   }
 
   // Block private IPs
   const ip = await dns.resolve4(url.hostname);
   if (isPrivateIP(ip[0])) {
-    return res.status(403).json({ error: 'Private IP not allowed' });
+    return res.status(403).json({ error: "Private IP not allowed" });
   }
 
   const response = await fetch(url.href);
@@ -993,9 +996,11 @@ app.get('/api/fetch', async (req, res) => {
 });
 
 function isPrivateIP(ip: string): boolean {
-  return /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.)/.test(ip)
-    || ip === '::1'
-    || ip.startsWith('169.254.');  // Cloud metadata
+  return (
+    /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.)/.test(ip) ||
+    ip === "::1" ||
+    ip.startsWith("169.254.")
+  ); // Cloud metadata
 }
 ```
 
@@ -1003,15 +1008,15 @@ function isPrivateIP(ip: string): boolean {
 
 ## Quick Reference Table
 
-| Category | Key CWEs | Top Mitigations |
-|----------|----------|-----------------|
-| A01 Broken Access Control | 200, 352, 639, 918 | Server-side checks, ownership validation, CSRF tokens |
-| A02 Cryptographic Failures | 259, 327, 331 | TLS, bcrypt, no hardcoded secrets, crypto.randomBytes |
-| A03 Injection | 20, 79, 89 | Parameterized queries, input validation, output encoding |
-| A04 Insecure Design | 209, 256, 434 | Threat modeling, rate limiting, defense in depth |
-| A05 Security Misconfiguration | 16, 611, 614 | Security headers, disable debug, defaults changed |
-| A06 Vulnerable Components | 1035, 1104 | npm audit, Dependabot, regular updates |
-| A07 Authentication Failures | 287, 307, 521, 798 | Strong passwords, MFA, rate limiting, no defaults |
-| A08 Integrity Failures | 502, 494 | Verify signatures, CI/CD hardening, schema validation |
-| A09 Logging Failures | 117, 532, 778 | Audit logs, monitoring, redact sensitive data |
-| A10 SSRF | 918 | URL allowlist, block private IPs, validate domains |
+| Category                      | Key CWEs           | Top Mitigations                                          |
+| ----------------------------- | ------------------ | -------------------------------------------------------- |
+| A01 Broken Access Control     | 200, 352, 639, 918 | Server-side checks, ownership validation, CSRF tokens    |
+| A02 Cryptographic Failures    | 259, 327, 331      | TLS, bcrypt, no hardcoded secrets, crypto.randomBytes    |
+| A03 Injection                 | 20, 79, 89         | Parameterized queries, input validation, output encoding |
+| A04 Insecure Design           | 209, 256, 434      | Threat modeling, rate limiting, defense in depth         |
+| A05 Security Misconfiguration | 16, 611, 614       | Security headers, disable debug, defaults changed        |
+| A06 Vulnerable Components     | 1035, 1104         | npm audit, Dependabot, regular updates                   |
+| A07 Authentication Failures   | 287, 307, 521, 798 | Strong passwords, MFA, rate limiting, no defaults        |
+| A08 Integrity Failures        | 502, 494           | Verify signatures, CI/CD hardening, schema validation    |
+| A09 Logging Failures          | 117, 532, 778      | Audit logs, monitoring, redact sensitive data            |
+| A10 SSRF                      | 918                | URL allowlist, block private IPs, validate domains       |

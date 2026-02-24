@@ -11,7 +11,6 @@
 ### Minor Changes
 
 - d683522: Runtime-safe log level resolution, console sink formatter option, and type improvements.
-
   - **fix**: `resolveLogLevel()` is now runtime-safe for edge/V8 environments and accepts `string` input (#337)
   - **feat**: `LoggerInstance` explicitly extends `Logger` from contracts (#338)
   - **feat**: `createConsoleSink()` accepts a `formatter` option for custom output formatting (#339)
@@ -41,7 +40,6 @@
 ### Minor Changes
 
 - Improve platform compatibility and add migration documentation
-
   - Add console sink fallback to `console.*` when `process.stdout`/`process.stderr` are unavailable
   - Add logger method overloads for reject level across adapters
   - Remove top-level `node:*` imports for non-Node bundler compatibility (Cloudflare Workers, Deno Deploy, Convex)
@@ -60,7 +58,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -82,7 +79,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

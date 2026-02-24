@@ -5,7 +5,7 @@ TanStack Router provides full type safety for routes, params, search params, and
 ## Basic Route Definition
 
 ```typescript
-import { createRoute, createRootRoute } from '@tanstack/react-router';
+import { createRoute, createRootRoute } from "@tanstack/react-router";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -15,7 +15,7 @@ const rootRoute = createRootRoute({
 // Basic route
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: "/",
   component: HomePage,
 });
 
@@ -406,7 +406,7 @@ const router = createRouter({
 // Access in route
 const userRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/users/$userId',
+  path: "/users/$userId",
   beforeLoad: ({ context }) => {
     // context typed as RouterContext
     console.log(context.auth.user);
@@ -421,15 +421,15 @@ Hide actual URL structure.
 ```typescript
 const userRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/users/$userId',
+  path: "/users/$userId",
 });
 
 // Navigate with mask
 navigate({
-  to: '/users/$userId',
-  params: { userId: '123' },
+  to: "/users/$userId",
+  params: { userId: "123" },
   mask: {
-    to: '/profile',
+    to: "/profile",
   },
 });
 
@@ -443,7 +443,7 @@ Transform search params before validation.
 ```typescript
 const productsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/products',
+  path: "/products",
   validateSearch: z.object({
     tags: z.array(z.string()).default([]),
   }),
@@ -461,19 +461,19 @@ const productsRoute = createRoute({
 ## Type Helpers
 
 ```typescript
-import type { RouteIds, RouteById } from '@tanstack/react-router';
+import type { RouteIds, RouteById } from "@tanstack/react-router";
 
 // Get all route IDs
 type AllRouteIds = RouteIds<typeof router>;
 
 // Get specific route type
-type UserRoute = RouteById<typeof router, '/users/$userId'>;
+type UserRoute = RouteById<typeof router, "/users/$userId">;
 
 // Extract params type
-type UserParams = UserRoute['types']['allParams'];
+type UserParams = UserRoute["types"]["allParams"];
 
 // Extract search type
-type UserSearch = UserRoute['types']['fullSearchSchema'];
+type UserSearch = UserRoute["types"]["fullSearchSchema"];
 ```
 
 ## Preloading Routes
@@ -534,12 +534,12 @@ export const Route = createRootRoute({
 });
 
 // routes/index.tsx
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 // routes/users/$userId.tsx
-export const Route = createFileRoute('/users/$userId')({
+export const Route = createFileRoute("/users/$userId")({
   component: UserPage,
   loader: async ({ params }) => {
     const user = await fetchUser(params.userId);
@@ -551,7 +551,7 @@ export const Route = createFileRoute('/users/$userId')({
 // npm run generate-routes
 
 // Import generated routes
-import { routeTree } from './routeTree.gen';
+import { routeTree } from "./routeTree.gen";
 const router = createRouter({ routeTree });
 ```
 

@@ -78,9 +78,9 @@ All clear — delivering implementation.
 
 ```javascript
 module.exports = {
-  darkMode: 'class',
+  darkMode: "class",
   // ... rest of config
-}
+};
 ```
 
 **2. Theme Provider** (`components/theme-provider.tsx`):
@@ -225,6 +225,7 @@ export function Header() {
 ```
 
 **Usage**:
+
 - Click toggle: cycles light → dark → system → light
 - System mode: follows OS preference automatically
 - Persists in localStorage across sessions

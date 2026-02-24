@@ -4,7 +4,9 @@
  * Verifies audience and priority annotations on content.
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "@outfitter/contracts";
+
 import {
   type ContentAnnotations,
   createMcpServer,

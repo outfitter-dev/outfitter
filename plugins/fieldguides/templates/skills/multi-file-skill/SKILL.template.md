@@ -12,6 +12,7 @@ version: 1.0.0
 ## Overview
 
 This skill provides comprehensive {CAPABILITY}:
+
 - **Feature 1**: { description }
 - **Feature 2**: { description }
 - **Feature 3**: { description }
@@ -55,6 +56,7 @@ This skill provides comprehensive {CAPABILITY}:
 ## Advanced Usage
 
 For advanced patterns and detailed API reference, see:
+
 - [REFERENCE.md](REFERENCE.md) - Complete API documentation
 - [EXAMPLES.md](EXAMPLES.md) - Real-world use cases
 
@@ -63,6 +65,7 @@ For advanced patterns and detailed API reference, see:
 This skill restricts tool usage to: **Read, Grep, Glob, Bash**
 
 Why these restrictions?
+
 - **Read/Grep/Glob**: { explanation }
 - **Bash**: { explanation }
 - **No Write/Edit**: { explanation }
@@ -99,11 +102,11 @@ Why these restrictions?
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| { problem 1 } | { cause } | { fix } |
-| { problem 2 } | { cause } | { fix } |
-| { problem 3 } | { cause } | { fix } |
+| Issue         | Cause     | Solution |
+| ------------- | --------- | -------- |
+| { problem 1 } | { cause } | { fix }  |
+| { problem 2 } | { cause } | { fix }  |
+| { problem 3 } | { cause } | { fix }  |
 
 ## Requirements
 
@@ -122,12 +125,14 @@ Why these restrictions?
 This SKILL.md provides the essentials. For deeper information:
 
 📚 **[REFERENCE.md](REFERENCE.md)**
+
 - Complete API documentation
 - Configuration options
 - Advanced patterns
 - Performance tuning
 
 📚 **[EXAMPLES.md](EXAMPLES.md)**
+
 - Real-world use cases
 - Integration examples
 - Best practice implementations

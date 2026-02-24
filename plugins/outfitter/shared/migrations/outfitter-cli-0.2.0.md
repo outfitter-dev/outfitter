@@ -38,9 +38,9 @@ Command specs now separate the command name from argument syntax. The CLI framew
 
 ```typescript
 // Arguments are separated from the command name during registration
-command("get <id>")          // name: "get", args: ["<id>"]
-command("[directory]")       // name: undefined, args: ["[directory]"]
-command("add <block>")       // name: "add", args: ["<block>"]
+command("get <id>"); // name: "get", args: ["<id>"]
+command("[directory]"); // name: undefined, args: ["[directory]"]
+command("add <block>"); // name: "add", args: ["<block>"]
 ```
 
 ### `--json` Output Mode
@@ -61,6 +61,7 @@ await output(record, { mode: "jsonl" });
 ```
 
 Mode is auto-detected:
+
 1. Explicit `mode` option
 2. `OUTFITTER_JSONL=1` env var → jsonl
 3. `OUTFITTER_JSON=1` env var → json
@@ -103,6 +104,7 @@ console.log(theme.inverse("Highlighted"));
 ```
 
 New theme semantic colors:
+
 - `theme.accent(text)` — Cyan for interactive elements
 - `theme.highlight(text)` — Bold for strong emphasis
 - `theme.link(text)` — Cyan + underline for URLs
@@ -116,14 +118,14 @@ Severity-level indicator function for compliance and diagnostic output:
 ```typescript
 import { getSeverityIndicator } from "@outfitter/tui/render";
 
-getSeverityIndicator("minor");    // "◇"
+getSeverityIndicator("minor"); // "◇"
 getSeverityIndicator("moderate"); // "◆"
-getSeverityIndicator("severe");   // "◈"
+getSeverityIndicator("severe"); // "◈"
 
 // Fallback for terminals without unicode
-getSeverityIndicator("minor", false);    // "◊"
+getSeverityIndicator("minor", false); // "◊"
 getSeverityIndicator("moderate", false); // "♦"
-getSeverityIndicator("severe", false);   // "♦♦"
+getSeverityIndicator("severe", false); // "♦♦"
 ```
 
 ## Migration Steps
@@ -131,11 +133,13 @@ getSeverityIndicator("severe", false);   // "♦♦"
 ### Import `createCLI` from the command subpath
 
 **Before:**
+
 ```typescript
 import { createCLI } from "@outfitter/cli/cli";
 ```
 
 **After:**
+
 ```typescript
 import { createCLI, command } from "@outfitter/cli/command";
 ```

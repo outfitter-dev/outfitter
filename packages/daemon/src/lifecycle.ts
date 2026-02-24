@@ -9,7 +9,9 @@
 
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import type {
   Daemon,
   DaemonOptions,

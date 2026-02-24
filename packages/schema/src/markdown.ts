@@ -9,6 +9,7 @@
  */
 
 import type { JsonSchema } from "@outfitter/contracts";
+
 import type {
   ActionManifest,
   ActionManifestEntry,

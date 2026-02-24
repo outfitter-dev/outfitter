@@ -19,11 +19,11 @@ type SyncHandler<TInput, TOutput, TError extends OutfitterError> = (
 
 ## Type Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `TInput` | Input type (use `unknown` for raw input that needs validation) |
-| `TOutput` | Success return type |
-| `TError` | Union of possible error types (must extend `OutfitterError`) |
+| Parameter | Description                                                    |
+| --------- | -------------------------------------------------------------- |
+| `TInput`  | Input type (use `unknown` for raw input that needs validation) |
+| `TOutput` | Success return type                                            |
+| `TError`  | Union of possible error types (must extend `OutfitterError`)   |
 
 ## Handler Structure
 
@@ -40,9 +40,11 @@ import { z } from "zod";
 // 1. Define input schema
 const InputSchema = z.object({
   id: z.string().min(1),
-  options: z.object({
-    includeDeleted: z.boolean().default(false),
-  }).optional(),
+  options: z
+    .object({
+      includeDeleted: z.boolean().default(false),
+    })
+    .optional(),
 });
 
 // 2. Create validator
@@ -56,10 +58,11 @@ interface UserOutput {
 }
 
 // 4. Implement handler
-export const getUser: Handler<unknown, UserOutput, ValidationError | NotFoundError> = async (
-  rawInput,
-  ctx
-) => {
+export const getUser: Handler<
+  unknown,
+  UserOutput,
+  ValidationError | NotFoundError
+> = async (rawInput, ctx) => {
   // Validate input
   const inputResult = validateInput(rawInput);
   if (inputResult.isErr()) return inputResult;
@@ -84,6 +87,7 @@ export const getUser: Handler<unknown, UserOutput, ValidationError | NotFoundErr
 ### Transport Agnostic
 
 Handlers know nothing about:
+
 - CLI flags and arguments
 - HTTP headers and status codes
 - MCP tool schemas
@@ -112,7 +116,10 @@ test("getUser returns user", async () => {
 Handlers can call other handlers:
 
 ```typescript
-const createOrder: Handler<CreateOrderInput, Order, OrderError> = async (input, ctx) => {
+const createOrder: Handler<CreateOrderInput, Order, OrderError> = async (
+  input,
+  ctx
+) => {
   // Call another handler
   const userResult = await getUser({ id: input.userId }, ctx);
   if (userResult.isErr()) {
@@ -161,11 +168,14 @@ if (result.isOk()) {
 Always validate at handler entry:
 
 ```typescript
-const handler: Handler<unknown, Output, ValidationError | OtherError> = async (rawInput, ctx) => {
+const handler: Handler<unknown, Output, ValidationError | OtherError> = async (
+  rawInput,
+  ctx
+) => {
   // First: validate
   const inputResult = validateInput(rawInput);
   if (inputResult.isErr()) return inputResult;
-  const input = inputResult.value;  // Now typed!
+  const input = inputResult.value; // Now typed!
 
   // Rest of handler uses validated input
 };
@@ -177,12 +187,12 @@ All cross-cutting concerns are passed via `HandlerContext`:
 
 ```typescript
 interface HandlerContext {
-  signal?: AbortSignal;           // Cancellation propagation
-  requestId: string;              // UUIDv7 for tracing
-  logger: Logger;                 // Structured logger with redaction
-  config?: ResolvedConfig;        // Resolved configuration values
-  workspaceRoot?: string;         // Workspace root path, if detected
-  cwd: string;                    // Current working directory
+  signal?: AbortSignal; // Cancellation propagation
+  requestId: string; // UUIDv7 for tracing
+  logger: Logger; // Structured logger with redaction
+  config?: ResolvedConfig; // Resolved configuration values
+  workspaceRoot?: string; // Workspace root path, if detected
+  cwd: string; // Current working directory
   env: Record<string, string | undefined>; // Environment variables (filtered)
 }
 

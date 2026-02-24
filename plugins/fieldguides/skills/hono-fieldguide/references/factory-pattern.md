@@ -5,15 +5,15 @@
 ## Environment Definition
 
 ```typescript
-import { createFactory } from 'hono/factory';
-import type { Database } from 'bun:sqlite';
+import { createFactory } from "hono/factory";
+import type { Database } from "bun:sqlite";
 
 type Env = {
   Variables: {
     user: {
       id: string;
       email: string;
-      role: 'admin' | 'user' | 'guest';
+      role: "admin" | "user" | "guest";
     };
     requestId: string;
     db: Database;
@@ -40,19 +40,19 @@ export const factory = createFactory<Env>();
 ```typescript
 // Request ID middleware
 export const requestIdMiddleware = factory.createMiddleware(async (c, next) => {
-  const requestId = c.req.header('x-request-id') || crypto.randomUUID();
-  c.set('requestId', requestId);
+  const requestId = c.req.header("x-request-id") || crypto.randomUUID();
+  c.set("requestId", requestId);
 
   await next();
 
   // Add to response
-  c.res.headers.set('x-request-id', requestId);
+  c.res.headers.set("x-request-id", requestId);
 });
 
 // Database middleware
 export const dbMiddleware = factory.createMiddleware(async (c, next) => {
-  const db = new Database('app.db');
-  c.set('db', db);
+  const db = new Database("app.db");
+  c.set("db", db);
 
   try {
     await next();
@@ -65,30 +65,30 @@ export const dbMiddleware = factory.createMiddleware(async (c, next) => {
 ### Authentication Middleware
 
 ```typescript
-import { HTTPException } from 'hono/http-exception';
+import { HTTPException } from "hono/http-exception";
 
 export const authMiddleware = factory.createMiddleware(async (c, next) => {
-  const token = c.req.header('authorization')?.replace('Bearer ', '');
+  const token = c.req.header("authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    throw new HTTPException(401, { message: 'Missing authorization token' });
+    throw new HTTPException(401, { message: "Missing authorization token" });
   }
 
   // Verify token (simplified)
   const payload = await verifyJWT(token);
 
   if (!payload) {
-    throw new HTTPException(401, { message: 'Invalid token' });
+    throw new HTTPException(401, { message: "Invalid token" });
   }
 
-  const db = c.get('db');
-  const user = db.query('SELECT * FROM users WHERE id = ?').get(payload.userId);
+  const db = c.get("db");
+  const user = db.query("SELECT * FROM users WHERE id = ?").get(payload.userId);
 
   if (!user) {
-    throw new HTTPException(401, { message: 'User not found' });
+    throw new HTTPException(401, { message: "User not found" });
   }
 
-  c.set('user', {
+  c.set("user", {
     id: user.id,
     email: user.email,
     role: user.role,
@@ -98,46 +98,50 @@ export const authMiddleware = factory.createMiddleware(async (c, next) => {
 });
 
 // Optional auth — doesn't throw if no token
-export const optionalAuthMiddleware = factory.createMiddleware(async (c, next) => {
-  const token = c.req.header('authorization')?.replace('Bearer ', '');
+export const optionalAuthMiddleware = factory.createMiddleware(
+  async (c, next) => {
+    const token = c.req.header("authorization")?.replace("Bearer ", "");
 
-  if (token) {
-    try {
-      const payload = await verifyJWT(token);
-      const db = c.get('db');
-      const user = db.query('SELECT * FROM users WHERE id = ?').get(payload.userId);
+    if (token) {
+      try {
+        const payload = await verifyJWT(token);
+        const db = c.get("db");
+        const user = db
+          .query("SELECT * FROM users WHERE id = ?")
+          .get(payload.userId);
 
-      if (user) {
-        c.set('user', {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        });
+        if (user) {
+          c.set("user", {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          });
+        }
+      } catch {
+        // Ignore invalid tokens for optional auth
       }
-    } catch {
-      // Ignore invalid tokens for optional auth
     }
-  }
 
-  await next();
-});
+    await next();
+  }
+);
 ```
 
 ### Authorization Middleware
 
 ```typescript
-type Role = 'admin' | 'user' | 'guest';
+type Role = "admin" | "user" | "guest";
 
 export const requireRole = (requiredRole: Role) => {
   return factory.createMiddleware(async (c, next) => {
-    const user = c.get('user');
+    const user = c.get("user");
 
     if (!user) {
-      throw new HTTPException(401, { message: 'Unauthorized' });
+      throw new HTTPException(401, { message: "Unauthorized" });
     }
 
     // Admin has access to everything
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       await next();
       return;
     }
@@ -160,16 +164,18 @@ export const requireRole = (requiredRole: Role) => {
 };
 
 // Resource ownership check
-export const requireOwnership = (resourceKey: 'userId' | 'authorId' = 'userId') => {
+export const requireOwnership = (
+  resourceKey: "userId" | "authorId" = "userId"
+) => {
   return factory.createMiddleware(async (c, next) => {
-    const user = c.get('user');
+    const user = c.get("user");
 
     if (!user) {
-      throw new HTTPException(401, { message: 'Unauthorized' });
+      throw new HTTPException(401, { message: "Unauthorized" });
     }
 
     // Admin bypasses ownership check
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       await next();
       return;
     }
@@ -178,7 +184,7 @@ export const requireOwnership = (resourceKey: 'userId' | 'authorId' = 'userId') 
     const resourceUserId = c.req.param(resourceKey);
 
     if (user.id !== resourceUserId) {
-      throw new HTTPException(403, { message: 'Access denied' });
+      throw new HTTPException(403, { message: "Access denied" });
     }
 
     await next();
@@ -190,22 +196,24 @@ export const requireOwnership = (resourceKey: 'userId' | 'authorId' = 'userId') 
 
 ```typescript
 export const sessionMiddleware = factory.createMiddleware(async (c, next) => {
-  const sessionId = c.req.header('x-session-id');
+  const sessionId = c.req.header("x-session-id");
 
   if (!sessionId) {
-    throw new HTTPException(401, { message: 'Missing session' });
+    throw new HTTPException(401, { message: "Missing session" });
   }
 
-  const db = c.get('db');
-  const session = db.query(
-    'SELECT * FROM sessions WHERE id = ? AND expires_at > CURRENT_TIMESTAMP'
-  ).get(sessionId);
+  const db = c.get("db");
+  const session = db
+    .query(
+      "SELECT * FROM sessions WHERE id = ? AND expires_at > CURRENT_TIMESTAMP"
+    )
+    .get(sessionId);
 
   if (!session) {
-    throw new HTTPException(401, { message: 'Invalid or expired session' });
+    throw new HTTPException(401, { message: "Invalid or expired session" });
   }
 
-  c.set('session', {
+  c.set("session", {
     id: session.id,
     expiresAt: new Date(session.expires_at),
   });
@@ -227,8 +235,8 @@ export const sessionMiddleware = factory.createMiddleware(async (c, next) => {
 ```typescript
 // Single handler
 const getProfile = factory.createHandlers((c) => {
-  const user = c.get('user'); // Fully typed!
-  const requestId = c.get('requestId');
+  const user = c.get("user"); // Fully typed!
+  const requestId = c.get("requestId");
 
   return c.json({
     user,
@@ -240,13 +248,13 @@ const getProfile = factory.createHandlers((c) => {
 const getUsers = factory.createHandlers(
   // Middleware
   async (c, next) => {
-    console.log('Fetching users...');
+    console.log("Fetching users...");
     await next();
   },
   // Handler
   async (c) => {
-    const db = c.get('db');
-    const users = db.query('SELECT id, email, role FROM users').all();
+    const db = c.get("db");
+    const users = db.query("SELECT id, email, role FROM users").all();
 
     return c.json({ users });
   }
@@ -256,8 +264,8 @@ const getUsers = factory.createHandlers(
 ### Handlers with Validation
 
 ```typescript
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
 const UpdateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -265,19 +273,23 @@ const UpdateProfileSchema = z.object({
 });
 
 const updateProfile = factory.createHandlers(
-  zValidator('json', UpdateProfileSchema),
+  zValidator("json", UpdateProfileSchema),
   async (c) => {
-    const user = c.get('user');
-    const data = c.req.valid('json');
-    const db = c.get('db');
+    const user = c.get("user");
+    const data = c.req.valid("json");
+    const db = c.get("db");
 
-    const updated = db.query(`
+    const updated = db
+      .query(
+        `
       UPDATE users
       SET name = COALESCE(?, name),
           bio = COALESCE(?, bio)
       WHERE id = ?
       RETURNING *
-    `).get(data.name || null, data.bio || null, user.id);
+    `
+      )
+      .get(data.name || null, data.bio || null, user.id);
 
     return c.json({ user: updated });
   }
@@ -289,23 +301,24 @@ const updateProfile = factory.createHandlers(
 ### Simple App
 
 ```typescript
-const app = factory.createApp()
+const app = factory
+  .createApp()
   // Global middleware
-  .use('*', requestIdMiddleware)
-  .use('*', dbMiddleware)
+  .use("*", requestIdMiddleware)
+  .use("*", dbMiddleware)
 
   // Public routes
-  .get('/health', (c) => c.json({ status: 'ok' }))
-  .post('/auth/login', loginHandler)
+  .get("/health", (c) => c.json({ status: "ok" }))
+  .post("/auth/login", loginHandler)
 
   // Protected routes
-  .use('/api/*', authMiddleware)
-  .get('/api/profile', ...getProfile)
-  .put('/api/profile', ...updateProfile)
+  .use("/api/*", authMiddleware)
+  .get("/api/profile", ...getProfile)
+  .put("/api/profile", ...updateProfile)
 
   // Admin routes
-  .use('/api/admin/*', requireRole('admin'))
-  .get('/api/admin/users', ...getUsers);
+  .use("/api/admin/*", requireRole("admin"))
+  .get("/api/admin/users", ...getUsers);
 
 export type AppType = typeof app;
 export default app;
@@ -315,90 +328,102 @@ export default app;
 
 ```typescript
 // routes/users.ts
-import { factory } from '../factory';
-import { requireRole } from '../middleware/auth';
+import { factory } from "../factory";
+import { requireRole } from "../middleware/auth";
 
-export const usersRoute = factory.createApp()
-  .get('/', async (c) => {
-    const db = c.get('db');
-    const users = db.query('SELECT id, email, role FROM users').all();
+export const usersRoute = factory
+  .createApp()
+  .get("/", async (c) => {
+    const db = c.get("db");
+    const users = db.query("SELECT id, email, role FROM users").all();
     return c.json({ users });
   })
-  .get('/:id', async (c) => {
-    const db = c.get('db');
-    const user = db.query('SELECT id, email, role FROM users WHERE id = ?')
-      .get(c.req.param('id'));
+  .get("/:id", async (c) => {
+    const db = c.get("db");
+    const user = db
+      .query("SELECT id, email, role FROM users WHERE id = ?")
+      .get(c.req.param("id"));
 
     if (!user) {
-      throw new HTTPException(404, { message: 'User not found' });
+      throw new HTTPException(404, { message: "User not found" });
     }
 
     return c.json({ user });
   })
-  .use(requireRole('admin')) // Admin-only routes below
-  .delete('/:id', async (c) => {
-    const db = c.get('db');
-    const user = db.query('DELETE FROM users WHERE id = ? RETURNING *')
-      .get(c.req.param('id'));
+  .use(requireRole("admin")) // Admin-only routes below
+  .delete("/:id", async (c) => {
+    const db = c.get("db");
+    const user = db
+      .query("DELETE FROM users WHERE id = ? RETURNING *")
+      .get(c.req.param("id"));
 
     if (!user) {
-      throw new HTTPException(404, { message: 'User not found' });
+      throw new HTTPException(404, { message: "User not found" });
     }
 
     return c.json({ deleted: true, user });
   });
 
 // routes/posts.ts
-import { factory } from '../factory';
+import { factory } from "../factory";
 
 const CreatePostSchema = z.object({
   title: z.string().min(1).max(200),
   content: z.string().min(1),
 });
 
-export const postsRoute = factory.createApp()
-  .get('/', async (c) => {
-    const db = c.get('db');
-    const posts = db.query('SELECT * FROM posts ORDER BY created_at DESC').all();
+export const postsRoute = factory
+  .createApp()
+  .get("/", async (c) => {
+    const db = c.get("db");
+    const posts = db
+      .query("SELECT * FROM posts ORDER BY created_at DESC")
+      .all();
     return c.json({ posts });
   })
-  .post('/', zValidator('json', CreatePostSchema), async (c) => {
-    const user = c.get('user');
-    const data = c.req.valid('json');
-    const db = c.get('db');
+  .post("/", zValidator("json", CreatePostSchema), async (c) => {
+    const user = c.get("user");
+    const data = c.req.valid("json");
+    const db = c.get("db");
 
-    const post = db.query(`
+    const post = db
+      .query(
+        `
       INSERT INTO posts (id, user_id, title, content)
       VALUES (?, ?, ?, ?)
       RETURNING *
-    `).get(crypto.randomUUID(), user.id, data.title, data.content);
+    `
+      )
+      .get(crypto.randomUUID(), user.id, data.title, data.content);
 
     return c.json({ post }, 201);
   })
-  .get('/:id', async (c) => {
-    const db = c.get('db');
-    const post = db.query('SELECT * FROM posts WHERE id = ?')
-      .get(c.req.param('id'));
+  .get("/:id", async (c) => {
+    const db = c.get("db");
+    const post = db
+      .query("SELECT * FROM posts WHERE id = ?")
+      .get(c.req.param("id"));
 
     if (!post) {
-      throw new HTTPException(404, { message: 'Post not found' });
+      throw new HTTPException(404, { message: "Post not found" });
     }
 
     return c.json({ post });
   });
 
 // index.ts
-import { factory } from './factory';
-import { usersRoute } from './routes/users';
-import { postsRoute } from './routes/posts';
+import { factory } from "./factory";
+import { usersRoute } from "./routes/users";
+import { postsRoute } from "./routes/posts";
 
-const app = factory.createApp()
-  .use('*', requestIdMiddleware)
-  .use('*', dbMiddleware)
+const app = factory
+  .createApp()
+  .use("*", requestIdMiddleware)
+  .use("*", dbMiddleware)
 
   // Mount routes
-  .route('/users', usersRoute)
-  .route('/posts', postsRoute);
+  .route("/users", usersRoute)
+  .route("/posts", postsRoute);
 
 export type AppType = typeof app;
 export default app;
@@ -418,13 +443,13 @@ export type BaseEnv = {
 };
 
 // auth-env.ts
-import type { BaseEnv } from './base-env';
+import type { BaseEnv } from "./base-env";
 
 export type AuthEnv = BaseEnv & {
-  Variables: BaseEnv['Variables'] & {
+  Variables: BaseEnv["Variables"] & {
     user: {
       id: string;
-      role: 'admin' | 'user';
+      role: "admin" | "user";
     };
   };
 };
@@ -432,14 +457,13 @@ export type AuthEnv = BaseEnv & {
 // Usage
 const authFactory = createFactory<AuthEnv>();
 
-export const authRoute = authFactory.createApp()
-  .get('/profile', (c) => {
-    const user = c.get('user'); // Typed!
-    const requestId = c.get('requestId'); // Also typed!
-    const db = c.get('db'); // Also typed!
+export const authRoute = authFactory.createApp().get("/profile", (c) => {
+  const user = c.get("user"); // Typed!
+  const requestId = c.get("requestId"); // Also typed!
+  const db = c.get("db"); // Also typed!
 
-    return c.json({ user, requestId });
-  });
+  return c.json({ user, requestId });
+});
 ```
 
 ### Merging Environments
@@ -458,18 +482,17 @@ type Env2 = {
 };
 
 type MergedEnv = {
-  Variables: Env1['Variables'] & Env2['Variables'];
+  Variables: Env1["Variables"] & Env2["Variables"];
 };
 
 const factory = createFactory<MergedEnv>();
 
-const app = factory.createApp()
-  .get('/test', (c) => {
-    const foo = c.get('foo'); // string
-    const bar = c.get('bar'); // number
+const app = factory.createApp().get("/test", (c) => {
+  const foo = c.get("foo"); // string
+  const bar = c.get("bar"); // number
 
-    return c.json({ foo, bar });
-  });
+  return c.json({ foo, bar });
+});
 ```
 
 ## Advanced Patterns
@@ -490,14 +513,18 @@ export const conditionalAuth = (condition: (c: Context) => boolean) => {
 };
 
 // Usage
-const app = factory.createApp()
-  .use('/api/*', conditionalAuth((c) => {
-    // Skip auth for health checks
-    return c.req.path !== '/api/health';
-  }))
-  .get('/api/health', (c) => c.json({ status: 'ok' }))
-  .get('/api/profile', (c) => {
-    const user = c.get('user'); // May be undefined
+const app = factory
+  .createApp()
+  .use(
+    "/api/*",
+    conditionalAuth((c) => {
+      // Skip auth for health checks
+      return c.req.path !== "/api/health";
+    })
+  )
+  .get("/api/health", (c) => c.json({ status: "ok" }))
+  .get("/api/profile", (c) => {
+    const user = c.get("user"); // May be undefined
     return c.json({ user });
   });
 ```
@@ -523,17 +550,17 @@ const composeMiddleware = (...middlewares: MiddlewareHandler[]) => {
 };
 
 // Usage
-const app = factory.createApp()
-  .use('/api/*', composeMiddleware(
-    requestIdMiddleware,
-    dbMiddleware,
-    authMiddleware
-  ))
-  .get('/api/profile', (c) => {
+const app = factory
+  .createApp()
+  .use(
+    "/api/*",
+    composeMiddleware(requestIdMiddleware, dbMiddleware, authMiddleware)
+  )
+  .get("/api/profile", (c) => {
     // All middleware ran
-    const requestId = c.get('requestId');
-    const db = c.get('db');
-    const user = c.get('user');
+    const requestId = c.get("requestId");
+    const db = c.get("db");
+    const user = c.get("user");
 
     return c.json({ user, requestId });
   });
@@ -550,11 +577,10 @@ const publicFactory = createFactory<{
   };
 }>();
 
-export const publicRoute = publicFactory.createApp()
-  .get('/status', (c) => {
-    // No user available here
-    return c.json({ status: 'ok' });
-  });
+export const publicRoute = publicFactory.createApp().get("/status", (c) => {
+  // No user available here
+  return c.json({ status: "ok" });
+});
 
 // Protected routes — auth required
 const protectedFactory = createFactory<{
@@ -565,19 +591,21 @@ const protectedFactory = createFactory<{
   };
 }>();
 
-export const protectedRoute = protectedFactory.createApp()
-  .get('/profile', (c) => {
-    const user = c.get('user'); // Always available!
+export const protectedRoute = protectedFactory
+  .createApp()
+  .get("/profile", (c) => {
+    const user = c.get("user"); // Always available!
     return c.json({ user });
   });
 
 // Combine
-const app = factory.createApp()
-  .use('*', requestIdMiddleware)
-  .use('*', dbMiddleware)
-  .route('/public', publicRoute)
-  .use('/protected/*', authMiddleware)
-  .route('/protected', protectedRoute);
+const app = factory
+  .createApp()
+  .use("*", requestIdMiddleware)
+  .use("*", dbMiddleware)
+  .route("/public", publicRoute)
+  .use("/protected/*", authMiddleware)
+  .route("/protected", protectedRoute);
 ```
 
 ### Dependency Injection
@@ -604,16 +632,17 @@ const factory = createFactory<Env>();
 
 // Inject dependencies
 const createApp = (db: IDatabase, cache: ICache) => {
-  return factory.createApp()
-    .use('*', async (c, next) => {
-      c.set('db', db);
-      c.set('cache', cache);
+  return factory
+    .createApp()
+    .use("*", async (c, next) => {
+      c.set("db", db);
+      c.set("cache", cache);
       await next();
     })
-    .get('/users/:id', async (c) => {
-      const cache = c.get('cache');
-      const db = c.get('db');
-      const id = c.req.param('id');
+    .get("/users/:id", async (c) => {
+      const cache = c.get("cache");
+      const db = c.get("db");
+      const id = c.req.param("id");
 
       // Try cache first
       const cached = await cache.get(`user:${id}`);
@@ -622,7 +651,7 @@ const createApp = (db: IDatabase, cache: ICache) => {
       }
 
       // Fetch from DB
-      const user = db.query('SELECT * FROM users WHERE id = ?').get(id);
+      const user = db.query("SELECT * FROM users WHERE id = ?").get(id);
 
       // Cache result
       await cache.set(`user:${id}`, JSON.stringify(user));
@@ -632,7 +661,7 @@ const createApp = (db: IDatabase, cache: ICache) => {
 };
 
 // Usage
-const db = new Database('app.db');
+const db = new Database("app.db");
 const cache = new RedisClient();
 
 const app = createApp(db, cache);
@@ -650,12 +679,10 @@ type Env = {
 
 const factory = createFactory<Env>();
 
-const app = factory.createApp()
-  .use('*', async (c, next) => {
-    c.set('requestId', crypto.randomUUID()); // Type error!
-    await next();
-  });
-
+const app = factory.createApp().use("*", async (c, next) => {
+  c.set("requestId", crypto.randomUUID()); // Type error!
+  await next();
+});
 
 // ✅ Correct: Include all variables in type
 type Env = {
@@ -665,35 +692,32 @@ type Env = {
   };
 };
 
-
 // ❌ Wrong: Using base Hono with factory
-import { Hono } from 'hono';
+import { Hono } from "hono";
 
 const app = new Hono() // Lost types!
   .use(authMiddleware) // Middleware expects typed context
-  .get('/profile', (c) => {
-    const user = c.get('user'); // Type error!
+  .get("/profile", (c) => {
+    const user = c.get("user"); // Type error!
   });
-
 
 // ✅ Correct: Use factory.createApp()
-const app = factory.createApp()
+const app = factory
+  .createApp()
   .use(authMiddleware)
-  .get('/profile', (c) => {
-    const user = c.get('user'); // Fully typed!
+  .get("/profile", (c) => {
+    const user = c.get("user"); // Fully typed!
   });
-
 
 // ❌ Wrong: Middleware doesn't use factory
 const authMiddleware = async (c: Context, next: Next) => {
-  c.set('user', { id: '123' }); // Lost types!
+  c.set("user", { id: "123" }); // Lost types!
   await next();
 };
 
-
 // ✅ Correct: Use factory.createMiddleware
 const authMiddleware = factory.createMiddleware(async (c, next) => {
-  c.set('user', { id: '123' }); // Typed!
+  c.set("user", { id: "123" }); // Typed!
   await next();
 });
 ```

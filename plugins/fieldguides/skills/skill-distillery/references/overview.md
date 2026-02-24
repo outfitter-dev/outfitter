@@ -4,15 +4,15 @@ Quick reference for the repo-to-plugin transformation workflow.
 
 ## Stages
 
-| Stage | Skill Loaded | Output |
-|-------|--------------|--------|
-| 1. Discovery | `research` | `artifacts/skill-distillery/discovery.md` |
-| 2. Recon | `codebase-analysis` | `artifacts/skill-distillery/recon.md` |
-| 3. Patterns | `find-patterns` | `artifacts/skill-distillery/patterns.md` |
-| 4. Mapping | `codify` | `artifacts/skill-distillery/mapping.md` |
-| 5. Authoring | `skillcraft` | `artifacts/skill-distillery/components/` |
-| 6. Packaging | `claude-plugins` | Plugin directory |
-| 7. Audit | `claude-plugins` | `artifacts/skill-distillery/audit.md` |
+| Stage        | Skill Loaded        | Output                                    |
+| ------------ | ------------------- | ----------------------------------------- |
+| 1. Discovery | `research`          | `artifacts/skill-distillery/discovery.md` |
+| 2. Recon     | `codebase-analysis` | `artifacts/skill-distillery/recon.md`     |
+| 3. Patterns  | `find-patterns`     | `artifacts/skill-distillery/patterns.md`  |
+| 4. Mapping   | `codify`            | `artifacts/skill-distillery/mapping.md`   |
+| 5. Authoring | `skillcraft`        | `artifacts/skill-distillery/components/`  |
+| 6. Packaging | `claude-plugins`    | Plugin directory                          |
+| 7. Audit     | `claude-plugins`    | `artifacts/skill-distillery/audit.md`     |
 
 ## Quick Mode
 

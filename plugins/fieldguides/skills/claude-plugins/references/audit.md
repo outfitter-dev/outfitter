@@ -4,11 +4,11 @@ Detailed validation checklists and output format for plugin audits.
 
 ## Severity Levels
 
-| Level | Indicator | Meaning |
-|-------|-----------|---------|
-| Critical | `◈` | Blocks functionality, must fix |
-| Warning | `◆` | Best practice violation, should fix |
-| Info | `◇` | Suggestion, optional improvement |
+| Level    | Indicator | Meaning                             |
+| -------- | --------- | ----------------------------------- |
+| Critical | `◈`       | Blocks functionality, must fix      |
+| Warning  | `◆`       | Best practice violation, should fix |
+| Info     | `◇`       | Suggestion, optional improvement    |
 
 ## Output Format
 
@@ -82,12 +82,12 @@ Detailed validation checklists and output format for plugin audits.
 
 ## Auto-Fixable Issues
 
-| Issue | Auto-Fix |
-|-------|----------|
-| Missing `description` in command | Generate from filename |
-| Script missing execute permission | `chmod +x` |
-| Trailing whitespace in YAML | Trim |
-| Missing `version` in plugin.json | Add `"1.0.0"` |
+| Issue                             | Auto-Fix               |
+| --------------------------------- | ---------------------- |
+| Missing `description` in command  | Generate from filename |
+| Script missing execute permission | `chmod +x`             |
+| Trailing whitespace in YAML       | Trim                   |
+| Missing `version` in plugin.json  | Add `"1.0.0"`          |
 
 Flag auto-fixable issues in output:
 

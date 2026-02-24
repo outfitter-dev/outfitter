@@ -4,18 +4,18 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 
 ## Categories
 
-| Category | Exit | HTTP | Class | When to Use |
-|----------|------|------|-------|-------------|
-| `validation` | 1 | 400 | `ValidationError` | Invalid input, schema failures, constraint violations |
-| `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
-| `conflict` | 3 | 409 | `ConflictError` | Already exists, version mismatch, optimistic lock failure |
-| `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
-| `timeout` | 5 | 504 | `TimeoutError` | Operation took too long |
-| `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
-| `network` | 7 | 502 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
-| `internal` | 8 | 500 | `InternalError` | Unexpected errors, bugs, unhandled cases |
-| `auth` | 9 | 401 | `AuthError` | Authentication required, invalid credentials |
-| `cancelled` | 130 | 499 | `CancelledError` | User interrupted (Ctrl+C), operation aborted |
+| Category     | Exit | HTTP | Class             | When to Use                                               |
+| ------------ | ---- | ---- | ----------------- | --------------------------------------------------------- |
+| `validation` | 1    | 400  | `ValidationError` | Invalid input, schema failures, constraint violations     |
+| `not_found`  | 2    | 404  | `NotFoundError`   | Resource doesn't exist                                    |
+| `conflict`   | 3    | 409  | `ConflictError`   | Already exists, version mismatch, optimistic lock failure |
+| `permission` | 4    | 403  | `PermissionError` | Forbidden action, insufficient privileges                 |
+| `timeout`    | 5    | 504  | `TimeoutError`    | Operation took too long                                   |
+| `rate_limit` | 6    | 429  | `RateLimitError`  | Too many requests, quota exceeded                         |
+| `network`    | 7    | 502  | `NetworkError`    | Connection failures, DNS errors, unreachable hosts        |
+| `internal`   | 8    | 500  | `InternalError`   | Unexpected errors, bugs, unhandled cases                  |
+| `auth`       | 9    | 401  | `AuthError`       | Authentication required, invalid credentials              |
+| `cancelled`  | 130  | 499  | `CancelledError`  | User interrupted (Ctrl+C), operation aborted              |
 
 ## Error Classes
 
@@ -23,9 +23,9 @@ All errors extend `OutfitterError` and have:
 
 ```typescript
 interface OutfitterError {
-  readonly _tag: string;           // Discriminator for pattern matching
+  readonly _tag: string; // Discriminator for pattern matching
   readonly category: ErrorCategory; // One of the 10 categories
-  readonly message: string;         // Human-readable message
+  readonly message: string; // Human-readable message
   readonly context?: Record<string, unknown>; // Additional context
 }
 ```
@@ -65,9 +65,9 @@ import { NotFoundError } from "@outfitter/contracts";
 NotFoundError.create("user", "user-123");
 
 // Access properties
-error.resourceType;  // "user"
-error.resourceId;    // "user-123"
-error.message;       // "user not found: user-123"
+error.resourceType; // "user"
+error.resourceId; // "user-123"
+error.message; // "user not found: user-123"
 ```
 
 ### ConflictError

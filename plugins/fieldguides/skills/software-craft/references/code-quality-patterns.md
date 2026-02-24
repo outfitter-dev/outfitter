@@ -11,13 +11,13 @@ Concrete examples for code quality standards.
 type Status = string;
 
 // Good: discriminated union
-type Status = 'pending' | 'approved' | 'rejected';
+type Status = "pending" | "approved" | "rejected";
 
 // Better: type-safe with associated data
 type Request =
-  | { status: 'pending' }
-  | { status: 'approved'; by: User; at: Date }
-  | { status: 'rejected'; reason: string };
+  | { status: "pending" }
+  | { status: "approved"; by: User; at: Date }
+  | { status: "rejected"; reason: string };
 ```
 
 ## Error Handling Examples
@@ -30,9 +30,9 @@ await saveUser(user);
 
 // Good: explicit handling with Result type
 const result = await saveUser(user);
-if (result.type === 'error') {
-  logger.error('Failed to save user', result.error);
-  return { type: 'error', message: 'Could not save user' };
+if (result.type === "error") {
+  logger.error("Failed to save user", result.error);
+  return { type: "error", message: "Could not save user" };
 }
 ```
 
@@ -61,23 +61,25 @@ user.active = true;
 
 ## Naming Conventions
 
-| Category | Pattern | Examples |
-|----------|---------|----------|
-| Functions | Verbs describing action | `calculateTotal`, `validateEmail`, `fetchUser` |
-| Variables | Nouns describing data | `userId`, `orderTotal`, `activeUsers` |
-| Booleans | Questions | `isValid`, `hasPermission`, `canEdit` |
-| Constants | SCREAMING_SNAKE_CASE | `MAX_RETRIES`, `DEFAULT_TIMEOUT` |
-| Types/Interfaces | PascalCase | `User`, `OrderRequest`, `AuthConfig` |
+| Category         | Pattern                 | Examples                                       |
+| ---------------- | ----------------------- | ---------------------------------------------- |
+| Functions        | Verbs describing action | `calculateTotal`, `validateEmail`, `fetchUser` |
+| Variables        | Nouns describing data   | `userId`, `orderTotal`, `activeUsers`          |
+| Booleans         | Questions               | `isValid`, `hasPermission`, `canEdit`          |
+| Constants        | SCREAMING_SNAKE_CASE    | `MAX_RETRIES`, `DEFAULT_TIMEOUT`               |
+| Types/Interfaces | PascalCase              | `User`, `OrderRequest`, `AuthConfig`           |
 
 ## Function Design Guidelines
 
 **Size and complexity:**
+
 - Do one thing well
 - 10-30 lines typical, max 50
 - 3 parameters ideal, max 5
 - Pure when possible (same input = same output)
 
 **Signs a function needs splitting:**
+
 - Multiple levels of nesting
 - Multiple responsibilities
 - Hard to name clearly

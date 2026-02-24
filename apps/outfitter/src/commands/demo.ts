@@ -8,6 +8,7 @@
  */
 
 import { fileURLToPath } from "node:url";
+
 import { output } from "@outfitter/cli";
 import {
   getPrimitiveIds,
@@ -15,6 +16,7 @@ import {
   renderAllDemos,
   renderDemo,
 } from "@outfitter/tui/demo";
+
 import type { CliOutputMode } from "../output-mode.js";
 
 const EMBEDDED_DEMO_FLAG = "--__outfitter-embedded-demo";

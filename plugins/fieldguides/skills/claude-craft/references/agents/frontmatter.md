@@ -30,6 +30,7 @@ description: |
 ```
 
 **Checklist:**
+
 - Starts with "Use this agent when..."
 - Includes 3-5 trigger keywords
 - Has 3-4 examples covering: typical use, edge case, verb triggers
@@ -61,11 +62,11 @@ description: |
 
 Controls which model the subagent uses. Three strategies:
 
-| Strategy | Syntax | Behavior |
-|----------|--------|----------|
-| **Omit entirely** | _(no `model` field)_ | Inherits parent's model. Same as `inherit`. |
-| **Explicit inherit** | `model: inherit` | Inherits parent's model. Use when you want to be explicit about the intent. |
-| **Pin a specific model** | `model: haiku\|sonnet\|opus` | Always uses that model regardless of parent. |
+| Strategy                 | Syntax                       | Behavior                                                                    |
+| ------------------------ | ---------------------------- | --------------------------------------------------------------------------- |
+| **Omit entirely**        | _(no `model` field)_         | Inherits parent's model. Same as `inherit`.                                 |
+| **Explicit inherit**     | `model: inherit`             | Inherits parent's model. Use when you want to be explicit about the intent. |
+| **Pin a specific model** | `model: haiku\|sonnet\|opus` | Always uses that model regardless of parent.                                |
 
 ```yaml
 # Strategy 1: Omit — inherits parent model (most common)
@@ -81,6 +82,7 @@ model: opus     # Complex reasoning, high-stakes decisions
 ```
 
 **When to pin a model:**
+
 - `haiku` — Read-only exploration, simple pattern matching, high-volume low-stakes work. Saves cost and latency.
 - `sonnet` — Straightforward implementation, standard review, test generation, docs.
 - `opus` — Nuanced judgment, multi-step reasoning, security/architecture review, complex refactoring, irreversible decisions.
@@ -102,7 +104,7 @@ If your agent needs specific skills, you must explicitly list them here.
 Tools to deny, removed from inherited or specified list.
 
 ```yaml
-disallowedTools: Write, Edit    # Deny write access even if tools inherits all
+disallowedTools: Write, Edit # Deny write access even if tools inherits all
 ```
 
 ### `permissionMode`
@@ -134,8 +136,8 @@ MCP servers available to this subagent. Each entry is a server name referencing 
 
 ```yaml
 mcpServers:
-  - slack                          # Reference existing server by name
-  - my-server:                     # Inline definition
+  - slack # Reference existing server by name
+  - my-server: # Inline definition
       command: npx
       args: ["-y", "@my/server"]
 ```
@@ -209,12 +211,12 @@ agents/db-migrator.md           → subagent_type: "db-migrator"
 
 ## File Locations
 
-| Scope | Path | Priority |
-|-------|------|----------|
+| Scope    | Path                      | Priority    |
+| -------- | ------------------------- | ----------- |
 | CLI flag | `--agents '{...}'` (JSON) | 1 (highest) |
-| Project | `.claude/agents/` | 2 |
-| Personal | `~/.claude/agents/` | 3 |
-| Plugin | `<plugin>/agents/` | 4 (lowest) |
+| Project  | `.claude/agents/`         | 2           |
+| Personal | `~/.claude/agents/`       | 3           |
+| Plugin   | `<plugin>/agents/`        | 4 (lowest)  |
 
 When multiple subagents share the same name, the higher-priority location wins. CLI-defined agents exist only for that session and aren't saved to disk.
 
@@ -265,11 +267,13 @@ model: inherit
 # Authentication Security Reviewer
 
 ## Expertise
+
 - OAuth 2.0 and OIDC
 - JWT tokens
 - Session management
 
 ## Process
+
 1. Analyze authentication flow
 2. Check token handling
 3. Verify session security

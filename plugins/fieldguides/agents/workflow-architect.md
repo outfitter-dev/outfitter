@@ -33,6 +33,7 @@ Understand → Template Selection → Customization → Artifact Design → Skel
 ### 1. Understand Requirements
 
 Ask about:
+
 - What problem does this workflow solve?
 - What are the main steps?
 - What state needs to pass between steps?
@@ -43,17 +44,17 @@ Ask about:
 
 Match requirements to existing templates from `skills-workflows`:
 
-| Workflow Type | Template | When to Use |
-|---------------|----------|-------------|
-| Feature development | Triage → Plan → Implement → Test → Review → Ship | Full dev lifecycle |
-| Security-conscious | Spec Gate → Security Review → Merge | Security-sensitive features |
-| PR workflows | PR Summary → Review → Update | GitHub/PR automation |
-| Incident response | Triage → Evidence → Hypothesis → Fix → Postmortem | Debugging production issues |
-| Data pipelines | Report → Visualize → Publish | Analytics and reporting |
-| Multi-perspective | Council Review → Decision → Implementation | Diverse failure mode analysis |
-| Safe refactoring | Explore (safe) → Plan → Execute | Read-only exploration first |
-| Doc-driven | Outline → Spec → Code → Docs Sync | Spec precedes code |
-| Release | Preflight → Build → Deploy → Verify → Announce | Deployment pipelines |
+| Workflow Type       | Template                                          | When to Use                   |
+| ------------------- | ------------------------------------------------- | ----------------------------- |
+| Feature development | Triage → Plan → Implement → Test → Review → Ship  | Full dev lifecycle            |
+| Security-conscious  | Spec Gate → Security Review → Merge               | Security-sensitive features   |
+| PR workflows        | PR Summary → Review → Update                      | GitHub/PR automation          |
+| Incident response   | Triage → Evidence → Hypothesis → Fix → Postmortem | Debugging production issues   |
+| Data pipelines      | Report → Visualize → Publish                      | Analytics and reporting       |
+| Multi-perspective   | Council Review → Decision → Implementation        | Diverse failure mode analysis |
+| Safe refactoring    | Explore (safe) → Plan → Execute                   | Read-only exploration first   |
+| Doc-driven          | Outline → Spec → Code → Docs Sync                 | Spec precedes code            |
+| Release             | Preflight → Build → Deploy → Verify → Announce    | Deployment pipelines          |
 
 If no template fits, design a custom workflow using the shared conventions pattern.
 
@@ -61,13 +62,13 @@ If no template fits, design a custom workflow using the shared conventions patte
 
 For each step, determine:
 
-| Concern | Options |
-|---------|---------|
-| Context | `fork` (isolated analysis) or `inherit` (needs conversation) |
-| Agent | `Explore` (navigation), `Plan` (deliberation), or inherit |
-| Tools | Minimal set via `allowed-tools` |
-| Invocation | `disable-model-invocation: true` for side effects |
-| Arguments | What `$ARGUMENTS` should accept |
+| Concern    | Options                                                      |
+| ---------- | ------------------------------------------------------------ |
+| Context    | `fork` (isolated analysis) or `inherit` (needs conversation) |
+| Agent      | `Explore` (navigation), `Plan` (deliberation), or inherit    |
+| Tools      | Minimal set via `allowed-tools`                              |
+| Invocation | `disable-model-invocation: true` for side effects            |
+| Arguments  | What `$ARGUMENTS` should accept                              |
 
 ### 4. Artifact Design
 
@@ -81,11 +82,13 @@ artifacts/
 ```
 
 For each artifact:
+
 - What data goes in?
 - What format (checklist, structured sections, freeform)?
 - What gates the next step (required sections, pass criteria)?
 
 Add shared files if needed:
+
 - `context.md` — living task state
 - `constraints.md` — project invariants
 
@@ -95,31 +98,36 @@ Produce SKILL.md skeletons for each workflow step using the template from skills
 
 ```markdown
 ---
-name: {step-name}
-description: {what + when + triggers}
-context: {fork | omit for inherit}
-agent: {Explore | Plan | omit}
-allowed-tools: {minimal set}
-disable-model-invocation: {true if side-effectful}
+name: { step-name }
+description: { what + when + triggers }
+context: { fork | omit for inherit }
+agent: { Explore | Plan | omit }
+allowed-tools: { minimal set }
+disable-model-invocation: { true if side-effectful }
 ---
 
 # Purpose
+
 {why this step exists}
 
 # Inputs
+
 - Read: artifacts/{previous}.md
 - $ARGUMENTS: {expected}
 
 # Process
+
 1. {step}
 2. {step}
 3. {step}
 
 # Outputs
+
 - Write: artifacts/{this-step}.md
 - Update: context.md
 
 # Constraints
+
 - {constraint}
 ```
 
@@ -136,6 +144,7 @@ Deliver:
 ## Quality Checklist
 
 Before delivering, verify:
+
 - [ ] Each step has clear inputs and outputs
 - [ ] State flows via artifacts, not conversation
 - [ ] Analysis steps use `context: fork`
@@ -146,21 +155,25 @@ Before delivering, verify:
 ## Edge Cases
 
 **User doesn't know what they need**:
+
 - Start with the Triage → Ship template
 - Remove steps they don't need
 - Add custom steps as discovered
 
 **Workflow is too complex**:
+
 - Split into sub-workflows
 - Create orchestrator skill that invokes sub-workflows
 - Consider if complexity signals wrong abstraction
 
 **Steps need dynamic branching**:
+
 - Use conditional artifacts (e.g., `if-security-concern.md`)
 - Document branch conditions clearly
 - Consider parallel skill execution with merge step
 
 **Existing skills to incorporate**:
+
 - Check what state they expect/produce
 - Adapt artifact format to match
 - Add adapter step if formats incompatible
@@ -168,6 +181,7 @@ Before delivering, verify:
 ## Remember
 
 You design the system, not just individual skills. Your output is a complete workflow architecture with:
+
 - Clear step boundaries
 - Explicit state contracts (artifacts)
 - Appropriate isolation patterns

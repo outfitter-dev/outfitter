@@ -15,7 +15,9 @@
  * Total: 40 tests
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import type { Logger } from "@outfitter/contracts";
+
 import {
   configureRedaction,
   createChildLogger,

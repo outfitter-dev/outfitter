@@ -9,11 +9,11 @@ Side-by-side feature comparison.
 ### Structure
 
 ```markdown
-| Feature | Option A | Option B | Option C |
-|---------|----------|----------|----------|
-| Criterion 1 | Value | Value | Value |
-| Criterion 2 | Value | Value | Value |
-| Criterion 3 | Value | Value | Value |
+| Feature     | Option A | Option B | Option C |
+| ----------- | -------- | -------- | -------- |
+| Criterion 1 | Value    | Value    | Value    |
+| Criterion 2 | Value    | Value    | Value    |
+| Criterion 3 | Value    | Value    | Value    |
 ```
 
 ### Best Practices
@@ -27,12 +27,12 @@ Side-by-side feature comparison.
 ### Example
 
 ```markdown
-| Capability | Express | Fastify | Hono |
-|------------|---------|---------|------|
-| Requests/sec | 15k | 30k | **60k** |
-| TypeScript | Plugin | Native | **Native** |
-| Bundle size | 500KB | 350KB | **14KB** |
-| Learning curve | Low | Medium | Low |
+| Capability     | Express | Fastify | Hono       |
+| -------------- | ------- | ------- | ---------- |
+| Requests/sec   | 15k     | 30k     | **60k**    |
+| TypeScript     | Plugin  | Native  | **Native** |
+| Bundle size    | 500KB   | 350KB   | **14KB**   |
+| Learning curve | Low     | Medium  | Low        |
 ```
 
 ## Trade-off Analysis
@@ -44,20 +44,24 @@ Deeper evaluation of strengths and weaknesses.
 For each option, document:
 
 **Strengths**:
+
 - What it does well
 - Unique advantages
 - Best use cases
 
 **Weaknesses**:
+
 - Limitations
 - Edge cases it handles poorly
 - Known issues
 
 **Use cases**:
+
 - When to choose this option
 - Ideal scenarios
 
 **Deal-breakers**:
+
 - When to definitely avoid
 - Hard constraints it violates
 
@@ -67,18 +71,22 @@ For each option, document:
 ## Option: {Name}
 
 **Strengths**:
+
 - {Advantage 1} — {evidence/detail}
 - {Advantage 2} — {evidence/detail}
 
 **Weaknesses**:
+
 - {Limitation 1} — {impact}
 - {Limitation 2} — {impact}
 
 **Best for**:
+
 - {Use case 1}
 - {Use case 2}
 
 **Avoid when**:
+
 - {Constraint 1}
 - {Constraint 2}
 ```
@@ -98,34 +106,34 @@ Quantitative scoring for complex decisions.
 ### Template
 
 ```markdown
-| Criterion | Weight | Option A | Option B | Option C |
-|-----------|--------|----------|----------|----------|
-| Performance | 5 | 4 (20) | 5 (25) | 3 (15) |
-| Ease of use | 3 | 5 (15) | 3 (9) | 4 (12) |
-| Ecosystem | 4 | 5 (20) | 3 (12) | 2 (8) |
-| Cost | 2 | 3 (6) | 4 (8) | 5 (10) |
-| **Total** | | **61** | **54** | **45** |
+| Criterion   | Weight | Option A | Option B | Option C |
+| ----------- | ------ | -------- | -------- | -------- |
+| Performance | 5      | 4 (20)   | 5 (25)   | 3 (15)   |
+| Ease of use | 3      | 5 (15)   | 3 (9)    | 4 (12)   |
+| Ecosystem   | 4      | 5 (20)   | 3 (12)   | 2 (8)    |
+| Cost        | 2      | 3 (6)    | 4 (8)    | 5 (10)   |
+| **Total**   |        | **61**   | **54**   | **45**   |
 ```
 
 ### Weight Guidelines
 
-| Weight | Meaning |
-|--------|---------|
-| 5 | Critical — must have |
-| 4 | Important — strong preference |
-| 3 | Moderate — nice to have |
-| 2 | Minor — slight preference |
-| 1 | Low — barely factors in |
+| Weight | Meaning                       |
+| ------ | ----------------------------- |
+| 5      | Critical — must have          |
+| 4      | Important — strong preference |
+| 3      | Moderate — nice to have       |
+| 2      | Minor — slight preference     |
+| 1      | Low — barely factors in       |
 
 ### Score Guidelines
 
-| Score | Meaning |
-|-------|---------|
-| 5 | Excellent — best in class |
-| 4 | Good — above average |
-| 3 | Adequate — meets needs |
-| 2 | Poor — below expectations |
-| 1 | Failing — does not meet need |
+| Score | Meaning                      |
+| ----- | ---------------------------- |
+| 5     | Excellent — best in class    |
+| 4     | Good — above average         |
+| 3     | Adequate — meets needs       |
+| 2     | Poor — below expectations    |
+| 1     | Failing — does not meet need |
 
 ## Pros/Cons List
 
@@ -137,14 +145,17 @@ Simple qualitative comparison.
 ## Option: {Name}
 
 ### Pros
+
 - {Benefit 1}
 - {Benefit 2}
 
 ### Cons
+
 - {Drawback 1}
 - {Drawback 2}
 
 ### Verdict
+
 {Summary recommendation}
 ```
 
@@ -162,21 +173,25 @@ Structured approach for defining what matters.
 ### Categories
 
 **Functional Requirements**:
+
 - Features needed
 - Capabilities required
 - Integration points
 
 **Non-Functional Requirements**:
+
 - Performance benchmarks
 - Scalability needs
 - Security requirements
 
 **Operational Concerns**:
+
 - Maintenance burden
 - Monitoring/observability
 - Deployment complexity
 
 **Business Factors**:
+
 - Cost (license, infrastructure)
 - Vendor lock-in risk
 - Team expertise
@@ -185,18 +200,18 @@ Structured approach for defining what matters.
 
 Categorize criteria:
 
-| Priority | Meaning | Impact on Decision |
-|----------|---------|-------------------|
-| Must-have | Non-negotiable | Eliminates options |
-| Should-have | Strong preference | Heavy weighting |
-| Nice-to-have | Bonus features | Light weighting |
+| Priority     | Meaning           | Impact on Decision |
+| ------------ | ----------------- | ------------------ |
+| Must-have    | Non-negotiable    | Eliminates options |
+| Should-have  | Strong preference | Heavy weighting    |
+| Nice-to-have | Bonus features    | Light weighting    |
 
 ## Method Selection Guide
 
-| Situation | Recommended Method |
-|-----------|-------------------|
-| Quick comparison | Feature matrix |
-| Complex decision | Weighted matrix |
-| Stakeholder alignment | Trade-off analysis |
-| Binary choice | Pros/cons list |
+| Situation              | Recommended Method |
+| ---------------------- | ------------------ |
+| Quick comparison       | Feature matrix     |
+| Complex decision       | Weighted matrix    |
+| Stakeholder alignment  | Trade-off analysis |
+| Binary choice          | Pros/cons list     |
 | Requirements gathering | Criteria framework |

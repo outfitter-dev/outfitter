@@ -11,7 +11,7 @@ const [vcsData, prData, issueData, ciData] = await Promise.allSettled([
   fetchVCSState(timeFilter),
   fetchPRStatus(timeFilter),
   fetchIssues(timeFilter),
-  fetchCIStatus(timeFilter)
+  fetchCIStatus(timeFilter),
 ]);
 
 // Handle each result (success or failure)
@@ -21,6 +21,7 @@ const [vcsData, prData, issueData, ciData] = await Promise.allSettled([
 ## Error Handling
 
 Graceful degradation:
+
 - Source unavailable → skip section, note in output
 - Partial data → show available, note gaps
 - API rate limits → use cached data, note staleness
@@ -29,6 +30,7 @@ Graceful degradation:
 ## Caching Strategy
 
 For expensive queries:
+
 - Cache with timestamp
 - Reuse if fresh (< 5 min)
 - Allow bypass with flag
@@ -63,6 +65,7 @@ scripts/
 **Output formats**: `json` (default, structured) | `text` (human-readable)
 
 **Benefits**:
+
 - Single command, parallel gathering
 - Graceful degradation
 - Consistent JSON schema
@@ -82,6 +85,7 @@ scripts/
 ### Custom Aggregations
 
 Optional sections when data available:
+
 - Velocity metrics (PRs merged/day)
 - Team activity (commits by author)
 - Quality indicators (test coverage trends)
@@ -90,6 +94,7 @@ Optional sections when data available:
 ### Tool-Specific Docs
 
 Reference documents should cover:
+
 - Optimal CLI/API calls
 - Response parsing
 - Rate limit handling
@@ -127,6 +132,7 @@ Map repos to relevant filters:
 ```
 
 **Lookup strategy**:
+
 1. Exact path match
 2. Pattern match (wildcards)
 3. Repo name extraction

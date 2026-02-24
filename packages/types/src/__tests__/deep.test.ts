@@ -7,6 +7,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+
 import type { DeepGet, DeepKeys, DeepSet } from "../deep.js";
 
 describe("deep path types", () => {

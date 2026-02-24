@@ -8,10 +8,12 @@
  */
 
 import { resolve } from "node:path";
+
 import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
 import { generateDocsMap } from "@outfitter/docs";
 import { createTheme } from "@outfitter/tui/render";
+
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { DocsMapEntryShape } from "./docs-types.js";

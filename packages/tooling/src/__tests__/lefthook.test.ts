@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
+
 import { parse as parseYaml } from "yaml";
 
 const PACKAGE_ROOT = join(import.meta.dir, "../..");

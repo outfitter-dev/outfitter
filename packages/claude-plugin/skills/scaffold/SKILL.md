@@ -8,16 +8,16 @@ argument-hint: [component type]
 
 # Scaffold Stack Components
 
-Templates for creating @outfitter/* components.
+Templates for creating @outfitter/\* components.
 
 ## Component Types
 
-| Type | Package | Template |
-|------|---------|----------|
-| Handler | `@outfitter/contracts` | [handler](#handler) |
-| CLI Command | `@outfitter/cli` | [cli-command](#cli-command) |
-| MCP Tool | `@outfitter/mcp` | [mcp-tool](#mcp-tool) |
-| Daemon | `@outfitter/daemon` | [daemon-service](#daemon-service) |
+| Type        | Package                | Template                          |
+| ----------- | ---------------------- | --------------------------------- |
+| Handler     | `@outfitter/contracts` | [handler](#handler)               |
+| CLI Command | `@outfitter/cli`       | [cli-command](#cli-command)       |
+| MCP Tool    | `@outfitter/mcp`       | [mcp-tool](#mcp-tool)             |
+| Daemon      | `@outfitter/daemon`    | [daemon-service](#daemon-service) |
 
 ## Handler
 
@@ -49,10 +49,11 @@ interface Output {
 const validateInput = createValidator(InputSchema);
 
 // 4. Handler
-export const myHandler: Handler<unknown, Output, ValidationError | NotFoundError> = async (
-  rawInput,
-  ctx
-) => {
+export const myHandler: Handler<
+  unknown,
+  Output,
+  ValidationError | NotFoundError
+> = async (rawInput, ctx) => {
   const inputResult = validateInput(rawInput);
   if (inputResult.isErr()) return inputResult;
   const input = inputResult.value;
@@ -240,9 +241,12 @@ const ipcServer = createIpcServer(getSocketPath("my-daemon"));
 ipcServer.onMessage(async (msg) => {
   const message = msg as { type: string };
   switch (message.type) {
-    case "status": return { status: "ok", uptime: process.uptime() };
-    case "health": return await healthChecker.check();
-    default: return { error: "Unknown command" };
+    case "status":
+      return { status: "ok", uptime: process.uptime() };
+    case "health":
+      return await healthChecker.check();
+    default:
+      return { error: "Unknown command" };
   }
 });
 

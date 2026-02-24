@@ -11,6 +11,7 @@ version: 1.0.0
 ## Overview
 
 This skill provides {CORE_CAPABILITY}:
+
 - **Feature 1**: { description }
 - **Feature 2**: { description }
 - **Feature 3**: { description }
@@ -88,6 +89,7 @@ Common issues and solutions:
 ## Requirements
 
 This skill requires:
+
 - { dependency 1 }: { version or details }
 - { dependency 2 }: { version or details }
 

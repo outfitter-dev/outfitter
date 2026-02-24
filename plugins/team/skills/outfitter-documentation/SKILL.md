@@ -11,7 +11,8 @@ metadata:
 
 Structure and templates for project documentation — the human-facing docs that help developers understand and use your project.
 
-This skill covers *what* to include and *where* it goes. For *how* to write it:
+This skill covers _what_ to include and _where_ it goes. For _how_ to write it:
+
 - Load the `outfitter-styleguide` skill for sentence rhythm, metaphors, structural moves
 - Load the `outfitter-voice` skill for philosophical foundation (apply as review pass)
 
@@ -33,11 +34,11 @@ Standardized directory layout for documentation across repositories.
 
 ### Root-Level Files
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Entry point for humans — quick start, links to docs |
-| `CONTRIBUTING.md` | Contribution guidelines (if applicable) |
-| `CHANGELOG.md` | Version history (auto-generated preferred) |
+| File              | Purpose                                             |
+| ----------------- | --------------------------------------------------- |
+| `README.md`       | Entry point for humans — quick start, links to docs |
+| `CONTRIBUTING.md` | Contribution guidelines (if applicable)             |
+| `CHANGELOG.md`    | Version history (auto-generated preferred)          |
 
 ### Standard Directories
 
@@ -53,13 +54,13 @@ project/
 
 ### Directory Purpose
 
-| Directory | Content |
-|-----------|---------|
+| Directory       | Content                                                            |
+| --------------- | ------------------------------------------------------------------ |
 | `architecture/` | System design docs, Architecture Decision Records (ADRs), diagrams |
-| `api/` | API reference, endpoint documentation, type definitions |
-| `cli/` | Command reference, flags, usage examples, exit codes |
-| `guides/` | How-to tutorials, walkthroughs, use-case guides |
-| `development/` | Contributing setup, local dev, testing, release process |
+| `api/`          | API reference, endpoint documentation, type definitions            |
+| `cli/`          | Command reference, flags, usage examples, exit codes               |
+| `guides/`       | How-to tutorials, walkthroughs, use-case guides                    |
+| `development/`  | Contributing setup, local dev, testing, release process            |
 
 ### Source of Truth Principle
 
@@ -88,12 +89,12 @@ See [templates/README.md](templates/README.md) for the full template.
 
 ### What Belongs in README vs docs/
 
-| README | `docs/` |
-|--------|---------|
-| Quick start (5-10 steps max) | Full tutorials |
-| Feature list (bullet points) | Feature deep-dives |
-| Installation options | Configuration reference |
-| Links to detailed docs | The detailed docs themselves |
+| README                       | `docs/`                      |
+| ---------------------------- | ---------------------------- |
+| Quick start (5-10 steps max) | Full tutorials               |
+| Feature list (bullet points) | Feature deep-dives           |
+| Installation options         | Configuration reference      |
+| Links to detailed docs       | The detailed docs themselves |
 
 ### Leading Section Pattern
 
@@ -107,17 +108,18 @@ Choose based on project type:
 
 When documenting packages or components with different maturity levels, use these labels:
 
-| Label | Meaning | Guidance |
-|-------|---------|----------|
-| **Stable** | APIs locked, breaking changes rare | Safe to depend on |
-| **Active** | APIs evolving based on usage | Watch for updates |
-| **Early** | APIs will change, not production-ready | Use with caution |
+| Label      | Meaning                                | Guidance          |
+| ---------- | -------------------------------------- | ----------------- |
+| **Stable** | APIs locked, breaking changes rare     | Safe to depend on |
+| **Active** | APIs evolving based on usage           | Watch for updates |
+| **Early**  | APIs will change, not production-ready | Use with caution  |
 
 Avoid metaphorical labels (Cold/Warm/Hot, etc.) — literal labels require no interpretation.
 
 ### Quick Start Best Practices
 
 1. **Make it copy-paste runnable.** Use heredoc format when showing file creation:
+
    ```bash
    cat > example.ts << 'EOF'
    import { ok, err } from '@org/contracts';
@@ -127,6 +129,7 @@ Avoid metaphorical labels (Cold/Warm/Hot, etc.) — literal labels require no in
    ```
 
 2. **Show output, including errors.** Demonstrate both success and failure:
+
    ```
    $ my-tool search --query "test"
    Found: [ "result-1", "result-2" ]
@@ -134,11 +137,14 @@ Avoid metaphorical labels (Cold/Warm/Hot, etc.) — literal labels require no in
    $ my-tool search
    Error [validation]: Query is required
    ```
+
    Showing error output proves your error handling works.
 
 3. **End with a memorable closer.** After the output block, add a confident one-liner:
+
    ````markdown
    **Output:**
+
    ```
    Found: [ "result-1", "result-2" ]
    ```
@@ -189,7 +195,7 @@ interface UserConfig {
 function configureUser(options: UserConfig): void {
   // Validate timeout is positive
   if (options.timeout <= 0) {
-    throw new Error('Timeout must be positive');
+    throw new Error("Timeout must be positive");
   }
   applyConfig(options);
 }
@@ -211,7 +217,7 @@ function configure(opts) {
 
 ### Function Documentation
 
-```typescript
+````typescript
 /**
  * Processes user data according to specified rules.
  *
@@ -231,8 +237,8 @@ function configure(opts) {
  * @throws {ValidationError} When userData is invalid
  * @throws {RuleError} When rules cannot be applied
  */
-function processUser(userData: UserData, rules: ProcessRules): ProcessedUser
-```
+function processUser(userData: UserData, rules: ProcessRules): ProcessedUser;
+````
 
 ### Parameter Documentation
 
@@ -248,10 +254,10 @@ Always document:
 
 ```markdown
 | Option    | Type      | Default | Description                     |
-|-----------|-----------|---------|--------------------------------|
-| `port`    | `number`  | `3000`  | Server port                    |
+| --------- | --------- | ------- | ------------------------------- |
+| `port`    | `number`  | `3000`  | Server port                     |
 | `timeout` | `number`  | `30000` | Request timeout in milliseconds |
-| `debug`   | `boolean` | `false` | Enable debug logging           |
+| `debug`   | `boolean` | `false` | Enable debug logging            |
 ```
 
 ## Maintenance

@@ -12,6 +12,7 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+
 import {
   booleanFlagPreset,
   composePresets,
@@ -26,6 +27,7 @@ import {
   withDocsExportOptions,
 } from "@outfitter/docs";
 import { Command } from "commander";
+
 import {
   type ExecuteCheckCommandOptions,
   type ExecuteExportCommandOptions,

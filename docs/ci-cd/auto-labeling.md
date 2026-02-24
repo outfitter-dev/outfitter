@@ -5,6 +5,7 @@ This document describes how pull requests are automatically labeled in the Outfi
 ## Overview
 
 PRs are automatically labeled based on the files they change. This powers several workflows:
+
 - Release automation (which packages need version bumps)
 - PR triage (what areas are affected)
 - Review routing (who should review)
@@ -19,21 +20,21 @@ When a PR is opened or updated, the `auto-label.yml` workflow runs and applies l
 
 PRs touching package source code get `package/*` labels:
 
-| Label | Triggered By |
-|-------|--------------|
+| Label               | Triggered By            |
+| ------------------- | ----------------------- |
 | `package/contracts` | `packages/contracts/**` |
-| `package/types` | `packages/types/**` |
-| `package/cli` | `packages/cli/**` |
-| `package/config` | `packages/config/**` |
-| `package/logging` | `packages/logging/**` |
-| `package/file-ops` | `packages/file-ops/**` |
-| `package/state` | `packages/state/**` |
-| `package/index` | `packages/index/**` |
-| `package/daemon` | `packages/daemon/**` |
-| `package/mcp` | `packages/mcp/**` |
-| `package/testing` | `packages/testing/**` |
-| `package/tooling` | `packages/tooling/**` |
-| `package/kit` | `packages/kit/**` |
+| `package/types`     | `packages/types/**`     |
+| `package/cli`       | `packages/cli/**`       |
+| `package/config`    | `packages/config/**`    |
+| `package/logging`   | `packages/logging/**`   |
+| `package/file-ops`  | `packages/file-ops/**`  |
+| `package/state`     | `packages/state/**`     |
+| `package/index`     | `packages/index/**`     |
+| `package/daemon`    | `packages/daemon/**`    |
+| `package/mcp`       | `packages/mcp/**`       |
+| `package/testing`   | `packages/testing/**`   |
+| `package/tooling`   | `packages/tooling/**`   |
+| `package/kit`       | `packages/kit/**`       |
 
 These labels help categorize which packages a PR affects.
 
@@ -41,34 +42,34 @@ These labels help categorize which packages a PR affects.
 
 PRs are labeled by the area of the codebase they affect:
 
-| Label | Triggered By |
-|-------|--------------|
-| `area/outfitter` | `apps/outfitter/**` |
-| `area/agents` | `packages/agents/**` |
-| `area/plugins` | `plugins/**` |
-| `area/ci-cd` | `.github/**` |
-| `area/docs` | `docs/**`, `*.md` |
-| `area/tooling` | `scripts/**`, config files |
+| Label            | Triggered By               |
+| ---------------- | -------------------------- |
+| `area/outfitter` | `apps/outfitter/**`        |
+| `area/agents`    | `packages/agents/**`       |
+| `area/plugins`   | `plugins/**`               |
+| `area/ci-cd`     | `.github/**`               |
+| `area/docs`      | `docs/**`, `*.md`          |
+| `area/tooling`   | `scripts/**`, config files |
 
 ### Type Labels
 
 Some content types are auto-detected:
 
-| Label | Triggered By |
-|-------|--------------|
-| `docs` | Documentation files (`.md`) |
-| `tests` | Test files (`*.test.ts`, `__tests__/**`) |
-| `deps` | Dependency files (`package.json`, `bun.lock`) |
+| Label   | Triggered By                                  |
+| ------- | --------------------------------------------- |
+| `docs`  | Documentation files (`.md`)                   |
+| `tests` | Test files (`*.test.ts`, `__tests__/**`)      |
+| `deps`  | Dependency files (`package.json`, `bun.lock`) |
 
 ### Graphite Stack Labels
 
 PRs in Graphite stacks get position labels:
 
-| Label | Meaning |
-|-------|---------|
-| `stack:base` | Bottom of a stack (merges directly to main) |
-| `stack:middle` | Middle of a stack |
-| `stack:top` | Top of a stack |
+| Label          | Meaning                                     |
+| -------------- | ------------------------------------------- |
+| `stack:base`   | Bottom of a stack (merges directly to main) |
+| `stack:middle` | Middle of a stack                           |
+| `stack:top`    | Top of a stack                              |
 
 These are managed by `stack-labels.yml`.
 
@@ -108,40 +109,40 @@ Some labels are applied manually, not automatically:
 
 ### Release Labels
 
-| Label | Purpose |
-|-------|---------|
-| `release:patch` | Bug fix release |
-| `release:minor` | Feature release |
-| `release:major` | Breaking change release |
-| `release:none` | No release needed -- skips changeset requirement in CI |
+| Label           | Purpose                                                |
+| --------------- | ------------------------------------------------------ |
+| `release:patch` | Bug fix release                                        |
+| `release:minor` | Feature release                                        |
+| `release:major` | Breaking change release                                |
+| `release:none`  | No release needed -- skips changeset requirement in CI |
 
 See [Releases](../RELEASES.md) for details.
 
 ### Priority Labels
 
-| Label | Purpose |
-|-------|---------|
-| `priority/critical` | Drop everything |
-| `priority/high` | Address soon |
-| `priority/medium` | Normal priority |
-| `priority/low` | When time permits |
+| Label               | Purpose           |
+| ------------------- | ----------------- |
+| `priority/critical` | Drop everything   |
+| `priority/high`     | Address soon      |
+| `priority/medium`   | Normal priority   |
+| `priority/low`      | When time permits |
 
 ### Status Labels
 
-| Label | Purpose |
-|-------|---------|
-| `status/blocked` | Waiting on something |
-| `status/needs-info` | Needs clarification |
-| `status/ready` | Ready for review |
+| Label               | Purpose              |
+| ------------------- | -------------------- |
+| `status/blocked`    | Waiting on something |
+| `status/needs-info` | Needs clarification  |
+| `status/ready`      | Ready for review     |
 
 ## Workflows
 
-| Workflow | Purpose |
-|----------|---------|
-| `auto-label.yml` | Apply labels based on file changes |
-| `stack-labels.yml` | Apply Graphite stack position labels |
+| Workflow               | Purpose                                     |
+| ---------------------- | ------------------------------------------- |
+| `auto-label.yml`       | Apply labels based on file changes          |
+| `stack-labels.yml`     | Apply Graphite stack position labels        |
 | `changeset-labels.yml` | Apply release labels from manual changesets |
-| `label-sync.yml` | Sync label definitions to GitHub |
+| `label-sync.yml`       | Sync label definitions to GitHub            |
 
 ## Troubleshooting
 

@@ -6,7 +6,9 @@
 
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+
 import { Result } from "better-result";
+
 import { DocsCoreError, type PackageDocsError } from "./errors.js";
 import { isPathInsideWorkspace, pathsOverlap } from "./path-utils.js";
 import type {

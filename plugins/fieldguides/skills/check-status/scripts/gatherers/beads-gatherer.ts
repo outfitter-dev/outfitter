@@ -11,6 +11,7 @@
  */
 
 import { parseArgs } from "node:util";
+
 import { filterByTime, parseTimeConstraint } from "../lib/time";
 import type {
   BeadsData,

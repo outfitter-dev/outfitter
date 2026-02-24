@@ -43,20 +43,20 @@ gh repo view --json nameWithOwner,defaultBranch
 interface GitHubPR {
   number: number;
   title: string;
-  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  state: "OPEN" | "CLOSED" | "MERGED";
   isDraft: boolean;
   author: { login: string };
   updatedAt: string;
   statusCheckRollup: {
-    state: 'SUCCESS' | 'FAILURE' | 'PENDING' | 'EXPECTED';
+    state: "SUCCESS" | "FAILURE" | "PENDING" | "EXPECTED";
     contexts: CheckContext[];
   };
-  reviewDecision: 'APPROVED' | 'CHANGES_REQUESTED' | 'REVIEW_REQUIRED' | null;
+  reviewDecision: "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED" | null;
 }
 
 async function fetchOpenPRs(): Promise<GitHubPR[]> {
   const result = await exec(
-    'gh pr list --json number,title,state,isDraft,author,updatedAt,statusCheckRollup,reviewDecision --limit 100'
+    "gh pr list --json number,title,state,isDraft,author,updatedAt,statusCheckRollup,reviewDecision --limit 100"
   );
 
   return JSON.parse(result);
@@ -68,8 +68,14 @@ async function fetchOpenPRs(): Promise<GitHubPR[]> {
 ```typescript
 interface CheckContext {
   name: string;
-  state: 'SUCCESS' | 'FAILURE' | 'PENDING' | 'EXPECTED';
-  conclusion: 'SUCCESS' | 'FAILURE' | 'NEUTRAL' | 'CANCELLED' | 'SKIPPED' | null;
+  state: "SUCCESS" | "FAILURE" | "PENDING" | "EXPECTED";
+  conclusion:
+    | "SUCCESS"
+    | "FAILURE"
+    | "NEUTRAL"
+    | "CANCELLED"
+    | "SKIPPED"
+    | null;
   targetUrl?: string;
 }
 
@@ -82,28 +88,28 @@ function analyzeCheckStatus(pr: GitHubPR): {
 } {
   const contexts = pr.statusCheckRollup?.contexts || [];
 
-  const passing = contexts.filter(c =>
-    c.state === 'SUCCESS' || c.conclusion === 'SUCCESS'
+  const passing = contexts.filter(
+    (c) => c.state === "SUCCESS" || c.conclusion === "SUCCESS"
   ).length;
 
-  const failing = contexts.filter(c =>
-    c.state === 'FAILURE' || c.conclusion === 'FAILURE'
+  const failing = contexts.filter(
+    (c) => c.state === "FAILURE" || c.conclusion === "FAILURE"
   ).length;
 
-  const pending = contexts.filter(c =>
-    c.state === 'PENDING' || c.state === 'EXPECTED'
+  const pending = contexts.filter(
+    (c) => c.state === "PENDING" || c.state === "EXPECTED"
   ).length;
 
   const failedChecks = contexts
-    .filter(c => c.state === 'FAILURE' || c.conclusion === 'FAILURE')
-    .map(c => c.name);
+    .filter((c) => c.state === "FAILURE" || c.conclusion === "FAILURE")
+    .map((c) => c.name);
 
   return {
     passing,
     failing,
     pending,
     total: contexts.length,
-    failedChecks
+    failedChecks,
   };
 }
 ```
@@ -116,12 +122,12 @@ interface ReviewSummary {
   changesRequested: number;
   commented: number;
   pending: number;
-  decision: 'APPROVED' | 'CHANGES_REQUESTED' | 'REVIEW_REQUIRED' | 'NONE';
+  decision: "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED" | "NONE";
 }
 
 function summarizeReviews(pr: GitHubPR): ReviewSummary {
   // reviewDecision is aggregate state from GitHub
-  const decision = pr.reviewDecision || 'NONE';
+  const decision = pr.reviewDecision || "NONE";
 
   // For detailed review counts, fetch full reviews:
   // gh pr view {number} --json reviews
@@ -129,10 +135,10 @@ function summarizeReviews(pr: GitHubPR): ReviewSummary {
   return {
     decision,
     // These would come from detailed review fetch if needed
-    approved: decision === 'APPROVED' ? 1 : 0,
-    changesRequested: decision === 'CHANGES_REQUESTED' ? 1 : 0,
+    approved: decision === "APPROVED" ? 1 : 0,
+    changesRequested: decision === "CHANGES_REQUESTED" ? 1 : 0,
     commented: 0,
-    pending: decision === 'REVIEW_REQUIRED' ? 1 : 0
+    pending: decision === "REVIEW_REQUIRED" ? 1 : 0,
   };
 }
 ```
@@ -150,7 +156,7 @@ async function fetchRecentPRs(since: string): Promise<GitHubPR[]> {
   const allPRs = await fetchOpenPRs();
 
   // Filter by updatedAt
-  return allPRs.filter(pr => {
+  return allPRs.filter((pr) => {
     const updatedAt = new Date(pr.updatedAt);
     return updatedAt >= cutoffDate;
   });
@@ -185,24 +191,26 @@ PR #{number}: {title} [{state}]
 ### CI Status Indicators
 
 ```typescript
-function formatCIStatus(checkSummary: ReturnType<typeof analyzeCheckStatus>): string {
+function formatCIStatus(
+  checkSummary: ReturnType<typeof analyzeCheckStatus>
+): string {
   const { passing, failing, pending, total, failedChecks } = checkSummary;
 
   let indicator: string;
   if (failing > 0) {
-    indicator = '✗';
+    indicator = "✗";
   } else if (pending > 0) {
-    indicator = '⏳';
+    indicator = "⏳";
   } else if (passing === total && total > 0) {
-    indicator = '✓';
+    indicator = "✓";
   } else {
-    indicator = '○'; // No checks
+    indicator = "○"; // No checks
   }
 
   let status = `${indicator} ${passing}/${total} checks`;
 
   if (failing > 0) {
-    status += ` (failing: ${failedChecks.join(', ')})`;
+    status += ` (failing: ${failedChecks.join(", ")})`;
   }
 
   return status;
@@ -216,13 +224,13 @@ function formatReviewStatus(reviewSummary: ReviewSummary): string {
   const { decision } = reviewSummary;
 
   const indicators: Record<string, string> = {
-    'APPROVED': '✓ Approved',
-    'CHANGES_REQUESTED': '👀 Changes requested',
-    'REVIEW_REQUIRED': '⏸ Awaiting review',
-    'NONE': '○ No reviews'
+    APPROVED: "✓ Approved",
+    CHANGES_REQUESTED: "👀 Changes requested",
+    REVIEW_REQUIRED: "⏸ Awaiting review",
+    NONE: "○ No reviews",
   };
 
-  return indicators[decision] || '○ No reviews';
+  return indicators[decision] || "○ No reviews";
 }
 ```
 
@@ -297,7 +305,7 @@ async function fetchPRsBatch(prNumbers: number[]): Promise<GitHubPR[]> {
   const allPRs = await fetchOpenPRs();
 
   // Filter to requested PRs
-  return allPRs.filter(pr => prNumbers.includes(pr.number));
+  return allPRs.filter((pr) => prNumbers.includes(pr.number));
 }
 ```
 
@@ -329,7 +337,7 @@ async function fetchCompletePRData(): Promise<PRData> {
   const [prs, repo, workflow_runs] = await Promise.all([
     fetchOpenPRs(),
     fetchRepoInfo(),
-    fetchRecentWorkflowRuns()
+    fetchRecentWorkflowRuns(),
   ]);
 
   return { prs, repo, workflow_runs };
@@ -341,13 +349,18 @@ async function fetchCompletePRData(): Promise<PRData> {
 ### Link PRs to Branches
 
 ```typescript
-function linkPRsToBranches(prs: GitHubPR[], branches: string[]): Map<string, GitHubPR> {
+function linkPRsToBranches(
+  prs: GitHubPR[],
+  branches: string[]
+): Map<string, GitHubPR> {
   // Fetch branch info for each PR
   const prBranchMap = new Map<string, GitHubPR>();
 
   for (const pr of prs) {
     // Get head ref (branch name) from PR
-    const headRef = await exec(`gh pr view ${pr.number} --json headRefName --jq .headRefName`);
+    const headRef = await exec(
+      `gh pr view ${pr.number} --json headRefName --jq .headRefName`
+    );
     prBranchMap.set(headRef.trim(), pr);
   }
 
@@ -362,7 +375,7 @@ function extractLinkedIssues(prBody: string): string[] {
   // Match: "Closes #123", "Fixes #456", "Resolves #789"
   const patterns = [
     /(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)s?\s+#(\d+)/gi,
-    /#(\d+)/g // Generic issue references
+    /#(\d+)/g, // Generic issue references
   ];
 
   const issueNumbers: string[] = [];
@@ -384,10 +397,10 @@ function extractLinkedIssues(prBody: string): string[] {
 ```typescript
 async function ensureGitHubAuth(): Promise<boolean> {
   try {
-    await exec('gh auth status');
+    await exec("gh auth status");
     return true;
   } catch (error) {
-    console.error('GitHub authentication required. Run: gh auth login');
+    console.error("GitHub authentication required. Run: gh auth login");
     return false;
   }
 }
@@ -397,12 +410,12 @@ async function ensureGitHubAuth(): Promise<boolean> {
 
 ```typescript
 async function checkRateLimit(): Promise<{ remaining: number; resetAt: Date }> {
-  const result = await exec('gh api rate_limit --jq .rate');
+  const result = await exec("gh api rate_limit --jq .rate");
   const data = JSON.parse(result);
 
   return {
     remaining: data.remaining,
-    resetAt: new Date(data.reset * 1000)
+    resetAt: new Date(data.reset * 1000),
   };
 }
 
@@ -411,7 +424,9 @@ async function withRateLimitCheck<T>(fn: () => Promise<T>): Promise<T> {
 
   if (limit.remaining < 10) {
     const waitTime = limit.resetAt.getTime() - Date.now();
-    console.warn(`Rate limit low (${limit.remaining}). Resets in ${waitTime}ms`);
+    console.warn(
+      `Rate limit low (${limit.remaining}). Resets in ${waitTime}ms`
+    );
   }
 
   return fn();
@@ -423,7 +438,9 @@ async function withRateLimitCheck<T>(fn: () => Promise<T>): Promise<T> {
 ```typescript
 async function detectGitHubRepo(): Promise<string | null> {
   try {
-    const result = await exec('gh repo view --json nameWithOwner --jq .nameWithOwner');
+    const result = await exec(
+      "gh repo view --json nameWithOwner --jq .nameWithOwner"
+    );
     return result.trim();
   } catch (error) {
     // Not in a GitHub repo or gh not configured
@@ -439,12 +456,14 @@ async function detectGitHubRepo(): Promise<string | null> {
 Enrich Graphite stack with GitHub PR details:
 
 ```typescript
-async function enrichGraphiteStackWithGitHub(stack: StackNode[]): Promise<void> {
-  const prNumbers = stack.map(n => n.prNumber).filter(Boolean);
+async function enrichGraphiteStackWithGitHub(
+  stack: StackNode[]
+): Promise<void> {
+  const prNumbers = stack.map((n) => n.prNumber).filter(Boolean);
   const prs = await fetchPRsBatch(prNumbers);
 
   for (const node of stack) {
-    const pr = prs.find(p => p.number === node.prNumber);
+    const pr = prs.find((p) => p.number === node.prNumber);
     if (pr) {
       node.githubPR = pr;
       node.ciStatus = analyzeCheckStatus(pr);
@@ -463,7 +482,7 @@ async function fetchWorkflowRuns(since: string): Promise<WorkflowRun[]> {
 
   const result = await exec(
     `gh run list --json status,conclusion,createdAt,displayTitle,workflowName,url ` +
-    `--created ">=${cutoffISO}" --limit 50`
+      `--created ">=${cutoffISO}" --limit 50`
   );
 
   return JSON.parse(result);
@@ -489,7 +508,7 @@ function safelyAccessPRData(pr: GitHubPR): {
   return {
     hasChecks: Boolean(pr.statusCheckRollup?.contexts?.length),
     hasReviews: Boolean(pr.reviewDecision),
-    isComplete: Boolean(pr.statusCheckRollup && pr.reviewDecision)
+    isComplete: Boolean(pr.statusCheckRollup && pr.reviewDecision),
   };
 }
 ```

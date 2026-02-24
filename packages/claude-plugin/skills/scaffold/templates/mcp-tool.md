@@ -17,19 +17,26 @@ const InputSchema = z.object({
   query: z.string().min(1).describe("The search term to look for"),
 
   // Provide defaults where sensible
-  limit: z.number().int().positive().default(10)
+  limit: z
+    .number()
+    .int()
+    .positive()
+    .default(10)
     .describe("Maximum number of results to return"),
 
   // Use enums for fixed choices
-  sortBy: z.enum(["name", "date", "relevance"]).default("relevance")
+  sortBy: z
+    .enum(["name", "date", "relevance"])
+    .default("relevance")
     .describe("Field to sort results by"),
 
   // Mark optional fields explicitly
-  tags: z.array(z.string()).optional()
-    .describe("Filter results by these tags"),
+  tags: z.array(z.string()).optional().describe("Filter results by these tags"),
 
   // Boolean options
-  includeArchived: z.boolean().default(false)
+  includeArchived: z
+    .boolean()
+    .default(false)
     .describe("Whether to include archived items"),
 });
 
@@ -175,17 +182,22 @@ export const listItemsTool = {
     limit: z.number().default(20).describe("Max items to return"),
     offset: z.number().default(0).describe("Number of items to skip"),
   }),
-  handler: async (input) => { /* ... */ },
+  handler: async (input) => {
+    /* ... */
+  },
 };
 
 // Get
 export const getItemTool = {
   name: "get_item",
-  description: "Get a specific item by ID. Use when user asks about a specific item.",
+  description:
+    "Get a specific item by ID. Use when user asks about a specific item.",
   inputSchema: z.object({
     id: z.string().describe("The item ID to retrieve"),
   }),
-  handler: async (input) => { /* ... */ },
+  handler: async (input) => {
+    /* ... */
+  },
 };
 
 // Create
@@ -196,19 +208,24 @@ export const createItemTool = {
     name: z.string().describe("Name for the new item"),
     description: z.string().optional().describe("Optional description"),
   }),
-  handler: async (input) => { /* ... */ },
+  handler: async (input) => {
+    /* ... */
+  },
 };
 
 // Update
 export const updateItemTool = {
   name: "update_item",
-  description: "Update an existing item. Use when user wants to modify an item.",
+  description:
+    "Update an existing item. Use when user wants to modify an item.",
   inputSchema: z.object({
     id: z.string().describe("The item ID to update"),
     name: z.string().optional().describe("New name"),
     description: z.string().optional().describe("New description"),
   }),
-  handler: async (input) => { /* ... */ },
+  handler: async (input) => {
+    /* ... */
+  },
 };
 
 // Delete
@@ -218,7 +235,9 @@ export const deleteItemTool = {
   inputSchema: z.object({
     id: z.string().describe("The item ID to delete"),
   }),
-  handler: async (input) => { /* ... */ },
+  handler: async (input) => {
+    /* ... */
+  },
 };
 ```
 
@@ -277,26 +296,26 @@ describe("search_items", () => {
 
 ```typescript
 // DO: Use descriptive field names
-query: z.string().describe("Search query")
+query: z.string().describe("Search query");
 
 // DON'T: Cryptic names
-q: z.string()
+q: z.string();
 
 // DO: Provide sensible defaults
-limit: z.number().default(10)
+limit: z.number().default(10);
 
 // DON'T: Require every field
-limit: z.number()
+limit: z.number();
 
 // DO: Use enums for fixed options
-format: z.enum(["json", "csv", "xml"])
+format: z.enum(["json", "csv", "xml"]);
 
 // DON'T: Accept any string
-format: z.string()
+format: z.string();
 
 // DO: Validate ranges
-page: z.number().int().min(1).max(100)
+page: z.number().int().min(1).max(100);
 
 // DON'T: Accept any number
-page: z.number()
+page: z.number();
 ```

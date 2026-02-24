@@ -8,7 +8,7 @@ related-skills: outfitter-atlas, outfitter-check, outfitter-start, tdd-fieldguid
 
 # Outfitter Upgrade
 
-Upgrade @outfitter/* packages with structured migration — from version detection through codemod execution to test verification.
+Upgrade @outfitter/\* packages with structured migration — from version detection through codemod execution to test verification.
 
 ## Steps
 
@@ -21,12 +21,12 @@ Upgrade @outfitter/* packages with structured migration — from version detecti
 
 ## Mode Selection
 
-| Condition | Mode | Rationale |
-|-----------|------|-----------|
-| No breaking changes | **Auto** | Bump, install, run tests — no code changes expected |
-| Breaking changes with codemods | **Autonomous** | CLI handles mechanical transforms, agent verifies |
-| Breaking changes, no codemods | **Interactive** | Agent needs judgment for code migration |
-| Major version jump (>2 minor) | **Interactive** | Too many changes to auto-apply safely |
+| Condition                      | Mode            | Rationale                                           |
+| ------------------------------ | --------------- | --------------------------------------------------- |
+| No breaking changes            | **Auto**        | Bump, install, run tests — no code changes expected |
+| Breaking changes with codemods | **Autonomous**  | CLI handles mechanical transforms, agent verifies   |
+| Breaking changes, no codemods  | **Interactive** | Agent needs judgment for code migration             |
+| Major version jump (>2 minor)  | **Interactive** | Too many changes to auto-apply safely               |
 
 ## Autonomous Loop
 
@@ -109,22 +109,22 @@ See `references/structured-changes.md` for full type definitions and parsing exa
 
 ### By Change Type
 
-| `change.type` | Agent Action |
-|---------------|-------------|
-| `moved` | Update import paths: `from` → `to` |
-| `renamed` | Find-and-replace: `from` → `to` in imports and usages |
-| `removed` | Find usages of `from`, replace with alternative from `detail` |
-| `signature-changed` | Update call sites per `detail` description |
-| `deprecated` | Optional: migrate now or add TODO for later |
-| `added` | No action needed — informational |
+| `change.type`       | Agent Action                                                  |
+| ------------------- | ------------------------------------------------------------- |
+| `moved`             | Update import paths: `from` → `to`                            |
+| `renamed`           | Find-and-replace: `from` → `to` in imports and usages         |
+| `removed`           | Find usages of `from`, replace with alternative from `detail` |
+| `signature-changed` | Update call sites per `detail` description                    |
+| `deprecated`        | Optional: migrate now or add TODO for later                   |
+| `added`             | No action needed — informational                              |
 
 ### By Update Type
 
-| Update Type | Action |
-|-------------|--------|
-| **Patch** (0.1.0 → 0.1.1) | Bump, test — no code changes expected |
-| **Minor** (0.1.0 → 0.2.0) | Review migration doc for new APIs, adopt if beneficial |
-| **Breaking** (flagged) | Follow migration guide, apply codemods, update code, test |
+| Update Type               | Action                                                    |
+| ------------------------- | --------------------------------------------------------- |
+| **Patch** (0.1.0 → 0.1.1) | Bump, test — no code changes expected                     |
+| **Minor** (0.1.0 → 0.2.0) | Review migration doc for new APIs, adopt if beneficial    |
+| **Breaking** (flagged)    | Follow migration guide, apply codemods, update code, test |
 
 ## Dependency Order
 
@@ -180,12 +180,12 @@ Each exports a `transform(options)` function. The CLI discovers and runs them au
 
 ## Error Recovery
 
-| Failure | Recovery |
-|---------|----------|
-| Upgrade fails on install | Check network, verify package exists on npm |
-| Codemod reports errors | Read the `errors` array, fix manually, re-run |
+| Failure                    | Recovery                                              |
+| -------------------------- | ----------------------------------------------------- |
+| Upgrade fails on install   | Check network, verify package exists on npm           |
+| Codemod reports errors     | Read the `errors` array, fix manually, re-run         |
 | Tests fail after migration | Read failure, cross-reference migration doc, fix code |
-| 3+ test fix attempts fail | Escalate to user with evidence |
+| 3+ test fix attempts fail  | Escalate to user with evidence                        |
 
 ## Related Skills
 

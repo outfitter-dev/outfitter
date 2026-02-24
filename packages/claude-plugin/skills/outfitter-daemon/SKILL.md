@@ -12,10 +12,7 @@ Deep dive into @outfitter/daemon patterns.
 ## Creating a Daemon
 
 ```typescript
-import {
-  createDaemon,
-  getLockPath,
-} from "@outfitter/daemon";
+import { createDaemon, getLockPath } from "@outfitter/daemon";
 import { createLogger, createConsoleSink } from "@outfitter/logging";
 
 const logger = createLogger({
@@ -28,7 +25,7 @@ const daemon = createDaemon({
   name: "my-daemon",
   pidFile: getLockPath("my-daemon"),
   logger,
-  shutdownTimeout: 10000,  // 10s graceful shutdown
+  shutdownTimeout: 10000, // 10s graceful shutdown
 });
 ```
 
@@ -66,10 +63,7 @@ if (result.isErr()) {
 ### Setting Up IPC
 
 ```typescript
-import {
-  createIpcServer,
-  getSocketPath,
-} from "@outfitter/daemon";
+import { createIpcServer, getSocketPath } from "@outfitter/daemon";
 
 const ipcServer = createIpcServer(getSocketPath("my-daemon"));
 
@@ -110,10 +104,7 @@ logger.info("IPC listening", { socket: getSocketPath("my-daemon") });
 ### IPC Client
 
 ```typescript
-import {
-  createIpcClient,
-  getSocketPath,
-} from "@outfitter/daemon";
+import { createIpcClient, getSocketPath } from "@outfitter/daemon";
 
 const client = createIpcClient(getSocketPath("my-daemon"));
 
@@ -164,7 +155,7 @@ const healthChecker = createHealthChecker([
     name: "disk",
     check: async () => {
       const free = await getDiskSpace();
-      return free > 100 * 1024 * 1024  // 100MB
+      return free > 100 * 1024 * 1024 // 100MB
         ? Result.ok(undefined)
         : Result.err(new Error("Low disk space"));
     },
@@ -189,7 +180,7 @@ ipcServer.onMessage(async (msg) => {
 ### Periodic Health Checks
 
 ```typescript
-const HEALTH_INTERVAL = 30000;  // 30 seconds
+const HEALTH_INTERVAL = 30000; // 30 seconds
 
 setInterval(async () => {
   const result = await healthChecker.check();

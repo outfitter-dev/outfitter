@@ -38,6 +38,7 @@ await initAgentDocs();
 ```
 
 This creates:
+
 - `AGENTS.md` — Guidelines for AI agents working in your project
 - `CLAUDE.md` — Project-level instructions for Claude
 - `.claude/CLAUDE.md` — Additional Claude-specific guidance
@@ -59,10 +60,10 @@ Initialize agent documentation in a directory.
 
 ```typescript
 interface InitOptions {
-  target?: string;   // Target directory (default: cwd)
-  merge?: boolean;   // Merge with existing files (default: false)
-  force?: boolean;   // Overwrite existing files (default: false)
-  quiet?: boolean;   // Suppress output (default: false)
+  target?: string; // Target directory (default: cwd)
+  merge?: boolean; // Merge with existing files (default: false)
+  force?: boolean; // Overwrite existing files (default: false)
+  quiet?: boolean; // Suppress output (default: false)
 }
 
 // Basic initialization
@@ -79,6 +80,7 @@ await initAgentDocs({ force: true });
 ```
 
 **Behavior:**
+
 - Without `force` or `merge`, existing files are skipped
 - With `merge`, only `settings.json` is merged; other files are skipped
 - With `force`, all files are overwritten
@@ -89,10 +91,10 @@ Run development environment bootstrap with optional extensions.
 
 ```typescript
 interface BootstrapOptions {
-  tools?: string[];                  // Additional tools to install
-  extend?: () => Promise<void>;      // Project-specific setup
-  force?: boolean;                   // Skip checks, run full bootstrap
-  quiet?: boolean;                   // Suppress output (for CI)
+  tools?: string[]; // Additional tools to install
+  extend?: () => Promise<void>; // Project-specific setup
+  force?: boolean; // Skip checks, run full bootstrap
+  quiet?: boolean; // Suppress output (for CI)
 }
 
 // Basic bootstrap
@@ -116,11 +118,13 @@ await bootstrap({ quiet: true });
 ```
 
 **Core tools installed:**
+
 - `gh` — GitHub CLI
 - `gt` — Graphite CLI for stacked PRs
 - `markdownlint-cli2` — Markdown linting
 
 **Authentication checks:**
+
 - GitHub CLI (`gh auth status` or `GH_TOKEN`/`GITHUB_TOKEN`)
 - Graphite CLI (`gt auth status` or `GT_AUTH_TOKEN`)
 
@@ -147,6 +151,7 @@ const merged = mergeSettings(existingSettings, defaultSettings);
 ```
 
 **Merge behavior:**
+
 - Arrays are concatenated and deduplicated
 - Objects are recursively merged
 - User values take precedence over defaults
@@ -163,15 +168,19 @@ Guidelines for AI agents working in your codebase:
 Guidelines for AI agents and developers working in this repository.
 
 ## Project Overview
+
 [Project description and context]
 
 ## Project Structure
+
 [Directory layout and conventions]
 
 ## Commands
+
 [Build, test, lint commands]
 
 ## Architecture
+
 [Key patterns and decisions]
 ```
 
@@ -257,11 +266,11 @@ bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ qui
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GH_TOKEN` | GitHub CLI authentication token |
-| `GITHUB_TOKEN` | Alternative GitHub token (fallback) |
-| `GT_AUTH_TOKEN` | Graphite CLI authentication token |
+| Variable        | Description                         |
+| --------------- | ----------------------------------- |
+| `GH_TOKEN`      | GitHub CLI authentication token     |
+| `GITHUB_TOKEN`  | Alternative GitHub token (fallback) |
+| `GT_AUTH_TOKEN` | Graphite CLI authentication token   |
 
 ## Platform Support
 

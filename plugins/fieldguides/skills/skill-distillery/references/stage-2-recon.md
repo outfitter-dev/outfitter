@@ -9,18 +9,21 @@ Codebase analysis to map internal structure.
 ## Analysis Checklist
 
 **Structure**:
+
 - [ ] Identify entry points (main, CLI handlers, exports)
 - [ ] Map directory organization
 - [ ] Find configuration files and patterns
 - [ ] Locate test files (reveal intended usage)
 
 **Public API**:
+
 - [ ] List exported functions/classes
 - [ ] Document CLI commands and subcommands
 - [ ] Note required vs optional parameters
 - [ ] Identify return types and error modes
 
 **Conventions**:
+
 - [ ] Naming patterns (camelCase, snake_case)
 - [ ] Error handling approach
 - [ ] Configuration precedence (env, file, args)
@@ -28,11 +31,11 @@ Codebase analysis to map internal structure.
 
 ## Confidence Levels
 
-| Level | Evidence | Action |
-|-------|----------|--------|
-| High | Tests + docs + clear structure | Proceed with confidence |
-| Medium | Tests OR docs, some structure | Note assumptions |
-| Low | Neither tests nor docs | Flag for user validation |
+| Level  | Evidence                       | Action                   |
+| ------ | ------------------------------ | ------------------------ |
+| High   | Tests + docs + clear structure | Proceed with confidence  |
+| Medium | Tests OR docs, some structure  | Note assumptions         |
+| Low    | Neither tests nor docs         | Flag for user validation |
 
 ## Output
 
@@ -42,15 +45,19 @@ Create `artifacts/skill-distillery/recon.md`:
 # Recon: {REPO_NAME}
 
 ## Structure
+
 {KEY_DIRECTORIES}
 
 ## Public API
+
 - {COMMAND/FUNCTION}: {PURPOSE}
 
 ## Configuration
+
 - {CONFIG_FILE}: {OPTIONS}
 
 ## Conventions
+
 - {CONVENTION}: {EXAMPLE}
 ```
 

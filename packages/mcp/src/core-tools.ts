@@ -12,6 +12,7 @@
 import type { HandlerContext, OutfitterError } from "@outfitter/contracts";
 import { Result, ValidationError } from "@outfitter/contracts";
 import { z } from "zod";
+
 import type { ToolDefinition } from "./types.js";
 
 // =============================================================================

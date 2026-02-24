@@ -5,6 +5,7 @@
  */
 
 import type { Result } from "better-result";
+
 import type { Validator } from "./validators.js";
 
 /**

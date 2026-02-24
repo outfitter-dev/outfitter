@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { parseArgs } from "node:util";
+
 import { checkHttpTools } from "./checkers/http.ts";
 import { checkJsonTools } from "./checkers/json.ts";
 import { checkNavigationTools } from "./checkers/navigation.ts";

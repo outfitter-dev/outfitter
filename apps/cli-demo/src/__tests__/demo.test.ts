@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+
 import {
   type DemoSection,
   getSection,

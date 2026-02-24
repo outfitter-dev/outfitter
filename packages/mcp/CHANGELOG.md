@@ -17,7 +17,6 @@
 ### Minor Changes
 
 - d683522: Fix runtime resource/prompt registration, add annotation presets, and improve adaptHandler.
-
   - **fix**: `createSdkServer` no longer registers unused resource/prompt capabilities (#331)
   - **feat**: Export `wrapToolResult` and `wrapToolError` from transport subpath (#341)
   - **feat**: Add `TOOL_ANNOTATIONS` presets (`readOnly`, `writeIdempotent`, `writeAppend`, `destructive`, `control`) (#342)
@@ -49,7 +48,6 @@
 ### Minor Changes
 
 - Expand MCP spec compliance with resources, prompts, and infrastructure
-
   - Add `ToolAnnotations` with behavioral hints (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`)
   - Add resource read handlers with `ResourceContent` types (text and blob variants)
   - Add `ResourceTemplateDefinition` with URI template expansion
@@ -75,7 +73,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -99,7 +96,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

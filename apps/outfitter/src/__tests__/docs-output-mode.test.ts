@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+
 import { resolveDocsOutputMode } from "../actions/docs-output-mode.js";
 
 describe("resolveDocsOutputMode", () => {

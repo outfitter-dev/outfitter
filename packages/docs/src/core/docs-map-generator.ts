@@ -11,7 +11,9 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
+
 import { Result } from "better-result";
+
 import {
   type DocKind,
   type DocsMap,

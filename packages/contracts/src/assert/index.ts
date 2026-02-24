@@ -8,6 +8,7 @@
  */
 
 import { Result } from "better-result";
+
 import { AssertionError } from "../errors.js";
 
 /**

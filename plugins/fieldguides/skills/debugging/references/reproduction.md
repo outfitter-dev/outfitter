@@ -26,12 +26,12 @@ Goal: Smallest possible code that demonstrates the bug.
 **Minimal reproduction** (15 lines):
 
 ```typescript
-import { authenticate } from './auth';
+import { authenticate } from "./auth";
 
 // Bug occurs when password contains special chars
 const result = await authenticate({
-  username: 'test@example.com',
-  password: 'p@ssw0rd!',
+  username: "test@example.com",
+  password: "p@ssw0rd!",
 });
 // Expected: success
 // Actual: fails with "Invalid credentials"
@@ -51,28 +51,33 @@ Create checklist for consistent reproduction:
 
 ```markdown
 ## Environment
+
 - [ ] OS/platform: macOS 14.1
 - [ ] Node version: 20.10.0
 - [ ] Package versions: see package.json
 - [ ] Environment variables: NODE_ENV=production
 
 ## Setup
+
 - [ ] Database state: Empty database with schema v2.3
 - [ ] File system state: No cache files
 - [ ] Configuration: Default config.json
 - [ ] Prerequisites: Redis running on localhost:6379
 
 ## Steps to Reproduce
+
 1. [ ] Start server: `npm run start`
 2. [ ] Navigate to `/login`
 3. [ ] Enter credentials with special chars in password
 4. [ ] Click "Login"
 
 ## Expected vs Actual
+
 **Expected**: User logged in successfully
 **Actual**: Error message "Invalid credentials" (password is correct)
 
 ## Additional Context
+
 - Bug does NOT occur with alphanumeric passwords
 - Bug started after upgrading bcrypt from 5.0.0 to 5.1.0
 - Affects 3% of login attempts based on logs
@@ -82,28 +87,33 @@ Create checklist for consistent reproduction:
 
 ```markdown
 ## Environment
-- [ ] OS/platform: _____
-- [ ] Language/runtime version: _____
-- [ ] Dependency versions: _____
-- [ ] Environment variables: _____
+
+- [ ] OS/platform: **\_**
+- [ ] Language/runtime version: **\_**
+- [ ] Dependency versions: **\_**
+- [ ] Environment variables: **\_**
 
 ## Setup
-- [ ] Database state: _____
-- [ ] File system state: _____
-- [ ] Configuration: _____
-- [ ] Prerequisites: _____
+
+- [ ] Database state: **\_**
+- [ ] File system state: **\_**
+- [ ] Configuration: **\_**
+- [ ] Prerequisites: **\_**
 
 ## Steps to Reproduce
-1. [ ] _____
-2. [ ] _____
-3. [ ] _____
+
+1. [ ] ***
+2. [ ] ***
+3. [ ] ***
 
 ## Expected vs Actual
-**Expected**: _____
-**Actual**: _____
+
+**Expected**: **\_**
+**Actual**: **\_**
 
 ## Additional Context
-- _____
+
+- ***
 ```
 
 ## Automated Reproduction
@@ -120,6 +130,7 @@ Convert manual steps to automated test.
 ### Example: Manual to Automated
 
 **Manual steps**:
+
 1. Create user with ID "test-123"
 2. Set user email to null
 3. Call getUserDisplay(user)
@@ -128,12 +139,12 @@ Convert manual steps to automated test.
 **Automated test**:
 
 ```typescript
-describe('getUserDisplay', () => {
-  it('reproduces crash with null email', () => {
+describe("getUserDisplay", () => {
+  it("reproduces crash with null email", () => {
     // Setup
     const userWithNullEmail = {
-      id: 'test-123',
-      name: 'Test User',
+      id: "test-123",
+      name: "Test User",
       email: null, // This triggers the bug
     };
 
@@ -149,7 +160,7 @@ After fix:
 
 ```typescript
 expect(() => getUserDisplay(userWithNullEmail)).toThrow(
-  'User email is required'
+  "User email is required"
 );
 ```
 
@@ -188,14 +199,12 @@ Mock external dependencies:
 ```typescript
 // Reproduce API failure
 const mockApi = {
-  fetchUser: vi.fn().mockRejectedValue(
-    new Error('API timeout')
-  ),
+  fetchUser: vi.fn().mockRejectedValue(new Error("API timeout")),
 };
 
-await expect(
-  getUserProfile('123', mockApi)
-).rejects.toThrow('Failed to fetch user');
+await expect(getUserProfile("123", mockApi)).rejects.toThrow(
+  "Failed to fetch user"
+);
 ```
 
 ### Intermittent Issues
@@ -205,12 +214,12 @@ Add timing/concurrency:
 ```typescript
 // Reproduce race condition
 const results = await Promise.all([
-  updateUser('123', { name: 'Alice' }),
-  updateUser('123', { name: 'Bob' }),
+  updateUser("123", { name: "Alice" }),
+  updateUser("123", { name: "Bob" }),
 ]);
 
 // One update should fail or last write should win consistently
-expect(results.filter(r => r.success)).toHaveLength(1);
+expect(results.filter((r) => r.success)).toHaveLength(1);
 ```
 
 ### Performance Issues
@@ -219,10 +228,10 @@ Reproduce with scale:
 
 ```typescript
 // Reproduce performance degradation
-const largeDataset = Array.from(
-  { length: 10000 },
-  (_, i) => ({ id: i, data: 'x'.repeat(1000) })
-);
+const largeDataset = Array.from({ length: 10000 }, (_, i) => ({
+  id: i,
+  data: "x".repeat(1000),
+}));
 
 const startTime = Date.now();
 const result = processData(largeDataset);
@@ -251,7 +260,7 @@ done
 
 ```typescript
 // If suspected race condition
-await new Promise(resolve => setTimeout(resolve, 100));
+await new Promise((resolve) => setTimeout(resolve, 100));
 // See if consistent delay changes behavior
 ```
 
@@ -282,6 +291,7 @@ Bugs may only occur in specific environments.
 ### Environment Matrix
 
 Test across:
+
 - Operating systems (macOS, Linux, Windows)
 - Runtime versions (Node 18, 20, 22)
 - Dependency versions (latest, locked)
@@ -305,6 +315,7 @@ RUN npm test -- --grep "bug reproduction"
 ```
 
 Benefits:
+
 - Consistent across machines
 - Documents exact environment
 - Easy for others to reproduce
@@ -330,11 +341,13 @@ When sharing reproduction:
 ## Reproduction
 
 **Environment:**
+
 - OS: macOS 14.1
 - Runtime: Node.js 20.10.0
 - Dependencies: see lockfile commit abc123
 
 **Steps:**
+
 1. Clone repo at commit abc123
 2. Run `npm install`
 3. Run `npm test -- --grep "specific test"`
@@ -354,6 +367,7 @@ When sharing reproduction:
 \`\`\`
 
 ## Additional Context
+
 - Fails 100% of time with these steps
 - Does not fail if X is changed to Y
 - Started after commit abc123
@@ -366,6 +380,7 @@ When sharing reproduction:
 **Problem**: Can't reproduce consistently
 
 **Solutions**:
+
 - Control randomness (seed random number generators)
 - Control timing (use fixed delays, not timeouts)
 - Control environment (Docker, locked dependencies)
@@ -376,6 +391,7 @@ When sharing reproduction:
 **Problem**: Reproduction requires too much setup
 
 **Solutions**:
+
 - Simplify to minimal case
 - Mock external dependencies
 - Use in-memory databases for tests
@@ -386,6 +402,7 @@ When sharing reproduction:
 **Problem**: "Works on my machine"
 
 **Solutions**:
+
 - Document exact environment (Docker)
 - Check for environment variables
 - Verify dependency versions match
@@ -394,6 +411,7 @@ When sharing reproduction:
 ## Summary
 
 Reliable reproduction is critical for:
+
 - Understanding the bug
 - Verifying the fix
 - Preventing regression

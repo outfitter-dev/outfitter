@@ -54,9 +54,9 @@ Creates an MCP server instance.
 
 ```typescript
 interface McpServerOptions {
-  name: string;           // Server name for MCP handshake
-  version: string;        // Server version (semver)
-  logger?: Logger;        // Optional structured logger (BYO)
+  name: string; // Server name for MCP handshake
+  version: string; // Server version (semver)
+  logger?: Logger; // Optional structured logger (BYO)
   defaultLogLevel?: McpLogLevel | null; // Default log forwarding level
 }
 
@@ -140,6 +140,7 @@ const server = createMcpServer({
 MCP servers can forward log messages to the connected client. The default log level is resolved from environment configuration:
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_LOG_LEVEL` environment variable
 2. `options.defaultLogLevel`
 3. `OUTFITTER_ENV` profile defaults (`"debug"` in development, `null` otherwise)
@@ -176,11 +177,11 @@ Helper for defining typed tools with better type inference.
 
 ```typescript
 interface ToolDefinition<TInput, TOutput, TError> {
-  name: string;                    // Unique tool name (kebab-case)
-  description: string;             // Human-readable description
-  inputSchema: z.ZodType<TInput>;  // Zod schema for validation
+  name: string; // Unique tool name (kebab-case)
+  description: string; // Human-readable description
+  inputSchema: z.ZodType<TInput>; // Zod schema for validation
   handler: Handler<TInput, TOutput, TError>;
-  deferLoading?: boolean;          // Default: true
+  deferLoading?: boolean; // Default: true
 }
 
 const getUserTool = defineTool({
@@ -203,10 +204,10 @@ Helper for defining MCP resources.
 
 ```typescript
 interface ResourceDefinition {
-  uri: string;           // Unique resource URI
-  name: string;          // Human-readable name
-  description?: string;  // Optional description
-  mimeType?: string;     // Content MIME type
+  uri: string; // Unique resource URI
+  name: string; // Human-readable name
+  description?: string; // Optional description
+  mimeType?: string; // Content MIME type
   handler?: ResourceReadHandler; // Optional resources/read handler
 }
 
@@ -255,7 +256,11 @@ interface McpServer {
 
   // Invocation
   readResource(uri: string): Promise<Result<ResourceContent[], McpError>>;
-  invokeTool<T>(name: string, input: unknown, options?: InvokeToolOptions): Promise<Result<T, McpError>>;
+  invokeTool<T>(
+    name: string,
+    input: unknown,
+    options?: InvokeToolOptions
+  ): Promise<Result<T, McpError>>;
 
   // Lifecycle
   start(): Promise<void>;
@@ -269,7 +274,7 @@ Extended handler context for MCP tools with additional metadata:
 
 ```typescript
 interface McpHandlerContext extends HandlerContext {
-  toolName?: string;  // Name of the tool being invoked
+  toolName?: string; // Name of the tool being invoked
 }
 ```
 
@@ -372,7 +377,9 @@ const listTool = defineTool({
   description: "List all items",
   inputSchema: z.object({}),
   annotations: TOOL_ANNOTATIONS.readOnly,
-  handler: async (input, ctx) => { /* ... */ },
+  handler: async (input, ctx) => {
+    /* ... */
+  },
 });
 
 // Spread and override for edge cases
@@ -381,17 +388,19 @@ const searchTool = defineTool({
   description: "Search external APIs",
   inputSchema: z.object({ q: z.string() }),
   annotations: { ...TOOL_ANNOTATIONS.readOnly, openWorldHint: true },
-  handler: async (input, ctx) => { /* ... */ },
+  handler: async (input, ctx) => {
+    /* ... */
+  },
 });
 ```
 
-| Preset | readOnly | destructive | idempotent | openWorld |
-|--------|----------|-------------|------------|-----------|
-| `readOnly` | true | false | true | false |
-| `write` | false | false | false | false |
-| `writeIdempotent` | false | false | true | false |
-| `destructive` | false | true | true | false |
-| `openWorld` | false | false | false | true |
+| Preset            | readOnly | destructive | idempotent | openWorld |
+| ----------------- | -------- | ----------- | ---------- | --------- |
+| `readOnly`        | true     | false       | true       | false     |
+| `write`           | false    | false       | false      | false     |
+| `writeIdempotent` | false    | false       | true       | false     |
+| `destructive`     | false    | true        | true       | false     |
+| `openWorld`       | false    | false       | false      | true      |
 
 For multi-action tools, use the most conservative union of hints. Per-action annotations are an MCP spec limitation.
 
@@ -454,12 +463,12 @@ const { server: sdkServer, toolsList, callTool } = createSdkServer(mcpServer);
 
 Tools return Results with typed errors. The framework automatically translates `OutfitterError` categories to JSON-RPC error codes:
 
-| Category | JSON-RPC Code | Description |
-|----------|--------------|-------------|
-| `validation` | -32602 | Invalid params |
-| `not_found` | -32601 | Method not found |
-| `permission` | -32600 | Invalid request |
-| `internal` | -32603 | Internal error |
+| Category     | JSON-RPC Code | Description      |
+| ------------ | ------------- | ---------------- |
+| `validation` | -32602        | Invalid params   |
+| `not_found`  | -32601        | Method not found |
+| `permission` | -32600        | Invalid request  |
+| `internal`   | -32603        | Internal error   |
 
 ```typescript
 const result = await server.invokeTool("get-user", { userId: "123" });
@@ -523,6 +532,7 @@ Add your MCP server to Claude Desktop:
 ```
 
 Config location:
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Linux: `~/.config/claude/claude_desktop_config.json`

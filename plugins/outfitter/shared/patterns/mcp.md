@@ -10,8 +10,8 @@ import { createMcpServer } from "@outfitter/mcp";
 const server = createMcpServer({
   name: "my-server",
   version: "0.1.0",
-  logger: myLogger,          // optional — defaults to Outfitter logger factory
-  defaultLogLevel: "info",   // optional — client log forwarding level
+  logger: myLogger, // optional — defaults to Outfitter logger factory
+  defaultLogLevel: "info", // optional — client log forwarding level
 });
 
 // Register tools, resources, prompts before start
@@ -25,11 +25,11 @@ await server.start();
 
 ### McpServerOptions
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `name` | `string` | required | Server name for MCP handshake |
-| `version` | `string` | required | Server version (semver) |
-| `logger` | `Logger` | auto-created | Logger instance |
+| Option            | Type                  | Default      | Description                         |
+| ----------------- | --------------------- | ------------ | ----------------------------------- |
+| `name`            | `string`              | required     | Server name for MCP handshake       |
+| `version`         | `string`              | required     | Server version (semver)             |
+| `logger`          | `Logger`              | auto-created | Logger instance                     |
 | `defaultLogLevel` | `McpLogLevel \| null` | env-resolved | Default client log forwarding level |
 
 **Log level precedence** for `defaultLogLevel`:
@@ -78,10 +78,10 @@ export const deleteTool = defineTool({
   description: "Permanently delete an item by ID",
   inputSchema: z.object({ id: z.string().describe("Item ID") }),
   annotations: {
-    readOnlyHint: false,      // modifies state
-    destructiveHint: true,    // may delete data
-    idempotentHint: true,     // same input = same effect
-    openWorldHint: false,     // no external system interaction
+    readOnlyHint: false, // modifies state
+    destructiveHint: true, // may delete data
+    idempotentHint: true, // same input = same effect
+    openWorldHint: false, // no external system interaction
   },
   handler: async (input, ctx) => {
     // ...
@@ -89,12 +89,12 @@ export const deleteTool = defineTool({
 });
 ```
 
-| Annotation | Type | Description |
-|-----------|------|-------------|
-| `readOnlyHint` | `boolean` | Tool does not modify any state |
-| `destructiveHint` | `boolean` | Tool may perform destructive operations |
-| `idempotentHint` | `boolean` | Multiple calls with same input have same effect |
-| `openWorldHint` | `boolean` | Tool may interact with external systems |
+| Annotation        | Type      | Description                                     |
+| ----------------- | --------- | ----------------------------------------------- |
+| `readOnlyHint`    | `boolean` | Tool does not modify any state                  |
+| `destructiveHint` | `boolean` | Tool may perform destructive operations         |
+| `idempotentHint`  | `boolean` | Multiple calls with same input have same effect |
+| `openWorldHint`   | `boolean` | Tool may interact with external systems         |
 
 ### Deferred Tool Loading
 
@@ -121,7 +121,9 @@ const InputSchema = z.object({
   limit: z.number().default(10).describe("Maximum number of results"),
 
   // Use enums for fixed choices
-  sortBy: z.enum(["name", "date", "relevance"]).default("relevance")
+  sortBy: z
+    .enum(["name", "date", "relevance"])
+    .default("relevance")
     .describe("Field to sort results by"),
 
   // Mark optional fields explicitly
@@ -168,7 +170,7 @@ const userTemplate = defineResourceTemplate({
   complete: {
     userId: async (value) => {
       const users = await searchUsers(value);
-      return { values: users.map(u => u.id) };
+      return { values: users.map((u) => u.id) };
     },
   },
 });
@@ -202,13 +204,15 @@ const reviewPrompt = definePrompt({
   ],
   handler: async (args) => {
     return Result.ok({
-      messages: [{
-        role: "user",
-        content: {
-          type: "text",
-          text: `Review this ${args.language} code. Focus: ${args.focus ?? "general quality"}`,
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Review this ${args.language} code. Focus: ${args.focus ?? "general quality"}`,
+          },
         },
-      }],
+      ],
     });
   },
 });
@@ -262,17 +266,17 @@ handler: async (input, ctx) => {
   }
 
   return Result.ok(item);
-}
+};
 ```
 
 Outfitter errors are automatically translated to MCP errors (JSON-RPC codes):
 
-| Category | JSON-RPC Code |
-|----------|---------------|
-| `validation` | -32602 (Invalid params) |
-| `not_found` | -32601 (Method not found) |
-| `permission`, `auth` | -32600 (Invalid request) |
-| Everything else | -32603 (Internal error) |
+| Category             | JSON-RPC Code             |
+| -------------------- | ------------------------- |
+| `validation`         | -32602 (Invalid params)   |
+| `not_found`          | -32601 (Method not found) |
+| `permission`, `auth` | -32600 (Invalid request)  |
+| Everything else      | -32603 (Internal error)   |
 
 ## Server Configuration
 

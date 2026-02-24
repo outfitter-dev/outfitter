@@ -5,6 +5,7 @@
  */
 
 import type { Theme } from "@outfitter/cli/colors";
+
 import { renderProgress } from "../../render/progress.js";
 import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";

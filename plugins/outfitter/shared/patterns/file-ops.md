@@ -43,8 +43,8 @@ const result = await getRelativePath("/workspace/src/index.ts");
 ```typescript
 import { isInsideWorkspace } from "@outfitter/file-ops";
 
-isInsideWorkspace("/workspace/src/file.ts", "/workspace");  // true
-isInsideWorkspace("/other/path", "/workspace");              // false
+isInsideWorkspace("/workspace/src/file.ts", "/workspace"); // true
+isInsideWorkspace("/other/path", "/workspace"); // false
 ```
 
 **Signature:** `isInsideWorkspace(path: string, workspaceRoot: string) → boolean`
@@ -151,12 +151,12 @@ const result = globSync("*.json", { cwd: "/config" });
 
 ### GlobOptions
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cwd` | `string` | `process.cwd()` | Base directory for matching |
-| `ignore` | `string[]` | — | Exclude patterns (prefix `!` to re-include) |
-| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
-| `dot` | `boolean` | `false` | Include dotfiles |
+| Option           | Type       | Default         | Description                                 |
+| ---------------- | ---------- | --------------- | ------------------------------------------- |
+| `cwd`            | `string`   | `process.cwd()` | Base directory for matching                 |
+| `ignore`         | `string[]` | —               | Exclude patterns (prefix `!` to re-include) |
+| `followSymlinks` | `boolean`  | `false`         | Follow symbolic links                       |
+| `dot`            | `boolean`  | `false`         | Include dotfiles                            |
 
 ## File Locking
 
@@ -196,7 +196,7 @@ if (await isLocked("/data/state.json")) {
 
 // Acquire with timeout
 const lockResult = await acquireLock("/data/state.json", {
-  timeout: 5000,      // Wait up to 5s
+  timeout: 5000, // Wait up to 5s
   retryInterval: 100, // Poll every 100ms
 });
 
@@ -239,8 +239,8 @@ import { acquireSharedLock, releaseSharedLock } from "@outfitter/file-ops";
 const lockResult = await acquireSharedLock("/data/db.json", { timeout: 3000 });
 if (lockResult.isOk()) {
   const lock = lockResult.value;
-  lock.lockType;  // "shared"
-  lock.readerId;  // unique reader ID (UUIDv7)
+  lock.lockType; // "shared"
+  lock.readerId; // unique reader ID (UUIDv7)
   // ... read data ...
   await releaseSharedLock(lock);
 }
@@ -248,10 +248,10 @@ if (lockResult.isOk()) {
 
 ### Lock Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `timeout` | `number` | `0` (fail immediately) | Max wait time in ms |
-| `retryInterval` | `number` | `50` | Delay between retries in ms |
+| Option          | Type     | Default                | Description                 |
+| --------------- | -------- | ---------------------- | --------------------------- |
+| `timeout`       | `number` | `0` (fail immediately) | Max wait time in ms         |
+| `retryInterval` | `number` | `50`                   | Delay between retries in ms |
 
 ### Lock File Conventions
 
@@ -268,13 +268,16 @@ Write files atomically using temp-file-then-rename. The file either has old cont
 ```typescript
 import { atomicWrite } from "@outfitter/file-ops";
 
-const result = await atomicWrite("/data/config.json", JSON.stringify(data, null, 2));
+const result = await atomicWrite(
+  "/data/config.json",
+  JSON.stringify(data, null, 2)
+);
 
 // With options
 const result2 = await atomicWrite("/data/config.json", content, {
-  createParentDirs: true,   // default: true
+  createParentDirs: true, // default: true
   preservePermissions: true, // copy perms from existing file
-  mode: 0o644,              // fallback file mode
+  mode: 0o644, // fallback file mode
 });
 ```
 
@@ -296,11 +299,11 @@ const result = await atomicWriteJson("/data/state.json", { counter: 42 });
 
 ### AtomicWriteOptions
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `createParentDirs` | `boolean` | `true` | Create parent dirs recursively |
+| Option                | Type      | Default | Description                         |
+| --------------------- | --------- | ------- | ----------------------------------- |
+| `createParentDirs`    | `boolean` | `true`  | Create parent dirs recursively      |
 | `preservePermissions` | `boolean` | `false` | Copy permissions from existing file |
-| `mode` | `number` | `0o644` | File mode for new files |
+| `mode`                | `number`  | `0o644` | File mode for new files             |
 
 ## Best Practices
 

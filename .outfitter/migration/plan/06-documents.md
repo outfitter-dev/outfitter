@@ -10,7 +10,6 @@ Update documentation to reflect new patterns and APIs.
 
 ## Files to Update
 
-
 ### {{this.file}}
 
 - **Type:** {{this.type}}
@@ -19,6 +18,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -29,6 +29,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -39,6 +40,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -49,6 +51,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -59,6 +62,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -69,6 +73,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -79,6 +84,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -89,6 +95,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -99,6 +106,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -109,6 +117,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -119,6 +128,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -129,6 +139,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -139,6 +150,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -149,6 +161,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -159,6 +172,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -169,6 +183,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -179,6 +194,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -189,6 +205,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -199,6 +216,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -209,6 +227,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -219,6 +238,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -229,6 +249,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -239,6 +260,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -249,6 +271,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -259,6 +282,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -269,6 +293,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -279,6 +304,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -289,6 +315,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -299,6 +326,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -309,6 +337,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -319,6 +348,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -329,6 +359,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -339,6 +370,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -349,6 +381,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -359,6 +392,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -369,6 +403,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -379,6 +414,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -389,6 +425,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -399,6 +436,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -409,6 +447,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -419,6 +458,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -429,6 +469,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -439,6 +480,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -449,6 +491,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -459,6 +502,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -469,6 +513,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -479,6 +524,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -489,6 +535,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -499,6 +546,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -509,6 +557,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -519,6 +568,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -529,6 +579,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -539,6 +590,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -549,6 +601,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -559,6 +612,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -569,6 +623,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -579,6 +634,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -589,6 +645,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -599,6 +656,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -609,6 +667,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -619,6 +678,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -629,6 +689,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -639,6 +700,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -649,6 +711,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -659,6 +722,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -669,6 +733,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -679,6 +744,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -689,6 +755,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -699,6 +766,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -709,6 +777,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -719,6 +788,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -729,6 +799,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -739,6 +810,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -749,6 +821,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -759,6 +832,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -769,6 +843,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -779,6 +854,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -789,6 +865,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -799,6 +876,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -809,6 +887,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -819,6 +898,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -829,6 +909,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -839,6 +920,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -849,6 +931,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -859,6 +942,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -869,6 +953,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -879,6 +964,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -889,6 +975,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -899,6 +986,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -909,6 +997,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -919,6 +1008,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -929,6 +1019,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -939,6 +1030,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -949,6 +1041,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -959,6 +1052,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -969,6 +1063,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -979,6 +1074,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -989,6 +1085,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -999,6 +1096,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1009,6 +1107,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1019,6 +1118,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1029,6 +1129,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1039,6 +1140,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1049,6 +1151,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1059,6 +1162,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1069,6 +1173,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1079,6 +1184,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1089,6 +1195,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1099,6 +1206,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1109,6 +1217,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1119,6 +1228,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1129,6 +1239,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1139,6 +1250,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1149,6 +1261,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1159,6 +1272,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1169,6 +1283,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1179,6 +1294,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1189,6 +1305,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1199,6 +1316,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1209,6 +1327,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1219,6 +1338,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1229,6 +1349,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1239,6 +1360,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1249,6 +1371,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1259,6 +1382,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1269,6 +1393,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1279,6 +1404,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1289,6 +1415,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1299,6 +1426,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1309,6 +1437,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1319,6 +1448,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1329,6 +1459,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1339,6 +1470,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1349,6 +1481,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1359,6 +1492,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1369,6 +1503,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1379,6 +1514,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1389,6 +1525,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1399,6 +1536,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1409,6 +1547,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1419,6 +1558,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1429,6 +1569,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1439,6 +1580,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1449,6 +1591,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1459,6 +1602,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1469,6 +1613,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1479,6 +1624,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1489,6 +1635,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1499,6 +1646,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1509,6 +1657,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1519,6 +1668,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1529,6 +1679,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1539,6 +1690,7 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
+
 - [ ] {{this}}
 
 ### {{this.file}}
@@ -1549,8 +1701,8 @@ Update documentation to reflect new patterns and APIs.
 #### Updates Needed
 
 {{#each this.updates}}
-- [ ] {{this}}
 
+- [ ] {{this}}
 
 ---
 
@@ -1558,7 +1710,7 @@ Update documentation to reflect new patterns and APIs.
 
 ## README Updates
 
-- [ ] Update installation instructions (add @outfitter/* packages)
+- [ ] Update installation instructions (add @outfitter/\* packages)
 - [ ] Update API examples (Result types, not exceptions)
 - [ ] Update error handling section
 - [ ] Add migration notes for consumers (if library)
@@ -1576,9 +1728,9 @@ const ctx = createContext();
 const result = await getUser({ id: "123" }, ctx);
 
 if (result.isOk()) {
-  console.log(result.value);
+console.log(result.value);
 } else {
-  console.error(result.error.message);
+console.error(result.error.message);
 }
 \`\`\`
 ```
@@ -1649,5 +1801,3 @@ Review and update comments that reference old patterns:
 - [ ] Examples compile and work
 
 ## Notes
-
-

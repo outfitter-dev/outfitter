@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { configureSync, resetSync } from "@logtape/logtape";
+
 import {
   createOutfitterLoggerFactory,
   type LogRecord,

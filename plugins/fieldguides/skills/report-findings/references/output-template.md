@@ -17,8 +17,8 @@ Standard structure for presenting research findings.
 
 ## Comparison (if applicable)
 
-| Criterion | Option A | Option B | Option C |
-|-----------|----------|----------|----------|
+| Criterion     | Option A  | Option B  | Option C  |
+| ------------- | --------- | --------- | --------- |
 | { criterion } | { value } | { value } | { value } |
 
 ## Recommendation
@@ -39,9 +39,11 @@ Standard structure for presenting research findings.
 Overall: {BAR} {PERCENTAGE}%
 
 **High confidence areas**:
+
 - { area } — { reason }
 
 **Lower confidence areas**:
+
 - { area } — { reason }
 
 ## Sources
@@ -67,6 +69,7 @@ For smaller findings or sub-reports.
 **Finding**: { main conclusion }
 
 **Evidence**:
+
 - { source 1 }: { key point }
 - { source 2 }: { key point }
 
@@ -130,6 +133,7 @@ Explain what drives confidence up or down.
 ### Caveats
 
 Include when:
+
 - Research has gaps
 - Sources conflict
 - Time constraints limited depth

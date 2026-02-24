@@ -6,27 +6,27 @@
 
 ## Summary
 
-| Category | Count | Files |
-|----------|-------|-------|
-| Exceptions (`throw`) | 59 | 31 |
-| Try/Catch blocks | 173 | 37 |
-| Console logging | 162 | 25 |
-| Hardcoded paths | 16 | 4 |
-| Custom error classes | 2 | — |
-| Documentation files | 154 | — |
-| **Unknowns** | 11 | — |
+| Category             | Count | Files |
+| -------------------- | ----- | ----- |
+| Exceptions (`throw`) | 59    | 31    |
+| Try/Catch blocks     | 173   | 37    |
+| Console logging      | 162   | 25    |
+| Hardcoded paths      | 16    | 4     |
+| Custom error classes | 2     | —     |
+| Documentation files  | 154   | —     |
+| **Unknowns**         | 11    | —     |
 
 ## Estimated Effort
 
-| Stage | Scope | Effort |
-|-------|-------|--------|
-| Foundation | Setup | Low |
-| Handlers | 0 functions | None |
-| Errors | 2 classes | Low |
-| Paths | 16 usages | High |
-| Adapters | 0 commands/tools | TBD |
-| Documents | 154 files | High |
-| Unknowns | 11 items | Review required |
+| Stage      | Scope            | Effort          |
+| ---------- | ---------------- | --------------- |
+| Foundation | Setup            | Low             |
+| Handlers   | 0 functions      | None            |
+| Errors     | 2 classes        | Low             |
+| Paths      | 16 usages        | High            |
+| Adapters   | 0 commands/tools | TBD             |
+| Documents  | 154 files        | High            |
+| Unknowns   | 11 items         | Review required |
 
 ## Dependencies to Add
 
@@ -35,6 +35,7 @@ bun add @outfitter/contracts @outfitter/logging @outfitter/config
 ```
 
 Optional:
+
 ```bash
 bun add @outfitter/cli      # If building CLI
 bun add @outfitter/mcp      # If building MCP server

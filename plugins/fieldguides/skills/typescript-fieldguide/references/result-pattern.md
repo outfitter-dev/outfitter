@@ -9,16 +9,17 @@ The Result pattern makes errors explicit in type signatures, forcing callers to 
 async function getUser(id: string): Promise<User> {
   const response = await fetch(`/api/users/${id}`);
   if (!response.ok) {
-    throw new Error('User not found'); // Invisible to caller
+    throw new Error("User not found"); // Invisible to caller
   }
   return response.json();
 }
 
 // Caller has no idea this can throw
-const user = await getUser('123'); // Can throw! But TypeScript doesn't warn
+const user = await getUser("123"); // Can throw! But TypeScript doesn't warn
 ```
 
 Problems:
+
 - **Hidden failure modes**: Types don't show what can fail
 - **Easy to forget**: Nothing forces error handling
 - **Poor error context**: Generic `Error` loses information
@@ -34,6 +35,7 @@ type Result<T, E = Error> =
 ```
 
 Benefits:
+
 - **Explicit errors**: Return type shows operation can fail
 - **Forced handling**: Caller must check `ok` to access value
 - **Rich error types**: Use discriminated unions for specific errors
@@ -45,9 +47,9 @@ Benefits:
 ```typescript
 // Error type for specific failures
 type UserError =
-  | { readonly type: 'not-found'; readonly id: string }
-  | { readonly type: 'network'; readonly message: string }
-  | { readonly type: 'validation'; readonly details: string };
+  | { readonly type: "not-found"; readonly id: string }
+  | { readonly type: "network"; readonly message: string }
+  | { readonly type: "validation"; readonly details: string };
 
 // ✅ Error visible in return type
 async function getUser(id: string): Promise<Result<User, UserError>> {
@@ -58,12 +60,12 @@ async function getUser(id: string): Promise<Result<User, UserError>> {
       if (response.status === 404) {
         return {
           ok: false,
-          error: { type: 'not-found', id }
+          error: { type: "not-found", id },
         };
       }
       return {
         ok: false,
-        error: { type: 'network', message: response.statusText }
+        error: { type: "network", message: response.statusText },
       };
     }
 
@@ -71,7 +73,7 @@ async function getUser(id: string): Promise<Result<User, UserError>> {
     if (!isUser(data)) {
       return {
         ok: false,
-        error: { type: 'validation', details: 'Invalid user data' }
+        error: { type: "validation", details: "Invalid user data" },
       };
     }
 
@@ -80,26 +82,26 @@ async function getUser(id: string): Promise<Result<User, UserError>> {
     return {
       ok: false,
       error: {
-        type: 'network',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }
+        type: "network",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
     };
   }
 }
 
 // Caller must handle errors
-const result = await getUser('123');
+const result = await getUser("123");
 
 if (!result.ok) {
   // TypeScript knows result.error exists
   switch (result.error.type) {
-    case 'not-found':
+    case "not-found":
       console.error(`User ${result.error.id} not found`);
       break;
-    case 'network':
+    case "network":
       console.error(`Network error: ${result.error.message}`);
       break;
-    case 'validation':
+    case "validation":
       console.error(`Invalid data: ${result.error.details}`);
       break;
   }
@@ -117,10 +119,7 @@ console.log(result.value.name);
 Transform success value, preserve error:
 
 ```typescript
-function map<T, U, E>(
-  result: Result<T, E>,
-  fn: (value: T) => U
-): Result<U, E> {
+function map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
   if (!result.ok) {
     return result;
   }
@@ -128,8 +127,8 @@ function map<T, U, E>(
 }
 
 // Usage
-const userResult = await getUser('123');
-const nameResult = map(userResult, user => user.name);
+const userResult = await getUser("123");
+const nameResult = map(userResult, (user) => user.name);
 // Result<string, UserError>
 ```
 
@@ -149,8 +148,8 @@ function flatMap<T, U, E>(
 }
 
 // Usage
-const userResult = await getUser('123');
-const postsResult = flatMap(userResult, user => getPosts(user.id));
+const userResult = await getUser("123");
+const postsResult = flatMap(userResult, (user) => getPosts(user.id));
 // Result<Post[], UserError>
 ```
 
@@ -172,7 +171,7 @@ function mapError<T, E, F>(
 // Convert specific error to generic
 const genericResult = mapError(
   userResult,
-  error => new Error(`User error: ${error.type}`)
+  (error) => new Error(`User error: ${error.type}`)
 );
 // Result<User, Error>
 ```
@@ -197,8 +196,8 @@ function match<T, E, U>(
 
 // Usage
 const message = match(userResult, {
-  ok: user => `Welcome, ${user.name}!`,
-  error: error => `Error: ${error.type}`
+  ok: (user) => `Welcome, ${user.name}!`,
+  error: (error) => `Error: ${error.type}`,
 });
 ```
 
@@ -215,7 +214,7 @@ function unwrap<T, E>(result: Result<T, E>): T {
 }
 
 // Only use when you're certain of success
-const user = unwrap(await getUser('123'));
+const user = unwrap(await getUser("123"));
 ```
 
 ### UnwrapOr
@@ -231,7 +230,7 @@ function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
 }
 
 // Safe fallback
-const user = unwrapOr(await getUser('123'), guestUser);
+const user = unwrapOr(await getUser("123"), guestUser);
 ```
 
 ## Advanced Patterns
@@ -259,9 +258,9 @@ function combine<T extends readonly Result<unknown, unknown>[]>(
 
 // Usage
 const [userResult, postsResult, settingsResult] = await Promise.all([
-  getUser('123'),
-  getPosts('123'),
-  getSettings('123')
+  getUser("123"),
+  getPosts("123"),
+  getSettings("123"),
 ]);
 
 const combined = combine([userResult, postsResult, settingsResult]);
@@ -300,9 +299,9 @@ async function asyncFlatMap<T, U, E>(
 }
 
 // Pipeline async operations
-const result = await getUser('123')
-  .then(r => asyncFlatMap(r, user => getPosts(user.id)))
-  .then(r => asyncMap(r, posts => posts.filter(p => p.published)));
+const result = await getUser("123")
+  .then((r) => asyncFlatMap(r, (user) => getPosts(user.id)))
+  .then((r) => asyncMap(r, (posts) => posts.filter((p) => p.published)));
 ```
 
 ### ResultBuilder for Chaining
@@ -327,7 +326,9 @@ class ResultBuilder<T, E> {
     return new ResultBuilder(mapError(this.result, fn));
   }
 
-  async mapAsync<U>(fn: (value: T) => Promise<U>): Promise<ResultBuilder<U, E>> {
+  async mapAsync<U>(
+    fn: (value: T) => Promise<U>
+  ): Promise<ResultBuilder<U, E>> {
     const result = await asyncMap(this.result, fn);
     return new ResultBuilder(result);
   }
@@ -357,10 +358,10 @@ class ResultBuilder<T, E> {
 }
 
 // Fluent API
-const name = ResultBuilder.of(await getUser('123'))
-  .map(user => user.name)
-  .map(name => name.toUpperCase())
-  .unwrapOr('Guest');
+const name = ResultBuilder.of(await getUser("123"))
+  .map((user) => user.name)
+  .map((name) => name.toUpperCase())
+  .unwrapOr("Guest");
 ```
 
 ### Validation Accumulation
@@ -379,11 +380,11 @@ function validateName(name: string): ValidationResult<string> {
   const errors: ValidationError[] = [];
 
   if (name.length === 0) {
-    errors.push({ field: 'name', message: 'Name is required' });
+    errors.push({ field: "name", message: "Name is required" });
   }
 
   if (name.length > 50) {
-    errors.push({ field: 'name', message: 'Name too long' });
+    errors.push({ field: "name", message: "Name too long" });
   }
 
   if (errors.length > 0) {
@@ -396,8 +397,8 @@ function validateName(name: string): ValidationResult<string> {
 function validateEmail(email: string): ValidationResult<string> {
   const errors: ValidationError[] = [];
 
-  if (!email.includes('@')) {
-    errors.push({ field: 'email', message: 'Invalid email' });
+  if (!email.includes("@")) {
+    errors.push({ field: "email", message: "Invalid email" });
   }
 
   if (errors.length > 0) {
@@ -433,8 +434,8 @@ function validateUser(data: {
     ok: true,
     value: {
       name: nameResult.value,
-      email: emailResult.value
-    }
+      email: emailResult.value,
+    },
   };
 }
 ```
@@ -444,12 +445,12 @@ function validateUser(data: {
 ### Zod + Result
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const UserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  name: z.string()
+  name: z.string(),
 });
 
 type ZodError = z.ZodError;
@@ -470,12 +471,12 @@ function parseUser(data: unknown): Result<User, ZodError> {
 Effect library has built-in Result-like types (`Effect`, `Either`):
 
 ```typescript
-import { Effect } from 'effect';
+import { Effect } from "effect";
 
 // Effect<User, UserError>
 const getUserEffect = Effect.tryPromise({
-  try: () => fetch('/api/users/123').then(r => r.json()),
-  catch: (error) => ({ type: 'network' as const, error })
+  try: () => fetch("/api/users/123").then((r) => r.json()),
+  catch: (error) => ({ type: "network" as const, error }),
 });
 ```
 
@@ -511,42 +512,42 @@ function UserProfile({ id }: { id: string }) {
 ## Testing
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('getUser', () => {
-  it('returns ok result for valid user', async () => {
-    const result = await getUser('123');
+describe("getUser", () => {
+  it("returns ok result for valid user", async () => {
+    const result = await getUser("123");
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.id).toBe('123');
+      expect(result.value.id).toBe("123");
     }
   });
 
-  it('returns not-found error for missing user', async () => {
-    const result = await getUser('999');
+  it("returns not-found error for missing user", async () => {
+    const result = await getUser("999");
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.type).toBe('not-found');
-      expect(result.error.id).toBe('999');
+      expect(result.error.type).toBe("not-found");
+      expect(result.error.id).toBe("999");
     }
   });
 });
 
-describe('map', () => {
-  it('transforms success value', () => {
+describe("map", () => {
+  it("transforms success value", () => {
     const result: Result<number, string> = { ok: true, value: 5 };
-    const mapped = map(result, n => n * 2);
+    const mapped = map(result, (n) => n * 2);
 
     expect(mapped).toEqual({ ok: true, value: 10 });
   });
 
-  it('preserves error', () => {
-    const result: Result<number, string> = { ok: false, error: 'fail' };
-    const mapped = map(result, n => n * 2);
+  it("preserves error", () => {
+    const result: Result<number, string> = { ok: false, error: "fail" };
+    const mapped = map(result, (n) => n * 2);
 
-    expect(mapped).toEqual({ ok: false, error: 'fail' });
+    expect(mapped).toEqual({ ok: false, error: "fail" });
   });
 });
 ```
@@ -565,6 +566,7 @@ return user; // No wrapper
 ```
 
 But:
+
 - Negligible in most cases
 - No try/catch overhead
 - Easier to optimize (JIT-friendly)
@@ -576,20 +578,20 @@ You can keep core logic transport-agnostic and adapt at the framework boundary.
 
 ```typescript
 type ApiError =
-  | { readonly type: 'not-found'; readonly id: string }
-  | { readonly type: 'validation'; readonly message: string };
+  | { readonly type: "not-found"; readonly id: string }
+  | { readonly type: "validation"; readonly message: string };
 
 function toHttp(error: ApiError): { status: number; body: unknown } {
   switch (error.type) {
-    case 'not-found':
+    case "not-found":
       return { status: 404, body: { error: `User ${error.id} not found` } };
-    case 'validation':
+    case "validation":
       return { status: 400, body: { error: error.message } };
   }
 }
 
 // Express
-app.get('/users/:id', async (req, res) => {
+app.get("/users/:id", async (req, res) => {
   const result = await getUser(req.params.id);
   if (!result.ok) {
     const http = toHttp(result.error);
@@ -611,8 +613,8 @@ transport-layer changes.
    ```typescript
    function safeGetUser(id: string): Promise<Result<User, Error>> {
      return getUser(id)
-       .then(value => ({ ok: true, value }) as const)
-       .catch(error => ({ ok: false, error }) as const);
+       .then((value) => ({ ok: true, value }) as const)
+       .catch((error) => ({ ok: false, error }) as const);
    }
    ```
 
@@ -623,6 +625,7 @@ transport-layer changes.
 ## When to Use Result
 
 **Use Result when:**
+
 - Errors are expected part of domain logic (not found, validation)
 - Caller should handle errors explicitly
 - Composing multiple error-prone operations
@@ -630,6 +633,7 @@ transport-layer changes.
 - Type safety for errors matters
 
 **Use exceptions when:**
+
 - Truly exceptional, unrecoverable errors (out of memory, corruption)
 - Interfacing with exception-based libraries
 - Performance-critical hot paths (profile first!)
@@ -637,6 +641,7 @@ transport-layer changes.
 ## Summary
 
 Result pattern provides:
+
 - **Type-safe errors**: Failures visible in types
 - **Forced handling**: Can't ignore errors
 - **Composability**: Easy to chain operations

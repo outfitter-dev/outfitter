@@ -15,7 +15,11 @@ bun add @outfitter/schema zod
 ## Quick Start
 
 ```typescript
-import { createActionRegistry, defineAction, Result } from "@outfitter/contracts";
+import {
+  createActionRegistry,
+  defineAction,
+  Result,
+} from "@outfitter/contracts";
 import { generateSurfaceMap } from "@outfitter/schema/surface";
 import { z } from "zod";
 
@@ -39,13 +43,13 @@ console.log(surface.actions.map((a) => a.id));
 
 ## Subpath Exports
 
-| Subpath | What's In It |
-|---------|---------------|
-| `@outfitter/schema` | Full public API from all modules |
-| `@outfitter/schema/manifest` | `generateManifest`, `ActionManifest*` types |
-| `@outfitter/schema/surface` | `generateSurfaceMap`, snapshot path + read/write helpers |
-| `@outfitter/schema/diff` | `diffSurfaceMaps`, diff result types |
-| `@outfitter/schema/markdown` | `formatManifestMarkdown`, markdown formatting options |
+| Subpath                      | What's In It                                             |
+| ---------------------------- | -------------------------------------------------------- |
+| `@outfitter/schema`          | Full public API from all modules                         |
+| `@outfitter/schema/manifest` | `generateManifest`, `ActionManifest*` types              |
+| `@outfitter/schema/surface`  | `generateSurfaceMap`, snapshot path + read/write helpers |
+| `@outfitter/schema/diff`     | `diffSurfaceMaps`, diff result types                     |
+| `@outfitter/schema/markdown` | `formatManifestMarkdown`, markdown formatting options    |
 
 ## Core Workflows
 
@@ -102,7 +106,10 @@ if (diff.hasChanges) {
 ```typescript
 import { formatManifestMarkdown } from "@outfitter/schema/markdown";
 
-const manifest = generateManifest(registry, { surface: "mcp", version: "1.0.0" });
+const manifest = generateManifest(registry, {
+  surface: "mcp",
+  version: "1.0.0",
+});
 
 const markdown = formatManifestMarkdown(manifest, {
   surface: "mcp",

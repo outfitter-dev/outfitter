@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(bun test *)
 
 # Stack Testing
 
-Test patterns for @outfitter/* packages.
+Test patterns for @outfitter/\* packages.
 
 ## Test Structure
 
@@ -168,7 +168,7 @@ test("returns search results", async () => {
 
 test("validates input schema", async () => {
   const result = await harness.invoke({
-    query: "",  // Invalid: min length 1
+    query: "", // Invalid: min length 1
   });
 
   expect(result.isErr()).toBe(true);
@@ -190,10 +190,7 @@ test("logs debug messages", async () => {
 
   await myHandler({ id: "1" }, ctx);
 
-  expect(mockLogger.calls.debug).toContainEqual([
-    "Processing",
-    { id: "1" },
-  ]);
+  expect(mockLogger.calls.debug).toContainEqual(["Processing", { id: "1" }]);
 });
 ```
 

@@ -5,10 +5,12 @@ Confidence reflects certainty that you can deliver the requested outcome with th
 ## Philosophy
 
 Balance two goals:
+
 1. **Gather enough** to deliver quality results
 2. **Avoid over-questioning** that frustrates user
 
 Consider:
+
 - **Clarity**: How well-defined is the ask?
 - **Risk**: What happens if assumptions are wrong?
 - **Complexity**: How many moving parts?
@@ -16,14 +18,14 @@ Consider:
 
 ## Level Overview
 
-| Bar       | Level | Name         | Internal % |
-| --------- | ----- | ------------ | ---------- |
-| `░░░░░`   | 0     | **Prepping** | 0–19%      |
-| `▓░░░░`   | 1     | **Scouting** | 20–39%     |
-| `▓▓░░░`   | 2     | **Exploring**| 40–59%     |
-| `▓▓▓░░`   | 3     | **Charting** | 60–74%     |
-| `▓▓▓▓░`   | 4     | **Mapped**   | 75–89%     |
-| `▓▓▓▓▓`   | 5     | **Ready**    | 90–100%    |
+| Bar     | Level | Name          | Internal % |
+| ------- | ----- | ------------- | ---------- |
+| `░░░░░` | 0     | **Prepping**  | 0–19%      |
+| `▓░░░░` | 1     | **Scouting**  | 20–39%     |
+| `▓▓░░░` | 2     | **Exploring** | 40–59%     |
+| `▓▓▓░░` | 3     | **Charting**  | 60–74%     |
+| `▓▓▓▓░` | 4     | **Mapped**    | 75–89%     |
+| `▓▓▓▓▓` | 5     | **Ready**     | 90–100%    |
 
 ## Stage Transitions
 
@@ -31,12 +33,12 @@ Confidence levels trigger stage transitions. Stages always advance, never regres
 
 ### Stage-Confidence Mapping
 
-| Level | Stage | activeForm |
-|-------|-------|------------|
-| 0–1 | Prep | "Prepping" |
-| 2–3 | Explore | "Exploring" |
-| 4 | Clarify | "Clarifying" |
-| 5 | Deliver | "Delivering" |
+| Level | Stage   | activeForm   |
+| ----- | ------- | ------------ |
+| 0–1   | Prep    | "Prepping"   |
+| 2–3   | Explore | "Exploring"  |
+| 4     | Clarify | "Clarifying" |
+| 5     | Deliver | "Delivering" |
 
 ### Rules
 
@@ -90,6 +92,7 @@ Confidence levels trigger stage transitions. Stages always advance, never regres
 **When**: Reasonable understanding, could deliver with notable assumptions
 
 **Do**:
+
 1. Summarize (3 bullets max)
 2. Ask 2–3 targeted questions toward level 4–5
 3. If user proceeds early → add `△ Caveats`
@@ -142,5 +145,6 @@ User wants quick delivery at lower confidence:
 ## Tuning
 
 Percentage boundaries can adjust based on risk tolerance:
+
 - **Higher risk tolerance** → shift boundaries down
 - **Lower risk tolerance** → shift boundaries up

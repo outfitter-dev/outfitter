@@ -19,11 +19,11 @@ const err = Result.err(NotFoundError.create("user", "123"));
 ```typescript
 // Boolean check
 if (result.isOk()) {
-  console.log(result.value);  // TypeScript knows type
+  console.log(result.value); // TypeScript knows type
 }
 
 if (result.isErr()) {
-  console.log(result.error);  // TypeScript knows error type
+  console.log(result.error); // TypeScript knows error type
 }
 ```
 
@@ -36,7 +36,7 @@ if (result.isOk()) {
 }
 
 // Unsafe access (throws if error)
-const user = result.unwrap();  // Throws if err!
+const user = result.unwrap(); // Throws if err!
 
 // With default
 const user = result.unwrapOr(defaultUser);
@@ -145,14 +145,17 @@ const result = userResult.recover((error) => {
 ### Sequential execution
 
 ```typescript
-const result = await getUser(id)
-  .then((r) => r.isOk() ? getOrders(r.value.id) : Promise.resolve(r));
+const result = await getUser(id).then((r) =>
+  r.isOk() ? getOrders(r.value.id) : Promise.resolve(r)
+);
 ```
 
 ### With async/await
 
 ```typescript
-async function getUserWithOrders(id: string): Promise<Result<UserWithOrders, Error>> {
+async function getUserWithOrders(
+  id: string
+): Promise<Result<UserWithOrders, Error>> {
   const userResult = await getUser(id);
   if (userResult.isErr()) return userResult;
 
@@ -226,15 +229,21 @@ function wrapThrowable<T>(fn: () => T): Result<T, InternalError> {
   try {
     return Result.ok(fn());
   } catch (error) {
-    return Result.err(InternalError.create("Unexpected error", { cause: error }));
+    return Result.err(
+      InternalError.create("Unexpected error", { cause: error })
+    );
   }
 }
 
-async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, InternalError>> {
+async function wrapAsync<T>(
+  fn: () => Promise<T>
+): Promise<Result<T, InternalError>> {
   try {
     return Result.ok(await fn());
   } catch (error) {
-    return Result.err(InternalError.create("Unexpected error", { cause: error }));
+    return Result.err(
+      InternalError.create("Unexpected error", { cause: error })
+    );
   }
 }
 ```

@@ -39,7 +39,10 @@ export function normalizeBorders(...) { ... }
 ```typescript
 export function getTerminalWidth(): number;
 export function getContentWidth(options: BoxOptions): number;
-export function getBoxOverhead(options: BoxOptions): { horizontal: number; vertical: number };
+export function getBoxOverhead(options: BoxOptions): {
+  horizontal: number;
+  vertical: number;
+};
 ```
 
 ### Step 4: Update `index.ts` exports
@@ -62,13 +65,13 @@ Extend `packages/cli/src/demo/renderers/layout.ts` with width utility examples.
 
 ## Files to Modify
 
-| File | Changes |
-|------|---------|
-| `render/box.ts` | Export normalization helpers |
-| `render/layout.ts` | Add width utilities |
-| `render/index.ts` | Export new utilities |
-| `__tests__/layout.test.ts` | Add tests |
-| `demo/renderers/layout.ts` | Add demo section |
+| File                       | Changes                      |
+| -------------------------- | ---------------------------- |
+| `render/box.ts`            | Export normalization helpers |
+| `render/layout.ts`         | Add width utilities          |
+| `render/index.ts`          | Export new utilities         |
+| `__tests__/layout.test.ts` | Add tests                    |
+| `demo/renderers/layout.ts` | Add demo section             |
 
 ## Dependencies
 

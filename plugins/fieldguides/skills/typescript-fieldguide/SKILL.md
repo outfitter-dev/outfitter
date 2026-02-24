@@ -56,16 +56,18 @@ NOT for: runtime-only logic unrelated to types, non-TypeScript projects
 
 ```typescript
 // ❌ NEVER
-function process(data: any) { return data.value; }
+function process(data: any) {
+  return data.value;
+}
 
 // ✅ ALWAYS
 function process(data: unknown): string {
-  if (!hasValue(data)) throw new TypeError('Invalid');
+  if (!hasValue(data)) throw new TypeError("Invalid");
   return data.value.toString();
 }
 
 function hasValue(v: unknown): v is { value: unknown } {
-  return typeof v === 'object' && v !== null && 'value' in v;
+  return typeof v === "object" && v !== null && "value" in v;
 }
 ```
 
@@ -73,7 +75,7 @@ Validate at boundaries:
 
 ```typescript
 async function fetchUser(id: string): Promise<User> {
-  const data: unknown = await fetch(`/api/users/${id}`).then(r => r.json());
+  const data: unknown = await fetch(`/api/users/${id}`).then((r) => r.json());
   return UserSchema.parse(data);
 }
 ```
@@ -90,19 +92,22 @@ type Result<T, E = Error> =
   | { readonly ok: false; readonly error: E };
 
 type UserError =
-  | { readonly type: 'not-found'; readonly id: string }
-  | { readonly type: 'network'; readonly message: string };
+  | { readonly type: "not-found"; readonly id: string }
+  | { readonly type: "network"; readonly message: string };
 
 async function getUser(id: string): Promise<Result<User, UserError>> {
   try {
     const response = await fetch(`/api/users/${id}`);
     if (response.status === 404)
-      return { ok: false, error: { type: 'not-found', id } };
+      return { ok: false, error: { type: "not-found", id } };
     if (!response.ok)
-      return { ok: false, error: { type: 'network', message: response.statusText } };
+      return {
+        ok: false,
+        error: { type: "network", message: response.statusText },
+      };
     return { ok: true, value: await response.json() };
   } catch (e) {
-    return { ok: false, error: { type: 'network', message: String(e) } };
+    return { ok: false, error: { type: "network", message: String(e) } };
   }
 }
 
@@ -110,8 +115,10 @@ async function getUser(id: string): Promise<Result<User, UserError>> {
 const result = await getUser(id);
 if (!result.ok) {
   switch (result.error.type) {
-    case 'not-found': return showNotFound(result.error.id);
-    case 'network': return showError(result.error.message);
+    case "not-found":
+      return showNotFound(result.error.id);
+    case "network":
+      return showError(result.error.message);
   }
 }
 return renderUser(result.value);
@@ -161,23 +168,23 @@ Prevent mixing incompatible primitives.
 declare const __brand: unique symbol;
 type Brand<T, B extends string> = T & { readonly [__brand]: B };
 
-type UserId = Brand<string, 'UserId'>;
-type ProductId = Brand<string, 'ProductId'>;
+type UserId = Brand<string, "UserId">;
+type ProductId = Brand<string, "ProductId">;
 
 function createUserId(value: string): UserId {
   if (!/^user-\d+$/.test(value)) throw new TypeError(`Invalid: ${value}`);
   return value as UserId;
 }
 
-const userId = createUserId('user-123');
+const userId = createUserId("user-123");
 // getUser(productId); // ❌ Type error
-getUser(userId);       // ✅ Works
+getUser(userId); // ✅ Works
 ```
 
 Security:
 
 ```typescript
-type SanitizedHtml = Brand<string, 'SanitizedHtml'>;
+type SanitizedHtml = Brand<string, "SanitizedHtml">;
 
 function sanitize(raw: string): SanitizedHtml {
   return escapeHtml(raw) as SanitizedHtml;
@@ -200,12 +207,14 @@ See [branded-types.md](references/branded-types.md) for advanced patterns.
 
 ```typescript
 class DatabaseConnection implements Disposable {
-  [Symbol.dispose]() { this.close(); }
+  [Symbol.dispose]() {
+    this.close();
+  }
 }
 
 function query() {
   using conn = new DatabaseConnection();
-  return conn.query('SELECT * FROM users');
+  return conn.query("SELECT * FROM users");
 } // Automatically closed
 
 async function asyncWork() {
@@ -224,14 +233,14 @@ Validate type without widening (TS 4.9+):
 ```typescript
 const config = {
   port: 3000,
-  host: 'localhost'
+  host: "localhost",
 } satisfies Record<string, string | number>;
 
-config.port // number (not string | number)
+config.port; // number (not string | number)
 
 const routes = {
-  home: '/',
-  user: '/user/:id'
+  home: "/",
+  user: "/user/:id",
 } as const satisfies Record<string, string>;
 
 type HomeRoute = typeof routes.home; // '/'
@@ -247,7 +256,7 @@ Preserve literals through generics (TS 5.0+):
 function makeTuple<const T extends readonly unknown[]>(...args: T): T {
   return args;
 }
-const result = makeTuple('a', 'b', 'c'); // ['a', 'b', 'c'] not string[]
+const result = makeTuple("a", "b", "c"); // ['a', 'b', 'c'] not string[]
 ```
 
 </const_type_parameters>
@@ -258,7 +267,7 @@ TS 5.5+ auto-infers type predicates:
 
 ```typescript
 function isString(x: unknown) {
-  return typeof x === 'string';
+  return typeof x === "string";
 }
 // Inferred: (x: unknown) => x is string
 
@@ -276,10 +285,13 @@ type Route = `/${string}`;
 type ApiRoute = `/api/v${number}/${string}`;
 
 type ExtractParams<T extends string> =
-  T extends `${string}:${infer P}/${infer R}` ? P | ExtractParams<`/${R}`>
-  : T extends `${string}:${infer P}` ? P : never;
+  T extends `${string}:${infer P}/${infer R}`
+    ? P | ExtractParams<`/${R}`>
+    : T extends `${string}:${infer P}`
+      ? P
+      : never;
 
-type Params = ExtractParams<'/user/:id/post/:postId'>; // 'id' | 'postId'
+type Params = ExtractParams<"/user/:id/post/:postId">; // 'id' | 'postId'
 ```
 
 See [modern-features.md](references/modern-features.md) for TS 5.5-5.8.
@@ -293,12 +305,12 @@ Schema = runtime validation + TypeScript type.
 <zod_core>
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const UserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
-  name: z.string().min(1).max(100)
+  name: z.string().min(1).max(100),
 });
 
 type User = z.infer<typeof UserSchema>;
@@ -321,7 +333,7 @@ const user = result.data;
 ```typescript
 const ApiResponse = z.discriminatedUnion("type", [
   z.object({ type: z.literal("success"), data: z.unknown() }),
-  z.object({ type: z.literal("error"), code: z.string(), message: z.string() })
+  z.object({ type: z.literal("error"), code: z.string(), message: z.string() }),
 ]);
 ```
 
@@ -329,9 +341,11 @@ const ApiResponse = z.discriminatedUnion("type", [
 
 ```typescript
 const EnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
   DATABASE_URL: z.string().url(),
-  PORT: z.coerce.number().int().positive().default(3000)
+  PORT: z.coerce.number().int().positive().default(3000),
 });
 const env = EnvSchema.parse(process.env);
 ```
@@ -339,15 +353,16 @@ const env = EnvSchema.parse(process.env);
 **API validation (Hono)**:
 
 ```typescript
-import { zValidator } from '@hono/zod-validator';
+import { zValidator } from "@hono/zod-validator";
 
-app.post('/users', zValidator('json', UserSchema), (c) => {
-  const user = c.req.valid('json');
+app.post("/users", zValidator("json", UserSchema), (c) => {
+  const user = c.req.valid("json");
   return c.json(user);
 });
 ```
 
 See:
+
 - [zod-building-blocks.md](references/zod-building-blocks.md) - primitives, refinements, transforms
 - [zod-schemas.md](references/zod-schemas.md) - composition patterns
 - [zod-integration.md](references/zod-integration.md) - API/form/env integration
@@ -359,12 +374,12 @@ See:
 ```typescript
 // User-defined
 function isString(v: unknown): v is string {
-  return typeof v === 'string';
+  return typeof v === "string";
 }
 
 // Assertion
 function assertString(v: unknown): asserts v is string {
-  if (typeof v !== 'string') throw new TypeError('Expected string');
+  if (typeof v !== "string") throw new TypeError("Expected string");
 }
 
 // With noUncheckedIndexedAccess
@@ -388,7 +403,9 @@ Types show structure. TSDoc shows intent. Critical for AI agents.
  * @example
  * const token = await authenticate({ email, password });
  */
-export async function authenticate(credentials: Credentials): Promise<SessionToken>;
+export async function authenticate(
+  credentials: Credentials
+): Promise<SessionToken>;
 ```
 
 Document: all exports, parameters with constraints, thrown errors, non-obvious returns.
@@ -398,6 +415,7 @@ See [tsdoc-patterns.md](references/tsdoc-patterns.md) for comprehensive guide.
 <rules>
 
 ALWAYS:
+
 - Strict TypeScript config enabled
 - Type-only imports: `import type { User } from './types'`
 - Const assertions for literal types
@@ -410,14 +428,16 @@ ALWAYS:
 - TSDoc on all exports
 
 NEVER:
+
 - `any` (use `unknown` + guards)
 - `@ts-ignore` (fix types or document)
 - TypeScript enums (use const assertions or z.enum)
-- Non-null assertions ``!`` (use guards)
+- Non-null assertions `!` (use guards)
 - Loose state (use discriminated unions)
 - Hidden errors (use Result)
 
 PREFER:
+
 - safeParse over parse
 - z.discriminatedUnion over z.union
 - Inferred predicates (TS 5.5+)
@@ -428,23 +448,28 @@ PREFER:
 <references>
 
 **Type Patterns:**
+
 - [result-pattern.md](references/result-pattern.md) - Result/Either utilities
 - [branded-types.md](references/branded-types.md) - advanced branded patterns
 - [advanced-types.md](references/advanced-types.md) - template literals, utilities
 
 **Modern Features:**
+
 - [modern-features.md](references/modern-features.md) - TS 5.5-5.8
 - [migration-paths.md](references/migration-paths.md) - upgrading TypeScript
 
 **Zod:**
+
 - [zod-building-blocks.md](references/zod-building-blocks.md) - primitives, transforms
 - [zod-schemas.md](references/zod-schemas.md) - composition patterns
 - [zod-integration.md](references/zod-integration.md) - API, forms, env
 
 **TSDoc:**
+
 - [tsdoc-patterns.md](references/tsdoc-patterns.md) - documentation patterns
 
 **Examples:**
+
 - [api-response.md](examples/api-response.md) - end-to-end type-safe API
 - [framework-adapters.md](examples/framework-adapters.md) - framework-agnostic handlers adapted to Express/Fastify/Hono
 - [form-validation.md](examples/form-validation.md) - Zod + React Hook Form

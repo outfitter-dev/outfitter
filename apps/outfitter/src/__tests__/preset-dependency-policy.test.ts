@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { getResolvedVersions } from "@outfitter/presets";
 
 function stripRangePrefix(version: string): string {

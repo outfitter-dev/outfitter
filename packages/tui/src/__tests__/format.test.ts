@@ -4,6 +4,7 @@
  * TDD RED PHASE: These tests define expected behavior for duration and byte formatting.
  */
 import { describe, expect, it } from "bun:test";
+
 import { formatBytes, formatDuration } from "../render/index.js";
 
 // ============================================================================

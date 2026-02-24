@@ -87,12 +87,14 @@ This preserves the skeptic's understanding of the proposal through multiple roun
 ## Context Handoff (for initial dispatch)
 
 When dispatching to the skeptic subagent, include:
+
 - The proposed solution or approach
 - Current requirements and constraints
 - Any justifications already offered
 - Team/project context if relevant
 
 When resuming the skeptic, include:
+
 - User's answers to probing questions
 - Additional context or constraints revealed
 - Specific areas to examine further
@@ -112,13 +114,14 @@ Watch for these justifications — they usually indicate unjustified complexity:
 
 The skeptic returns one of three verdicts:
 
-| Verdict | Meaning | Action |
-|---------|---------|--------|
-| **proceed** | Complexity is minor (🟡) | Note alternatives, continue |
-| **caution** | Complexity is moderate (🟠) | Discuss before proceeding |
-| **block** | Complexity is high risk (🛑) | Address concerns first |
+| Verdict     | Meaning                      | Action                      |
+| ----------- | ---------------------------- | --------------------------- |
+| **proceed** | Complexity is minor (🟡)     | Note alternatives, continue |
+| **caution** | Complexity is moderate (🟠)  | Discuss before proceeding   |
+| **block**   | Complexity is high risk (🛑) | Address concerns first      |
 
 After discussion, document the outcome:
+
 - **Simplified**: Chose simpler alternative
 - **Justified**: Complexity validated with evidence, documented in ADR
 - **Deferred**: Needs more investigation, created follow-up task

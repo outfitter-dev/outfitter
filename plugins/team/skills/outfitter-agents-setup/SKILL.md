@@ -50,15 +50,15 @@ See [templates/AGENTS.md](templates/AGENTS.md) for the full template.
 
 ### What Belongs in AGENTS.md
 
-| Include | Exclude |
-|---------|---------|
+| Include                    | Exclude                    |
+| -------------------------- | -------------------------- |
 | Project structure overview | Tool-specific instructions |
-| Key commands | Claude task management |
-| Architectural patterns | Codex sandbox config |
-| Development principles | MCP server setup |
-| Code style conventions | IDE settings |
-| Testing approach | |
-| Git workflow | |
+| Key commands               | Claude task management     |
+| Architectural patterns     | Codex sandbox config       |
+| Development principles     | MCP server setup           |
+| Code style conventions     | IDE settings               |
+| Testing approach           |                            |
+| Git workflow               |                            |
 
 ### Length Guidelines
 
@@ -83,6 +83,7 @@ See [templates/CLAUDE-ROOT.md](templates/CLAUDE-ROOT.md) for the template. Keep 
 Previously, some projects used symlinks between CLAUDE.md and AGENTS.md. **Don't do this.**
 
 Problems with symlinks:
+
 - Git treats them inconsistently across platforms
 - Some tools don't follow symlinks
 - Confusing when editing — which file is canonical?
@@ -104,12 +105,12 @@ See [templates/CLAUDE-DOTCLAUDE.md](templates/CLAUDE-DOTCLAUDE.md) for an exampl
 
 ### What Belongs in .claude/CLAUDE.md
 
-| Include | Exclude |
-|---------|---------|
-| Task management patterns | Project architecture |
+| Include                          | Exclude                        |
+| -------------------------------- | ------------------------------ |
+| Task management patterns         | Project architecture           |
 | Claude-specific tool preferences | Code style (goes in AGENTS.md) |
-| MCP server usage | Testing approach |
-| Subagent coordination | Git workflow |
+| MCP server usage                 | Testing approach               |
+| Subagent coordination            | Git workflow                   |
 
 ## .claude/rules/
 
@@ -122,6 +123,7 @@ Modular, topic-specific rule files. Auto-loaded into Claude's context.
 ### When to Use Rules Files
 
 Use `.claude/rules/` for:
+
 - Language-specific guidelines (TYPESCRIPT.md, RUST.md)
 - Testing conventions (TESTING.md)
 - API standards (API.md)
@@ -172,12 +174,12 @@ Codex CLI doesn't support `.claude/rules/` or `paths` frontmatter. Keep critical
 └── settings.json       # Permissions, MCP servers
 ```
 
-| Directory | Purpose |
-|-----------|---------|
+| Directory   | Purpose                                           |
+| ----------- | ------------------------------------------------- |
 | `commands/` | User-invocable slash commands (`/build`, `/test`) |
-| `skills/` | Project-specific skills loaded on activation |
-| `rules/` | Topic-specific convention files |
-| `hooks/` | Event handlers for tool calls and lifecycle |
+| `skills/`   | Project-specific skills loaded on activation      |
+| `rules/`    | Topic-specific convention files                   |
+| `hooks/`    | Event handlers for tool calls and lifecycle       |
 
 ## Writing for Agent Consumption
 
@@ -188,9 +190,9 @@ When writing content that agents will parse:
 ```markdown
 ## Good: Explicit structure
 
-| Command | Description |
-|---------|-------------|
-| `bun test` | Run tests |
+| Command     | Description   |
+| ----------- | ------------- |
+| `bun test`  | Run tests     |
 | `bun build` | Build project |
 
 ## Bad: Prose-heavy
@@ -217,10 +219,10 @@ Set timeout to control how long operations wait.
 ```markdown
 ## Good: Errors are first-class
 
-| Error | Cause | Resolution |
-|-------|-------|------------|
-| `CONFIG_NOT_FOUND` | Missing config file | Run `init` first |
-| `INVALID_FORMAT` | Malformed input | Check input schema |
+| Error              | Cause               | Resolution         |
+| ------------------ | ------------------- | ------------------ |
+| `CONFIG_NOT_FOUND` | Missing config file | Run `init` first   |
+| `INVALID_FORMAT`   | Malformed input     | Check input schema |
 
 ## Bad: Errors as afterthought
 

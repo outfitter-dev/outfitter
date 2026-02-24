@@ -104,6 +104,7 @@ git commit -m "feat: add Claude Code team configuration"
 ### Step 5: Team Onboarding
 
 When team members open the project in Claude Code and trust the folder:
+
 - Marketplaces auto-install
 - Plugins become available
 

@@ -5,10 +5,12 @@
  */
 
 import { resolve } from "node:path";
+
 import { cwdPreset } from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import {
   type DocsApiInput,
   printDocsApiResults,

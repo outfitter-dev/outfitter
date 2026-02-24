@@ -8,6 +8,7 @@
  * Total: 6 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { createContext, generateRequestId } from "../context.js";
 import type { Logger } from "../handler.js";
 

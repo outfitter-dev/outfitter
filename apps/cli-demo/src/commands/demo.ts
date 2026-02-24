@@ -13,13 +13,13 @@ import { isInteractive } from "@outfitter/cli/terminal";
 import type { OutputMode } from "@outfitter/cli/types";
 import { createTheme, renderTable, SPINNERS } from "@outfitter/tui/render";
 import { ANSI } from "@outfitter/tui/streaming";
+
 import {
   getSectionIds,
   getSections,
   runAllSections,
   runSection,
 } from "./demo/registry.js";
-
 // Import app-specific sections to register them
 // Note: Primitive demos (colors, table, etc.) are provided by @outfitter/tui/demo
 import "./demo/errors.js";

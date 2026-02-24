@@ -7,18 +7,19 @@ metadata:
   version: "0.1.1"
   upstream: "clig.dev + POSIX/GNU/Heroku/12-factor + Agent Skills spec"
 ---
+
 # CLI Development Guidelines
 
 ## When to activate this skill
 
-- You are *designing*, *implementing*, or *reviewing* a command-line tool.
+- You are _designing_, _implementing_, or _reviewing_ a command-line tool.
 - The user mentions (explicitly or implicitly): `--help`, flags, subcommands, exit codes, stdout/stderr, piping, JSON output, color, prompts, config files, env vars, “works in CI”, install/uninstall, telemetry.
 
 ## What this skill produces
 
-- A *CLI contract* (what users can rely on): commands, flags, IO behavior, exit codes, config/env, examples, and safety behavior.
-- Draft *help output* and docs structure (example-first).
-- A *compliance audit* (when runnable) using `scripts/cli_audit.py`.
+- A _CLI contract_ (what users can rely on): commands, flags, IO behavior, exit codes, config/env, examples, and safety behavior.
+- Draft _help output_ and docs structure (example-first).
+- A _compliance audit_ (when runnable) using `scripts/cli_audit.py`.
 
 ## Non-negotiable CLI citizenship
 
@@ -51,6 +52,7 @@ metadata:
   - Safety: confirmations, `--dry-run`, `--force`, secret handling.
 
 Use:
+
 - [CLI reference](references/REFERENCE.md)
 - [CLI spec template](templates/cli-command-spec-template.json)
 
@@ -78,6 +80,7 @@ Use:
   - Unscriptable output (no stable modes)
 
 Use:
+
 - [Checklist](references/CHECKLIST.md)
 - `scripts/cli_audit.py`
 

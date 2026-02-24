@@ -27,6 +27,7 @@ Full cycle from requirements to delivery:
 ```
 
 **Handoff artifacts**:
+
 - research → coding: Requirements doc, decision log
 - coding → reviewing: PR with tests passing
 - reviewing → testing: Approval with caveats noted
@@ -150,15 +151,15 @@ Production issues:
 
 ## Choosing a Workflow
 
-| Situation | Workflow |
-|-----------|----------|
-| New feature request | Feature Development |
-| Bug report | Bug Investigation |
-| "Should we use X?" | Architecture Decision |
-| PR ready for merge | Code Review |
-| "How does this work?" | Exploration |
-| Tech debt cleanup | Refactoring |
-| Production is down | Incident Response |
+| Situation             | Workflow              |
+| --------------------- | --------------------- |
+| New feature request   | Feature Development   |
+| Bug report            | Bug Investigation     |
+| "Should we use X?"    | Architecture Decision |
+| PR ready for merge    | Code Review           |
+| "How does this work?" | Exploration           |
+| Tech debt cleanup     | Refactoring           |
+| Production is down    | Incident Response     |
 
 ## Workflow Customization
 

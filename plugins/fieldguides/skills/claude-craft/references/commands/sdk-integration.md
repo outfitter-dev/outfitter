@@ -19,7 +19,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 
 for await (const message of query({
   prompt: "Hello",
-  options: { maxTurns: 1 }
+  options: { maxTurns: 1 },
 })) {
   if (message.type === "system" && message.subtype === "init") {
     console.log("Available commands:", message.slash_commands);
@@ -59,7 +59,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 // Basic invocation
 for await (const message of query({
   prompt: "/review",
-  options: { maxTurns: 3 }
+  options: { maxTurns: 3 },
 })) {
   if (message.type === "assistant") {
     console.log("Review:", message.message);
@@ -69,7 +69,7 @@ for await (const message of query({
 // With arguments
 for await (const message of query({
   prompt: "/fix-issue 123",
-  options: { maxTurns: 5 }
+  options: { maxTurns: 5 },
 })) {
   if (message.type === "result") {
     console.log("Fixed:", message.result);
@@ -113,8 +113,8 @@ for await (const message of query({
   prompt: "/my-custom-command",
   options: {
     maxTurns: 3,
-    settingSources: ['user', 'project', 'local']  // Enable filesystem
-  }
+    settingSources: ["user", "project", "local"], // Enable filesystem
+  },
 })) {
   // Process results
 }
@@ -134,6 +134,7 @@ async for message in query(
 ```
 
 **Setting Sources**:
+
 - `user` - Personal settings (`~/.claude/`)
 - `project` - Project settings (`.claude/`)
 - `local` - Local overrides
@@ -149,7 +150,7 @@ Summarize conversation history to reduce context:
 ```typescript
 for await (const message of query({
   prompt: "/compact",
-  options: { maxTurns: 1 }
+  options: { maxTurns: 1 },
 })) {
   if (message.type === "system" && message.subtype === "compact_boundary") {
     console.log("Compacted");
@@ -165,7 +166,7 @@ Start fresh conversation:
 ```typescript
 for await (const message of query({
   prompt: "/clear",
-  options: { maxTurns: 1 }
+  options: { maxTurns: 1 },
 })) {
   if (message.type === "system" && message.subtype === "init") {
     console.log("Cleared, new session:", message.session_id);
@@ -186,7 +187,7 @@ async function developmentWorkflow(featureName: string) {
   // Step 1: Create branch
   for await (const msg of query({
     prompt: `/create-branch ${featureName}`,
-    options: { maxTurns: 3 }
+    options: { maxTurns: 3 },
   })) {
     // Handle branch creation
   }
@@ -194,7 +195,7 @@ async function developmentWorkflow(featureName: string) {
   // Step 2: Implement feature
   for await (const msg of query({
     prompt: `/implement ${featureName}`,
-    options: { maxTurns: 10 }
+    options: { maxTurns: 10 },
   })) {
     // Handle implementation
   }
@@ -202,7 +203,7 @@ async function developmentWorkflow(featureName: string) {
   // Step 3: Create PR
   for await (const msg of query({
     prompt: "/create-pr",
-    options: { maxTurns: 3 }
+    options: { maxTurns: 3 },
   })) {
     // Handle PR creation
   }
@@ -219,7 +220,7 @@ async function deployIfTestsPass() {
 
   for await (const msg of query({
     prompt: "/run-tests",
-    options: { maxTurns: 5 }
+    options: { maxTurns: 5 },
   })) {
     if (msg.type === "result" && msg.result.includes("All tests passed")) {
       testsPass = true;
@@ -229,7 +230,7 @@ async function deployIfTestsPass() {
   if (testsPass) {
     for await (const msg of query({
       prompt: "/deploy staging",
-      options: { maxTurns: 5 }
+      options: { maxTurns: 5 },
     })) {
       // Handle deployment
     }
@@ -246,7 +247,7 @@ async function deployIfTestsPass() {
 ```typescript
 for await (const msg of query({
   prompt: "/nonexistent-command",
-  options: { maxTurns: 1 }
+  options: { maxTurns: 1 },
 })) {
   if (msg.type === "error") {
     console.error("Command error:", msg.error);
@@ -266,7 +267,7 @@ try {
   for await (const msg of query({
     prompt: "/long-running-command",
     options: { maxTurns: 10 },
-    signal: controller.signal
+    signal: controller.signal,
   })) {
     // Process messages
   }
@@ -317,7 +318,7 @@ async function runCodeQuality() {
 
   for await (const msg of query({
     prompt: "/lint && /test && /security-check",
-    options: { maxTurns: 10 }
+    options: { maxTurns: 10 },
   })) {
     if (msg.type === "result") {
       results.push(msg.result);
@@ -336,7 +337,7 @@ async function handleUserCommand(userMessage: string) {
   if (userMessage.startsWith("/")) {
     for await (const msg of query({
       prompt: userMessage,
-      options: { maxTurns: 5 }
+      options: { maxTurns: 5 },
     })) {
       if (msg.type === "assistant") {
         await sendToChannel(msg.message);
@@ -354,7 +355,7 @@ async function batchReview(files: string[]) {
   for (const file of files) {
     for await (const msg of query({
       prompt: `/review-file ${file}`,
-      options: { maxTurns: 3 }
+      options: { maxTurns: 3 },
     })) {
       if (msg.type === "result") {
         await saveReview(file, msg.result);
@@ -374,7 +375,7 @@ Always specify which settings to load:
 
 ```typescript
 options: {
-  settingSources: ['user', 'project', 'local']
+  settingSources: ["user", "project", "local"];
 }
 ```
 
@@ -418,13 +419,19 @@ Simple commands need fewer turns:
 
 ```typescript
 // Simple lookup
-options: { maxTurns: 1 }
+options: {
+  maxTurns: 1;
+}
 
 // Standard operation
-options: { maxTurns: 3 }
+options: {
+  maxTurns: 3;
+}
 
 // Complex workflow
-options: { maxTurns: 10 }
+options: {
+  maxTurns: 10;
+}
 ```
 
 ---

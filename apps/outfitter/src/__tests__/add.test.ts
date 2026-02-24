@@ -9,7 +9,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+
 import { getResolvedVersions } from "@outfitter/presets";
+
 import { listBlocks, runAdd } from "../commands/add.js";
 import type { Manifest } from "../manifest.js";
 

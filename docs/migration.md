@@ -95,7 +95,10 @@ try {
 ```typescript
 import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
-const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
+const getUser: Handler<{ id: string }, User, NotFoundError> = async (
+  input,
+  ctx
+) => {
   const user = await db.users.findById(input.id);
   if (!user) {
     return Result.err(NotFoundError.create("user", input.id));
@@ -204,16 +207,17 @@ logger.debug("Config loaded", { config }); // Secrets auto-redacted
 
 Outfitter logging is **message-first**: `logger.info("message", { meta })`. Pino and many other loggers are **object-first**: `logger.info({ meta }, "message")`. If you keep the object-first order, logs will be malformed.
 
-| Pattern | Pino (object-first) | @outfitter/logging (message-first) |
-| --- | --- | --- |
-| Basic log | `logger.info({ msg: "hello" })` | `logger.info("hello")` |
-| With metadata | `logger.info({ userId: 123 }, "hello")` | `logger.info("hello", { userId: 123 })` |
-| Error | `logger.error({ err, msg: "failed" })` | `logger.error("failed", { error: err })` |
-| Child logger | `logger.child({ userId })` | `logger.child({ userId })` |
+| Pattern       | Pino (object-first)                     | @outfitter/logging (message-first)       |
+| ------------- | --------------------------------------- | ---------------------------------------- |
+| Basic log     | `logger.info({ msg: "hello" })`         | `logger.info("hello")`                   |
+| With metadata | `logger.info({ userId: 123 }, "hello")` | `logger.info("hello", { userId: 123 })`  |
+| Error         | `logger.error({ err, msg: "failed" })`  | `logger.error("failed", { error: err })` |
+| Child logger  | `logger.child({ userId })`              | `logger.child({ userId })`               |
 
 `@outfitter/logging` ships with message-first method signatures. Swapping arguments is a TypeScript error in strict mode.
 
 Common pitfalls:
+
 - **Object-first habits**: `logger.info({ userId }, "message")` is invalid here.
 - **Relying on `msg` key**: prefer the first string argument as the message.
 - **Using logs for user output**: logs are for diagnostics. CLI output should go through `@outfitter/cli` output utilities.
@@ -232,9 +236,9 @@ const cachePath = path.join(os.homedir(), ".myapp", "cache");
 ```typescript
 import { getConfigDir, getCacheDir, getStateDir } from "@outfitter/config";
 
-const configDir = getConfigDir("myapp");  // ~/.config/myapp
-const cacheDir = getCacheDir("myapp");    // ~/.cache/myapp
-const stateDir = getStateDir("myapp");    // ~/.local/state/myapp
+const configDir = getConfigDir("myapp"); // ~/.config/myapp
+const cacheDir = getCacheDir("myapp"); // ~/.cache/myapp
+const stateDir = getStateDir("myapp"); // ~/.local/state/myapp
 ```
 
 **Key changes:**

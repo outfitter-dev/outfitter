@@ -4,21 +4,21 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 
 ## Categories
 
-| Category | Exit | HTTP | Class | When to Use |
-|----------|------|------|-------|-------------|
-| `validation` | 1 | 400 | `ValidationError` | Invalid input, schema failures, constraint violations |
-| `validation` | 1 | 400 | `AmbiguousError` | Multiple matches found, user must disambiguate |
-| `not_found` | 2 | 404 | `NotFoundError` | Resource doesn't exist |
-| `conflict` | 3 | 409 | `AlreadyExistsError` | Resource already exists (inverse of NotFoundError) |
-| `conflict` | 3 | 409 | `ConflictError` | Version mismatch, optimistic lock failure, concurrent modification |
-| `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
-| `timeout` | 5 | 504 | `TimeoutError` | Operation took too long |
-| `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
-| `network` | 7 | 502 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
-| `internal` | 8 | 500 | `InternalError` | Unexpected errors, bugs, unhandled cases |
-| `internal` | 8 | 500 | `AssertionError` | Invariant violations, programming bugs |
-| `auth` | 9 | 401 | `AuthError` | Authentication required, invalid credentials |
-| `cancelled` | 130 | 499 | `CancelledError` | User interrupted (Ctrl+C), operation aborted |
+| Category     | Exit | HTTP | Class                | When to Use                                                        |
+| ------------ | ---- | ---- | -------------------- | ------------------------------------------------------------------ |
+| `validation` | 1    | 400  | `ValidationError`    | Invalid input, schema failures, constraint violations              |
+| `validation` | 1    | 400  | `AmbiguousError`     | Multiple matches found, user must disambiguate                     |
+| `not_found`  | 2    | 404  | `NotFoundError`      | Resource doesn't exist                                             |
+| `conflict`   | 3    | 409  | `AlreadyExistsError` | Resource already exists (inverse of NotFoundError)                 |
+| `conflict`   | 3    | 409  | `ConflictError`      | Version mismatch, optimistic lock failure, concurrent modification |
+| `permission` | 4    | 403  | `PermissionError`    | Forbidden action, insufficient privileges                          |
+| `timeout`    | 5    | 504  | `TimeoutError`       | Operation took too long                                            |
+| `rate_limit` | 6    | 429  | `RateLimitError`     | Too many requests, quota exceeded                                  |
+| `network`    | 7    | 502  | `NetworkError`       | Connection failures, DNS errors, unreachable hosts                 |
+| `internal`   | 8    | 500  | `InternalError`      | Unexpected errors, bugs, unhandled cases                           |
+| `internal`   | 8    | 500  | `AssertionError`     | Invariant violations, programming bugs                             |
+| `auth`       | 9    | 401  | `AuthError`          | Authentication required, invalid credentials                       |
+| `cancelled`  | 130  | 499  | `CancelledError`     | User interrupted (Ctrl+C), operation aborted                       |
 
 ## Error Classes
 
@@ -26,9 +26,9 @@ All errors extend `OutfitterError` and have:
 
 ```typescript
 interface OutfitterError {
-  readonly _tag: string;           // Discriminator for pattern matching
+  readonly _tag: string; // Discriminator for pattern matching
   readonly category: ErrorCategory; // One of the 10 categories
-  readonly message: string;         // Human-readable message
+  readonly message: string; // Human-readable message
   readonly context?: Record<string, unknown>; // Structured metadata
 }
 ```
@@ -85,10 +85,10 @@ NotFoundError.create("user", "user-123", { searchedIn: "active_users" });
 InternalError.create("Unexpected failure", { cause: originalError });
 
 // Specialized signatures (no context parameter)
-TimeoutError.create("database query", 5000);       // operation, timeoutMs
+TimeoutError.create("database query", 5000); // operation, timeoutMs
 RateLimitError.create("API rate limit exceeded", 30); // message, retryAfterSeconds
-AuthError.create("Invalid API key", "invalid");     // message, reason
-CancelledError.create("Operation cancelled");       // message only
+AuthError.create("Invalid API key", "invalid"); // message, reason
+CancelledError.create("Operation cancelled"); // message only
 ```
 
 ### `context` Field
@@ -134,9 +134,11 @@ new ValidationError({ message: "Invalid email format", field: "email" });
 // From Zod
 const result = schema.safeParse(input);
 if (!result.success) {
-  return Result.err(ValidationError.create("input", "schema validation failed", {
-    issues: result.error.issues,
-  }));
+  return Result.err(
+    ValidationError.create("input", "schema validation failed", {
+      issues: result.error.issues,
+    })
+  );
 }
 ```
 
@@ -157,8 +159,8 @@ new AmbiguousError({
 });
 
 // Access candidates for disambiguation UI
-error.candidates;  // ["Introduction", "Intro to APIs"]
-error.category;    // "validation" (exit 1, HTTP 400)
+error.candidates; // ["Introduction", "Intro to APIs"]
+error.category; // "validation" (exit 1, HTTP 400)
 ```
 
 ### NotFoundError
@@ -176,8 +178,8 @@ NotFoundError.create("user", "user-123", {
 });
 
 // Access properties
-error.resourceType;  // "user"
-error.resourceId;    // "user-123"
+error.resourceType; // "user"
+error.resourceId; // "user-123"
 ```
 
 ### AlreadyExistsError
@@ -195,12 +197,13 @@ AlreadyExistsError.create("file", "notes/meeting.md");
 AlreadyExistsError.create("user", "user-123", { email: "alice@example.com" });
 
 // Access properties (mirrors NotFoundError)
-error.resourceType;  // "file"
-error.resourceId;    // "notes/meeting.md"
-error.category;      // "conflict" (exit 3, HTTP 409)
+error.resourceType; // "file"
+error.resourceId; // "notes/meeting.md"
+error.category; // "conflict" (exit 3, HTTP 409)
 ```
 
 **Choosing between AlreadyExistsError and ConflictError:**
+
 - Resource already exists? Use `AlreadyExistsError`
 - Version/ETag mismatch? Use `ConflictError`
 - Concurrent modification? Use `ConflictError`
@@ -323,7 +326,9 @@ if (result.isErr()) {
       console.log(`${result.error.resourceType} not found`);
       break;
     case "AlreadyExistsError":
-      console.log(`${result.error.resourceType} already exists: ${result.error.resourceId}`);
+      console.log(
+        `${result.error.resourceType} already exists: ${result.error.resourceId}`
+      );
       break;
     case "ConflictError":
       console.log("Conflict:", result.error.message);
@@ -360,12 +365,12 @@ Use `ERROR_CODES` for granular numeric error codes within each category:
 import { ERROR_CODES, type ErrorCode } from "@outfitter/contracts";
 
 // ERROR_CODES maps categories to specific numeric codes
-ERROR_CODES.validation.FIELD_REQUIRED;    // 1001
-ERROR_CODES.validation.INVALID_FORMAT;    // 1002
+ERROR_CODES.validation.FIELD_REQUIRED; // 1001
+ERROR_CODES.validation.INVALID_FORMAT; // 1002
 ERROR_CODES.not_found.RESOURCE_NOT_FOUND; // 2001
-ERROR_CODES.conflict.ALREADY_EXISTS;      // 3001
-ERROR_CODES.conflict.VERSION_MISMATCH;    // 3002
-ERROR_CODES.internal.UNEXPECTED_STATE;    // 8001
+ERROR_CODES.conflict.ALREADY_EXISTS; // 3001
+ERROR_CODES.conflict.VERSION_MISMATCH; // 3002
+ERROR_CODES.internal.UNEXPECTED_STATE; // 8001
 
 // ErrorCode is the union of all numeric codes
 const code: ErrorCode = ERROR_CODES.validation.FIELD_REQUIRED;
@@ -379,8 +384,7 @@ For domain-specific errors, create factory functions that use `create()`:
 import { ValidationError, NotFoundError } from "@outfitter/contracts";
 
 // Domain factory wrapping the generic create()
-export const userNotFound = (id: string) =>
-  NotFoundError.create("user", id);
+export const userNotFound = (id: string) => NotFoundError.create("user", id);
 
 export const invalidEmail = (email: string) =>
   ValidationError.create("email", "invalid format", { received: email });
@@ -393,7 +397,11 @@ import { ValidationError } from "@outfitter/contracts";
 
 export class EmailValidationError extends ValidationError {
   constructor(email: string) {
-    super({ message: "Invalid email format", field: "email", context: { email } });
+    super({
+      message: "Invalid email format",
+      field: "email",
+      context: { email },
+    });
   }
 }
 ```

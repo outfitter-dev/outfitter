@@ -26,6 +26,7 @@ Conventions for managing work in Linear. Covers project structure, PRDs, milesto
 **Always use Linear projects. Never use tracking issues** (parent issues with checklists or sub-issues used to group work).
 
 Why:
+
 - Projects have dedicated views, milestones, status updates, health tracking, and progress metrics
 - Tracking issues conflate "the work" with "managing the work" — they show up in backlogs, get stale, and lack structure
 - Projects support PRD-style content, timeline views, and cross-team visibility
@@ -72,20 +73,25 @@ Example: "Convention over configuration — sensible defaults, explicit override
 ## Scope
 
 ### In scope
+
 - Concrete deliverables (bullet list)
 
 ### Out of scope
+
 - Things we're explicitly not doing (prevents scope creep)
 
 ## Milestones
 
 ### Milestone 1: Foundation
+
 Core infrastructure. Issues: ...
 
 ### Milestone 2: Feature surface
+
 User-facing functionality. Issues: ...
 
 ### Milestone 3: Polish
+
 Edge cases, docs, DX refinements. Issues: ...
 
 ## Success Criteria
@@ -116,13 +122,13 @@ Milestones group related issues into phases. They represent logical groupings, n
 
 Use descriptive names that convey what the milestone achieves:
 
-| Pattern | Example |
-|---------|---------|
-| Foundation | Core types and contracts |
-| Feature surface | User-facing commands and options |
-| Integration | Cross-package wiring |
-| Polish | Edge cases, docs, DX |
-| Hardening | Performance, error handling, tests |
+| Pattern         | Example                            |
+| --------------- | ---------------------------------- |
+| Foundation      | Core types and contracts           |
+| Feature surface | User-facing commands and options   |
+| Integration     | Cross-package wiring               |
+| Polish          | Edge cases, docs, DX               |
+| Hardening       | Performance, error handling, tests |
 
 Avoid generic names like "Phase 1" or "Sprint 3" — they carry no meaning.
 
@@ -139,11 +145,11 @@ Issues map 1:1 to pull requests. This is the fundamental sizing constraint.
 
 ### Target size
 
-| Metric | Target | Hard limit |
-|--------|--------|------------|
-| Effective LOC | 100-250 | ~300 (non-mechanical) |
-| Files touched | 3-5 | 8 |
-| Review time | 30-60 min | 60 min |
+| Metric        | Target    | Hard limit            |
+| ------------- | --------- | --------------------- |
+| Effective LOC | 100-250   | ~300 (non-mechanical) |
+| Files touched | 3-5       | 8                     |
+| Review time   | 30-60 min | 60 min                |
 
 **Effective LOC** = lines that require human review. Excludes lockfiles, codegen, formatting-only changes.
 
@@ -175,11 +181,11 @@ Formatting, renames, codegen, lockfile updates — isolate these in their own is
 
 ### Common label dimensions
 
-| Dimension | Examples | When to use |
-|-----------|----------|-------------|
-| Package | `@outfitter/cli`, `@outfitter/contracts` | Scopes issue to a specific package |
-| Type | `feature`, `bug`, `chore`, `docs` | Classifies the nature of work |
-| Concern | `DX`, `performance`, `security`, `testing` | Cross-cutting quality attribute |
+| Dimension | Examples                                   | When to use                        |
+| --------- | ------------------------------------------ | ---------------------------------- |
+| Package   | `@outfitter/cli`, `@outfitter/contracts`   | Scopes issue to a specific package |
+| Type      | `feature`, `bug`, `chore`, `docs`          | Classifies the nature of work      |
+| Concern   | `DX`, `performance`, `security`, `testing` | Cross-cutting quality attribute    |
 
 ### Guidelines
 
@@ -245,16 +251,16 @@ Post project updates for milestone completions, blockers, or significant progres
 
 ### Tool selection
 
-| Operation | Tool |
-|-----------|------|
-| Create/update issues | `mcp__claude_ai_Linear__create_issue`, `update_issue` |
-| Create/update projects | `mcp__claude_ai_Linear__create_project`, `update_project` |
-| Milestones | `mcp__claude_ai_Linear__create_milestone`, `update_milestone` |
-| List/search | `mcp__claude_ai_Linear__list_issues`, `list_projects` |
-| Labels | `mcp__claude_ai_Linear__list_issue_labels`, `create_issue_label` |
-| Documents | `mcp__claude_ai_Linear__create_document`, `update_document` |
-| Project status updates | `save_status_update` or GraphQL for more control |
-| Comments with formatting | GraphQL `commentCreate` (the `comment` action breaks newlines) |
+| Operation                | Tool                                                             |
+| ------------------------ | ---------------------------------------------------------------- |
+| Create/update issues     | `mcp__claude_ai_Linear__create_issue`, `update_issue`            |
+| Create/update projects   | `mcp__claude_ai_Linear__create_project`, `update_project`        |
+| Milestones               | `mcp__claude_ai_Linear__create_milestone`, `update_milestone`    |
+| List/search              | `mcp__claude_ai_Linear__list_issues`, `list_projects`            |
+| Labels                   | `mcp__claude_ai_Linear__list_issue_labels`, `create_issue_label` |
+| Documents                | `mcp__claude_ai_Linear__create_document`, `update_document`      |
+| Project status updates   | `save_status_update` or GraphQL for more control                 |
+| Comments with formatting | GraphQL `commentCreate` (the `comment` action breaks newlines)   |
 
 ### Before calling any Linear tool
 

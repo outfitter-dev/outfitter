@@ -110,11 +110,14 @@ const error = new AmbiguousError({
 });
 
 // Or use the factory
-const error = AmbiguousError.create("heading", ["Introduction", "Intro to APIs"]);
+const error = AmbiguousError.create("heading", [
+  "Introduction",
+  "Intro to APIs",
+]);
 
 // Access candidates for disambiguation UI
 error.candidates; // ["Introduction", "Intro to APIs"]
-error.category;   // "validation"
+error.category; // "validation"
 error.exitCode(); // 1
 ```
 
@@ -149,12 +152,18 @@ const config = expect(loadConfig(), "Failed to load config");
 ### Use `create()` factories instead of manual construction
 
 **Before:**
+
 ```typescript
 new ValidationError({ message: "email: format invalid", field: "email" });
-new NotFoundError({ message: "user not found: user-123", resourceType: "user", resourceId: "user-123" });
+new NotFoundError({
+  message: "user not found: user-123",
+  resourceType: "user",
+  resourceId: "user-123",
+});
 ```
 
 **After:**
+
 ```typescript
 ValidationError.create("email", "format invalid");
 NotFoundError.create("user", "user-123");
@@ -165,11 +174,13 @@ NotFoundError.create("user", "user-123");
 The `context` field replaces ad-hoc `details` patterns:
 
 **Before:**
+
 ```typescript
 new InternalError("Unexpected error", { cause: error });
 ```
 
 **After:**
+
 ```typescript
 new InternalError({ message: "Unexpected error", context: { cause: error } });
 // Or with factory:
@@ -179,6 +190,7 @@ InternalError.create("Unexpected error", { cause: error });
 ### Use `AmbiguousError` for multi-match scenarios
 
 **Before:**
+
 ```typescript
 new ValidationError({
   message: `Multiple matches found for '${query}'`,
@@ -187,6 +199,7 @@ new ValidationError({
 ```
 
 **After:**
+
 ```typescript
 AmbiguousError.create(query, matchedCandidates);
 // Carries the candidate list for transport layers to use

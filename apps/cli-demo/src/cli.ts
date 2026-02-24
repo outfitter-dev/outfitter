@@ -7,9 +7,11 @@
  */
 
 import { readFileSync } from "node:fs";
+
 import { exitWithError } from "@outfitter/cli";
 import { createCLI } from "@outfitter/cli/command";
 import type { Command } from "commander";
+
 import { applyDemoRootFlags, resolveDemoRootFlags } from "./cli-root-flags.js";
 import { printDemoResults, runDemo } from "./commands/demo.js";
 import { resolveOutputModeFromContext } from "./output-mode.js";

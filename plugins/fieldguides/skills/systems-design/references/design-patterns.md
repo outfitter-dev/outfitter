@@ -14,15 +14,15 @@
 
 **When to use microservices:**
 
-| Signal | Microservices |
-|--------|---------------|
-| Large team (10+ engineers) | Yes |
-| Clear domain boundaries | Yes |
-| Independent scaling needs | Yes |
-| Polyglot requirements | Yes |
-| Small team (<5 engineers) | No |
-| Unclear domain | No |
-| Premature optimization | No |
+| Signal                     | Microservices |
+| -------------------------- | ------------- |
+| Large team (10+ engineers) | Yes           |
+| Clear domain boundaries    | Yes           |
+| Independent scaling needs  | Yes           |
+| Polyglot requirements      | Yes           |
+| Small team (<5 engineers)  | No            |
+| Unclear domain             | No            |
+| Premature optimization     | No            |
 
 ## Communication Patterns
 
@@ -47,6 +47,7 @@ Core: services publish events, others subscribe
 **Challenges**: Eventual consistency, event versioning, ordering
 
 **Best practices**:
+
 - Schema registry for event contracts
 - Include correlation IDs for tracing
 - Design idempotent consumers

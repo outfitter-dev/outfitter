@@ -25,12 +25,12 @@ NOT for: trivial tasks, clear requirements with validated complexity, regulatory
 
 Load the `maintain-tasks` skill when applying framework to non-trivial proposals:
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Identify | Complexity smell detected | "Identifying complexity smell" |
+| Stage       | Trigger                    | activeForm                       |
+| ----------- | -------------------------- | -------------------------------- |
+| Identify    | Complexity smell detected  | "Identifying complexity smell"   |
 | Alternative | Generating simpler options | "Proposing simpler alternatives" |
-| Question | Probing constraints | "Questioning constraints" |
-| Document | Recording decision | "Documenting decision" |
+| Question    | Probing constraints        | "Questioning constraints"        |
+| Document    | Recording decision         | "Documenting decision"           |
 
 Task format:
 
@@ -42,6 +42,7 @@ Task format:
 ```
 
 Workflow:
+
 - Start: Create Identify `in_progress` when smell detected
 - Transition: Mark current `completed`, add next `in_progress`
 - Skip to Document if complexity validated immediately
@@ -54,12 +55,15 @@ Workflow:
 Adjust tone based on severity:
 
 ◇ **Alternative** (Minor complexity):
+
 > "Interesting approach. Help me understand why X over the more common Y?"
 
 ◆ **Caution** (Moderate risk):
+
 > "This pattern often leads to { specific problems }. Are we solving for something I'm not seeing?"
 
 ◈ **Hazard** (High risk):
+
 > "This violates { principle } and will likely cause { specific issues }. I strongly recommend { alternative }. If we must proceed, we need to document the reasoning."
 
 </escalation>
@@ -69,41 +73,48 @@ Adjust tone based on severity:
 Common complexity smells to watch for:
 
 **Build vs Buy**: Custom solution when proven libraries exist
+
 - Custom auth system → Auth0, Clerk, BetterAuth
 - Custom validation → Zod, Valibot, ArkType
 - Custom state management → Zustand, Jotai, Nanostores
 - Custom form handling → React Hook Form, Formik
 
 **Indirect Solutions**: Solving problem A by first solving problems B, C, D
+
 - Compiling TS→JS then using JS → Use TS directly in build tool
 - Reading file, transforming, writing back → Use stream processing
 - Storing in DB to pass between functions → Pass data directly
 
 **Premature Abstraction**: Layers "for flexibility" without concrete future requirements
+
 - Plugin systems for 1 use case
 - Factories for single implementations
 - Dependency injection for stateless functions
 - Generic repositories for 1 data source
 
 **Performance Theater**: Optimizing without measurements or clear bottlenecks
+
 - Caching before measuring load
 - Debouncing without user complaints
 - Worker threads for CPU-light tasks
 - Memoization of cheap calculations
 
 **Security Shortcuts**: Disabling security features instead of configuring properly
+
 - `CORS: *` → Configure specific origins
 - `any` types for external data → Runtime validation with Zod
 - Disabling SSL verification → Fix certificate chain
 - Storing secrets in code → Environment variables + vault
 
 **Framework Overkill**: Heavy frameworks for simple tasks
+
 - React for static content → HTML + CSS
 - Redux for local UI state → useState
 - GraphQL for simple CRUD → REST
 - Microservices for small apps → Monolith first
 
 **Custom Infrastructure**: Building platform features that cloud providers offer
+
 - Custom logging → CloudWatch, Datadog
 - Custom metrics → Prometheus, Grafana
 - Custom secrets → AWS Secrets Manager, Vault
@@ -146,29 +157,43 @@ Guide toward simpler alternatives with concrete examples:
 
 ```typescript
 // Complex
-interface Plugin { transform(data: Data): Data }
-const plugins = loadPlugins()
-let result = data
-for (const plugin of plugins) { result = plugin.transform(result) }
+interface Plugin {
+  transform(data: Data): Data;
+}
+const plugins = loadPlugins();
+let result = data;
+for (const plugin of plugins) {
+  result = plugin.transform(result);
+}
 
 // Simple
-const features = getFeatureFlags()
-let result = data
-if (features.transformA) { result = transformA(result) }
-if (features.transformB) { result = transformB(result) }
+const features = getFeatureFlags();
+let result = data;
+if (features.transformA) {
+  result = transformA(result);
+}
+if (features.transformB) {
+  result = transformB(result);
+}
 ```
 
 **Direct over Generic**
 
 ```typescript
 // Complex (premature abstraction)
-interface DataStore<T> { get(id: string): Promise<T> }
-class PostgresStore<T> implements DataStore<T> { /* ... */ }
-const users = new PostgresStore<User>({ /* config */ })
+interface DataStore<T> {
+  get(id: string): Promise<T>;
+}
+class PostgresStore<T> implements DataStore<T> {
+  /* ... */
+}
+const users = new PostgresStore<User>({
+  /* config */
+});
 
 // Simple (direct, refactor later if needed)
 async function getUser(id: string): Promise<User> {
-  return await db.query('SELECT * FROM users WHERE id = $1', [id])
+  return await db.query("SELECT * FROM users WHERE id = $1", [id]);
 }
 ```
 
@@ -176,13 +201,13 @@ async function getUser(id: string): Promise<User> {
 
 ```typescript
 // Complex
-import _ from 'lodash'
-const unique = _.uniq(array)
-const mapped = _.map(array, fn)
+import _ from "lodash";
+const unique = _.uniq(array);
+const mapped = _.map(array, fn);
 
 // Simple
-const unique = [...new Set(array)]
-const mapped = array.map(fn)
+const unique = [...new Set(array)];
+const mapped = array.map(fn);
 ```
 
 **Composition over Configuration**
@@ -220,6 +245,7 @@ Complexity is appropriate when:
 6. **Team Expertise**: Team has deep expertise in complex pattern but not simple one
 
 Even then:
+
 - Document why in ADR
 - Add TODO to revisit when constraints change
 - Isolate complexity to smallest possible scope
@@ -234,6 +260,7 @@ Apply this protocol systematically:
 ### 1. IDENTIFY → Recognize complexity smell
 
 Scan proposal for common triggers:
+
 - Build vs Buy
 - Indirect Solutions
 - Premature Abstraction
@@ -250,6 +277,7 @@ Always provide **concrete, specific alternatives** with examples:
 ✅ Specific: "Use Zod for validation instead of building a custom validation engine. Here's how..."
 
 Include:
+
 - Exact library/pattern name
 - Code snippet showing simpler approach
 - Why it's sufficient for actual requirements
@@ -257,6 +285,7 @@ Include:
 ### 3. QUESTION → Investigate constraints
 
 Ask probing questions to uncover hidden requirements:
+
 - "What specific requirement makes the simpler approach insufficient?"
 - "What will break in 6 months if we use the standard pattern?"
 - "What performance/scale problem are we solving?"
@@ -266,6 +295,7 @@ Ask probing questions to uncover hidden requirements:
 ### 4. DOCUMENT → Record decisions
 
 If complexity chosen after validation:
+
 - Document specific requirement that justifies it
 - Add ADR (Architecture Decision Record) explaining trade-offs
 - Include TODO for revisiting when requirements change
@@ -276,6 +306,7 @@ If complexity chosen after validation:
 <rules>
 
 ALWAYS:
+
 - Apply pushback protocol to non-trivial proposals
 - Provide concrete alternatives with code examples
 - Ask specific questions about constraints
@@ -283,6 +314,7 @@ ALWAYS:
 - Document justified complexity decisions
 
 NEVER:
+
 - Accept "might need it later" without concrete timeline
 - Allow security shortcuts without threat model
 - Skip questioning performance claims without measurements

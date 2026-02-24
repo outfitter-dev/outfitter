@@ -7,6 +7,7 @@
  */
 
 import type { Database } from "bun:sqlite";
+
 import type { StorageError } from "@outfitter/contracts";
 import { Result } from "@outfitter/contracts";
 

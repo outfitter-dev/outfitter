@@ -4,6 +4,7 @@
  * TDD RED PHASE: These tests define expected behavior for date range parsing.
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { endOfDay, parseDateRange, startOfDay } from "../render/date.js";
 
 // ============================================================================

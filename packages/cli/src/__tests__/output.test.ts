@@ -7,6 +7,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+
 import { exitWithError, output } from "../output.js";
 
 // =============================================================================

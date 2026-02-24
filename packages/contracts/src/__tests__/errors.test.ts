@@ -9,6 +9,7 @@
  * Total: 42 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   AlreadyExistsError,
   AmbiguousError,

@@ -14,6 +14,7 @@
  */
 
 import { parseArgs } from "node:util";
+
 import { formatTimeConstraint, toRelativeTime } from "./lib/time";
 import type {
   BeadsData,

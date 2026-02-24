@@ -19,8 +19,8 @@ Add validation at multiple layers:
 ```typescript
 function processUser(userId: string): User {
   // Input validation
-  if (!userId || typeof userId !== 'string') {
-    throw new Error('Invalid userId: must be non-empty string');
+  if (!userId || typeof userId !== "string") {
+    throw new Error("Invalid userId: must be non-empty string");
   }
 
   // Fetch with error handling
@@ -31,7 +31,7 @@ function processUser(userId: string): User {
 
   // Output validation
   if (!user.email || !user.name) {
-    throw new Error('Invalid user data: missing required fields');
+    throw new Error("Invalid user data: missing required fields");
   }
 
   return user;
@@ -39,6 +39,7 @@ function processUser(userId: string): User {
 ```
 
 Key layers:
+
 - Input validation (reject bad data early)
 - Operation error handling (catch failures)
 - Output validation (ensure correct results)
@@ -71,18 +72,22 @@ Example:
 Common debugging mistakes to avoid:
 
 **Random Walk** - trying different things hoping one works
+
 - Why it fails: Wastes time, may mask real issue
 - Instead: Follow stages 1-2 to understand system
 
 **Quick Fix** - stopping symptom without finding root cause
+
 - Why it fails: Bug will resurface or manifest differently
 - Instead: Use stage 1 to find root cause before fixing
 
 **Cargo Cult** - copying code without understanding why
+
 - Why it fails: May not apply to your context
 - Instead: Use stage 2 to understand working examples
 
 **Shotgun Approach** - changing multiple things simultaneously
+
 - Why it fails: Can't tell which change fixed it
 - Instead: Test one hypothesis at a time
 

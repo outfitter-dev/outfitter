@@ -40,22 +40,23 @@ Caching + pub/sub + simple data? → Redis
 
 ### Backend (TypeScript/JavaScript)
 
-| Framework | Best for |
-|-----------|----------|
-| Hono | New projects, serverless, edge |
-| Express | Teams with Express experience |
-| Fastify | Raw speed matters |
-| NestJS | Large teams, complex domains |
+| Framework | Best for                       |
+| --------- | ------------------------------ |
+| Hono      | New projects, serverless, edge |
+| Express   | Teams with Express experience  |
+| Fastify   | Raw speed matters              |
+| NestJS    | Large teams, complex domains   |
 
 ### Backend (Rust)
 
-| Framework | Best for |
-|-----------|----------|
-| Axum | New projects, type-safe routing |
-| Actix-web | Raw performance critical |
-| Rocket | Rapid development |
+| Framework | Best for                        |
+| --------- | ------------------------------- |
+| Axum      | New projects, type-safe routing |
+| Actix-web | Raw performance critical        |
+| Rocket    | Rapid development               |
 
 Decision criteria:
+
 - Team expertise and learning curve
 - Performance requirements (most apps don't need Rust speed)
 - Ecosystem and library availability
@@ -64,12 +65,12 @@ Decision criteria:
 
 ### Frontend
 
-| Stack | Best for |
-|-------|----------|
-| React + TanStack Router | Complex state, large ecosystem |
-| Solid | Performance-critical UIs |
-| Svelte | Small teams, simple apps |
-| Next.js | SSR/SSG needs, full-stack React |
+| Stack                   | Best for                        |
+| ----------------------- | ------------------------------- |
+| React + TanStack Router | Complex state, large ecosystem  |
+| Solid                   | Performance-critical UIs        |
+| Svelte                  | Small teams, simple apps        |
+| Next.js                 | SSR/SSG needs, full-stack React |
 
 ## Infrastructure
 

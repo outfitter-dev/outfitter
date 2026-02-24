@@ -25,6 +25,7 @@ import {
   UnsubscribeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { safeStringify } from "@outfitter/contracts";
+
 import type { McpLogLevel } from "./logging.js";
 import type { McpServer } from "./types.js";
 

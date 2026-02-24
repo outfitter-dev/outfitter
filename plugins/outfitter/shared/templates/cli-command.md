@@ -152,7 +152,11 @@ export const userDeleteAction = defineAction({
     group: "user",
     command: "delete <id>",
     options: [
-      { flags: "--force", description: "Skip confirmation", defaultValue: false },
+      {
+        flags: "--force",
+        description: "Skip confirmation",
+        defaultValue: false,
+      },
     ],
   },
   handler: async (input, ctx) => deleteUser(input, ctx),

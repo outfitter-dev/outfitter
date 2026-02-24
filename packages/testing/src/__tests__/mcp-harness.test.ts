@@ -8,6 +8,7 @@
 import { describe, expect, it } from "bun:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { Result } from "@outfitter/contracts";
 import {
   defineTool,
@@ -16,6 +17,7 @@ import {
   type SerializedTool,
 } from "@outfitter/mcp";
 import { z } from "zod";
+
 import {
   createMCPTestHarness,
   createMcpHarness,

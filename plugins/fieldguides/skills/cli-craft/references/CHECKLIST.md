@@ -1,6 +1,6 @@
 # CLI Development Checklist
 
-Use this to *review a CLI design* or *gate a release*.
+Use this to _review a CLI design_ or _gate a release_.
 
 ## Interface contract
 
@@ -22,7 +22,7 @@ Use this to *review a CLI design* or *gate a release*.
 
 ## Help and docs
 
-- If invoked incorrectly (missing required args), prints a *concise* help block.
+- If invoked incorrectly (missing required args), prints a _concise_ help block.
 - Full help is scan-friendly:
   - USAGE
   - DESCRIPTION

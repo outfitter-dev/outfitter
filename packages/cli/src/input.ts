@@ -8,8 +8,10 @@
  */
 
 import path from "node:path";
+
 import { ValidationError } from "@outfitter/contracts";
 import { Err, Ok, type Result } from "better-result";
+
 import type {
   CollectIdsOptions,
   ExpandFileOptions,

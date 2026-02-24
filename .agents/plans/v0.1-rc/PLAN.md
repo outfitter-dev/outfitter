@@ -4,19 +4,24 @@
 **Status**: Active
 
 ## Intent
+
 Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.1-rc scope that closes remaining gaps, documents intentional divergences, and validates real-world usage (fresh scaffold + Waymark migration).
 
 ## Scope
+
 **In**
+
 - v0.1-rc backlog and validation (scaffolds, migrations, gap closures).
 - Document deltas vs spec/plan (see `DELTAS.md`) and decide keep vs align.
 - Waymark migration (local) after verifying scaffolds.
 
 **Out**
+
 - New feature expansion beyond spec gaps (e.g., Cloudflare adapters, telemetry).
 - Tooling tier packages unless required for RC (`@outfitter/scripts`, `@outfitter/actions`, `@outfitter/release`).
 
 ## Remaining Work (v0.1-rc)
+
 [x] `@outfitter/testing`: add spec-compat APIs (createMCPTestHarness wrapper + alias), add `captureCLI`/`mockStdin`, add mock factories.
 [ ] Templates: implement unified placeholder set (projectName/binName/packageName/description/author/year) with aliases; `author` can be org, `year` optional.
 [ ] Templates: add missing scripts (`test:watch`, `lint:fix`) and define a standard script set.
@@ -30,10 +35,12 @@ Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.
 [ ] Decide Firewatch migration timing (optional for RC).
 
 ## Validation Checklist
+
 - `bun run test`, `bun run typecheck`, `bun run lint`, `bun run build` from repo root.
 - `outfitter init cli|mcp|daemon` scaffolds, and generated project commands are viable (local mode + published RC mode).
 - Waymark migration passes its tests and dev workflows.
 
 ## Notes
+
 - `SPEC.md` and `PLAN.md` are frozen as of 2026-01-24.
 - Phase 7 is treated as the v0.1-rc scope, not an additional phase.

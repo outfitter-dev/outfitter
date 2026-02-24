@@ -14,27 +14,30 @@ This spec defines an enhanced box system for `@outfitter/cli` that adds internal
 
 Four TUI libraries were analyzed for their box/container rendering approaches:
 
-| Library | Language | Layout Model | Key Pattern |
-|---------|----------|--------------|-------------|
-| [Lip Gloss](https://github.com/charmbracelet/lipgloss) | Go | Join functions | `JoinHorizontal`/`JoinVertical` with alignment |
-| [Ratatui](https://github.com/ratatui/ratatui) | Rust | Constraint-based | Layout splits with Min/Max/Ratio/Percentage |
-| [React Ink](https://github.com/vadimdemedes/ink) | JS | Flexbox (Yoga) | CSS-like properties on Box components |
-| [OpenTUI](https://opentui.com/) | TS | Flexbox (Yoga) | `BoxRenderable` with border/padding options |
+| Library                                                | Language | Layout Model     | Key Pattern                                    |
+| ------------------------------------------------------ | -------- | ---------------- | ---------------------------------------------- |
+| [Lip Gloss](https://github.com/charmbracelet/lipgloss) | Go       | Join functions   | `JoinHorizontal`/`JoinVertical` with alignment |
+| [Ratatui](https://github.com/ratatui/ratatui)          | Rust     | Constraint-based | Layout splits with Min/Max/Ratio/Percentage    |
+| [React Ink](https://github.com/vadimdemedes/ink)       | JS       | Flexbox (Yoga)   | CSS-like properties on Box components          |
+| [OpenTUI](https://opentui.com/)                        | TS       | Flexbox (Yoga)   | `BoxRenderable` with border/padding options    |
 
 ### Key Insights
 
 **Common patterns across all libraries:**
+
 1. **Separation of concerns**: Content rendering vs. layout composition
 2. **Alignment control**: Vertical alignment for horizontal joins, horizontal for vertical
 3. **Border customization**: Individual side control, multiple style presets
 4. **Padding vs. margin**: Internal vs. external spacing distinction
 
 **Divergent approaches:**
+
 - Lip Gloss: Functional composition with `Join*` functions (closest to our current approach)
 - Ratatui: Constraint solver for complex responsive layouts
 - Ink/OpenTUI: Full flexbox model with Yoga engine
 
 **Our constraint**: Static CLI output means we do not need:
+
 - Interactive focus management
 - Dynamic constraint solving
 - Full flexbox (overkill for static output)
@@ -58,6 +61,7 @@ renderSeparator(options?: SeparatorOptions): string
 ```
 
 **What is missing:**
+
 1. Internal dividers within a box
 2. Nested box composition (box-in-box)
 3. Individual border side control
@@ -73,7 +77,7 @@ Add divider support within boxes using T-intersection characters.
 ```typescript
 interface BoxOptions {
   // ... existing options ...
-  
+
   /**
    * Content sections separated by internal dividers.
    * When provided, content is rendered in sections with horizontal dividers.
@@ -83,12 +87,8 @@ interface BoxOptions {
 
 // Usage
 renderBox({
-  sections: [
-    "Header content",
-    ["Line 1", "Line 2"],
-    "Footer content"
-  ],
-  border: "single"
+  sections: ["Header content", ["Line 1", "Line 2"], "Footer content"],
+  border: "single",
 });
 
 // Output:
@@ -103,6 +103,7 @@ renderBox({
 ```
 
 **Implementation notes:**
+
 - Uses existing `leftT` and `rightT` from `BorderCharacters`
 - Respects current padding settings
 - Sections array takes precedence over `content` parameter when provided
@@ -114,18 +115,22 @@ Add individual border side control and margin support.
 ```typescript
 interface BoxOptions {
   // ... existing options ...
-  
+
   /**
    * External margin (spacing outside the box).
    * Single number applies to all sides.
    */
-  margin?: number | { top?: number; right?: number; bottom?: number; left?: number };
-  
+  margin?:
+    | number
+    | { top?: number; right?: number; bottom?: number; left?: number };
+
   /**
    * Enhanced padding with individual side control.
    */
-  padding?: number | { top?: number; right?: number; bottom?: number; left?: number };
-  
+  padding?:
+    | number
+    | { top?: number; right?: number; bottom?: number; left?: number };
+
   /**
    * Control which borders to render.
    * @default { top: true, right: true, bottom: true, left: true }
@@ -140,7 +145,7 @@ interface BoxOptions {
 
 // Usage: Box with only top and bottom borders
 renderBox("Content", {
-  borders: { top: true, bottom: true, left: false, right: false }
+  borders: { top: true, bottom: true, left: false, right: false },
 });
 
 // Output:
@@ -174,7 +179,10 @@ interface Box {
 /**
  * Creates a Box object that can be composed with other boxes.
  */
-function createBox(content: BoxContent | BoxContent[], options?: BoxOptions): Box;
+function createBox(
+  content: BoxContent | BoxContent[],
+  options?: BoxOptions
+): Box;
 
 /**
  * Convenience function that returns a string (current behavior).
@@ -202,7 +210,7 @@ Enhance existing layout functions with border-aware joining.
 interface HorizontalLayoutOptions {
   gap?: number;
   align?: "top" | "center" | "bottom";
-  
+
   /**
    * When true, merge adjacent borders into single lines.
    * Requires boxes with compatible border styles.
@@ -229,6 +237,7 @@ joinHorizontal([left.output, right.output], { mergeBorders: true });
 ```
 
 **Implementation notes:**
+
 - Border merging uses existing `topT`, `bottomT`, and `cross` characters
 - Only works when both boxes have compatible border styles
 - Falls back to gap-based layout for incompatible styles
@@ -240,18 +249,18 @@ Add proportional sizing for layout composition.
 ```typescript
 interface BoxOptions {
   // ... existing options ...
-  
+
   /**
    * Flex grow factor for proportional sizing in layouts.
    * @default 0
    */
   flex?: number;
-  
+
   /**
    * Minimum width constraint.
    */
   minWidth?: number;
-  
+
   /**
    * Maximum width constraint.
    */
@@ -260,7 +269,7 @@ interface BoxOptions {
 
 interface HorizontalLayoutOptions {
   // ... existing options ...
-  
+
   /**
    * Total width for the layout.
    * When set, boxes with flex values will share remaining space.
@@ -285,16 +294,18 @@ joinHorizontal([narrow.output, wide.output], { width: 60 });
 renderBox("Content", {
   border: "rounded",
   padding: 1,
-  title: "Header"
+  title: "Header",
 });
 ```
 
 **Pros:**
+
 - Familiar to TypeScript developers
 - Good IDE autocomplete
 - Easy to extend
 
 **Cons:**
+
 - Verbose for simple cases
 - All options mixed together
 
@@ -302,18 +313,16 @@ renderBox("Content", {
 
 ```typescript
 // Alternative - not proposed
-Box.new()
-  .border("rounded")
-  .padding(1)
-  .title("Header")
-  .render("Content");
+Box.new().border("rounded").padding(1).title("Header").render("Content");
 ```
 
 **Pros:**
+
 - Chainable, readable
 - Clear separation of configuration and rendering
 
 **Cons:**
+
 - More complex implementation
 - Unfamiliar to some developers
 - Harder to type correctly
@@ -326,29 +335,29 @@ Current `BorderCharacters` interface supports all needed characters:
 
 ```typescript
 interface BorderCharacters {
-  topLeft: string;      // ┌ ╔ ╭ ┏
-  topRight: string;     // ┐ ╗ ╮ ┓
-  bottomLeft: string;   // └ ╚ ╰ ┗
-  bottomRight: string;  // ┘ ╝ ╯ ┛
-  horizontal: string;   // ─ ═ ━
-  vertical: string;     // │ ║ ┃
-  topT: string;         // ┬ ╦ ┳ (for border merging)
-  bottomT: string;      // ┴ ╩ ┻ (for border merging)
-  leftT: string;        // ├ ╠ ┣ (for internal dividers)
-  rightT: string;       // ┤ ╣ ┫ (for internal dividers)
-  cross: string;        // ┼ ╬ ╋ (for grid intersections)
+  topLeft: string; // ┌ ╔ ╭ ┏
+  topRight: string; // ┐ ╗ ╮ ┓
+  bottomLeft: string; // └ ╚ ╰ ┗
+  bottomRight: string; // ┘ ╝ ╯ ┛
+  horizontal: string; // ─ ═ ━
+  vertical: string; // │ ║ ┃
+  topT: string; // ┬ ╦ ┳ (for border merging)
+  bottomT: string; // ┴ ╩ ┻ (for border merging)
+  leftT: string; // ├ ╠ ┣ (for internal dividers)
+  rightT: string; // ┤ ╣ ┫ (for internal dividers)
+  cross: string; // ┼ ╬ ╋ (for grid intersections)
 }
 ```
 
 ## Implementation Phases
 
-| Phase | Feature | Priority | Complexity | Dependencies |
-|-------|---------|----------|------------|--------------|
-| 1 | Internal dividers | High | Low | None |
-| 2 | Individual borders, margin | Medium | Low | None |
-| 3 | Nested boxes | Medium | Medium | Phase 2 |
-| 4 | Border merging | Low | Medium | Phase 3 |
-| 5 | Flex sizing | Low | High | Phase 3 |
+| Phase | Feature                    | Priority | Complexity | Dependencies |
+| ----- | -------------------------- | -------- | ---------- | ------------ |
+| 1     | Internal dividers          | High     | Low        | None         |
+| 2     | Individual borders, margin | Medium   | Low        | None         |
+| 3     | Nested boxes               | Medium   | Medium     | Phase 2      |
+| 4     | Border merging             | Low      | Medium     | Phase 3      |
+| 5     | Flex sizing                | Low      | High       | Phase 3      |
 
 **Recommendation:** Implement Phases 1-3 for the initial release. Phases 4-5 can be deferred based on user feedback.
 
@@ -360,15 +369,11 @@ interface BorderCharacters {
 const status = renderBox({
   sections: [
     "System Status",
-    [
-      "CPU:    45%",
-      "Memory: 2.1 GB / 8 GB",
-      "Disk:   120 GB free"
-    ],
-    "Last updated: 2 minutes ago"
+    ["CPU:    45%", "Memory: 2.1 GB / 8 GB", "Disk:   120 GB free"],
+    "Last updated: 2 minutes ago",
   ],
   border: "rounded",
-  width: 30
+  width: 30,
 });
 
 // Output:
@@ -386,42 +391,48 @@ const status = renderBox({
 ### Dashboard Layout
 
 ```typescript
-const header = createBox("Dashboard", { 
+const header = createBox("Dashboard", {
   border: "heavy",
   align: "center",
-  width: 60
+  width: 60,
 });
 
-const sidebar = createBox({
-  sections: ["Navigation", ["Home", "Settings", "Help"]]
-}, { border: "single", width: 15 });
+const sidebar = createBox(
+  {
+    sections: ["Navigation", ["Home", "Settings", "Help"]],
+  },
+  { border: "single", width: 15 }
+);
 
-const main = createBox("Main content area", { 
+const main = createBox("Main content area", {
   border: "single",
-  flex: 1 
+  flex: 1,
 });
 
 const layout = joinVertical([
   header.output,
-  joinHorizontal([sidebar.output, main.output], { gap: 1 })
+  joinHorizontal([sidebar.output, main.output], { gap: 1 }),
 ]);
 ```
 
 ### Help Command Output
 
 ```typescript
-const usage = renderBox([
-  "outfitter <command> [options]",
-  "",
-  "Commands:",
-  "  init     Initialize a new project",
-  "  build    Build the project",
-  "  serve    Start development server"
-], {
-  title: "Usage",
-  border: "rounded",
-  padding: 1
-});
+const usage = renderBox(
+  [
+    "outfitter <command> [options]",
+    "",
+    "Commands:",
+    "  init     Initialize a new project",
+    "  build    Build the project",
+    "  serve    Start development server",
+  ],
+  {
+    title: "Usage",
+    border: "rounded",
+    padding: 1,
+  }
+);
 ```
 
 ## Trade-offs
@@ -457,14 +468,16 @@ const usage = renderBox([
 ## Open Questions
 
 1. **Section titles**: Should sections within a box support individual titles?
+
    ```typescript
    sections: [
      { title: "Header", content: "..." },
-     { content: ["Line 1", "Line 2"] }
-   ]
+     { content: ["Line 1", "Line 2"] },
+   ];
    ```
 
 2. **Border color per-side**: Worth the complexity?
+
    ```typescript
    borderColor: {
      top: "red",

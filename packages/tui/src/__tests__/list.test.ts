@@ -11,6 +11,7 @@
  * Total: 15 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import { renderList } from "../render/index.js";
 
 // ============================================================================

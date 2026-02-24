@@ -41,16 +41,16 @@ bun run scripts/client.ts {{operation_2}} --param value
 
 ## Error Handling
 
-| Error | Meaning | Resolution |
-|-------|---------|------------|
-| 401 | Invalid API key | Check {{API_NAME_UPPER}}_API_KEY is set correctly |
-| 429 | Rate limited | Wait and retry, or reduce request frequency |
-| 500 | Server error | Retry after a moment |
+| Error | Meaning         | Resolution                                         |
+| ----- | --------------- | -------------------------------------------------- |
+| 401   | Invalid API key | Check {{API_NAME_UPPER}}\_API_KEY is set correctly |
+| 429   | Rate limited    | Wait and retry, or reduce request frequency        |
+| 500   | Server error    | Retry after a moment                               |
 
 ## Requirements
 
 - Bun runtime
-- {{API_NAME_UPPER}}_API_KEY environment variable
+- {{API_NAME_UPPER}}\_API_KEY environment variable
 
 ## Tips
 

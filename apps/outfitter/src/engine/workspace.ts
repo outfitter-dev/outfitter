@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+
 import { Result } from "@outfitter/contracts";
+
 import { sanitizePackageName } from "./names.js";
 import { ScaffoldError } from "./types.js";
 

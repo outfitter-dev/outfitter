@@ -26,12 +26,12 @@ function process(data: unknown) {
 
 ```typescript
 // ◆ Moderate
-const user = users.find(u => u.id === id);
+const user = users.find((u) => u.id === id);
 return user.name; // might be undefined
 
 // ✓ Good
-const user = users.find(u => u.id === id);
-return user?.name ?? 'Unknown';
+const user = users.find((u) => u.id === id);
+return user?.name ?? "Unknown";
 ```
 
 **Type guards for unions:**
@@ -40,7 +40,8 @@ return user?.name ?? 'Unknown';
 // ◆ Moderate
 type Result = Success | Error;
 function handle(result: Result) {
-  if (result.success) { // Property doesn't exist
+  if (result.success) {
+    // Property doesn't exist
     return result.data;
   }
 }
@@ -111,8 +112,8 @@ async function saveUser(user: User): Promise<Result<void, DbError>> {
     await db.insert(user);
     return { success: true };
   } catch (error) {
-    logger.error('Failed to save user', { user, error });
-    return { success: false, error: new DbError('Insert failed') };
+    logger.error("Failed to save user", { user, error });
+    return { success: false, error: new DbError("Insert failed") };
   }
 }
 ```
@@ -121,7 +122,7 @@ async function saveUser(user: User): Promise<Result<void, DbError>> {
 
 ```typescript
 // ◆ Moderate
-if (!user) throw new Error('Invalid');
+if (!user) throw new Error("Invalid");
 
 // ✓ Good
 if (!user) {
@@ -138,9 +139,9 @@ fetchData().then(process); // Unhandled rejection
 // ✓ Good
 fetchData()
   .then(process)
-  .catch(error => {
-    logger.error('Fetch failed', { error });
-    notifyUser('Data unavailable');
+  .catch((error) => {
+    logger.error("Fetch failed", { error });
+    notifyUser("Data unavailable");
   });
 
 // ✓ Better - async/await
@@ -148,8 +149,8 @@ try {
   const data = await fetchData();
   process(data);
 } catch (error) {
-  logger.error('Fetch failed', { error });
-  notifyUser('Data unavailable');
+  logger.error("Fetch failed", { error });
+  notifyUser("Data unavailable");
 }
 ```
 
@@ -157,12 +158,12 @@ try {
 
 ```typescript
 // ◆ Moderate
-const file = await fs.open('data.txt');
+const file = await fs.open("data.txt");
 const content = await file.readFile(); // Might throw, file not closed
 return content;
 
 // ✓ Good
-const file = await fs.open('data.txt');
+const file = await fs.open("data.txt");
 try {
   return await file.readFile();
 } finally {
@@ -186,18 +187,18 @@ try {
 
 ```typescript
 // ◈ Severe
-app.get('/user/:id', (req, res) => {
+app.get("/user/:id", (req, res) => {
   const user = db.query(`SELECT * FROM users WHERE id = ${req.params.id}`);
   res.json(user);
 });
 
 // ✓ Good
-app.get('/user/:id', (req, res) => {
+app.get("/user/:id", (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id) || id < 0) {
-    return res.status(400).json({ error: 'Invalid user ID' });
+    return res.status(400).json({ error: "Invalid user ID" });
   }
-  const user = db.query('SELECT * FROM users WHERE id = ?', [id]);
+  const user = db.query("SELECT * FROM users WHERE id = ?", [id]);
   res.json(user);
 });
 ```
@@ -206,24 +207,24 @@ app.get('/user/:id', (req, res) => {
 
 ```typescript
 // ◈ Severe
-const API_KEY = 'sk_live_abc123xyz789';
+const API_KEY = "sk_live_abc123xyz789";
 
 // ✓ Good
 const API_KEY = process.env.API_KEY;
-if (!API_KEY) throw new Error('API_KEY not configured');
+if (!API_KEY) throw new Error("API_KEY not configured");
 ```
 
 **Authentication checks:**
 
 ```typescript
 // ◈ Severe
-app.delete('/admin/users/:id', (req, res) => {
+app.delete("/admin/users/:id", (req, res) => {
   db.deleteUser(req.params.id);
   res.json({ success: true });
 });
 
 // ✓ Good
-app.delete('/admin/users/:id', requireAuth, requireAdmin, (req, res) => {
+app.delete("/admin/users/:id", requireAuth, requireAdmin, (req, res) => {
   db.deleteUser(req.params.id);
   res.json({ success: true });
 });
@@ -243,7 +244,7 @@ function displayMessage(msg: string) {
 }
 
 // Or use sanitization library
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 element.innerHTML = DOMPurify.sanitize(msg);
 ```
 
@@ -275,8 +276,8 @@ if (await bcrypt.compare(inputPassword, user.passwordHash)) { ... }
 ```typescript
 // ◆ Moderate - new function, no tests
 export function calculateDiscount(price: number, tier: string): number {
-  if (tier === 'premium') return price * 0.8;
-  if (tier === 'standard') return price * 0.9;
+  if (tier === "premium") return price * 0.8;
+  if (tier === "standard") return price * 0.9;
   return price;
 }
 ```
@@ -285,17 +286,17 @@ export function calculateDiscount(price: number, tier: string): number {
 
 ```typescript
 // ◆ Moderate - only happy path tested
-test('calculateDiscount applies premium discount', () => {
-  expect(calculateDiscount(100, 'premium')).toBe(80);
+test("calculateDiscount applies premium discount", () => {
+  expect(calculateDiscount(100, "premium")).toBe(80);
 });
 
 // ✓ Good - edge cases included
-test('calculateDiscount handles edge cases', () => {
-  expect(calculateDiscount(100, 'premium')).toBe(80);
-  expect(calculateDiscount(100, 'standard')).toBe(90);
-  expect(calculateDiscount(100, 'unknown')).toBe(100);
-  expect(calculateDiscount(0, 'premium')).toBe(0);
-  expect(calculateDiscount(-10, 'premium')).toBe(-8); // Or throw?
+test("calculateDiscount handles edge cases", () => {
+  expect(calculateDiscount(100, "premium")).toBe(80);
+  expect(calculateDiscount(100, "standard")).toBe(90);
+  expect(calculateDiscount(100, "unknown")).toBe(100);
+  expect(calculateDiscount(0, "premium")).toBe(0);
+  expect(calculateDiscount(-10, "premium")).toBe(-8); // Or throw?
 });
 ```
 
@@ -303,14 +304,14 @@ test('calculateDiscount handles edge cases', () => {
 
 ```typescript
 // ◆ Moderate - test doesn't verify behavior
-test('user creation', async () => {
-  await createUser({ name: 'Alice' }); // No assertion!
+test("user creation", async () => {
+  await createUser({ name: "Alice" }); // No assertion!
 });
 
 // ✓ Good
-test('user creation', async () => {
-  const user = await createUser({ name: 'Alice' });
-  expect(user.name).toBe('Alice');
+test("user creation", async () => {
+  const user = await createUser({ name: "Alice" });
+  expect(user.name).toBe("Alice");
   expect(user.id).toBeDefined();
 
   const fromDb = await db.getUser(user.id);
@@ -322,12 +323,12 @@ test('user creation', async () => {
 
 ```typescript
 // ◆ Moderate
-test('first test', () => {
+test("first test", () => {
   globalState.users = [testUser];
   expect(findUser(1)).toEqual(testUser);
 });
 
-test('second test', () => {
+test("second test", () => {
   // Fails if first test didn't run or ran differently
   expect(globalState.users.length).toBe(1);
 });
@@ -341,12 +342,12 @@ afterEach(() => {
   globalState.users = [];
 });
 
-test('first test', () => {
+test("first test", () => {
   globalState.users = [testUser];
   expect(findUser(1)).toEqual(testUser);
 });
 
-test('second test', () => {
+test("second test", () => {
   expect(globalState.users.length).toBe(0); // Clean slate
 });
 ```
@@ -355,17 +356,17 @@ test('second test', () => {
 
 ```typescript
 // ◆ Moderate - only success path tested
-test('fetchUser retrieves user', async () => {
+test("fetchUser retrieves user", async () => {
   const user = await fetchUser(1);
   expect(user.id).toBe(1);
 });
 
 // ✓ Good
-test('fetchUser handles not found', async () => {
-  await expect(fetchUser(999)).rejects.toThrow('User not found');
+test("fetchUser handles not found", async () => {
+  await expect(fetchUser(999)).rejects.toThrow("User not found");
 });
 
-test('fetchUser handles network errors', async () => {
+test("fetchUser handles network errors", async () => {
   mockApi.get.mockRejectedValue(new NetworkError());
   await expect(fetchUser(1)).rejects.toThrow(NetworkError);
 });
@@ -388,13 +389,13 @@ test('fetchUser handles network errors', async () => {
 ```typescript
 // ◇ Minor
 function proc(d: Data): number {
-  const x = d.items.filter(i => i.active).length;
+  const x = d.items.filter((i) => i.active).length;
   return x * 1.2;
 }
 
 // ✓ Good
 function calculateActiveItemsWithSurcharge(data: Data): number {
-  const activeItemCount = data.items.filter(item => item.active).length;
+  const activeItemCount = data.items.filter((item) => item.active).length;
   const SURCHARGE_MULTIPLIER = 1.2;
   return activeItemCount * SURCHARGE_MULTIPLIER;
 }
@@ -406,14 +407,14 @@ function calculateActiveItemsWithSurcharge(data: Data): number {
 // ◆ Moderate - doing too much
 function processUserRequest(userId: string, action: string, data: any) {
   const user = db.getUser(userId);
-  if (!user) throw new Error('Not found');
+  if (!user) throw new Error("Not found");
 
-  logger.info('Processing', { userId, action });
+  logger.info("Processing", { userId, action });
 
-  if (action === 'update') {
+  if (action === "update") {
     db.updateUser(userId, data);
-    email.send(user.email, 'Updated');
-  } else if (action === 'delete') {
+    email.send(user.email, "Updated");
+  } else if (action === "delete") {
     db.deleteUser(userId);
     cache.clear(userId);
   }
@@ -424,7 +425,7 @@ function processUserRequest(userId: string, action: string, data: any) {
 // ✓ Good - separated concerns
 function validateUser(userId: string): User {
   const user = db.getUser(userId);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error("User not found");
   return user;
 }
 
@@ -463,7 +464,9 @@ function validateEmail(email: string): boolean {
 }
 
 function validateAdminEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.endsWith('@admin.com');
+  return (
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.endsWith("@admin.com")
+  );
 }
 
 // ✓ Good
@@ -474,7 +477,7 @@ function validateEmail(email: string): boolean {
 }
 
 function validateAdminEmail(email: string): boolean {
-  return validateEmail(email) && email.endsWith('@admin.com');
+  return validateEmail(email) && email.endsWith("@admin.com");
 }
 ```
 
@@ -486,7 +489,7 @@ function process(user: User) {
   if (user) {
     if (user.active) {
       if (user.subscription) {
-        if (user.subscription.plan === 'premium') {
+        if (user.subscription.plan === "premium") {
           return doThing();
         }
       }
@@ -500,7 +503,7 @@ function process(user: User) {
   if (!user) return null;
   if (!user.active) return null;
   if (!user.subscription) return null;
-  if (user.subscription.plan !== 'premium') return null;
+  if (user.subscription.plan !== "premium") return null;
 
   return doThing();
 }
@@ -562,10 +565,12 @@ export function transformData(input: RawData, options: Options): ProcessedData {
 ```typescript
 // ◆ Moderate - unclear why
 function score(items: Item[]): number {
-  return items.reduce((sum, item) => {
-    const weight = item.priority * 0.7 + item.age * 0.3;
-    return sum + (item.value * weight);
-  }, 0) / items.length;
+  return (
+    items.reduce((sum, item) => {
+      const weight = item.priority * 0.7 + item.age * 0.3;
+      return sum + item.value * weight;
+    }, 0) / items.length
+  );
 }
 
 // ✓ Good
@@ -579,10 +584,12 @@ function score(items: Item[]): number {
  * Based on research paper: doi:10.1234/scoring-algorithm
  */
 function score(items: Item[]): number {
-  return items.reduce((sum, item) => {
-    const weight = item.priority * 0.7 + item.age * 0.3;
-    return sum + (item.value * weight);
-  }, 0) / items.length;
+  return (
+    items.reduce((sum, item) => {
+      const weight = item.priority * 0.7 + item.age * 0.3;
+      return sum + item.value * weight;
+    }, 0) / items.length
+  );
 }
 ```
 
@@ -673,9 +680,9 @@ async function getUsersWithPosts(userIds: string[]) {
     return acc;
   }, {});
 
-  return users.map(user => ({
+  return users.map((user) => ({
     ...user,
-    posts: postsByUser[user.id] || []
+    posts: postsByUser[user.id] || [],
   }));
 }
 ```
@@ -684,13 +691,13 @@ async function getUsersWithPosts(userIds: string[]) {
 
 ```typescript
 // ◆ Moderate - O(n) lookup
-const activeUsers = users.filter(u => u.active);
+const activeUsers = users.filter((u) => u.active);
 function isActive(userId: string): boolean {
-  return activeUsers.find(u => u.id === userId) !== undefined; // O(n)
+  return activeUsers.find((u) => u.id === userId) !== undefined; // O(n)
 }
 
 // ✓ Good - O(1) lookup
-const activeUserIds = new Set(users.filter(u => u.active).map(u => u.id));
+const activeUserIds = new Set(users.filter((u) => u.active).map((u) => u.id));
 function isActive(userId: string): boolean {
   return activeUserIds.has(userId); // O(1)
 }
@@ -702,16 +709,14 @@ function isActive(userId: string): boolean {
 // ◇ Minor
 function processItems(items: Item[]) {
   return items
-    .map(i => ({ ...i }))        // Copy 1
-    .map(i => ({ ...i, processed: true }))  // Copy 2
-    .filter(i => i.active);
+    .map((i) => ({ ...i })) // Copy 1
+    .map((i) => ({ ...i, processed: true })) // Copy 2
+    .filter((i) => i.active);
 }
 
 // ✓ Good
 function processItems(items: Item[]) {
-  return items
-    .filter(i => i.active)
-    .map(i => ({ ...i, processed: true }));
+  return items.filter((i) => i.active).map((i) => ({ ...i, processed: true }));
 }
 ```
 
@@ -720,8 +725,8 @@ function processItems(items: Item[]) {
 ```typescript
 // ◆ Moderate - sequential, slow
 async function loadData() {
-  const users = await fetchUsers();    // Wait
-  const posts = await fetchPosts();    // Wait
+  const users = await fetchUsers(); // Wait
+  const posts = await fetchPosts(); // Wait
   const comments = await fetchComments(); // Wait
   return { users, posts, comments };
 }
@@ -731,7 +736,7 @@ async function loadData() {
   const [users, posts, comments] = await Promise.all([
     fetchUsers(),
     fetchPosts(),
-    fetchComments()
+    fetchComments(),
   ]);
   return { users, posts, comments };
 }
@@ -847,6 +852,7 @@ pub fn get_value(slice: &[u8], index: usize) -> Option<u8> {
 Ship with these → security incidents, runtime failures, data loss.
 
 Examples:
+
 - SQL injection, XSS, auth bypass
 - Unhandled errors that crash
 - Type assertions that can panic
@@ -861,6 +867,7 @@ Examples:
 Ship with these → maintenance burden, degraded quality, potential bugs.
 
 Examples:
+
 - Missing null checks
 - Poor error messages
 - Missing tests
@@ -875,6 +882,7 @@ Examples:
 Ship with these → code could be better, but functional and safe.
 
 Examples:
+
 - Unclear variable names
 - Magic numbers
 - Missing edge case tests
@@ -891,6 +899,7 @@ Examples:
 ### Security-Sensitive Areas
 
 Give extra scrutiny to:
+
 - Authentication/authorization logic
 - User input handling (forms, APIs, queries)
 - Database queries (SQL injection risk)
@@ -912,6 +921,7 @@ Give extra scrutiny to:
 ### When to Escalate
 
 Flag for senior review if:
+
 - Security implications unclear
 - Performance impact uncertain
 - Architecture decision embedded
@@ -925,6 +935,7 @@ Flag for senior review if:
 ### Full Review (default)
 
 Run all categories for:
+
 - Pre-merge reviews
 - Critical path changes
 - Security-sensitive code
@@ -933,6 +944,7 @@ Run all categories for:
 ### Targeted Review
 
 Focus specific categories for:
+
 - **Refactors** → Code Quality, Tests
 - **Bug fixes** → Error Handling, Tests, Type Safety
 - **Performance work** → Performance, Tests

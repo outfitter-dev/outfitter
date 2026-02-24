@@ -20,6 +20,7 @@ const result = loadConfig("my-app", schema);
 ```
 
 Supported config formats:
+
 - `.json` — Strict JSON (no comments)
 - `.jsonc` / `.json5` — JSON with comments and trailing commas
 - `.toml` — TOML format
@@ -34,6 +35,7 @@ Config loading now integrates with MCP resource handlers, allowing config values
 ### Use `.jsonc` for configs that need comments
 
 **Before** (workaround with `.json`):
+
 ```json
 {
   "debug": true
@@ -41,6 +43,7 @@ Config loading now integrates with MCP resource handlers, allowing config values
 ```
 
 **After** (`.jsonc` with comments):
+
 ```jsonc
 {
   // Enable debug mode for development

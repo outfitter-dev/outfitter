@@ -27,10 +27,10 @@ Prevent cascading failures by failing fast when downstream unhealthy.
 
 Manage distributed transactions across services.
 
-| Type | Description |
-|------|-------------|
-| Choreography | Services emit events, others listen and react |
-| Orchestration | Central coordinator manages workflow |
+| Type          | Description                                   |
+| ------------- | --------------------------------------------- |
+| Choreography  | Services emit events, others listen and react |
+| Orchestration | Central coordinator manages workflow          |
 
 - **Use when**: Multi-service transaction, eventual consistency acceptable
 

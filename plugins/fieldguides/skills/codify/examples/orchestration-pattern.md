@@ -9,6 +9,7 @@ Demonstrates identifying, specifying, and implementing an orchestration pattern.
 User: "Every time I commit, I manually update Linear with the commit SHA and branch. Can we automate this?"
 
 Analysis:
+
 - User has git workflow (commits, branches, PRs)
 - User tracks work in Linear (issues, status)
 - Manual coordination is time-consuming and error-prone
@@ -93,6 +94,7 @@ Decision: **HOOK**
 <rationale>
 
 HOOK because:
+
 - Event-triggered (post-commit, pre-push)
 - Fully automatable, no human judgment
 - Augments git operations automatically
@@ -182,6 +184,7 @@ description: Manually sync commits with Linear
 Sync existing commits with Linear issues.
 
 Usage:
+
 - `/linear-sync` — sync last 5 commits
 - `/linear-sync main..feature` — sync range
 - `/linear-sync --dry-run` — preview changes
@@ -213,8 +216,8 @@ LINEAR_API_KEY="invalid" git commit -m "ABC-123: test"
 
 ## Success Metrics
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Time per commit | 2–3 min manual | 0 sec |
-| Update accuracy | ~85% (human error) | ~98% |
-| Commit traceability | Often incomplete | 100% linked |
+| Metric              | Before             | After       |
+| ------------------- | ------------------ | ----------- |
+| Time per commit     | 2–3 min manual     | 0 sec       |
+| Update accuracy     | ~85% (human error) | ~98%        |
+| Commit traceability | Often incomplete   | 100% linked |

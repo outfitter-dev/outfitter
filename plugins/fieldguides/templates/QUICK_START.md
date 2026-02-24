@@ -255,13 +255,13 @@ find .claude/skills -name "*.sh" -exec chmod +x {} \;
 
 ## File Locations
 
-| Component | Project | Personal | Plugin |
-|-----------|---------|----------|--------|
-| Commands | `.claude/commands/` | `~/.claude/commands/` | `commands/` |
-| Hooks (config) | `.claude/settings.json` | `~/.claude/settings.json` | `hooks/hooks.json` |
-| Hooks (scripts) | `.claude/hooks/` | `~/.claude/hooks/` | `scripts/` |
-| Skills | `.claude/skills/` | `~/.claude/skills/` | `skills/` |
-| Agents | `.claude/agents/` | `~/.claude/agents/` | `agents/` |
+| Component       | Project                 | Personal                  | Plugin             |
+| --------------- | ----------------------- | ------------------------- | ------------------ |
+| Commands        | `.claude/commands/`     | `~/.claude/commands/`     | `commands/`        |
+| Hooks (config)  | `.claude/settings.json` | `~/.claude/settings.json` | `hooks/hooks.json` |
+| Hooks (scripts) | `.claude/hooks/`        | `~/.claude/hooks/`        | `scripts/`         |
+| Skills          | `.claude/skills/`       | `~/.claude/skills/`       | `skills/`          |
+| Agents          | `.claude/agents/`       | `~/.claude/agents/`       | `agents/`          |
 
 ## Next Steps
 

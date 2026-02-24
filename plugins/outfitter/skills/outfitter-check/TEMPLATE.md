@@ -7,11 +7,11 @@
 ## Summary
 
 | Severity | Count |
-|----------|-------|
-| Critical | {n} |
-| High | {n} |
-| Medium | {n} |
-| Low | {n} |
+| -------- | ----- |
+| Critical | {n}   |
+| High     | {n}   |
+| Medium   | {n}   |
+| Low      | {n}   |
 
 ## Critical
 
@@ -19,8 +19,8 @@
 
 ### {Issue Type}
 
-| Location | Issue |
-|----------|-------|
+| Location        | Issue         |
+| --------------- | ------------- |
 | `{file}:{line}` | {description} |
 
 **Fix**: {Brief guidance + link to fieldguide pattern}
@@ -31,8 +31,8 @@
 
 ### {Issue Type}
 
-| Location | Issue |
-|----------|-------|
+| Location        | Issue         |
+| --------------- | ------------- |
 | `{file}:{line}` | {description} |
 
 **Fix**: {Brief guidance + link to fieldguide pattern}
@@ -43,8 +43,8 @@
 
 ### {Issue Type}
 
-| Location | Issue |
-|----------|-------|
+| Location        | Issue         |
+| --------------- | ------------- |
 | `{file}:{line}` | {description} |
 
 **Fix**: {Brief guidance + link to fieldguide pattern}
@@ -57,14 +57,14 @@
 
 **Installed versions:**
 
-| Package | Version |
-|---------|---------|
+| Package                | Version   |
+| ---------------------- | --------- |
 | `{@outfitter/package}` | {version} |
 
 **Updates available:**
 
-| Package | Current | Available | Type |
-|---------|---------|-----------|------|
+| Package                | Current   | Available   | Type                 |
+| ---------------------- | --------- | ----------- | -------------------- | ----------------- |
 | `{@outfitter/package}` | {current} | {available} | {minor (no breaking) | major (breaking)} |
 
 **Migration guide:**

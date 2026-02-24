@@ -13,7 +13,9 @@
  * Total: 8 tests (compile-time verification)
  */
 import { describe, expect, it } from "bun:test";
+
 import { Result } from "better-result";
+
 import type {
   AdapterAuthError,
   AuthAdapter,

@@ -1,11 +1,26 @@
 {
   "name": "@outfitter/index",
-  "description": "SQLite FTS5 full-text search indexing for Outfitter",
   "version": "0.2.3",
-  "type": "module",
+  "description": "SQLite FTS5 full-text search indexing for Outfitter",
+  "keywords": [
+    "fts5",
+    "index",
+    "outfitter",
+    "search",
+    "sqlite",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/index"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -41,7 +56,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/index",
     "lint": "biome lint ./src",
@@ -58,22 +75,5 @@
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "keywords": [
-    "outfitter",
-    "index",
-    "fts5",
-    "sqlite",
-    "search",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/index"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

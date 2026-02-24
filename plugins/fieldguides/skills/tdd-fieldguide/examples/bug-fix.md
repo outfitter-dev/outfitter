@@ -37,7 +37,7 @@ First, understand the current implementation:
 
 ```typescript
 export function calculatePercentage(value: number, total: number): number {
-  return (value / total) * 100
+  return (value / total) * 100;
 }
 ```
 
@@ -46,29 +46,29 @@ Issue clear: No validation for zero total.
 **Write failing test**: `src/calculator/percentage.test.ts`
 
 ```typescript
-import { describe, test, expect } from 'bun:test'
-import { calculatePercentage } from './percentage'
+import { describe, test, expect } from "bun:test";
+import { calculatePercentage } from "./percentage";
 
-describe('calculatePercentage', () => {
+describe("calculatePercentage", () => {
   // Existing tests
-  test('calculates percentage correctly', () => {
-    expect(calculatePercentage(25, 100)).toBe(25)
-    expect(calculatePercentage(50, 200)).toBe(25)
-  })
+  test("calculates percentage correctly", () => {
+    expect(calculatePercentage(25, 100)).toBe(25);
+    expect(calculatePercentage(50, 200)).toBe(25);
+  });
 
   // NEW: Bug reproduction test
-  test('handles division by zero gracefully', () => {
-    const result = calculatePercentage(10, 0)
+  test("handles division by zero gracefully", () => {
+    const result = calculatePercentage(10, 0);
 
-    expect(result).toBe(0)
+    expect(result).toBe(0);
     // OR throw error approach:
     // expect(() => calculatePercentage(10, 0)).toThrow('Total cannot be zero')
-  })
+  });
 
-  test('handles zero value with valid total', () => {
-    expect(calculatePercentage(0, 100)).toBe(0)
-  })
-})
+  test("handles zero value with valid total", () => {
+    expect(calculatePercentage(0, 100)).toBe(0);
+  });
+});
 ```
 
 **Run test**: `bun test percentage.test.ts`
@@ -107,10 +107,10 @@ Confidence: `▓▓▓▓░` → Know exact fix needed
 export function calculatePercentage(value: number, total: number): number {
   // Fix: Handle division by zero
   if (total === 0) {
-    return 0
+    return 0;
   }
 
-  return (value / total) * 100
+  return (value / total) * 100;
 }
 ```
 
@@ -160,8 +160,8 @@ Current fix works but could be more robust. Consider:
 
 ```typescript
 type PercentageResult =
-  | { type: 'success'; value: number }
-  | { type: 'error'; code: 'ZERO_TOTAL' | 'NEGATIVE_TOTAL' }
+  | { type: "success"; value: number }
+  | { type: "error"; code: "ZERO_TOTAL" | "NEGATIVE_TOTAL" };
 
 export function calculatePercentage(
   value: number,
@@ -169,56 +169,56 @@ export function calculatePercentage(
 ): PercentageResult {
   // Validate total
   if (total === 0) {
-    return { type: 'error', code: 'ZERO_TOTAL' }
+    return { type: "error", code: "ZERO_TOTAL" };
   }
 
   if (total < 0) {
-    return { type: 'error', code: 'NEGATIVE_TOTAL' }
+    return { type: "error", code: "NEGATIVE_TOTAL" };
   }
 
   return {
-    type: 'success',
+    type: "success",
     value: (value / total) * 100,
-  }
+  };
 }
 ```
 
 **Update tests** to match new signature:
 
 ```typescript
-describe('calculatePercentage', () => {
-  test('calculates percentage correctly', () => {
-    const result1 = calculatePercentage(25, 100)
-    const result2 = calculatePercentage(50, 200)
+describe("calculatePercentage", () => {
+  test("calculates percentage correctly", () => {
+    const result1 = calculatePercentage(25, 100);
+    const result2 = calculatePercentage(50, 200);
 
-    expect(result1).toEqual({ type: 'success', value: 25 })
-    expect(result2).toEqual({ type: 'success', value: 25 })
-  })
+    expect(result1).toEqual({ type: "success", value: 25 });
+    expect(result2).toEqual({ type: "success", value: 25 });
+  });
 
-  test('returns error for division by zero', () => {
-    const result = calculatePercentage(10, 0)
-
-    expect(result).toEqual({
-      type: 'error',
-      code: 'ZERO_TOTAL',
-    })
-  })
-
-  test('returns error for negative total', () => {
-    const result = calculatePercentage(10, -100)
+  test("returns error for division by zero", () => {
+    const result = calculatePercentage(10, 0);
 
     expect(result).toEqual({
-      type: 'error',
-      code: 'NEGATIVE_TOTAL',
-    })
-  })
+      type: "error",
+      code: "ZERO_TOTAL",
+    });
+  });
 
-  test('handles zero value with valid total', () => {
-    const result = calculatePercentage(0, 100)
+  test("returns error for negative total", () => {
+    const result = calculatePercentage(10, -100);
 
-    expect(result).toEqual({ type: 'success', value: 0 })
-  })
-})
+    expect(result).toEqual({
+      type: "error",
+      code: "NEGATIVE_TOTAL",
+    });
+  });
+
+  test("handles zero value with valid total", () => {
+    const result = calculatePercentage(0, 100);
+
+    expect(result).toEqual({ type: "success", value: 0 });
+  });
+});
 ```
 
 **Run tests**: `bun test percentage.test.ts`
@@ -237,15 +237,15 @@ calculatePercentage
 
 ```typescript
 // Before
-const percentage = calculatePercentage(completed, total)
-return { percentage }
+const percentage = calculatePercentage(completed, total);
+return { percentage };
 
 // After
-const result = calculatePercentage(completed, total)
-if (result.type === 'error') {
-  return { error: 'Invalid calculation', code: result.code }
+const result = calculatePercentage(completed, total);
+if (result.type === "error") {
+  return { error: "Invalid calculation", code: result.code };
 }
-return { percentage: result.value }
+return { percentage: result.value };
 ```
 
 **Run all tests**: `bun test`
@@ -304,19 +304,19 @@ Perfect mutation score — tests thoroughly verify behavior.
 **Integration test** to verify API fix:
 
 ```typescript
-describe('GET /api/stats', () => {
-  test('handles zero total gracefully', async () => {
+describe("GET /api/stats", () => {
+  test("handles zero total gracefully", async () => {
     const response = await request(app)
-      .get('/api/stats')
-      .query({ completed: 10, total: 0 })
+      .get("/api/stats")
+      .query({ completed: 10, total: 0 });
 
-    expect(response.status).toBe(200)
+    expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
-      error: 'Invalid calculation',
-      code: 'ZERO_TOTAL',
-    })
-  })
-})
+      error: "Invalid calculation",
+      code: "ZERO_TOTAL",
+    });
+  });
+});
 ```
 
 **Run integration tests**: `bun test tests/integration/`
@@ -340,6 +340,7 @@ All integration tests passing
 ## Session Summary
 
 **Duration**: 16 minutes total
+
 - RED: 4 min
 - GREEN: 3 min
 - REFACTOR: 5 min
@@ -352,12 +353,14 @@ All integration tests passing
 **Mutation Score**: 100%
 
 **Improvements beyond minimal fix**:
+
 - Used discriminated union for error handling
 - Added negative total validation
 - Updated API to handle error results
 - Added integration test
 
 **Production deployment**:
+
 - All tests passing
 - No regressions detected
 - Error handling verified

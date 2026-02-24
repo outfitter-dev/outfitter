@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { z } from "zod";
+
 import { createActionRegistry, defineAction } from "../actions.js";
 import { Result } from "../index.js";
 

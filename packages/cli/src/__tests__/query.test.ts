@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { composePresets, verbosePreset } from "../flags.js";
 import { jqPreset, outputModePreset } from "../query.js";
 

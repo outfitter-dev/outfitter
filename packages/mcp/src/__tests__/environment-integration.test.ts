@@ -5,6 +5,7 @@
  * OUTFITTER_LOG_LEVEL > options.defaultLogLevel > environment profile > null
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+
 import { createMcpServer } from "../index.js";
 
 describe("MCP Environment Integration", () => {

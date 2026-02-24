@@ -11,12 +11,7 @@ Detailed examples and patterns for configuring MCP servers in Claude Desktop.
   "mcpServers": {
     "weather": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/absolute/path/to/weather",
-        "run",
-        "server.py"
-      ]
+      "args": ["--directory", "/absolute/path/to/weather", "run", "server.py"]
     }
   }
 }
@@ -130,12 +125,7 @@ Use `${VAR_NAME}` syntax:
   "mcpServers": {
     "custom-tools": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/absolute/path/to/server",
-        "run",
-        "server.py"
-      ],
+      "args": ["--directory", "/absolute/path/to/server", "run", "server.py"],
       "env": {
         "API_KEY": "${TOOLS_API_KEY}",
         "DEBUG": "false"

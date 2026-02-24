@@ -16,6 +16,7 @@
  * Total: 23 tests
  */
 import { afterEach, describe, expect, it } from "bun:test";
+
 import {
   type Collection,
   clearRenderers,

@@ -12,6 +12,7 @@ Verify Outfitter Stack compliance and produce a structured report.
 ## Goal
 
 Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-outfitter-check.md` documenting:
+
 1. What violations were found (by severity)
 2. Where they are (file:line)
 3. How to fix them (with pattern references)
@@ -19,6 +20,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 ## Constraints
 
 **DO:**
+
 - Load `outfitter-atlas` first for pattern knowledge
 - Scan systematically using the diagnostic commands
 - Rank findings by severity (Critical > High > Medium > Low)
@@ -26,6 +28,7 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 - Produce a Compliance Report at the end
 
 **DON'T:**
+
 - Skip categories during scanning
 - Report issues without actionable guidance
 - Mix severity levels (keep them separate)
@@ -44,13 +47,14 @@ Scan a codebase and produce a Compliance Report at `.agents/notes/YYYY-MM-DD-out
 
 Ask or infer the target:
 
-| Scope | When | Command Modifier |
-|-------|------|------------------|
-| Single file | "Check this file" | `rg PATTERN path/to/file.ts` |
-| Directory | "Check src/handlers" | `rg PATTERN path/to/dir/` |
-| Full codebase | "Check compliance" | `rg PATTERN --type ts` |
+| Scope         | When                 | Command Modifier             |
+| ------------- | -------------------- | ---------------------------- |
+| Single file   | "Check this file"    | `rg PATTERN path/to/file.ts` |
+| Directory     | "Check src/handlers" | `rg PATTERN path/to/dir/`    |
+| Full codebase | "Check compliance"   | `rg PATTERN --type ts`       |
 
 Exclude test files unless specifically requested:
+
 ```bash
 rg PATTERN --type ts -g "!*.test.ts" -g "!__tests__/*"
 ```
@@ -114,21 +118,21 @@ rg "z\.(string|number|boolean|object)\(\)(?!.*\.describe)" --type ts -n
 
 Count results and assign severity:
 
-| Severity | Findings | Action |
-|----------|----------|--------|
-| **Critical** | throw/try-catch in handlers | Must fix before merge |
-| **High** | console.log, hardcoded paths | Should fix before merge |
-| **Medium** | Custom errors, missing context | Fix when touching file |
-| **Low** | Style issues, missing describe | Nice to have |
+| Severity     | Findings                       | Action                  |
+| ------------ | ------------------------------ | ----------------------- |
+| **Critical** | throw/try-catch in handlers    | Must fix before merge   |
+| **High**     | console.log, hardcoded paths   | Should fix before merge |
+| **Medium**   | Custom errors, missing context | Fix when touching file  |
+| **Low**      | Style issues, missing describe | Nice to have            |
 
 ### Severity Definitions
 
-| Level | Impact | Examples |
-|-------|--------|----------|
+| Level        | Impact                                      | Examples                             |
+| ------------ | ------------------------------------------- | ------------------------------------ |
 | **Critical** | Breaks core patterns, causes runtime issues | Thrown exceptions, unvalidated paths |
-| **High** | Breaks observability or portability | Console logging, hardcoded paths |
-| **Medium** | Reduces type safety or consistency | Custom errors, missing context param |
-| **Low** | Affects polish, not correctness | Style, documentation gaps |
+| **High**     | Breaks observability or portability         | Console logging, hardcoded paths     |
+| **Medium**   | Reduces type safety or consistency          | Custom errors, missing context param |
+| **Low**      | Affects polish, not correctness             | Style, documentation gaps            |
 
 ## Step 4: Produce Report
 
@@ -144,11 +148,11 @@ mkdir -p .agents/notes
 
 ### Pass Criteria
 
-| Status | Criteria |
-|--------|----------|
-| **PASS** | 0 critical, 0 high |
+| Status       | Criteria                      |
+| ------------ | ----------------------------- |
+| **PASS**     | 0 critical, 0 high            |
 | **WARNINGS** | 0 critical, 1+ high or medium |
-| **FAIL** | 1+ critical |
+| **FAIL**     | 1+ critical                   |
 
 ### Quick Summary
 
@@ -165,14 +169,14 @@ mkdir -p .agents/notes
 
 Point to fieldguide patterns for each issue type:
 
-| Issue | Fix Pattern |
-|-------|-------------|
-| `throw new` | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
-| `try/catch` | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md) |
-| `console.log` | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md) |
-| Hardcoded paths | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md) |
-| Custom errors | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md) |
-| Missing context | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md) |
+| Issue           | Fix Pattern                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `throw new`     | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
+| `try/catch`     | [patterns/results.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/results.md)       |
+| `console.log`   | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md)       |
+| Hardcoded paths | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md)     |
+| Custom errors   | [patterns/errors.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/errors.md)         |
+| Missing context | [patterns/handler.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md)       |
 
 ## Quick Check
 
@@ -204,6 +208,7 @@ bunx outfitter upgrade --json --cwd .
 If updates are found, append a **Migration Guidance** section to the compliance report. If all packages are up to date, note that in the report.
 
 The command:
+
 1. Reads `package.json` for `@outfitter/*` dependencies
 2. Queries npm for latest versions
 3. When `--guide` is used, composes migration docs from the kit plugin's shared migrations

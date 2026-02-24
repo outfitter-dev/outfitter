@@ -33,35 +33,34 @@ Work through each dimension. For each item, document: PASS/FAIL + evidence.
 
 ### Correctness (accuracy)
 
-| Check | How to Verify |
-|-------|---------------|
-| Code examples run | Extract and execute each example. Report errors verbatim. |
-| API signatures match | Compare documented signatures against source code. |
-| Links resolve | Check each link target exists (relative paths, anchors, URLs). |
+| Check                     | How to Verify                                                   |
+| ------------------------- | --------------------------------------------------------------- |
+| Code examples run         | Extract and execute each example. Report errors verbatim.       |
+| API signatures match      | Compare documented signatures against source code.              |
+| Links resolve             | Check each link target exists (relative paths, anchors, URLs).  |
 | Technical claims accurate | Cross-reference against implementation or authoritative source. |
-| Versions current | Verify version numbers match package.json, Cargo.toml, etc. |
+| Versions current          | Verify version numbers match package.json, Cargo.toml, etc.     |
 
 ### Completeness (nothing missing)
 
-| Check | How to Verify |
-|-------|---------------|
-| Required sections present | Compare against applicable template (README, API ref, guide). |
-| Parameters documented | Each param has: type, purpose, constraints, default value. |
-| Error scenarios covered | Document what happens when things go wrong. |
-| Edge cases addressed | Empty inputs, nulls, boundaries, concurrent access. |
-| Success and failure examples | Show both happy path and error handling. |
+| Check                        | How to Verify                                                 |
+| ---------------------------- | ------------------------------------------------------------- |
+| Required sections present    | Compare against applicable template (README, API ref, guide). |
+| Parameters documented        | Each param has: type, purpose, constraints, default value.    |
+| Error scenarios covered      | Document what happens when things go wrong.                   |
+| Edge cases addressed         | Empty inputs, nulls, boundaries, concurrent access.           |
+| Success and failure examples | Show both happy path and error handling.                      |
 
 ### Comprehensiveness (depth)
 
-| Check | How to Verify |
-|-------|---------------|
-| Common use cases | List 3-5 typical scenarios; verify each is addressed. |
-| Migration paths | Breaking changes include upgrade instructions. |
-| Cross-references | Related docs linked where helpful. |
-| Agent-friendly | Structured for AI consumption (clear headers, examples). |
-| Troubleshooting | Common issues and solutions documented. |
+| Check            | How to Verify                                            |
+| ---------------- | -------------------------------------------------------- |
+| Common use cases | List 3-5 typical scenarios; verify each is addressed.    |
+| Migration paths  | Breaking changes include upgrade instructions.           |
+| Cross-references | Related docs linked where helpful.                       |
+| Agent-friendly   | Structured for AI consumption (clear headers, examples). |
+| Troubleshooting  | Common issues and solutions documented.                  |
 
 ## Output
 
 Use the report structure in [TEMPLATE.md](TEMPLATE.md).
-

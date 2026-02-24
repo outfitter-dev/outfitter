@@ -27,6 +27,7 @@ NOT for: unit testing, mock testing, performance benchmarking, load testing
 NO MOCKS EVER.
 
 Truth hierarchy:
+
 1. **Scenarios** — real dependencies, actual behavior
 2. **Unit tests** — isolated logic, synthetic inputs
 3. **Mocks** — assumptions about how things work
@@ -84,40 +85,40 @@ Quick validation without ceremony. Write script, run against real deps, verify b
 
 ```typescript
 // .scratch/test-auth-flow.ts
-import { db } from '../src/db'
-import { api } from '../src/api'
+import { db } from "../src/db";
+import { api } from "../src/api";
 
 async function testAuthFlow() {
   // Setup: real test user in real database
   const user = await db.users.create({
-    email: 'test@example.com',
-    password: 'hashed-test-password'
-  })
+    email: "test@example.com",
+    password: "hashed-test-password",
+  });
 
   // Execute: real HTTP requests
-  const loginRes = await api.post('/auth/login', {
+  const loginRes = await api.post("/auth/login", {
     email: user.email,
-    password: 'test-password'
-  })
+    password: "test-password",
+  });
 
   // Verify: actual response
-  console.assert(loginRes.status === 200, 'Login should succeed')
-  console.assert(loginRes.body.token, 'Should receive JWT token')
+  console.assert(loginRes.status === 200, "Login should succeed");
+  console.assert(loginRes.body.token, "Should receive JWT token");
 
-  const meRes = await api.get('/auth/me', {
-    headers: { Authorization: `Bearer ${loginRes.body.token}` }
-  })
+  const meRes = await api.get("/auth/me", {
+    headers: { Authorization: `Bearer ${loginRes.body.token}` },
+  });
 
-  console.assert(meRes.status === 200, 'Auth should work')
-  console.assert(meRes.body.email === user.email, 'Should return correct user')
+  console.assert(meRes.status === 200, "Auth should work");
+  console.assert(meRes.body.email === user.email, "Should return correct user");
 
   // Cleanup
-  await db.users.delete({ id: user.id })
+  await db.users.delete({ id: user.id });
 
-  console.log('✓ Auth flow validated')
+  console.log("✓ Auth flow validated");
 }
 
-testAuthFlow().catch(console.error)
+testAuthFlow().catch(console.error);
 ```
 
 </scratch_directory>
@@ -151,12 +152,14 @@ Each line is complete JSON object with fields:
 ## When to Document
 
 Document in scenarios.jsonl when:
+
 - Scenario validates critical user path
 - Bug was caught by this scenario (regression prevention)
 - Behavior is non-obvious or frequently questioned
 - Integration pattern is reusable across features
 
 Delete from .scratch/ when:
+
 - One-time debugging script
 - Exploratory testing that didn't find issues
 - Temporary verification during development
@@ -174,6 +177,7 @@ Loop: Write → Execute → Document → Cleanup
 5. **Cleanup** — delete script or promote to permanent tests
 
 Each iteration:
+
 - Script is throwaway (lives in .scratch/)
 - Dependencies are real (no mocks, no stubs)
 - Validation is concrete (actual behavior observed)
@@ -205,6 +209,7 @@ grep -q '.scratch/' .gitignore || echo '.scratch/' >> .gitignore
 ## 1. Setup → Setting up scenario environment
 
 Prepare real dependencies:
+
 - Spin up local database (Docker, embedded)
 - Configure test API keys (staging credentials)
 - Initialize test data (real records, not fixtures)
@@ -213,6 +218,7 @@ Prepare real dependencies:
 ## 2. Script → Writing proof program
 
 Create .scratch/ test script:
+
 - Import real dependencies (no mocks)
 - Setup stage: prepare state
 - Execute stage: perform actions
@@ -222,6 +228,7 @@ Create .scratch/ test script:
 ## 3. Execute → Running against real dependencies
 
 Run proof program:
+
 - Execute with real database connection
 - Call actual API endpoints
 - Use live service instances
@@ -230,6 +237,7 @@ Run proof program:
 ## 4. Document → Capturing successful patterns
 
 If scenario validates behavior:
+
 - Extract pattern to scenarios.jsonl
 - Document setup requirements
 - Record expected outcomes
@@ -242,6 +250,7 @@ Delete .scratch/ script or promote to permanent test suite.
 <rules>
 
 ALWAYS:
+
 - Verify .scratch/ in .gitignore before first use
 - Test against real dependencies (actual DB, live APIs)
 - Use self-contained scripts (runnable with single command)
@@ -252,6 +261,7 @@ ALWAYS:
 - Use test credentials (never production)
 
 NEVER:
+
 - Use mocks, stubs, or test doubles
 - Commit .scratch/ directory contents
 - Test against production data
@@ -262,6 +272,7 @@ NEVER:
 - Leave test data in shared environments
 
 ESCALATE when:
+
 - No staging environment available
 - Real dependencies too expensive to test
 - Test requires destructive production operations
@@ -272,14 +283,17 @@ ESCALATE when:
 <references>
 
 Patterns and examples:
+
 - [patterns.md](references/patterns.md) — common scenario patterns and templates
 
 Related skills:
+
 - debugging — investigation methodology (scenarios help reproduce bugs)
 - tdd-fieldguide — TDD workflow (scenarios validate features)
 - codebase-analysis — evidence gathering (scenarios provide empirical data)
 
 External resources:
+
 - [Growing Object-Oriented Software, Guided by Tests](http://www.growing-object-oriented-software.com/) — end-to-end testing philosophy
 - [Testing Without Mocks](https://www.jamesshore.com/v2/blog/2018/testing-without-mocks) — James Shore's pattern library
 

@@ -20,12 +20,14 @@ const listUsers = defineTool({
   description: "List all users",
   inputSchema: z.object({ limit: z.number().optional() }),
   annotations: {
-    readOnlyHint: true,       // Does not modify state
-    destructiveHint: false,   // Not destructive
-    idempotentHint: true,     // Same input → same result
-    openWorldHint: false,     // Operates on closed dataset
+    readOnlyHint: true, // Does not modify state
+    destructiveHint: false, // Not destructive
+    idempotentHint: true, // Same input → same result
+    openWorldHint: false, // Operates on closed dataset
   },
-  handler: async (input, ctx) => { /* ... */ },
+  handler: async (input, ctx) => {
+    /* ... */
+  },
 });
 ```
 
@@ -63,11 +65,13 @@ const userProfile: ResourceTemplateDefinition = {
   description: "Profile for a specific user",
   handler: async (uri, variables, ctx) => {
     const user = await getUser(variables.userId);
-    return Result.ok([{
-      uri,
-      text: JSON.stringify(user),
-      mimeType: "application/json",
-    }]);
+    return Result.ok([
+      {
+        uri,
+        text: JSON.stringify(user),
+        mimeType: "application/json",
+      },
+    ]);
   },
   complete: {
     userId: async (partial) => {
@@ -135,6 +139,7 @@ Annotate content with audience and priority hints:
 ### Add annotations to existing tools
 
 **Before:**
+
 ```typescript
 const tool = defineTool({
   name: "delete-user",
@@ -145,6 +150,7 @@ const tool = defineTool({
 ```
 
 **After:**
+
 ```typescript
 const tool = defineTool({
   name: "delete-user",
@@ -164,12 +170,12 @@ MCP clients use schema descriptions for tool documentation:
 
 ```typescript
 // Before
-z.object({ limit: z.number().optional() })
+z.object({ limit: z.number().optional() });
 
 // After
 z.object({
   limit: z.number().optional().describe("Maximum number of results to return"),
-})
+});
 ```
 
 ## No Action Required

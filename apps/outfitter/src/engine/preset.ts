@@ -7,8 +7,10 @@ import {
   writeFileSync,
 } from "node:fs";
 import { extname, join } from "node:path";
+
 import { Result } from "@outfitter/contracts";
 import { getPresetsDir } from "@outfitter/presets";
+
 import type { EngineOptions, PlaceholderValues } from "./types.js";
 import { ScaffoldError } from "./types.js";
 

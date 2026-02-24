@@ -18,12 +18,7 @@
  */
 
 // Colors (theme and ANSI)
-export {
-  ANSI,
-  createTheme,
-  type Theme,
-  type Tokens,
-} from "./colors/index.js";
+export { ANSI, createTheme, type Theme, type Tokens } from "./colors/index.js";
 
 // Output (stdout/stderr abstraction)
 export { exitWithError, output } from "./output.js";

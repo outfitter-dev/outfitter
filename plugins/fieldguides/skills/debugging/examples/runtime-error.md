@@ -24,6 +24,7 @@ Stack trace points to line 42 in formatter.ts accessing `.email` on undefined va
 ### Reproduce Consistently
 
 Steps to reproduce:
+
 1. Load user profile page
 2. Navigate to profile ID: `user-incomplete-123`
 3. Error occurs consistently for this user
@@ -47,7 +48,7 @@ Added logging to formatter.ts:
 
 ```typescript
 export function formatUserDisplay(user: User): string {
-  console.log('[DEBUG] formatUserDisplay input:', JSON.stringify(user));
+  console.log("[DEBUG] formatUserDisplay input:", JSON.stringify(user));
 
   // Line 42 - where error occurs
   const email = user.email.toLowerCase();
@@ -76,7 +77,7 @@ const display = formatUserDisplay(profile.user);
 Check profile.user:
 
 ```typescript
-console.log('[DEBUG] profile object:', JSON.stringify(profile));
+console.log("[DEBUG] profile object:", JSON.stringify(profile));
 // Output: {"id":"prof-123","user":{"id":"user-incomplete-123","name":"Test User"}}
 ```
 
@@ -110,7 +111,7 @@ Found similar code that handles missing fields:
 // src/auth/userValidator.ts
 export function validateUser(user: Partial<User>): User {
   if (!user.email) {
-    throw new Error('User must have email');
+    throw new Error("User must have email");
   }
   return user as User;
 }
@@ -121,11 +122,13 @@ This validates email exists before using it.
 ### Identify Differences
 
 Working code:
+
 - Validates email exists before access
 - Handles Partial<User> type
 - Throws clear error if missing
 
 Broken code:
+
 - Assumes email always exists
 - Direct property access
 - No validation
@@ -159,6 +162,7 @@ const user = profile.user; // May be incomplete
 **Hypothesis**: "The function fails because the optimization commit (3d7a921) changed from fetching full user objects to using cached profile data, which doesn't include email for users who haven't completed onboarding. The formatter assumes email always exists, causing undefined access."
 
 Evidence supporting hypothesis:
+
 - Error only occurs for specific users (incomplete profiles)
 - Started after optimization commit
 - Working users have email, broken users don't
@@ -181,6 +185,7 @@ const display = formatUserDisplay(user);
 ### Execute Test
 
 Run with reverted code:
+
 - Error no longer occurs
 - All users display correctly (including user-incomplete-123)
 - Full fetch includes all required fields
@@ -196,17 +201,17 @@ Run with reverted code:
 ### Create Failing Test
 
 ```typescript
-describe('formatUserDisplay', () => {
-  it('handles users without email gracefully', () => {
+describe("formatUserDisplay", () => {
+  it("handles users without email gracefully", () => {
     const incompleteUser = {
-      id: 'user-123',
-      name: 'Test User',
+      id: "user-123",
+      name: "Test User",
       // email intentionally missing
     };
 
     // This currently throws, should handle gracefully
     expect(() => formatUserDisplay(incompleteUser)).toThrow(
-      'User email is required'
+      "User email is required"
     );
   });
 });
@@ -217,6 +222,7 @@ Test fails as expected (throws TypeError instead of clear error).
 ### Implement Fix
 
 Two options identified:
+
 1. Fetch full user data (removes optimization)
 2. Handle missing email in formatter (preserves optimization)
 
@@ -225,12 +231,12 @@ Choose option 2 to preserve optimization and add defensive validation:
 ```typescript
 export function formatUserDisplay(user: User): string {
   // Input validation
-  if (!user.email || typeof user.email !== 'string') {
+  if (!user.email || typeof user.email !== "string") {
     throw new Error(`User email is required for display. User ID: ${user.id}`);
   }
 
   const email = user.email.toLowerCase();
-  const name = user.name || 'Unknown';
+  const name = user.name || "Unknown";
 
   return `${name} <${email}>`;
 }
@@ -239,6 +245,7 @@ export function formatUserDisplay(user: User): string {
 ### Verify Fix Works
 
 Run tests:
+
 - Failing test now passes (throws clear error message)
 - All existing tests pass
 - Manual reproduction: Clear error message instead of crash
@@ -291,11 +298,13 @@ try {
 **Root cause**: Optimization changed data source from full user fetch to cached profile data. Cached data incomplete for users who haven't finished onboarding.
 
 **The fix**:
+
 1. Added input validation in formatter
 2. Profile service falls back to full fetch for incomplete users
 3. Clear error messages guide developers
 
 **Prevention**:
+
 - Always validate required fields before access
 - Consider data completeness when optimizing data fetching
 - Add tests for incomplete/partial data scenarios

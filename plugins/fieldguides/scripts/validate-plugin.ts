@@ -13,6 +13,7 @@
 
 import { chmodSync, existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
+
 import {
   extractFrontmatter,
   isAllowedToolsCommaSeparated,

@@ -26,10 +26,12 @@ import { renderList } from "@outfitter/tui/list";
 import { renderBox } from "@outfitter/tui/box";
 
 // Render a table
-console.log(renderTable([
-  { name: "config", status: "loaded", entries: 12 },
-  { name: "cache", status: "warm", entries: 847 },
-]));
+console.log(
+  renderTable([
+    { name: "config", status: "loaded", entries: 12 },
+    { name: "cache", status: "warm", entries: 847 },
+  ])
+);
 
 // Render a bullet list
 console.log(renderList(["First item", "Second item", "Third item"]));
@@ -44,63 +46,63 @@ Every module is available as a subpath import. No deep imports into `dist/` need
 
 ### Rendering Primitives
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/render` | All rendering utilities (tables, lists, boxes, trees, formatting, layout, shapes) |
-| `@outfitter/tui/table` | `renderTable`, `TableOptions` |
-| `@outfitter/tui/list` | `renderList`, `ListOptions`, `ListStyle` |
-| `@outfitter/tui/box` | `renderBox`, `createBox`, `BoxOptions` |
-| `@outfitter/tui/tree` | `renderTree`, `TreeOptions`, `TREE_GUIDES` |
-| `@outfitter/tui/borders` | `BORDERS`, `getBorderCharacters`, `drawHorizontalLine` |
+| Subpath                  | What's In It                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `@outfitter/tui/render`  | All rendering utilities (tables, lists, boxes, trees, formatting, layout, shapes) |
+| `@outfitter/tui/table`   | `renderTable`, `TableOptions`                                                     |
+| `@outfitter/tui/list`    | `renderList`, `ListOptions`, `ListStyle`                                          |
+| `@outfitter/tui/box`     | `renderBox`, `createBox`, `BoxOptions`                                            |
+| `@outfitter/tui/tree`    | `renderTree`, `TreeOptions`, `TREE_GUIDES`                                        |
+| `@outfitter/tui/borders` | `BORDERS`, `getBorderCharacters`, `drawHorizontalLine`                            |
 
 ### Themes
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/theme` | `createVisualTheme`, `defaultTheme`, `roundedTheme`, `boldTheme`, `minimalTheme` |
-| `@outfitter/tui/theme/presets` | All preset themes |
-| `@outfitter/tui/theme/presets/default` | Default theme only |
-| `@outfitter/tui/theme/presets/rounded` | Rounded theme only |
-| `@outfitter/tui/theme/presets/bold` | Bold theme only |
-| `@outfitter/tui/theme/presets/minimal` | Minimal theme only |
-| `@outfitter/tui/theme/context` | `createThemedContext`, `getContextTheme` |
-| `@outfitter/tui/theme/create` | `createVisualTheme` factory |
-| `@outfitter/tui/theme/resolve` | `resolveGlyph`, `resolveStateMarker` |
+| Subpath                                | What's In It                                                                     |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `@outfitter/tui/theme`                 | `createVisualTheme`, `defaultTheme`, `roundedTheme`, `boldTheme`, `minimalTheme` |
+| `@outfitter/tui/theme/presets`         | All preset themes                                                                |
+| `@outfitter/tui/theme/presets/default` | Default theme only                                                               |
+| `@outfitter/tui/theme/presets/rounded` | Rounded theme only                                                               |
+| `@outfitter/tui/theme/presets/bold`    | Bold theme only                                                                  |
+| `@outfitter/tui/theme/presets/minimal` | Minimal theme only                                                               |
+| `@outfitter/tui/theme/context`         | `createThemedContext`, `getContextTheme`                                         |
+| `@outfitter/tui/theme/create`          | `createVisualTheme` factory                                                      |
+| `@outfitter/tui/theme/resolve`         | `resolveGlyph`, `resolveStateMarker`                                             |
 
 ### Streaming Output
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/streaming` | `createSpinner`, `createStreamWriter`, `ANSI` |
-| `@outfitter/tui/streaming/spinner` | `createSpinner`, `Spinner`, `SpinnerOptions` |
-| `@outfitter/tui/streaming/writer` | `createStreamWriter`, `StreamWriter` |
-| `@outfitter/tui/streaming/ansi` | ANSI escape sequence constants |
+| Subpath                            | What's In It                                  |
+| ---------------------------------- | --------------------------------------------- |
+| `@outfitter/tui/streaming`         | `createSpinner`, `createStreamWriter`, `ANSI` |
+| `@outfitter/tui/streaming/spinner` | `createSpinner`, `Spinner`, `SpinnerOptions`  |
+| `@outfitter/tui/streaming/writer`  | `createStreamWriter`, `StreamWriter`          |
+| `@outfitter/tui/streaming/ansi`    | ANSI escape sequence constants                |
 
 ### Interactive Prompts
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/prompt` | `promptText`, `promptSelect`, `promptConfirm`, `promptGroup`, `validators` |
-| `@outfitter/tui/prompt/text` | `promptText`, `promptPassword` |
-| `@outfitter/tui/prompt/select` | `promptSelect`, `promptMultiSelect` |
-| `@outfitter/tui/prompt/confirm` | `promptConfirm` |
-| `@outfitter/tui/prompt/group` | `promptGroup` |
-| `@outfitter/tui/prompt/validators` | Validation helpers |
-| `@outfitter/tui/confirm` | `confirmDestructive` (destructive operation confirmation) |
+| Subpath                            | What's In It                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `@outfitter/tui/prompt`            | `promptText`, `promptSelect`, `promptConfirm`, `promptGroup`, `validators` |
+| `@outfitter/tui/prompt/text`       | `promptText`, `promptPassword`                                             |
+| `@outfitter/tui/prompt/select`     | `promptSelect`, `promptMultiSelect`                                        |
+| `@outfitter/tui/prompt/confirm`    | `promptConfirm`                                                            |
+| `@outfitter/tui/prompt/group`      | `promptGroup`                                                              |
+| `@outfitter/tui/prompt/validators` | Validation helpers                                                         |
+| `@outfitter/tui/confirm`           | `confirmDestructive` (destructive operation confirmation)                  |
 
 ### Presets
 
-| Subpath | What's In It |
-|---------|-------------|
+| Subpath                          | What's In It                                     |
+| -------------------------------- | ------------------------------------------------ |
 | `@outfitter/tui/preset/standard` | Table + list + box + colors (most common bundle) |
-| `@outfitter/tui/preset/full` | Standard + tree + borders |
+| `@outfitter/tui/preset/full`     | Standard + tree + borders                        |
 
 ### Demo Infrastructure
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/demo` | `renderDemo`, `renderAllDemos`, primitive metadata |
-| `@outfitter/tui/demo/section` | Section helpers for building demos |
+| Subpath                       | What's In It                                       |
+| ----------------------------- | -------------------------------------------------- |
+| `@outfitter/tui/demo`         | `renderDemo`, `renderAllDemos`, primitive metadata |
+| `@outfitter/tui/demo/section` | Section helpers for building demos                 |
 
 ## Themes
 
@@ -180,13 +182,14 @@ if (name.isOk()) {
 // Grouped prompts for wizard-style flows
 const config = await promptGroup({
   name: () => promptText({ message: "Name:" }),
-  template: () => promptSelect({
-    message: "Template:",
-    options: [
-      { value: "basic", label: "Basic" },
-      { value: "full", label: "Full Stack" },
-    ],
-  }),
+  template: () =>
+    promptSelect({
+      message: "Template:",
+      options: [
+        { value: "basic", label: "Basic" },
+        { value: "full", label: "Full Stack" },
+      ],
+    }),
   debug: () => promptConfirm({ message: "Enable debug mode?" }),
 });
 ```
@@ -238,10 +241,10 @@ import {
 
 `@outfitter/tui` extracts visual rendering concerns from `@outfitter/cli`. The split:
 
-| Package | Responsibility |
-|---------|---------------|
+| Package          | Responsibility                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
 | `@outfitter/cli` | Output modes, input parsing, pagination, terminal detection, colors, text utilities, command building |
-| `@outfitter/tui` | Tables, lists, boxes, trees, borders, themes, spinners, streaming, prompts |
+| `@outfitter/tui` | Tables, lists, boxes, trees, borders, themes, spinners, streaming, prompts                            |
 
 `@outfitter/cli` provides the foundation (colors, text, terminal). `@outfitter/tui` builds visual components on top.
 

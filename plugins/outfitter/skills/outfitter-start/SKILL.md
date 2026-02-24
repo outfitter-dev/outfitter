@@ -42,6 +42,7 @@ ls CLAUDE.md SPEC.md PLAN.md README.md 2>/dev/null
 ```
 
 **If context files exist**, read them and look for keywords:
+
 - "CLI", "command-line", "tool" → suggest `cli` preset
 - "MCP", "server", "tools for AI" → suggest `mcp` preset
 - "daemon", "background", "service" → suggest `daemon` preset
@@ -52,6 +53,7 @@ ls CLAUDE.md SPEC.md PLAN.md README.md 2>/dev/null
 Use AskUserQuestion to clarify before running commands. See [references/new-project-scaffolding.md](references/new-project-scaffolding.md) for the full decision flow.
 
 **Key questions:**
+
 1. Preset type (CLI, MCP, daemon, minimal)
 2. Project name
 3. Whether to include tooling (scaffolding block)
@@ -64,6 +66,7 @@ outfitter init <cli|mcp|daemon> . --name <name>
 ```
 
 **Options:**
+
 - `--no-tooling` — Skip biome, lefthook, claude settings
 - `--with <blocks>` — Specific blocks: `claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`
 - `--force` — Overwrite existing files
@@ -71,6 +74,7 @@ outfitter init <cli|mcp|daemon> . --name <name>
 ### Step 4: Report and Suggest Next Steps
 
 After scaffolding:
+
 1. List key files created
 2. Suggest: `bun install && bun run dev`
 3. Recommend loading `outfitter-atlas` for pattern reference
@@ -84,6 +88,7 @@ For existing projects, generate a phased adoption plan.
 ### Goal
 
 Produce a structured adoption plan at `.agents/plans/outfitter-start/` containing:
+
 1. Scan results showing what needs conversion (SCAN.md)
 2. Stage-by-stage task files tracking progress (stages/)
 3. Clear completion criteria for each stage
@@ -91,12 +96,14 @@ Produce a structured adoption plan at `.agents/plans/outfitter-start/` containin
 ### Constraints
 
 **DO:**
+
 - Load fieldguide first — it has the patterns, this skill has the workflow
 - Run the setup script to generate the plan
 - Work through stages in dependency order
 - Mark progress in `stages/overview.md`
 
 **DON'T:**
+
 - Skip the scan phase
 - Duplicate fieldguide content (reference it instead)
 - Work on blocked stages before dependencies complete
@@ -136,16 +143,16 @@ The script will refuse to run if a plan already exists (won't override).
 
 ### What to Review in SCAN.md
 
-| Finding | Meaning |
-|---------|---------|
-| 0 throws, 0 custom errors | Greenfield — skip to Foundation, use fieldguide presets |
-| 1-5 throws | Low effort — straightforward conversions |
-| 6-15 throws | Medium effort — plan your approach |
-| 16+ throws | High effort — work through stages methodically |
-| Custom error classes | Map each to taxonomy (see `stages/errors.md`) |
-| High console count | Lots of logging to convert (see `stages/handlers.md`) |
-| Package Discovery table | Review all `@outfitter/*` options before installing |
-| High blast radius handlers | Split into caller-focused sub-phases before converting |
+| Finding                    | Meaning                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| 0 throws, 0 custom errors  | Greenfield — skip to Foundation, use fieldguide presets |
+| 1-5 throws                 | Low effort — straightforward conversions                |
+| 6-15 throws                | Medium effort — plan your approach                      |
+| 16+ throws                 | High effort — work through stages methodically          |
+| Custom error classes       | Map each to taxonomy (see `stages/errors.md`)           |
+| High console count         | Lots of logging to convert (see `stages/handlers.md`)   |
+| Package Discovery table    | Review all `@outfitter/*` options before installing     |
+| High blast radius handlers | Split into caller-focused sub-phases before converting  |
 
 `@outfitter/types` should be treated as **optional** unless the target project
 has clear branded-type or utility adoption points.
@@ -153,6 +160,7 @@ has clear branded-type or utility adoption points.
 ### Decision Point
 
 After reviewing SCAN.md:
+
 - **Greenfield?** → Load fieldguide, use its presets directly
 - **Migration?** → Continue to Stage 2
 
@@ -205,13 +213,13 @@ Work through stages in order, updating `stages/overview.md` as you go.
 
 Update `stages/overview.md` as you work:
 
-| Status | When to Use |
-|--------|-------------|
-| ⬜ Not Started | Haven't begun this stage |
-| 🟡 In Progress | Currently working on it |
-| ✅ Complete | All checklist items done |
-| 🔴 Blocked | Waiting on another stage |
-| ⏭️ Skipped | Not applicable (e.g., no MCP tools) |
+| Status         | When to Use                         |
+| -------------- | ----------------------------------- |
+| ⬜ Not Started | Haven't begun this stage            |
+| 🟡 In Progress | Currently working on it             |
+| ✅ Complete    | All checklist items done            |
+| 🔴 Blocked     | Waiting on another stage            |
+| ⏭️ Skipped     | Not applicable (e.g., no MCP tools) |
 
 ### Quick Reference
 
@@ -267,13 +275,13 @@ rm -rf .agents/plans/outfitter-start
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| [references/new-project-scaffolding.md](references/new-project-scaffolding.md) | Full guide for new project setup |
-| [scripts/setup.sh](scripts/setup.sh) | Entry point — generates migration plan |
-| [migration/assessment.md](migration/assessment.md) | Decision tree for scope evaluation |
-| [migration/patterns-quick-ref.md](migration/patterns-quick-ref.md) | Quick lookup → links to fieldguide |
-| [references/manual-scan.md](references/manual-scan.md) | Manual ripgrep commands |
+| File                                                                           | Purpose                                |
+| ------------------------------------------------------------------------------ | -------------------------------------- |
+| [references/new-project-scaffolding.md](references/new-project-scaffolding.md) | Full guide for new project setup       |
+| [scripts/setup.sh](scripts/setup.sh)                                           | Entry point — generates migration plan |
+| [migration/assessment.md](migration/assessment.md)                             | Decision tree for scope evaluation     |
+| [migration/patterns-quick-ref.md](migration/patterns-quick-ref.md)             | Quick lookup → links to fieldguide     |
+| [references/manual-scan.md](references/manual-scan.md)                         | Manual ripgrep commands                |
 
 ## Related Skills
 

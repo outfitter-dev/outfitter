@@ -53,6 +53,7 @@ Run iterative cycles until the issue is resolved:
 ### Context Accumulation
 
 Each loop iteration passes forward:
+
 - Original error context
 - Investigation findings from debugger
 - Review feedback from reviewer
@@ -67,6 +68,7 @@ If you catch yourself wanting to "just try something" — stop. Return to invest
 ## Context Handoff (for initial dispatch)
 
 When dispatching to the debugger subagent, include:
+
 - Exact error messages or unexpected behavior
 - Stack traces if available
 - Recent changes (git diff context)

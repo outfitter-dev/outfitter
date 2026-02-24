@@ -95,6 +95,7 @@ const daemonDir = getDaemonDir("waymark");
 ```
 
 Path resolution follows XDG standards:
+
 - `$XDG_RUNTIME_DIR` takes precedence if set
 - Linux: Falls back to `/run/user/<uid>`
 - macOS: Uses `$TMPDIR`
@@ -156,8 +157,8 @@ if (pid !== undefined) {
 
 ```typescript
 interface LockHandle {
-  readonly lockPath: string;  // Path to the lock file
-  readonly pid: number;       // PID that owns the lock
+  readonly lockPath: string; // Path to the lock file
+  readonly pid: number; // PID that owns the lock
 }
 ```
 
@@ -173,8 +174,8 @@ import { createDaemon, type DaemonOptions } from "@outfitter/daemon";
 const options: DaemonOptions = {
   name: "my-daemon",
   pidFile: "/var/run/my-daemon.pid",
-  logger: myLogger,           // Optional @outfitter/logging instance
-  shutdownTimeout: 10000,     // Optional, default: 5000ms
+  logger: myLogger, // Optional @outfitter/logging instance
+  shutdownTimeout: 10000, // Optional, default: 5000ms
 };
 
 const daemon = createDaemon(options);
@@ -200,8 +201,8 @@ if (startResult.isErr()) {
 }
 
 // Check running state
-console.log("Running:", daemon.isRunning());  // true
-console.log("State:", daemon.state);          // "running"
+console.log("Running:", daemon.isRunning()); // true
+console.log("State:", daemon.state); // "running"
 
 // Stop gracefully (also triggered by SIGTERM/SIGINT)
 const stopResult = await daemon.stop();
@@ -214,14 +215,15 @@ if (stopResult.isErr()) {
 
 The daemon follows a state machine:
 
-| State | Description |
-|-------|-------------|
-| `stopped` | Initial state, daemon not running |
+| State      | Description                                  |
+| ---------- | -------------------------------------------- |
+| `stopped`  | Initial state, daemon not running            |
 | `starting` | Transitioning to running (creating PID file) |
-| `running` | Daemon is active and processing |
-| `stopping` | Graceful shutdown in progress |
+| `running`  | Daemon is active and processing              |
+| `stopping` | Graceful shutdown in progress                |
 
 State transitions:
+
 - `stopped` -> `starting` -> `running` (via `start()`)
 - `running` -> `stopping` -> `stopped` (via `stop()` or signal)
 - `starting` -> `stopped` (if start fails)
@@ -374,7 +376,7 @@ checker.register({
 ```typescript
 const status = await checker.check();
 
-console.log("Overall healthy:", status.healthy);  // true only if ALL checks pass
+console.log("Overall healthy:", status.healthy); // true only if ALL checks pass
 console.log("Uptime (seconds):", status.uptime);
 console.log("Checks:", status.checks);
 // {
@@ -402,13 +404,13 @@ interface HealthCheck {
 
 interface HealthCheckResult {
   healthy: boolean;
-  message?: string;  // Error message on failure
+  message?: string; // Error message on failure
 }
 
 interface HealthStatus {
-  healthy: boolean;                          // true only if ALL checks pass
+  healthy: boolean; // true only if ALL checks pass
   checks: Record<string, HealthCheckResult>; // Individual results
-  uptime: number;                            // Seconds since checker created
+  uptime: number; // Seconds since checker created
 }
 
 interface HealthChecker {
@@ -433,11 +435,11 @@ const error = new DaemonError({
 
 // Error codes
 type DaemonErrorCode =
-  | "ALREADY_RUNNING"    // Daemon start requested but already running
-  | "NOT_RUNNING"        // Daemon stop requested but not running
-  | "SHUTDOWN_TIMEOUT"   // Graceful shutdown exceeded timeout
-  | "PID_ERROR"          // PID file operations failed
-  | "START_FAILED";      // Daemon failed to start
+  | "ALREADY_RUNNING" // Daemon start requested but already running
+  | "NOT_RUNNING" // Daemon stop requested but not running
+  | "SHUTDOWN_TIMEOUT" // Graceful shutdown exceeded timeout
+  | "PID_ERROR" // PID file operations failed
+  | "START_FAILED"; // Daemon failed to start
 ```
 
 ### Connection Errors
@@ -478,11 +480,11 @@ const lockError = new LockError({
 
 ## Platform Support
 
-| Platform | Socket Type | Runtime Dir |
-|----------|-------------|-------------|
-| Linux | Unix domain socket | `$XDG_RUNTIME_DIR` or `/run/user/<uid>` |
-| macOS | Unix domain socket | `$TMPDIR` |
-| Windows | Named pipe | `%TEMP%` |
+| Platform | Socket Type        | Runtime Dir                             |
+| -------- | ------------------ | --------------------------------------- |
+| Linux    | Unix domain socket | `$XDG_RUNTIME_DIR` or `/run/user/<uid>` |
+| macOS    | Unix domain socket | `$TMPDIR`                               |
+| Windows  | Named pipe         | `%TEMP%`                                |
 
 ## Related Packages
 

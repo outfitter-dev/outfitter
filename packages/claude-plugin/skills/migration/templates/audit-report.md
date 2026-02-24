@@ -6,27 +6,27 @@
 
 ## Summary
 
-| Category | Count | Files |
-|----------|-------|-------|
-| Exceptions (`throw`) | {{THROW_COUNT}} | {{THROW_FILES}} |
-| Try/Catch blocks | {{TRY_CATCH_COUNT}} | {{TRY_CATCH_FILES}} |
-| Console logging | {{CONSOLE_COUNT}} | {{CONSOLE_FILES}} |
-| Hardcoded paths | {{PATH_COUNT}} | {{PATH_FILES}} |
-| Custom error classes | {{ERROR_CLASS_COUNT}} | — |
-| Documentation files | {{DOC_COUNT}} | — |
-| **Unknowns** | {{UNKNOWN_COUNT}} | — |
+| Category             | Count                 | Files               |
+| -------------------- | --------------------- | ------------------- |
+| Exceptions (`throw`) | {{THROW_COUNT}}       | {{THROW_FILES}}     |
+| Try/Catch blocks     | {{TRY_CATCH_COUNT}}   | {{TRY_CATCH_FILES}} |
+| Console logging      | {{CONSOLE_COUNT}}     | {{CONSOLE_FILES}}   |
+| Hardcoded paths      | {{PATH_COUNT}}        | {{PATH_FILES}}      |
+| Custom error classes | {{ERROR_CLASS_COUNT}} | —                   |
+| Documentation files  | {{DOC_COUNT}}         | —                   |
+| **Unknowns**         | {{UNKNOWN_COUNT}}     | —                   |
 
 ## Estimated Effort
 
-| Stage | Scope | Effort |
-|-------|-------|--------|
-| Foundation | Setup | Low |
-| Handlers | {{HANDLER_COUNT}} functions | {{HANDLER_EFFORT}} |
-| Errors | {{ERROR_CLASS_COUNT}} classes | {{ERROR_EFFORT}} |
-| Paths | {{PATH_COUNT}} usages | {{PATH_EFFORT}} |
-| Adapters | {{ADAPTER_COUNT}} commands/tools | {{ADAPTER_EFFORT}} |
-| Documents | {{DOC_COUNT}} files | {{DOC_EFFORT}} |
-| Unknowns | {{UNKNOWN_COUNT}} items | Review required |
+| Stage      | Scope                            | Effort             |
+| ---------- | -------------------------------- | ------------------ |
+| Foundation | Setup                            | Low                |
+| Handlers   | {{HANDLER_COUNT}} functions      | {{HANDLER_EFFORT}} |
+| Errors     | {{ERROR_CLASS_COUNT}} classes    | {{ERROR_EFFORT}}   |
+| Paths      | {{PATH_COUNT}} usages            | {{PATH_EFFORT}}    |
+| Adapters   | {{ADAPTER_COUNT}} commands/tools | {{ADAPTER_EFFORT}} |
+| Documents  | {{DOC_COUNT}} files              | {{DOC_EFFORT}}     |
+| Unknowns   | {{UNKNOWN_COUNT}} items          | Review required    |
 
 ## Dependencies to Add
 
@@ -35,6 +35,7 @@ bun add @outfitter/contracts @outfitter/logging @outfitter/config
 ```
 
 Optional:
+
 ```bash
 bun add @outfitter/cli      # If building CLI
 bun add @outfitter/mcp      # If building MCP server

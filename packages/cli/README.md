@@ -56,11 +56,11 @@ output(errors, { stream: process.stderr });
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `mode` | `OutputMode` | auto | Force a specific output mode |
-| `stream` | `WritableStream` | `stdout` | Stream to write to |
-| `pretty` | `boolean` | `false` | Pretty-print JSON output |
+| Option   | Type             | Default  | Description                  |
+| -------- | ---------------- | -------- | ---------------------------- |
+| `mode`   | `OutputMode`     | auto     | Force a specific output mode |
+| `stream` | `WritableStream` | `stdout` | Stream to write to           |
+| `pretty` | `boolean`        | `false`  | Pretty-print JSON output     |
 
 **Output Modes:**
 
@@ -108,10 +108,10 @@ const ids = await collectIds(args.ids, {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `allowFile` | `boolean` | `true` | Allow `@file` expansion |
-| `allowStdin` | `boolean` | `true` | Allow `@-` for stdin |
+| Option       | Type      | Default | Description             |
+| ------------ | --------- | ------- | ----------------------- |
+| `allowFile`  | `boolean` | `true`  | Allow `@file` expansion |
+| `allowStdin` | `boolean` | `true`  | Allow `@-` for stdin    |
 
 #### `expandFileArg(input, options?)`
 
@@ -132,11 +132,11 @@ const content = await expandFileArg(args.content, {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `encoding` | `BufferEncoding` | `utf-8` | File encoding |
-| `maxSize` | `number` | - | Maximum file size in bytes |
-| `trim` | `boolean` | `false` | Trim whitespace |
+| Option     | Type             | Default | Description                |
+| ---------- | ---------------- | ------- | -------------------------- |
+| `encoding` | `BufferEncoding` | `utf-8` | File encoding              |
+| `maxSize`  | `number`         | -       | Maximum file size in bytes |
+| `trim`     | `boolean`        | `false` | Trim whitespace            |
 
 #### `parseGlob(pattern, options?)`
 
@@ -154,13 +154,13 @@ const files = await parseGlob("src/**/*.ts", {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cwd` | `string` | `process.cwd()` | Working directory |
-| `ignore` | `string[]` | `[]` | Patterns to exclude |
-| `onlyFiles` | `boolean` | `false` | Only match files |
-| `onlyDirectories` | `boolean` | `false` | Only match directories |
-| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
+| Option            | Type       | Default         | Description            |
+| ----------------- | ---------- | --------------- | ---------------------- |
+| `cwd`             | `string`   | `process.cwd()` | Working directory      |
+| `ignore`          | `string[]` | `[]`            | Patterns to exclude    |
+| `onlyFiles`       | `boolean`  | `false`         | Only match files       |
+| `onlyDirectories` | `boolean`  | `false`         | Only match directories |
+| `followSymlinks`  | `boolean`  | `false`         | Follow symbolic links  |
 
 #### `parseKeyValue(input)`
 
@@ -219,15 +219,15 @@ if (result.isOk()) {
 
 **Filter Operators:**
 
-| Prefix | Operator | Description |
-|--------|----------|-------------|
-| (none) | `eq` | Equals (default) |
-| `!` | `ne` | Not equals |
-| `>` | `gt` | Greater than |
-| `<` | `lt` | Less than |
-| `>=` | `gte` | Greater than or equal |
-| `<=` | `lte` | Less than or equal |
-| `~` | `contains` | Contains substring |
+| Prefix | Operator   | Description           |
+| ------ | ---------- | --------------------- |
+| (none) | `eq`       | Equals (default)      |
+| `!`    | `ne`       | Not equals            |
+| `>`    | `gt`       | Greater than          |
+| `<`    | `lt`       | Less than             |
+| `>=`   | `gte`      | Greater than or equal |
+| `<=`   | `lte`      | Less than or equal    |
+| `~`    | `contains` | Contains substring    |
 
 #### `parseSortSpec(input)`
 
@@ -268,13 +268,13 @@ if (result.isOk()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `trim` | `boolean` | `false` | Trim whitespace |
+| Option      | Type      | Default | Description          |
+| ----------- | --------- | ------- | -------------------- |
+| `trim`      | `boolean` | `false` | Trim whitespace      |
 | `lowercase` | `boolean` | `false` | Convert to lowercase |
-| `minLength` | `number` | - | Minimum length |
-| `maxLength` | `number` | - | Maximum length |
-| `pattern` | `RegExp` | - | Required pattern |
+| `minLength` | `number`  | -       | Minimum length       |
+| `maxLength` | `number`  | -       | Maximum length       |
+| `pattern`   | `RegExp`  | -       | Required pattern     |
 
 #### `confirmDestructive(options)`
 
@@ -366,7 +366,12 @@ if (flags.reset) {
 Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../docs/cli/conventions.md) for the complete catalog.
 
 ```typescript
-import { composePresets, verbosePreset, cwdPreset, forcePreset } from "@outfitter/cli/flags";
+import {
+  composePresets,
+  verbosePreset,
+  cwdPreset,
+  forcePreset,
+} from "@outfitter/cli/flags";
 import { outputModePreset } from "@outfitter/cli/query";
 
 const preset = composePresets(verbosePreset(), cwdPreset(), forcePreset());
@@ -382,6 +387,7 @@ command("deploy")
 **Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`
 
 **Additional modules:**
+
 - `@outfitter/cli/verbs` — Standard verb families (`create`, `modify`, `remove`, `list`, `show`)
 - `@outfitter/cli/query` — Output mode and jq expression presets
 - `@outfitter/cli/completion` — Shell completion script generation
@@ -390,19 +396,20 @@ command("deploy")
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OUTFITTER_ENV` | Environment profile (`development`, `production`, `test`) | `production` |
-| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`) | - |
-| `OUTFITTER_JSON` | Set to `1` to force JSON output | - |
-| `OUTFITTER_JSONL` | Set to `1` to force JSONL output (takes priority over JSON) | - |
-| `XDG_STATE_HOME` | State directory for pagination | Platform-specific |
+| Variable            | Description                                                 | Default           |
+| ------------------- | ----------------------------------------------------------- | ----------------- |
+| `OUTFITTER_ENV`     | Environment profile (`development`, `production`, `test`)   | `production`      |
+| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`)                          | -                 |
+| `OUTFITTER_JSON`    | Set to `1` to force JSON output                             | -                 |
+| `OUTFITTER_JSONL`   | Set to `1` to force JSONL output (takes priority over JSON) | -                 |
+| `XDG_STATE_HOME`    | State directory for pagination                              | Platform-specific |
 
 ### `resolveVerbose(verbose?)`
 
 Resolve verbose mode from environment configuration. Use this instead of hardcoding verbosity so your CLI responds to `OUTFITTER_ENV` and `OUTFITTER_VERBOSE` automatically.
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
 2. Explicit `verbose` parameter (from `--verbose` CLI flag)
 3. `OUTFITTER_ENV` profile defaults (`true` in development)
@@ -449,18 +456,18 @@ The bridge uses `optsWithGlobals()` so global and subcommand `--json` flags both
 
 Exit codes are automatically determined from error categories:
 
-| Category | Exit Code |
-|----------|-----------|
-| `validation` | 1 |
-| `not_found` | 2 |
-| `conflict` | 3 |
-| `permission` | 4 |
-| `timeout` | 5 |
-| `rate_limit` | 6 |
-| `network` | 7 |
-| `internal` | 8 |
-| `auth` | 9 |
-| `cancelled` | 130 |
+| Category     | Exit Code |
+| ------------ | --------- |
+| `validation` | 1         |
+| `not_found`  | 2         |
+| `conflict`   | 3         |
+| `permission` | 4         |
+| `timeout`    | 5         |
+| `rate_limit` | 6         |
+| `network`    | 7         |
+| `internal`   | 8         |
+| `auth`       | 9         |
+| `cancelled`  | 130       |
 
 ### Tagged Errors
 
@@ -478,9 +485,18 @@ exitWithError(error); // Exits with code 2
 All types are exported for TypeScript consumers:
 
 ```typescript
-import type { CLIConfig, CommandConfig, CommandAction, CommandFlags } from "@outfitter/cli/command";
+import type {
+  CLIConfig,
+  CommandConfig,
+  CommandAction,
+  CommandFlags,
+} from "@outfitter/cli/command";
 import type { OutputMode, OutputOptions } from "@outfitter/cli/output";
-import type { CollectIdsOptions, ExpandFileOptions, ParseGlobOptions } from "@outfitter/cli/input";
+import type {
+  CollectIdsOptions,
+  ExpandFileOptions,
+  ParseGlobOptions,
+} from "@outfitter/cli/input";
 import type { PaginationState, CursorOptions } from "@outfitter/cli/pagination";
 ```
 

@@ -6,6 +6,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join, resolve } from "node:path";
+
 import { isPathWithin, validatePackageName } from "../engine/names.js";
 
 describe("isPathWithin", () => {

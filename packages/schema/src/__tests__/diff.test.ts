@@ -1,11 +1,13 @@
 import { describe, expect, it } from "bun:test";
+
 import {
   createActionRegistry,
   defineAction,
   Result,
 } from "@outfitter/contracts";
 import { z } from "zod";
-import { diffSurfaceMaps } from "../diff.js";
+
+import { diffSurfaceMaps } from "../diff/index.js";
 import { generateSurfaceMap } from "../surface.js";
 
 // =============================================================================

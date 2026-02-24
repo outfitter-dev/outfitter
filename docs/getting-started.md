@@ -21,6 +21,7 @@ bun run dev
 ```
 
 **Output:**
+
 ```
 my-cli v0.1.0
 
@@ -32,6 +33,7 @@ Commands:
 ```
 
 This creates a working CLI with:
+
 - Typed commands via Commander.js
 - Human-first output with JSON/JSONL opt-in
 - Error handling with exit codes
@@ -59,7 +61,12 @@ bun add @outfitter/cli @outfitter/contracts @outfitter/config
 Handlers are transport-agnostic functions that return `Result` types. Create `src/handlers/list-notes.ts`:
 
 ```typescript
-import { Result, NotFoundError, type Handler, type HandlerContext } from "@outfitter/contracts";
+import {
+  Result,
+  NotFoundError,
+  type Handler,
+  type HandlerContext,
+} from "@outfitter/contracts";
 
 interface ListNotesInput {
   limit?: number;
@@ -83,10 +90,11 @@ const notes: Note[] = [
   { id: "2", title: "Second note", tags: ["personal"] },
 ];
 
-export const listNotes: Handler<ListNotesInput, ListNotesOutput, NotFoundError> = async (
-  input,
-  ctx
-) => {
+export const listNotes: Handler<
+  ListNotesInput,
+  ListNotesOutput,
+  NotFoundError
+> = async (input, ctx) => {
   ctx.logger.debug("Listing notes", { input });
 
   let filtered = notes;
@@ -122,28 +130,27 @@ const cli = createCLI({
   description: "A simple note-taking CLI",
 });
 
-cli.program
-  .addCommand(
-    command("list")
-      .description("List all notes")
-      .option("-l, --limit <n>", "Limit results", parseInt)
-      .option("-t, --tag <tag>", "Filter by tag")
-      .action(async ({ flags }) => {
-        const ctx = createContext({});
+cli.program.addCommand(
+  command("list")
+    .description("List all notes")
+    .option("-l, --limit <n>", "Limit results", parseInt)
+    .option("-t, --tag <tag>", "Filter by tag")
+    .action(async ({ flags }) => {
+      const ctx = createContext({});
 
-        const result = await listNotes(
-          { limit: flags.limit, tag: flags.tag },
-          ctx
-        );
+      const result = await listNotes(
+        { limit: flags.limit, tag: flags.tag },
+        ctx
+      );
 
-        if (result.isErr()) {
-          exitWithError(result.error);
-        }
+      if (result.isErr()) {
+        exitWithError(result.error);
+      }
 
-        await output(result.value);
-      })
-      .build()
-  );
+      await output(result.value);
+    })
+    .build()
+);
 
 cli.program.parse();
 ```
@@ -174,6 +181,7 @@ bun run dev list
 ```
 
 **Output:**
+
 ```
 notes: 2 results
 
@@ -187,8 +195,15 @@ bun run dev list --json
 ```
 
 **Output:**
+
 ```json
-{"notes":[{"id":"1","title":"First note","tags":["work"]},{"id":"2","title":"Second note","tags":["personal"]}],"total":2}
+{
+  "notes": [
+    { "id": "1", "title": "First note", "tags": ["work"] },
+    { "id": "2", "title": "Second note", "tags": ["personal"] }
+  ],
+  "total": 2
+}
 ```
 
 ```bash
@@ -197,6 +212,7 @@ bun run dev list --tag work --limit 5
 ```
 
 **Output:**
+
 ```
 notes: 1 result
 

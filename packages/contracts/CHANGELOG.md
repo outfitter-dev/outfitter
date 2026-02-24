@@ -17,7 +17,6 @@
 ### Minor Changes
 
 - d683522: Add `ValidationError.fromMessage()` and improve error factory documentation.
-
   - **feat**: `ValidationError.fromMessage(message, context?)` for freeform validation errors (#335)
   - **docs**: Error factory quick-reference table and casing behavior documentation (#336)
 
@@ -26,7 +25,6 @@
 ### Minor Changes
 
 - Add error ergonomics and Result boundary helpers
-
   - Add optional `context` field to `NotFoundError` and `ValidationError` for attaching structured domain metadata
   - Add `static create()` factory methods to all 10 error classes for concise construction
   - Add `AmbiguousError` class (category: `validation`, code: `AMBIGUOUS_MATCH`) for disambiguation scenarios with a `candidates` field
@@ -41,7 +39,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -60,7 +57,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

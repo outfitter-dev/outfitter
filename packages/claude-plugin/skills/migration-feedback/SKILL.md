@@ -13,7 +13,8 @@ Create GitHub issues on `outfitter-dev/stack` for problems discovered during mig
 ## When to Use
 
 Invoke this skill when migration work reveals:
-- **Bugs** in @outfitter/* packages
+
+- **Bugs** in @outfitter/\* packages
 - **Missing features** that would help migration
 - **Unclear documentation** that caused confusion
 - **Pattern gaps** where the stack doesn't have guidance
@@ -21,19 +22,20 @@ Invoke this skill when migration work reveals:
 
 ## Issue Categories
 
-| Category | Label | Example |
-|----------|-------|---------|
-| `bug` | `bug` | Package throws when it should return Result |
-| `enhancement` | `enhancement` | Add helper for common migration pattern |
-| `docs` | `documentation` | Handler contract docs missing edge case |
-| `unclear-pattern` | `question` | How to handle X scenario with Result types |
-| `dx` | `dx` | Error message unclear, hard to debug |
+| Category          | Label           | Example                                     |
+| ----------------- | --------------- | ------------------------------------------- |
+| `bug`             | `bug`           | Package throws when it should return Result |
+| `enhancement`     | `enhancement`   | Add helper for common migration pattern     |
+| `docs`            | `documentation` | Handler contract docs missing edge case     |
+| `unclear-pattern` | `question`      | How to handle X scenario with Result types  |
+| `dx`              | `dx`            | Error message unclear, hard to debug        |
 
 ## Creating an Issue
 
 ### 1. Gather Context
 
 Before creating, collect:
+
 - Package name (`@outfitter/contracts`, etc.)
 - Specific function or pattern
 - What was expected vs actual behavior

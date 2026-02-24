@@ -30,11 +30,11 @@ bun .claude/skills/check-skill-formatting/scripts/lint-placeholders.ts ${ARGUMEN
 
 Instructional placeholders using brackets instead of braces:
 
-| Found | Expected |
-|-------|----------|
+| Found                             | Expected                            |
+| --------------------------------- | ----------------------------------- |
 | `[Complete AWS-specific content]` | `{ complete AWS-specific content }` |
-| `[Details follow...]` | `{ details follow }` |
-| `[Section content]` | `{ section content }` |
+| `[Details follow...]`             | `{ details follow }`                |
+| `[Section content]`               | `{ section content }`               |
 
 ### What it skips
 
@@ -55,17 +55,17 @@ bun plugins/fieldguides/scripts/lint-fences.ts ${ARGUMENTS:-plugins/}
 
 ### What it catches
 
-- **Bare fences**: Opening `` ``` `` without a language (suggests one based on content heuristics)
-- **Broken nesting**: Inner fence with same backtick count as outer fence (use ```` ```` ```` for outer)
+- **Bare fences**: Opening ` ``` ` without a language (suggests one based on content heuristics)
+- **Broken nesting**: Inner fence with same backtick count as outer fence (use ` ` ```` for outer)
 
 ### Fix patterns
 
-| Issue | Fix |
-|-------|-----|
-| `` ``` `` with TypeScript content | `` ```typescript `` |
-| `` ``` `` with shell commands | `` ```bash `` |
-| `` ``` `` with plain text | `` ```text `` |
-| Inner `` ``` `` inside outer `` ``` `` | Use ```` ```` ```` for outer fence |
+| Issue                              | Fix                          |
+| ---------------------------------- | ---------------------------- |
+| ` ``` ` with TypeScript content    | ` ```typescript `            |
+| ` ``` ` with shell commands        | ` ```bash `                  |
+| ` ``` ` with plain text            | ` ```text `                  |
+| Inner ` ``` ` inside outer ` ``` ` | Use ` ` ```` for outer fence |
 
 ## Relative Paths Linter
 
@@ -82,8 +82,8 @@ bun plugins/fieldguides/scripts/lint-relative-paths.ts ${ARGUMENTS:-plugins/}
 
 ### Fix patterns
 
-| Issue | Fix |
-|-------|-----|
-| `[link](../skill-name/SKILL.md)` | `[link](${CLAUDE_PLUGIN_ROOT}/skills/skill-name/SKILL.md)` |
-| `[link](../patterns/handler.md)` | `[link](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md)` |
-| `../EXTERNAL.md` (outside plugin) | Remove link or reference by name |
+| Issue                             | Fix                                                        |
+| --------------------------------- | ---------------------------------------------------------- |
+| `[link](../skill-name/SKILL.md)`  | `[link](${CLAUDE_PLUGIN_ROOT}/skills/skill-name/SKILL.md)` |
+| `[link](../patterns/handler.md)`  | `[link](${CLAUDE_PLUGIN_ROOT}/shared/patterns/handler.md)` |
+| `../EXTERNAL.md` (outside plugin) | Remove link or reference by name                           |

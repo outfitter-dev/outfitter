@@ -16,24 +16,24 @@ From main conversation, Claude uses Task tool:
 
 ## Parameters
 
-| Parameter | Required | Purpose |
-|-----------|----------|---------|
-| `description` | Yes | Short summary (3-5 words) of what agent will do |
-| `prompt` | Yes | Detailed instructions for the agent |
-| `subagent_type` | Yes | Agent identifier (see naming below) |
-| `resume` | No | Agent ID to resume a previous conversation |
-| `model` | No | Override model for this invocation |
-| `run_in_background` | No | Run agent asynchronously |
+| Parameter           | Required | Purpose                                         |
+| ------------------- | -------- | ----------------------------------------------- |
+| `description`       | Yes      | Short summary (3-5 words) of what agent will do |
+| `prompt`            | Yes      | Detailed instructions for the agent             |
+| `subagent_type`     | Yes      | Agent identifier (see naming below)             |
+| `resume`            | No       | Agent ID to resume a previous conversation      |
+| `model`             | No       | Override model for this invocation              |
+| `run_in_background` | No       | Run agent asynchronously                        |
 
 ## Agent Naming
 
 The `subagent_type` format depends on agent source:
 
-| Source | Format | Example |
-|--------|--------|---------|
-| Built-in | `name` | `Explore`, `Plan`, `general-purpose` |
-| Same plugin | `name` | `security-reviewer` (file: `agents/security-reviewer.md`) |
-| Other plugin | `name` | `reviewer`, `quartermaster` |
+| Source       | Format | Example                                                   |
+| ------------ | ------ | --------------------------------------------------------- |
+| Built-in     | `name` | `Explore`, `Plan`, `general-purpose`                      |
+| Same plugin  | `name` | `security-reviewer` (file: `agents/security-reviewer.md`) |
+| Other plugin | `name` | `reviewer`, `quartermaster`                               |
 
 **Note**: Examples in this file use short names. Use `/agents` to see available agents.
 
@@ -83,12 +83,14 @@ Agents can be resumed to continue previous conversations:
 ```
 
 **How it works:**
+
 - Each agent execution returns a unique `agentId`
 - Agent conversation stored in separate transcript
 - Use `resume` parameter with the `agentId` to continue
 - Agent resumes with full context from previous conversation
 
 **Use cases:**
+
 - Long-running research broken into multiple sessions
 - Iterative refinement without losing context
 - Multi-step workflows with sequential context
@@ -99,12 +101,12 @@ Run agents asynchronously while continuing other work. Essential for parallel wo
 
 ### When to Use Background Execution
 
-| Scenario | Background? | Rationale |
-|----------|-------------|-----------|
-| Independent parallel reviews | Yes | No dependencies, faster completion |
-| Sequential pipeline | No | Each step needs previous result |
-| Long-running analysis while user waits | Yes | Can work on other tasks meanwhile |
-| Quick consultation mid-task | No | Need immediate answer to continue |
+| Scenario                               | Background? | Rationale                          |
+| -------------------------------------- | ----------- | ---------------------------------- |
+| Independent parallel reviews           | Yes         | No dependencies, faster completion |
+| Sequential pipeline                    | No          | Each step needs previous result    |
+| Long-running analysis while user waits | Yes         | Can work on other tasks meanwhile  |
+| Quick consultation mid-task            | No          | Need immediate answer to continue  |
 
 ### Launching Background Agents
 
@@ -135,11 +137,11 @@ Use the `TaskOutput` tool to get results from background agents:
 
 **Parameters:**
 
-| Parameter | Default | Purpose |
-|-----------|---------|---------|
-| `task_id` | Required | ID returned when launching background agent |
-| `block` | `true` | Wait for completion (`true`) or check status (`false`) |
-| `timeout` | `30000` | Max wait time in milliseconds (up to 600000) |
+| Parameter | Default  | Purpose                                                |
+| --------- | -------- | ------------------------------------------------------ |
+| `task_id` | Required | ID returned when launching background agent            |
+| `block`   | `true`   | Wait for completion (`true`) or check status (`false`) |
+| `timeout` | `30000`  | Max wait time in milliseconds (up to 600000)           |
 
 **Blocking mode** (`block: true`): Waits until agent completes or timeout.
 

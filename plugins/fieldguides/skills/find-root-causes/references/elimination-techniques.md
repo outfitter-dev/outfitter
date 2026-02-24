@@ -48,10 +48,10 @@ Round 3: Test with options 13-18
 ### Efficiency
 
 | Problem Size | Binary Search Steps | Linear Search Steps |
-|--------------|---------------------|---------------------|
-| 10 items | ~4 | 10 |
-| 100 items | ~7 | 100 |
-| 1000 items | ~10 | 1000 |
+| ------------ | ------------------- | ------------------- |
+| 10 items     | ~4                  | 10                  |
+| 100 items    | ~7                  | 100                 |
+| 1000 items   | ~10                 | 1000                |
 
 ## Variable Isolation
 
@@ -197,27 +197,27 @@ Isolating environment-specific factors.
 
 ### Difference Checklist
 
-| Category | Working | Failing |
-|----------|---------|---------|
-| OS/Version | | |
-| Runtime version | | |
-| Dependencies | | |
-| Config files | | |
-| Environment variables | | |
-| Network/ports | | |
-| Permissions | | |
-| Resource limits | | |
+| Category              | Working | Failing |
+| --------------------- | ------- | ------- |
+| OS/Version            |         |         |
+| Runtime version       |         |         |
+| Dependencies          |         |         |
+| Config files          |         |         |
+| Environment variables |         |         |
+| Network/ports         |         |         |
+| Permissions           |         |         |
+| Resource limits       |         |         |
 
 ## Technique Selection Guide
 
-| Situation | Recommended Technique |
-|-----------|----------------------|
-| Many commits to check | Binary search (git bisect) |
-| Multiple config options | Variable isolation |
-| Finite component list | Process of elimination |
-| Multi-stage pipeline | Divide and conquer |
-| "Works elsewhere" | Environment bisection |
-| Unknown scope | Start with divide and conquer, then specialize |
+| Situation               | Recommended Technique                          |
+| ----------------------- | ---------------------------------------------- |
+| Many commits to check   | Binary search (git bisect)                     |
+| Multiple config options | Variable isolation                             |
+| Finite component list   | Process of elimination                         |
+| Multi-stage pipeline    | Divide and conquer                             |
+| "Works elsewhere"       | Environment bisection                          |
+| Unknown scope           | Start with divide and conquer, then specialize |
 
 ## Combining Techniques
 

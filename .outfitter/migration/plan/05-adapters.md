@@ -10,11 +10,7 @@ Wrap handlers with CLI and/or MCP transport adapters.
 
 ## CLI Commands
 
-
-
 ## MCP Tools
-
-
 
 ## CLI Patterns
 
@@ -87,5 +83,3 @@ it("handles tool call", async () => {
 - [ ] Error codes verified
 
 ## Notes
-
-

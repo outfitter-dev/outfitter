@@ -5,6 +5,7 @@ How agents should use Tasks to track work and maintain visibility.
 ## Why Tasks Matter
 
 Tasks are powerful for agents because:
+
 - **Visibility** — user sees exactly what agent is doing
 - **Planning** — forces structured thinking before action
 - **Recovery** — context survives compaction
@@ -107,6 +108,7 @@ Expand dynamically by calling `TaskCreate` as scope becomes clear.
 ## When to TaskCreate
 
 Add tasks when you discover:
+
 - **New files** to process
 - **New concerns** to address
 - **Follow-up investigations** from findings
@@ -116,6 +118,7 @@ Add tasks when you discover:
 ## Discipline Rules
 
 **DO:**
+
 - `TaskCreate` before starting work
 - `TaskUpdate` to `in_progress` as you begin each task
 - `TaskUpdate` to `completed` immediately when done
@@ -123,6 +126,7 @@ Add tasks when you discover:
 - Keep subjects action-oriented
 
 **DON'T:**
+
 - Batch multiple completions together
 - Leave task subjects vague ("do the thing")
 - Have multiple `in_progress` at once
@@ -138,6 +142,7 @@ completed    → Done (mark immediately)
 ```
 
 If blocked:
+
 - `TaskCreate` for the blocker
 - Use `addBlockedBy` to link
 - Keep blocked task pending or in_progress
@@ -146,6 +151,7 @@ If blocked:
 ## Visibility Goal
 
 **Anyone reading your task list should understand:**
+
 - What you're currently doing (in_progress)
 - What remains to be done (pending)
 - What you've completed (completed with descriptions)

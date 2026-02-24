@@ -53,12 +53,12 @@ Discovery -> Init -> Components -> Validate -> Distribute -> Marketplace
 
 Before creating a plugin, clarify:
 
-| Question | Impact |
-|----------|--------|
-| What problem does this solve? | Plugin scope and features |
-| Who will use it? | Distribution method |
-| What components are needed? | Commands, agents, hooks, MCP servers |
-| Where will it live? | Personal, project, or marketplace |
+| Question                      | Impact                               |
+| ----------------------------- | ------------------------------------ |
+| What problem does this solve? | Plugin scope and features            |
+| Who will use it?              | Distribution method                  |
+| What components are needed?   | Commands, agents, hooks, MCP servers |
+| Where will it live?           | Personal, project, or marketplace    |
 
 ## Stage 2: Initialization
 
@@ -118,8 +118,20 @@ my-marketplace/
   },
   "strict": false,
   "plugins": [
-    {"name": "plugin-a", "source": "./plugin-a", "version": "1.0.0", "description": "Plugin A", "license": "MIT"},
-    {"name": "plugin-b", "source": "./plugin-b", "version": "1.0.0", "description": "Plugin B", "license": "MIT"}
+    {
+      "name": "plugin-a",
+      "source": "./plugin-a",
+      "version": "1.0.0",
+      "description": "Plugin A",
+      "license": "MIT"
+    },
+    {
+      "name": "plugin-b",
+      "source": "./plugin-b",
+      "version": "1.0.0",
+      "description": "Plugin B",
+      "license": "MIT"
+    }
   ]
 }
 ```
@@ -161,6 +173,7 @@ description: "Security-focused code reviewer"
 ---
 
 You are a security expert. When reviewing code:
+
 1. Check for vulnerabilities
 2. Verify input validation
 3. Report issues with severity levels
@@ -180,7 +193,12 @@ Two ways to define hooks:
     "PreToolUse": [
       {
         "matcher": "Write|Edit",
-        "hooks": [{"type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh"}]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh"
+          }
+        ]
       }
     ]
   }
@@ -205,7 +223,7 @@ Add reusable methodology patterns in `skills/` directory. For skill authoring, l
     "my-server": {
       "command": "${CLAUDE_PLUGIN_ROOT}/servers/my-server",
       "args": ["--config", "${CLAUDE_PLUGIN_ROOT}/config.json"],
-      "env": {"API_KEY": "${MY_API_KEY}"}
+      "env": { "API_KEY": "${MY_API_KEY}" }
     }
   }
 }
@@ -230,18 +248,21 @@ Before distribution, validate the plugin. See [audit.md](references/audit.md) fo
 ### Quick Checklist
 
 **Structure:**
+
 - [ ] Standalone: plugin.json exists and is valid JSON
 - [ ] Marketplace (consolidated): metadata in marketplace.json with `strict: false`
 - [ ] Required fields present (name, version, description)
 - [ ] Plugin name matches directory name (kebab-case)
 
 **Components:**
+
 - [ ] Commands have YAML frontmatter with description
 - [ ] Agents have YAML frontmatter with name and description
 - [ ] Hook scripts are executable (`chmod +x`)
 - [ ] Hook matchers are valid regex
 
 **Documentation:**
+
 - [ ] README.md with installation instructions
 - [ ] LICENSE file included
 
@@ -265,6 +286,7 @@ See [structure.md](references/structure.md) for validation commands and detailed
 ### Semantic Versioning
 
 Follow semver (MAJOR.MINOR.PATCH):
+
 - **MAJOR**: Breaking changes
 - **MINOR**: New features (backward compatible)
 - **PATCH**: Bug fixes
@@ -286,11 +308,11 @@ gh release create v1.0.0 --title "v1.0.0" --notes "Initial release"
 
 ### Distribution Methods
 
-| Method | Best For | Setup |
-|--------|----------|-------|
-| GitHub repo | Public/team plugins | Push to GitHub |
-| Git URL | GitLab, Bitbucket | Full URL in source |
-| Local path | Development/testing | Relative path |
+| Method      | Best For            | Setup              |
+| ----------- | ------------------- | ------------------ |
+| GitHub repo | Public/team plugins | Push to GitHub     |
+| Git URL     | GitLab, Bitbucket   | Full URL in source |
+| Local path  | Development/testing | Relative path      |
 
 See [distribution.md](references/distribution.md) for packaging, CI/CD, and release automation.
 
@@ -305,10 +327,8 @@ Create `.claude-plugin/marketplace.json`:
 ```json
 {
   "name": "my-marketplace",
-  "owner": {"name": "Team Name", "email": "team@example.com"},
-  "plugins": [
-    {"name": "my-plugin", "source": "./plugins/my-plugin"}
-  ]
+  "owner": { "name": "Team Name", "email": "team@example.com" },
+  "plugins": [{ "name": "my-plugin", "source": "./plugins/my-plugin" }]
 }
 ```
 
@@ -360,21 +380,25 @@ See [marketplace.md](references/marketplace.md) for full schema, team configurat
 ## Troubleshooting
 
 **Plugin not loading:**
+
 - Standalone: verify plugin.json syntax: `jq empty .claude-plugin/plugin.json`
 - Marketplace: verify marketplace.json syntax and `strict: false` if no plugin.json
 - Check plugin name matches directory
 - Ensure required fields present (name, version, description)
 
 **Commands not appearing:**
+
 - Verify YAML frontmatter exists
 - Check files in `commands/` directory
 
 **Hooks not executing:**
+
 - Check scripts executable: `chmod +x`
 - Verify matcher regex correct
 - Test hook script independently
 
 **MCP servers failing:**
+
 - Verify server binary exists
 - Check environment variables set
 - Review logs: `~/Library/Logs/Claude/`
@@ -392,6 +416,7 @@ See [marketplace.md](references/marketplace.md) for full schema, team configurat
 <rules>
 
 ALWAYS:
+
 - Standalone plugins: create `.claude-plugin/plugin.json`
 - Marketplace local plugins: use `strict: false` and consolidate metadata in marketplace.json
 - External plugins: let the external repo own its manifest
@@ -401,6 +426,7 @@ ALWAYS:
 - Follow semantic versioning
 
 NEVER:
+
 - Hardcode secrets in plugin files
 - Use path traversal (`../`) for cross-plugin resources
 - Skip validation before distribution

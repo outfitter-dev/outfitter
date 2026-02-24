@@ -7,17 +7,20 @@ Guidance for different repository types.
 Examples: git, docker, kubectl, gh, npm
 
 ### Discovery Focus
+
 - Command structure and subcommands
 - Common workflows users perform
 - Flags that are hard to remember
 - Error messages and recovery patterns
 
 ### Pattern Types
+
 - Command sequences (e.g., add → commit → push)
 - Option combinations (e.g., docker build with caching)
 - Error handling workflows
 
 ### Primary Components
+
 - **Skills**: For multi-step workflows
 - **Commands**: Entry points for common operations
 
@@ -43,17 +46,20 @@ kubectl-plugin/
 Examples: Stripe, OpenAI, AWS SDK, Prisma
 
 ### Discovery Focus
+
 - API surface and key methods
 - Authentication patterns
 - Common integration scenarios
 - Error handling conventions
 
 ### Pattern Types
+
 - Request/response patterns
 - Error handling and retry logic
 - Configuration and initialization
 
 ### Primary Components
+
 - **Skills**: Integration patterns and best practices
 - **Commands**: Quick API calls
 
@@ -78,17 +84,20 @@ stripe-plugin/
 Examples: filesystem, database, memory, linear
 
 ### Discovery Focus
+
 - Tool manifest and capabilities
 - Common operation sequences
 - State management patterns
 - Error modes and recovery
 
 ### Pattern Types
+
 - Tool combinations (read → transform → write)
 - State management across calls
 - Coordination patterns
 
 ### Primary Components
+
 - **Skills**: Coordinated operations
 - **Hooks**: Automatic triggers based on state
 
@@ -114,17 +123,20 @@ database-mcp-plugin/
 Examples: webpack, vite, esbuild, turbo
 
 ### Discovery Focus
+
 - Configuration options
 - Plugin/loader ecosystem
 - Build optimization patterns
 - Common troubleshooting
 
 ### Pattern Types
+
 - Configuration generation
 - Performance optimization sequences
 - Migration between tools
 
 ### Primary Components
+
 - **Skills**: Configuration and optimization
 - **Commands**: Quick actions (build, analyze)
 
@@ -135,17 +147,20 @@ Examples: webpack, vite, esbuild, turbo
 Examples: jest, vitest, playwright, cypress
 
 ### Discovery Focus
+
 - Test patterns and best practices
 - Configuration options
 - Mocking and fixtures
 - CI integration
 
 ### Pattern Types
+
 - Test organization
 - Fixture management
 - Coverage optimization
 
 ### Primary Components
+
 - **Skills**: Testing methodology
 - **Hooks**: Pre-commit test runs
 
@@ -155,9 +170,9 @@ Examples: jest, vitest, playwright, cypress
 
 Use quick mode (skip Stages 3-4) when:
 
-| Criterion | Quick Mode | Full Pipeline |
-|-----------|------------|---------------|
-| Commands | < 5 | 5+ |
-| Scope | Single purpose | Multi-purpose |
-| Patterns | Obvious | Needs discovery |
+| Criterion    | Quick Mode            | Full Pipeline   |
+| ------------ | --------------------- | --------------- |
+| Commands     | < 5                   | 5+              |
+| Scope        | Single purpose        | Multi-purpose   |
+| Patterns     | Obvious               | Needs discovery |
 | User request | "Just get it working" | "Comprehensive" |

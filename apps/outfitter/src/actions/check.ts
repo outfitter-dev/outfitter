@@ -5,6 +5,7 @@
  */
 
 import { resolve } from "node:path";
+
 import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import {

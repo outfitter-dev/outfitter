@@ -13,6 +13,7 @@ import {
   type Theme,
 } from "@outfitter/cli/colors";
 import { hasNoColorEnv, resolveForceColorEnv } from "@outfitter/cli/terminal";
+
 import { getThemeMethodsByCategory } from "../registry.js";
 import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";

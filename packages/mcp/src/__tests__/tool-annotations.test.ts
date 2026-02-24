@@ -5,8 +5,10 @@
  * readOnlyHint, destructiveHint, idempotentHint, openWorldHint
  */
 import { describe, expect, it } from "bun:test";
+
 import { type HandlerContext, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import {
   adaptHandler,
   createMcpServer,

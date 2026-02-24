@@ -1,11 +1,28 @@
 {
   "name": "@outfitter/cli",
-  "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
   "version": "0.5.2",
-  "type": "module",
+  "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
+  "keywords": [
+    "bun",
+    "cli",
+    "colors",
+    "commander",
+    "outfitter",
+    "renderers",
+    "terminal",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/cli"
+  },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -107,7 +124,9 @@
       }
     }
   },
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/cli",
     "test": "bun test",
@@ -123,13 +142,6 @@
     "better-result": "catalog:",
     "commander": "catalog:"
   },
-  "peerDependencies": {
-    "@outfitter/config": ">=0.3.0",
-    "@outfitter/contracts": ">=0.2.0",
-    "@outfitter/schema": ">=0.1.0",
-    "@outfitter/types": ">=0.2.0",
-    "zod": ">=4.0.0"
-  },
   "devDependencies": {
     "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
@@ -138,26 +150,14 @@
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },
+  "peerDependencies": {
+    "@outfitter/config": ">=0.3.0",
+    "@outfitter/contracts": ">=0.2.0",
+    "@outfitter/schema": ">=0.1.0",
+    "@outfitter/types": ">=0.2.0",
+    "zod": ">=4.0.0"
+  },
   "engines": {
     "bun": ">=1.3.9"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/cli"
-  },
-  "license": "MIT",
-  "keywords": [
-    "cli",
-    "commander",
-    "typescript",
-    "bun",
-    "outfitter",
-    "terminal",
-    "colors",
-    "renderers"
-  ]
+  }
 }

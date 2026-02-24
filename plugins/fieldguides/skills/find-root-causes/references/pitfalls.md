@@ -6,18 +6,19 @@ Cognitive biases and resistance patterns that derail root cause investigation.
 
 Rationalizations that prevent finding root cause:
 
-| Thought | Why It's Wrong | Counter |
-|---------|----------------|---------|
-| "I already looked at that" | Memory is unreliable under pressure | Re-examine with fresh evidence |
-| "That can't be the issue" | Assumptions block investigation | Test anyway, let evidence decide |
-| "We need to fix this quickly" | Pressure leads to random changes | Methodical investigation is faster |
-| "The logs don't show anything" | Absence of evidence != evidence of absence | Consider what logs might be missing |
-| "It worked before" | Systems change constantly | Past behavior doesn't guarantee current |
-| "Let me just try this one thing" | Random trial without hypothesis wastes time | Form hypothesis first |
+| Thought                          | Why It's Wrong                              | Counter                                 |
+| -------------------------------- | ------------------------------------------- | --------------------------------------- |
+| "I already looked at that"       | Memory is unreliable under pressure         | Re-examine with fresh evidence          |
+| "That can't be the issue"        | Assumptions block investigation             | Test anyway, let evidence decide        |
+| "We need to fix this quickly"    | Pressure leads to random changes            | Methodical investigation is faster      |
+| "The logs don't show anything"   | Absence of evidence != evidence of absence  | Consider what logs might be missing     |
+| "It worked before"               | Systems change constantly                   | Past behavior doesn't guarantee current |
+| "Let me just try this one thing" | Random trial without hypothesis wastes time | Form hypothesis first                   |
 
 ### Warning Signs
 
 You're falling into resistance when:
+
 - Same thoughts recurring without new evidence
 - Feeling defensive about previous conclusions
 - Avoiding re-testing areas you "already checked"
@@ -26,6 +27,7 @@ You're falling into resistance when:
 ### Recovery
 
 When you catch yourself:
+
 1. Pause the investigation
 2. Write down current assumptions
 3. Challenge each assumption with "how do I know this?"
@@ -45,16 +47,19 @@ Tendency to see evidence supporting existing beliefs.
 ### Counter-Strategies
 
 **Actively seek disconfirmation**:
+
 - Ask "what would prove me wrong?"
 - Design tests specifically to disprove hypothesis
 - Have someone else review your reasoning
 
 **Test alternative hypotheses**:
+
 - Even when confident in one theory
 - Especially when confident in one theory
 - Give each hypothesis fair testing time
 
 **Document objectively**:
+
 - Record all evidence, not just supporting evidence
 - Note your confidence level before and after tests
 - Track hypothesis changes over time
@@ -65,12 +70,12 @@ Mistaking timing for cause.
 
 ### Common Mistakes
 
-| Observation | Faulty Conclusion |
-|-------------|-------------------|
-| "It started when X changed" | X caused it |
-| "Happens at specific time" | Time is the cause |
-| "Only affects user Y" | User Y is doing something wrong |
-| "Works after restart" | Memory/state is the issue |
+| Observation                 | Faulty Conclusion               |
+| --------------------------- | ------------------------------- |
+| "It started when X changed" | X caused it                     |
+| "Happens at specific time"  | Time is the cause               |
+| "Only affects user Y"       | User Y is doing something wrong |
+| "Works after restart"       | Memory/state is the issue       |
 
 ### Verification Steps
 
@@ -86,6 +91,7 @@ Observation: "Bug only appears on Mondays"
 Bad conclusion: "Something about Monday causes the bug"
 
 Better investigation:
+
 - What's different on Monday? (traffic patterns, batch jobs, fresh caches)
 - Is it Monday specifically or "first day after weekend"?
 - Does it happen on holidays?

@@ -26,13 +26,13 @@ NOT for: performance optimization, general code review, feature implementation
 
 Load the `maintain-tasks` skill for stage tracking. Each stage feeds the next.
 
-| Stage | Trigger | activeForm |
-|-------|---------|------------|
-| Threat Model | Session start | "Building threat model" |
-| Attack Surface | Model complete | "Mapping attack surface" |
-| Vulnerability Scan | Surface mapped | "Scanning for vulnerabilities" |
-| Risk Assessment | Vulns identified | "Assessing risk levels" |
-| Remediation Plan | Risks assessed | "Planning remediation" |
+| Stage              | Trigger          | activeForm                     |
+| ------------------ | ---------------- | ------------------------------ |
+| Threat Model       | Session start    | "Building threat model"        |
+| Attack Surface     | Model complete   | "Mapping attack surface"       |
+| Vulnerability Scan | Surface mapped   | "Scanning for vulnerabilities" |
+| Risk Assessment    | Vulns identified | "Assessing risk levels"        |
+| Remediation Plan   | Risks assessed   | "Planning remediation"         |
 
 Critical findings: add urgent remediation task immediately.
 
@@ -42,12 +42,12 @@ Critical findings: add urgent remediation task immediately.
 
 CVSS-aligned severity for findings:
 
-| Indicator | Severity | CVSS | Examples |
-|-----------|----------|------|----------|
-| **Critical** | 9.0-10.0 | RCE, auth bypass, mass data exposure, admin privesc |
-| **High** | 7.0-8.9 | SQLi, stored XSS, auth weakness, sensitive data leak |
-| **Medium** | 4.0-6.9 | CSRF, reflected XSS, info disclosure, weak crypto |
-| **Low** | 0.1-3.9 | Misconfig, missing headers, verbose errors |
+| Indicator    | Severity | CVSS                                                 | Examples |
+| ------------ | -------- | ---------------------------------------------------- | -------- |
+| **Critical** | 9.0-10.0 | RCE, auth bypass, mass data exposure, admin privesc  |
+| **High**     | 7.0-8.9  | SQLi, stored XSS, auth weakness, sensitive data leak |
+| **Medium**   | 4.0-6.9  | CSRF, reflected XSS, info disclosure, weak crypto    |
+| **Low**      | 0.1-3.9  | Misconfig, missing headers, verbose errors           |
 
 Format: "**Critical** RCE via unsanitized shell command"
 
@@ -59,14 +59,14 @@ Format: "**Critical** RCE via unsanitized shell command"
 
 Systematic threat identification by category:
 
-| Threat | Question | Check |
-|--------|----------|-------|
-| **S**poofing | Can attacker impersonate? | Auth mechanisms, tokens, sessions, API keys |
-| **T**ampering | Can attacker modify data? | Input validation, integrity checks, DB access |
-| **R**epudiation | Can actions be denied? | Audit logs, signatures, timestamps |
-| **I**nfo Disclosure | Can attacker access secrets? | Encryption, access control, logging |
-| **D**enial of Service | Can attacker disrupt? | Rate limits, timeouts, input size |
-| **E**levation | Can attacker gain access? | Authz checks, RBAC, least privilege |
+| Threat                | Question                     | Check                                         |
+| --------------------- | ---------------------------- | --------------------------------------------- |
+| **S**poofing          | Can attacker impersonate?    | Auth mechanisms, tokens, sessions, API keys   |
+| **T**ampering         | Can attacker modify data?    | Input validation, integrity checks, DB access |
+| **R**epudiation       | Can actions be denied?       | Audit logs, signatures, timestamps            |
+| **I**nfo Disclosure   | Can attacker access secrets? | Encryption, access control, logging           |
+| **D**enial of Service | Can attacker disrupt?        | Rate limits, timeouts, input size             |
+| **E**levation         | Can attacker gain access?    | Authz checks, RBAC, least privilege           |
 
 ## Attack Trees
 
@@ -91,6 +91,7 @@ For each branch assess: feasibility, impact, detection, current defenses.
 ## Trust Boundaries
 
 Identify where data crosses trust levels:
+
 - Browser to server
 - Server to database
 - Service to third-party API
@@ -105,6 +106,7 @@ Every boundary needs validation.
 ## Entry Points
 
 **External**:
+
 - HTTP/API endpoints (REST, GraphQL, gRPC)
 - WebSocket connections
 - File uploads
@@ -112,12 +114,14 @@ Every boundary needs validation.
 - Webhooks
 
 **Data Inputs**:
+
 - User data (forms, query params, headers)
 - File content (type, size, payload)
 - API payloads (JSON, XML)
 - Database queries
 
 **Auth Boundaries**:
+
 - Public (no auth)
 - Authenticated
 - Admin/privileged
@@ -131,6 +135,7 @@ Every boundary needs validation.
 4. Third-party integrations
 
 For each entry point document:
+
 - Auth required? (none/user/admin)
 - Input validated? (none/basic/strict)
 - Rate limited?
@@ -143,40 +148,44 @@ For each entry point document:
 
 ## Quick Reference
 
-| Vulnerability | Vulnerable | Secure |
-|--------------|------------|--------|
-| SQL Injection | String concat in query | Parameterized queries |
-| XSS | innerHTML with user data | textContent or DOMPurify |
-| Command Injection | exec() with user input | execFile() with array |
-| Path Traversal | Direct path concat | basename + prefix check |
-| Weak Password | MD5/SHA1/plain | bcrypt (12+) or argon2 |
-| Predictable Token | Math.random/Date.now | crypto.randomBytes(32) |
-| Broken Auth | Client-side role check | Server-side every request |
-| IDOR | No ownership check | Verify user owns resource |
-| Hardcoded Secret | API key in code | Environment variable |
-| Info Leak | Stack trace to user | Generic error, log detail |
+| Vulnerability     | Vulnerable               | Secure                    |
+| ----------------- | ------------------------ | ------------------------- |
+| SQL Injection     | String concat in query   | Parameterized queries     |
+| XSS               | innerHTML with user data | textContent or DOMPurify  |
+| Command Injection | exec() with user input   | execFile() with array     |
+| Path Traversal    | Direct path concat       | basename + prefix check   |
+| Weak Password     | MD5/SHA1/plain           | bcrypt (12+) or argon2    |
+| Predictable Token | Math.random/Date.now     | crypto.randomBytes(32)    |
+| Broken Auth       | Client-side role check   | Server-side every request |
+| IDOR              | No ownership check       | Verify user owns resource |
+| Hardcoded Secret  | API key in code          | Environment variable      |
+| Info Leak         | Stack trace to user      | Generic error, log detail |
 
 ## Critical Checks
 
 **Authentication**:
+
 - Passwords: bcrypt/argon2, cost 12+
 - Sessions: crypto.randomBytes(32), httpOnly, secure, sameSite
 - JWT: verify signature, specify algorithm, short expiry
 - Reset: random token, 1hr expiry, hash stored token
 
 **Authorization**:
+
 - Server-side on every request
 - Verify ownership before resource access
 - Explicit allowlist for mass assignment
 - No role elevation from client input
 
 **Input Validation**:
+
 - Type, length, format on all inputs
 - Parameterized queries (never concat)
 - Escape/sanitize HTML output
 - Validate file uploads (type, size, content)
 
 **Cryptography**:
+
 - AES-256-GCM, SHA-256+
 - Never MD5, SHA1, DES, ECB
 - Secrets from env, never hardcoded
@@ -190,18 +199,18 @@ See [vulnerability-patterns.md](references/vulnerability-patterns.md) for code e
 
 2021 OWASP Top 10 categories. Check each during vulnerability scan.
 
-| # | Category | Key CWEs | Top Mitigations |
-|---|----------|----------|-----------------|
-| A01 | Broken Access Control | 200, 352, 639 | Server-side checks, ownership validation |
-| A02 | Cryptographic Failures | 259, 327, 331 | TLS, bcrypt, no hardcoded secrets |
-| A03 | Injection | 20, 79, 89 | Parameterized queries, input validation |
-| A04 | Insecure Design | 209, 256, 434 | Threat modeling, rate limiting |
-| A05 | Security Misconfiguration | 16, 611, 614 | Security headers, disable debug |
-| A06 | Vulnerable Components | 1035, 1104 | npm audit, Dependabot |
-| A07 | Auth Failures | 287, 307, 521 | Strong passwords, MFA, rate limiting |
-| A08 | Integrity Failures | 502, 494 | Verify signatures, schema validation |
-| A09 | Logging Failures | 117, 532, 778 | Audit logs, redact sensitive data |
-| A10 | SSRF | 918 | URL allowlist, block private IPs |
+| #   | Category                  | Key CWEs      | Top Mitigations                          |
+| --- | ------------------------- | ------------- | ---------------------------------------- |
+| A01 | Broken Access Control     | 200, 352, 639 | Server-side checks, ownership validation |
+| A02 | Cryptographic Failures    | 259, 327, 331 | TLS, bcrypt, no hardcoded secrets        |
+| A03 | Injection                 | 20, 79, 89    | Parameterized queries, input validation  |
+| A04 | Insecure Design           | 209, 256, 434 | Threat modeling, rate limiting           |
+| A05 | Security Misconfiguration | 16, 611, 614  | Security headers, disable debug          |
+| A06 | Vulnerable Components     | 1035, 1104    | npm audit, Dependabot                    |
+| A07 | Auth Failures             | 287, 307, 521 | Strong passwords, MFA, rate limiting     |
+| A08 | Integrity Failures        | 502, 494      | Verify signatures, schema validation     |
+| A09 | Logging Failures          | 117, 532, 778 | Audit logs, redact sensitive data        |
+| A10 | SSRF                      | 918           | URL allowlist, block private IPs         |
 
 See [owasp-top-10.md](references/owasp-top-10.md) for detailed breakdowns with code examples.
 
@@ -256,12 +265,15 @@ Update todos as you progress. Use [review-checklist.md](references/review-checkl
 **Category**: {OWASP} | **CWE**: {ID} | **File**: {PATH}:{LINES}
 
 ### Issue
+
 {CLEAR_EXPLANATION}
 
 ### Impact
+
 {WHAT_ATTACKER_COULD_DO}
 
 ### Fix
+
 {SPECIFIC_REMEDIATION_WITH_CODE}
 ```
 
@@ -271,18 +283,20 @@ Update todos as you progress. Use [review-checklist.md](references/review-checkl
 # Security Audit: {SCOPE}
 
 | Severity | Count |
-|----------|-------|
-| Critical | N |
-| High | N |
-| Medium | N |
-| Low | N |
+| -------- | ----- |
+| Critical | N     |
+| High     | N     |
+| Medium   | N     |
+| Low      | N     |
 
 ## Key Findings
+
 1. {TOP_CRITICAL}
 2. {SECOND}
 3. {THIRD}
 
 ## Recommendations
+
 - Immediate: {CRITICAL_FIXES}
 - Short-term: {HIGH_MEDIUM}
 - Long-term: {HARDENING}
@@ -295,6 +309,7 @@ See [report-templates.md](references/report-templates.md) for full templates.
 <rules>
 
 ALWAYS:
+
 - Start with threat modeling before code review
 - Map complete attack surface
 - Check against all OWASP Top 10 categories
@@ -305,6 +320,7 @@ ALWAYS:
 - Update todos when transitioning stages
 
 NEVER:
+
 - Skip threat modeling for "simple" features
 - Assume input is trustworthy
 - Rely on client-side security
@@ -318,16 +334,19 @@ NEVER:
 <references>
 
 **Deep dives**:
+
 - [vulnerability-patterns.md](references/vulnerability-patterns.md) - secure vs vulnerable code examples
 - [owasp-top-10.md](references/owasp-top-10.md) - detailed OWASP categories with CWE mappings
 - [review-checklist.md](references/review-checklist.md) - complete security review checklist
 - [report-templates.md](references/report-templates.md) - finding and audit report templates
 
 **Related skills**:
+
 - codebase-analysis - evidence-based investigation foundation
 - debugging - when security issues manifest as bugs
 
 **External**:
+
 - [OWASP Top 10](https://owasp.org/Top10/)
 - [CWE Database](https://cwe.mitre.org/)
 - [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/)

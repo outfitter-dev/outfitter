@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { type FenceFinding, scanFences } from "../lint-fences";
 
 function findings(content: string): FenceFinding[] {

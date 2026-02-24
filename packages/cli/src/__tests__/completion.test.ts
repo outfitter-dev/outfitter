@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { Command } from "commander";
+
 import { createCompletionCommand, generateCompletion } from "../completion.js";
 
 describe("createCompletionCommand", () => {

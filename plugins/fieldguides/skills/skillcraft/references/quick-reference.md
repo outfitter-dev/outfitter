@@ -64,16 +64,16 @@ Clear criteria for when this applies
 
 ## Common Mistakes to Avoid
 
-| Mistake | Fix |
-|---------|-----|
-| Verbose SKILL.md (1000+ lines) | Keep under 500, move details to references/ |
-| "NEVER do X" without alternatives | "ALWAYS do Y; NEVER do X" |
-| Deeply nested references (3+ levels) | Keep 1 level deep with table of contents |
-| No version control | Track in git with semantic versioning |
-| No examples | Add 1-2 examples in references/examples.md |
-| Unclear scope (skill does too much) | One skill, one job |
-| Testing only with Sonnet | Test with Haiku, Sonnet, AND Opus |
-| Static text without action | Make it executable/testable |
+| Mistake                              | Fix                                         |
+| ------------------------------------ | ------------------------------------------- |
+| Verbose SKILL.md (1000+ lines)       | Keep under 500, move details to references/ |
+| "NEVER do X" without alternatives    | "ALWAYS do Y; NEVER do X"                   |
+| Deeply nested references (3+ levels) | Keep 1 level deep with table of contents    |
+| No version control                   | Track in git with semantic versioning       |
+| No examples                          | Add 1-2 examples in references/examples.md  |
+| Unclear scope (skill does too much)  | One skill, one job                          |
+| Testing only with Sonnet             | Test with Haiku, Sonnet, AND Opus           |
+| Static text without action           | Make it executable/testable                 |
 
 ## Testing Checklist
 
@@ -132,21 +132,21 @@ Execution (dynamic)        → references/ loaded on demand
 
 ## Degrees of Freedom
 
-| Level | Format | When to Use |
-|-------|--------|-------------|
-| **High** | Text instructions | Creative tasks, multiple valid approaches |
-| **Medium** | Pseudocode | Standard patterns with variation allowed |
-| **Low** | Scripts | Security-critical, exact sequence required |
+| Level      | Format            | When to Use                                |
+| ---------- | ----------------- | ------------------------------------------ |
+| **High**   | Text instructions | Creative tasks, multiple valid approaches  |
+| **Medium** | Pseudocode        | Standard patterns with variation allowed   |
+| **Low**    | Scripts           | Security-critical, exact sequence required |
 
 **Examples:**
 
-| Task | Freedom |
-|------|---------|
-| Error message formatting | High |
-| API integration | Medium |
-| Authentication flows | Low |
-| Database migrations | Low |
-| Code formatting | High |
+| Task                     | Freedom |
+| ------------------------ | ------- |
+| Error message formatting | High    |
+| API integration          | Medium  |
+| Authentication flows     | Low     |
+| Database migrations      | Low     |
+| Code formatting          | High    |
 
 ## Security Quick Check
 
@@ -204,13 +204,13 @@ See [patterns.md](./patterns.md) for detailed examples.
 
 ## When to Create a Skill vs Other Tools
 
-| Need | Use |
-|------|-----|
-| Multi-step workflow with judgment | **Skill** |
-| Simple shortcut/expansion | Slash command |
-| Data access / API integration | MCP server |
-| Specialized autonomous work | Subagent |
-| Event-triggered automation | Hook |
+| Need                              | Use           |
+| --------------------------------- | ------------- |
+| Multi-step workflow with judgment | **Skill**     |
+| Simple shortcut/expansion         | Slash command |
+| Data access / API integration     | MCP server    |
+| Specialized autonomous work       | Subagent      |
+| Event-triggered automation        | Hook          |
 
 ## Getting Help
 

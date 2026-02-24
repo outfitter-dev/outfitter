@@ -88,18 +88,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ## [1.0.0] - 2025-01-20
 
 ### Added
+
 - Initial release
 - Command X for feature Y
 
 ### Changed
+
 - Updated behavior of command A
 
 ### Fixed
+
 - Fixed bug in agent B
 
 ## [0.1.0] - 2025-01-10
 
 ### Added
+
 - Initial development version
 ```
 
@@ -107,11 +111,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 **Format:** `MAJOR.MINOR.PATCH`
 
-| Type | When | Example |
-|------|------|---------|
-| MAJOR | Breaking changes | 1.0.0 -> 2.0.0 |
+| Type  | When                      | Example        |
+| ----- | ------------------------- | -------------- |
+| MAJOR | Breaking changes          | 1.0.0 -> 2.0.0 |
 | MINOR | New features (compatible) | 1.0.0 -> 1.1.0 |
-| PATCH | Bug fixes | 1.0.0 -> 1.0.1 |
+| PATCH | Bug fixes                 | 1.0.0 -> 1.0.1 |
 
 ### Version Bump Workflow
 
@@ -243,7 +247,7 @@ name: Release Plugin
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 
 jobs:
   release:
@@ -281,7 +285,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: '*-v${{ steps.version.outputs.VERSION }}.zip'
+          files: "*-v${{ steps.version.outputs.VERSION }}.zip"
           generate_release_notes: true
 ```
 

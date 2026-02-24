@@ -16,6 +16,7 @@ bun run scripts/run.ts {{command_1}} [options]
 ```
 
 **Options:**
+
 - `--dry-run` — Preview without executing
 - `--verbose` — Show detailed output
 
@@ -68,11 +69,11 @@ All commands are designed to be safely re-run:
 
 ## Error Handling
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| Permission denied | Insufficient access | Check file/directory permissions |
-| Already exists | Resource conflict | Use `--force` to overwrite |
-| Not found | Missing dependency | Ensure prerequisites are installed |
+| Error             | Cause               | Solution                           |
+| ----------------- | ------------------- | ---------------------------------- |
+| Permission denied | Insufficient access | Check file/directory permissions   |
+| Already exists    | Resource conflict   | Use `--force` to overwrite         |
+| Not found         | Missing dependency  | Ensure prerequisites are installed |
 
 ## Tips
 

@@ -8,6 +8,7 @@ import {
   type ActionRegistry,
   createActionRegistry,
 } from "@outfitter/contracts";
+
 import { addAction, listBlocksAction } from "./actions/add.js";
 import { checkAction, checkTsdocAction } from "./actions/check.js";
 import { demoAction } from "./actions/demo.js";

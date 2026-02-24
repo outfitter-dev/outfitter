@@ -11,6 +11,7 @@ argument-hint: {YOUR_ARG_HINT} (e.g., "<file-path>")
 
 {ADDITIONAL_FILE_REFERENCES}
 Examples:
+
 - Single file: @src/utils/helpers.ts
 - Multiple files: @$1 and @$2
 - With arguments: @$1 for file path from user
@@ -21,6 +22,7 @@ Examples:
 
 Example:
 Provide a detailed explanation of:
+
 1. **Purpose**: What is this file responsible for?
 2. **Key Components**: Main functions, classes, and exports
 3. **Dependencies**: External libraries and internal imports

@@ -5,8 +5,10 @@
  */
 
 import { describe, expect, test } from "bun:test";
+
 import { InternalError, Result, ValidationError } from "@outfitter/contracts";
 import type { TsDocCheckResult } from "@outfitter/tooling";
+
 import { outfitterActions } from "../actions.js";
 import { runDocsApi } from "../commands/docs-api.js";
 

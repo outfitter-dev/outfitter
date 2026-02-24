@@ -23,12 +23,12 @@ Comprehensive technical reference for Claude Code event hooks.
 
 Hooks are configured in JSON settings files:
 
-| Location | Scope | Committed |
-|----------|-------|-----------|
-| `~/.claude/settings.json` | Personal (all projects) | No |
-| `.claude/settings.json` | Project (shared with team) | Yes |
-| `.claude/settings.local.json` | Project (local overrides) | No |
-| `plugin/hooks/hooks.json` | Plugin | Yes |
+| Location                      | Scope                      | Committed |
+| ----------------------------- | -------------------------- | --------- |
+| `~/.claude/settings.json`     | Personal (all projects)    | No        |
+| `.claude/settings.json`       | Project (shared with team) | Yes       |
+| `.claude/settings.local.json` | Project (local overrides)  | No        |
+| `plugin/hooks/hooks.json`     | Plugin                     | Yes       |
 
 ### Basic Structure
 
@@ -72,6 +72,7 @@ Hooks are configured in JSON settings files:
 **Type**: String (key)
 **Required**: At least one
 **Valid values**:
+
 - `PreToolUse`
 - `PostToolUse`
 - `PostToolUseFailure`
@@ -128,6 +129,7 @@ Hooks are configured in JSON settings files:
 **Description**: Pattern to match tools or event types
 
 **Syntax options:**
+
 - Simple: `"Write"` - Exact tool name
 - Regex: `"Edit|Write"` - OR pattern
 - Wildcard: `"*"` - All tools
@@ -135,7 +137,7 @@ Hooks are configured in JSON settings files:
 - MCP: `"mcp__server__tool"` - MCP tool pattern
 
 ```json
-{"matcher": "Write|Edit"}
+{ "matcher": "Write|Edit" }
 ```
 
 #### `hooks` (nested)
@@ -174,6 +176,7 @@ Hooks are configured in JSON settings files:
 **Description**: Shell command to execute
 
 **Features:**
+
 - Variable expansion: `$file`, `$CLAUDE_PROJECT_DIR`
 - Stdin: Receives JSON input
 - Stdout: Shown to user
@@ -194,6 +197,7 @@ Hooks are configured in JSON settings files:
 **Description**: Prompt sent to the Claude model or agent
 
 **Placeholders:**
+
 - `$ARGUMENTS` — Full context passed to the hook
 - `$TOOL_INPUT` — Tool input for tool-related events
 - `$TOOL_RESULT` — Tool result (PostToolUse only)
@@ -328,6 +332,7 @@ Executes **before** a tool runs. Can block or modify execution.
 **Can block**: Yes (exit code 2)
 
 **Common matchers**:
+
 - `Bash` - Shell commands
 - `Write` - File writing
 - `Edit` - File editing
@@ -340,6 +345,7 @@ Executes **before** a tool runs. Can block or modify execution.
 - `*` - All tools
 
 **Use cases**:
+
 - Validate bash commands before execution
 - Check file paths for security issues
 - Block dangerous operations
@@ -355,11 +361,13 @@ Executes **before** a tool runs. Can block or modify execution.
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/validate-bash.sh",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/validate-bash.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -377,12 +385,14 @@ Executes **after** a tool completes successfully.
 **Can block**: No (but can report issues)
 
 **Common matchers**:
+
 - `Write(*.ext)` - Specific file types
 - `Edit(*.ext)` - Specific file types
 - `Write|Edit` - Any file modification
 - `*` - All successful tools
 
 **Use cases**:
+
 - Auto-format code files
 - Run linters
 - Update documentation
@@ -398,11 +408,13 @@ Executes **after** a tool completes successfully.
     "PostToolUse": [
       {
         "matcher": "Write|Edit(*.ts)",
-        "hooks": [{
-          "type": "command",
-          "command": "biome check --write \"$file\"",
-          "timeout": 10
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "biome check --write \"$file\"",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
@@ -422,6 +434,7 @@ Executes when user submits a prompt to Claude.
 **Matcher**: Always `*`
 
 **Use cases**:
+
 - Add timestamp or date context
 - Add environment information
 - Log user activity
@@ -436,11 +449,13 @@ Executes when user submits a prompt to Claude.
     "UserPromptSubmit": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/add-context.sh",
-          "timeout": 2
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/add-context.sh",
+            "timeout": 2
+          }
+        ]
       }
     ]
   }
@@ -460,6 +475,7 @@ Executes when Claude Code sends a notification.
 **Matchers**: Notification type — `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`
 
 **Use cases**:
+
 - Send to external systems (Slack, email)
 - Log notifications
 - Trigger alerts
@@ -474,11 +490,13 @@ Executes when Claude Code sends a notification.
     "Notification": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/send-to-slack.sh",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/send-to-slack.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -498,6 +516,7 @@ Executes when main Claude agent finishes responding.
 **Matcher**: No matcher support (always fires)
 
 **Use cases**:
+
 - Clean up temporary resources
 - Send completion notifications
 - Update external systems
@@ -512,11 +531,13 @@ Executes when main Claude agent finishes responding.
     "Stop": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/on-completion.sh",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/on-completion.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -536,6 +557,7 @@ Executes when a subagent (Task tool) finishes.
 **Matchers**: Agent type name — e.g., `Explore`, `Plan`, `db-agent`
 
 **Use cases**:
+
 - Track subagent usage
 - Log subagent results
 - Trigger follow-up actions
@@ -550,11 +572,13 @@ Executes when a subagent (Task tool) finishes.
     "SubagentStop": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/log-subagent.sh",
-          "timeout": 3
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/log-subagent.sh",
+            "timeout": 3
+          }
+        ]
       }
     ]
   }
@@ -572,10 +596,12 @@ Executes before conversation compacts.
 **Can block**: No
 
 **Matchers**:
+
 - `manual` - User triggered via `/compact`
 - `auto` - Automatic compact
 
 **Use cases**:
+
 - Backup conversation
 - Archive important context
 - Update external summaries
@@ -590,11 +616,13 @@ Executes before conversation compacts.
     "PreCompact": [
       {
         "matcher": "manual",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/backup-conversation.sh",
-          "timeout": 10
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/backup-conversation.sh",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
@@ -612,12 +640,14 @@ Executes when session starts or resumes.
 **Can block**: No
 
 **Matchers**:
+
 - `startup` - Claude Code starts
 - `resume` - Session resumes (`--resume`, `--continue`)
 - `clear` - After `/clear` command
 - `compact` - After compact operation
 
 **Use cases**:
+
 - Display welcome message
 - Show git status
 - Load project context
@@ -632,11 +662,13 @@ Executes when session starts or resumes.
     "SessionStart": [
       {
         "matcher": "startup",
-        "hooks": [{
-          "type": "command",
-          "command": "echo 'Welcome!' && git status",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Welcome!' && git status",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -654,6 +686,7 @@ Executes when session ends.
 **Can block**: No
 
 **Matchers** (reasons):
+
 - `clear` - User ran `/clear`
 - `logout` - User logged out
 - `prompt_input_exit` - Exited during prompt input
@@ -661,6 +694,7 @@ Executes when session ends.
 - `other` - Other reasons
 
 **Use cases**:
+
 - Clean up resources
 - Save state
 - Log session metrics
@@ -675,11 +709,13 @@ Executes when session ends.
     "SessionEnd": [
       {
         "matcher": "*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/cleanup.sh",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/cleanup.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -711,6 +747,7 @@ Use `|` for OR logic:
 ```
 
 **Regex features:**
+
 - `|` - OR operator
 - `.` - Any character
 - `*` - Zero or more
@@ -731,10 +768,11 @@ Use `|` for OR logic:
 Match all tools:
 
 ```json
-{"matcher": "*"}  // Matches everything
+{ "matcher": "*" } // Matches everything
 ```
 
 **Use cases:**
+
 - Logging all tool usage
 - Global validation
 - Universal context injection
@@ -752,6 +790,7 @@ Match tools with specific file patterns:
 ```
 
 **Supported patterns:**
+
 - `*.ext` - Any file with extension
 - `path/*.ext` - Files in specific directory
 - `**/*.ext` - Recursive file match
@@ -1028,11 +1067,11 @@ exit 1
 
 **Behavior:**
 
-| Exit Code | Behavior | Stdout | Stderr |
-|-----------|----------|--------|--------|
-| 0 | Success | Shown to user | Ignored |
-| 2 | Block (PreToolUse only) | Ignored | Shown to Claude |
-| 1 or other | Non-blocking error | Ignored | Shown to user |
+| Exit Code  | Behavior                | Stdout        | Stderr          |
+| ---------- | ----------------------- | ------------- | --------------- |
+| 0          | Success                 | Shown to user | Ignored         |
+| 2          | Block (PreToolUse only) | Ignored       | Shown to Claude |
+| 1 or other | Non-blocking error      | Ignored       | Shown to user   |
 
 ### JSON Output (Advanced)
 
@@ -1058,31 +1097,38 @@ For complex responses:
 #### Field Reference
 
 **`continue`** (boolean)
+
 - `true`: Continue execution
 - `false`: Stop execution
 
 **`stopReason`** (string)
+
 - Message explaining why stopped
 - Shown to user
 
 **`suppressOutput`** (boolean)
+
 - `true`: Hide stdout from user
 - `false`: Show stdout
 
 **`systemMessage`** (string)
+
 - Info/warning message
 - Shown to user
 
 **`decision`** (string)
+
 - `"block"`: Block operation (PreToolUse)
 - `"approve"`: Approve operation
 - `undefined`: No decision
 
 **`reason`** (string)
+
 - Explanation for decision
 - Shown in context
 
 **`hookSpecificOutput`** (object)
+
 - Event-specific data
 - See below for details
 
@@ -1101,6 +1147,7 @@ For complex responses:
 ```
 
 **Permission decisions:**
+
 - `"allow"`: Approve tool use
 - `"deny"`: Block tool use
 - `"ask"`: Ask user for permission
@@ -1151,6 +1198,7 @@ exit 0
 ```
 
 **Use cases:**
+
 - Reference project scripts
 - Construct relative paths
 - Check project structure
@@ -1166,6 +1214,7 @@ exit 0
 ```
 
 **Use cases:**
+
 - Auto-format files
 - Run linters
 - Update related files
@@ -1183,6 +1232,7 @@ exit 0
 ```
 
 **Use cases:**
+
 - Reference plugin scripts
 - Load plugin resources
 - Access plugin data
@@ -1232,11 +1282,13 @@ exit 0
 ```
 
 **Behavior:**
+
 - Execution continues
 - Stdout shown to user
 - Stderr ignored
 
 **Use for:**
+
 - Successful validation
 - Informational output
 - Non-critical messages
@@ -1250,11 +1302,13 @@ exit 1
 ```
 
 **Behavior:**
+
 - Execution continues
 - Stderr shown to user
 - Stdout ignored
 
 **Use for:**
+
 - Warnings
 - Non-critical issues
 - Suggestions
@@ -1268,12 +1322,14 @@ exit 2
 ```
 
 **Behavior:**
+
 - PreToolUse: Blocks tool execution
 - PostToolUse: Reports error (doesn't block)
 - Stderr shown to Claude
 - Stdout ignored
 
 **Use for:**
+
 - Security violations
 - Policy enforcement
 - Dangerous operations
@@ -1347,6 +1403,7 @@ Execute multiple hooks sequentially:
 ```
 
 **Execution:**
+
 - Runs in order
 - If one fails (non-zero exit), subsequent hooks still run
 - All output collected and shown
@@ -1475,20 +1532,24 @@ Set appropriate timeouts:
   "hooks": {
     "PreToolUse": [
       {
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/validate.sh",
-          "timeout": 5
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/validate.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/format.sh",
-          "timeout": 30
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/format.sh",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
@@ -1496,6 +1557,7 @@ Set appropriate timeouts:
 ```
 
 **Guidelines:**
+
 - Validation: 3-5 seconds
 - Formatting: 10-30 seconds
 - Network operations: 30-60 seconds
@@ -1545,17 +1607,21 @@ MCP tools follow pattern: `mcp__<server>__<tool>`
     "PreToolUse": [
       {
         "matcher": "mcp__memory__.*",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/log-memory-ops.sh"
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/log-memory-ops.sh"
+          }
+        ]
       },
       {
         "matcher": "mcp__github__create_issue",
-        "hooks": [{
-          "type": "command",
-          "command": "./.claude/hooks/validate-issue.sh"
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/validate-issue.sh"
+          }
+        ]
       }
     ]
   }
@@ -1613,11 +1679,13 @@ Hooks are **auto-discovered** from `{plugin}/hooks/hooks.json`. Do NOT define ho
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
-        "hooks": [{
-          "type": "command",
-          "command": "${CLAUDE_PLUGIN_ROOT}/scripts/format-code.sh",
-          "timeout": 30
-        }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/format-code.sh",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }

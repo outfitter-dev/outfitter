@@ -59,9 +59,7 @@ await output({ id: "123" }); // human by default
 **Before:**
 
 ```typescript
-command("list")
-  .option("--json", "Output as JSON")
-  .action(runList);
+command("list").option("--json", "Output as JSON").action(runList);
 ```
 
 **After:**

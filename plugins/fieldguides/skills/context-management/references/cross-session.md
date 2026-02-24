@@ -5,6 +5,7 @@ Persisting state across conversation sessions using episodic memory.
 ## The Session Boundary Problem
 
 Tasks survive **context compaction** but not **session boundaries**. When a conversation ends:
+
 - Task state is gone
 - Agent IDs are invalid
 - Decisions are forgotten
@@ -14,6 +15,7 @@ For work spanning multiple sessions, use episodic memory MCP server.
 ## When to Use Cross-Session Persistence
 
 **Use episodic memory when**:
+
 - Project spans multiple days
 - Complex refactor with many steps
 - Work will be interrupted (meetings, context switches)
@@ -21,6 +23,7 @@ For work spanning multiple sessions, use episodic memory MCP server.
 - Key decisions need to survive sessions
 
 **Just use Tasks when**:
+
 - Single-session task
 - Work completes within conversation
 - No significant decisions to preserve
@@ -81,21 +84,22 @@ At new session start:
 ```
 
 Then:
+
 1. Read the returned state
 2. Reconstruct tasks from saved data using `TaskCreate`
 3. Resume from `current_focus`
 
 ## What to Save
 
-| Category | Why |
-|----------|-----|
-| Completed work | Know what's done |
-| Remaining work | Know what's left |
-| Decisions made | Don't re-decide |
-| Files modified | Know where changes live |
-| Current focus | Resume exactly |
-| Blockers | Know what's blocking |
-| Notes | Context that might be needed |
+| Category       | Why                          |
+| -------------- | ---------------------------- |
+| Completed work | Know what's done             |
+| Remaining work | Know what's left             |
+| Decisions made | Don't re-decide              |
+| Files modified | Know where changes live      |
+| Current focus  | Resume exactly               |
+| Blockers       | Know what's blocking         |
+| Notes          | Context that might be needed |
 
 ## What NOT to Save
 
@@ -152,7 +156,7 @@ For longer projects:
   "stage": "design",
   "completed": ["New error pattern designed", "Migration strategy outlined"],
   "remaining": ["Implement error utilities", "Migrate endpoints"],
-  "decisions": {"error_format": "RFC 7807 Problem Details"}
+  "decisions": { "error_format": "RFC 7807 Problem Details" }
 }
 ```
 
@@ -162,13 +166,14 @@ For longer projects:
 
 Episodic memory is your **session-level** state. External trackers handle **project-level** state:
 
-| Tool | Scope | When to Update |
-|------|-------|----------------|
-| Tasks | Within conversation | Every task completion |
-| Episodic memory | Across sessions | Session boundaries |
-| Linear/GitHub | Project lifetime | Stage completions |
+| Tool            | Scope               | When to Update        |
+| --------------- | ------------------- | --------------------- |
+| Tasks           | Within conversation | Every task completion |
+| Episodic memory | Across sessions     | Session boundaries    |
+| Linear/GitHub   | Project lifetime    | Stage completions     |
 
 Workflow:
+
 1. Pull task from Linear/GitHub
 2. Track in Tasks during session
 3. Save to episodic memory at session end

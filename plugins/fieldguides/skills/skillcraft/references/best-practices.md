@@ -29,6 +29,7 @@ description: "Extracts text and tables from PDF files, fills forms, and merges d
 ```
 
 **Keys to effective discovery**:
+
 - Include WHAT the skill does AND WHEN to use it
 - Use third-person voice
 - Include specific trigger terms users might mention
@@ -63,6 +64,7 @@ Links to deep-dive docs in references/ subdirectory
 ```
 
 **Keys to effective activation**:
+
 - **Assume intelligence**: Claude doesn't need basic concepts explained
 - **Be directive, not comprehensive**: Focus on what makes THIS approach different
 - **Keep under 500 lines**: Move details to references/
@@ -86,6 +88,7 @@ skill-name/
 ```
 
 **Why this works** (source: Juan C Olamendy, skillmatic-ai):
+
 - Prevents context rot from loading irrelevant information
 - Allows targeted follow-up ("show me the advanced patterns")
 - Keeps initial load fast and focused
@@ -104,11 +107,13 @@ Load the `debugging` skill using the Skill tool to investigate
 this authentication failure systematically.
 
 Pass these parameters to the debugging workflow:
+
 - Error context: { collected error details }
 - Hypothesis: Token validation timing issue
 ```
 
 **Why this works**:
+
 - Reuses established methodologies
 - Maintains single source of truth
 - Allows skills to evolve independently
@@ -123,6 +128,7 @@ For orchestrating specialized work with context isolation, load the `claude-craf
 ### Skill + External Service Integration
 
 Skills can integrate with external services (APIs, MCP servers) by separating concerns:
+
 - **External service**: Handles authentication, rate limiting, data access
 - **Skill**: Handles business logic, formatting, workflows
 
@@ -164,11 +170,13 @@ description: "Creates weekly team status reports with wins, challenges, and prio
 **Symptom**: 1000+ line SKILL.md files with exhaustive explanations.
 
 **Why it's a problem**:
+
 - Wastes context window on every invocation
 - Buries key directives in noise
 - Assumes Claude needs basic concepts explained
 
 **Fix**:
+
 - Keep SKILL.md under 500 lines
 - Move deep dives to references/
 - Trust Claude's base knowledge
@@ -227,11 +235,13 @@ ALWAYS write the test first. NEVER skip the refactor step.
 **Symptom**: Skills referencing files that reference other files 3+ levels deep.
 
 **Why it's a problem**:
+
 - Context explosion
 - Circular references
 - Hard to maintain
 
 **Fix** (source: skillmatic-ai research):
+
 - Keep references ONE level deep
 - Use table of contents in long reference files
 - Let Claude request additional detail if needed
@@ -253,11 +263,13 @@ SKILL.md → references/auth-patterns.md (with ToC for JWT, OAuth, etc.)
 **Symptom**: Skills maintained as loose documents without version control, testing, or reviews.
 
 **Why it's a problem**:
+
 - Skills drift from reality
 - Breaking changes go unnoticed
 - No way to roll back problematic versions
 
 **Fix** (source: blog.sshh.io, Nate's newsletter):
+
 - **Version control**: Skills in git repos with semantic versioning
 - **Testing**: Build evaluations to validate skill behavior
 - **Reviews**: Treat skill PRs like code reviews
@@ -281,17 +293,20 @@ changelog: |
 **Symptom**: Never manually clearing context, letting auto-compaction handle everything.
 
 **Why it's a problem** (source: blog.sshh.io practitioner experience):
+
 - Important context gets compressed or dropped
 - Skill instructions get summarized incorrectly
 - Debugging becomes harder when full skill isn't visible
 
 **Fix**: Manual context management strategy:
+
 1. Start complex tasks with `/clear` for clean slate
 2. Use `/catchup` with explicit context about what skills are active
 3. Let auto-compaction handle routine continuations
 4. Force reload skills after compaction if behavior seems off
 
 **When to manually clear**:
+
 - Starting new major feature
 - Switching between unrelated tasks
 - After hitting context limits on complex debugging
@@ -304,6 +319,7 @@ changelog: |
 **Example**: "code-helper" that does linting, testing, documentation, deployment, and debugging.
 
 **Why it's a problem**:
+
 - Hard to discover (description too generic)
 - Loads unnecessary context
 - Becomes maintenance nightmare
@@ -311,6 +327,7 @@ changelog: |
 **Fix**: **One skill, one job**.
 
 ✅ **Well-scoped skills**:
+
 - `linting-workflow`: Code quality checks and fixes
 - `tdd-fieldguide`: TDD methodology
 - `api-documentation`: API reference generation
@@ -337,6 +354,7 @@ changelog: |
 **Input**: User asks to add login endpoint
 
 **Workflow**:
+
 1. Load TDD skill
 2. Write failing test for /login POST
 3. Implement minimal auth logic
@@ -349,6 +367,7 @@ changelog: |
 **Input**: User asks to add login with OAuth and JWT and refresh tokens
 
 **Workflow**:
+
 1. Load pathfinding skill to break down requirements
 2. Load TDD skill for each component separately
 3. OAuth integration → JWT generation → Refresh logic
@@ -366,12 +385,14 @@ changelog: |
 **Pattern**: Build evaluations BEFORE extensive documentation (source: Nate's newsletter).
 
 **Workflow**:
+
 1. Create minimal skill version
 2. Build test suite with target inputs/outputs
 3. Iterate skill until evals pass consistently
 4. THEN write comprehensive docs
 
 **Why this works**:
+
 - Prevents documenting the wrong approach
 - Faster iteration cycles
 - Forces clarity about success criteria
@@ -386,7 +407,7 @@ interface SkillEval {
   input: string;
   expectedBehavior: string[];
   forbiddenBehavior: string[];
-  targetModels: ('haiku' | 'sonnet' | 'opus')[];
+  targetModels: ("haiku" | "sonnet" | "opus")[];
 }
 
 const tddSkillEvals: SkillEval[] = [
@@ -398,15 +419,15 @@ const tddSkillEvals: SkillEval[] = [
       "Test fails initially (red phase)",
       "Implements minimal solution",
       "Test passes (green phase)",
-      "Refactors with tests passing"
+      "Refactors with tests passing",
     ],
     forbiddenBehavior: [
       "Writes implementation before test",
       "Skips refactor step",
-      "Makes test pass by modifying test"
+      "Makes test pass by modifying test",
     ],
-    targetModels: ['haiku', 'sonnet', 'opus']
-  }
+    targetModels: ["haiku", "sonnet", "opus"],
+  },
 ];
 ```
 
@@ -415,17 +436,18 @@ const tddSkillEvals: SkillEval[] = [
 **Pattern**: Test skills with all target models.
 
 **Why**: Haiku, Sonnet, and Opus interpret instructions differently:
+
 - **Haiku**: Needs more explicit instructions, less inference
 - **Sonnet**: Balanced reasoning, good for most workflows
 - **Opus**: Handles complex context, better with ambiguity
 
 **Testing strategy** (source: Anthropic best practices):
 
-| Aspect | Haiku Test | Sonnet Test | Opus Test |
-|--------|------------|-------------|-----------|
-| Clarity | Do instructions work with minimal reasoning? | Do instructions balance brevity and clarity? | Do instructions leverage advanced reasoning? |
-| Context | Works with small context? | Handles moderate references? | Manages large cross-references? |
-| Edge cases | Explicit handling? | Reasonable inference? | Sophisticated judgment? |
+| Aspect     | Haiku Test                                   | Sonnet Test                                  | Opus Test                                    |
+| ---------- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| Clarity    | Do instructions work with minimal reasoning? | Do instructions balance brevity and clarity? | Do instructions leverage advanced reasoning? |
+| Context    | Works with small context?                    | Handles moderate references?                 | Manages large cross-references?              |
+| Edge cases | Explicit handling?                           | Reasonable inference?                        | Sophisticated judgment?                      |
 
 **Fix pattern**: If Haiku fails but Sonnet passes, instructions likely assume too much inference.
 
@@ -436,12 +458,14 @@ const tddSkillEvals: SkillEval[] = [
 **Anti-pattern**: Only testing with constructed examples.
 
 **Strategy** (from practitioner experience):
+
 1. **Dogfooding**: Use your own skills for real work
 2. **Iteration tracking**: Log when skills are loaded but not followed
 3. **Confusion signals**: Detect when Claude asks for clarification (skill might be unclear)
 4. **Outcome validation**: Did the skill achieve its intended result?
 
 **Metrics to track**:
+
 - Skill load frequency (is it discoverable?)
 - Completion rate (do workflows finish?)
 - User satisfaction (did it solve the problem?)
@@ -491,12 +515,14 @@ company-skills/
 ```
 
 **Benefits**:
+
 - Codifies company processes
 - Onboarding material becomes executable
 - Process improvements propagate automatically
 - Consistency across teams
 
 **Implementation** (from practitioners):
+
 1. **Central registry**: Marketplace or internal skill server
 2. **Contribution guidelines**: Templates for creating company skills
 3. **Review process**: Skills reviewed like code before publishing
@@ -509,16 +535,19 @@ company-skills/
 # Company Skill Manifest
 
 ## Deployment
+
 - `deployment-staging`: Deploy to staging with rollback plan
 - `deployment-production`: Production deploy with checklist
 - `deployment-rollback`: Emergency rollback procedures
 
 ## Code Review
+
 - `pr-review-backend`: Backend code review checklist
 - `pr-review-frontend`: Frontend code review standards
 - `security-review`: Security-focused code review
 
 ## Documentation
+
 - `api-documentation`: OpenAPI spec generation
 - `readme-maintenance`: README updates for features
 ```
@@ -555,6 +584,7 @@ company-skills/
 **Usage**: Skill says "See references/api-patterns.md#rate-limiting for retry logic" rather than loading entire file.
 
 **Why it works**:
+
 - Claude can navigate to specific section
 - Preserves context for other tasks
 - User can request more depth if needed
@@ -567,6 +597,7 @@ company-skills/
 **Skill**: Executes deployment with current best practices
 
 **Benefits** (source: Juan C Olamendy):
+
 - **Always current**: If process changes, skill changes
 - **Executable**: Not just instructions but enforcement
 - **Testable**: Verify the process actually works
@@ -625,18 +656,23 @@ description: "End-to-end feature development workflow."
 # Feature Development Workflow
 
 ## Stage 1: Planning
+
 Load `pathfinding` skill to clarify requirements and architecture.
 
 ## Stage 2: Implementation
+
 Load `tdd-fieldguide` skill to implement with tests.
 
 ## Stage 3: Documentation
+
 Load `api-documentation` skill to generate API docs.
 
 ## Stage 4: Review
+
 Load `code-review` skill to validate implementation.
 
 ## Stage 5: Deployment
+
 Load `deployment-staging` skill to deploy for testing.
 
 Each stage must complete successfully before proceeding to next.
@@ -650,13 +686,13 @@ Each stage must complete successfully before proceeding to next.
 ## Error Recovery
 
 If tests fail in Stage 2:
-  Load `debugging` skill to investigate
-  Return to Stage 2 after fixes
+Load `debugging` skill to investigate
+Return to Stage 2 after fixes
 
 If code review finds issues in Stage 4:
-  Return to Stage 2 for fixes
-  Re-run Stage 3 to update docs
-  Re-run Stage 4 to re-review
+Return to Stage 2 for fixes
+Re-run Stage 3 to update docs
+Re-run Stage 4 to re-review
 ```
 
 ## Security Considerations
@@ -674,6 +710,7 @@ If code review finds issues in Stage 4:
 ### Protection Strategies
 
 **1. Source verification**:
+
 - Only install skills from trusted authors
 - Review skill code before using
 - Check community reputation and reviews
@@ -694,6 +731,7 @@ If code review finds issues in Stage 4:
 ```
 
 **3. Sandbox testing**:
+
 - Test new skills in isolated project first
 - Use throwaway credentials for initial testing
 - Monitor file system and network activity
@@ -704,14 +742,15 @@ If code review finds issues in Stage 4:
 ```yaml
 # Proposed security metadata (from research)
 permissions:
-  file_read: ['src/**', 'docs/**']
-  file_write: ['docs/**']
-  network: ['https://api.company.com']
+  file_read: ["src/**", "docs/**"]
+  file_write: ["docs/**"]
+  network: ["https://api.company.com"]
   environment: []
 ```
 
 **5. Audit logging**:
 Track what skills do in production:
+
 - What files were accessed?
 - What commands were executed?
 - What network requests were made?
@@ -725,11 +764,13 @@ Track what skills do in production:
 **Pattern**: Replace tribal knowledge with executable skills (source: Juan C Olamendy).
 
 **Traditional problem**:
+
 - "How do we deploy?" → Ask Sarah, she knows
 - "What's the PR review process?" → Different on every team
 - "How do we handle incidents?" → Check the wiki (outdated)
 
 **Skill solution**:
+
 - **deployment-production skill**: Encodes Sarah's knowledge
 - **pr-review skill**: Standardizes review process
 - **incident-response skill**: Current playbook, always up to date
@@ -754,11 +795,13 @@ description: "Company deployment process with all safety checks."
 # Internal Deployment Workflow
 
 ## Pre-Deploy Checklist
+
 1. Verify Jira ticket is in "Ready for Deploy" status
 2. Confirm tests pass in CI: `check-ci-status`
 3. Get approval in #deploy-requests Slack channel
 
 ## Deploy
+
 1. Run staging deploy: `npm run deploy:staging`
 2. Verify staging health: `curl https://staging.company.com/health`
 3. Run smoke tests: `npm run smoke-test:staging`
@@ -766,6 +809,7 @@ description: "Company deployment process with all safety checks."
 5. Monitor for 5 minutes: Watch Datadog dashboard
 
 ## Post-Deploy
+
 1. Verify production health: `curl https://company.com/health`
 2. Post to #deployments: "Deployed [feature] to prod"
 3. Update Jira ticket to "Deployed"
@@ -824,6 +868,7 @@ version: 2.1.0
 ```
 
 **Versioning rules**:
+
 - **MAJOR**: Breaking changes (workflow steps changed, different inputs required)
 - **MINOR**: New features (additional optional steps, new references added)
 - **PATCH**: Bug fixes (typos, clarifications, small improvements)
@@ -832,17 +877,23 @@ version: 2.1.0
 
 ```markdown
 # Version 1.x: Required user to provide API key
+
 ---
+
 name: api-client
 version: 1.5.0
 description: "Make API calls with provided credentials."
+
 ---
 
 # Version 2.x: Uses MCP server for authentication (breaking)
+
 ---
+
 name: api-client
 version: 2.0.0
 description: "Make API calls using Linear MCP server."
+
 ---
 ```
 

@@ -1,4 +1,4 @@
-# Getting Started with @outfitter/*
+# Getting Started with @outfitter/\*
 
 Quick onboarding for new agents and developers.
 
@@ -14,7 +14,12 @@ bun add @outfitter/contracts zod
 
 ```typescript
 // src/handlers/greet.ts
-import { Result, ValidationError, createValidator, type Handler } from "@outfitter/contracts";
+import {
+  Result,
+  ValidationError,
+  createValidator,
+  type Handler,
+} from "@outfitter/contracts";
 import { z } from "zod";
 
 const InputSchema = z.object({
@@ -27,7 +32,10 @@ interface Output {
   greeting: string;
 }
 
-export const greet: Handler<unknown, Output, ValidationError> = async (rawInput, ctx) => {
+export const greet: Handler<unknown, Output, ValidationError> = async (
+  rawInput,
+  ctx
+) => {
   const inputResult = validateInput(rawInput);
   if (inputResult.isErr()) return inputResult;
 
@@ -124,12 +132,12 @@ export const greetTool = defineTool({
 
 ## Core Concepts
 
-| Concept | What it is |
-|---------|------------|
-| **Handler** | Pure function: `(input, ctx) => Result<Output, Error>` |
-| **Result** | Success (`Result.ok(value)`) or failure (`Result.err(error)`) |
-| **Context** | Carries logger, config, signal, requestId |
-| **Error Taxonomy** | 10 categories mapping to exit codes and HTTP status |
+| Concept            | What it is                                                    |
+| ------------------ | ------------------------------------------------------------- |
+| **Handler**        | Pure function: `(input, ctx) => Result<Output, Error>`        |
+| **Result**         | Success (`Result.ok(value)`) or failure (`Result.err(error)`) |
+| **Context**        | Carries logger, config, signal, requestId                     |
+| **Error Taxonomy** | 10 categories mapping to exit codes and HTTP status           |
 
 ## Next Steps
 

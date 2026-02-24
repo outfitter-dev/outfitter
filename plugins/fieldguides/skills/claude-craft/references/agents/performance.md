@@ -69,11 +69,13 @@ description: |
 ## Caching
 
 Agents benefit from prompt caching:
+
 - Description and instructions cached
 - Repeated invocations faster
 - Tool restrictions cached
 
 **Maximize caching:**
+
 - Keep agent instructions stable
 - Don't dynamically generate agent content
 - Reuse agents frequently
@@ -93,17 +95,17 @@ tools: Glob, Grep, Read, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet,
 
 ## Context Size Guidelines
 
-| Agent Type | Typical Context | Max Recommended |
-|------------|-----------------|-----------------|
-| Quick review | 1-3 files | 5 files |
-| Standard review | 3-10 files | 20 files |
-| Deep analysis | Full module | 50 files |
-| Research | Varies | Focused queries |
+| Agent Type      | Typical Context | Max Recommended |
+| --------------- | --------------- | --------------- |
+| Quick review    | 1-3 files       | 5 files         |
+| Standard review | 3-10 files      | 20 files        |
+| Deep analysis   | Full module     | 50 files        |
+| Research        | Varies          | Focused queries |
 
 ## Latency vs Quality Tradeoffs
 
-| Priority | Model | Context | Use Case |
-|----------|-------|---------|----------|
-| Speed | haiku | Minimal | Quick checks |
-| Balance | sonnet/inherit | Moderate | Standard work |
-| Quality | opus | Full | Critical analysis |
+| Priority | Model          | Context  | Use Case          |
+| -------- | -------------- | -------- | ----------------- |
+| Speed    | haiku          | Minimal  | Quick checks      |
+| Balance  | sonnet/inherit | Moderate | Standard work     |
+| Quality  | opus           | Full     | Critical analysis |

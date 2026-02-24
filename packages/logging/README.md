@@ -184,7 +184,7 @@ Routes logs to stdout/stderr based on level:
 
 - `trace`, `debug`, `info` -> stdout
 - `warn`, `error`, `fatal` -> stderr
- - Falls back to `console.*` when process streams are unavailable (edge/serverless)
+- Falls back to `console.*` when process streams are unavailable (edge/serverless)
 
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";
@@ -203,9 +203,9 @@ const jsonLogger = createLogger({
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `colors` | `boolean` | auto-detect | Enable ANSI colors |
+| Option      | Type        | Default                   | Description          |
+| ----------- | ----------- | ------------------------- | -------------------- |
+| `colors`    | `boolean`   | auto-detect               | Enable ANSI colors   |
 | `formatter` | `Formatter` | `createPrettyFormatter()` | Custom log formatter |
 
 ### File Sink
@@ -326,6 +326,7 @@ Resolve the log level from environment configuration. Use this instead of hardco
 Accepts `LogLevel` or a plain `string` — useful when forwarding CLI flags or MCP values without casting. Invalid strings are ignored and fall through to the next precedence level.
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_LOG_LEVEL` environment variable
 2. Explicit `level` parameter
 3. `OUTFITTER_ENV` profile defaults (`"debug"` in development)
@@ -418,19 +419,20 @@ customLogger.info("Hello from custom backend");
 
 ## Runtime Compatibility
 
-| Export | Node.js | Bun | Edge/V8 Isolates | Notes |
-|---|---|---|---|---|
-| `createLogger` | Yes | Yes | Yes | Universal |
-| `createConsoleSink` | Yes | Yes | Yes | Falls back to `console.*` when `process` unavailable |
-| `createFileSink` | No | Yes | No | Requires `Bun.file` / `Bun.write` |
-| `createJsonFormatter` | Yes | Yes | Yes | Universal |
-| `createPrettyFormatter` | Yes | Yes | Yes | Universal |
-| `resolveLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
-| `resolveOutfitterLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
-| `configureRedaction` | Yes | Yes | Yes | Universal |
-| `flush` | Yes | Yes | Yes | Universal |
+| Export                     | Node.js | Bun | Edge/V8 Isolates | Notes                                                |
+| -------------------------- | ------- | --- | ---------------- | ---------------------------------------------------- |
+| `createLogger`             | Yes     | Yes | Yes              | Universal                                            |
+| `createConsoleSink`        | Yes     | Yes | Yes              | Falls back to `console.*` when `process` unavailable |
+| `createFileSink`           | No      | Yes | No               | Requires `Bun.file` / `Bun.write`                    |
+| `createJsonFormatter`      | Yes     | Yes | Yes              | Universal                                            |
+| `createPrettyFormatter`    | Yes     | Yes | Yes              | Universal                                            |
+| `resolveLogLevel`          | Yes     | Yes | Yes              | Guards `process.env` access                          |
+| `resolveOutfitterLogLevel` | Yes     | Yes | Yes              | Guards `process.env` access                          |
+| `configureRedaction`       | Yes     | Yes | Yes              | Universal                                            |
+| `flush`                    | Yes     | Yes | Yes              | Universal                                            |
 
 Edge-runtime notes:
+
 - `resolveLogLevel()` safely returns defaults when `process` is undefined
 - `createConsoleSink()` auto-detects TTY via `process.stdout?.isTTY` with graceful fallback
 
@@ -438,32 +440,32 @@ Edge-runtime notes:
 
 ### Functions
 
-| Function                | Description                                         |
-| ----------------------- | --------------------------------------------------- |
-| `createLogger`          | Create a configured logger instance                 |
-| `createChildLogger`     | Create a child logger with merged context           |
-| `resolveLogLevel`       | Resolve log level from env vars and profile         |
-| `configureRedaction`    | Configure global redaction patterns and keys        |
-| `flush`                 | Flush all pending log writes across all sinks       |
-| `createJsonFormatter`   | Create a JSON formatter for structured output       |
-| `createPrettyFormatter` | Create a human-readable formatter with colors       |
-| `createConsoleSink`     | Create a console sink (stdout/stderr routing)       |
-| `createFileSink`        | Create a file sink with buffered writes             |
+| Function                | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `createLogger`          | Create a configured logger instance           |
+| `createChildLogger`     | Create a child logger with merged context     |
+| `resolveLogLevel`       | Resolve log level from env vars and profile   |
+| `configureRedaction`    | Configure global redaction patterns and keys  |
+| `flush`                 | Flush all pending log writes across all sinks |
+| `createJsonFormatter`   | Create a JSON formatter for structured output |
+| `createPrettyFormatter` | Create a human-readable formatter with colors |
+| `createConsoleSink`     | Create a console sink (stdout/stderr routing) |
+| `createFileSink`        | Create a file sink with buffered writes       |
 
 ### Types
 
-| Type                     | Description                                     |
-| ------------------------ | ----------------------------------------------- |
-| `LogLevel`               | Union of log level strings                      |
-| `LogRecord`              | Structured log record with timestamp/metadata   |
-| `LoggerConfig`           | Configuration options for `createLogger`        |
-| `LoggerInstance`         | Logger interface with level methods             |
-| `RedactionConfig`        | Per-logger redaction configuration              |
-| `GlobalRedactionConfig`  | Global redaction patterns and keys              |
-| `Formatter`              | Interface for log record formatting             |
-| `Sink`                   | Interface for log output destinations           |
-| `PrettyFormatterOptions` | Options for human-readable formatter            |
-| `FileSinkOptions`        | Options for file sink configuration             |
+| Type                     | Description                                   |
+| ------------------------ | --------------------------------------------- |
+| `LogLevel`               | Union of log level strings                    |
+| `LogRecord`              | Structured log record with timestamp/metadata |
+| `LoggerConfig`           | Configuration options for `createLogger`      |
+| `LoggerInstance`         | Logger interface with level methods           |
+| `RedactionConfig`        | Per-logger redaction configuration            |
+| `GlobalRedactionConfig`  | Global redaction patterns and keys            |
+| `Formatter`              | Interface for log record formatting           |
+| `Sink`                   | Interface for log output destinations         |
+| `PrettyFormatterOptions` | Options for human-readable formatter          |
+| `FileSinkOptions`        | Options for file sink configuration           |
 
 ## Upgrading
 

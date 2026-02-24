@@ -17,15 +17,15 @@ const logger = createLogger({
 
 ## Log Levels
 
-| Level | Method | Use For |
-|-------|--------|---------|
-| `trace` | `logger.trace()` | Very detailed debugging |
-| `debug` | `logger.debug()` | Development debugging |
-| `info` | `logger.info()` | Normal operations |
-| `warn` | `logger.warn()` | Unexpected but handled |
-| `error` | `logger.error()` | Failures requiring attention |
-| `fatal` | `logger.fatal()` | Unrecoverable failures |
-| `silent` | — | Disables all output (filter only) |
+| Level    | Method           | Use For                           |
+| -------- | ---------------- | --------------------------------- |
+| `trace`  | `logger.trace()` | Very detailed debugging           |
+| `debug`  | `logger.debug()` | Development debugging             |
+| `info`   | `logger.info()`  | Normal operations                 |
+| `warn`   | `logger.warn()`  | Unexpected but handled            |
+| `error`  | `logger.error()` | Failures requiring attention      |
+| `fatal`  | `logger.fatal()` | Unrecoverable failures            |
+| `silent` | —                | Disables all output (filter only) |
 
 Level hierarchy: `trace` < `debug` < `info` < `warn` < `error` < `fatal`
 
@@ -84,9 +84,9 @@ const logger = createLogger({
 });
 
 logger.info("Config", {
-  apiKey: "secret-123",     // Logged as "[REDACTED]"
-  password: "hunter2",      // Logged as "[REDACTED]"
-  email: "user@example.com" // Not redacted
+  apiKey: "secret-123", // Logged as "[REDACTED]"
+  password: "hunter2", // Logged as "[REDACTED]"
+  email: "user@example.com", // Not redacted
 });
 ```
 
@@ -97,6 +97,7 @@ Always redacted (case-insensitive): `password`, `secret`, `token`, `apikey`
 ### Default Patterns
 
 Automatically matched and redacted in string values:
+
 - Bearer tokens (`Bearer xxx`)
 - API key patterns (`api_key=xxx`, `apikey: xxx`)
 - GitHub tokens (`ghp_`, `gho_`, `ghs_`, `ghr_`)
@@ -132,11 +133,11 @@ Nested values are also redacted:
 ```typescript
 logger.info("Request", {
   headers: {
-    authorization: "Bearer token",  // Redacted
+    authorization: "Bearer token", // Redacted
   },
   body: {
     user: {
-      password: "secret",  // Redacted
+      password: "secret", // Redacted
     },
   },
 });
@@ -168,7 +169,7 @@ import { createFileSink } from "@outfitter/logging";
 
 const fileSink = createFileSink({
   path: "/var/log/myapp/app.log",
-  append: true,  // default: true (append to existing)
+  append: true, // default: true (append to existing)
 });
 
 // Call flush() before exit to ensure buffered writes complete
@@ -186,8 +187,8 @@ const jsonFormatter = createJsonFormatter();
 
 // Pretty (human-readable)
 const prettyFormatter = createPrettyFormatter({
-  colors: true,     // ANSI colors (default: false)
-  timestamp: true,  // ISO 8601 timestamp (default: true)
+  colors: true, // ANSI colors (default: false)
+  timestamp: true, // ISO 8601 timestamp (default: true)
 });
 // → 2024-01-22T12:00:00.000Z [INFO] my-service: Hello world
 
@@ -299,6 +300,7 @@ await factory.flush();
 ```
 
 Defaults applied by the factory:
+
 - Log level resolved via `resolveOutfitterLogLevel()` (environment-aware)
 - Redaction enabled by default
 - Console sink when no explicit sinks provided
@@ -328,11 +330,11 @@ const logger = createLogger({
 
 ### Environment Profiles
 
-| `OUTFITTER_ENV` | Default logLevel |
-|-----------------|-----------------|
-| `development` | `"debug"` |
-| `production` | `null` (falls through to `"info"`) |
-| `test` | `null` (falls through to `"info"`) |
+| `OUTFITTER_ENV` | Default logLevel                   |
+| --------------- | ---------------------------------- |
+| `development`   | `"debug"`                          |
+| `production`    | `null` (falls through to `"info"`) |
+| `test`          | `null` (falls through to `"info"`) |
 
 ### resolveOutfitterLogLevel
 
@@ -351,7 +353,10 @@ Used internally by the Outfitter logger factory.
 ## Handler Context Integration
 
 ```typescript
-import { createOutfitterLoggerFactory, createConsoleSink } from "@outfitter/logging";
+import {
+  createOutfitterLoggerFactory,
+  createConsoleSink,
+} from "@outfitter/logging";
 
 const factory = createOutfitterLoggerFactory({
   defaults: { sinks: [createConsoleSink()] },
@@ -364,7 +369,7 @@ const logger = factory.createLogger({
 
 // In handler
 const myHandler: Handler<Input, Output, Error> = async (input, ctx) => {
-  ctx.logger.info("Processing", { input });  // Includes requestId via context
+  ctx.logger.info("Processing", { input }); // Includes requestId via context
 };
 ```
 

@@ -5,9 +5,11 @@
  */
 
 import { resolve } from "node:path";
+
 import { cwdPreset } from "@outfitter/cli/flags";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
+
 import { printDoctorResults, runDoctor } from "../commands/doctor.js";
 import {
   type CliOutputMode,

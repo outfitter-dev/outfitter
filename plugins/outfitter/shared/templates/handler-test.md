@@ -159,10 +159,7 @@ test("logs debug messages", async () => {
 
   await myHandler({ id: "123" }, ctx);
 
-  expect(mockLogger.calls.debug).toContainEqual([
-    "Processing",
-    { id: "123" },
-  ]);
+  expect(mockLogger.calls.debug).toContainEqual(["Processing", { id: "123" }]);
 });
 ```
 

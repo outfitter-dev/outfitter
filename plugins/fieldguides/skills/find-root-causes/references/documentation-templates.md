@@ -24,14 +24,14 @@ Real-time documentation during investigation.
 
 ### Entry Types
 
-| Prefix | Use For |
-|--------|---------|
-| DISCOVERY | New information gathered |
-| HYPOTHESIS | New theory formed |
-| TEST | Experiment executed |
-| EVIDENCE | Data that supports/refutes hypothesis |
-| ROOT CAUSE | Final determination |
-| BLOCKED | Cannot proceed, need help |
+| Prefix     | Use For                               |
+| ---------- | ------------------------------------- |
+| DISCOVERY  | New information gathered              |
+| HYPOTHESIS | New theory formed                     |
+| TEST       | Experiment executed                   |
+| EVIDENCE   | Data that supports/refutes hypothesis |
+| ROOT CAUSE | Final determination                   |
+| BLOCKED    | Cannot proceed, need help             |
 
 ### Benefits
 
@@ -51,9 +51,11 @@ Post-investigation documentation.
 # Root Cause Analysis: {Issue Title}
 
 ## Summary
+
 Brief description of issue and resolution in 2-3 sentences.
 
 ## Timeline
+
 - {DATE/TIME}: Issue first observed
 - {DATE/TIME}: Investigation started
 - {DATE/TIME}: Root cause identified
@@ -61,42 +63,54 @@ Brief description of issue and resolution in 2-3 sentences.
 - {DATE/TIME}: Issue verified resolved
 
 ## Symptoms
+
 What users/systems experienced:
+
 - {Observable symptom 1}
 - {Observable symptom 2}
 
 ## Root Cause
+
 **Primary cause**: {What ultimately caused the issue}
 
 **Contributing factors**:
+
 - {Factor that made issue worse or harder to catch}
 - {Factor that enabled issue to occur}
 
 ## Evidence
+
 How we confirmed this was the root cause:
+
 - {Evidence 1}
 - {Evidence 2}
 - {Test that confirmed}
 
 ## Resolution
+
 **Immediate fix**: {What was done to resolve}
 
 **Code/config changes**: {Links to PRs, commits}
 
 ## Prevention
+
 **How to prevent recurrence**:
+
 - {Preventive measure 1}
 - {Preventive measure 2}
 
 **Detection improvements**:
+
 - {How to catch this earlier next time}
 
 ## Lessons Learned
+
 - {What went well in investigation}
 - {What could improve}
 - {Knowledge gap discovered}
 
 ## Appendix
+
 - Investigation log
 - Relevant logs/screenshots
 - Related incidents
@@ -110,6 +124,7 @@ For minor issues not requiring full RCA.
 
 ```markdown
 ## Incident: {Brief title}
+
 **Date**: {When}
 **Duration**: {How long}
 **Impact**: {Who/what affected}
@@ -129,6 +144,7 @@ When testing multiple hypotheses.
 ## Hypotheses
 
 ### H1: {Description}
+
 - **Likelihood**: High/Medium/Low
 - **Evidence for**: {Supporting data}
 - **Evidence against**: {Contradicting data}
@@ -136,6 +152,7 @@ When testing multiple hypotheses.
 - **Status**: Pending/Testing/Confirmed/Ruled Out
 
 ### H2: {Description}
+
 ...
 ```
 
@@ -160,20 +177,24 @@ Document system state at time of issue.
 **Time**: {Timestamp}
 
 ### Versions
+
 - Application: {version}
 - Runtime: {version}
 - Key dependencies: {versions}
 
 ### Configuration
+
 - {Relevant config values}
 
 ### State
+
 - Memory: {usage}
 - CPU: {usage}
 - Connections: {counts}
 - Queue depth: {if applicable}
 
 ### Recent Changes
+
 - {Deploy/config change within last 24-48h}
 ```
 
@@ -185,26 +206,32 @@ For team discussions.
 
 ```markdown
 ## Postmortem: {Incident}
+
 **Date**: {Meeting date}
 **Attendees**: {Names}
 
 ### Summary (5 min)
+
 {Owner presents incident summary}
 
 ### Timeline Review (10 min)
+
 {Walk through what happened when}
 
 ### Root Cause Discussion (15 min)
+
 - Confirmed root cause
 - Contributing factors
 - Why wasn't this caught earlier?
 
 ### Action Items (15 min)
-| Action | Owner | Due Date |
-|--------|-------|----------|
-| {Preventive measure} | {Name} | {Date} |
+
+| Action               | Owner  | Due Date |
+| -------------------- | ------ | -------- |
+| {Preventive measure} | {Name} | {Date}   |
 
 ### Follow-up
+
 - Next review: {Date if needed}
 - Documentation: {Where RCA will be stored}
 ```

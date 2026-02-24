@@ -13,6 +13,7 @@
  * Total: 16 tests
  */
 import { describe, expect, it } from "bun:test";
+
 import {
   getStringWidth,
   padText,

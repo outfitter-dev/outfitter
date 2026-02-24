@@ -5,7 +5,9 @@
  */
 
 import { dirname, extname, relative, resolve } from "node:path";
+
 import { Result } from "better-result";
+
 import { DocsCoreError, type PackageDocsError } from "./errors.js";
 import {
   isPathInsideWorkspace,

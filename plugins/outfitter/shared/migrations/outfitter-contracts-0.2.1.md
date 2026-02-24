@@ -20,10 +20,7 @@ packages that need pluggable logging backends:
 - `createLoggerFactory(adapter)`
 
 ```typescript
-import {
-  createLoggerFactory,
-  type LoggerAdapter,
-} from "@outfitter/contracts";
+import { createLoggerFactory, type LoggerAdapter } from "@outfitter/contracts";
 
 const adapter: LoggerAdapter = {
   createLogger(config) {

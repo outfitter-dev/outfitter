@@ -8,22 +8,23 @@ Add diagnostic logging at key points:
 
 ```typescript
 function processData(data: Data): Result {
-  console.log('[DEBUG] processData input:', JSON.stringify(data));
+  console.log("[DEBUG] processData input:", JSON.stringify(data));
 
   const transformed = transform(data);
-  console.log('[DEBUG] after transform:', JSON.stringify(transformed));
+  console.log("[DEBUG] after transform:", JSON.stringify(transformed));
 
   const validated = validate(transformed);
-  console.log('[DEBUG] after validate:', JSON.stringify(validated));
+  console.log("[DEBUG] after validate:", JSON.stringify(validated));
 
   const result = finalize(validated);
-  console.log('[DEBUG] processData result:', JSON.stringify(result));
+  console.log("[DEBUG] processData result:", JSON.stringify(result));
 
   return result;
 }
 ```
 
 Key points to instrument:
+
 - Function entry/exit with parameters and return values
 - Before/after each transformation
 - Error catch blocks
@@ -97,7 +98,7 @@ Capture intermediate state for inspection:
 const checkpoint = {
   timestamp: Date.now(),
   state: structuredClone(currentState),
-  lastOperation: 'after validation',
+  lastOperation: "after validation",
 };
 debugSnapshots.push(checkpoint);
 

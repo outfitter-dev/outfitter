@@ -24,12 +24,12 @@ Is it a multi-step process with stages?
 
 ## Component Comparison
 
-| Aspect | Skill | Command | Hook | Agent |
-|--------|-------|---------|------|-------|
-| Invocation | Auto or `/skill` | `/command` | Event-triggered | Task tool |
-| Context | Inherit or fork | Main context | Script execution | Isolated |
-| Complexity | Medium-high | Low-medium | Low | High |
-| Use case | Methodology | Entry point | Automation | Orchestration |
+| Aspect     | Skill            | Command      | Hook             | Agent         |
+| ---------- | ---------------- | ------------ | ---------------- | ------------- |
+| Invocation | Auto or `/skill` | `/command`   | Event-triggered  | Task tool     |
+| Context    | Inherit or fork  | Main context | Script execution | Isolated      |
+| Complexity | Medium-high      | Low-medium   | Low              | High          |
+| Use case   | Methodology      | Entry point  | Automation       | Orchestration |
 
 ## Common Combos
 
@@ -62,15 +62,19 @@ Create `artifacts/skill-distillery/mapping.md`:
 # Component Mapping: {REPO_NAME}
 
 ## Skills
+
 - {SKILL_NAME}: {PATTERN} → {RATIONALE}
 
 ## Commands
+
 - {COMMAND_NAME}: {PURPOSE}
 
 ## Hooks
+
 - {HOOK_TYPE}: {TRIGGER} → {ACTION}
 
 ## Agents
+
 - {AGENT_NAME}: {ORCHESTRATION_SCOPE}
 ```
 

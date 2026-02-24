@@ -9,8 +9,10 @@
  */
 
 import { resolve } from "node:path";
+
 import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
+
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 

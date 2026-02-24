@@ -4,12 +4,12 @@ Project-level artifacts generated and consumed by the Outfitter CLI. Lives at th
 
 ## Contents
 
-| Path | Purpose | Committed |
-|------|---------|-----------|
-| `surface.json` | CLI action surface map for drift detection | Yes |
+| Path            | Purpose                                                      | Committed                |
+| --------------- | ------------------------------------------------------------ | ------------------------ |
+| `surface.json`  | CLI action surface map for drift detection                   | Yes                      |
 | `docs-map.json` | Generated docs inventory manifest used by docs-map workflows | No (generated on demand) |
-| `migration/` | Migration audit reports and upgrade plans | Yes |
-| `reports/` | Generated analysis reports (link checks, etc.) | No (gitignored) |
+| `migration/`    | Migration audit reports and upgrade plans                    | Yes                      |
+| `reports/`      | Generated analysis reports (link checks, etc.)               | No (gitignored)          |
 
 ### `surface.json`
 
@@ -60,8 +60,8 @@ bun run check-surface-map-format
 
 ## When to Regenerate
 
-| Trigger | Command |
-|---------|---------|
-| Added or changed a CLI action | `outfitter schema generate` |
-| Pre-push hook fails with drift | `outfitter schema generate` then re-push |
-| Stale migration state | Remove `migration/` after completing upgrade |
+| Trigger                        | Command                                      |
+| ------------------------------ | -------------------------------------------- |
+| Added or changed a CLI action  | `outfitter schema generate`                  |
+| Pre-push hook fails with drift | `outfitter schema generate` then re-push     |
+| Stale migration state          | Remove `migration/` after completing upgrade |
