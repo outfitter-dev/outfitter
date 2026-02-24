@@ -287,7 +287,7 @@ Hooks are configured in JSON settings files:
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           }
         ]
@@ -411,7 +411,7 @@ Executes **after** a tool completes successfully.
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           }
         ]
@@ -1210,7 +1210,7 @@ exit 0
 **Description**: Absolute path to affected file
 
 ```bash
-"biome check --write \"$file\""
+"bunx ultracite fix \"$file\""
 ```
 
 **Use cases:**
@@ -1382,7 +1382,7 @@ Execute multiple hooks sequentially:
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           },
           {

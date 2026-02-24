@@ -131,7 +131,7 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 | `@outfitter/schema`    | Schema introspection, surface maps, drift detection | CLI/MCP parity docs and CI drift checks              |
 | `@outfitter/tui`       | Terminal UI rendering primitives and prompts        | Rich terminal UX (tables, trees, prompts, streaming) |
 | `@outfitter/testing`   | Test harnesses, fixtures                            | Testing (always)                                     |
-| `@outfitter/tooling`   | Biome, TypeScript, Lefthook presets                 | Project setup (dev dependency)                       |
+| `@outfitter/tooling`   | oxlint, TypeScript, Lefthook presets                | Project setup (dev dependency)                       |
 
 ## Trail Map: Designing a System
 

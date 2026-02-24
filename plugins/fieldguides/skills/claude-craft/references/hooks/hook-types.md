@@ -162,7 +162,7 @@ Executes **after** a tool completes successfully.
       "hooks": [
         {
           "type": "command",
-          "command": "biome check --write \"$file\"",
+          "command": "bunx ultracite fix \"$file\"",
           "timeout": 10
         }
       ]

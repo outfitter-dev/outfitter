@@ -147,18 +147,18 @@ describe("add mapInput", () => {
   test("--cwd maps to resolved cwd", () => {
     const action = outfitterActions.get("add");
     const mapped = action?.cli?.mapInput?.({
-      args: ["biome"],
+      args: ["linter"],
       flags: { cwd: "/tmp/test-project" },
     }) as { cwd: string; block: string };
 
     expect(mapped.cwd).toBe("/tmp/test-project");
-    expect(mapped.block).toBe("biome");
+    expect(mapped.block).toBe("linter");
   });
 
   test("defaults cwd to process.cwd() when --cwd omitted", () => {
     const action = outfitterActions.get("add");
     const mapped = action?.cli?.mapInput?.({
-      args: ["biome"],
+      args: ["linter"],
       flags: {},
     }) as { cwd: string };
 

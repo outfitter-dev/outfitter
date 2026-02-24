@@ -115,7 +115,7 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 | `@outfitter/schema`    | Schema introspection, surface map generation, and drift detection for Outfitter                      |
 | `@outfitter/state`     | Pagination cursor persistence and state management for Outfitter                                     |
 | `@outfitter/testing`   | Test harnesses, fixtures, and utilities for Outfitter packages                                       |
-| `@outfitter/tooling`   | Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint) |
+| `@outfitter/tooling`   | Dev tooling configuration presets for Outfitter projects (oxlint, typescript, lefthook, markdownlint) |
 | `@outfitter/tui`       | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming         |
 | `@outfitter/types`     | Branded types, type guards, and type utilities for Outfitter                                         |
 

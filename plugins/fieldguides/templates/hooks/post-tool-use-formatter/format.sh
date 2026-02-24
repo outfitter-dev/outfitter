@@ -22,23 +22,21 @@ if [[ ! -f "$FILE_PATH" ]]; then
   exit 1
 fi
 
-# Format the file with biome (adjust to your formatter)
+# Format the file with ultracite (adjust to your formatter)
 echo "Formatting $FILE_PATH..."
 
-if command -v biome &>/dev/null; then
-  biome check --write "$FILE_PATH" 2>&1 || {
-    echo "Warning: biome formatting failed for $FILE_PATH" >&2
-    exit 0  # Non-blocking warning
-  }
-  echo "✓ Formatted successfully"
+if command -v ultracite &>/dev/null && ultracite fix "$FILE_PATH" 2>&1; then
+  echo "Formatted successfully"
+elif command -v bunx &>/dev/null && bunx ultracite fix "$FILE_PATH" 2>&1; then
+  echo "Formatted successfully"
 elif command -v prettier &>/dev/null; then
   prettier --write "$FILE_PATH" 2>&1 || {
     echo "Warning: prettier formatting failed for $FILE_PATH" >&2
     exit 0
   }
-  echo "✓ Formatted successfully"
+  echo "Formatted successfully"
 else
-  echo "Warning: No formatter found (biome or prettier)" >&2
+  echo "Warning: No formatter found (ultracite via binary/bunx, or prettier)" >&2
   exit 0
 fi
 

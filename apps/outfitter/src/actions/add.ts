@@ -45,7 +45,7 @@ export const addAction = defineAction({
     group: "add",
     command: "<block>",
     description:
-      "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
+      "Add a block from the registry (claude, linter, lefthook, bootstrap, scaffolding)",
     options: [...addSharedFlags.options, ...addCwd.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);

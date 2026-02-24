@@ -117,7 +117,7 @@ Add based on needs:
 
 Dev dependencies:
 ├── @outfitter/testing       # Test harnesses
-└── @outfitter/tooling       # Biome, TypeScript, Lefthook presets
+└── @outfitter/tooling       # oxlint, TypeScript, Lefthook presets
 ```
 
 **Selection rules**:

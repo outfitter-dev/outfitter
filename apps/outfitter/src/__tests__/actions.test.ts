@@ -73,7 +73,7 @@ describe("outfitter action mapping", () => {
         args: ["/tmp/init-cli"],
         flags: {
           tooling: true,
-          with: "claude,biome",
+          with: "claude,linter",
         },
       }) as {
         noTooling?: boolean | undefined;
@@ -86,7 +86,7 @@ describe("outfitter action mapping", () => {
 
     expect(mapped.targetDir).toBe("/tmp/init-cli");
     expect(mapped.noTooling).toBe(false);
-    expect(mapped.with).toBe("claude,biome");
+    expect(mapped.with).toBe("claude,linter");
   });
 
   test("maps upgrade --no-codemods across commander flag shapes", () => {
@@ -188,7 +188,7 @@ describe("outfitter action mapping", () => {
     expect(action?.cli?.mapInput).toBeDefined();
 
     const mapped = action?.cli?.mapInput?.({
-      args: ["biome"],
+      args: ["linter"],
       flags: {
         force: true,
         dryRun: true,

@@ -51,6 +51,24 @@ function getRegistryFileContent(blockName: string, filePath: string): string {
   return file.content;
 }
 
+/**
+ * Helper: writes all canonical files for a registry block into the test directory.
+ */
+function writeAllBlockFiles(testDir: string, blockName: string): void {
+  const registryPath = getRegistryPath();
+  const registryRaw = readFileSync(registryPath, "utf-8");
+  const registry = JSON.parse(registryRaw);
+  const block = registry.blocks[blockName];
+  if (!block?.files) {
+    throw new Error(`Block ${blockName} has no files`);
+  }
+  for (const file of block.files as { path: string; content: string }[]) {
+    const dir = dirname(join(testDir, file.path));
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(testDir, file.path), file.content);
+  }
+}
+
 describe("runCheck", () => {
   const testDir = join(import.meta.dirname, ".test-check-output");
 
@@ -72,11 +90,8 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("all blocks current returns 0 drift count", async () => {
-    // Write the canonical registry content for linter (both files)
-    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
-    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
-    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
-    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+    // Write all canonical registry files for linter block
+    writeAllBlockFiles(testDir, "linter");
 
     // Get tooling version
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
@@ -143,7 +158,7 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // Manifest says linter is installed, but no .oxlintrc.json file exists
+    // Manifest says linter is installed, but no linter files exist
     writeTestManifest(testDir, {
       version: 1,
       blocks: {
@@ -169,11 +184,8 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("no manifest falls back to file-presence heuristic", async () => {
-    // Write linter block files with canonical content but no manifest
-    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
-    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
-    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
-    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+    // Write all canonical linter files but no manifest
+    writeAllBlockFiles(testDir, "linter");
 
     const result = await runCheck({ cwd: testDir });
 
@@ -207,15 +219,14 @@ describe("runCheck", () => {
   // =========================================================================
 
   test("JSON structural comparison ignores formatting differences", async () => {
-    // Write .oxlintrc.json with different formatting but same structure
-    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
-    const parsed = JSON.parse(oxlintContent);
+    // Write all canonical linter files first
+    writeAllBlockFiles(testDir, "linter");
+    // Overwrite .oxlintrc.json with different formatting but same structure
+    const linterContent = getRegistryFileContent("linter", ".oxlintrc.json");
+    const parsed = JSON.parse(linterContent);
     // Re-serialize with different formatting (spaces instead of tabs, sorted differently)
     const reformatted = JSON.stringify(parsed, null, "  ");
     writeFileSync(join(testDir, ".oxlintrc.json"), reformatted);
-    // Write .oxfmtrc.jsonc with canonical content
-    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
-    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
 
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
@@ -249,11 +260,8 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // Write canonical content for linter (both files)
-    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
-    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
-    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
-    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+    // Write all canonical linter files
+    writeAllBlockFiles(testDir, "linter");
 
     // Write drifted content for lefthook
     writeFileSync(join(testDir, ".lefthook.yml"), "modified: true");
@@ -330,11 +338,8 @@ describe("runCheck", () => {
     const toolingPkgPath = require.resolve("@outfitter/tooling/package.json");
     const toolingPkg = JSON.parse(readFileSync(toolingPkgPath, "utf-8"));
 
-    // linter: current (canonical content — both files)
-    const oxlintContent = getRegistryFileContent("linter", ".oxlintrc.json");
-    writeFileSync(join(testDir, ".oxlintrc.json"), oxlintContent);
-    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
-    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+    // linter: current (all canonical files)
+    writeAllBlockFiles(testDir, "linter");
 
     // lefthook: drifted (modified content)
     writeFileSync(join(testDir, ".lefthook.yml"), "modified: true");

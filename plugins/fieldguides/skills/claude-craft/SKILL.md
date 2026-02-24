@@ -288,7 +288,7 @@ See [hooks/hook-types.md](references/hooks/hook-types.md) for detailed per-event
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           }
         ]
