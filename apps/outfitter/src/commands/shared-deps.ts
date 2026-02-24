@@ -42,10 +42,11 @@ function requireInternalVersion(name: string): string {
  * Internal @outfitter/* versions come from workspace scanning.
  */
 export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
-  "@biomejs/biome": requireVersion("@biomejs/biome"),
   "@outfitter/tooling": requireInternalVersion("@outfitter/tooling"),
   "@types/bun": requireVersion("@types/bun"),
   lefthook: requireVersion("lefthook"),
+  oxfmt: requireVersion("oxfmt"),
+  oxlint: requireVersion("oxlint"),
   typescript: requireVersion("typescript"),
   ultracite: requireVersion("ultracite"),
 };
@@ -59,8 +60,8 @@ export const SHARED_SCRIPTS = {
   "clean:artifacts": "rm -rf dist .turbo",
   "verify:ci":
     "bun run typecheck && bun run check && bun run build && bun run test",
-  lint: "biome check .",
-  "lint:fix": "biome check . --write",
-  format: "biome format --write .",
+  lint: "oxlint .",
+  "lint:fix": "oxlint --fix .",
+  format: "oxfmt --write .",
   typecheck: "tsc --noEmit",
 } as const;

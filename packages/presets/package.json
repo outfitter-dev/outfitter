@@ -39,7 +39,6 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
-    "@biomejs/biome": "catalog:",
     "@clack/prompts": "catalog:",
     "@logtape/logtape": "catalog:",
     "@modelcontextprotocol/sdk": "catalog:",
