@@ -6,7 +6,7 @@
  * @module result
  */
 
-// biome-ignore lint/performance/noBarrelFile: intentional re-export for API surface
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
 export {
   combine2,
   combine3,

@@ -130,10 +130,10 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
     lines.push("renderTree(tree, {");
     lines.push("  renderLabel: (key, value) => {");
     lines.push("    if (value && typeof value === 'object') {");
-    // biome-ignore lint/suspicious/noTemplateCurlyInString: code example display
+    // eslint-disable-next-line no-template-curly-in-string -- code example display
     lines.push("      return `📁 ${key}/`;");
     lines.push("    }");
-    // biome-ignore lint/suspicious/noTemplateCurlyInString: code example display
+    // eslint-disable-next-line no-template-curly-in-string -- code example display
     lines.push("    return `📄 ${key}`;");
     lines.push("  }");
     lines.push("})");

@@ -433,7 +433,7 @@ bun run src/client.ts
 
 ## Environment Setup
 
-The scaffolded projects include sensible defaults. If you're setting up manually, use strict TypeScript and Biome for formatting. See the [template tsconfig](https://github.com/outfitter-dev/outfitter/blob/main/templates/tsconfig.json) for recommended compiler options.
+The scaffolded projects include sensible defaults. If you're setting up manually, use strict TypeScript, oxlint for linting, and oxfmt for formatting. See the [template tsconfig](https://github.com/outfitter-dev/outfitter/blob/main/templates/tsconfig.json) for recommended compiler options.
 
 ## Next Steps
 

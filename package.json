@@ -43,8 +43,8 @@
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "typecheck": "turbo run typecheck",
-    "check": "ultracite check",
-    "fix": "ultracite fix",
+    "check": "oxlint . && oxfmt --check .",
+    "fix": "oxlint --fix .",
     "clean:artifacts": "turbo run clean && rm -rf .turbo",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
@@ -63,7 +63,6 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
     "@changesets/cli": "^2.29.8",
     "@outfitter/presets": "workspace:*",
     "bunup": "^0.16.29",
@@ -102,7 +101,6 @@
     "zod": "^4.3.5"
   },
   "trustedDependencies": [
-    "@biomejs/biome",
     "oxfmt",
     "oxlint"
   ]

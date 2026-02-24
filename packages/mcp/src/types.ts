@@ -19,7 +19,7 @@ import type { z } from "zod";
 
 // Re-export types for convenience
 export type { Result } from "@outfitter/contracts";
-// biome-ignore lint/performance/noBarrelFile: intentional re-export for API surface
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
 export { TaggedError } from "@outfitter/contracts";
 
 // Internal alias for use in this file
@@ -634,7 +634,7 @@ export interface McpServer {
    * Called internally by the transport layer.
    * @param sdkServer - The MCP SDK Server instance
    */
-  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
+  // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type
   bindSdkServer?(sdkServer: any): void;
 
   /**

@@ -35,7 +35,7 @@ export type {
   GenerateManifestOptions,
 } from "@outfitter/schema";
 
-// biome-ignore lint/performance/noBarrelFile: not a barrel — re-exports for backward compat alongside local exports
+// eslint-disable-next-line oxc/no-barrel-file -- not a barrel — re-exports for backward compat alongside local exports
 export { generateManifest } from "@outfitter/schema";
 
 // =============================================================================

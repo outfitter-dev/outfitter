@@ -34,7 +34,7 @@
  */
 
 // Context
-// biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-exports for subpath API
 export {
   createThemedContext,
   getContextTheme,

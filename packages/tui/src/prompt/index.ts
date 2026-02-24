@@ -30,7 +30,7 @@
  * @packageDocumentation
  */
 
-// biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-exports for subpath API
 export { promptConfirm } from "./confirm.js";
 export { type PromptStep, promptGroup } from "./group.js";
 export { promptMultiSelect, promptSelect } from "./select.js";

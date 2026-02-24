@@ -16,7 +16,7 @@ import { ANSI } from "./colors/colors.js";
 /**
  * Regular expression pattern to match ANSI escape codes.
  */
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
+// eslint-disable-next-line no-control-regex -- ANSI escape codes require control characters
 export const ANSI_REGEX: RegExp = /\x1b\[[0-9;]*m/g;
 
 // ============================================================================
@@ -142,7 +142,7 @@ export function truncateText(text: string, maxWidth: number): string {
     // Check if we're at an ANSI escape sequence in the original text
     while (fullIndex < text.length && text[fullIndex] === "\x1b") {
       // Find end of ANSI sequence
-      // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape codes require control characters
+      // eslint-disable-next-line no-control-regex -- ANSI escape codes require control characters
       const match = text.slice(fullIndex).match(/^\x1b\[[0-9;]*m/);
       if (match) {
         result += match[0];

@@ -183,7 +183,7 @@ describe("runAdd", () => {
 
     // Verify executable permission
     const stats = statSync(join(testDir, "scripts/bootstrap.sh"));
-    // biome-ignore lint/suspicious/noBitwiseOperators: checking file mode bits
+    // eslint-disable-next-line no-bitwise -- checking file mode bits
     const isExecutable = (stats.mode & 0o100) !== 0;
     expect(isExecutable).toBe(true);
   });

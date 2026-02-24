@@ -125,7 +125,7 @@ export function mockStdin(input: string): { restore: () => void } {
   const encoded = new TextEncoder().encode(input);
 
   const mockStream = {
-    // biome-ignore lint/suspicious/useAwait: async generator needs async keyword even without await
+    // eslint-disable-next-line require-await, typescript/require-await -- async generator needs async keyword even without await
     async *[Symbol.asyncIterator](): AsyncGenerator<Uint8Array, void, unknown> {
       yield encoded;
     },

@@ -115,9 +115,9 @@ describe("lint-relative-paths", () => {
       expect(findings(content)).toHaveLength(0);
     });
 
-    // biome-ignore lint/suspicious/noTemplateCurlyInString: testing literal ${CLAUDE_PLUGIN_ROOT}
+    // eslint-disable-next-line no-template-curly-in-string -- testing literal ${CLAUDE_PLUGIN_ROOT}
     test("ignores ../ inside ${CLAUDE_PLUGIN_ROOT} references", () => {
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: testing literal ${CLAUDE_PLUGIN_ROOT}
+      // eslint-disable-next-line no-template-curly-in-string -- testing literal ${CLAUDE_PLUGIN_ROOT}
       const content = "[guide](${CLAUDE_PLUGIN_ROOT}/shared/guides/arch.md)";
       expect(findings(content)).toHaveLength(0);
     });

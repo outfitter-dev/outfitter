@@ -29,7 +29,7 @@ export interface OutputModePresetConfig {
 /**
  * Resolved output mode from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type OutputModeFlags = {
   /** The resolved output mode */
   readonly outputMode: OutputMode;
@@ -83,7 +83,7 @@ export function outputModePreset(
 /**
  * Resolved jq expression from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type JqFlags = {
   /** The jq expression, or undefined if not provided */
   readonly jq: string | undefined;

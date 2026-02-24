@@ -23,7 +23,7 @@
  * @packageDocumentation
  */
 
-// biome-ignore lint/performance/noBarrelFile: intentional preset aggregation
+// eslint-disable-next-line oxc/no-barrel-file -- intentional preset aggregation
 export {
   BORDERS,
   type BorderStyle,

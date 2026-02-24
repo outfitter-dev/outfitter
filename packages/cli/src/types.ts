@@ -335,7 +335,7 @@ export interface PaginationPresetConfig {
 /**
  * Resolved interaction flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type InteractionFlags = {
   /** Whether interactive prompts are allowed */
   readonly interactive: boolean;
@@ -347,7 +347,7 @@ export type InteractionFlags = {
 /**
  * Resolved strict mode flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type StrictFlags = {
   /** Whether strict mode is enabled */
   readonly strict: boolean;
@@ -356,7 +356,7 @@ export type StrictFlags = {
 /**
  * Resolved time-window flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type TimeWindowFlags = {
   /** Start of time window */
   readonly since: Date | undefined;
@@ -376,7 +376,7 @@ export interface TimeWindowPresetConfig {
 /**
  * Resolved execution flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type ExecutionFlags = {
   /** Timeout in milliseconds (undefined = no timeout) */
   readonly timeout: number | undefined;
@@ -404,7 +404,7 @@ export interface ExecutionPresetConfig {
 /**
  * Resolved projection flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type ProjectionFlags = {
   /** Fields to include (undefined = all) */
   readonly fields: string[] | undefined;
@@ -424,7 +424,7 @@ export type ColorMode = "auto" | "always" | "never";
 /**
  * Resolved color flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type ColorFlags = {
   /** Color output mode */
   readonly color: ColorMode;
@@ -433,7 +433,7 @@ export type ColorFlags = {
 /**
  * Resolved pagination flags from CLI input.
  */
-// biome-ignore lint/style/useConsistentTypeDefinitions: must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type PaginationFlags = {
   /** Number of results to return */
   readonly limit: number;
@@ -658,7 +658,7 @@ export interface CursorOptions {
  * Re-export error classes from contracts for convenience.
  * These are the canonical error types for the CLI.
  */
-// biome-ignore lint/performance/noBarrelFile: intentional re-exports for API surface
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-exports for API surface
 export {
   CancelledError,
   type ErrorCategory,
