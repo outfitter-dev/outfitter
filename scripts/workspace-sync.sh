@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# prebuild.sh
-# Runs before build to sync files and prepare the workspace.
+# workspace-sync.sh
+# Sync workspace files (scaffolding, marketplace, docs). Explicit invocation only.
 
 set -euo pipefail
 
@@ -22,13 +22,13 @@ sync_agent_scaffolding() {
   # Sync settings.json
   if [[ -f "$src/settings.json" ]]; then
     cp "$src/settings.json" "$dest/"
-    echo "[prebuild] Synced .claude/settings.json"
+    echo "[workspace-sync] Synced .claude/settings.json"
   fi
 
   # Sync hooks directory
   if [[ -d "$src/hooks" ]]; then
     cp -r "$src/hooks" "$dest/"
-    echo "[prebuild] Synced .claude/hooks/"
+    echo "[workspace-sync] Synced .claude/hooks/"
   fi
 }
 
@@ -59,13 +59,13 @@ assemble_package_docs() {
 # -----------------------------------------------------------------------------
 
 main() {
-  echo "[prebuild] Starting..."
+  echo "[workspace-sync] Starting..."
 
   sync_agent_scaffolding
   generate_marketplace_manifest
   assemble_package_docs
 
-  echo "[prebuild] Done"
+  echo "[workspace-sync] Done"
 }
 
 main "$@"

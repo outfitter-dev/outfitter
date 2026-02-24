@@ -3,7 +3,7 @@
 /**
  * Generate marketplace-manifest.json from .claude-plugin/marketplace.json.
  *
- * This runs at prebuild time so the check-outfitter skill can read
+ * This runs during workspace-sync so the check-outfitter skill can read
  * the manifest at runtime without access to the monorepo source tree.
  */
 

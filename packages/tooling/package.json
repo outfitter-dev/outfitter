@@ -1,139 +1,139 @@
 {
-	"name": "@outfitter/tooling",
-	"version": "0.3.3",
-	"description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
-	"keywords": [
-		"biome",
-		"config",
-		"lefthook",
-		"markdownlint",
-		"outfitter",
-		"presets",
-		"tooling",
-		"typescript"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/outfitter-dev/outfitter.git",
-		"directory": "packages/tooling"
-	},
-	"bin": {
-		"tooling": "./dist/cli/index.js"
-	},
-	"files": [
-		"dist",
-		"registry",
-		"biome.json",
-		"tsconfig.preset.json",
-		"tsconfig.preset.bun.json",
-		"lefthook.yml",
-		".markdownlint-cli2.jsonc"
-	],
-	"type": "module",
-	"sideEffects": false,
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
-		"./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc",
-		"./biome": "./biome.json",
-		"./biome.json": "./biome.json",
-		"./cli/check": {
-			"import": {
-				"types": "./dist/cli/check.d.ts",
-				"default": "./dist/cli/check.js"
-			}
-		},
-		"./cli/check-markdown-links": {
-			"import": {
-				"types": "./dist/cli/check-markdown-links.d.ts",
-				"default": "./dist/cli/check-markdown-links.js"
-			}
-		},
-		"./cli/check-tsdoc": {
-			"import": {
-				"types": "./dist/cli/check-tsdoc.d.ts",
-				"default": "./dist/cli/check-tsdoc.js"
-			}
-		},
-		"./cli/fix": {
-			"import": {
-				"types": "./dist/cli/fix.d.ts",
-				"default": "./dist/cli/fix.js"
-			}
-		},
-		"./cli/init": {
-			"import": {
-				"types": "./dist/cli/init.d.ts",
-				"default": "./dist/cli/init.js"
-			}
-		},
-		"./lefthook": "./lefthook.yml",
-		"./lefthook.yml": "./lefthook.yml",
-		"./package.json": "./package.json",
-		"./registry": {
-			"import": {
-				"types": "./dist/registry/index.d.ts",
-				"default": "./dist/registry/index.js"
-			}
-		},
-		"./tsconfig": "./tsconfig.preset.json",
-		"./tsconfig-bun": "./tsconfig.preset.bun.json",
-		"./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
-		"./tsconfig.preset.json": "./tsconfig.preset.json"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"scripts": {
-		"build:registry": "bun run src/registry/build.ts",
-		"sync:exports": "bun run scripts/sync-exports.ts",
-		"sync:exports:check": "bun run scripts/sync-exports.ts --check",
-		"prebuild": "bun run build:registry && bun run sync:exports:check",
-		"build": "bunup --filter @outfitter/tooling",
-		"prepack": "bun run sync:exports",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src",
-		"test": "bun run build:registry && bun test",
-		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist registry",
-		"prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
-	},
-	"dependencies": {
-		"@outfitter/cli": "workspace:*",
-		"commander": "catalog:",
-		"typescript": "catalog:",
-		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"@outfitter/presets": "workspace:*",
-		"@types/bun": "catalog:",
-		"yaml": "catalog:"
-	},
-	"peerDependencies": {
-		"lefthook": "^2.0.0",
-		"markdownlint-cli2": ">=0.17.0",
-		"ultracite": "^7.0.0"
-	},
-	"peerDependenciesMeta": {
-		"ultracite": {
-			"optional": true
-		},
-		"lefthook": {
-			"optional": true
-		},
-		"markdownlint-cli2": {
-			"optional": true
-		}
-	},
-	"engines": {
-		"bun": ">=1.3.9"
-	}
+  "name": "@outfitter/tooling",
+  "description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
+  "version": "0.3.3",
+  "type": "module",
+  "files": [
+    "dist",
+    "registry",
+    "biome.json",
+    "tsconfig.preset.json",
+    "tsconfig.preset.bun.json",
+    "lefthook.yml",
+    ".markdownlint-cli2.jsonc"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
+    "./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc",
+    "./biome": "./biome.json",
+    "./biome.json": "./biome.json",
+    "./cli/check": {
+      "import": {
+        "types": "./dist/cli/check.d.ts",
+        "default": "./dist/cli/check.js"
+      }
+    },
+    "./cli/check-markdown-links": {
+      "import": {
+        "types": "./dist/cli/check-markdown-links.d.ts",
+        "default": "./dist/cli/check-markdown-links.js"
+      }
+    },
+    "./cli/check-tsdoc": {
+      "import": {
+        "types": "./dist/cli/check-tsdoc.d.ts",
+        "default": "./dist/cli/check-tsdoc.js"
+      }
+    },
+    "./cli/fix": {
+      "import": {
+        "types": "./dist/cli/fix.d.ts",
+        "default": "./dist/cli/fix.js"
+      }
+    },
+    "./cli/init": {
+      "import": {
+        "types": "./dist/cli/init.d.ts",
+        "default": "./dist/cli/init.js"
+      }
+    },
+    "./lefthook": "./lefthook.yml",
+    "./lefthook.yml": "./lefthook.yml",
+    "./package.json": "./package.json",
+    "./registry": {
+      "import": {
+        "types": "./dist/registry/index.d.ts",
+        "default": "./dist/registry/index.js"
+      }
+    },
+    "./tsconfig": "./tsconfig.preset.json",
+    "./tsconfig-bun": "./tsconfig.preset.bun.json",
+    "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+    "./tsconfig.preset.json": "./tsconfig.preset.json"
+  },
+  "bin": {
+    "tooling": "./dist/cli/index.js"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build:registry": "bun run src/registry/build.ts",
+    "sync:exports": "bun run scripts/sync-exports.ts",
+    "sync:exports:check": "bun run scripts/sync-exports.ts --check",
+    "prebuild": "bun run build:registry && bun run sync:exports:check",
+    "build": "bunup --filter @outfitter/tooling",
+    "prepack": "bun run sync:exports",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
+    "test": "bun run build:registry && bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist registry",
+    "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
+  },
+  "dependencies": {
+    "@outfitter/cli": "workspace:*",
+    "commander": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@outfitter/presets": "workspace:*",
+    "@types/bun": "catalog:",
+    "yaml": "catalog:"
+  },
+  "peerDependencies": {
+    "ultracite": "^7.0.0",
+    "lefthook": "^2.0.0",
+    "markdownlint-cli2": ">=0.17.0"
+  },
+  "peerDependenciesMeta": {
+    "ultracite": {
+      "optional": true
+    },
+    "lefthook": {
+      "optional": true
+    },
+    "markdownlint-cli2": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "bun": ">=1.3.9"
+  },
+  "keywords": [
+    "outfitter",
+    "tooling",
+    "biome",
+    "typescript",
+    "lefthook",
+    "markdownlint",
+    "config",
+    "presets"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/tooling"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

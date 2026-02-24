@@ -26,12 +26,12 @@
     },
     "lint": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "biome.json"],
+      "inputs": ["src/**", ".oxlintrc.json", ".oxfmtrc.jsonc"],
       "outputs": []
     },
     "lint:fix": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "biome.json"],
+      "inputs": ["src/**", ".oxlintrc.json", ".oxfmtrc.jsonc"],
       "outputs": []
     },
     "typecheck": {

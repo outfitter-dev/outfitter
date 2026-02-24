@@ -159,6 +159,13 @@ function publishPackage(pkg: WorkspacePackage): void {
   run("npm", argsList, dirname(pkg.path));
 }
 
+function runPublishPrerequisites(): void {
+  // Root build compiles package outputs and normalizes exports.
+  run("bun", ["run", "build"], ROOT);
+  // Tooling publishes registry artifacts from /registry that are gitignored.
+  run("bun", ["run", "--filter", "@outfitter/tooling", "build:registry"], ROOT);
+}
+
 function main(): void {
   const workspacePackages = listWorkspacePackages();
   const versionMap = new Map(
@@ -167,7 +174,7 @@ function main(): void {
   const originals = new Map<string, string>();
 
   if (!skipBuild) {
-    run("bun", ["run", "build:turbo"], ROOT);
+    runPublishPrerequisites();
   }
 
   for (const pkg of workspacePackages) {

@@ -9,7 +9,7 @@
   ],
   "type": "module",
   "scripts": {
-    "prebuild": "./scripts/prebuild.sh",
+    "sync:all": "./scripts/workspace-sync.sh",
     "verify:ci": "bun run verify:ci:checks && bun run test",
     "verify:ci:checks": "bun run typecheck && bun run check && bun run check-publish-guardrails && bun run check-changeset && bun run check-bunup-registry && bun run check-preset-dependency-versions && bun run docs:check:ci && bun run docs:check:links && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run check-boundary-invocations && bun run check-canonical-surface-map && bun run check-surface-map-format && bun run schema:diff",
     "check-changeset": "bun run apps/outfitter/src/commands/repo.ts check changeset --cwd .",
@@ -26,7 +26,6 @@
     "docs:check:links": "bun run apps/outfitter/src/commands/repo.ts check markdown-links --cwd .",
     "build": "bunup && bun scripts/normalize-exports.ts",
     "build:local": "bunup && bun scripts/normalize-exports.ts && cd apps/outfitter && bun link",
-    "build:turbo": "turbo run build",
     "docs:sync:core": "bun run apps/outfitter/src/commands/repo.ts export docs --cwd .",
     "docs:sync:readme": "bun run --filter @outfitter/docs build && bun run packages/docs/dist/cli.js docs sync-readme --cwd .",
     "docs:sync": "bun run apps/outfitter/src/commands/repo.ts sync docs --cwd . && bun run docs:sync:readme",

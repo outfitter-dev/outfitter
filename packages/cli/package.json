@@ -131,8 +131,8 @@
     "build": "cd ../.. && bunup --filter @outfitter/cli",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "lint": "biome lint ./src",
-    "lint:fix": "biome lint --write ./src",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"

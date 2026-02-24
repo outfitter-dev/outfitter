@@ -22,7 +22,7 @@ pre-commit:
 
     sync-agent-scaffolding:
       glob: ".claude/{settings.json,hooks/*}"
-      run: ./scripts/prebuild.sh
+      run: ./scripts/sync-agent-scaffolding.sh
       stage_fixed: true
 
 pre-push:

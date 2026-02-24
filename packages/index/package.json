@@ -61,8 +61,8 @@
   },
   "scripts": {
     "build": "cd ../.. && bunup --filter @outfitter/index",
-    "lint": "biome lint ./src",
-    "lint:fix": "biome lint --write ./src",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
