@@ -34,9 +34,14 @@ describe("cli commands", () => {
     const commandFiles = Array.from(glob.scanSync({ cwd: srcRoot })).map(
       (file) => join(srcRoot, file)
     );
+    const actionGlob = new Bun.Glob("actions/*.ts");
+    const actionFiles = Array.from(actionGlob.scanSync({ cwd: srcRoot })).map(
+      (file) => join(srcRoot, file)
+    );
 
     const files = [
       ...commandFiles,
+      ...actionFiles,
       join(srcRoot, "actions.ts"),
       join(srcRoot, "cli.ts"),
     ];

@@ -1,0 +1,57 @@
+/**
+ * Shared action registry helpers.
+ *
+ * @packageDocumentation
+ */
+
+import { z } from "zod";
+
+export const outputModeSchema = z
+  .enum(["human", "json", "jsonl"])
+  .default("human");
+
+export function resolveStringFlag(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+export function resolveNoToolingFlag(flags: {
+  readonly noTooling?: unknown;
+  readonly tooling?: unknown;
+}): boolean | undefined {
+  if (typeof flags.noTooling === "boolean") {
+    return !flags.noTooling;
+  }
+
+  if (typeof flags.tooling === "boolean") {
+    if (!flags.tooling) {
+      return true;
+    }
+
+    return process.argv.includes("--tooling") ? false : undefined;
+  }
+
+  return undefined;
+}
+
+export function resolveLocalFlag(flags: {
+  readonly local?: unknown;
+  readonly workspace?: unknown;
+}): boolean | undefined {
+  if (flags.local === true || flags.workspace === true) {
+    return true;
+  }
+
+  return undefined;
+}
+
+export function resolveInstallTimeoutFlag(value: unknown): number | undefined {
+  if (typeof value === "string") {
+    return Number.parseInt(value, 10);
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  return undefined;
+}

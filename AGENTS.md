@@ -114,7 +114,7 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 
 Actions are the canonical unit of CLI and MCP functionality. Each action is defined via `defineAction()` with Zod schemas for input/output, CLI option declarations, and a handler function.
 
-**Where actions live**: `apps/outfitter/src/actions.ts` — all actions are registered in a single `ActionRegistry`.
+**Where actions live**: Action definitions live in `apps/outfitter/src/actions/*.ts` (grouped by domain), while `apps/outfitter/src/actions.ts` composes and exports the single `ActionRegistry`.
 
 **What an action provides**:
 
@@ -137,11 +137,12 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 #### Adding a New CLI Command
 
 1. Define the handler in `apps/outfitter/src/commands/<name>.ts` — pure function returning `Result<T, E>`
-2. Register via `defineAction()` in `apps/outfitter/src/actions.ts` with input/output Zod schemas
-3. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
-4. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
-5. Run `outfitter schema generate` to update `.outfitter/surface.json`
-6. Verify with `outfitter schema diff` (should report no drift after regeneration)
+2. Define and export the action from the appropriate `apps/outfitter/src/actions/<domain>.ts` module using `defineAction()` with input/output Zod schemas
+3. Wire the action into `apps/outfitter/src/actions.ts` so it is included in the shared `ActionRegistry`
+4. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
+5. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
+6. Run `outfitter schema generate` to update `.outfitter/surface.json`
+7. Verify with `outfitter schema diff` (should report no drift after regeneration)
 
 ### Error Taxonomy
 
