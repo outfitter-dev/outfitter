@@ -67,8 +67,8 @@ outfitter init <cli|mcp|daemon> . --name <name>
 
 **Options:**
 
-- `--no-tooling` — Skip biome, lefthook, claude settings
-- `--with <blocks>` — Specific blocks: `claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`
+- `--no-tooling` — Skip linter, lefthook, claude settings
+- `--with <blocks>` — Specific blocks: `claude`, `linter`, `lefthook`, `bootstrap`, `scaffolding`
 - `--force` — Overwrite existing files
 
 ### Step 4: Report and Suggest Next Steps

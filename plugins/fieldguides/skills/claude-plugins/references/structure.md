@@ -360,7 +360,7 @@ When using a separate file, it requires a root-level `"hooks"` wrapper:
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 30
           }
         ]

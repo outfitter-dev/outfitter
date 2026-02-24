@@ -38,7 +38,7 @@ Top-level commands:
 
 - `init [directory]` - Create a new project from scratch (interactive or scripted)
 - `scaffold <target> [name]` - Add a new capability to an existing project
-- `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
+- `add <block>` - Add a tooling block (`claude`, `linter`, `lefthook`, `bootstrap`, `scaffolding`)
 - `repo <action> <subject>` - Repository maintenance namespace (`check|sync|export`)
 - `upgrade` - Check installed `@outfitter/*` versions and optionally show migration guidance
 - `doctor` - Validate local environment and project dependencies
@@ -106,7 +106,7 @@ Examples:
 ```bash
 outfitter scaffold mcp
 outfitter scaffold lib shared-utils
-outfitter scaffold cli admin-console --with biome,lefthook
+outfitter scaffold cli admin-console --with linter,lefthook
 ```
 
 ### `add`
@@ -127,7 +127,7 @@ Examples:
 
 ```bash
 outfitter add scaffolding
-outfitter add biome --dry-run
+outfitter add linter --dry-run
 outfitter add list
 ```
 

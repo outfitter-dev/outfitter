@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-24T19:47:59.955Z",
+  "generatedAt": "2026-02-24T20:11:02.608Z",
   "surfaces": [
     "cli"
   ],
@@ -223,7 +223,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -386,7 +386,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -545,7 +545,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -704,7 +704,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -863,7 +863,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -1022,7 +1022,7 @@
           },
           {
             "flags": "--with <blocks>",
-            "description": "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)"
+            "description": "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)"
           },
           {
             "flags": "--no-tooling",
@@ -1196,7 +1196,7 @@
       "cli": {
         "group": "add",
         "command": "<block>",
-        "description": "Add a block from the registry (claude, biome, lefthook, bootstrap, scaffolding)",
+        "description": "Add a block from the registry (claude, linter, lefthook, bootstrap, scaffolding)",
         "options": [
           {
             "flags": "-f, --force",

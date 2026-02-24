@@ -20,7 +20,7 @@ Real-world examples of Claude Code event hooks for automation, validation, and w
 
 ## Auto-Formatting
 
-### TypeScript with Biome
+### TypeScript with Ultracite
 
 Auto-format TypeScript files after writing or editing.
 
@@ -35,7 +35,7 @@ Auto-format TypeScript files after writing or editing.
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           }
         ]
@@ -45,7 +45,7 @@ Auto-format TypeScript files after writing or editing.
 }
 ```
 
-**Result**: Every TypeScript file is automatically formatted with Biome after Claude writes or edits it.
+**Result**: Every TypeScript file is automatically formatted with Ultracite (oxlint + oxfmt) after Claude writes or edits it.
 
 ### Python with Black
 
@@ -143,8 +143,8 @@ fi
 # Determine formatter based on extension
 case "$FILE_PATH" in
   *.ts|*.tsx|*.js|*.jsx)
-    if command -v biome &>/dev/null; then
-      biome check --write "$FILE_PATH" 2>&1 || true
+    if command -v bunx &>/dev/null; then
+      bunx ultracite fix "$FILE_PATH" 2>&1 || true
     fi
     ;;
   *.py)
@@ -1195,7 +1195,7 @@ Format, type-check, lint, and test TypeScript files.
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           },
           {
@@ -1319,7 +1319,7 @@ Team-wide formatting and validation.
         "hooks": [
           {
             "type": "command",
-            "command": "biome check --write \"$file\"",
+            "command": "bunx ultracite fix \"$file\"",
             "timeout": 10
           }
         ]
@@ -1514,7 +1514,7 @@ fi
 
 # Run formatter
 if [[ "$FILE_PATH" =~ \.ts$ ]]; then
-  biome check --write "$FILE_PATH"
+  bunx ultracite fix "$FILE_PATH"
 fi
 
 exit 0
@@ -1642,7 +1642,7 @@ BACKUP="${FILE_PATH}.bak"
 cp "$FILE_PATH" "$BACKUP"
 
 # Try to format
-if ! biome check --write "$FILE_PATH" 2>/dev/null; then
+if ! bunx ultracite fix "$FILE_PATH" 2>/dev/null; then
   # Restore backup on failure
   mv "$BACKUP" "$FILE_PATH"
   echo "⚠ Format failed, restored original file" >&2

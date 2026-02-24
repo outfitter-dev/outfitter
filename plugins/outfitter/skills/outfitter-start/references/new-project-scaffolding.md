@@ -86,11 +86,11 @@ AskUserQuestion:
 
 ```
 AskUserQuestion:
-  question: "Include standard tooling? (biome, lefthook, claude settings)"
+  question: "Include standard tooling? (linter, lefthook, claude settings)"
   header: "Tooling"
   options:
     - label: "Yes, add scaffolding (Recommended)"
-      description: "Adds biome.json, .lefthook.yml, .claude/settings.json, bootstrap script"
+      description: "Adds oxlintrc.jsonc, .lefthook.yml, .claude/settings.json, bootstrap script"
     - label: "No, just the preset"
       description: "Only creates the project structure"
 ```
@@ -109,8 +109,8 @@ outfitter init <cli|mcp|daemon> . --name <name> --no-tooling
 # Or: outfitter init . --preset <preset> --name <name> --no-tooling
 
 # With specific blocks
-outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
-# Or: outfitter init . --preset <preset> --name <name> --with claude,biome
+outfitter init <cli|mcp|daemon> . --name <name> --with claude,linter
+# Or: outfitter init . --preset <preset> --name <name> --with claude,linter
 ```
 
 ### Available Presets
@@ -128,7 +128,7 @@ outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
 | ------------- | -------------------------------------------- |
 | `scaffolding` | All blocks below (default)                   |
 | `claude`      | `.claude/settings.json`, format-on-stop hook |
-| `biome`       | `biome.json`, ultracite dependency           |
+| `linter`      | `oxlintrc.jsonc`, ultracite dependency       |
 | `lefthook`    | `.lefthook.yml`, lefthook dependency         |
 | `bootstrap`   | `scripts/bootstrap.sh`                       |
 

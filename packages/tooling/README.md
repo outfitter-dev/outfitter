@@ -4,7 +4,7 @@ Dev tooling configuration presets and CLI for Outfitter projects.
 
 ## Features
 
-- **Configuration Presets**: Biome, TypeScript, Lefthook, and markdownlint configs
+- **Configuration Presets**: oxlint, TypeScript, Lefthook, and markdownlint configs
 - **CLI Commands**: Initialize configs, upgrade Bun, TDD-aware pre-push hooks
 - **Registry System**: Composable config blocks for scaffolding
 
@@ -16,7 +16,7 @@ bun add -D @outfitter/tooling
 
 Peer dependencies (optional):
 
-- `ultracite` — Biome wrapper for formatting/linting
+- `ultracite` — oxlint/oxfmt wrapper for formatting/linting
 - `lefthook` — Git hooks
 - `markdownlint-cli2` — Markdown linting
 
@@ -24,7 +24,7 @@ Peer dependencies (optional):
 
 ### `tooling init`
 
-Initialize tooling configuration in the current project. Copies preset configs for Biome, TypeScript, Lefthook, and markdownlint.
+Initialize tooling configuration in the current project. Copies preset configs for oxlint, TypeScript, Lefthook, and markdownlint.
 
 ```bash
 bunx @outfitter/tooling init
@@ -173,16 +173,6 @@ bunx @outfitter/tooling check-readme-imports --json
 
 ## Configuration Presets
 
-### Biome
-
-Extends our Biome config in your `biome.json`:
-
-```json
-{
-  "extends": ["@outfitter/tooling/biome.json"]
-}
-```
-
 ### TypeScript
 
 Extends our TypeScript config in your `tsconfig.json`:
@@ -231,7 +221,7 @@ The tooling package includes a registry of composable config blocks for the `out
 Available blocks:
 
 - `claude` — Claude Code settings and hooks
-- `biome` — Biome/Ultracite configuration
+- `linter` — oxlint/Ultracite configuration
 - `lefthook` — Git hooks configuration
 - `markdownlint` — Markdown linting configuration
 - `bootstrap` — Project bootstrap script
@@ -251,13 +241,17 @@ bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
 
 ## Exports
 
-| Export                       | Description                  |
-| ---------------------------- | ---------------------------- |
-| `./biome.json`               | Biome configuration preset   |
-| `./tsconfig.preset.json`     | TypeScript preset (general)  |
-| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)      |
-| `./lefthook.yml`             | Lefthook hooks configuration |
-| `./.markdownlint-cli2.jsonc` | markdownlint configuration   |
+| Export                       | Description                              |
+| ---------------------------- | ---------------------------------------- |
+| `./registry`                 | Tooling block registry API               |
+| `./tsconfig`                | Alias for `./tsconfig.preset.json`       |
+| `./tsconfig-bun`            | Alias for `./tsconfig.preset.bun.json`   |
+| `./tsconfig.preset.json`     | TypeScript preset (general)              |
+| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)                  |
+| `./lefthook`                | Alias for `./lefthook.yml`               |
+| `./lefthook.yml`             | Lefthook hooks configuration             |
+| `./.markdownlint-cli2`      | Alias for `./.markdownlint-cli2.jsonc`   |
+| `./.markdownlint-cli2.jsonc` | markdownlint configuration               |
 
 ## Related
 

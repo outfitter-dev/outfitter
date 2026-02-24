@@ -121,7 +121,7 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "--with <blocks>",
     description:
-      "Tooling to add (comma-separated: scaffolding, claude, biome, lefthook, bootstrap)",
+      "Tooling to add (comma-separated: scaffolding, claude, linter, lefthook, bootstrap)",
   },
   {
     flags: "--no-tooling",

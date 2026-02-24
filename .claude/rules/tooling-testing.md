@@ -12,7 +12,7 @@ paths:
 
 2. Config preset changed?
 
-- Applies to `packages/tooling/biome.json`, `packages/tooling/lefthook.yml`, `packages/tooling/tsconfig.preset*.json`.
+- Applies to `packages/tooling/lefthook.yml`, `packages/tooling/tsconfig.preset*.json`.
 - Run `cd packages/tooling && bun test --update-snapshots`.
 - Review `.snap` diffs. If diff is wrong, fix source config, not snapshot.
 

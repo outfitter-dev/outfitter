@@ -10,7 +10,7 @@
 >
 > # Or add individual blocks
 > npx outfitter add claude      # Claude Code settings & hooks
-> npx outfitter add biome       # Biome configuration
+> npx outfitter add linter      # oxlint/oxfmt configuration
 > npx outfitter add lefthook    # Git hooks
 > npx outfitter add bootstrap   # Bootstrap script
 > ```
