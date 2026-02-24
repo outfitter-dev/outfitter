@@ -25,11 +25,9 @@ fi
 # Format the file with ultracite (adjust to your formatter)
 echo "Formatting $FILE_PATH..."
 
-if command -v bunx &>/dev/null; then
-  bunx ultracite fix "$FILE_PATH" 2>&1 || {
-    echo "Warning: ultracite formatting failed for $FILE_PATH" >&2
-    exit 0  # Non-blocking warning
-  }
+if command -v ultracite &>/dev/null && ultracite fix "$FILE_PATH" 2>&1; then
+  echo "Formatted successfully"
+elif command -v bunx &>/dev/null && bunx ultracite fix "$FILE_PATH" 2>&1; then
   echo "Formatted successfully"
 elif command -v prettier &>/dev/null; then
   prettier --write "$FILE_PATH" 2>&1 || {
@@ -38,7 +36,7 @@ elif command -v prettier &>/dev/null; then
   }
   echo "Formatted successfully"
 else
-  echo "Warning: No formatter found (ultracite or prettier)" >&2
+  echo "Warning: No formatter found (ultracite via binary/bunx, or prettier)" >&2
   exit 0
 fi
 

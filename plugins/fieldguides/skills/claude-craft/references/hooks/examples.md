@@ -143,8 +143,12 @@ fi
 # Determine formatter based on extension
 case "$FILE_PATH" in
   *.ts|*.tsx|*.js|*.jsx)
-    if command -v bunx &>/dev/null; then
-      bunx ultracite fix "$FILE_PATH" 2>&1 || true
+    if command -v ultracite &>/dev/null && ultracite fix "$FILE_PATH" 2>&1; then
+      :
+    elif command -v bunx &>/dev/null && bunx ultracite fix "$FILE_PATH" 2>&1; then
+      :
+    elif command -v prettier &>/dev/null; then
+      prettier --write "$FILE_PATH" 2>&1 || true
     fi
     ;;
   *.py)
