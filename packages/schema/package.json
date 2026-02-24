@@ -21,6 +21,30 @@
         "default": "./dist/diff.js"
       }
     },
+    "./diff/actions": {
+      "import": {
+        "types": "./dist/diff/actions.d.ts",
+        "default": "./dist/diff/actions.js"
+      }
+    },
+    "./diff/metadata": {
+      "import": {
+        "types": "./dist/diff/metadata.d.ts",
+        "default": "./dist/diff/metadata.js"
+      }
+    },
+    "./diff/shared": {
+      "import": {
+        "types": "./dist/diff/shared.d.ts",
+        "default": "./dist/diff/shared.js"
+      }
+    },
+    "./diff/types": {
+      "import": {
+        "types": "./dist/diff/types.d.ts",
+        "default": "./dist/diff/types.js"
+      }
+    },
     "./manifest": {
       "import": {
         "types": "./dist/manifest.d.ts",
