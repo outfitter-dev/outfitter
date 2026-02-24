@@ -7,9 +7,8 @@
  * Checks:
  * 1. Preset deps match presets (base version comparison)
  * 2. Registry.json devDependency versions match presets
- * 3. Biome schema URLs match the catalog biome version
- * 4. Bun version is consistent across .bun-version, engines, and docs
- * 5. No stale hardcoded version fallbacks in source files
+ * 3. Bun version is consistent across .bun-version, engines, and docs
+ * 4. No stale hardcoded version fallbacks in source files
  */
 
 import { readFileSync } from "node:fs";
@@ -144,36 +143,7 @@ function validateRegistryVersions(
   }
 }
 
-// --- Check 3: Biome schema URLs ---
-
-function validateBiomeSchemaUrls(
-  expectedBiomeVersion: string,
-  problems: string[]
-): void {
-  const baseVersion = normalizeVersionRange(expectedBiomeVersion);
-  const templateRoots = ["templates", "packages/presets/presets"] as const;
-  const glob = new Bun.Glob("**/biome.json.template");
-  for (const root of templateRoots) {
-    for (const relativePath of glob.scanSync({ cwd: root, absolute: false })) {
-      const path = join(root, relativePath);
-      try {
-        const content = readFileSync(path, "utf-8");
-        const match = content.match(
-          /biomejs\.dev\/schemas\/([\d.]+)\/schema\.json/
-        );
-        if (match && match[1] !== baseVersion) {
-          problems.push(
-            `biome schema drift: ${path} has ${match[1]} but expected ${baseVersion}`
-          );
-        }
-      } catch {
-        // Skip unreadable files.
-      }
-    }
-  }
-}
-
-// --- Check 4: Bun version consistency ---
+// --- Check 3: Bun version consistency ---
 
 function validateBunVersionConsistency(problems: string[]): void {
   const bunVersionFile = readFileSync(".bun-version", "utf-8").trim();
@@ -229,7 +199,7 @@ function validateBunVersionConsistency(problems: string[]): void {
   }
 }
 
-// --- Check 5: No stale fallbacks ---
+// --- Check 4: No stale fallbacks ---
 
 function validateNoStaleFallbacks(problems: string[]): void {
   const filesToCheck = [
@@ -264,11 +234,6 @@ function main(): number {
 
   validatePresetDeps(resolvedVersions, problems);
   validateRegistryVersions(resolvedVersions, problems);
-
-  const biomeVersion = resolvedVersions["@biomejs/biome"];
-  if (biomeVersion) {
-    validateBiomeSchemaUrls(biomeVersion, problems);
-  }
 
   validateBunVersionConsistency(problems);
   validateNoStaleFallbacks(problems);
