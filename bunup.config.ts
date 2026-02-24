@@ -122,7 +122,17 @@ export default defineWorkspace(
             "./cli",
             "./command/*",
             "./commands/*",
+            // Internal core helpers from modularization passes are intentionally
+            // private; keep only the stable docs-map/public core entrypoints.
+            "./core/content-processing",
+            "./core/drift",
+            "./core/errors",
+            "./core/expected-output",
+            "./core/llms-render",
+            "./core/options",
+            "./core/path-utils",
             "./core/sentinel-sync",
+            "./core/types",
             "./version",
           ],
         },
@@ -226,7 +236,7 @@ export default defineWorkspace(
       // Current exports cover all command, engine, and create subpaths.
       config: {
         exports: {
-          exclude: ["./internal/*", "./output-mode"],
+          exclude: ["./actions/*", "./internal/*", "./output-mode"],
         },
       },
     },
