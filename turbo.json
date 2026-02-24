@@ -3,6 +3,7 @@
   "remoteCache": {
     "signature": true
   },
+  "globalDependencies": [".bun-version"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
