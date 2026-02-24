@@ -1,12 +1,11 @@
 {
   "name": "@outfitter/tooling",
-  "description": "Dev tooling configuration presets for Outfitter projects (biome, typescript, lefthook, markdownlint)",
+  "description": "Dev tooling configuration presets for Outfitter projects (oxlint/oxfmt, typescript, lefthook, markdownlint)",
   "version": "0.3.3",
   "type": "module",
   "files": [
     "dist",
     "registry",
-    "biome.json",
     "tsconfig.preset.json",
     "tsconfig.preset.bun.json",
     "lefthook.yml",
@@ -23,8 +22,6 @@
     },
     "./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
     "./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc",
-    "./biome": "./biome.json",
-    "./biome.json": "./biome.json",
     "./cli/check": {
       "import": {
         "types": "./dist/cli/check.d.ts",
@@ -120,7 +117,8 @@
   "keywords": [
     "outfitter",
     "tooling",
-    "biome",
+    "oxlint",
+    "oxfmt",
     "typescript",
     "lefthook",
     "markdownlint",

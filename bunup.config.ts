@@ -221,7 +221,6 @@ export default defineWorkspace(
             "./version",
           ],
           customExports: {
-            "./biome.json": "./biome.json",
             "./tsconfig.preset.json": "./tsconfig.preset.json",
             "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
             "./lefthook.yml": "./lefthook.yml",

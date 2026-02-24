@@ -48,6 +48,8 @@
     "bunup": "catalog:",
     "commander": "catalog:",
     "lefthook": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
     "smol-toml": "catalog:",
     "ultracite": "catalog:",
     "yaml": "catalog:",

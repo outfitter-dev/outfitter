@@ -2,13 +2,13 @@
  * @outfitter/tooling
  *
  * Dev tooling configuration presets for Outfitter projects.
- * Provides standardized biome, TypeScript, lefthook, and markdownlint configurations.
+ * Provides standardized oxlint/oxfmt, TypeScript, lefthook, and markdownlint configurations.
  *
  * @example
  * ```json
- * // biome.json
+ * // .oxlintrc.json — extend the Outfitter preset
  * {
- *   "extends": ["ultracite/biome/core", "@outfitter/tooling/biome.json"]
+ *   "extends": ["ultracite/oxlint/core"]
  * }
  * ```
  *
