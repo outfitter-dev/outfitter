@@ -60,9 +60,9 @@ describe("runAdd", () => {
     ).toBe(true);
   });
 
-  test("adds biome block with devDependencies", async () => {
+  test("adds linter block with devDependencies", async () => {
     const result = await runAdd({
-      block: "biome",
+      block: "linter",
       force: false,
       dryRun: false,
       cwd: testDir,
@@ -70,7 +70,7 @@ describe("runAdd", () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.created).toContain("biome.json");
+      expect(result.value.created).toContain(".oxlintrc.json");
       expect(result.value.devDependencies.ultracite).toBe(
         resolvedVersions["ultracite"]
       );
@@ -208,7 +208,7 @@ describe("runAdd", () => {
 
   test("stamps manifest after successful add", async () => {
     const result = await runAdd({
-      block: "biome",
+      block: "linter",
       force: false,
       dryRun: false,
       cwd: testDir,
@@ -223,9 +223,9 @@ describe("runAdd", () => {
     const raw = readFileSync(manifestPath, "utf-8");
     const manifest = JSON.parse(raw) as Manifest;
     expect(manifest.version).toBe(1);
-    expect(manifest.blocks["biome"]).toBeDefined();
-    expect(manifest.blocks["biome"]?.installedFrom).toMatch(/^\d+\.\d+\.\d+/);
-    expect(manifest.blocks["biome"]?.installedAt).toBeDefined();
+    expect(manifest.blocks["linter"]).toBeDefined();
+    expect(manifest.blocks["linter"]?.installedFrom).toMatch(/^\d+\.\d+\.\d+/);
+    expect(manifest.blocks["linter"]?.installedAt).toBeDefined();
   });
 
   test("manifest records correct installedFrom version", async () => {
@@ -250,7 +250,7 @@ describe("runAdd", () => {
 
   test("dry run does not stamp manifest", async () => {
     await runAdd({
-      block: "biome",
+      block: "linter",
       force: false,
       dryRun: true,
       cwd: testDir,
@@ -268,7 +268,7 @@ describe("runAdd", () => {
     chmodSync(join(outfitterDir, "manifest.json"), 0o444);
 
     const result = await runAdd({
-      block: "biome",
+      block: "linter",
       force: false,
       dryRun: false,
       cwd: testDir,
@@ -277,7 +277,7 @@ describe("runAdd", () => {
     // The add command should still succeed — stamping is best-effort
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.created).toContain("biome.json");
+      expect(result.value.created).toContain(".oxlintrc.json");
     }
 
     // Clean up: restore write permission for afterEach cleanup
@@ -292,7 +292,7 @@ describe("listBlocks", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value).toContain("claude");
-      expect(result.value).toContain("biome");
+      expect(result.value).toContain("linter");
       expect(result.value).toContain("lefthook");
       expect(result.value).toContain("bootstrap");
       expect(result.value).toContain("scaffolding");
