@@ -81,4 +81,46 @@ describe("docs.list action", () => {
 
     expect(mapped.jq).toBe(".entries[0]");
   });
+
+  test("mapInput uses OUTFITTER_JSONL env fallback when --output is omitted", () => {
+    const originalJsonl = process.env["OUTFITTER_JSONL"];
+    process.env["OUTFITTER_JSONL"] = "1";
+
+    try {
+      const action = outfitterActions.get("docs.list");
+      const mapped = action?.cli?.mapInput?.({
+        args: [],
+        flags: {},
+      }) as { outputMode: string };
+
+      expect(mapped.outputMode).toBe("jsonl");
+    } finally {
+      if (originalJsonl === undefined) {
+        delete process.env["OUTFITTER_JSONL"];
+      } else {
+        process.env["OUTFITTER_JSONL"] = originalJsonl;
+      }
+    }
+  });
+
+  test("mapInput explicit --output overrides OUTFITTER_JSONL fallback", () => {
+    const originalJsonl = process.env["OUTFITTER_JSONL"];
+    process.env["OUTFITTER_JSONL"] = "1";
+
+    try {
+      const action = outfitterActions.get("docs.list");
+      const mapped = action?.cli?.mapInput?.({
+        args: [],
+        flags: { output: "human" },
+      }) as { outputMode: string };
+
+      expect(mapped.outputMode).toBe("human");
+    } finally {
+      if (originalJsonl === undefined) {
+        delete process.env["OUTFITTER_JSONL"];
+      } else {
+        process.env["OUTFITTER_JSONL"] = originalJsonl;
+      }
+    }
+  });
 });

@@ -35,11 +35,8 @@ import {
   printDocsShowResults,
   runDocsShow,
 } from "../commands/docs-show.js";
-import {
-  type CliOutputMode,
-  resolveStructuredOutputMode,
-} from "../output-mode.js";
 import { checkTsdocOutputSchema } from "./check.js";
+import { resolveDocsOutputMode } from "./docs-output-mode.js";
 import { outputModeSchema, resolveStringFlag } from "./shared.js";
 
 const docsListInputSchema = z.object({
@@ -82,17 +79,7 @@ export const docsListAction = defineAction({
         context.flags
       );
       const { jq } = docsListJq.resolve(context.flags);
-      const explicitOutput = typeof context.flags["output"] === "string";
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
       const { cwd: rawCwd } = docsListCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
       const kind = resolveStringFlag(context.flags["kind"]);
@@ -150,17 +137,7 @@ export const docsShowAction = defineAction({
         context.flags
       );
       const { jq } = docsShowJq.resolve(context.flags);
-      const explicitOutput = typeof context.flags["output"] === "string";
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
       const { cwd: rawCwd } = docsShowCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
 
@@ -226,17 +203,7 @@ export const docsSearchAction = defineAction({
         context.flags
       );
       const { jq } = docsSearchJq.resolve(context.flags);
-      const explicitOutput = typeof context.flags["output"] === "string";
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
       const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
       const kind = resolveStringFlag(context.flags["kind"]);
@@ -306,17 +273,7 @@ export const docsApiAction = defineAction({
         context.flags
       );
       const { jq } = docsApiJq.resolve(context.flags);
-      const explicitOutput = typeof context.flags["output"] === "string";
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
       const { cwd: rawCwd } = docsApiCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
 
@@ -397,17 +354,7 @@ export const docsExportAction = defineAction({
       const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
         context.flags
       );
-      const explicitOutput = typeof context.flags["output"] === "string";
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
       const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
       const targetRaw = resolveStringFlag(context.flags["target"]);
