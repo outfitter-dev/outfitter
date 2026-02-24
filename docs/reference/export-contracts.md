@@ -48,7 +48,7 @@ typecheck -> check -> docs:check:ci -> check-exports -> check-readme-imports
 -> build -> check-clean-tree -> check-boundary-invocations -> test
 ```
 
-`docs:check:ci` validates `docs/packages` drift for normal PR CI.
+`docs:check:ci` validates `docs/README.md` sentinel freshness for normal PR CI.
 
 This same pipeline runs locally via pre-push hook (`bunx @outfitter/tooling pre-push`) and in CI. Local and CI are always in parity for day-to-day PR verification.
 

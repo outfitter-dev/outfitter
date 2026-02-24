@@ -34,6 +34,8 @@ Each package has detailed API documentation in its own directory. The canonical
 location is `packages/<name>/README.md` (and `packages/<name>/docs/` for deep
 docs). Use `outfitter docs list` to browse the docs index, or
 `outfitter docs show <id>` to view a specific document.
+Regenerate README sentinel sections with `bun run docs:sync:readme`; verify
+freshness with `bun run docs:check:readme-sentinel`.
 
 <!-- BEGIN:GENERATED:PACKAGE_LIST -->
 | Package | Description |
@@ -43,7 +45,7 @@ docs). Use `outfitter docs list` to browse the docs index, or
 | [`@outfitter/config`](../packages/config/) | XDG-compliant config loading with schema validation for Outfitter |
 | [`@outfitter/contracts`](../packages/contracts/) | Result/Error patterns, error taxonomy, and handler contracts for Outfitter |
 | [`@outfitter/daemon`](../packages/daemon/) | Daemon lifecycle, IPC, and health checks for Outfitter |
-| [`@outfitter/docs`](../packages/docs/) | CLI and host command adapter for Outfitter docs workflows |
+| [`@outfitter/docs`](../packages/docs/) | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows |
 | [`@outfitter/file-ops`](../packages/file-ops/) | Workspace detection, secure path handling, and file locking for Outfitter |
 | [`@outfitter/index`](../packages/index/) | SQLite FTS5 full-text search indexing for Outfitter |
 | [`@outfitter/logging`](../packages/logging/) | Structured logging via logtape with redaction support for Outfitter |
