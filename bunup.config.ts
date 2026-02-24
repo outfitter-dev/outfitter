@@ -1,14 +1,6 @@
 import type { BunupPlugin } from "bunup";
 import { defineWorkspace } from "bunup";
 
-// DTS splitting requires Bun >= 1.3.7 (fix: oven-sh/bun#26089)
-// TODO: Remove version check once 1.3.7 is widely adopted
-const bunVersion = Bun.version.split(".").map(Number);
-const supportsDtsSplitting =
-  bunVersion[0] > 1 ||
-  (bunVersion[0] === 1 && bunVersion[1] > 3) ||
-  (bunVersion[0] === 1 && bunVersion[1] === 3 && bunVersion[2] >= 7);
-
 /**
  * Work around Bun duplicate export bug with re-exported entrypoints.
  * Removes duplicate export statements that appear consecutively.
@@ -258,8 +250,8 @@ export default defineWorkspace(
     format: ["esm"],
     // Work around Bun duplicate export bug with re-exported entrypoints
     plugins: [stripDuplicateExports()],
-    // TypeScript declarations (splitting enabled when Bun >= 1.3.7)
-    dts: supportsDtsSplitting ? { splitting: true } : true,
+    // TypeScript declarations with splitting
+    dts: { splitting: true },
     // Auto-generate package.json exports field
     exports: true,
     // Code splitting for optimal tree-shaking
