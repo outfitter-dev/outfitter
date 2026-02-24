@@ -63,6 +63,16 @@ export function createMemberExpressionNode(
   };
 }
 
+export function createImportDeclarationNode(importSource: string): unknown {
+  return {
+    type: "ImportDeclaration",
+    source: {
+      type: "Literal",
+      value: importSource,
+    },
+  };
+}
+
 export function runRuleForEvent({
   event,
   filename,
