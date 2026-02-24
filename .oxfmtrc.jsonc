@@ -14,7 +14,7 @@
   "bracketSameLine": false,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "experimentalSortPackageJson": true,
+  "experimentalSortPackageJson": false,
   "experimentalSortImports": {
     "ignoreCase": true,
     "newlinesBetween": true,

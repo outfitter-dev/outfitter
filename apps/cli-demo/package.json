@@ -70,8 +70,8 @@
     "dev": "bun run src/cli.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "lint": "biome lint ./src",
-    "lint:fix": "biome lint --write ./src",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
     "pretypecheck": "(test -f ../../packages/tui/dist/index.d.ts || bun run --filter @outfitter/tui build) && (test -f ../../packages/cli/dist/output.d.ts || bun run --filter @outfitter/cli build)",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

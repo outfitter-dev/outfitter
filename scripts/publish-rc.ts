@@ -167,7 +167,7 @@ function main(): void {
   const originals = new Map<string, string>();
 
   if (!skipBuild) {
-    run("bun", ["run", "build:turbo"], ROOT);
+    runPublishPrerequisites();
   }
 
   for (const pkg of workspacePackages) {
