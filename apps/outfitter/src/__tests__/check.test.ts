@@ -187,6 +187,21 @@ describe("runCheck", () => {
     }
   });
 
+  test("no manifest detects linter from oxfmt marker and reports drift", async () => {
+    const oxfmtContent = getRegistryFileContent("linter", ".oxfmtrc.jsonc");
+    writeFileSync(join(testDir, ".oxfmtrc.jsonc"), oxfmtContent);
+
+    const result = await runCheck({ cwd: testDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const linterBlock = result.value.blocks.find((b) => b.name === "linter");
+      expect(linterBlock).toBeDefined();
+      expect(linterBlock?.status).toBe("drifted");
+      expect(result.value.totalChecked).toBeGreaterThan(0);
+    }
+  });
+
   // =========================================================================
   // JSON structural comparison ignores formatting
   // =========================================================================
