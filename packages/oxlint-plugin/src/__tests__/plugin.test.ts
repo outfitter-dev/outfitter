@@ -14,6 +14,7 @@ describe("oxlint plugin scaffold", () => {
     expect(Object.keys(plugin.rules)).toEqual([
       "max-file-lines",
       "no-console-in-packages",
+      "no-cross-tier-import",
       "no-process-env-in-packages",
       "no-process-exit-in-packages",
       "no-throw-in-handler",
@@ -29,6 +30,7 @@ describe("oxlint plugin scaffold", () => {
     expect(recommended.rules).toEqual({
       "outfitter/no-throw-in-handler": "error",
       "outfitter/no-console-in-packages": "error",
+      "outfitter/no-cross-tier-import": "error",
       "outfitter/no-process-exit-in-packages": "error",
       "outfitter/no-process-env-in-packages": "warn",
       "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],

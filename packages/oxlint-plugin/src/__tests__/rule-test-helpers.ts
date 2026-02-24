@@ -73,6 +73,22 @@ export function createImportDeclarationNode(importSource: string): unknown {
   };
 }
 
+export function createRequireCallNode(importSource: string): unknown {
+  return {
+    type: "CallExpression",
+    callee: {
+      type: "Identifier",
+      name: "require",
+    },
+    arguments: [
+      {
+        type: "Literal",
+        value: importSource,
+      },
+    ],
+  };
+}
+
 export function runRuleForEvent({
   event,
   filename,
