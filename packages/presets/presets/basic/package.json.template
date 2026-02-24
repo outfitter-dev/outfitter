@@ -24,9 +24,9 @@
 		"typecheck": "tsc --noEmit",
 		"check": "ultracite check",
 		"verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
-		"lint": "biome check .",
-		"lint:fix": "biome check . --write",
-		"format": "biome format --write .",
+		"lint": "oxlint .",
+		"lint:fix": "oxlint --fix .",
+		"format": "oxfmt --write .",
 		"clean:artifacts": "rm -rf dist .turbo",
 		"clean": "rm -rf dist"
 	},

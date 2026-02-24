@@ -20,9 +20,9 @@
 		"test": "bun test",
 		"test:watch": "bun test --watch",
 		"typecheck": "tsc --noEmit",
-		"lint": "biome check .",
-		"lint:fix": "biome check . --write",
-		"format": "biome format --write .",
+		"lint": "oxlint .",
+		"lint:fix": "oxlint --fix .",
+		"format": "oxfmt --write .",
 		"clean:artifacts": "rm -rf dist .turbo"
 	},
 	"dependencies": {
