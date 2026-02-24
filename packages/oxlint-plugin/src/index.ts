@@ -31,7 +31,13 @@ plugin.configs["recommended"] = {
   plugins: {
     outfitter: plugin,
   },
-  rules: {},
+  rules: {
+    "outfitter/no-throw-in-handler": "error",
+    "outfitter/no-console-in-packages": "error",
+    "outfitter/no-process-exit-in-packages": "error",
+    "outfitter/no-process-env-in-packages": "warn",
+    "outfitter/max-file-lines": ["warn", { warn: 200, error: 400 }],
+  },
 };
 
 export { rules } from "./rules/index.js";

@@ -193,7 +193,7 @@ export default defineWorkspace(
       root: "packages/oxlint-plugin",
       config: {
         exports: {
-          exclude: ["./rules"],
+          exclude: ["./rules", "./rules/*"],
         },
       },
     },

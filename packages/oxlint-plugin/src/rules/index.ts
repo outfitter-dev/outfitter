@@ -1,7 +1,14 @@
-/**
- * Rule registry for @outfitter/oxlint-plugin.
- *
- * OS-379 scaffolds the plugin package and test harness. Rule implementations
- * land in follow-up issues (OS-380+).
- */
-export const rules = {} satisfies Record<string, unknown>;
+import { maxFileLinesRule } from "./max-file-lines.js";
+import { noConsoleInPackagesRule } from "./no-console-in-packages.js";
+import { noProcessEnvInPackagesRule } from "./no-process-env-in-packages.js";
+import { noProcessExitInPackagesRule } from "./no-process-exit-in-packages.js";
+import { noThrowInHandlerRule } from "./no-throw-in-handler.js";
+import type { RuleModule } from "./shared.js";
+
+export const rules: Record<string, RuleModule> = {
+  "max-file-lines": maxFileLinesRule,
+  "no-console-in-packages": noConsoleInPackagesRule,
+  "no-process-env-in-packages": noProcessEnvInPackagesRule,
+  "no-process-exit-in-packages": noProcessExitInPackagesRule,
+  "no-throw-in-handler": noThrowInHandlerRule,
+};
