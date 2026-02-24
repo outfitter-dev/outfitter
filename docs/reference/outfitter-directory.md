@@ -16,6 +16,7 @@ Project-level artifacts generated and consumed by the Outfitter CLI. Lives at th
 Snapshot of all registered CLI actions, their input/output schemas, and flag definitions. Used by `outfitter schema diff` to detect drift between the committed surface map and the live runtime.
 
 Canonical policy: root `.outfitter/surface.json` is the only committed surface map. Do not commit `apps/outfitter/.outfitter/surface.json`.
+Formatting policy: `.outfitter/surface.json` is serialized by `schema generate` (two-space JSON with trailing newline) and checked by `check-surface-map-format`. Do not run generic formatter rewrites on this file.
 
 ```bash
 # Regenerate after adding or changing actions
@@ -54,6 +55,7 @@ CI/pre-push guard:
 
 ```bash
 bun run check-canonical-surface-map
+bun run check-surface-map-format
 ```
 
 ## When to Regenerate

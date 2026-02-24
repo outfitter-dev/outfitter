@@ -29,7 +29,13 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["!**/node_modules", "!**/dist", "!**/.turbo", "!**/*.gen.ts"]
+    "includes": [
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.turbo",
+      "!**/*.gen.ts",
+      "!**/.outfitter/surface.json"
+    ]
   },
   "overrides": [
     {
