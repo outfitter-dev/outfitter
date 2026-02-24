@@ -188,9 +188,9 @@ function createRegistryConfig(): RegistryBuildConfig {
           ".claude/hooks/format-code-on-stop.sh",
         ],
       },
-      oxlint: {
+      linter: {
         description:
-          "oxlint/oxfmt linter and formatter configuration via Ultracite",
+          "Linter and formatter configuration (oxlint/oxfmt) via Ultracite",
         files: [".oxlintrc.json", ".oxfmtrc.jsonc"],
         devDependencies: {
           ultracite: resolveVersion(versions, "ultracite"),
@@ -227,7 +227,7 @@ function createRegistryConfig(): RegistryBuildConfig {
       scaffolding: {
         description:
           "Full starter kit: Claude settings, oxlint/oxfmt, Lefthook, markdownlint, and bootstrap script",
-        extends: ["claude", "oxlint", "lefthook", "markdownlint", "bootstrap"],
+        extends: ["claude", "linter", "lefthook", "markdownlint", "bootstrap"],
       },
     },
   };
