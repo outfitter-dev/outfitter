@@ -1072,12 +1072,15 @@ describe("init command registry blocks", () => {
     if (result.isOk()) {
       expect(result.value.blocksAdded).toBeDefined();
       expect(result.value.blocksAdded?.created).toContain(".oxlintrc.json");
+      expect(result.value.blocksAdded?.created).toContain(".oxfmtrc.jsonc");
       // Note: ultracite is already in SHARED_DEV_DEPS so it won't be in the added list
     }
 
-    // Verify .oxlintrc.json was created
+    // Verify both linter config files were created
     const oxlintPath = join(tempDir, ".oxlintrc.json");
     expect(existsSync(oxlintPath)).toBe(true);
+    const oxfmtPath = join(tempDir, ".oxfmtrc.jsonc");
+    expect(existsSync(oxfmtPath)).toBe(true);
   });
 
   test("adds multiple blocks from comma-separated list", async () => {
