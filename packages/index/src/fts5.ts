@@ -267,7 +267,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
   }
 
   return {
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async add(doc: IndexDocument): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -295,7 +295,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -342,7 +342,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async search(
       query: SearchQuery
     ): Promise<Result<SearchResult<T>[], StorageError>> {
@@ -411,7 +411,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async remove(id: string): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -433,7 +433,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async clear(): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {

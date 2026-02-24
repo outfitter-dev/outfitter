@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-// biome-ignore lint/performance/noBarrelFile: intentional re-exports for subpath API
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-exports for subpath API
 export { boldTheme } from "./bold.js";
 export { defaultTheme } from "./default.js";
 export { minimalTheme } from "./minimal.js";

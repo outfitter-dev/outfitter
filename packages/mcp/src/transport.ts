@@ -206,7 +206,7 @@ export function createSdkServer(server: McpServer): Server {
   // Subscription handlers (resource feature)
   sdkServer.setRequestHandler(
     SubscribeRequestSchema,
-    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       server.subscribe(request.params.uri);
       return {};
@@ -215,7 +215,7 @@ export function createSdkServer(server: McpServer): Server {
 
   sdkServer.setRequestHandler(
     UnsubscribeRequestSchema,
-    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       server.unsubscribe(request.params.uri);
       return {};
@@ -265,7 +265,7 @@ export function createSdkServer(server: McpServer): Server {
   // Logging handler
   sdkServer.setRequestHandler(
     SetLevelRequestSchema,
-    // biome-ignore lint/suspicious/useAwait: protocol requires async
+    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       const level = request.params.level as McpLogLevel;
       server.setLogLevel?.(level);

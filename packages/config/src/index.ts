@@ -65,7 +65,7 @@ import type { ZodSchema } from "zod";
 // Error Types
 // ============================================================================
 
-// biome-ignore lint/style/useConsistentTypeDefinitions: type required for TaggedError constraint
+// eslint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
 type ParseErrorFields = {
   /** Human-readable error message describing the parse failure */
   message: string;
@@ -98,7 +98,7 @@ export class ParseError extends ParseErrorBase {
   readonly category = "validation" as const;
 }
 
-// biome-ignore lint/style/useConsistentTypeDefinitions: type required for TaggedError constraint
+// eslint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
 type CircularExtendsErrorFields = {
   /** Human-readable error message */
   message: string;

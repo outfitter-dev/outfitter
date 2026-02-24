@@ -2,7 +2,7 @@
  * Centralized environment variable access with Zod validation.
  *
  * This module provides a single point of access for process.env,
- * eliminating the need for biome-ignore comments throughout the codebase
+ * eliminating the need for eslint-disable-next-line comments throughout the codebase
  * (TypeScript's `noPropertyAccessFromIndexSignature` conflicts with
  * Biome's `useLiteralKeys` rule).
  *
@@ -135,7 +135,7 @@ export function parseEnv<T extends z.ZodRawShape>(
 // App-Level Environment
 // ============================================================================
 
-// biome-ignore lint/style/useConsistentTypeDefinitions: type required for Zod schema constraint
+// eslint-disable-next-line typescript/consistent-type-definitions -- type required for Zod schema constraint
 type AppEnvShape = {
   NODE_ENV: z.ZodDefault<
     z.ZodEnum<{

@@ -40,7 +40,7 @@ export interface HeadingOptions {
 }
 
 /** ANSI escape sequence pattern */
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape detection requires matching ESC character
+// eslint-disable-next-line no-control-regex -- ANSI escape detection requires matching ESC character
 const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
 
 /**

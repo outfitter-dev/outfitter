@@ -196,7 +196,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   const prompts = new Map<string, PromptDefinition>();
 
   // SDK server binding for notifications
-  // biome-ignore lint/suspicious/noExplicitAny: SDK Server type from @modelcontextprotocol/sdk
+  // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type from @modelcontextprotocol/sdk
   let sdkServer: any = null;
   const subscriptions = new Set<string>();
   let clientLogLevel: McpLogLevel | null = resolveDefaultLogLevel(options);
@@ -739,14 +739,14 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       sdkServer.sendLoggingMessage?.(params);
     },
 
-    // biome-ignore lint/suspicious/noExplicitAny: SDK Server type
+    // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type
     bindSdkServer(server: any): void {
       sdkServer = server;
       clientLogLevel = resolveDefaultLogLevel(options);
       logger.debug("SDK server bound for notifications");
     },
 
-    // biome-ignore lint/suspicious/useAwait: interface requires Promise return type
+    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async start(): Promise<void> {
       logger.info("MCP server starting", { name, version, tools: tools.size });
       // In a full implementation, this would start the transport layer

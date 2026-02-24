@@ -71,7 +71,7 @@ export function zodToJsonSchema(schema: z.ZodType<unknown>): JsonSchema {
   return convertZodType(schema);
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function getDef(schemaOrDef: any): any {
   if (!schemaOrDef) {
     return undefined;
@@ -88,7 +88,7 @@ function getDef(schemaOrDef: any): any {
   return schemaOrDef;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function getDescription(schema: any, def: any): string | undefined {
   if (typeof schema?.description === "string") {
     return schema.description;
@@ -303,7 +303,7 @@ function convertZodType(schema: z.ZodType<unknown>): JsonSchema {
 /**
  * Convert Zod string schema with checks.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function convertString(def: any): JsonSchema {
   const schema: JsonSchema = { type: "string" };
 
@@ -382,7 +382,7 @@ function convertString(def: any): JsonSchema {
 /**
  * Convert Zod number schema with checks.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function convertNumber(def: any): JsonSchema {
   const schema: JsonSchema = { type: "number" };
 
@@ -446,7 +446,7 @@ function convertNumber(def: any): JsonSchema {
 /**
  * Convert Zod array schema.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function convertArray(def: any): JsonSchema {
   const element = def.element ?? def.type;
   const schema: JsonSchema = {
@@ -464,7 +464,7 @@ function convertArray(def: any): JsonSchema {
  * (refinements, transforms) or ZodPipeline, which would otherwise
  * incorrectly appear as required.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function isFieldOptional(fieldDef: any): boolean {
   if (!(fieldDef?.typeName || fieldDef?.type)) {
     return false;
@@ -513,7 +513,7 @@ function isFieldOptional(fieldDef: any): boolean {
 /**
  * Convert Zod object schema.
  */
-// biome-ignore lint/suspicious/noExplicitAny: Zod internals
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
 function convertObject(def: any): JsonSchema {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];

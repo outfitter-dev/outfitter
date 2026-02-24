@@ -6,5 +6,5 @@
  * @packageDocumentation
  */
 
-// biome-ignore lint/performance/noBarrelFile: intentional re-export for backward compatibility
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for backward compatibility
 export { type JsonSchema, zodToJsonSchema } from "@outfitter/contracts/schema";

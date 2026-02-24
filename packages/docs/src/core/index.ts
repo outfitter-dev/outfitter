@@ -43,7 +43,7 @@ import type {
 } from "./types.js";
 
 export type { PackageDocsError } from "./errors.js";
-// biome-ignore lint/performance/noBarrelFile: preserve existing core/index export shape.
+// eslint-disable-next-line oxc/no-barrel-file -- preserve existing core/index export shape.
 export { DocsCoreError } from "./errors.js";
 export type {
   CheckLlmsDocsResult,

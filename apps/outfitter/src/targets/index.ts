@@ -1,4 +1,4 @@
-// biome-ignore lint/performance/noBarrelFile: intentional re-export for targets module API surface.
+// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for targets module API surface.
 export {
   getInitTarget,
   getReadyTarget,

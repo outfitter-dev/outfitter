@@ -240,10 +240,10 @@ Strict mode with additional safety flags:
 
 Keep types explicit; avoid `any`. Prefer module-local organization over central registries.
 
-### Formatting (Biome)
+### Formatting (oxfmt)
 
-- Tabs (width 2), double quotes, always semicolons
-- Trailing commas, 100 char line width
+- Use oxfmt/Ultracite for formatting and oxlint for lint checks
+- Prefer repo-provided scripts (`bun run check`, `bun run fix`) over ad hoc formatter invocations
 
 ## Testing
 

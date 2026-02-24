@@ -254,8 +254,7 @@ describe("adaptHandler()", () => {
 
     const adapted = adaptHandler(domainHandler);
 
-    // biome-ignore lint/suspicious/noEmptyBlockStatements: noop logger stubs
-    const noop = () => {};
+    const noop = () => undefined;
     const ctx = {
       requestId: "test-123",
       logger: { info: noop, warn: noop, error: noop, debug: noop },

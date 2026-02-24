@@ -12,7 +12,6 @@
         "zod": "^4.3.5",
       },
       "devDependencies": {
-        "@biomejs/biome": "2.4.4",
         "@changesets/cli": "^2.29.8",
         "@outfitter/presets": "workspace:*",
         "bunup": "^0.16.29",
@@ -368,7 +367,6 @@
   },
   "trustedDependencies": [
     "oxfmt",
-    "@biomejs/biome",
     "oxlint",
   ],
   "catalog": {
