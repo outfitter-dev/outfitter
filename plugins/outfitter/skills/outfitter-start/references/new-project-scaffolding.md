@@ -90,7 +90,7 @@ AskUserQuestion:
   header: "Tooling"
   options:
     - label: "Yes, add scaffolding (Recommended)"
-      description: "Adds oxlintrc.jsonc, .lefthook.yml, .claude/settings.json, bootstrap script"
+      description: "Adds .oxlintrc.json, .oxfmtrc.jsonc, .lefthook.yml, .claude/settings.json, bootstrap script"
     - label: "No, just the preset"
       description: "Only creates the project structure"
 ```
@@ -128,7 +128,7 @@ outfitter init <cli|mcp|daemon> . --name <name> --with claude,linter
 | ------------- | -------------------------------------------- |
 | `scaffolding` | All blocks below (default)                   |
 | `claude`      | `.claude/settings.json`, format-on-stop hook |
-| `linter`      | `oxlintrc.jsonc`, ultracite dependency       |
+| `linter`      | `.oxlintrc.json`, `.oxfmtrc.jsonc`, ultracite dependency |
 | `lefthook`    | `.lefthook.yml`, lefthook dependency         |
 | `bootstrap`   | `scripts/bootstrap.sh`                       |
 

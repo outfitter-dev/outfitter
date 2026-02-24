@@ -20,7 +20,8 @@
         }
       },
       "code_actions_on_format": {
-        "source.fixAll.oxc": true
+        "source.fixAll.oxc": true,
+        "source.organizeImports.oxc": true
       }
     },
     "TypeScript": {
@@ -30,7 +31,8 @@
         }
       },
       "code_actions_on_format": {
-        "source.fixAll.oxc": true
+        "source.fixAll.oxc": true,
+        "source.organizeImports.oxc": true
       }
     },
     "TSX": {
@@ -40,7 +42,8 @@
         }
       },
       "code_actions_on_format": {
-        "source.fixAll.oxc": true
+        "source.fixAll.oxc": true,
+        "source.organizeImports.oxc": true
       }
     }
   }
