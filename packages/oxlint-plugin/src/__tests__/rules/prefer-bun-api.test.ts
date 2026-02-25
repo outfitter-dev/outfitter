@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { preferBunApiRule } from "../../rules/prefer-bun-api.js";
 import {
   createImportDeclarationNode,
@@ -147,5 +148,76 @@ describe("prefer-bun-api", () => {
     });
 
     expect(reports).toHaveLength(0);
+  });
+
+  test("ignores import type declarations", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "apps/outfitter/src/commands/check.ts",
+      nodes: [
+        {
+          type: "ImportDeclaration",
+          importKind: "type",
+          source: { type: "Literal", value: "semver" },
+        },
+      ],
+      rule: preferBunApiRule,
+      sourceText: 'import type { SemVer } from "semver";',
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("ignores imports where all named specifiers are type-only", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "apps/outfitter/src/commands/check.ts",
+      nodes: [
+        {
+          type: "ImportDeclaration",
+          importKind: "value",
+          source: { type: "Literal", value: "semver" },
+          specifiers: [
+            {
+              type: "ImportSpecifier",
+              importKind: "type",
+            },
+          ],
+        },
+      ],
+      rule: preferBunApiRule,
+      sourceText: 'import { type SemVer } from "semver";',
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("still reports mixed value imports from mapped packages", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "apps/outfitter/src/commands/check.ts",
+      nodes: [
+        {
+          type: "ImportDeclaration",
+          importKind: "value",
+          source: { type: "Literal", value: "semver" },
+          specifiers: [
+            {
+              type: "ImportSpecifier",
+              importKind: "type",
+            },
+            {
+              type: "ImportSpecifier",
+              importKind: "value",
+            },
+          ],
+        },
+      ],
+      rule: preferBunApiRule,
+      sourceText: 'import { type SemVer, valid } from "semver";',
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("preferBunApi");
   });
 });

@@ -49,6 +49,38 @@ function getImportSource(node: unknown): string | undefined {
   return asLiteralString((node as { source?: unknown }).source);
 }
 
+function isTypeOnlyImport(node: unknown): boolean {
+  if (!node || typeof node !== "object") {
+    return false;
+  }
+
+  if ((node as { type?: unknown }).type !== "ImportDeclaration") {
+    return false;
+  }
+
+  if ((node as { importKind?: unknown }).importKind === "type") {
+    return true;
+  }
+
+  const specifiers = (node as { specifiers?: readonly unknown[] }).specifiers;
+
+  if (!(Array.isArray(specifiers) && specifiers.length > 0)) {
+    return false;
+  }
+
+  return specifiers.every((specifier) => {
+    if (!specifier || typeof specifier !== "object") {
+      return false;
+    }
+
+    if ((specifier as { type?: unknown }).type !== "ImportSpecifier") {
+      return false;
+    }
+
+    return (specifier as { importKind?: unknown }).importKind === "type";
+  });
+}
+
 export const preferBunApiRule: RuleModule = {
   meta: {
     type: "suggestion",
@@ -81,6 +113,10 @@ export const preferBunApiRule: RuleModule = {
 
     return {
       ImportDeclaration(node) {
+        if (isTypeOnlyImport(node)) {
+          return;
+        }
+
         const importSource = getImportSource(node);
 
         if (!importSource) {
