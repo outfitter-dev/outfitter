@@ -14,14 +14,77 @@ import { outfitterActions } from "../actions.js";
 // ---------------------------------------------------------------------------
 
 describe("check mapInput", () => {
-  test("--ci deprecated alias maps to outputMode json", () => {
+  test("--all maps to orchestrator mode all", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { all: true },
+    }) as { mode: string };
+
+    expect(mapped.mode).toBe("all");
+  });
+
+  test("--ci maps to orchestrator mode ci", () => {
     const action = outfitterActions.get("check");
     const mapped = action?.cli?.mapInput?.({
       args: [],
       flags: { ci: true },
-    }) as { outputMode: string };
+    }) as { mode: string };
 
-    expect(mapped.outputMode).toBe("json");
+    expect(mapped.mode).toBe("ci");
+  });
+
+  test("--pre-commit maps to orchestrator mode pre-commit", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { preCommit: true },
+    }) as { mode: string };
+
+    expect(mapped.mode).toBe("pre-commit");
+  });
+
+  test("--pre-push maps to orchestrator mode pre-push", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { prePush: true },
+    }) as { mode: string };
+
+    expect(mapped.mode).toBe("pre-push");
+  });
+
+  test("--pre-commit captures staged files from args", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: ["apps/outfitter/src/cli.ts", ".claude/hooks/pre-commit.sh"],
+      flags: { preCommit: true },
+    }) as { stagedFiles?: readonly string[] };
+
+    expect(mapped.stagedFiles).toEqual([
+      "apps/outfitter/src/cli.ts",
+      ".claude/hooks/pre-commit.sh",
+    ]);
+  });
+
+  test("mode flags are mutually exclusive", () => {
+    const action = outfitterActions.get("check");
+    expect(() =>
+      action?.cli?.mapInput?.({
+        args: [],
+        flags: { all: true, ci: true },
+      })
+    ).toThrow("Use only one of --all, --ci, --pre-commit, or --pre-push.");
+  });
+
+  test("--block cannot be combined with orchestrator mode flags", () => {
+    const action = outfitterActions.get("check");
+    expect(() =>
+      action?.cli?.mapInput?.({
+        args: [],
+        flags: { block: "linter", ci: true },
+      })
+    ).toThrow("--block cannot be combined with orchestrator mode flags.");
   });
 
   test("--output json maps to outputMode json", () => {
@@ -34,14 +97,15 @@ describe("check mapInput", () => {
     expect(mapped.outputMode).toBe("json");
   });
 
-  test("--output json takes precedence over --ci", () => {
+  test("--output json takes precedence over mode defaults", () => {
     const action = outfitterActions.get("check");
     const mapped = action?.cli?.mapInput?.({
       args: [],
       flags: { output: "json", ci: true },
-    }) as { outputMode: string };
+    }) as { outputMode: string; mode: string };
 
     expect(mapped.outputMode).toBe("json");
+    expect(mapped.mode).toBe("ci");
   });
 
   describe("OUTFITTER_JSON env var", () => {
@@ -99,6 +163,18 @@ describe("check mapInput", () => {
           process.env["OUTFITTER_JSONL"] = previousJsonl;
         }
       }
+    });
+
+    test("mode flag suppresses OUTFITTER_JSON=1 fallback", () => {
+      process.env["OUTFITTER_JSON"] = "1";
+      const action = outfitterActions.get("check");
+      const mapped = action?.cli?.mapInput?.({
+        args: [],
+        flags: { all: true },
+      }) as { outputMode: string; mode: string };
+
+      expect(mapped.mode).toBe("all");
+      expect(mapped.outputMode).toBe("human");
     });
   });
 

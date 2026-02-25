@@ -19,6 +19,11 @@ import {
 import type { TsDocCheckResult } from "@outfitter/tooling";
 import { z } from "zod";
 
+import {
+  type CheckOrchestratorMode,
+  printCheckOrchestratorResults,
+  runCheckOrchestrator,
+} from "../commands/check-orchestrator.js";
 import { runCheckTsdoc } from "../commands/check-tsdoc.js";
 import { printCheckResults, runCheck } from "../commands/check.js";
 import {
@@ -30,14 +35,20 @@ import { outputModeSchema, resolveStringFlag } from "./shared.js";
 interface CheckActionInput {
   block?: string;
   cwd: string;
+  mode?: CheckOrchestratorMode;
   outputMode: CliOutputMode;
+  stagedFiles?: readonly string[];
   verbose: boolean;
 }
+
+const checkOrchestratorModes = ["all", "ci", "pre-commit", "pre-push"] as const;
 
 const checkInputSchema = z.object({
   cwd: z.string(),
   verbose: z.boolean(),
   block: z.string().optional(),
+  mode: z.enum(checkOrchestratorModes).optional(),
+  stagedFiles: z.array(z.string()).optional(),
   outputMode: outputModeSchema,
 }) as z.ZodType<CheckActionInput>;
 
@@ -50,6 +61,32 @@ const checkVerboseOptions: ActionCliOption[] = checkVerbose.options.map(
       ? { ...option, description: "Show diffs for drifted files" }
       : option
 );
+
+function resolveCheckMode(
+  flags: Record<string, unknown>
+): CheckOrchestratorMode | undefined {
+  const requestedModes: CheckOrchestratorMode[] = [];
+  if (flags["all"] === true) {
+    requestedModes.push("all");
+  }
+  if (flags["ci"] === true) {
+    requestedModes.push("ci");
+  }
+  if (flags["preCommit"] === true) {
+    requestedModes.push("pre-commit");
+  }
+  if (flags["prePush"] === true) {
+    requestedModes.push("pre-push");
+  }
+
+  if (requestedModes.length > 1) {
+    throw ValidationError.fromMessage(
+      "Use only one of --all, --ci, --pre-commit, or --pre-push."
+    );
+  }
+
+  return requestedModes[0];
+}
 
 const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
   id: "check",
@@ -66,29 +103,59 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
     options: [
       ...checkVerboseOptions,
       {
-        flags: "-b, --block <name>",
-        description: "Check a specific block only",
+        flags: "--all",
+        description: "Run the full check orchestrator",
+        defaultValue: false,
       },
       {
         flags: "--ci",
-        description: "Deprecated: use --output json instead",
+        description: "Run CI check orchestration (includes tests)",
         defaultValue: false,
+      },
+      {
+        flags: "--pre-commit",
+        description: "Run pre-commit check orchestration",
+        defaultValue: false,
+      },
+      {
+        flags: "--pre-push",
+        description: "Run pre-push check orchestration",
+        defaultValue: false,
+      },
+      {
+        flags: "-b, --block <name>",
+        description: "Check a specific block only",
       },
       ...checkOutputMode.options,
       ...checkCwd.options,
     ],
     mapInput: (context) => {
+      const mode = resolveCheckMode(context.flags);
       const { outputMode: presetOutputMode } = checkOutputMode.resolve(
         context.flags
       );
       const explicitOutput = typeof context.flags["output"] === "string";
+      const block = resolveStringFlag(context.flags["block"]);
+      if (mode !== undefined && block !== undefined) {
+        throw ValidationError.fromMessage(
+          "--block cannot be combined with orchestrator mode flags."
+        );
+      }
+
+      const stagedFiles =
+        mode === "pre-commit"
+          ? context.args.filter(
+              (arg): arg is string =>
+                typeof arg === "string" && arg.trim().length > 0
+            )
+          : undefined;
       let outputMode: CliOutputMode;
       if (explicitOutput) {
         // Explicit --output should always win over env fallbacks.
         outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (context.flags["ci"]) {
-        // Deprecated --ci alias
-        outputMode = "json";
+      } else if (mode !== undefined) {
+        // Orchestrator mode should not inherit JSON env defaults implicitly.
+        outputMode = "human";
       } else if (process.env["OUTFITTER_JSONL"] === "1") {
         outputMode = "jsonl";
       } else if (process.env["OUTFITTER_JSON"] === "1") {
@@ -99,17 +166,46 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       const { verbose } = checkVerbose.resolve(context.flags);
       const { cwd: rawCwd } = checkCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
-      const block = resolveStringFlag(context.flags["block"]);
       return {
         cwd,
         verbose,
         ...(block !== undefined ? { block } : {}),
+        ...(mode !== undefined ? { mode } : {}),
+        ...(stagedFiles !== undefined ? { stagedFiles } : {}),
         outputMode,
       };
     },
   },
   handler: async (input) => {
-    const { outputMode, ...checkInput } = input;
+    const { outputMode, mode, stagedFiles, ...checkInput } = input;
+
+    if (mode !== undefined) {
+      const orchestratorResult = await runCheckOrchestrator({
+        cwd: checkInput.cwd,
+        mode,
+        ...(stagedFiles && stagedFiles.length > 0 ? { stagedFiles } : {}),
+      });
+
+      if (orchestratorResult.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: orchestratorResult.error.message,
+            context: { action: "check" },
+          })
+        );
+      }
+
+      await printCheckOrchestratorResults(orchestratorResult.value, {
+        mode: outputMode,
+      });
+
+      if (!orchestratorResult.value.ok) {
+        process.exit(1);
+      }
+
+      return Result.ok(orchestratorResult.value);
+    }
+
     const result = await runCheck(checkInput);
 
     if (result.isErr()) {
