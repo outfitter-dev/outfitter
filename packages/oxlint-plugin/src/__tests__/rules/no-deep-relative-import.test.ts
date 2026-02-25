@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noDeepRelativeImportRule } from "../../rules/no-deep-relative-import.js";
 import {
   createImportDeclarationNode,
@@ -116,6 +117,24 @@ describe("no-deep-relative-import", () => {
     expect(reports[0]?.data).toEqual({
       importSource: "../sibling.js",
       maxParentSegments: 0,
+    });
+  });
+
+  test("counts terminal .. segments in deep-relative imports", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "packages/logging/src/index.ts",
+      nodes: [createImportDeclarationNode("../..")],
+      options: [{ maxParentSegments: 1 }],
+      rule: noDeepRelativeImportRule,
+      sourceText: 'import "../..";',
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("noDeepRelativeImport");
+    expect(reports[0]?.data).toEqual({
+      importSource: "../..",
+      maxParentSegments: 1,
     });
   });
 

@@ -27,12 +27,14 @@ function resolveMaxParentSegments(options: readonly unknown[]): number {
 }
 
 function countLeadingParentSegments(importSource: string): number {
-  let remaining = importSource;
   let count = 0;
 
-  while (remaining.startsWith("../")) {
+  for (const segment of importSource.split("/")) {
+    if (segment !== "..") {
+      break;
+    }
+
     count += 1;
-    remaining = remaining.slice(3);
   }
 
   return count;
