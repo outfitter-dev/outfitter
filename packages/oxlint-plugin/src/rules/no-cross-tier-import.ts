@@ -1,6 +1,7 @@
 import {
-  asIdentifierName,
   asLiteralString,
+  getImportSourceFromImportDeclaration,
+  getImportSourceFromRequire,
   normalizeFilePath,
   type RuleContext,
   type RuleModule,
@@ -145,40 +146,6 @@ function isBoundaryViolation({
   readonly targetTier: TierName;
 }): boolean {
   return TIER_LEVEL[sourceTier] < TIER_LEVEL[targetTier];
-}
-
-function getImportSourceFromImportDeclaration(
-  node: unknown
-): string | undefined {
-  if (!node || typeof node !== "object") {
-    return undefined;
-  }
-
-  if ((node as { type?: unknown }).type !== "ImportDeclaration") {
-    return undefined;
-  }
-
-  return asLiteralString((node as { source?: unknown }).source);
-}
-
-function getImportSourceFromRequire(node: unknown): string | undefined {
-  if (!node || typeof node !== "object") {
-    return undefined;
-  }
-
-  if ((node as { type?: unknown }).type !== "CallExpression") {
-    return undefined;
-  }
-
-  const callee = (node as { callee?: unknown }).callee;
-
-  if (asIdentifierName(callee) !== "require") {
-    return undefined;
-  }
-
-  const firstArgument = (node as { arguments?: readonly unknown[] })
-    .arguments?.[0];
-  return asLiteralString(firstArgument);
 }
 
 function getImportSourceFromExportDeclaration(
