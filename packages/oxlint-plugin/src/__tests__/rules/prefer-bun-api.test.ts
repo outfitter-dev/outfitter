@@ -111,6 +111,19 @@ describe("prefer-bun-api", () => {
     expect(reports).toHaveLength(0);
   });
 
+  test("allows empty string to disable default mappings", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "apps/outfitter/src/commands/check.ts",
+      nodes: [createImportDeclarationNode("uuid")],
+      options: [{ mappings: { uuid: "" } }],
+      rule: preferBunApiRule,
+      sourceText: 'import { v4 } from "uuid";',
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
   test("verifies all default mappings individually", () => {
     const defaultMappings: Record<string, string> = {
       "better-sqlite3": "bun:sqlite",

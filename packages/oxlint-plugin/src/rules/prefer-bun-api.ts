@@ -26,7 +26,7 @@ function resolveImportMapping(
   const normalizedMappings: Record<string, string> = {};
 
   for (const [importName, alternative] of Object.entries(customMappings)) {
-    if (typeof alternative === "string" && alternative.length > 0) {
+    if (typeof alternative === "string") {
       normalizedMappings[importName] = alternative;
     }
   }
@@ -125,7 +125,7 @@ export const preferBunApiRule: RuleModule = {
 
         const bunAlternative = importMapping[importSource];
 
-        if (!bunAlternative) {
+        if (!bunAlternative || bunAlternative.length === 0) {
           return;
         }
 
