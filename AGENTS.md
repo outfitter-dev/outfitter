@@ -31,13 +31,13 @@ bun run build --filter=@outfitter/cli      # Single package
 # Test
 bun run test                               # All packages
 bun run test --filter=@outfitter/contracts # Single package
-bun run test:watch                         # Watch mode
 cd packages/contracts && bun test          # Direct invocation
 
 # Lint/Format
-bun run lint                               # Check
-bun run lint:fix                           # Fix
-bun run format                             # Format
+bun run lint                               # Lint checks
+bun run check                              # Lint + format checks
+bun run format:check                       # Format checks
+bun run format:fix                         # Apply formatting fixes
 bun run typecheck                          # TypeScript validation
 
 # Release
@@ -129,7 +129,7 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 
 **Introspection**: `outfitter schema` shows all registered actions. `outfitter schema <action-id> --output json` returns the full schema including input/output shapes.
 
-**Surface maps**: `outfitter schema generate` writes `.outfitter/surface.json` for drift detection. `outfitter schema diff` compares committed surface map against runtime, exiting non-zero on drift. The committed source of truth is root `.outfitter/surface.json` only; do not commit `apps/outfitter/.outfitter/surface.json`. Surface map formatting is also enforced via `bun run check-surface-map-format`.
+**Surface maps**: `outfitter schema generate` writes `.outfitter/surface.json` for drift detection. `outfitter schema diff` compares committed surface map against runtime, exiting non-zero on drift. The committed source of truth is root `.outfitter/surface.json` only; do not commit `apps/outfitter/.outfitter/surface.json`. Surface map formatting is also enforced via `outfitter check surface-map-format`.
 
 #### Adding a New CLI Command
 
@@ -243,7 +243,7 @@ Keep types explicit; avoid `any`. Prefer module-local organization over central 
 ### Formatting (oxfmt)
 
 - Use oxfmt/Ultracite for formatting and oxlint for lint checks
-- Prefer repo-provided scripts (`bun run check`, `bun run fix`) over ad hoc formatter invocations
+- Prefer repo-provided scripts (`bun run check`, `bun run format:fix`) over ad hoc formatter invocations
 
 ## Testing
 
@@ -290,7 +290,7 @@ fix(cli): handle missing config gracefully
   - Allows RED phase branches (`*-tests`, `*/tests`, `*_tests`) to skip tests
   - Use `--force` to skip tests on any branch
   - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
-  - Docs README sentinel drift (`bun run docs:check:readme-sentinel`) fails the push if `docs/README.md` generated sections are stale
+  - Docs README sentinel drift (`outfitter check docs-sentinel`) fails the push if `docs/README.md` generated sections are stale
 
 ### Changesets
 
