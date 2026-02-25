@@ -11,7 +11,13 @@ describe("oxlint plugin scaffold", () => {
 
   test("exports a rule registry", () => {
     expect(plugin.rules).toBe(rules);
-    expect(Object.keys(plugin.rules)).toHaveLength(0);
+    expect(Object.keys(plugin.rules)).toEqual([
+      "max-file-lines",
+      "no-console-in-packages",
+      "no-process-env-in-packages",
+      "no-process-exit-in-packages",
+      "no-throw-in-handler",
+    ]);
   });
 
   test("provides a recommended flat-config scaffold", () => {
@@ -19,6 +25,12 @@ describe("oxlint plugin scaffold", () => {
 
     expect(recommended).toBeDefined();
     expect(recommended.plugins.outfitter).toBe(plugin);
-    expect(recommended.rules).toEqual({});
+    expect(recommended.rules).toEqual({
+      "outfitter/no-throw-in-handler": "error",
+      "outfitter/no-console-in-packages": "error",
+      "outfitter/no-process-exit-in-packages": "error",
+      "outfitter/no-process-env-in-packages": "warn",
+      "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],
+    });
   });
 });
