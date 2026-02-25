@@ -21,7 +21,7 @@ export interface RuleModule {
 }
 
 const PACKAGES_SRC_PATTERN = /(?:^|\/)packages\/[^/]+\/src\//;
-const TEST_FILE_PATTERN = /(?:^|\/)__tests__\/|\.test\.[cm]?[jt]sx?$/;
+const TEST_FILE_PATTERN = /(?:^|\/)__tests__\/|\.(test|spec)\.[cm]?[jt]sx?$/;
 
 interface NodeWithType {
   readonly type: string;
