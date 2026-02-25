@@ -16,7 +16,6 @@ interface TierConfig {
 
 interface RuleOption {
   readonly tiers?: Partial<TierConfig>;
-  readonly toolingRuntimeExceptions?: readonly string[];
 }
 
 const DEFAULT_TIERS: TierConfig = {
@@ -42,7 +41,11 @@ const DEFAULT_TIERS: TierConfig = {
   ],
 };
 
-const DEFAULT_TOOLING_RUNTIME_EXCEPTIONS = ["@outfitter/testing"];
+const TIER_LEVEL: Readonly<Record<TierName, number>> = {
+  foundation: 0,
+  runtime: 1,
+  tooling: 2,
+};
 
 function isStringArray(value: unknown): value is readonly string[] {
   return (
@@ -52,7 +55,6 @@ function isStringArray(value: unknown): value is readonly string[] {
 
 function resolveConfig(options: readonly unknown[]): {
   readonly tiers: TierConfig;
-  readonly toolingRuntimeExceptions: ReadonlySet<string>;
 } {
   const option = (options[0] as RuleOption | undefined) ?? {};
   const optionTiers = option.tiers ?? {};
@@ -69,15 +71,8 @@ function resolveConfig(options: readonly unknown[]): {
       : DEFAULT_TIERS.tooling,
   };
 
-  const toolingRuntimeExceptions = isStringArray(
-    option.toolingRuntimeExceptions
-  )
-    ? option.toolingRuntimeExceptions
-    : DEFAULT_TOOLING_RUNTIME_EXCEPTIONS;
-
   return {
     tiers,
-    toolingRuntimeExceptions: new Set(toolingRuntimeExceptions),
   };
 }
 
@@ -149,15 +144,7 @@ function isBoundaryViolation({
   readonly sourceTier: TierName;
   readonly targetTier: TierName;
 }): boolean {
-  if (sourceTier === "foundation") {
-    return targetTier !== "foundation";
-  }
-
-  if (sourceTier === "runtime") {
-    return targetTier === "tooling";
-  }
-
-  return targetTier === "runtime";
+  return TIER_LEVEL[sourceTier] < TIER_LEVEL[targetTier];
 }
 
 function getImportSourceFromImportDeclaration(
@@ -224,10 +211,6 @@ export const noCrossTierImportRule: RuleModule = {
             },
             additionalProperties: false,
           },
-          toolingRuntimeExceptions: {
-            type: "array",
-            items: { type: "string" },
-          },
         },
         additionalProperties: false,
       },
@@ -238,7 +221,7 @@ export const noCrossTierImportRule: RuleModule = {
     },
   },
   create(context: RuleContext) {
-    const { tiers, toolingRuntimeExceptions } = resolveConfig(context.options);
+    const { tiers } = resolveConfig(context.options);
     const sourcePackage = resolveSourcePackage(context.filename);
 
     if (!sourcePackage) {
@@ -264,14 +247,6 @@ export const noCrossTierImportRule: RuleModule = {
       const targetTier = getTierForPackage(tiers, targetPackage);
 
       if (!(targetTier && isBoundaryViolation({ sourceTier, targetTier }))) {
-        return;
-      }
-
-      if (
-        sourceTier === "tooling" &&
-        targetTier === "runtime" &&
-        toolingRuntimeExceptions.has(sourcePackage)
-      ) {
         return;
       }
 

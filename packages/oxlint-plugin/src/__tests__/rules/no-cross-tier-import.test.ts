@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noCrossTierImportRule } from "../../rules/no-cross-tier-import.js";
 import {
   createImportDeclarationNode,
@@ -43,7 +44,7 @@ describe("no-cross-tier-import", () => {
     expect(reports[0]?.data?.targetTier).toBe("tooling");
   });
 
-  test("reports tooling to runtime violations", () => {
+  test("allows tooling to runtime imports", () => {
     const reports = runRuleForEvent({
       event: "ImportDeclaration",
       filename: "packages/tooling/src/index.ts",
@@ -52,12 +53,10 @@ describe("no-cross-tier-import", () => {
       sourceText: readFixture("invalid/no-cross-tier-import.ts"),
     });
 
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.data?.sourceTier).toBe("tooling");
-    expect(reports[0]?.data?.targetTier).toBe("runtime");
+    expect(reports).toHaveLength(0);
   });
 
-  test("allows @outfitter/testing exception for runtime imports", () => {
+  test("allows @outfitter/testing runtime imports", () => {
     const reports = runRuleForEvent({
       event: "ImportDeclaration",
       filename: "packages/testing/src/index.ts",
@@ -99,7 +98,7 @@ describe("no-cross-tier-import", () => {
     expect(reports).toHaveLength(0);
   });
 
-  test("supports custom tier config and custom exception list", () => {
+  test("supports custom tier config", () => {
     const reports = runRuleForEvent({
       event: "ImportDeclaration",
       filename: "packages/testing/src/index.ts",
@@ -111,7 +110,6 @@ describe("no-cross-tier-import", () => {
             runtime: ["@outfitter/contracts"],
             tooling: [],
           },
-          toolingRuntimeExceptions: [],
         },
       ],
       rule: noCrossTierImportRule,
@@ -149,11 +147,8 @@ describe("no-cross-tier-import", () => {
     });
 
     // apps/outfitter resolves to "outfitter" which is in tooling tier;
-    // @outfitter/logging is runtime -- tooling→runtime is a violation
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.data?.sourceTier).toBe("tooling");
-    expect(reports[0]?.data?.targetTier).toBe("runtime");
-    expect(reports[0]?.data?.sourcePackage).toBe("outfitter");
+    // @outfitter/logging is runtime, and higher tiers can import lower tiers
+    expect(reports).toHaveLength(0);
   });
 
   test("resolves sub-path imports to their base package", () => {
