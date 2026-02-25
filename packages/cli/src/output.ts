@@ -324,6 +324,7 @@ export function exitWithError(error: Error, options?: OutputOptions): never {
     process.stderr.write(`${formatErrorHuman(error)}\n`);
   }
 
+  // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
   process.exit(exitCode);
 }
 

@@ -240,7 +240,8 @@ export async function runCheckChangeset(
     process.stdout.write(
       `${COLORS.dim}check-changeset skipped (NO_CHANGESET=1)${COLORS.reset}\n`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   // Skip on post-merge pushes to main
@@ -248,7 +249,8 @@ export async function runCheckChangeset(
     process.stdout.write(
       `${COLORS.dim}check-changeset skipped (push event)${COLORS.reset}\n`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   // Get changed files from git using array-based spawn (safe from injection)
@@ -261,7 +263,8 @@ export async function runCheckChangeset(
     );
     if (proc.exitCode !== 0) {
       // Git diff failed -- likely local dev without origin, pass silently
-      process.exit(0);
+      process.exitCode = 0;
+      return;
     }
     changedFiles = proc.stdout
       .toString()
@@ -270,7 +273,8 @@ export async function runCheckChangeset(
       .filter((line) => line.length > 0);
   } catch {
     // Git not available or other error -- pass silently
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   const changedPackages = getChangedPackagePaths(changedFiles);
@@ -279,7 +283,8 @@ export async function runCheckChangeset(
     process.stdout.write(
       `${COLORS.green}No package source changes detected.${COLORS.reset}\n`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   const changesetFiles = getChangedChangesetFiles(changedFiles);
@@ -329,11 +334,12 @@ export async function runCheckChangeset(
     process.stderr.write(
       `\nUpdate the affected changeset files to remove ignored packages before merging.\n`
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   process.stdout.write(
     `${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`
   );
-  process.exit(0);
+  process.exitCode = 0;
 }

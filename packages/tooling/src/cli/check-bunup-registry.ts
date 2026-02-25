@@ -104,14 +104,16 @@ export async function runCheckBunupRegistry(): Promise<void> {
     const rawConfig: unknown = configModule.default;
     if (!Array.isArray(rawConfig)) {
       process.stderr.write("bunup.config.ts must export a workspace array\n");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     registeredNames = (rawConfig as WorkspaceEntry[]).map(
       (entry) => entry.name
     );
   } catch {
     process.stderr.write(`Could not load bunup.config.ts from ${cwd}\n`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   // Scan packages/*/package.json and apps/*/package.json for bunup --filter build scripts
@@ -143,7 +145,8 @@ export async function runCheckBunupRegistry(): Promise<void> {
     process.stdout.write(
       `${COLORS.green}All ${packagesWithFilter.length} packages with bunup --filter are registered in bunup.config.ts.${COLORS.reset}\n`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   process.stderr.write(
@@ -163,5 +166,5 @@ export async function runCheckBunupRegistry(): Promise<void> {
     `Without registration, ${COLORS.dim}bunup --filter <name>${COLORS.reset} silently exits with no output.\n`
   );
 
-  process.exit(1);
+  process.exitCode = 1;
 }

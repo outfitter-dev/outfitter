@@ -732,7 +732,8 @@ export async function runCheckTsdoc(
         "Searched: packages/*/src/index.ts, apps/*/src/index.ts, src/index.ts\n" +
         "Use --package <path> to specify a package path explicitly.\n"
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (resolveJsonMode(options)) {
@@ -744,5 +745,5 @@ export async function runCheckTsdoc(
     });
   }
 
-  process.exit(result.ok ? 0 : 1);
+  process.exitCode = result.ok ? 0 : 1;
 }

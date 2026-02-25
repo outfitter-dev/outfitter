@@ -89,6 +89,7 @@ export function createCLI(config: CLIConfig): CLI {
   });
 
   const exit =
+    // eslint-disable-next-line outfitter/no-process-exit-in-packages -- CLI adapter default exit hook owns process termination
     config.onExit ?? ((code: number): void => void process.exit(code));
 
   // Force Commander to throw instead of exiting so parse() can route all exits

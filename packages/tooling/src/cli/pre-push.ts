@@ -464,7 +464,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     log(
       `${COLORS.yellow}Force flag set${COLORS.reset} - skipping strict verification`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   const versionCheck = checkBunVersion();
@@ -474,7 +475,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     );
     log("Fix: bunx @outfitter/tooling upgrade-bun");
     log("");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const branch = getCurrentBranch();
@@ -486,13 +488,15 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     log(
       `${COLORS.yellow}Skipping strict verification${COLORS.reset} for automated changeset release push`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   // Check for RED phase branch
   if (isRedPhaseBranch(branch)) {
     if (maybeSkipForRedPhase("branch", branch)) {
-      process.exit(0);
+      process.exitCode = 0;
+      return;
     }
   }
 
@@ -500,7 +504,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   if (isScaffoldBranch(branch)) {
     if (hasRedPhaseBranchInContext(branch)) {
       if (maybeSkipForRedPhase("context", branch)) {
-        process.exit(0);
+        process.exitCode = 0;
+        return;
       }
     }
   }
@@ -515,7 +520,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     log("Add one of:");
     log("  - verify:ci");
     log("  - typecheck + (check or lint) + build + test");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   log(
@@ -541,7 +547,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     log("  - feature-tests");
     log("  - feature/tests");
     log("  - feature_tests");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   // TSDoc coverage summary (warning only, does not affect exit code)
@@ -556,5 +563,5 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
 
   log("");
   log(`${COLORS.green}Strict verification passed${COLORS.reset}`);
-  process.exit(0);
+  process.exitCode = 0;
 }

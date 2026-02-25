@@ -85,7 +85,8 @@ export async function runCheckCleanTree(
   );
   if (diffResult.exitCode !== 0) {
     process.stderr.write("Failed to run git diff\n");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   const modified = parseGitDiff(diffResult.stdout.toString());
 
@@ -96,7 +97,8 @@ export async function runCheckCleanTree(
   );
   if (lsResult.exitCode !== 0) {
     process.stderr.write("Failed to run git ls-files\n");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   const untracked = parseUntrackedFiles(lsResult.stdout.toString());
 
@@ -107,7 +109,8 @@ export async function runCheckCleanTree(
     process.stdout.write(
       `${COLORS.green}Working tree is clean.${COLORS.reset}\n`
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   process.stderr.write(
@@ -133,5 +136,5 @@ export async function runCheckCleanTree(
   );
   process.stderr.write("Commit these changes or add them to .gitignore.\n");
 
-  process.exit(1);
+  process.exitCode = 1;
 }

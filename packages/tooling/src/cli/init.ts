@@ -88,7 +88,8 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
 
   if (!(await pkgFile.exists())) {
     process.stderr.write("No package.json found in current directory\n");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const pkg = (await pkgFile.json()) as PackageJson;
@@ -109,5 +110,5 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
   });
 
   const exitCode = await proc.exited;
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }

@@ -357,7 +357,8 @@ Exit codes:
   0  All links valid
   1  Broken links found
 `);
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   const cwd = process.cwd();
@@ -365,7 +366,7 @@ Exit codes:
     args.length > 0 ? args.filter((a) => !a.startsWith("--")) : undefined;
 
   const exitCode = await runCheckMarkdownLinks(cwd, patterns);
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }
 
 if (import.meta.main) {
