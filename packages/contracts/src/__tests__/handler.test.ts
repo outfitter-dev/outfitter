@@ -29,11 +29,15 @@ describe("Handler type", () => {
   it("enforces Result return type (compile-time)", () => {
     // This test verifies that Handler type compiles correctly
     // A handler MUST return Promise<Result<T, E>>
+    // oxlint-disable-next-line outfitter/handler-must-return-result -- compile-time contract test intentionally assigns via Handler type alias
     const handler: Handler<
       { id: string },
       { name: string },
       NotFoundError
-    > = async (input, _ctx) => {
+    > = async (
+      input,
+      _ctx
+    ): Promise<Result<{ name: string }, NotFoundError>> => {
       if (input.id === "missing") {
         return Result.err(
           new NotFoundError({
@@ -55,7 +59,7 @@ describe("Handler type", () => {
       { value: number },
       string,
       ValidationError
-    > = (input, _ctx) => {
+    > = (input, _ctx): Result<string, ValidationError> => {
       if (input.value < 0) {
         return Result.err(
           new ValidationError({

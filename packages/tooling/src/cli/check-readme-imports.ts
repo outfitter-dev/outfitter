@@ -328,5 +328,5 @@ export async function runCheckReadmeImports(
     }
   }
 
-  process.exit(hasInvalid ? 1 : 0);
+  process.exitCode = hasInvalid ? 1 : 0;
 }

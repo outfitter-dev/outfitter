@@ -31,6 +31,10 @@ interface ToolCheck {
   name: string;
 }
 
+function printLine(message: string): void {
+  process.stdout.write(`${message}\n`);
+}
+
 const CORE_TOOLS: ToolCheck[] = [
   {
     name: "gh",
@@ -39,7 +43,7 @@ const CORE_TOOLS: ToolCheck[] = [
       if (process.platform === "darwin") {
         await run("brew", ["install", "gh"]);
       } else {
-        console.log("    Install GitHub CLI: https://cli.github.com/");
+        printLine("    Install GitHub CLI: https://cli.github.com/");
       }
     },
   },
@@ -68,15 +72,15 @@ function commandExists(command: string): boolean {
 }
 
 function log(message: string, quiet: boolean): void {
-  if (!quiet) console.log(message);
+  if (!quiet) printLine(message);
 }
 
 function success(message: string, quiet: boolean): void {
-  if (!quiet) console.log(`✓ ${message}`);
+  if (!quiet) printLine(`✓ ${message}`);
 }
 
 function info(message: string, quiet: boolean): void {
-  if (!quiet) console.log(`▸ ${message}`);
+  if (!quiet) printLine(`▸ ${message}`);
 }
 
 /**

@@ -36,5 +36,5 @@ export async function runCheck(paths: string[] = []): Promise<void> {
   });
 
   const exitCode = await proc.exited;
-  process.exit(exitCode);
+  process.exitCode = exitCode;
 }

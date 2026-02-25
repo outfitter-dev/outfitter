@@ -30,16 +30,20 @@ export interface InitOptions {
 
 const TEMPLATES_DIR = resolve(import.meta.dirname, "../scaffolding/templates");
 
+function printLine(message: string): void {
+  process.stdout.write(`${message}\n`);
+}
+
 function log(message: string, quiet: boolean): void {
-  if (!quiet) console.log(message);
+  if (!quiet) printLine(message);
 }
 
 function success(message: string, quiet: boolean): void {
-  if (!quiet) console.log(`✓ ${message}`);
+  if (!quiet) printLine(`✓ ${message}`);
 }
 
 function skip(message: string, quiet: boolean): void {
-  if (!quiet) console.log(`- ${message}`);
+  if (!quiet) printLine(`- ${message}`);
 }
 
 async function copyTemplate(

@@ -1,3 +1,4 @@
+/* oxlint-disable outfitter/handler-must-return-result */
 import type { Handler } from "@outfitter/contracts";
 
 export const badHandler: Handler<

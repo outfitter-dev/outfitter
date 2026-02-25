@@ -180,7 +180,9 @@ register(
         cwd,
         patterns.length > 0 ? patterns : undefined
       );
-      if (exitCode !== 0) process.exit(exitCode);
+      if (exitCode !== 0) {
+        process.exitCode = exitCode;
+      }
     })
 );
 

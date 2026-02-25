@@ -159,7 +159,8 @@ export async function runCheckBoundaryInvocations(): Promise<void> {
     process.stderr.write(
       `Boundary invocation check failed before evaluation: ${message}\n`
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   const violations = findBoundaryViolations(entries);
 
@@ -167,7 +168,8 @@ export async function runCheckBoundaryInvocations(): Promise<void> {
     process.stdout.write(
       "No boundary invocation violations detected in root/apps scripts.\n"
     );
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   process.stderr.write("Boundary invocation violations detected:\n\n");
@@ -181,5 +183,5 @@ export async function runCheckBoundaryInvocations(): Promise<void> {
     "\nUse canonical command surfaces (e.g. `outfitter repo ...` or package bins) instead of executing packages/*/src directly.\n"
   );
 
-  process.exit(1);
+  process.exitCode = 1;
 }

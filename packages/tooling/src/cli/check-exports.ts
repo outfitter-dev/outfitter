@@ -350,12 +350,14 @@ export async function runCheckExports(
     const rawConfig: unknown = configModule.default;
     if (!Array.isArray(rawConfig)) {
       process.stderr.write("bunup.config.ts must export a workspace array\n");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     workspaces = rawConfig as WorkspaceEntry[];
   } catch {
     process.stderr.write(`Could not load bunup.config.ts from ${cwd}\n`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const results: PackageResult[] = [];
@@ -439,5 +441,5 @@ export async function runCheckExports(
     }
   }
 
-  process.exit(checkResult.ok ? 0 : 1);
+  process.exitCode = checkResult.ok ? 0 : 1;
 }
