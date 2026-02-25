@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import { resolve } from "node:path";
 
 import { outfitterActions } from "../actions.js";
 
@@ -38,44 +39,119 @@ describe("check automation action registration", () => {
   }
 });
 
-describe("check automation mapInput", () => {
-  const previousJson = process.env["OUTFITTER_JSON"];
-  const previousJsonl = process.env["OUTFITTER_JSONL"];
+const workspaceRoot = resolve(import.meta.dir, "../../../..");
 
-  afterEach(() => {
-    if (previousJson === undefined) {
-      delete process.env["OUTFITTER_JSON"];
-    } else {
-      process.env["OUTFITTER_JSON"] = previousJson;
-    }
+function mergeEnv(
+  overrides: Record<string, string | undefined>
+): Record<string, string> {
+  const env: Record<string, string> = {};
 
-    if (previousJsonl === undefined) {
-      delete process.env["OUTFITTER_JSONL"];
-    } else {
-      process.env["OUTFITTER_JSONL"] = previousJsonl;
+  for (const [key, value] of Object.entries(process.env)) {
+    if (typeof value === "string") {
+      env[key] = value;
     }
+  }
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (typeof value === "string") {
+      env[key] = value;
+    } else {
+      delete env[key];
+    }
+  }
+
+  return env;
+}
+
+async function runOutfitterCheck(
+  args: readonly string[],
+  envOverrides: Record<string, string | undefined>
+): Promise<{ code: number; stderr: string; stdout: string }> {
+  const child = Bun.spawn(
+    ["bun", "run", "apps/outfitter/src/cli.ts", ...args],
+    {
+      cwd: workspaceRoot,
+      env: mergeEnv(envOverrides),
+      stderr: "pipe",
+      stdin: "ignore",
+      stdout: "pipe",
+    }
+  );
+
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+
+  return { code, stderr, stdout };
+}
+
+describe("check automation CLI output mode", () => {
+  test("OUTFITTER_JSON=1 falls back to json output", async () => {
+    const result = await runOutfitterCheck(
+      ["check", "publish-guardrails", "--cwd", "."],
+      {
+        OUTFITTER_JSON: "1",
+        OUTFITTER_JSONL: undefined,
+      }
+    );
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
+
+    const payload = JSON.parse(result.stdout) as {
+      checkedManifestCount: number;
+      ok: boolean;
+      violations: unknown[];
+    };
+
+    expect(payload.ok).toBe(true);
+    expect(payload.checkedManifestCount).toBeGreaterThan(0);
+    expect(payload.violations).toEqual([]);
   });
 
-  test("explicit --output json maps to outputMode json", () => {
-    const action = outfitterActions.get("check.publish-guardrails");
-    const mapped = action?.cli?.mapInput?.({
-      args: [],
-      flags: { output: "json" },
-    }) as { outputMode: string };
+  test("explicit --output human overrides OUTFITTER_JSON=1", async () => {
+    const result = await runOutfitterCheck(
+      ["check", "publish-guardrails", "--cwd", ".", "--output", "human"],
+      {
+        OUTFITTER_JSON: "1",
+        OUTFITTER_JSONL: undefined,
+      }
+    );
 
-    expect(mapped.outputMode).toBe("json");
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.stdout).toMatch(
+      /\[publish-guardrails\] checked \d+ workspace manifests; all publishable packages enforce prepublishOnly guard/
+    );
+    expect(() => JSON.parse(result.stdout)).toThrow();
   });
 
-  test("OUTFITTER_JSON=1 falls back to outputMode json", () => {
-    process.env["OUTFITTER_JSON"] = "1";
-    delete process.env["OUTFITTER_JSONL"];
+  test("OUTFITTER_JSONL=1 falls back to jsonl output", async () => {
+    const result = await runOutfitterCheck(
+      ["check", "publish-guardrails", "--cwd", "."],
+      {
+        OUTFITTER_JSON: undefined,
+        OUTFITTER_JSONL: "1",
+      }
+    );
 
-    const action = outfitterActions.get("check.surface-map");
-    const mapped = action?.cli?.mapInput?.({
-      args: [],
-      flags: {},
-    }) as { outputMode: string };
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
 
-    expect(mapped.outputMode).toBe("json");
+    // JSONL framing: single non-empty line (no pretty-printed JSON)
+    const lines = result.stdout.split("\n").filter((l) => l.length > 0);
+    expect(lines).toHaveLength(1);
+
+    const payload = JSON.parse(lines[0]!) as {
+      ok: boolean;
+      violations: unknown[];
+      workspaceRoot: string;
+    };
+
+    expect(payload.ok).toBe(true);
+    expect(payload.workspaceRoot).toBe(workspaceRoot);
+    expect(payload.violations).toEqual([]);
   });
 });
