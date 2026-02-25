@@ -346,7 +346,7 @@ Repository maintenance operations are namespaced under `outfitter repo check|syn
 
 ### CI and Hook Enforcement
 
-`verify:ci` enforces boundary and command policy through `check-exports`, `check-readme-imports`, `check-clean-tree`, and `check-boundary-invocations`. Pre-push runs the same sequence through `bunx @outfitter/tooling pre-push`.
+`verify:ci` runs `outfitter check --ci`, which enforces export/readme/boundary policies, docs/surface checks, and test execution through a single orchestrated entrypoint. Pre-push runs `outfitter check --pre-push`.
 
 ## Related Documentation
 

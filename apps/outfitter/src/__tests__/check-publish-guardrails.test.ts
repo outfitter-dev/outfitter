@@ -4,7 +4,7 @@ import {
   findPublishGuardrailViolations,
   REQUIRED_PREPUBLISH_ONLY,
   type WorkspacePackageManifest,
-} from "./check-publish-guardrails";
+} from "../commands/check-publish-guardrails.js";
 
 describe("findPublishGuardrailViolations", () => {
   test("ignores private packages", () => {

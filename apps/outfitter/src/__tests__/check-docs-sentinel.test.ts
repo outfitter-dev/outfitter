@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { checkDocsReadmeSentinelContent } from "./check-docs-readme-sentinel";
+import { checkDocsReadmeSentinelContent } from "../commands/check-docs-sentinel.js";
 
 function wrapSentinel(content: string): string {
   return [

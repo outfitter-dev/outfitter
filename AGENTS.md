@@ -286,9 +286,7 @@ fix(cli): handle missing config gracefully
 ### Git Hooks (Lefthook)
 
 - **pre-commit**: Format, lint, typecheck (affected packages)
-- **pre-push**: Build + TDD-aware test suite via `bunx @outfitter/tooling pre-push`, plus schema drift check
-  - Allows RED phase branches (`*-tests`, `*/tests`, `*_tests`) to skip tests
-  - Use `--force` to skip tests on any branch
+- **pre-push**: Full repository verification via `outfitter check --pre-push`, plus schema drift check
   - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
   - Docs README sentinel drift (`outfitter check docs-sentinel`) fails the push if `docs/README.md` generated sections are stale
 

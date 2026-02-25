@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-25T13:58:58.278Z",
+  "generatedAt": "2026-02-25T18:51:58.795Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1139,6 +1139,16 @@
           "block": {
             "type": "string"
           },
+          "mode": {
+            "type": "string",
+            "enum": ["all", "ci", "pre-commit", "pre-push"]
+          },
+          "stagedFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "outputMode": {
             "type": "string",
             "enum": ["human", "json", "jsonl"],
@@ -1149,6 +1159,7 @@
       },
       "cli": {
         "group": "check",
+        "command": "[staged-files...]",
         "description": "Compare local config blocks against the registry for drift detection",
         "options": [
           {
@@ -1157,13 +1168,28 @@
             "defaultValue": false
           },
           {
-            "flags": "-b, --block <name>",
-            "description": "Check a specific block only"
+            "flags": "--all",
+            "description": "Run the full check orchestrator",
+            "defaultValue": false
           },
           {
             "flags": "--ci",
-            "description": "Deprecated: use --output json instead",
+            "description": "Run CI check orchestration (includes tests)",
             "defaultValue": false
+          },
+          {
+            "flags": "--pre-commit",
+            "description": "Run pre-commit check orchestration",
+            "defaultValue": false
+          },
+          {
+            "flags": "--pre-push",
+            "description": "Run pre-push check orchestration",
+            "defaultValue": false
+          },
+          {
+            "flags": "-b, --block <name>",
+            "description": "Check a specific block only"
           },
           {
             "flags": "-o, --output <mode>",
@@ -1352,6 +1378,181 @@
           {
             "flags": "--jq <expr>",
             "description": "Filter JSON output with a jq expression"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.publish-guardrails",
+      "description": "Validate publishable package manifests enforce prepublishOnly guardrails",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "publish-guardrails",
+        "description": "Validate publishable package manifests enforce prepublishOnly guardrails",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.preset-versions",
+      "description": "Validate preset dependency versions, registry versions, and Bun version consistency",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "preset-versions",
+        "description": "Validate preset dependency versions, registry versions, and Bun version consistency",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.surface-map",
+      "description": "Validate canonical surface map path usage (.outfitter/surface.json only)",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "surface-map",
+        "description": "Validate canonical surface map path usage (.outfitter/surface.json only)",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.surface-map-format",
+      "description": "Validate canonical formatting for .outfitter/surface.json",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "surface-map-format",
+        "description": "Validate canonical formatting for .outfitter/surface.json",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.docs-sentinel",
+      "description": "Validate docs/README.md PACKAGE_LIST sentinel freshness",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "docs-sentinel",
+        "description": "Validate docs/README.md PACKAGE_LIST sentinel freshness",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
           }
         ]
       }

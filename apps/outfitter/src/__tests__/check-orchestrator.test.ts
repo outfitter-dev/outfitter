@@ -68,6 +68,7 @@ describe("buildCheckOrchestratorPlan", () => {
     expect(stepIds).toContain("typecheck");
     expect(stepIds).toContain("lint-and-format");
     expect(stepIds).toContain("schema-diff");
+    expect(stepIds).toContain("tree-clean");
     expect(stepIds).not.toContain("tests");
   });
 
