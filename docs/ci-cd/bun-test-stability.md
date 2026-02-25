@@ -20,7 +20,8 @@ Date revalidated: **2026-02-25**.
   - `OUTFITTER_CI_TURBO_CONCURRENCY=2`
   - `OUTFITTER_CI_BUN_MAX_CONCURRENCY=4`
   - `OUTFITTER_CI_TURBO_LOG_ORDER=stream`
-  - `OUTFITTER_CI_TURBO_OUTPUT_LOGS=full`
+  - `OUTFITTER_CI_TURBO_OUTPUT_LOGS=errors-only`
+- `outfitter check` now supports `--compact` for structured output mode to drop per-step `command/stdout/stderr` fields when automation needs smaller payloads.
 
 ### OS-313: heavyweight suite sharding
 
@@ -35,12 +36,13 @@ Date revalidated: **2026-02-25**.
 
 ### OS-314: diagnostics + Bun trial workflow
 
-- `test:ci` now writes diagnostic artifacts to `.outfitter/ci/`.
+- `test:ci` now writes diagnostic artifacts to `.outfitter/reports/ci/`.
 - CI and release workflows upload diagnostics on failures:
-  - `.outfitter/ci/**`
+  - `.outfitter/reports/ci/**`
   - `.turbo/runs/*.json`
 - Added manual Bun trial workflow:
   - `.github/workflows/bun-stability-trial.yml`
+  - Keeps `OUTFITTER_CI_TURBO_OUTPUT_LOGS=full` for deeper crash forensics during trial runs
 
 ## Current Repository Baseline (2026-02-25)
 
@@ -74,4 +76,4 @@ Run **Actions > Bun Stability Trial > Run workflow** and provide:
 - `iterations`: repeat count per version.
 - `turbo_concurrency` and `bun_max_concurrency`: guardrail parameters.
 
-Each matrix job uploads per-run diagnostics and a compact summary JSON under `.outfitter/ci-trial/`.
+Each matrix job uploads per-run diagnostics and a compact summary JSON under `.outfitter/reports/ci-trial/`.

@@ -110,6 +110,26 @@ describe("check mapInput", () => {
     expect(mapped.outputMode).toBe("json");
   });
 
+  test("--compact maps to compact true", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: { compact: true },
+    }) as { compact: boolean };
+
+    expect(mapped.compact).toBe(true);
+  });
+
+  test("compact defaults to false", () => {
+    const action = outfitterActions.get("check");
+    const mapped = action?.cli?.mapInput?.({
+      args: [],
+      flags: {},
+    }) as { compact: boolean };
+
+    expect(mapped.compact).toBe(false);
+  });
+
   test("--output json takes precedence over mode defaults", () => {
     const action = outfitterActions.get("check");
     const mapped = action?.cli?.mapInput?.({

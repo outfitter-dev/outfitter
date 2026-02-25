@@ -6,7 +6,11 @@
 
 import { resolve } from "node:path";
 
-import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import {
+  booleanFlagPreset,
+  cwdPreset,
+  verbosePreset,
+} from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import {
   type ActionCliOption,
@@ -38,6 +42,7 @@ import {
 
 interface CheckActionInput {
   block?: string;
+  compact: boolean;
   cwd: string;
   mode?: CheckOrchestratorMode;
   outputMode: CliOutputMode;
@@ -48,6 +53,7 @@ interface CheckActionInput {
 const checkOrchestratorModes = ["all", "ci", "pre-commit", "pre-push"] as const;
 
 const checkInputSchema = z.object({
+  compact: z.boolean(),
   cwd: z.string(),
   verbose: z.boolean(),
   block: z.string().optional(),
@@ -59,6 +65,13 @@ const checkInputSchema = z.object({
 const checkVerbose = verbosePreset();
 const checkCwd = cwdPreset();
 const checkOutputMode = outputModePreset();
+const checkCompact = booleanFlagPreset({
+  id: "checkCompact",
+  key: "compact",
+  flags: "--compact",
+  description:
+    "Omit verbose fields in structured orchestrator output (steps keep id/label/exitCode/durationMs only)",
+});
 const checkVerboseOptions: ActionCliOption[] = checkVerbose.options.map(
   (option) =>
     option.flags === "-v, --verbose"
@@ -132,11 +145,13 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
         flags: "-b, --block <name>",
         description: "Check a specific block only",
       },
+      ...checkCompact.options,
       ...checkOutputMode.options,
       ...checkCwd.options,
     ],
     mapInput: (context) => {
       const mode = resolveCheckMode(context.flags);
+      const { compact } = checkCompact.resolve(context.flags);
       const { outputMode: presetOutputMode } = checkOutputMode.resolve(
         context.flags
       );
@@ -173,6 +188,7 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       const { cwd: rawCwd } = checkCwd.resolve(context.flags);
       const cwd = resolve(process.cwd(), rawCwd);
       return {
+        compact,
         cwd,
         verbose,
         ...(block !== undefined ? { block } : {}),
@@ -183,7 +199,7 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
     },
   },
   handler: async (input) => {
-    const { outputMode, mode, stagedFiles, ...checkInput } = input;
+    const { outputMode, mode, stagedFiles, compact, ...checkInput } = input;
 
     if (mode !== undefined) {
       const orchestratorResult = await runCheckOrchestrator({
@@ -202,6 +218,7 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       }
 
       await printCheckOrchestratorResults(orchestratorResult.value, {
+        compact,
         mode: outputMode,
       });
 

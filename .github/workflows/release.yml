@@ -112,7 +112,7 @@ jobs:
           OUTFITTER_CI_TURBO_CONCURRENCY: "2"
           OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
           OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
-          OUTFITTER_CI_TURBO_OUTPUT_LOGS: "full"
+          OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -127,7 +127,7 @@ jobs:
           OUTFITTER_CI_TURBO_CONCURRENCY: "2"
           OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
           OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
-          OUTFITTER_CI_TURBO_OUTPUT_LOGS: "full"
+          OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -140,7 +140,7 @@ jobs:
           name: release-test-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: ignore
           path: |
-            .outfitter/ci/**
+            .outfitter/reports/ci/**
             .turbo/runs/*.json
 
       - name: Setup Node (for npm OIDC publish)
