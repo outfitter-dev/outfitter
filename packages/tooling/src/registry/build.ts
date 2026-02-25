@@ -159,16 +159,34 @@ function resolveVersion(
   return version;
 }
 
+function getWorkspacePackageVersion(relativePackageJsonPath: string): string {
+  const pkgPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    relativePackageJsonPath
+  );
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as {
+    version?: unknown;
+  };
+
+  if (typeof pkg.version !== "string") {
+    throw new Error(`Expected version in package.json at ${pkgPath}`);
+  }
+
+  return `^${pkg.version}`;
+}
+
 /**
  * Read the tooling package's own version for self-referencing in registry blocks.
  */
 function getToolingVersion(): string {
-  const pkgPath = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "../../package.json"
-  );
-  const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
-  return `^${pkg.version}`;
+  return getWorkspacePackageVersion("../../package.json");
+}
+
+/**
+ * Read the local @outfitter/oxlint-plugin version for linter registry blocks.
+ */
+function getOxlintPluginVersion(): string {
+  return getWorkspacePackageVersion("../../../oxlint-plugin/package.json");
 }
 
 /**
@@ -177,6 +195,7 @@ function getToolingVersion(): string {
 function createRegistryConfig(): RegistryBuildConfig {
   const { all: versions } = getResolvedVersions();
   const toolingVersion = getToolingVersion();
+  const oxlintPluginVersion = getOxlintPluginVersion();
 
   return {
     version: "1.0.0",
@@ -200,6 +219,7 @@ function createRegistryConfig(): RegistryBuildConfig {
           "packages/tooling/configs/.oxfmtrc.jsonc": ".oxfmtrc.jsonc",
         },
         devDependencies: {
+          "@outfitter/oxlint-plugin": oxlintPluginVersion,
           ultracite: resolveVersion(versions, "ultracite"),
           oxlint: resolveVersion(versions, "oxlint"),
           oxfmt: resolveVersion(versions, "oxfmt"),

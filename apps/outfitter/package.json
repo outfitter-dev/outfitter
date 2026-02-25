@@ -316,6 +316,7 @@
     "@outfitter/docs": "workspace:*",
     "@outfitter/logging": "workspace:*",
     "@outfitter/mcp": "workspace:*",
+    "@outfitter/oxlint-plugin": "workspace:*",
     "@outfitter/presets": "workspace:*",
     "@outfitter/tooling": "workspace:*",
     "@outfitter/tui": "workspace:*",

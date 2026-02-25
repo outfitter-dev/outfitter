@@ -175,6 +175,9 @@ describe("init command file creation", () => {
 
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.devDependencies["@outfitter/oxlint-plugin"]).toBe(
+      workspaceVersion("@outfitter/oxlint-plugin")
+    );
     expect(packageJson.devDependencies["@outfitter/tooling"]).toBe(
       workspaceVersion("@outfitter/tooling")
     );
