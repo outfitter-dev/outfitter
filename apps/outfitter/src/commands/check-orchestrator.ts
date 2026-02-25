@@ -95,7 +95,15 @@ export function buildCheckOrchestratorPlan(
       {
         id: "publish-guardrails",
         label: "Publish guardrails",
-        command: ["bun", "run", "check-publish-guardrails"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "publish-guardrails",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "changeset",
@@ -110,12 +118,28 @@ export function buildCheckOrchestratorPlan(
       {
         id: "preset-versions",
         label: "Preset dependency versions",
-        command: ["bun", "run", "check-preset-dependency-versions"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "preset-versions",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "docs-sentinel",
         label: "Docs readme sentinel",
-        command: ["bun", "run", "docs:check:ci"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "docs-sentinel",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "docs-links",
@@ -145,12 +169,28 @@ export function buildCheckOrchestratorPlan(
       {
         id: "surface-map-canonical",
         label: "Surface map canonical path",
-        command: ["bun", "run", "check-canonical-surface-map"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "surface-map",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "surface-map-format",
         label: "Surface map format",
-        command: ["bun", "run", "check-surface-map-format"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "surface-map-format",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "schema-diff",
