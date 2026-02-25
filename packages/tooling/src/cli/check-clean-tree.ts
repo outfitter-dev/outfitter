@@ -13,9 +13,9 @@
 
 /** Status of the working tree after verification steps */
 export interface TreeStatus {
-	readonly clean: boolean;
-	readonly modified: string[];
-	readonly untracked: string[];
+  readonly clean: boolean;
+  readonly modified: string[];
+  readonly untracked: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -26,27 +26,27 @@ export interface TreeStatus {
  * Parse `git diff --name-only` output into a list of modified file paths.
  */
 export function parseGitDiff(diffOutput: string): string[] {
-	return diffOutput
-		.split("\n")
-		.map((line) => line.trim())
-		.filter(Boolean);
+  return diffOutput
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 /**
  * Parse `git ls-files --others --exclude-standard` output into a list of untracked file paths.
  */
 export function parseUntrackedFiles(lsOutput: string): string[] {
-	return lsOutput
-		.split("\n")
-		.map((line) => line.trim())
-		.filter(Boolean);
+  return lsOutput
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 /**
  * Determine if the tree status represents a clean working tree.
  */
 export function isCleanTree(status: TreeStatus): boolean {
-	return status.modified.length === 0 && status.untracked.length === 0;
+  return status.modified.length === 0 && status.untracked.length === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,10 +54,10 @@ export function isCleanTree(status: TreeStatus): boolean {
 // ---------------------------------------------------------------------------
 
 const COLORS = {
-	reset: "\x1b[0m",
-	red: "\x1b[31m",
-	green: "\x1b[32m",
-	dim: "\x1b[2m",
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  dim: "\x1b[2m",
 };
 
 // ---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ const COLORS = {
 // ---------------------------------------------------------------------------
 
 export interface CheckCleanTreeOptions {
-	readonly paths?: string[];
+  readonly paths?: string[];
 }
 
 /**
@@ -74,64 +74,64 @@ export interface CheckCleanTreeOptions {
  * Exits 0 if clean, 1 if dirty files are found.
  */
 export async function runCheckCleanTree(
-	options: CheckCleanTreeOptions = {},
+  options: CheckCleanTreeOptions = {}
 ): Promise<void> {
-	const pathArgs = options.paths ?? [];
+  const pathArgs = options.paths ?? [];
 
-	// Find modified tracked files (HEAD catches both staged and unstaged)
-	const diffResult = Bun.spawnSync(
-		["git", "diff", "HEAD", "--name-only", "--", ...pathArgs],
-		{ stderr: "pipe" },
-	);
-	if (diffResult.exitCode !== 0) {
-		process.stderr.write("Failed to run git diff\n");
-		process.exit(1);
-	}
-	const modified = parseGitDiff(diffResult.stdout.toString());
+  // Find modified tracked files (HEAD catches both staged and unstaged)
+  const diffResult = Bun.spawnSync(
+    ["git", "diff", "HEAD", "--name-only", "--", ...pathArgs],
+    { stderr: "pipe" }
+  );
+  if (diffResult.exitCode !== 0) {
+    process.stderr.write("Failed to run git diff\n");
+    process.exit(1);
+  }
+  const modified = parseGitDiff(diffResult.stdout.toString());
 
-	// Find new untracked files
-	const lsResult = Bun.spawnSync(
-		["git", "ls-files", "--others", "--exclude-standard", "--", ...pathArgs],
-		{ stderr: "pipe" },
-	);
-	if (lsResult.exitCode !== 0) {
-		process.stderr.write("Failed to run git ls-files\n");
-		process.exit(1);
-	}
-	const untracked = parseUntrackedFiles(lsResult.stdout.toString());
+  // Find new untracked files
+  const lsResult = Bun.spawnSync(
+    ["git", "ls-files", "--others", "--exclude-standard", "--", ...pathArgs],
+    { stderr: "pipe" }
+  );
+  if (lsResult.exitCode !== 0) {
+    process.stderr.write("Failed to run git ls-files\n");
+    process.exit(1);
+  }
+  const untracked = parseUntrackedFiles(lsResult.stdout.toString());
 
-	const clean = modified.length === 0 && untracked.length === 0;
-	const status: TreeStatus = { clean, modified, untracked };
+  const clean = modified.length === 0 && untracked.length === 0;
+  const status: TreeStatus = { clean, modified, untracked };
 
-	if (status.clean) {
-		process.stdout.write(
-			`${COLORS.green}Working tree is clean.${COLORS.reset}\n`,
-		);
-		process.exit(0);
-	}
+  if (status.clean) {
+    process.stdout.write(
+      `${COLORS.green}Working tree is clean.${COLORS.reset}\n`
+    );
+    process.exit(0);
+  }
 
-	process.stderr.write(
-		`${COLORS.red}Working tree is dirty after verification:${COLORS.reset}\n\n`,
-	);
+  process.stderr.write(
+    `${COLORS.red}Working tree is dirty after verification:${COLORS.reset}\n\n`
+  );
 
-	if (modified.length > 0) {
-		process.stderr.write("Modified files:\n");
-		for (const file of modified) {
-			process.stderr.write(`  ${COLORS.dim}M${COLORS.reset} ${file}\n`);
-		}
-	}
+  if (modified.length > 0) {
+    process.stderr.write("Modified files:\n");
+    for (const file of modified) {
+      process.stderr.write(`  ${COLORS.dim}M${COLORS.reset} ${file}\n`);
+    }
+  }
 
-	if (untracked.length > 0) {
-		process.stderr.write("Untracked files:\n");
-		for (const file of untracked) {
-			process.stderr.write(`  ${COLORS.dim}?${COLORS.reset} ${file}\n`);
-		}
-	}
+  if (untracked.length > 0) {
+    process.stderr.write("Untracked files:\n");
+    for (const file of untracked) {
+      process.stderr.write(`  ${COLORS.dim}?${COLORS.reset} ${file}\n`);
+    }
+  }
 
-	process.stderr.write(
-		"\nThis likely means a build step produced uncommitted changes.\n",
-	);
-	process.stderr.write("Commit these changes or add them to .gitignore.\n");
+  process.stderr.write(
+    "\nThis likely means a build step produced uncommitted changes.\n"
+  );
+  process.stderr.write("Commit these changes or add them to .gitignore.\n");
 
-	process.exit(1);
+  process.exit(1);
 }

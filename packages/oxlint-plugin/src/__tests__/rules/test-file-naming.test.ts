@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { testFileNamingRule } from "../../rules/test-file-naming.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 

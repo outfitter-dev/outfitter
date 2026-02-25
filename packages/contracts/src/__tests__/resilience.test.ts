@@ -82,7 +82,7 @@ describe("retry<T>()", () => {
 
     const fn = async (): Promise<Result<string, NetworkError>> => {
       const now = Date.now();
-      if (delays.length > 0 || delays.length === 0) {
+      if (delays.length >= 0) {
         delays.push(now - lastTime);
       }
       lastTime = now;

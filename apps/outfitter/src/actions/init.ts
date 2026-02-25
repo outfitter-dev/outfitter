@@ -13,6 +13,7 @@ import {
 import {
   type ActionCliInputContext,
   type ActionCliOption,
+  type ActionSpec,
   defineAction,
   InternalError,
   Result,
@@ -196,7 +197,7 @@ function createInitAction(options: {
   readonly command: string;
   readonly presetOverride?: NormalizedInitPreset;
   readonly includePresetOption?: boolean;
-}) {
+}): ActionSpec<InitActionInput, unknown> {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
     description:
@@ -269,7 +270,7 @@ function createInitAction(options: {
   });
 }
 
-export const createAction = defineAction({
+const _createAction: ActionSpec<{}, unknown, InternalError> = defineAction({
   id: "create",
   description: "Removed - use 'outfitter init' instead",
   surfaces: ["cli"],
@@ -299,45 +300,57 @@ export const createAction = defineAction({
       })
     ),
 });
+export const createAction: typeof _createAction = _createAction;
 
-export const initAction = createInitAction({
+const _initAction: ReturnType<typeof createInitAction> = createInitAction({
   id: "init",
   description: "Create a new Outfitter project",
   command: "[directory]",
   includePresetOption: true,
 });
+export const initAction: typeof _initAction = _initAction;
 
-export const initCliAction = createInitAction({
+const _initCliAction: ReturnType<typeof createInitAction> = createInitAction({
   id: "init.cli",
   description: "Create a new CLI project",
   command: "cli [directory]",
   presetOverride: "cli",
 });
+export const initCliAction: typeof _initCliAction = _initCliAction;
 
-export const initMcpAction = createInitAction({
+const _initMcpAction: ReturnType<typeof createInitAction> = createInitAction({
   id: "init.mcp",
   description: "Create a new MCP server",
   command: "mcp [directory]",
   presetOverride: "mcp",
 });
+export const initMcpAction: typeof _initMcpAction = _initMcpAction;
 
-export const initDaemonAction = createInitAction({
-  id: "init.daemon",
-  description: "Create a new daemon project",
-  command: "daemon [directory]",
-  presetOverride: "daemon",
-});
+const _initDaemonAction: ReturnType<typeof createInitAction> = createInitAction(
+  {
+    id: "init.daemon",
+    description: "Create a new daemon project",
+    command: "daemon [directory]",
+    presetOverride: "daemon",
+  }
+);
+export const initDaemonAction: typeof _initDaemonAction = _initDaemonAction;
 
-export const initLibraryAction = createInitAction({
-  id: "init.library",
-  description: "Create a new library project",
-  command: "library [directory]",
-  presetOverride: "library",
-});
+const _initLibraryAction: ReturnType<typeof createInitAction> =
+  createInitAction({
+    id: "init.library",
+    description: "Create a new library project",
+    command: "library [directory]",
+    presetOverride: "library",
+  });
+export const initLibraryAction: typeof _initLibraryAction = _initLibraryAction;
 
-export const initFullStackAction = createInitAction({
-  id: "init.full-stack",
-  description: "Create a full-stack workspace",
-  command: "full-stack [directory]",
-  presetOverride: "full-stack",
-});
+const _initFullStackAction: ReturnType<typeof createInitAction> =
+  createInitAction({
+    id: "init.full-stack",
+    description: "Create a full-stack workspace",
+    command: "full-stack [directory]",
+    presetOverride: "full-stack",
+  });
+export const initFullStackAction: typeof _initFullStackAction =
+  _initFullStackAction;

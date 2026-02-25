@@ -32,34 +32,34 @@
 
 // Re-export check-tsdoc analysis functions and schemas
 export type {
-	CheckTsDocOptions,
-	CoverageLevel,
-	DeclarationCoverage,
-	PackageCoverage,
-	TsDocCheckResult,
+  CheckTsDocOptions,
+  CoverageLevel,
+  DeclarationCoverage,
+  PackageCoverage,
+  TsDocCheckResult,
 } from "./cli/check-tsdoc.js";
 export {
-	analyzeCheckTsdoc,
-	coverageLevelSchema,
-	declarationCoverageSchema,
-	packageCoverageSchema,
-	printCheckTsdocHuman,
-	tsDocCheckResultSchema,
+  analyzeCheckTsdoc,
+  coverageLevelSchema,
+  declarationCoverageSchema,
+  packageCoverageSchema,
+  printCheckTsdocHuman,
+  tsDocCheckResultSchema,
 } from "./cli/check-tsdoc.js";
 // Re-export registry types for convenience
 export type {
-	AddBlockOptions,
-	AddBlockResult,
-	Block,
-	BlockDefinition,
-	FileEntry,
-	Registry,
-	RegistryBuildConfig,
+  AddBlockOptions,
+  AddBlockResult,
+  Block,
+  BlockDefinition,
+  FileEntry,
+  Registry,
+  RegistryBuildConfig,
 } from "./registry/index.js";
 export {
-	BlockSchema,
-	FileEntrySchema,
-	RegistrySchema,
+  BlockSchema,
+  FileEntrySchema,
+  RegistrySchema,
 } from "./registry/index.js";
 /** Package version, read dynamically from package.json. */
 export { VERSION } from "./version.js";

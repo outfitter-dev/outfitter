@@ -241,17 +241,17 @@ bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
 
 ## Exports
 
-| Export                       | Description                              |
-| ---------------------------- | ---------------------------------------- |
-| `./registry`                 | Tooling block registry API               |
-| `./tsconfig`                | Alias for `./tsconfig.preset.json`       |
-| `./tsconfig-bun`            | Alias for `./tsconfig.preset.bun.json`   |
-| `./tsconfig.preset.json`     | TypeScript preset (general)              |
-| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)                  |
-| `./lefthook`                | Alias for `./lefthook.yml`               |
-| `./lefthook.yml`             | Lefthook hooks configuration             |
-| `./.markdownlint-cli2`      | Alias for `./.markdownlint-cli2.jsonc`   |
-| `./.markdownlint-cli2.jsonc` | markdownlint configuration               |
+| Export                       | Description                            |
+| ---------------------------- | -------------------------------------- |
+| `./registry`                 | Tooling block registry API             |
+| `./tsconfig`                 | Alias for `./tsconfig.preset.json`     |
+| `./tsconfig-bun`             | Alias for `./tsconfig.preset.bun.json` |
+| `./tsconfig.preset.json`     | TypeScript preset (general)            |
+| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)                |
+| `./lefthook`                 | Alias for `./lefthook.yml`             |
+| `./lefthook.yml`             | Lefthook hooks configuration           |
+| `./.markdownlint-cli2`       | Alias for `./.markdownlint-cli2.jsonc` |
+| `./.markdownlint-cli2.jsonc` | markdownlint configuration             |
 
 ## Related
 

@@ -7,7 +7,9 @@ function wrapSentinel(content: string): string {
     "# Docs",
     "",
     "<!-- BEGIN:GENERATED:PACKAGE_LIST -->",
+    "",
     content,
+    "",
     "<!-- END:GENERATED:PACKAGE_LIST -->",
     "",
   ].join("\n");

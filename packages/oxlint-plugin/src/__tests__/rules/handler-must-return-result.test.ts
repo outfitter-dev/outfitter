@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { handlerMustReturnResultRule } from "../../rules/handler-must-return-result.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 
@@ -43,7 +44,9 @@ function createQualifiedTypeReference(
 
 function createHandlerVariableDeclaratorNode(
   returnType: unknown,
-  initType: "ArrowFunctionExpression" | "FunctionExpression" = "ArrowFunctionExpression"
+  initType:
+    | "ArrowFunctionExpression"
+    | "FunctionExpression" = "ArrowFunctionExpression"
 ): unknown {
   return {
     type: "VariableDeclarator",

@@ -68,7 +68,7 @@ export async function buildExpectedOutput(
     ])
   );
 
-  const sortedCollectedFiles = [...collectedFiles].sort((a, b) =>
+  const sortedCollectedFiles = [...collectedFiles].toSorted((a, b) =>
     toPosixPath(a.destinationAbsolutePath).localeCompare(
       toPosixPath(b.destinationAbsolutePath)
     )

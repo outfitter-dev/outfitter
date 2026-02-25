@@ -122,7 +122,7 @@ export function sortBy<T>(
     return [...items];
   }
 
-  return [...items].sort((a, b) => {
+  return [...items].toSorted((a, b) => {
     for (const { key, order = "asc" } of criteria) {
       const aVal = a[key];
       const bVal = b[key];

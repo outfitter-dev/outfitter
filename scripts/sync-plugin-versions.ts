@@ -45,10 +45,11 @@ function writeJson(path: string, data: unknown): void {
  * - negative if a < b
  * - 0 if equal
  */
+const parseVersion = (v: string) => v.split(".").map(Number);
+
 function compareVersions(a: string, b: string): number {
-  const parse = (v: string) => v.split(".").map(Number);
-  const [aMajor = 0, aMinor = 0, aPatch = 0] = parse(a);
-  const [bMajor = 0, bMinor = 0, bPatch = 0] = parse(b);
+  const [aMajor = 0, aMinor = 0, aPatch = 0] = parseVersion(a);
+  const [bMajor = 0, bMinor = 0, bPatch = 0] = parseVersion(b);
 
   if (aMajor !== bMajor) return aMajor - bMajor;
   if (aMinor !== bMinor) return aMinor - bMinor;

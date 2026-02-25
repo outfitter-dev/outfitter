@@ -50,7 +50,7 @@ function createTestLoggerWithContext(
     message: string,
     data?: Record<string, unknown>
   ) => {
-    const merged = { ...context, ...(data ?? {}) };
+    const merged = { ...context, ...data };
     const entry: LogEntry = {
       level,
       message,

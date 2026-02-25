@@ -90,6 +90,7 @@ describe("guards", () => {
     });
 
     it("returns false for class instances", () => {
+      // oxlint-disable-next-line no-extraneous-class -- deliberate test fixture for isPlainObject
       class MyClass {}
       expect(isPlainObject(new MyClass())).toBe(false);
     });

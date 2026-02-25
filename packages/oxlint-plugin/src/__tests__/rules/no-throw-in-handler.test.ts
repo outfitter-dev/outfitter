@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noThrowInHandlerRule } from "../../rules/no-throw-in-handler.js";
 import {
   countPattern,
@@ -61,8 +62,7 @@ describe("no-throw-in-handler", () => {
       filename: "packages/cli/src/command.ts",
       nodes: [createThrowStatementNode()],
       rule: noThrowInHandlerRule,
-      sourceText:
-        'const err = new RangeError("out of range");\nthrow err;',
+      sourceText: 'const err = new RangeError("out of range");\nthrow err;',
     });
 
     expect(reports).toHaveLength(1);

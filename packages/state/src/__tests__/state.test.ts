@@ -821,9 +821,8 @@ describe("Pagination Helpers", () => {
     });
 
     it("uses default limit when not specified in metadata", async () => {
-      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import(
-        "../index.js"
-      );
+      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } =
+        await import("../index.js");
       const items = Array.from({ length: 100 }, (_, i) => i + 1);
 
       const cursorResult = createCursor({
@@ -842,9 +841,8 @@ describe("Pagination Helpers", () => {
     });
 
     it("falls back to default limit when limit is non-positive", async () => {
-      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } = await import(
-        "../index.js"
-      );
+      const { paginate, createCursor, DEFAULT_PAGE_LIMIT } =
+        await import("../index.js");
       const items = Array.from({ length: 50 }, (_, i) => i + 1);
 
       const cursorResult = createCursor({
@@ -902,9 +900,8 @@ describe("Pagination Helpers", () => {
     });
 
     it("saveCursor persists cursor to store", async () => {
-      const { saveCursor, createCursor, createPaginationStore } = await import(
-        "../index.js"
-      );
+      const { saveCursor, createCursor, createPaginationStore } =
+        await import("../index.js");
       const store = createPaginationStore();
 
       const cursorResult = createCursor({

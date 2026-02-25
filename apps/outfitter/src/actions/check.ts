@@ -10,6 +10,7 @@ import { cwdPreset, verbosePreset } from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import {
   type ActionCliOption,
+  type ActionSpec,
   defineAction,
   InternalError,
   Result,
@@ -17,8 +18,9 @@ import {
 } from "@outfitter/contracts";
 import type { TsDocCheckResult } from "@outfitter/tooling";
 import { z } from "zod";
-import { printCheckResults, runCheck } from "../commands/check.js";
+
 import { runCheckTsdoc } from "../commands/check-tsdoc.js";
+import { printCheckResults, runCheck } from "../commands/check.js";
 import {
   type CliOutputMode,
   resolveStructuredOutputMode,
@@ -49,7 +51,7 @@ const checkVerboseOptions: ActionCliOption[] = checkVerbose.options.map(
       : option
 );
 
-export const checkAction = defineAction({
+const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
   id: "check",
   description:
     "Compare local config blocks against the registry for drift detection",
@@ -132,6 +134,7 @@ export const checkAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const checkAction: typeof _checkAction = _checkAction;
 
 interface CheckTsDocActionInput {
   cwd: string;
@@ -189,7 +192,11 @@ export const checkTsdocOutputSchema = z.object({
 const checkTsdocOutputMode = outputModePreset({ includeJsonl: true });
 const checkTsdocJq = jqPreset();
 
-export const checkTsdocAction = defineAction<
+const _checkTsdocAction: ActionSpec<
+  CheckTsDocActionInput,
+  TsDocCheckResult,
+  ValidationError | InternalError
+> = defineAction<
   CheckTsDocActionInput,
   TsDocCheckResult,
   ValidationError | InternalError
@@ -309,3 +316,4 @@ export const checkTsdocAction = defineAction<
     return Result.ok(result.value);
   },
 });
+export const checkTsdocAction: typeof _checkTsdocAction = _checkTsdocAction;

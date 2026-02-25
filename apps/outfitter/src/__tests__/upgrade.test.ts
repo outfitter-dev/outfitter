@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+import { getInstalledPackagesFromWorkspace } from "../commands/upgrade-workspace.js";
 import {
   findMigrationDocsDir,
   printUpgradeResults,
@@ -15,7 +17,6 @@ import {
   runUpgrade,
   type UpgradeResult,
 } from "../commands/upgrade.js";
-import { getInstalledPackagesFromWorkspace } from "../commands/upgrade-workspace.js";
 
 // =============================================================================
 // Test Utilities

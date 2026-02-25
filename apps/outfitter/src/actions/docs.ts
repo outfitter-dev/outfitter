@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 
 import { cwdPreset } from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
-import { defineAction, Result } from "@outfitter/contracts";
+import { type ActionSpec, defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
@@ -53,7 +53,7 @@ const docsListCwd = cwdPreset();
 const docsListOutputMode = outputModePreset({ includeJsonl: true });
 const docsListJq = jqPreset();
 
-export const docsListAction = defineAction({
+const _docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
   id: "docs.list",
   description: "List documentation entries from the docs map",
   surfaces: ["cli"],
@@ -108,6 +108,7 @@ export const docsListAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const docsListAction: typeof _docsListAction = _docsListAction;
 
 const docsShowInputSchema = z.object({
   id: z.string(),
@@ -120,7 +121,7 @@ const docsShowCwd = cwdPreset();
 const docsShowOutputMode = outputModePreset({ includeJsonl: true });
 const docsShowJq = jqPreset();
 
-export const docsShowAction = defineAction({
+const _docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
   id: "docs.show",
   description: "Show a specific documentation entry and its content",
   surfaces: ["cli"],
@@ -163,6 +164,7 @@ export const docsShowAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const docsShowAction: typeof _docsShowAction = _docsShowAction;
 
 const docsSearchInputSchema = z.object({
   query: z.string(),
@@ -177,7 +179,7 @@ const docsSearchCwd = cwdPreset();
 const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
 const docsSearchJq = jqPreset();
 
-export const docsSearchAction = defineAction({
+const _docsSearchAction: ActionSpec<DocsSearchInput, unknown> = defineAction({
   id: "docs.search",
   description: "Search documentation content for a query string",
   surfaces: ["cli"],
@@ -233,6 +235,7 @@ export const docsSearchAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const docsSearchAction: typeof _docsSearchAction = _docsSearchAction;
 
 const docsApiInputSchema = z.object({
   cwd: z.string(),
@@ -246,7 +249,7 @@ const docsApiCwd = cwdPreset();
 const docsApiOutputMode = outputModePreset({ includeJsonl: true });
 const docsApiJq = jqPreset();
 
-export const docsApiAction = defineAction({
+const _docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
   id: "docs.api",
   description: "Extract API reference from TSDoc coverage data",
   surfaces: ["cli"],
@@ -317,6 +320,7 @@ export const docsApiAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const docsApiAction: typeof _docsApiAction = _docsApiAction;
 
 const docsExportTargetValues = [
   "packages",
@@ -334,7 +338,7 @@ const docsExportInputSchema = z.object({
 const docsExportCwd = cwdPreset();
 const docsExportOutputMode = outputModePreset({ includeJsonl: true });
 
-export const docsExportAction = defineAction({
+const _docsExportAction: ActionSpec<DocsExportInput, unknown> = defineAction({
   id: "docs.export",
   description: "Export documentation to packages, llms.txt, or both",
   surfaces: ["cli"],
@@ -381,3 +385,4 @@ export const docsExportAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const docsExportAction: typeof _docsExportAction = _docsExportAction;

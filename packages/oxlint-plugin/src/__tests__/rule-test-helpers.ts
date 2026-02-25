@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import type { RuleContext, RuleModule } from "../rules/shared.js";
 
 const TEST_DIR = dirname(fileURLToPath(import.meta.url));

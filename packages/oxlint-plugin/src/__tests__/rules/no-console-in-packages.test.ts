@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noConsoleInPackagesRule } from "../../rules/no-console-in-packages.js";
 import {
   countPattern,
@@ -113,8 +114,7 @@ describe("no-console-in-packages", () => {
       filename: "packages/logging/src/logger.ts",
       nodes,
       rule: noConsoleInPackagesRule,
-      sourceText:
-        'console.log("a");\nconsole.warn("b");\nconsole.error("c");',
+      sourceText: 'console.log("a");\nconsole.warn("b");\nconsole.error("c");',
     });
 
     expect(reports).toHaveLength(3);

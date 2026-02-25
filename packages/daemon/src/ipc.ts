@@ -287,15 +287,15 @@ export function createIpcServer(socketPath: string): IpcServer {
  * client.close();
  * ```
  */
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export function createIpcClient(socketPath: string): IpcClient {
   let socket: Socket<undefined> | null = null;
   let isConnected = false;
   const pendingRequests = new Map<string, PendingRequest>();
   let messageBuffer = "";
-
-  function generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  }
 
   function processBuffer(): void {
     const lines = messageBuffer.split("\n");

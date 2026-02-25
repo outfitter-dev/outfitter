@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noProcessExitInPackagesRule } from "../../rules/no-process-exit-in-packages.js";
 import {
   countPattern,
@@ -10,9 +11,7 @@ import {
 
 describe("no-process-exit-in-packages", () => {
   test("reports process.exit in packages source files", () => {
-    const invalidSource = readFixture(
-      "invalid/no-process-exit-in-packages.ts"
-    );
+    const invalidSource = readFixture("invalid/no-process-exit-in-packages.ts");
     const exitCount = countPattern(
       invalidSource,
       /\bprocess\s*\.\s*exit\s*\(/gu
@@ -93,9 +92,7 @@ describe("no-process-exit-in-packages", () => {
   });
 
   test("ignores non-package source files", () => {
-    const invalidSource = readFixture(
-      "invalid/no-process-exit-in-packages.ts"
-    );
+    const invalidSource = readFixture("invalid/no-process-exit-in-packages.ts");
     const exitCall = [createCallExpressionNode("process", "exit")];
 
     const reports = runRuleForEvent({
@@ -110,9 +107,7 @@ describe("no-process-exit-in-packages", () => {
   });
 
   test("keeps valid fixture clean", () => {
-    const validSource = readFixture(
-      "valid/no-process-exit-in-packages.ts"
-    );
+    const validSource = readFixture("valid/no-process-exit-in-packages.ts");
 
     const reports = runRuleForEvent({
       event: "CallExpression",

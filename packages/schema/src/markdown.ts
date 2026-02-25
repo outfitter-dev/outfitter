@@ -70,7 +70,7 @@ export function formatManifestMarkdown(
   // Filter to actions that support the selected surface, then sort alphabetically
   const sorted = manifest.actions
     .filter((action) => action.surfaces.includes(surface))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const nameA = displayName(a, surface);
       const nameB = displayName(b, surface);
       return nameA.localeCompare(nameB);

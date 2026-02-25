@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noProcessEnvInPackagesRule } from "../../rules/no-process-env-in-packages.js";
 import {
   countPattern,
@@ -9,13 +10,8 @@ import {
 
 describe("no-process-env-in-packages", () => {
   test("reports process.env usage in packages source files", () => {
-    const invalidSource = readFixture(
-      "invalid/no-process-env-in-packages.ts"
-    );
-    const envCount = countPattern(
-      invalidSource,
-      /\bprocess\s*\.\s*env\b/gu
-    );
+    const invalidSource = readFixture("invalid/no-process-env-in-packages.ts");
+    const envCount = countPattern(invalidSource, /\bprocess\s*\.\s*env\b/gu);
     const envReads = Array.from({ length: envCount }, () =>
       createMemberExpressionNode("process", "env")
     );
@@ -70,8 +66,7 @@ describe("no-process-env-in-packages", () => {
       filename: "packages/config/src/loader.ts",
       nodes,
       rule: noProcessEnvInPackagesRule,
-      sourceText:
-        'process.env["A"];\nprocess.env["B"];\nprocess.env["C"];',
+      sourceText: 'process.env["A"];\nprocess.env["B"];\nprocess.env["C"];',
     });
 
     expect(reports).toHaveLength(3);
@@ -80,8 +75,7 @@ describe("no-process-env-in-packages", () => {
   test("excludes test files from reporting", () => {
     const reports = runRuleForEvent({
       event: "MemberExpression",
-      filename:
-        "packages/config/src/__tests__/environment.test.ts",
+      filename: "packages/config/src/__tests__/environment.test.ts",
       nodes: [createMemberExpressionNode("process", "env")],
       rule: noProcessEnvInPackagesRule,
       sourceText: 'process.env["NODE_ENV"] = "test";',
@@ -91,9 +85,7 @@ describe("no-process-env-in-packages", () => {
   });
 
   test("ignores non-package source files", () => {
-    const invalidSource = readFixture(
-      "invalid/no-process-env-in-packages.ts"
-    );
+    const invalidSource = readFixture("invalid/no-process-env-in-packages.ts");
     const envRead = [createMemberExpressionNode("process", "env")];
 
     const reports = runRuleForEvent({
@@ -108,9 +100,7 @@ describe("no-process-env-in-packages", () => {
   });
 
   test("keeps valid fixture clean", () => {
-    const validSource = readFixture(
-      "valid/no-process-env-in-packages.ts"
-    );
+    const validSource = readFixture("valid/no-process-env-in-packages.ts");
 
     const reports = runRuleForEvent({
       event: "MemberExpression",

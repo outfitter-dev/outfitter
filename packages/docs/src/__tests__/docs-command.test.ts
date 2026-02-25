@@ -252,10 +252,9 @@ describe("createDocsCommand", () => {
     expect(out).toEqual([
       "docs/README.md updated with generated package list.",
     ]);
-    expect(updatedReadme).toContain("| Package | Description |");
-    expect(updatedReadme).toContain(
-      "| [`@acme/alpha`](../packages/alpha/) | |"
-    );
+    expect(updatedReadme).toContain("| Package");
+    expect(updatedReadme).toContain("| Description");
+    expect(updatedReadme).toContain("[`@acme/alpha`](../packages/alpha/)");
     expect(updatedReadme).not.toContain("stale generated content");
     expect(process.exitCode).toBe(originalExitCode);
   });

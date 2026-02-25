@@ -296,7 +296,7 @@ Track items the scanner couldn't categorize or that need human judgment.
 #### Decision
 
 - [ ] Reviewed
-- [ ] Decision: ******\_******
+- [ ] Decision: **\*\***\_**\*\***
 - [ ] Implemented
 
 ---

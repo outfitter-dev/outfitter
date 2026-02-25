@@ -103,9 +103,7 @@ export async function executePlan(
             projectDir,
             plan.values,
             options,
-            {
-              ...(skipFilter ? { skipFilter } : {}),
-            }
+            skipFilter ? { skipFilter } : {}
           );
           if (presetResult.isErr()) {
             return presetResult;

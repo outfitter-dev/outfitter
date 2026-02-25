@@ -200,7 +200,7 @@ function discoverPathsFromEntrypoints(
     }
   }
 
-  return [...paths].sort();
+  return [...paths].toSorted();
 }
 
 function formatDiscoveryMessage(
@@ -294,7 +294,7 @@ function emitJsonlLines(result: TsDocCheckResult, summary: boolean): unknown[] {
   lines.push({ type: "meta", version: "1.0.0", ok: result.ok });
   lines.push({ type: "summary", ...result.summary });
 
-  const sortedPackages = [...result.packages].sort((a, b) =>
+  const sortedPackages = [...result.packages].toSorted((a, b) =>
     a.name.localeCompare(b.name)
   );
 

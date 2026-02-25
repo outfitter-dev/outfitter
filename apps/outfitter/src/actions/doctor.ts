@@ -7,7 +7,7 @@
 import { resolve } from "node:path";
 
 import { cwdPreset } from "@outfitter/cli/flags";
-import { defineAction, Result } from "@outfitter/contracts";
+import { type ActionSpec, defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printDoctorResults, runDoctor } from "../commands/doctor.js";
@@ -29,7 +29,7 @@ const doctorInputSchema = z.object({
 
 const doctorCwd = cwdPreset();
 
-export const doctorAction = defineAction({
+const _doctorAction: ActionSpec<DoctorActionInput, unknown> = defineAction({
   id: "doctor",
   description: "Validate environment and dependencies",
   surfaces: ["cli"],
@@ -60,3 +60,4 @@ export const doctorAction = defineAction({
     return Result.ok(result);
   },
 });
+export const doctorAction: typeof _doctorAction = _doctorAction;

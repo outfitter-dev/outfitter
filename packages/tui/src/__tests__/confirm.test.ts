@@ -45,16 +45,16 @@ afterEach(() => {
 // confirmDestructive() Tests
 // =============================================================================
 
-describe("confirmDestructive()", () => {
-  function setInteractiveTerminal(): void {
-    process.env.TERM = "xterm-256color";
-    Object.defineProperty(process.stdout, "isTTY", {
-      value: true,
-      writable: true,
-      configurable: true,
-    });
-  }
+function setInteractiveTerminal(): void {
+  process.env.TERM = "xterm-256color";
+  Object.defineProperty(process.stdout, "isTTY", {
+    value: true,
+    writable: true,
+    configurable: true,
+  });
+}
 
+describe("confirmDestructive()", () => {
   test("returns Ok(true) when bypassFlag is true", async () => {
     const result = await confirmDestructive({
       message: "Delete 5 items?",

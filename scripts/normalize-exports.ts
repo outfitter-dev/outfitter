@@ -38,14 +38,14 @@ async function discoverWorkspaceRoots(cwd: string): Promise<string[]> {
     }
   }
 
-  return roots.sort();
+  return roots.toSorted();
 }
 
 function sortExports(
   exports: Record<string, unknown>
 ): Record<string, unknown> {
   const sorted: Record<string, unknown> = {};
-  for (const key of Object.keys(exports).sort()) {
+  for (const key of Object.keys(exports).toSorted()) {
     sorted[key] = exports[key];
   }
   return sorted;

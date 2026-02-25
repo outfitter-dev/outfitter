@@ -22,7 +22,7 @@ function sortDrift(drift: DocsDrift[]): DocsDrift[] {
     unexpected: 2,
   };
 
-  return drift.sort((a, b) => {
+  return drift.toSorted((a, b) => {
     const byKind = kindPriority[a.kind] - kindPriority[b.kind];
     if (byKind !== 0) {
       return byKind;
@@ -57,7 +57,7 @@ async function listFilesRecursively(rootPath: string): Promise<string[]> {
     }
   }
 
-  return files.sort((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
+  return files.toSorted((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
 }
 
 export async function pruneEmptyDirectories(rootPath: string): Promise<void> {
@@ -110,7 +110,7 @@ export async function computeExplicitFileDrift(
   expectedFiles: ReadonlyMap<string, string>
 ): Promise<DocsDrift[]> {
   const drift: DocsDrift[] = [];
-  const expectedEntries = [...expectedFiles.entries()].sort(([a], [b]) =>
+  const expectedEntries = [...expectedFiles.entries()].toSorted(([a], [b]) =>
     toPosixPath(a).localeCompare(toPosixPath(b))
   );
 
@@ -143,7 +143,7 @@ export async function computeDrift(
   const existingFiles = await listFilesRecursively(options.outputRoot);
   const drift: DocsDrift[] = [];
 
-  const expectedEntries = [...expectedFiles.entries()].sort(([a], [b]) =>
+  const expectedEntries = [...expectedFiles.entries()].toSorted(([a], [b]) =>
     toPosixPath(a).localeCompare(toPosixPath(b))
   );
 

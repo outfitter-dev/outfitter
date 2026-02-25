@@ -9,7 +9,12 @@ import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { cwdPreset, dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import {
+  type ActionSpec,
+  defineAction,
+  InternalError,
+  Result,
+} from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
@@ -36,7 +41,10 @@ const addInputSchema = z.object({
 const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
 const addCwd = cwdPreset();
 
-export const addAction = defineAction({
+const _addAction: ActionSpec<
+  AddInput & { outputMode: CliOutputMode },
+  unknown
+> = defineAction({
   id: "add",
   description: "Add a block from the registry to your project",
   surfaces: ["cli"],
@@ -78,48 +86,51 @@ export const addAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const addAction: typeof _addAction = _addAction;
 
-export const listBlocksAction = defineAction({
-  id: "add.list",
-  description: "List available blocks",
-  surfaces: ["cli"],
-  input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
-    outputMode: CliOutputMode;
-  }>,
-  cli: {
-    group: "add",
-    command: "list",
+const _listBlocksAction: ActionSpec<{ outputMode: CliOutputMode }, unknown> =
+  defineAction({
+    id: "add.list",
     description: "List available blocks",
-    mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
-      return {
-        outputMode,
-      };
+    surfaces: ["cli"],
+    input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
+      outputMode: CliOutputMode;
+    }>,
+    cli: {
+      group: "add",
+      command: "list",
+      description: "List available blocks",
+      mapInput: (context) => {
+        const outputMode = resolveOutputModeFromContext(context.flags);
+        return {
+          outputMode,
+        };
+      },
     },
-  },
-  handler: async (input) => {
-    const result = listBlocks();
+    handler: async (input) => {
+      const result = listBlocks();
 
-    if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "add.list" },
-        })
-      );
-    }
+      if (result.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: result.error.message,
+            context: { action: "add.list" },
+          })
+        );
+      }
 
-    const structuredMode = resolveStructuredOutputMode(input.outputMode);
-    if (structuredMode) {
-      await output({ blocks: result.value }, { mode: structuredMode });
-    } else {
-      const lines = [
-        "Available blocks:",
-        ...result.value.map((block) => `  - ${block}`),
-      ];
-      await output(lines, { mode: "human" });
-    }
+      const structuredMode = resolveStructuredOutputMode(input.outputMode);
+      if (structuredMode) {
+        await output({ blocks: result.value }, { mode: structuredMode });
+      } else {
+        const lines = [
+          "Available blocks:",
+          ...result.value.map((block) => `  - ${block}`),
+        ];
+        await output(lines, { mode: "human" });
+      }
 
-    return Result.ok({ blocks: result.value });
-  },
-});
+      return Result.ok({ blocks: result.value });
+    },
+  });
+export const listBlocksAction: typeof _listBlocksAction = _listBlocksAction;

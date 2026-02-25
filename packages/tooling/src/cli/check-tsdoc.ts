@@ -21,39 +21,39 @@ export type CoverageLevel = "documented" | "partial" | "undocumented";
 
 /** Result for a single exported declaration. */
 export interface DeclarationCoverage {
-	readonly name: string;
-	readonly kind: string;
-	readonly level: CoverageLevel;
-	readonly file: string;
-	readonly line: number;
+  readonly name: string;
+  readonly kind: string;
+  readonly level: CoverageLevel;
+  readonly file: string;
+  readonly line: number;
 }
 
 /** Coverage summary statistics. */
 export interface CoverageSummary {
-	readonly documented: number;
-	readonly partial: number;
-	readonly undocumented: number;
-	readonly total: number;
-	readonly percentage: number;
+  readonly documented: number;
+  readonly partial: number;
+  readonly undocumented: number;
+  readonly total: number;
+  readonly percentage: number;
 }
 
 /** Per-package TSDoc coverage stats. */
 export interface PackageCoverage {
-	readonly name: string;
-	readonly path: string;
-	readonly declarations: readonly DeclarationCoverage[];
-	readonly documented: number;
-	readonly partial: number;
-	readonly undocumented: number;
-	readonly total: number;
-	readonly percentage: number;
+  readonly name: string;
+  readonly path: string;
+  readonly declarations: readonly DeclarationCoverage[];
+  readonly documented: number;
+  readonly partial: number;
+  readonly undocumented: number;
+  readonly total: number;
+  readonly percentage: number;
 }
 
 /** Aggregated result across all packages. */
 export interface TsDocCheckResult {
-	readonly ok: boolean;
-	readonly packages: readonly PackageCoverage[];
-	readonly summary: CoverageSummary;
+  readonly ok: boolean;
+  readonly packages: readonly PackageCoverage[];
+  readonly summary: CoverageSummary;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,57 +62,57 @@ export interface TsDocCheckResult {
 
 /** Zod schema for {@link CoverageLevel}. */
 export const coverageLevelSchema: ZodType<CoverageLevel> = z.enum([
-	"documented",
-	"partial",
-	"undocumented",
+  "documented",
+  "partial",
+  "undocumented",
 ]);
 
 /** Zod schema for {@link DeclarationCoverage}. */
 export const declarationCoverageSchema: ZodType<DeclarationCoverage> = z.object(
-	{
-		name: z.string(),
-		kind: z.string(),
-		level: coverageLevelSchema,
-		file: z.string(),
-		line: z.number(),
-	},
+  {
+    name: z.string(),
+    kind: z.string(),
+    level: coverageLevelSchema,
+    file: z.string(),
+    line: z.number(),
+  }
 );
 
 /** Zod schema for {@link CoverageSummary}. */
 export const coverageSummarySchema: ZodType<CoverageSummary> = z.object({
-	documented: z.number(),
-	partial: z.number(),
-	undocumented: z.number(),
-	total: z.number(),
-	percentage: z.number(),
+  documented: z.number(),
+  partial: z.number(),
+  undocumented: z.number(),
+  total: z.number(),
+  percentage: z.number(),
 });
 
 /** Zod schema for {@link PackageCoverage}. */
 export const packageCoverageSchema: ZodType<PackageCoverage> = z.object({
-	name: z.string(),
-	path: z.string(),
-	declarations: z.array(declarationCoverageSchema),
-	documented: z.number(),
-	partial: z.number(),
-	undocumented: z.number(),
-	total: z.number(),
-	percentage: z.number(),
+  name: z.string(),
+  path: z.string(),
+  declarations: z.array(declarationCoverageSchema),
+  documented: z.number(),
+  partial: z.number(),
+  undocumented: z.number(),
+  total: z.number(),
+  percentage: z.number(),
 });
 
 /** Zod schema for {@link TsDocCheckResult}. */
 export const tsDocCheckResultSchema: ZodType<TsDocCheckResult> = z.object({
-	ok: z.boolean(),
-	packages: z.array(packageCoverageSchema),
-	summary: coverageSummarySchema,
+  ok: z.boolean(),
+  packages: z.array(packageCoverageSchema),
+  summary: coverageSummarySchema,
 });
 
 /** Options for the check-tsdoc command. */
 export interface CheckTsDocOptions {
-	readonly strict?: boolean | undefined;
-	readonly json?: boolean | undefined;
-	readonly minCoverage?: number | undefined;
-	readonly cwd?: string | undefined;
-	readonly paths?: readonly string[] | undefined;
+  readonly strict?: boolean | undefined;
+  readonly json?: boolean | undefined;
+  readonly minCoverage?: number | undefined;
+  readonly cwd?: string | undefined;
+  readonly paths?: readonly string[] | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,30 +127,30 @@ export interface CheckTsDocOptions {
  * and `export *` are excluded since TSDoc belongs at the definition site.
  */
 export function isExportedDeclaration(node: ts.Node): boolean {
-	// Exclude re-exports: export { ... } from "..."
-	if (ts.isExportDeclaration(node)) return false;
+  // Exclude re-exports: export { ... } from "..."
+  if (ts.isExportDeclaration(node)) return false;
 
-	// Exclude export * from "..."
-	if (ts.isExportAssignment(node)) return false;
+  // Exclude export * from "..."
+  if (ts.isExportAssignment(node)) return false;
 
-	// Must be a supported declaration kind
-	const isDeclaration =
-		ts.isFunctionDeclaration(node) ||
-		ts.isInterfaceDeclaration(node) ||
-		ts.isTypeAliasDeclaration(node) ||
-		ts.isClassDeclaration(node) ||
-		ts.isEnumDeclaration(node) ||
-		ts.isVariableStatement(node);
+  // Must be a supported declaration kind
+  const isDeclaration =
+    ts.isFunctionDeclaration(node) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isTypeAliasDeclaration(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isEnumDeclaration(node) ||
+    ts.isVariableStatement(node);
 
-	if (!isDeclaration) return false;
+  if (!isDeclaration) return false;
 
-	// Check for export modifier
-	const modifiers = ts.canHaveModifiers(node)
-		? ts.getModifiers(node)
-		: undefined;
-	if (!modifiers) return false;
+  // Check for export modifier
+  const modifiers = ts.canHaveModifiers(node)
+    ? ts.getModifiers(node)
+    : undefined;
+  if (!modifiers) return false;
 
-	return modifiers.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword);
+  return modifiers.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword);
 }
 
 /**
@@ -160,25 +160,25 @@ export function isExportedDeclaration(node: ts.Node): boolean {
  * Returns `undefined` for anonymous declarations (e.g., `export default function() {}`).
  */
 export function getDeclarationName(node: ts.Node): string | undefined {
-	if (ts.isVariableStatement(node)) {
-		const decl = node.declarationList.declarations[0];
-		if (decl && ts.isIdentifier(decl.name)) {
-			return decl.name.text;
-		}
-		return undefined;
-	}
+  if (ts.isVariableStatement(node)) {
+    const decl = node.declarationList.declarations[0];
+    if (decl && ts.isIdentifier(decl.name)) {
+      return decl.name.text;
+    }
+    return undefined;
+  }
 
-	if (
-		ts.isFunctionDeclaration(node) ||
-		ts.isInterfaceDeclaration(node) ||
-		ts.isTypeAliasDeclaration(node) ||
-		ts.isClassDeclaration(node) ||
-		ts.isEnumDeclaration(node)
-	) {
-		return node.name?.text;
-	}
+  if (
+    ts.isFunctionDeclaration(node) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isTypeAliasDeclaration(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isEnumDeclaration(node)
+  ) {
+    return node.name?.text;
+  }
 
-	return undefined;
+  return undefined;
 }
 
 /**
@@ -187,13 +187,13 @@ export function getDeclarationName(node: ts.Node): string | undefined {
  * Maps AST node types to human-readable kind strings used in coverage reports.
  */
 export function getDeclarationKind(node: ts.Node): string {
-	if (ts.isFunctionDeclaration(node)) return "function";
-	if (ts.isInterfaceDeclaration(node)) return "interface";
-	if (ts.isTypeAliasDeclaration(node)) return "type";
-	if (ts.isClassDeclaration(node)) return "class";
-	if (ts.isEnumDeclaration(node)) return "enum";
-	if (ts.isVariableStatement(node)) return "variable";
-	return "unknown";
+  if (ts.isFunctionDeclaration(node)) return "function";
+  if (ts.isInterfaceDeclaration(node)) return "interface";
+  if (ts.isTypeAliasDeclaration(node)) return "type";
+  if (ts.isClassDeclaration(node)) return "class";
+  if (ts.isEnumDeclaration(node)) return "enum";
+  if (ts.isVariableStatement(node)) return "variable";
+  return "unknown";
 }
 
 /**
@@ -203,30 +203,30 @@ export function getDeclarationKind(node: ts.Node): string {
  * filtering for block comments that begin with the JSDoc marker.
  */
 function hasJSDocComment(node: ts.Node, sourceFile: ts.SourceFile): boolean {
-	const sourceText = sourceFile.getFullText();
-	const ranges = ts.getLeadingCommentRanges(sourceText, node.getFullStart());
-	if (!ranges) return false;
+  const sourceText = sourceFile.getFullText();
+  const ranges = ts.getLeadingCommentRanges(sourceText, node.getFullStart());
+  if (!ranges) return false;
 
-	return ranges.some((range) => {
-		if (range.kind !== ts.SyntaxKind.MultiLineCommentTrivia) return false;
-		const text = sourceText.slice(range.pos, range.end);
-		return text.startsWith("/**");
-	});
+  return ranges.some((range) => {
+    if (range.kind !== ts.SyntaxKind.MultiLineCommentTrivia) return false;
+    const text = sourceText.slice(range.pos, range.end);
+    return text.startsWith("/**");
+  });
 }
 
 /**
  * Check whether a member node (property, method) has a leading JSDoc comment.
  */
 function memberHasJSDoc(member: ts.Node, sourceFile: ts.SourceFile): boolean {
-	const sourceText = sourceFile.getFullText();
-	const ranges = ts.getLeadingCommentRanges(sourceText, member.getFullStart());
-	if (!ranges) return false;
+  const sourceText = sourceFile.getFullText();
+  const ranges = ts.getLeadingCommentRanges(sourceText, member.getFullStart());
+  if (!ranges) return false;
 
-	return ranges.some((range) => {
-		if (range.kind !== ts.SyntaxKind.MultiLineCommentTrivia) return false;
-		const text = sourceText.slice(range.pos, range.end);
-		return text.startsWith("/**");
-	});
+  return ranges.some((range) => {
+    if (range.kind !== ts.SyntaxKind.MultiLineCommentTrivia) return false;
+    const text = sourceText.slice(range.pos, range.end);
+    return text.startsWith("/**");
+  });
 }
 
 /**
@@ -239,25 +239,25 @@ function memberHasJSDoc(member: ts.Node, sourceFile: ts.SourceFile): boolean {
  * - `"undocumented"` -- no JSDoc comment at all.
  */
 export function classifyDeclaration(
-	node: ts.Node,
-	sourceFile: ts.SourceFile,
+  node: ts.Node,
+  sourceFile: ts.SourceFile
 ): CoverageLevel {
-	const hasDoc = hasJSDocComment(node, sourceFile);
+  const hasDoc = hasJSDocComment(node, sourceFile);
 
-	if (!hasDoc) return "undocumented";
+  if (!hasDoc) return "undocumented";
 
-	// For interfaces and classes, check member documentation
-	if (ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) {
-		const members = node.members;
-		if (members.length > 0) {
-			const allMembersDocumented = members.every((member) =>
-				memberHasJSDoc(member, sourceFile),
-			);
-			if (!allMembersDocumented) return "partial";
-		}
-	}
+  // For interfaces and classes, check member documentation
+  if (ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) {
+    const members = node.members;
+    if (members.length > 0) {
+      const allMembersDocumented = members.every((member) =>
+        memberHasJSDoc(member, sourceFile)
+      );
+      if (!allMembersDocumented) return "partial";
+    }
+  }
 
-	return "documented";
+  return "documented";
 }
 
 /**
@@ -267,32 +267,32 @@ export function classifyDeclaration(
  * classifies each for documentation coverage.
  */
 export function analyzeSourceFile(
-	sourceFile: ts.SourceFile,
+  sourceFile: ts.SourceFile
 ): DeclarationCoverage[] {
-	const results: DeclarationCoverage[] = [];
+  const results: DeclarationCoverage[] = [];
 
-	for (const statement of sourceFile.statements) {
-		if (!isExportedDeclaration(statement)) continue;
+  for (const statement of sourceFile.statements) {
+    if (!isExportedDeclaration(statement)) continue;
 
-		const name = getDeclarationName(statement);
-		if (!name) continue;
+    const name = getDeclarationName(statement);
+    if (!name) continue;
 
-		const kind = getDeclarationKind(statement);
-		const level = classifyDeclaration(statement, sourceFile);
-		const { line } = sourceFile.getLineAndCharacterOfPosition(
-			statement.getStart(sourceFile),
-		);
+    const kind = getDeclarationKind(statement);
+    const level = classifyDeclaration(statement, sourceFile);
+    const { line } = sourceFile.getLineAndCharacterOfPosition(
+      statement.getStart(sourceFile)
+    );
 
-		results.push({
-			name,
-			kind,
-			level,
-			file: sourceFile.fileName,
-			line: line + 1, // Convert 0-based to 1-based
-		});
-	}
+    results.push({
+      name,
+      kind,
+      level,
+      file: sourceFile.fileName,
+      line: line + 1, // Convert 0-based to 1-based
+    });
+  }
 
-	return results;
+  return results;
 }
 
 /**
@@ -302,38 +302,38 @@ export function analyzeSourceFile(
  * An empty array returns 100% (no declarations to check).
  */
 export function calculateCoverage(
-	declarations: readonly DeclarationCoverage[],
+  declarations: readonly DeclarationCoverage[]
 ): {
-	documented: number;
-	partial: number;
-	undocumented: number;
-	total: number;
-	percentage: number;
+  documented: number;
+  partial: number;
+  undocumented: number;
+  total: number;
+  percentage: number;
 } {
-	const total = declarations.length;
-	if (total === 0) {
-		return {
-			documented: 0,
-			partial: 0,
-			undocumented: 0,
-			total: 0,
-			percentage: 100,
-		};
-	}
+  const total = declarations.length;
+  if (total === 0) {
+    return {
+      documented: 0,
+      partial: 0,
+      undocumented: 0,
+      total: 0,
+      percentage: 100,
+    };
+  }
 
-	const documented = declarations.filter(
-		(d) => d.level === "documented",
-	).length;
-	const partial = declarations.filter((d) => d.level === "partial").length;
-	const undocumented = declarations.filter(
-		(d) => d.level === "undocumented",
-	).length;
+  const documented = declarations.filter(
+    (d) => d.level === "documented"
+  ).length;
+  const partial = declarations.filter((d) => d.level === "partial").length;
+  const undocumented = declarations.filter(
+    (d) => d.level === "undocumented"
+  ).length;
 
-	// Partial counts as half
-	const score = documented + partial * 0.5;
-	const percentage = Math.round((score / total) * 100);
+  // Partial counts as half
+  const score = documented + partial * 0.5;
+  const percentage = Math.round((score / total) * 100);
 
-	return { documented, partial, undocumented, total, percentage };
+  return { documented, partial, undocumented, total, percentage };
 }
 
 // ---------------------------------------------------------------------------
@@ -341,13 +341,13 @@ export function calculateCoverage(
 // ---------------------------------------------------------------------------
 
 const COLORS = {
-	reset: "\x1b[0m",
-	red: "\x1b[31m",
-	green: "\x1b[32m",
-	yellow: "\x1b[33m",
-	blue: "\x1b[34m",
-	dim: "\x1b[2m",
-	bold: "\x1b[1m",
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  dim: "\x1b[2m",
+  bold: "\x1b[1m",
 };
 
 // ---------------------------------------------------------------------------
@@ -356,96 +356,93 @@ const COLORS = {
 
 /** Resolve whether JSON output mode is active. */
 export function resolveJsonMode(options: CheckTsDocOptions = {}): boolean {
-	return options.json ?? process.env["OUTFITTER_JSON"] === "1";
+  return options.json ?? process.env["OUTFITTER_JSON"] === "1";
 }
 
 /** Build a visual bar chart for a percentage value. */
 function bar(percentage: number, width = 20): string {
-	const filled = Math.round((percentage / 100) * width);
-	const empty = width - filled;
-	const color =
-		percentage >= 80
-			? COLORS.green
-			: percentage >= 50
-				? COLORS.yellow
-				: COLORS.red;
-	return `${color}${"█".repeat(filled)}${COLORS.dim}${"░".repeat(empty)}${COLORS.reset}`;
+  const filled = Math.round((percentage / 100) * width);
+  const empty = width - filled;
+  const color =
+    percentage >= 80
+      ? COLORS.green
+      : percentage >= 50
+        ? COLORS.yellow
+        : COLORS.red;
+  return `${color}${"█".repeat(filled)}${COLORS.dim}${"░".repeat(empty)}${COLORS.reset}`;
 }
 
 /** Discover packages with src/index.ts entry points. */
 function discoverPackages(
-	cwd: string,
+  cwd: string
 ): Array<{ name: string; path: string; entryPoint: string }> {
-	const packages: Array<{ name: string; path: string; entryPoint: string }> =
-		[];
-	const seenEntryPoints = new Set<string>();
+  const packages: Array<{ name: string; path: string; entryPoint: string }> =
+    [];
+  const seenEntryPoints = new Set<string>();
 
-	// Search packages/*/ and apps/*/ for monorepo layouts
-	for (const pattern of ["packages/*/src/index.ts", "apps/*/src/index.ts"]) {
-		const glob = new Bun.Glob(pattern);
-		for (const match of glob.scanSync({ cwd, dot: false })) {
-			const parts = match.split("/");
-			const rootDir = parts[0];
-			const pkgDir = parts[1];
-			if (!rootDir || !pkgDir) continue;
-			const entryPoint = resolve(cwd, match);
-			if (seenEntryPoints.has(entryPoint)) {
-				continue;
-			}
-			seenEntryPoints.add(entryPoint);
+  // Search packages/*/ and apps/*/ for monorepo layouts
+  for (const pattern of ["packages/*/src/index.ts", "apps/*/src/index.ts"]) {
+    const glob = new Bun.Glob(pattern);
+    for (const match of glob.scanSync({ cwd, dot: false })) {
+      const parts = match.split("/");
+      const rootDir = parts[0];
+      const pkgDir = parts[1];
+      if (!rootDir || !pkgDir) continue;
+      const entryPoint = resolve(cwd, match);
+      if (seenEntryPoints.has(entryPoint)) {
+        continue;
+      }
+      seenEntryPoints.add(entryPoint);
 
-			const pkgRoot = resolve(cwd, rootDir, pkgDir);
-			let pkgName = pkgDir;
+      const pkgRoot = resolve(cwd, rootDir, pkgDir);
+      let pkgName = pkgDir;
 
-			try {
-				const pkgJson = JSON.parse(
-					require("node:fs").readFileSync(
-						resolve(pkgRoot, "package.json"),
-						"utf-8",
-					),
-				) as { name?: string };
-				if (pkgJson.name) pkgName = pkgJson.name;
-			} catch {
-				// Fall back to directory name
-			}
+      try {
+        const pkgJson = JSON.parse(
+          require("node:fs").readFileSync(
+            resolve(pkgRoot, "package.json"),
+            "utf-8"
+          )
+        ) as { name?: string };
+        if (pkgJson.name) pkgName = pkgJson.name;
+      } catch {
+        // Fall back to directory name
+      }
 
-			packages.push({
-				name: pkgName,
-				path: pkgRoot,
-				entryPoint,
-			});
-		}
-	}
+      packages.push({
+        name: pkgName,
+        path: pkgRoot,
+        entryPoint,
+      });
+    }
+  }
 
-	// Single-app repo: check cwd itself for src/index.ts
-	if (packages.length === 0) {
-		const entryPoint = resolve(cwd, "src/index.ts");
-		try {
-			require("node:fs").accessSync(entryPoint);
-			let pkgName = "root";
-			try {
-				const pkgJson = JSON.parse(
-					require("node:fs").readFileSync(
-						resolve(cwd, "package.json"),
-						"utf-8",
-					),
-				) as { name?: string };
-				if (pkgJson.name) pkgName = pkgJson.name;
-			} catch {
-				// Fall back to "root"
-			}
-			packages.push({
-				name: pkgName,
-				path: cwd,
-				entryPoint,
-			});
-			seenEntryPoints.add(entryPoint);
-		} catch {
-			// No src/index.ts in cwd
-		}
-	}
+  // Single-app repo: check cwd itself for src/index.ts
+  if (packages.length === 0) {
+    const entryPoint = resolve(cwd, "src/index.ts");
+    try {
+      require("node:fs").accessSync(entryPoint);
+      let pkgName = "root";
+      try {
+        const pkgJson = JSON.parse(
+          require("node:fs").readFileSync(resolve(cwd, "package.json"), "utf-8")
+        ) as { name?: string };
+        if (pkgJson.name) pkgName = pkgJson.name;
+      } catch {
+        // Fall back to "root"
+      }
+      packages.push({
+        name: pkgName,
+        path: cwd,
+        entryPoint,
+      });
+      seenEntryPoints.add(entryPoint);
+    } catch {
+      // No src/index.ts in cwd
+    }
+  }
 
-	return packages.sort((a, b) => a.name.localeCompare(b.name));
+  return packages.toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -456,122 +453,122 @@ function discoverPackages(
  * within the package (skips external modules).
  */
 function collectReExportedSourceFiles(
-	sourceFile: ts.SourceFile,
-	program: ts.Program,
-	pkgPath: string,
+  sourceFile: ts.SourceFile,
+  program: ts.Program,
+  pkgPath: string
 ): ts.SourceFile[] {
-	const result: ts.SourceFile[] = [];
-	const seen = new Set<string>();
+  const result: ts.SourceFile[] = [];
+  const seen = new Set<string>();
 
-	for (const statement of sourceFile.statements) {
-		if (!ts.isExportDeclaration(statement)) continue;
-		if (!statement.moduleSpecifier) continue;
-		if (!ts.isStringLiteral(statement.moduleSpecifier)) continue;
+  for (const statement of sourceFile.statements) {
+    if (!ts.isExportDeclaration(statement)) continue;
+    if (!statement.moduleSpecifier) continue;
+    if (!ts.isStringLiteral(statement.moduleSpecifier)) continue;
 
-		const specifier = statement.moduleSpecifier.text;
-		// Only follow relative imports (within the package)
-		if (!specifier.startsWith(".")) continue;
+    const specifier = statement.moduleSpecifier.text;
+    // Only follow relative imports (within the package)
+    if (!specifier.startsWith(".")) continue;
 
-		const resolvedModule = ts.resolveModuleName(
-			specifier,
-			sourceFile.fileName,
-			program.getCompilerOptions(),
-			ts.sys,
-		);
-		const resolvedFileName = resolvedModule.resolvedModule?.resolvedFileName;
-		if (!resolvedFileName) continue;
-		if (!resolvedFileName.startsWith(pkgPath)) continue;
-		if (seen.has(resolvedFileName)) continue;
-		seen.add(resolvedFileName);
+    const resolvedModule = ts.resolveModuleName(
+      specifier,
+      sourceFile.fileName,
+      program.getCompilerOptions(),
+      ts.sys
+    );
+    const resolvedFileName = resolvedModule.resolvedModule?.resolvedFileName;
+    if (!resolvedFileName) continue;
+    if (!resolvedFileName.startsWith(pkgPath)) continue;
+    if (seen.has(resolvedFileName)) continue;
+    seen.add(resolvedFileName);
 
-		const sf = program.getSourceFile(resolvedFileName);
-		if (sf) result.push(sf);
-	}
+    const sf = program.getSourceFile(resolvedFileName);
+    if (sf) result.push(sf);
+  }
 
-	return result;
+  return result;
 }
 
 /** Analyze a single package entry point, returning coverage data. */
 function analyzePackage(
-	pkg: {
-		name: string;
-		path: string;
-		entryPoint: string;
-	},
-	workspaceCwd: string,
+  pkg: {
+    name: string;
+    path: string;
+    entryPoint: string;
+  },
+  workspaceCwd: string
 ): PackageCoverage {
-	// Validate entry point exists
-	try {
-		require("node:fs").accessSync(pkg.entryPoint);
-	} catch {
-		return {
-			name: pkg.name,
-			path: pkg.path,
-			declarations: [],
-			documented: 0,
-			partial: 0,
-			undocumented: 0,
-			total: 0,
-			percentage: 0,
-		};
-	}
+  // Validate entry point exists
+  try {
+    require("node:fs").accessSync(pkg.entryPoint);
+  } catch {
+    return {
+      name: pkg.name,
+      path: pkg.path,
+      declarations: [],
+      documented: 0,
+      partial: 0,
+      undocumented: 0,
+      total: 0,
+      percentage: 0,
+    };
+  }
 
-	// Try to find a tsconfig for this package, fall back to root
-	let tsconfigPath = resolve(pkg.path, "tsconfig.json");
-	try {
-		require("node:fs").accessSync(tsconfigPath);
-	} catch {
-		tsconfigPath = resolve(workspaceCwd, "tsconfig.json");
-	}
+  // Try to find a tsconfig for this package, fall back to root
+  let tsconfigPath = resolve(pkg.path, "tsconfig.json");
+  try {
+    require("node:fs").accessSync(tsconfigPath);
+  } catch {
+    tsconfigPath = resolve(workspaceCwd, "tsconfig.json");
+  }
 
-	const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
-	const parsedConfig = ts.parseJsonConfigFileContent(
-		configFile.config,
-		ts.sys,
-		pkg.path,
-	);
+  const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+  const parsedConfig = ts.parseJsonConfigFileContent(
+    configFile.config,
+    ts.sys,
+    pkg.path
+  );
 
-	const program = ts.createProgram({
-		rootNames: [pkg.entryPoint],
-		options: parsedConfig.options,
-		host: ts.createCompilerHost(parsedConfig.options),
-	});
+  const program = ts.createProgram({
+    rootNames: [pkg.entryPoint],
+    options: parsedConfig.options,
+    host: ts.createCompilerHost(parsedConfig.options),
+  });
 
-	const sourceFile = program.getSourceFile(pkg.entryPoint);
-	if (!sourceFile) {
-		return {
-			name: pkg.name,
-			path: pkg.path,
-			declarations: [],
-			documented: 0,
-			partial: 0,
-			undocumented: 0,
-			total: 0,
-			percentage: 0,
-		};
-	}
+  const sourceFile = program.getSourceFile(pkg.entryPoint);
+  if (!sourceFile) {
+    return {
+      name: pkg.name,
+      path: pkg.path,
+      declarations: [],
+      documented: 0,
+      partial: 0,
+      undocumented: 0,
+      total: 0,
+      percentage: 0,
+    };
+  }
 
-	// Analyze direct exports in the entry point
-	const declarations = analyzeSourceFile(sourceFile);
+  // Analyze direct exports in the entry point
+  const declarations = analyzeSourceFile(sourceFile);
 
-	// Follow re-exports into their source files (barrel pattern)
-	const reExportedFiles = collectReExportedSourceFiles(
-		sourceFile,
-		program,
-		pkg.path,
-	);
-	for (const sf of reExportedFiles) {
-		declarations.push(...analyzeSourceFile(sf));
-	}
+  // Follow re-exports into their source files (barrel pattern)
+  const reExportedFiles = collectReExportedSourceFiles(
+    sourceFile,
+    program,
+    pkg.path
+  );
+  for (const sf of reExportedFiles) {
+    declarations.push(...analyzeSourceFile(sf));
+  }
 
-	const stats = calculateCoverage(declarations);
+  const stats = calculateCoverage(declarations);
 
-	return {
-		name: pkg.name,
-		path: pkg.path,
-		declarations,
-		...stats,
-	};
+  return {
+    name: pkg.name,
+    path: pkg.path,
+    declarations,
+    ...stats,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -589,59 +586,59 @@ function analyzePackage(
  * @returns Aggregated coverage result across all packages, or `null` if no packages found
  */
 export function analyzeCheckTsdoc(
-	options: CheckTsDocOptions = {},
+  options: CheckTsDocOptions = {}
 ): TsDocCheckResult | null {
-	const cwd = options.cwd ? resolve(options.cwd) : process.cwd();
-	const minCoverage = options.minCoverage ?? 0;
+  const cwd = options.cwd ? resolve(options.cwd) : process.cwd();
+  const minCoverage = options.minCoverage ?? 0;
 
-	// Discover or use provided paths
-	let packages: Array<{ name: string; path: string; entryPoint: string }>;
+  // Discover or use provided paths
+  let packages: Array<{ name: string; path: string; entryPoint: string }>;
 
-	if (options.paths && options.paths.length > 0) {
-		packages = options.paths.map((p) => {
-			const absPath = resolve(cwd, p);
-			const entryPoint = resolve(absPath, "src/index.ts");
-			let name = p;
+  if (options.paths && options.paths.length > 0) {
+    packages = options.paths.map((p) => {
+      const absPath = resolve(cwd, p);
+      const entryPoint = resolve(absPath, "src/index.ts");
+      let name = p;
 
-			try {
-				const pkgJson = JSON.parse(
-					require("node:fs").readFileSync(
-						resolve(absPath, "package.json"),
-						"utf-8",
-					),
-				) as { name?: string };
-				if (pkgJson.name) name = pkgJson.name;
-			} catch {
-				// Fall back to path
-			}
+      try {
+        const pkgJson = JSON.parse(
+          require("node:fs").readFileSync(
+            resolve(absPath, "package.json"),
+            "utf-8"
+          )
+        ) as { name?: string };
+        if (pkgJson.name) name = pkgJson.name;
+      } catch {
+        // Fall back to path
+      }
 
-			return { name, path: absPath, entryPoint };
-		});
-	} else {
-		packages = discoverPackages(cwd);
-	}
+      return { name, path: absPath, entryPoint };
+    });
+  } else {
+    packages = discoverPackages(cwd);
+  }
 
-	if (packages.length === 0) {
-		return null;
-	}
+  if (packages.length === 0) {
+    return null;
+  }
 
-	// Analyze each package
-	const packageResults: PackageCoverage[] = [];
-	for (const pkg of packages) {
-		packageResults.push(analyzePackage(pkg, cwd));
-	}
+  // Analyze each package
+  const packageResults: PackageCoverage[] = [];
+  for (const pkg of packages) {
+    packageResults.push(analyzePackage(pkg, cwd));
+  }
 
-	// Aggregate summary
-	const allDeclarations = packageResults.flatMap((p) => p.declarations);
-	const summary = calculateCoverage(allDeclarations);
+  // Aggregate summary
+  const allDeclarations = packageResults.flatMap((p) => p.declarations);
+  const summary = calculateCoverage(allDeclarations);
 
-	const ok = !options.strict || summary.percentage >= minCoverage;
+  const ok = !options.strict || summary.percentage >= minCoverage;
 
-	return {
-		ok,
-		packages: packageResults,
-		summary,
-	};
+  return {
+    ok,
+    packages: packageResults,
+    summary,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -657,60 +654,60 @@ export function analyzeCheckTsdoc(
  * @param options - Display options (strict mode, coverage threshold for warning)
  */
 export function printCheckTsdocHuman(
-	result: TsDocCheckResult,
-	options?: { strict?: boolean | undefined; minCoverage?: number | undefined },
+  result: TsDocCheckResult,
+  options?: { strict?: boolean | undefined; minCoverage?: number | undefined }
 ): void {
-	process.stdout.write(
-		`\n${COLORS.bold}TSDoc Coverage Report${COLORS.reset}\n\n`,
-	);
+  process.stdout.write(
+    `\n${COLORS.bold}TSDoc Coverage Report${COLORS.reset}\n\n`
+  );
 
-	for (const pkg of result.packages) {
-		const color =
-			pkg.percentage >= 80
-				? COLORS.green
-				: pkg.percentage >= 50
-					? COLORS.yellow
-					: COLORS.red;
+  for (const pkg of result.packages) {
+    const color =
+      pkg.percentage >= 80
+        ? COLORS.green
+        : pkg.percentage >= 50
+          ? COLORS.yellow
+          : COLORS.red;
 
-		process.stdout.write(
-			`  ${color}${pkg.percentage.toString().padStart(3)}%${COLORS.reset} ${bar(pkg.percentage)} ${pkg.name}\n`,
-		);
+    process.stdout.write(
+      `  ${color}${pkg.percentage.toString().padStart(3)}%${COLORS.reset} ${bar(pkg.percentage)} ${pkg.name}\n`
+    );
 
-		if (pkg.total > 0) {
-			const parts: string[] = [];
-			if (pkg.documented > 0)
-				parts.push(
-					`${COLORS.green}${pkg.documented} documented${COLORS.reset}`,
-				);
-			if (pkg.partial > 0)
-				parts.push(`${COLORS.yellow}${pkg.partial} partial${COLORS.reset}`);
-			if (pkg.undocumented > 0)
-				parts.push(
-					`${COLORS.red}${pkg.undocumented} undocumented${COLORS.reset}`,
-				);
-			process.stdout.write(
-				`       ${COLORS.dim}${pkg.total} declarations:${COLORS.reset} ${parts.join(", ")}\n`,
-			);
-		} else {
-			process.stdout.write(
-				`       ${COLORS.dim}no exported declarations${COLORS.reset}\n`,
-			);
-		}
-	}
+    if (pkg.total > 0) {
+      const parts: string[] = [];
+      if (pkg.documented > 0)
+        parts.push(
+          `${COLORS.green}${pkg.documented} documented${COLORS.reset}`
+        );
+      if (pkg.partial > 0)
+        parts.push(`${COLORS.yellow}${pkg.partial} partial${COLORS.reset}`);
+      if (pkg.undocumented > 0)
+        parts.push(
+          `${COLORS.red}${pkg.undocumented} undocumented${COLORS.reset}`
+        );
+      process.stdout.write(
+        `       ${COLORS.dim}${pkg.total} declarations:${COLORS.reset} ${parts.join(", ")}\n`
+      );
+    } else {
+      process.stdout.write(
+        `       ${COLORS.dim}no exported declarations${COLORS.reset}\n`
+      );
+    }
+  }
 
-	const { summary } = result;
-	process.stdout.write(
-		`\n  ${COLORS.bold}Summary:${COLORS.reset} ${summary.percentage}% coverage (${summary.documented} documented, ${summary.partial} partial, ${summary.undocumented} undocumented of ${summary.total} total)\n`,
-	);
+  const { summary } = result;
+  process.stdout.write(
+    `\n  ${COLORS.bold}Summary:${COLORS.reset} ${summary.percentage}% coverage (${summary.documented} documented, ${summary.partial} partial, ${summary.undocumented} undocumented of ${summary.total} total)\n`
+  );
 
-	const minCoverage = options?.minCoverage ?? 0;
-	if (options?.strict && summary.percentage < minCoverage) {
-		process.stderr.write(
-			`\n  ${COLORS.red}Coverage ${summary.percentage}% is below minimum threshold of ${minCoverage}%${COLORS.reset}\n`,
-		);
-	}
+  const minCoverage = options?.minCoverage ?? 0;
+  if (options?.strict && summary.percentage < minCoverage) {
+    process.stderr.write(
+      `\n  ${COLORS.red}Coverage ${summary.percentage}% is below minimum threshold of ${minCoverage}%${COLORS.reset}\n`
+    );
+  }
 
-	process.stdout.write("\n");
+  process.stdout.write("\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -725,27 +722,27 @@ export function printCheckTsdocHuman(
  * Calls `process.exit()` on completion.
  */
 export async function runCheckTsdoc(
-	options: CheckTsDocOptions = {},
+  options: CheckTsDocOptions = {}
 ): Promise<void> {
-	const result = analyzeCheckTsdoc(options);
+  const result = analyzeCheckTsdoc(options);
 
-	if (!result) {
-		process.stderr.write(
-			"No packages found with src/index.ts entry points.\n" +
-				"Searched: packages/*/src/index.ts, apps/*/src/index.ts, src/index.ts\n" +
-				"Use --package <path> to specify a package path explicitly.\n",
-		);
-		process.exit(1);
-	}
+  if (!result) {
+    process.stderr.write(
+      "No packages found with src/index.ts entry points.\n" +
+        "Searched: packages/*/src/index.ts, apps/*/src/index.ts, src/index.ts\n" +
+        "Use --package <path> to specify a package path explicitly.\n"
+    );
+    process.exit(1);
+  }
 
-	if (resolveJsonMode(options)) {
-		process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-	} else {
-		printCheckTsdocHuman(result, {
-			strict: options.strict,
-			minCoverage: options.minCoverage,
-		});
-	}
+  if (resolveJsonMode(options)) {
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  } else {
+    printCheckTsdocHuman(result, {
+      strict: options.strict,
+      minCoverage: options.minCoverage,
+    });
+  }
 
-	process.exit(result.ok ? 0 : 1);
+  process.exit(result.ok ? 0 : 1);
 }

@@ -124,13 +124,13 @@ outfitter init <cli|mcp|daemon> . --name <name> --with claude,linter
 
 ### Available Tooling Blocks
 
-| Block         | Contents                                     |
-| ------------- | -------------------------------------------- |
-| `scaffolding` | All blocks below (default)                   |
-| `claude`      | `.claude/settings.json`, format-on-stop hook |
+| Block         | Contents                                                 |
+| ------------- | -------------------------------------------------------- |
+| `scaffolding` | All blocks below (default)                               |
+| `claude`      | `.claude/settings.json`, format-on-stop hook             |
 | `linter`      | `.oxlintrc.json`, `.oxfmtrc.jsonc`, ultracite dependency |
-| `lefthook`    | `.lefthook.yml`, lefthook dependency         |
-| `bootstrap`   | `scripts/bootstrap.sh`                       |
+| `lefthook`    | `.lefthook.yml`, lefthook dependency                     |
+| `bootstrap`   | `scripts/bootstrap.sh`                                   |
 
 ## Post-Scaffolding
 

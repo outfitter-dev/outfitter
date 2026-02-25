@@ -174,7 +174,7 @@ async function findMarkdownFiles(searchPath: string): Promise<string[]> {
   for await (const match of glob.scan({ cwd: searchPath, absolute: true })) {
     files.push(match);
   }
-  return files.sort();
+  return files.toSorted();
 }
 
 // ── Output ──────────────────────────────────────────────────────────────────

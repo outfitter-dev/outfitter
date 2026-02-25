@@ -330,7 +330,7 @@ describe("analyzeUpgrades — determinism", () => {
     );
 
     const names = plan.packages.map((p) => p.name);
-    expect(names).toEqual([...names].sort());
+    expect(names).toEqual([...names].toSorted());
   });
 });
 

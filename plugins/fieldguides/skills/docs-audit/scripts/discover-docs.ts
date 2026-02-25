@@ -270,11 +270,11 @@ async function analyzeFile(
 
 function sortFiles(files: DocFile[], sortBy: "staleness" | "alpha"): DocFile[] {
   if (sortBy === "alpha") {
-    return files.sort((a, b) => a.path.localeCompare(b.path));
+    return files.toSorted((a, b) => a.path.localeCompare(b.path));
   }
 
   // Sort by staleness (most stale first)
-  return files.sort((a, b) => b.daysAgo - a.daysAgo);
+  return files.toSorted((a, b) => b.daysAgo - a.daysAgo);
 }
 
 function formatText(manifest: Manifest): string {

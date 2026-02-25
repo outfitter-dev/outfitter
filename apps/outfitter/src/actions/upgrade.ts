@@ -13,7 +13,12 @@ import {
   dryRunPreset,
   interactionPreset,
 } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import {
+  type ActionSpec,
+  defineAction,
+  InternalError,
+  Result,
+} from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
@@ -80,7 +85,7 @@ const upgradeFlags = actionCliPresets(
   upgradeGuide
 );
 
-export const upgradeAction = defineAction({
+const _upgradeAction: ActionSpec<UpgradeActionInput, unknown> = defineAction({
   id: "upgrade",
   description: "Check for @outfitter/* package updates and migration guidance",
   surfaces: ["cli"],
@@ -145,3 +150,4 @@ export const upgradeAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const upgradeAction: typeof _upgradeAction = _upgradeAction;

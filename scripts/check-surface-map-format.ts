@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -8,16 +9,36 @@ export interface SurfaceMapFormatCheckResult {
   readonly ok: boolean;
 }
 
-export function canonicalizeJson(content: string): string {
+export function canonicalizeJson(content: string, filePath: string): string {
   const parsed = JSON.parse(content) as unknown;
-  return `${JSON.stringify(parsed, null, 2)}\n`;
+  const normalized = `${JSON.stringify(parsed, null, 2)}\n`;
+  const formatResult = spawnSync(
+    "bun",
+    ["x", "oxfmt", "--stdin-filepath", filePath],
+    {
+      encoding: "utf-8",
+      input: normalized,
+    }
+  );
+
+  if (
+    formatResult.status !== 0 ||
+    typeof formatResult.stdout !== "string" ||
+    formatResult.stdout.length === 0
+  ) {
+    return normalized;
+  }
+
+  return formatResult.stdout.endsWith("\n")
+    ? formatResult.stdout
+    : `${formatResult.stdout}\n`;
 }
 
 export function checkSurfaceMapFormat(
   content: string,
   filePath: string
 ): SurfaceMapFormatCheckResult {
-  const expected = canonicalizeJson(content);
+  const expected = canonicalizeJson(content, filePath);
 
   return {
     filePath,

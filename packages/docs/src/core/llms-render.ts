@@ -43,7 +43,7 @@ function renderLlmsIndex(
 
     const packageEntries = expectedOutput.entries
       .filter((entry) => entry.packageName === packageName)
-      .sort((a, b) =>
+      .toSorted((a, b) =>
         toPosixPath(a.destinationAbsolutePath).localeCompare(
           toPosixPath(b.destinationAbsolutePath)
         )
@@ -75,7 +75,7 @@ function renderLlmsFull(
     "",
   ];
 
-  const entries = [...expectedOutput.entries].sort((a, b) =>
+  const entries = [...expectedOutput.entries].toSorted((a, b) =>
     toPosixPath(a.destinationAbsolutePath).localeCompare(
       toPosixPath(b.destinationAbsolutePath)
     )

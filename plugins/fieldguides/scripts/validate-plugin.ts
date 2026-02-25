@@ -535,7 +535,7 @@ function findFiles(dir: string, pattern: string): string[] {
   for (const match of glob.scanSync({ cwd: dir, absolute: true })) {
     results.push(match);
   }
-  return results.sort();
+  return results.toSorted();
 }
 
 function findAllFiles(dir: string): string[] {
@@ -548,7 +548,7 @@ function findAllFiles(dir: string): string[] {
   })) {
     results.push(match);
   }
-  return results.sort();
+  return results.toSorted();
 }
 
 function listDirectories(dir: string): string[] {
@@ -563,7 +563,7 @@ function listDirectories(dir: string): string[] {
       // skip inaccessible entries
     }
   }
-  return results.sort();
+  return results.toSorted();
 }
 
 // ── Summary Output ───────────────────────────────────────────────────────────

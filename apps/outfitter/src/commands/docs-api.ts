@@ -132,7 +132,7 @@ export async function printDocsApiResults(
   lines.push(`API Reference (${totalDeclarations} declarations)`);
   lines.push("=".repeat(60));
 
-  const sortedPackages = [...result.packages].sort((a, b) =>
+  const sortedPackages = [...result.packages].toSorted((a, b) =>
     a.name.localeCompare(b.name)
   );
 

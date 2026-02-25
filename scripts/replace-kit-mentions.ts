@@ -471,7 +471,7 @@ async function findFiles(): Promise<string[]> {
     }
   }
 
-  return files.sort();
+  return files.toSorted();
 }
 
 function shouldSkipLine(line: string): boolean {
@@ -552,11 +552,11 @@ async function findUnmatchedKitMentions(filePath: string): Promise<string[]> {
   return unmatched;
 }
 
-async function main() {
-  const writeLine = (message = ""): void => {
-    process.stdout.write(`${message}\n`);
-  };
+const writeLine = (message = ""): void => {
+  process.stdout.write(`${message}\n`);
+};
 
+async function main() {
   writeLine(DRY_RUN ? "🔍 DRY RUN MODE" : "✏️  APPLYING CHANGES");
   writeLine();
 

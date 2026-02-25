@@ -90,12 +90,12 @@ export async function syncPackageDocs(
         .map((filePath) =>
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
       removedFiles: unexpectedFiles
         .map((filePath) =>
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
       warnings: expectedOutput.warnings,
     });
   } catch (error) {
@@ -131,7 +131,7 @@ export async function checkPackageDocs(
         .map((filePath) =>
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
       drift,
       isUpToDate: drift.length === 0,
       warnings: expectedOutput.warnings,
@@ -187,7 +187,7 @@ export async function syncLlmsDocs(
         .map((filePath) =>
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
       warnings: expectedOutput.warnings,
     });
   } catch (error) {
@@ -240,7 +240,7 @@ export async function checkLlmsDocs(
         .map((filePath) =>
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
       drift,
       isUpToDate: drift.length === 0,
       warnings: expectedOutput.warnings,

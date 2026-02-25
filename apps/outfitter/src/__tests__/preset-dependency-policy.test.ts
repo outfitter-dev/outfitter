@@ -20,7 +20,7 @@ function getPresetPackageJsonPaths(rootDir: string): readonly string[] {
   const glob = new Bun.Glob("**/package.json.template");
   return Array.from(glob.scanSync({ cwd: rootDir, absolute: false }))
     .map((relative) => join(rootDir, relative))
-    .sort();
+    .toSorted();
 }
 
 describe("preset dependency policy", () => {

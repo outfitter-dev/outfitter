@@ -793,6 +793,63 @@ export async function printInitResults(
 // Commander wiring
 // =============================================================================
 
+interface InitCommandFlags {
+  bin?: string;
+  dryRun?: boolean;
+  force?: boolean;
+  installTimeout?: number;
+  json?: boolean;
+  local?: boolean;
+  name?: string;
+  noTooling?: boolean;
+  opts?: () => InitCommandFlags;
+  preset?: InitPresetId;
+  skipCommit?: boolean;
+  skipGit?: boolean;
+  skipInstall?: boolean;
+  structure?: InitStructure;
+  with?: string;
+  workspace?: boolean;
+  workspaceName?: string;
+  yes?: boolean;
+}
+
+const resolveLocal = (flags: InitCommandFlags): boolean | undefined => {
+  if (flags.local === true || flags.workspace === true) {
+    return true;
+  }
+  return undefined;
+};
+
+const resolveOutputMode = (flags: InitCommandFlags): OutputMode | undefined => {
+  if (flags.json) {
+    return "json";
+  }
+  return undefined;
+};
+
+const withCommonOptions = (command: Command): Command =>
+  command
+    .option("-n, --name <name>", "Package name (defaults to directory name)")
+    .option("-b, --bin <name>", "Binary name (defaults to project name)")
+    .option(
+      "-p, --preset <preset>",
+      "Preset to use (minimal|cli|mcp|daemon|library|full-stack)"
+    )
+    .option("-s, --structure <mode>", "Project structure (single|workspace)")
+    .option("--workspace-name <name>", "Workspace root package name")
+    .option("-f, --force", "Overwrite existing files", false)
+    .option("--local", "Use workspace:* for @outfitter dependencies")
+    .option("--workspace", "Alias for --local")
+    .option("--with <blocks>", "Comma-separated tooling blocks to add")
+    .option("--no-tooling", "Skip default tooling blocks")
+    .option("-y, --yes", "Skip prompts and use defaults", false)
+    .option("--dry-run", "Preview changes without writing files", false)
+    .option("--skip-install", "Skip bun install", false)
+    .option("--skip-git", "Skip git init and initial commit", false)
+    .option("--skip-commit", "Skip initial commit only", false)
+    .option("--install-timeout <ms>", "bun install timeout in ms");
+
 /**
  * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
  */
@@ -800,27 +857,6 @@ export function initCommand(program: Command): void {
   const init = program
     .command("init")
     .description("Create a new Outfitter project");
-
-  interface InitCommandFlags {
-    bin?: string;
-    dryRun?: boolean;
-    force?: boolean;
-    installTimeout?: number;
-    json?: boolean;
-    local?: boolean;
-    name?: string;
-    noTooling?: boolean;
-    opts?: () => InitCommandFlags;
-    preset?: InitPresetId;
-    skipCommit?: boolean;
-    skipGit?: boolean;
-    skipInstall?: boolean;
-    structure?: InitStructure;
-    with?: string;
-    workspace?: boolean;
-    workspaceName?: string;
-    yes?: boolean;
-  }
 
   const resolveFlags = (
     flags: InitCommandFlags,
@@ -831,44 +867,6 @@ export function initCommand(program: Command): void {
     }
     return typeof flags.opts === "function" ? flags.opts() : flags;
   };
-
-  const resolveLocal = (flags: InitCommandFlags): boolean | undefined => {
-    if (flags.local === true || flags.workspace === true) {
-      return true;
-    }
-    return undefined;
-  };
-
-  const resolveOutputMode = (
-    flags: InitCommandFlags
-  ): OutputMode | undefined => {
-    if (flags.json) {
-      return "json";
-    }
-    return undefined;
-  };
-
-  const withCommonOptions = (command: Command): Command =>
-    command
-      .option("-n, --name <name>", "Package name (defaults to directory name)")
-      .option("-b, --bin <name>", "Binary name (defaults to project name)")
-      .option(
-        "-p, --preset <preset>",
-        "Preset to use (minimal|cli|mcp|daemon|library|full-stack)"
-      )
-      .option("-s, --structure <mode>", "Project structure (single|workspace)")
-      .option("--workspace-name <name>", "Workspace root package name")
-      .option("-f, --force", "Overwrite existing files", false)
-      .option("--local", "Use workspace:* for @outfitter dependencies")
-      .option("--workspace", "Alias for --local")
-      .option("--with <blocks>", "Comma-separated tooling blocks to add")
-      .option("--no-tooling", "Skip default tooling blocks")
-      .option("-y, --yes", "Skip prompts and use defaults", false)
-      .option("--dry-run", "Preview changes without writing files", false)
-      .option("--skip-install", "Skip bun install", false)
-      .option("--skip-git", "Skip git init and initial commit", false)
-      .option("--skip-commit", "Skip initial commit only", false)
-      .option("--install-timeout <ms>", "bun install timeout in ms");
 
   withCommonOptions(init.argument("[directory]")).action(
     async (

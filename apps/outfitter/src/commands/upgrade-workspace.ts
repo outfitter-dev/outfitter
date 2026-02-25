@@ -240,7 +240,7 @@ export function collectWorkspaceManifests(
     }
   }
 
-  return Result.ok(Array.from(files).sort((a, b) => a.localeCompare(b)));
+  return Result.ok(Array.from(files).toSorted((a, b) => a.localeCompare(b)));
 }
 
 // =============================================================================
@@ -267,8 +267,8 @@ function extractOutfitterDeps(
   }
 
   const deps = {
-    ...(pkg.dependencies ?? {}),
-    ...(pkg.devDependencies ?? {}),
+    ...pkg.dependencies,
+    ...pkg.devDependencies,
   };
 
   const packages: { name: string; version: string }[] = [];
@@ -381,7 +381,7 @@ export function getInstalledPackagesFromWorkspace(
   for (const [name, versionMap] of packageVersionMap) {
     const versions = Array.from(versionMap.entries())
       .map(([version, manifests]) => ({ version, manifests }))
-      .sort((a, b) => {
+      .toSorted((a, b) => {
         try {
           return Bun.semver.order(a.version, b.version);
         } catch {

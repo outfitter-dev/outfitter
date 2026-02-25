@@ -89,12 +89,13 @@ function pathsOverlap(pathA: string, pathB: string): boolean {
  * @param packageName - Owning package directory name, if applicable
  * @returns The inferred {@link DocKind}
  */
+const hasToken = (name: string, token: string): boolean =>
+  new RegExp(`(?:^|[^a-z0-9])${token}(?:[^a-z0-9]|$)`, "u").test(name);
+
 function inferDocKind(relativePath: string, packageName?: string): DocKind {
   const lower = relativePath.toLowerCase();
   const filename = lower.split("/").at(-1) ?? "";
   const isPackageDeepDoc = Boolean(packageName && lower.includes("/docs/"));
-  const hasToken = (name: string, token: string): boolean =>
-    new RegExp(`(?:^|[^a-z0-9])${token}(?:[^a-z0-9]|$)`, "u").test(name);
 
   if (filename === "readme.md" || filename === "readme.mdx") return "readme";
   if (filename.includes("changelog") || filename.includes("release"))

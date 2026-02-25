@@ -186,7 +186,7 @@ export function generateManifest(
   return {
     version: options?.version ?? "1.0.0",
     generatedAt: new Date().toISOString(),
-    surfaces: [...surfaceSet].sort(),
+    surfaces: [...surfaceSet].toSorted(),
     actions: actions.map(actionToManifestEntry),
     errors: buildErrorTaxonomy(),
     outputModes: [...OUTPUT_MODES],

@@ -33,8 +33,8 @@ import outfitter from "@outfitter/oxlint-plugin";
 export default [
   {
     plugins: { outfitter },
-    rules: {}
-  }
+    rules: {},
+  },
 ];
 ```
 
