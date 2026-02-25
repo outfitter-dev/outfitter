@@ -6,9 +6,10 @@
 
 import { z } from "zod";
 
-export const outputModeSchema = z
+const _outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
   .enum(["human", "json", "jsonl"])
   .default("human");
+export const outputModeSchema: typeof _outputModeSchema = _outputModeSchema;
 
 export function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;

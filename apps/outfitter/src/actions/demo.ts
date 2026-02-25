@@ -4,7 +4,12 @@
  * @packageDocumentation
  */
 
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import {
+  type ActionSpec,
+  defineAction,
+  InternalError,
+  Result,
+} from "@outfitter/contracts";
 import { z } from "zod";
 
 import { runDemo } from "../commands/demo.js";
@@ -28,7 +33,7 @@ const demoInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<DemoActionInput>;
 
-export const demoAction = defineAction({
+const _demoAction: ActionSpec<DemoActionInput, unknown> = defineAction({
   id: "demo",
   description: "Run the CLI demo app",
   surfaces: ["cli"],
@@ -79,3 +84,4 @@ export const demoAction = defineAction({
     }
   },
 });
+export const demoAction: typeof _demoAction = _demoAction;

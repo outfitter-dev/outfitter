@@ -6,7 +6,12 @@
 
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import {
+  type ActionSpec,
+  defineAction,
+  InternalError,
+  Result,
+} from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printScaffoldResults, runScaffold } from "../commands/scaffold.js";
@@ -90,7 +95,7 @@ function resolveScaffoldOptions(context: {
   };
 }
 
-export const scaffoldAction = defineAction({
+const _scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> = defineAction({
   id: "scaffold",
   description: "Add a capability to an existing project",
   surfaces: ["cli"],
@@ -142,3 +147,4 @@ export const scaffoldAction = defineAction({
     return Result.ok(result.value);
   },
 });
+export const scaffoldAction: typeof _scaffoldAction = _scaffoldAction;
