@@ -181,6 +181,27 @@ function getImportSourceFromRequire(node: unknown): string | undefined {
   return asLiteralString(firstArgument);
 }
 
+function getImportSourceFromExportDeclaration(
+  node: unknown
+): string | undefined {
+  if (!node || typeof node !== "object") {
+    return undefined;
+  }
+
+  const nodeType = (node as { type?: unknown }).type;
+
+  if (
+    !(
+      nodeType === "ExportNamedDeclaration" ||
+      nodeType === "ExportAllDeclaration"
+    )
+  ) {
+    return undefined;
+  }
+
+  return asLiteralString((node as { source?: unknown }).source);
+}
+
 export const noCrossTierImportRule: RuleModule = {
   meta: {
     type: "problem",
@@ -268,6 +289,12 @@ export const noCrossTierImportRule: RuleModule = {
       },
       CallExpression(node) {
         reportIfViolation(node, getImportSourceFromRequire(node));
+      },
+      ExportNamedDeclaration(node) {
+        reportIfViolation(node, getImportSourceFromExportDeclaration(node));
+      },
+      ExportAllDeclaration(node) {
+        reportIfViolation(node, getImportSourceFromExportDeclaration(node));
       },
     };
   },

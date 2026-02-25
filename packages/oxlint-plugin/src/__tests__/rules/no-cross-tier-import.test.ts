@@ -191,4 +191,65 @@ describe("no-cross-tier-import", () => {
 
     expect(reports).toHaveLength(0);
   });
+
+  test("reports export-from violations", () => {
+    const reports = runRuleForEvent({
+      event: "ExportNamedDeclaration",
+      filename: "packages/contracts/src/index.ts",
+      nodes: [
+        {
+          type: "ExportNamedDeclaration",
+          source: {
+            type: "Literal",
+            value: "@outfitter/logging",
+          },
+        },
+      ],
+      rule: noCrossTierImportRule,
+      sourceText: 'export { getLogger } from "@outfitter/logging";',
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.data?.sourceTier).toBe("foundation");
+    expect(reports[0]?.data?.targetTier).toBe("runtime");
+  });
+
+  test("reports export-all violations", () => {
+    const reports = runRuleForEvent({
+      event: "ExportAllDeclaration",
+      filename: "packages/logging/src/index.ts",
+      nodes: [
+        {
+          type: "ExportAllDeclaration",
+          source: {
+            type: "Literal",
+            value: "@outfitter/tooling",
+          },
+        },
+      ],
+      rule: noCrossTierImportRule,
+      sourceText: 'export * from "@outfitter/tooling";',
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.data?.sourceTier).toBe("runtime");
+    expect(reports[0]?.data?.targetTier).toBe("tooling");
+  });
+
+  test("ignores export declarations without source modules", () => {
+    const reports = runRuleForEvent({
+      event: "ExportNamedDeclaration",
+      filename: "packages/contracts/src/index.ts",
+      nodes: [
+        {
+          type: "ExportNamedDeclaration",
+          source: null,
+        },
+      ],
+      rule: noCrossTierImportRule,
+      sourceText: "export { Result };",
+    });
+
+    expect(reports).toHaveLength(0);
+  });
 });
