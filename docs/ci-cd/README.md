@@ -25,12 +25,13 @@ Add the `release:none` label to PRs that don't need a release (docs, CI, tests).
 
 ### Workflows Overview
 
-| Workflow               | Trigger                            | Purpose                                               |
-| ---------------------- | ---------------------------------- | ----------------------------------------------------- |
-| `auto-label.yml`       | PR open/update                     | Label PRs by file changes                             |
-| `canary.yml`           | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
-| `changeset-labels.yml` | PR with manual changeset           | Apply release label                                   |
-| `release.yml`          | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
-| `stack-labels.yml`     | PR open/update                     | Graphite stack labels                                 |
-| `label-sync.yml`       | Push to main                       | Sync label definitions                                |
-| `ci.yml`               | PR/push                            | Build and test                                        |
+| Workflow                  | Trigger                            | Purpose                                                    |
+| ------------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| `auto-label.yml`          | PR open/update                     | Label PRs by file changes                                  |
+| `canary.yml`              | Push to main (changeset files)     | Publish `@canary` dist-tag                                 |
+| `changeset-labels.yml`    | PR with manual changeset           | Apply release label                                        |
+| `release.yml`             | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest`      |
+| `stack-labels.yml`        | PR open/update                     | Graphite stack labels                                      |
+| `label-sync.yml`          | Push to main                       | Sync label definitions                                     |
+| `ci.yml`                  | PR/push                            | Build and test                                             |
+| `bun-stability-trial.yml` | Manual dispatch                    | Repeated `test:ci` runs across Bun versions with artifacts |
