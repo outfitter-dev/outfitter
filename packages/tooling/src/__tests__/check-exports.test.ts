@@ -181,11 +181,11 @@ describe("compareExports", () => {
   test("treats string export values correctly", () => {
     const actual: ExportMap = {
       "./package.json": "./package.json",
-      "./biome": "./biome.json",
+      "./lefthook": "./lefthook.yml",
     };
     const expected: ExportMap = {
       "./package.json": "./package.json",
-      "./biome": "./biome.json",
+      "./lefthook": "./lefthook.yml",
     };
 
     const result = compareExports({
