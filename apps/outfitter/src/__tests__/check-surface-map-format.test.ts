@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   canonicalizeJson,
   checkSurfaceMapFormat,
-} from "./check-surface-map-format";
+} from "../commands/check-surface-map-format.js";
 
 describe("checkSurfaceMapFormat", () => {
   test("passes for oxfmt-canonical JSON with trailing newline", () => {

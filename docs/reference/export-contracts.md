@@ -10,9 +10,9 @@ The pipeline has five components:
 
 1. **bunup** builds from source and auto-generates `package.json#exports`
 2. **`exports.exclude`** in `bunup.config.ts` constrains what bunup publishes
-3. **`check-exports`** validates that source files and `package.json` are in sync
-4. **`check-readme-imports`** validates that README examples reference real exports
-5. **`check-boundary-invocations`** validates root/apps scripts do not execute
+3. **`outfitter repo check exports`** validates that source files and `package.json` are in sync
+4. **`outfitter repo check readme`** validates that README examples reference real exports
+5. **`outfitter repo check boundary-invocations`** validates root/apps scripts do not execute
    `packages/*/src/*` directly
 
 ### Export Exclusions
@@ -41,26 +41,25 @@ Common exclusion patterns:
 
 ## Verification Flow
 
-The `verify:ci` script runs the full pipeline:
+CI now runs an explicit build step followed by `verify:ci`:
 
 ```
-typecheck -> check -> docs:check:ci -> check-exports -> check-readme-imports
--> build -> check-clean-tree -> check-boundary-invocations -> test
+build -> verify:ci (outfitter check --ci)
 ```
 
-`docs:check:ci` validates `docs/README.md` sentinel freshness for normal PR CI.
+`outfitter check --ci` orchestrates typecheck, lint/format checks, docs sentinel/link checks, export/readme/boundary checks, working-tree cleanliness, schema drift, and tests.
 
-This same pipeline runs locally via pre-push hook (`bunx @outfitter/tooling pre-push`) and in CI. Local and CI are always in parity for day-to-day PR verification.
+This same pipeline runs locally via pre-push hook (`outfitter check --pre-push`) and in CI. Local and CI are always in parity for day-to-day PR verification.
 
 Tracked llms artifacts (`docs/llms.txt`, `docs/llms-full.txt`) are refreshed and validated in the stable release workflow rather than in every PR CI run.
 
 The key sequence for export integrity:
 
-1. `check-exports` validates committed `package.json#exports` matches source (pre-build)
-2. `check-readme-imports` validates README examples reference real exports (pre-build)
+1. `outfitter repo check exports --cwd .` validates committed `package.json#exports` matches source (pre-build)
+2. `outfitter repo check readme --cwd .` validates README examples reference real exports (pre-build)
 3. `build` regenerates `package.json#exports` from source
-4. `check-clean-tree` fails if the build changed any tracked files (stale exports)
-5. `check-boundary-invocations` enforces command boundary policy
+4. `outfitter repo check tree --cwd .` fails if the build changed tracked files (stale exports)
+5. `outfitter repo check boundary-invocations --cwd .` enforces command boundary policy
 6. Tests confirm runtime behavior matches the declared surface
 
 ## Common Workflows
@@ -69,26 +68,26 @@ The key sequence for export integrity:
 
 1. Create the source file in `src/`
 2. Run `bun run build` to regenerate exports
-3. Verify: `bunx @outfitter/tooling check-exports`
+3. Verify: `bun run apps/outfitter/src/cli.ts repo check exports --cwd .`
 4. Update the package README if documenting the new subpath
 
 ### Adding an Internal Module
 
 1. Create the source file (e.g., `src/internal/helpers.ts`)
 2. Add an exclusion pattern to `bunup.config.ts` if one does not already cover it (the `./internal/*` pattern handles most cases)
-3. Run `bun run build && bunx @outfitter/tooling check-exports` to confirm it stays out of the public surface
+3. Run `bun run build && bun run apps/outfitter/src/cli.ts repo check exports --cwd .` to confirm it stays out of the public surface
 
 ### Fixing Export Drift
 
-`check-exports` reports drift when `package.json#exports` does not match what bunup would generate.
+`outfitter repo check exports --cwd .` reports drift when `package.json#exports` does not match what bunup would generate.
 
 1. Run `bun run build` to regenerate exports
 2. If drift persists, check `bunup.config.ts` exclusions -- a new source file may need an explicit exclude
-3. If `check-clean-tree` fails in CI, the committed `package.json` was stale. Rebuild and commit the result
+3. If `outfitter repo check tree --cwd .` fails in CI, the committed `package.json` was stale. Rebuild and commit the result
 
 ### Fixing README Import Drift
 
-`check-readme-imports` reports invalid imports when a README references a subpath that does not exist in the corresponding `package.json#exports`.
+`outfitter repo check readme --cwd .` reports invalid imports when a README references a subpath that does not exist in the corresponding `package.json#exports`.
 
 1. Fix the README to use a correct subpath, or add the missing export
 2. To exempt a code block from validation, add a comment before it:
@@ -193,8 +192,8 @@ surfaces (`outfitter repo ...` or package bins).
 Agents running check/fix loops should follow this sequence:
 
 ```
-check-exports -> build (if drift) -> check-clean-tree -> check-readme-imports
--> check-boundary-invocations
+repo check exports -> build (if drift) -> repo check tree -> repo check readme
+-> repo check boundary-invocations
 ```
 
 - Use `--json` for machine-parseable output

@@ -209,6 +209,19 @@ export function buildCheckOrchestratorPlan(
         command: ["bun", "run", "exports:check"],
       },
       {
+        id: "tree-clean",
+        label: "Working tree clean",
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "tree",
+          "--cwd",
+          ".",
+        ],
+      },
+      {
         id: "boundary-invocations",
         label: "Boundary invocations",
         command: [
