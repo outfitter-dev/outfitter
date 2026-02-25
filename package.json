@@ -11,7 +11,7 @@
   "scripts": {
     "sync:all": "./scripts/workspace-sync.sh",
     "verify:ci": "bun run verify:ci:checks && bun run test",
-    "verify:ci:checks": "bun run typecheck && bun run check && bun run check-publish-guardrails && bun run check-changeset && bun run check-bunup-registry && bun run check-preset-dependency-versions && bun run docs:check:ci && bun run docs:check:links && bun run check-exports && bun run check-readme-imports && bun run build && bun run check-clean-tree && bun run check-boundary-invocations && bun run check-canonical-surface-map && bun run check-surface-map-format && bun run schema:diff",
+    "verify:ci:checks": "bun run typecheck && bun run check && bun run check-publish-guardrails && bun run check-changeset && bun run check-bunup-registry && bun run check-preset-dependency-versions && bun run docs:check:ci && bun run docs:check:links && bun run check-exports && bun run check-readme-imports && bun run build:verify && bun run check-clean-tree && bun run check-boundary-invocations && bun run check-canonical-surface-map && bun run check-surface-map-format && bun run schema:diff",
     "check-changeset": "bun run apps/outfitter/src/commands/repo.ts check changeset --cwd .",
     "check-publish-guardrails": "bun run scripts/check-publish-guardrails.ts",
     "check-bunup-registry": "bun run apps/outfitter/src/commands/repo.ts check registry --cwd .",
@@ -25,6 +25,7 @@
     "exports:check": "bun scripts/normalize-exports.ts --check",
     "schema:diff": "bun run apps/outfitter/src/cli.ts schema diff",
     "docs:check:links": "bun run apps/outfitter/src/commands/repo.ts check markdown-links --cwd .",
+    "build:verify": "bunup && bun run exports:check",
     "build": "bunup && bun scripts/normalize-exports.ts",
     "build:local": "bunup && bun scripts/normalize-exports.ts && cd apps/outfitter && bun link",
     "docs:sync:core": "bun run apps/outfitter/src/commands/repo.ts export docs --cwd .",
