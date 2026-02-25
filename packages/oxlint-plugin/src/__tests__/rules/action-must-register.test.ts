@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { actionMustRegisterRule } from "../../rules/action-must-register.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 
@@ -96,6 +97,38 @@ describe("action-must-register", () => {
     // Only betaAction is missing from the registry
     expect(reports).toHaveLength(1);
     expect(reports[0]?.data?.actionName).toBe("betaAction");
+  });
+
+  test("reports generic defineAction exports that are missing from registry imports", () => {
+    const genericActionSource = [
+      'import { defineAction } from "./define-action.js";',
+      "",
+      "export const genericAction = defineAction<",
+      "{ readonly flag: boolean },",
+      "{ readonly ok: true }",
+      ">({",
+      '  id: "generic.action",',
+      "  handler: async () => ({ isOk: () => true, value: { ok: true } }),",
+      "});",
+    ].join("\n");
+
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "apps/outfitter/src/actions/generic.ts",
+      nodes: [{ type: "Program" }],
+      options: [
+        {
+          registrySourceText:
+            'import { someOtherAction } from "./actions/generic.js";',
+        },
+      ],
+      rule: actionMustRegisterRule,
+      sourceText: genericActionSource,
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("actionMustRegister");
+    expect(reports[0]?.data?.actionName).toBe("genericAction");
   });
 
   test("resolves aliased imports (import { x as y }) by original name", () => {

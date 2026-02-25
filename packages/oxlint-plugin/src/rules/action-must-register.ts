@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+
 import {
   normalizeFilePath,
   type RuleContext,
@@ -16,7 +17,7 @@ interface ActionSourceFile {
 }
 
 const ACTION_DEFINITION_PATTERN =
-  /export\s+const\s+([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*defineAction\s*\(/gu;
+  /export\s+const\s+([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*defineAction(?:\s*<[\s\S]*?>)?\s*\(/gu;
 const ACTIONS_DIRECTORY_MARKER = "/apps/outfitter/src/actions/";
 const RELATIVE_ACTIONS_DIRECTORY_PREFIX = "apps/outfitter/src/actions/";
 
