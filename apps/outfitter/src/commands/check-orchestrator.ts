@@ -108,12 +108,28 @@ export function buildCheckOrchestratorPlan(
       {
         id: "changeset",
         label: "Changeset",
-        command: ["bun", "run", "check-changeset"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "changeset",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "registry",
         label: "Bunup registry",
-        command: ["bun", "run", "check-bunup-registry"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "registry",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "preset-versions",
@@ -144,17 +160,41 @@ export function buildCheckOrchestratorPlan(
       {
         id: "docs-links",
         label: "Markdown links",
-        command: ["bun", "run", "docs:check:links"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "markdown-links",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "exports",
         label: "Exports",
-        command: ["bun", "run", "check-exports"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "exports",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "readme-imports",
         label: "README imports",
-        command: ["bun", "run", "check-readme-imports"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "readme",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "exports-normalized",
@@ -164,7 +204,15 @@ export function buildCheckOrchestratorPlan(
       {
         id: "boundary-invocations",
         label: "Boundary invocations",
-        command: ["bun", "run", "check-boundary-invocations"],
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/commands/repo.ts",
+          "check",
+          "boundary-invocations",
+          "--cwd",
+          ".",
+        ],
       },
       {
         id: "surface-map-canonical",

@@ -34,8 +34,8 @@ Each package has detailed API documentation in its own directory. The canonical
 location is `packages/<name>/README.md` (and `packages/<name>/docs/` for deep
 docs). Use `outfitter docs list` to browse the docs index, or
 `outfitter docs show <id>` to view a specific document.
-Regenerate README sentinel sections with `bun run docs:sync:readme`; verify
-freshness with `bun run docs:check:readme-sentinel`.
+Regenerate README sentinel sections with `bun run sync:docs:readme`; verify
+freshness with `bun run apps/outfitter/src/cli.ts check docs-sentinel --cwd .`.
 
 <!-- BEGIN:GENERATED:PACKAGE_LIST -->
 
