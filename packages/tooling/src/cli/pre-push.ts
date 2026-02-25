@@ -462,9 +462,11 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   const versionCheck = checkBunVersion();
   if (!versionCheck.matches) {
     log(
-      `${COLORS.yellow}Bun version mismatch${COLORS.reset}: expected ${versionCheck.expected} (from .bun-version), running ${versionCheck.actual}`
+      `${COLORS.red}Bun version mismatch${COLORS.reset}: running ${versionCheck.actual}, pinned ${versionCheck.expected}`
     );
+    log("Fix: bunx @outfitter/tooling upgrade-bun");
     log("");
+    process.exit(1);
   }
 
   const branch = getCurrentBranch();

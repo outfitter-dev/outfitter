@@ -150,6 +150,16 @@ interface PackageJsonReadResult {
 
 const MIN_BUN_VERSION = "1.3.6";
 
+function readPinnedBunVersion(projectRoot: string): string | undefined {
+  const versionFile = join(projectRoot, ".bun-version");
+  if (!existsSync(versionFile)) {
+    return undefined;
+  }
+
+  const pinned = readFileSync(versionFile, "utf-8").trim();
+  return pinned.length > 0 ? pinned : undefined;
+}
+
 // =============================================================================
 // Individual Checks
 // =============================================================================
@@ -157,10 +167,25 @@ const MIN_BUN_VERSION = "1.3.6";
 /**
  * Checks the Bun version.
  */
-function checkBunVersion(): BunVersionCheck {
-  const required = MIN_BUN_VERSION;
+function checkBunVersion(cwd: string, rootCwd?: string): BunVersionCheck {
   const current = Bun.version;
+  const pinned = readPinnedBunVersion(rootCwd ?? cwd);
 
+  if (pinned) {
+    const passed = current === pinned;
+    return {
+      passed,
+      version: current,
+      required: pinned,
+      ...(passed
+        ? {}
+        : {
+            error: `Bun version ${current} does not match pinned ${pinned}`,
+          }),
+    };
+  }
+
+  const required = MIN_BUN_VERSION;
   const passed = Bun.semver.satisfies(current, `>=${required}`);
 
   return {
@@ -404,7 +429,7 @@ function runDoctorForCwd(
   const wsRoot = isWorkspaceRoot(packageJsonRead.parsed);
 
   // Run all checks
-  const bunVersion = checkBunVersion();
+  const bunVersion = checkBunVersion(cwd, options.rootCwd);
   const packageJson = checkPackageJson(packageJsonRead);
   const dependencies = checkDependencies(cwd, packageJsonRead, options.rootCwd);
   const configFiles = checkConfigFiles(cwd);
