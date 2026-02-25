@@ -120,6 +120,23 @@ describe("no-deep-relative-import", () => {
     });
   });
 
+  test("reports bare .. import when maxParentSegments is 0", () => {
+    const reports = runRuleForEvent({
+      event: "ImportDeclaration",
+      filename: "packages/logging/src/index.ts",
+      nodes: [createImportDeclarationNode("..")],
+      options: [{ maxParentSegments: 0 }],
+      rule: noDeepRelativeImportRule,
+      sourceText: 'import "..";',
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.data).toEqual({
+      importSource: "..",
+      maxParentSegments: 0,
+    });
+  });
+
   test("counts terminal .. segments in deep-relative imports", () => {
     const reports = runRuleForEvent({
       event: "ImportDeclaration",
