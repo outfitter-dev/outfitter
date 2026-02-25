@@ -132,4 +132,13 @@ describe("Registry Build Output", () => {
     expect(version).toBeDefined();
     expect(version).toMatch(/^\^\d+\.\d+\.\d+$/);
   });
+
+  test("linter block includes the oxlint plugin dependency", () => {
+    const version =
+      REGISTRY_CONFIG.blocks.linter?.devDependencies?.[
+        "@outfitter/oxlint-plugin"
+      ];
+    expect(version).toBeDefined();
+    expect(version).toMatch(/^\^\d+\.\d+\.\d+$/);
+  });
 });

@@ -59,6 +59,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
     "@clack/prompts": "^1.0.1",
+    "@outfitter/oxlint-plugin": "workspace:*",
     "@outfitter/presets": "workspace:*",
     "@types/node": "^25.3.0",
     "bunup": "^0.16.29",

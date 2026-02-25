@@ -7,6 +7,7 @@
       "devDependencies": {
         "@changesets/cli": "^2.29.8",
         "@clack/prompts": "^1.0.1",
+        "@outfitter/oxlint-plugin": "workspace:*",
         "@outfitter/presets": "workspace:*",
         "@types/node": "^25.3.0",
         "bunup": "^0.16.29",
@@ -48,8 +49,8 @@
       "name": "outfitter",
       "version": "0.3.2",
       "bin": {
-        "outfitter": "./dist/cli.js",
         "out": "./dist/cli.js",
+        "outfitter": "./dist/cli.js",
       },
       "dependencies": {
         "@clack/prompts": "catalog:",
@@ -60,6 +61,7 @@
         "@outfitter/docs": "workspace:*",
         "@outfitter/logging": "workspace:*",
         "@outfitter/mcp": "workspace:*",
+        "@outfitter/oxlint-plugin": "workspace:*",
         "@outfitter/presets": "workspace:*",
         "@outfitter/tooling": "workspace:*",
         "@outfitter/tui": "workspace:*",

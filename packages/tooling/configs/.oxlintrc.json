@@ -1,6 +1,12 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint"],
+  "jsPlugins": [
+    {
+      "name": "outfitter",
+      "specifier": "@outfitter/oxlint-plugin"
+    }
+  ],
   "globals": { "Bun": "readonly" },
   "categories": {
     "correctness": "error",
@@ -17,6 +23,20 @@
     "**/*.gen.ts"
   ],
   "rules": {
-    "no-void": "off"
+    "no-void": "off",
+    "outfitter/action-must-register": "warn",
+    "outfitter/handler-must-return-result": "error",
+    "outfitter/max-file-lines": ["error", { "warn": 200, "error": 400 }],
+    "outfitter/no-console-in-packages": "error",
+    "outfitter/no-cross-tier-import": "error",
+    "outfitter/no-deep-relative-import": "warn",
+    "outfitter/no-nested-barrel": "warn",
+    "outfitter/no-process-env-in-packages": "warn",
+    "outfitter/no-process-exit-in-packages": "error",
+    "outfitter/no-throw-in-handler": "error",
+    "outfitter/prefer-bun-api": "warn",
+    "outfitter/snapshot-location": "warn",
+    "outfitter/test-file-naming": "warn",
+    "outfitter/use-error-taxonomy": "warn"
   }
 }

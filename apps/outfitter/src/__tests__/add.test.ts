@@ -71,6 +71,9 @@ describe("runAdd", () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.created).toContain(".oxlintrc.json");
+      expect(result.value.devDependencies["@outfitter/oxlint-plugin"]).toMatch(
+        /^\^\d+\.\d+\.\d+$/
+      );
       expect(result.value.devDependencies.ultracite).toBe(
         resolvedVersions["ultracite"]
       );
@@ -79,6 +82,9 @@ describe("runAdd", () => {
     // Verify package.json was updated
     const pkgContent = readFileSync(join(testDir, "package.json"), "utf-8");
     const pkg = JSON.parse(pkgContent);
+    expect(pkg.devDependencies?.["@outfitter/oxlint-plugin"]).toMatch(
+      /^\^\d+\.\d+\.\d+$/
+    );
     expect(pkg.devDependencies?.ultracite).toBe(resolvedVersions["ultracite"]);
   });
 
@@ -96,6 +102,9 @@ describe("runAdd", () => {
       expect(result.value.created.length).toBeGreaterThanOrEqual(4);
       expect(result.value.devDependencies.ultracite).toBe(
         resolvedVersions["ultracite"]
+      );
+      expect(result.value.devDependencies["@outfitter/oxlint-plugin"]).toMatch(
+        /^\^\d+\.\d+\.\d+$/
       );
       expect(result.value.devDependencies.lefthook).toBe(
         resolvedVersions["lefthook"]

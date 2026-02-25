@@ -42,6 +42,9 @@ function requireInternalVersion(name: string): string {
  * Internal @outfitter/* versions come from workspace scanning.
  */
 export const SHARED_DEV_DEPS: Readonly<Record<string, string>> = {
+  "@outfitter/oxlint-plugin": requireInternalVersion(
+    "@outfitter/oxlint-plugin"
+  ),
   "@outfitter/tooling": requireInternalVersion("@outfitter/tooling"),
   "@types/bun": requireVersion("@types/bun"),
   lefthook: requireVersion("lefthook"),
