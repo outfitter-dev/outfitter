@@ -26,7 +26,7 @@ const stripDuplicateExports = (): BunupPlugin => ({
             .split(",")
             .map((specifier) => specifier.trim())
             .filter(Boolean)
-            .sort()
+            .toSorted()
             .join(",");
           return { start, end, specifiers };
         });
@@ -187,6 +187,15 @@ export default defineWorkspace(
     {
       name: "@outfitter/presets",
       root: "packages/presets",
+    },
+    {
+      name: "@outfitter/oxlint-plugin",
+      root: "packages/oxlint-plugin",
+      config: {
+        exports: {
+          exclude: ["./rules"],
+        },
+      },
     },
     {
       name: "@outfitter/testing",

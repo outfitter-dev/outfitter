@@ -50,6 +50,7 @@ freshness with `bun run docs:check:readme-sentinel`.
 | [`@outfitter/index`](../packages/index/) | SQLite FTS5 full-text search indexing for Outfitter |
 | [`@outfitter/logging`](../packages/logging/) | Structured logging via logtape with redaction support for Outfitter |
 | [`@outfitter/mcp`](../packages/mcp/) | MCP server framework with typed tools for Outfitter |
+| [`@outfitter/oxlint-plugin`](../packages/oxlint-plugin/) | Custom lint rules for Outfitter architecture and safety conventions |
 | [`@outfitter/presets`](../packages/presets/) | Scaffold presets and shared dependency versions for Outfitter projects |
 | [`@outfitter/schema`](../packages/schema/) | Schema introspection, surface map generation, and drift detection for Outfitter |
 | [`@outfitter/state`](../packages/state/) | Pagination cursor persistence and state management for Outfitter |
