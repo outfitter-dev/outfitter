@@ -76,7 +76,7 @@ describe("createVerificationPlan", () => {
   test("uses lint in fallback when check is missing", () => {
     const plan = createVerificationPlan({
       typecheck: "tsc --noEmit",
-      lint: "biome check .",
+      lint: "oxlint .",
       build: "bun build src/index.ts",
       test: "bun test",
     });

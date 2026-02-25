@@ -3,8 +3,8 @@ import { describe, expect, test } from "bun:test";
 import { buildSyncedExports, shortAlias, sortExports } from "../sync-exports";
 
 describe("shortAlias", () => {
-  test("biome.json returns biome", () => {
-    expect(shortAlias("biome.json")).toBe("biome");
+  test(".oxlintrc.json returns .oxlintrc", () => {
+    expect(shortAlias(".oxlintrc.json")).toBe(".oxlintrc");
   });
 
   test("tsconfig.preset.json returns tsconfig", () => {
@@ -45,7 +45,7 @@ describe("buildSyncedExports", () => {
     const synced = buildSyncedExports({
       files: [
         "dist",
-        "biome.json",
+        ".oxlintrc.json",
         "tsconfig.preset.json",
         "tsconfig.preset.bun.json",
         "lefthook.yml",
@@ -58,8 +58,8 @@ describe("buildSyncedExports", () => {
             default: "./dist/cli/check.js",
           },
         },
-        "./biome": "./stale.json",
-        "./biome.json": "./stale.json",
+        "./.oxlintrc": "./stale.json",
+        "./.oxlintrc.json": "./stale.json",
         "./tsconfig": "./stale.json",
         "./tsconfig.preset.json": "./stale.json",
         "./package.json": "./package.json",
@@ -72,8 +72,8 @@ describe("buildSyncedExports", () => {
       },
     });
 
-    expect(synced["./biome"]).toBe("./biome.json");
-    expect(synced["./biome.json"]).toBe("./biome.json");
+    expect(synced["./.oxlintrc"]).toBe("./.oxlintrc.json");
+    expect(synced["./.oxlintrc.json"]).toBe("./.oxlintrc.json");
     expect(synced["./tsconfig"]).toBe("./tsconfig.preset.json");
     expect(synced["./tsconfig.preset.json"]).toBe("./tsconfig.preset.json");
     expect(synced["./tsconfig-bun"]).toBe("./tsconfig.preset.bun.json");
@@ -83,8 +83,8 @@ describe("buildSyncedExports", () => {
       ".",
       "./.markdownlint-cli2",
       "./.markdownlint-cli2.jsonc",
-      "./biome",
-      "./biome.json",
+      "./.oxlintrc",
+      "./.oxlintrc.json",
       "./cli/check",
       "./lefthook",
       "./lefthook.yml",

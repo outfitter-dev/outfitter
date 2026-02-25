@@ -58,9 +58,9 @@ describe("BlockSchema", () => {
 
   test("validates block with dependencies", () => {
     const block = {
-      name: "biome",
-      description: "Biome configuration",
-      files: [{ path: "biome.json", content: "{}" }],
+      name: "linter",
+      description: "Linter configuration",
+      files: [{ path: ".oxlintrc.json", content: "{}" }],
       devDependencies: {
         ultracite: "^7.0.0",
       },
@@ -73,7 +73,7 @@ describe("BlockSchema", () => {
     const block = {
       name: "scaffolding",
       description: "Full starter kit",
-      extends: ["claude", "biome", "lefthook", "bootstrap"],
+      extends: ["claude", "linter", "lefthook", "bootstrap"],
     };
     const result = BlockSchema.parse(block);
     expect(result.extends).toHaveLength(4);
@@ -91,16 +91,16 @@ describe("RegistrySchema", () => {
           description: "Claude Code settings",
           files: [{ path: ".claude/settings.json", content: "{}" }],
         },
-        biome: {
-          name: "biome",
-          description: "Biome configuration",
-          files: [{ path: "biome.json", content: "{}" }],
+        linter: {
+          name: "linter",
+          description: "Linter configuration",
+          files: [{ path: ".oxlintrc.json", content: "{}" }],
           devDependencies: { ultracite: "^7.0.0" },
         },
         scaffolding: {
           name: "scaffolding",
           description: "Full starter kit",
-          extends: ["claude", "biome"],
+          extends: ["claude", "linter"],
         },
       },
     };

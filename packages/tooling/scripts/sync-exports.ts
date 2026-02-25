@@ -6,7 +6,7 @@
  * gets two exports: the full filename and an extensionless short alias.
  *
  * Short alias rules:
- *   biome.json               → ./biome
+ *   .oxlintrc.json           → ./.oxlintrc
  *   tsconfig.preset.json     → ./tsconfig
  *   tsconfig.preset.bun.json → ./tsconfig-bun
  *   lefthook.yml             → ./lefthook
