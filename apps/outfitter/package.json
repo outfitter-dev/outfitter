@@ -334,6 +334,8 @@
     "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
     "test": "bun test",
+    "test:init-integration": "bun test ./src/__tests__/init-*.test.ts",
+    "test:upgrade-integration": "bun test ./src/__tests__/upgrade-integration-*.test.ts",
     "test:scaffold-e2e": "OUTFITTER_RUN_SCAFFOLD_E2E=1 bun test ./src/__tests__/scaffold-e2e.test.ts",
     "test:watch": "bun test --watch",
     "lint": "oxlint ./src",
