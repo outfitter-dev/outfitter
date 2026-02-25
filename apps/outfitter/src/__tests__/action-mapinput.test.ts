@@ -9,6 +9,19 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
 import { outfitterActions } from "../actions.js";
 
+async function withArgv(
+  argv: readonly string[],
+  run: () => void | Promise<void>
+): Promise<void> {
+  const originalArgv = process.argv;
+  process.argv = [...argv];
+  try {
+    await run();
+  } finally {
+    process.argv = originalArgv;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // check mapInput
 // ---------------------------------------------------------------------------
@@ -136,26 +149,36 @@ describe("check mapInput", () => {
 
     test("explicit --output human overrides OUTFITTER_JSON=1", () => {
       process.env["OUTFITTER_JSON"] = "1";
-      const action = outfitterActions.get("check");
-      const mapped = action?.cli?.mapInput?.({
-        args: [],
-        flags: { output: "human" },
-      }) as { outputMode: string };
+      return withArgv(
+        ["bun", "outfitter", "check", "--output", "human"],
+        () => {
+          const action = outfitterActions.get("check");
+          const mapped = action?.cli?.mapInput?.({
+            args: [],
+            flags: { output: "human" },
+          }) as { outputMode: string };
 
-      expect(mapped.outputMode).toBe("human");
+          expect(mapped.outputMode).toBe("human");
+        }
+      );
     });
 
     test("explicit --output human overrides OUTFITTER_JSONL=1", () => {
       const previousJsonl = process.env["OUTFITTER_JSONL"];
       process.env["OUTFITTER_JSONL"] = "1";
       try {
-        const action = outfitterActions.get("check");
-        const mapped = action?.cli?.mapInput?.({
-          args: [],
-          flags: { output: "human" },
-        }) as { outputMode: string };
+        return withArgv(
+          ["bun", "outfitter", "check", "--output", "human"],
+          () => {
+            const action = outfitterActions.get("check");
+            const mapped = action?.cli?.mapInput?.({
+              args: [],
+              flags: { output: "human" },
+            }) as { outputMode: string };
 
-        expect(mapped.outputMode).toBe("human");
+            expect(mapped.outputMode).toBe("human");
+          }
+        );
       } finally {
         if (previousJsonl === undefined) {
           delete process.env["OUTFITTER_JSONL"];
@@ -252,13 +275,18 @@ describe("check.tsdoc mapInput", () => {
     process.env["OUTFITTER_JSON"] = "1";
 
     try {
-      const action = outfitterActions.get("check.tsdoc");
-      const mapped = action?.cli?.mapInput?.({
-        args: [],
-        flags: { output: "human" },
-      }) as { outputMode: string };
+      return withArgv(
+        ["bun", "outfitter", "check", "tsdoc", "--output", "human"],
+        () => {
+          const action = outfitterActions.get("check.tsdoc");
+          const mapped = action?.cli?.mapInput?.({
+            args: [],
+            flags: { output: "human" },
+          }) as { outputMode: string };
 
-      expect(mapped.outputMode).toBe("human");
+          expect(mapped.outputMode).toBe("human");
+        }
+      );
     } finally {
       if (previousJson === undefined) {
         delete process.env["OUTFITTER_JSON"];
@@ -273,13 +301,18 @@ describe("check.tsdoc mapInput", () => {
     process.env["OUTFITTER_JSONL"] = "1";
 
     try {
-      const action = outfitterActions.get("check.tsdoc");
-      const mapped = action?.cli?.mapInput?.({
-        args: [],
-        flags: { output: "human" },
-      }) as { outputMode: string };
+      return withArgv(
+        ["bun", "outfitter", "check", "tsdoc", "--output", "human"],
+        () => {
+          const action = outfitterActions.get("check.tsdoc");
+          const mapped = action?.cli?.mapInput?.({
+            args: [],
+            flags: { output: "human" },
+          }) as { outputMode: string };
 
-      expect(mapped.outputMode).toBe("human");
+          expect(mapped.outputMode).toBe("human");
+        }
+      );
     } finally {
       if (previousJsonl === undefined) {
         delete process.env["OUTFITTER_JSONL"];

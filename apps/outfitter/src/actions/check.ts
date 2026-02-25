@@ -30,7 +30,11 @@ import {
   type CliOutputMode,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
-import { outputModeSchema, resolveStringFlag } from "./shared.js";
+import {
+  hasExplicitOutputFlag,
+  outputModeSchema,
+  resolveStringFlag,
+} from "./shared.js";
 
 interface CheckActionInput {
   block?: string;
@@ -136,7 +140,7 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       const { outputMode: presetOutputMode } = checkOutputMode.resolve(
         context.flags
       );
-      const explicitOutput = typeof context.flags["output"] === "string";
+      const explicitOutput = hasExplicitOutputFlag(context.flags);
       const block = resolveStringFlag(context.flags["block"]);
       if (mode !== undefined && block !== undefined) {
         throw ValidationError.fromMessage(
@@ -341,7 +345,7 @@ const _checkTsdocAction: ActionSpec<
         context.flags
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
-      const explicitOutput = typeof context.flags["output"] === "string";
+      const explicitOutput = hasExplicitOutputFlag(context.flags);
       let outputMode: CliOutputMode;
       if (explicitOutput) {
         // Explicit --output should always win over env fallbacks.

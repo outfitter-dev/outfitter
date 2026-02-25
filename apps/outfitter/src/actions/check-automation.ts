@@ -40,7 +40,7 @@ import {
   type CliOutputMode,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
-import { outputModeSchema } from "./shared.js";
+import { hasExplicitOutputFlag, outputModeSchema } from "./shared.js";
 
 interface CheckAutomationInput {
   cwd: string;
@@ -61,7 +61,7 @@ function mapCheckAutomationInput(context: {
   const { outputMode: presetOutputMode } = checkAutomationOutput.resolve(
     context.flags
   );
-  const explicitOutput = typeof context.flags["output"] === "string";
+  const explicitOutput = hasExplicitOutputFlag(context.flags);
 
   let outputMode: CliOutputMode;
   if (explicitOutput) {

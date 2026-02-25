@@ -11,6 +11,45 @@ const _outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
   .default("human");
 export const outputModeSchema: typeof _outputModeSchema = _outputModeSchema;
 
+function argvContainsOutputFlag(argv: readonly string[]): boolean {
+  for (let index = 0; index < argv.length; index++) {
+    const arg = argv[index];
+    if (!arg) {
+      continue;
+    }
+
+    if (arg === "-o" || arg === "--output") {
+      return true;
+    }
+
+    if (arg.startsWith("--output=") || arg.startsWith("-o=")) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function hasExplicitOutputFlag(
+  flags: Record<string, unknown>,
+  options: {
+    readonly argv?: readonly string[];
+    readonly defaultMode?: "human" | "json" | "jsonl";
+  } = {}
+): boolean {
+  const mode = flags["output"];
+  if (typeof mode !== "string") {
+    return false;
+  }
+
+  const defaultMode = options.defaultMode ?? "human";
+  if (mode !== defaultMode) {
+    return true;
+  }
+
+  return argvContainsOutputFlag(options.argv ?? process.argv.slice(2));
+}
+
 export function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
