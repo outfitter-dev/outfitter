@@ -74,7 +74,9 @@ describe("replaceSentinelSection", () => {
         "# Title",
         "",
         "<!-- BEGIN:GENERATED:PACKAGE_LIST -->",
+        "",
         "new content here",
+        "",
         "<!-- END:GENERATED:PACKAGE_LIST -->",
         "",
         "## Footer",
@@ -145,7 +147,9 @@ describe("replaceSentinelSection", () => {
     expect(result).toBe(
       [
         "<!-- BEGIN:GENERATED:ITEMS -->",
+        "",
         "single line",
+        "",
         "<!-- END:GENERATED:ITEMS -->",
       ].join("\n")
     );
@@ -189,14 +193,13 @@ describe("generatePackageListSection", () => {
 
     const result = await generatePackageListSection(workspaceRoot);
 
-    expect(result).toContain("| Package | Description |");
-    expect(result).toContain("|---------|-------------|");
-    expect(result).toContain(
-      "| [`@outfitter/cli`](../packages/cli/) | CLI framework |"
-    );
-    expect(result).toContain(
-      "| [`@outfitter/config`](../packages/config/) | XDG-compliant configuration |"
-    );
+    expect(result).toContain("| Package");
+    expect(result).toContain("| Description");
+    expect(result).toContain("---");
+    expect(result).toContain("[`@outfitter/cli`](../packages/cli/)");
+    expect(result).toContain("CLI framework");
+    expect(result).toContain("[`@outfitter/config`](../packages/config/)");
+    expect(result).toContain("XDG-compliant configuration");
   });
 
   it("excludes private packages", async () => {
@@ -269,8 +272,9 @@ describe("generatePackageListSection", () => {
 
     const result = await generatePackageListSection(workspaceRoot);
 
-    expect(result).toContain("| Package | Description |");
-    expect(result).toContain("|---------|-------------|");
+    expect(result).toContain("| Package");
+    expect(result).toContain("| Description");
+    expect(result).toContain("---");
     // Only header rows, no data rows
     const rows = result.split("\n").filter((line) => line.startsWith("| [`"));
     expect(rows).toHaveLength(0);
@@ -300,6 +304,6 @@ describe("generatePackageListSection", () => {
 
     expect(result).toContain("@outfitter/cli");
     // Should have an empty description cell but not crash
-    expect(result).toContain("| [`@outfitter/cli`](../packages/cli/) |");
+    expect(result).toContain("[`@outfitter/cli`](../packages/cli/)");
   });
 });

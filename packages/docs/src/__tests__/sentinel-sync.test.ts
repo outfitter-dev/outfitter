@@ -94,10 +94,9 @@ describe("sentinel-sync script", () => {
     expect(result.stdout).toBe(
       "docs/README.md updated with generated package list.\n"
     );
-    expect(updatedReadme).toContain("| Package | Description |");
-    expect(updatedReadme).toContain(
-      "| [`@acme/alpha`](../packages/alpha/) | |"
-    );
+    expect(updatedReadme).toContain("| Package");
+    expect(updatedReadme).toContain("| Description");
+    expect(updatedReadme).toContain("[`@acme/alpha`](../packages/alpha/)");
     expect(updatedReadme).not.toContain("stale generated content");
   });
 });

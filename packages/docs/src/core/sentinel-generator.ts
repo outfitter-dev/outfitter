@@ -65,7 +65,9 @@ export function replaceSentinelSection(
     `${escapeRegex(beginTag)}[\\s\\S]*?${escapeRegex(endTag)}`,
     "g"
   );
-  return content.replace(regex, `${beginTag}\n${newContent}\n${endTag}`);
+  // Keep blank lines around generated content so markdown formatters preserve
+  // this section without churn.
+  return content.replace(regex, `${beginTag}\n\n${newContent}\n\n${endTag}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -180,15 +182,32 @@ export async function generatePackageListSection(
   const packagesRoot = join(workspaceRoot, "packages");
   const packages = await discoverPublishablePackages(packagesRoot);
 
+  const rows = packages.map((pkg) => {
+    const link = `../packages/${pkg.dirName}/`;
+    return {
+      packageCell: `[\`${pkg.name}\`](${link})`,
+      descriptionCell: pkg.description,
+    };
+  });
+
+  const packageWidth = Math.max(
+    "Package".length,
+    ...rows.map((row) => row.packageCell.length)
+  );
+  const descriptionWidth = Math.max(
+    "Description".length,
+    ...rows.map((row) => row.descriptionCell.length)
+  );
+
   const lines: string[] = [
-    "| Package | Description |",
-    "|---------|-------------|",
+    `| ${"Package".padEnd(packageWidth)} | ${"Description".padEnd(descriptionWidth)} |`,
+    `| ${"-".repeat(packageWidth)} | ${"-".repeat(descriptionWidth)} |`,
   ];
 
-  for (const pkg of packages) {
-    const link = `../packages/${pkg.dirName}/`;
-    const descriptionCell = pkg.description ? ` ${pkg.description} ` : " ";
-    lines.push(`| [\`${pkg.name}\`](${link}) |${descriptionCell}|`);
+  for (const row of rows) {
+    lines.push(
+      `| ${row.packageCell.padEnd(packageWidth)} | ${row.descriptionCell.padEnd(descriptionWidth)} |`
+    );
   }
 
   return lines.join("\n");
