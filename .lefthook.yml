@@ -11,9 +11,9 @@ pre-commit:
 
     typecheck:
       glob: "*.{ts,tsx}"
-      # Avoid turbo dependency fan-out (^build) in commit hooks, which can
-      # trigger bunup export rewrites and leave unstaged package.json drift.
-      run: bun run typecheck -- --only
+      # Only typecheck packages that have staged .ts/.tsx files, rather than
+      # running turbo typecheck across all 20+ packages on every commit.
+      run: ./scripts/pre-commit-typecheck.sh {staged_files}
 
     check-exports:
       glob: "*.{ts,tsx}"
