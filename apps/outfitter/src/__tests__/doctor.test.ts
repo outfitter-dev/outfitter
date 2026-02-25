@@ -78,6 +78,29 @@ describe("doctor command Bun version check", () => {
 
     expect(result.checks.bunVersion.required).toBe("1.3.6");
   });
+
+  test("uses pinned .bun-version when present", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(join(tempDir, ".bun-version"), `${Bun.version}\n`);
+
+    const result = runDoctor({ cwd: tempDir });
+
+    expect(result.checks.bunVersion.passed).toBe(true);
+    expect(result.checks.bunVersion.required).toBe(Bun.version);
+  });
+
+  test("fails when .bun-version does not match runtime version", async () => {
+    const { runDoctor } = await import("../commands/doctor.js");
+
+    writeFileSync(join(tempDir, ".bun-version"), "0.0.1\n");
+
+    const result = runDoctor({ cwd: tempDir });
+
+    expect(result.checks.bunVersion.passed).toBe(false);
+    expect(result.checks.bunVersion.required).toBe("0.0.1");
+    expect(result.checks.bunVersion.error).toContain("does not match");
+  });
 });
 
 // =============================================================================

@@ -418,6 +418,36 @@ function runScript(scriptName: string): boolean {
   return result.exitCode === 0;
 }
 
+export interface BunVersionCheckResult {
+  readonly matches: boolean;
+  readonly expected?: string;
+  readonly actual?: string;
+}
+
+/**
+ * Check that the local Bun version matches the pinned version in ".bun-version".
+ *
+ * @param projectRoot - Directory containing ".bun-version" (defaults to cwd)
+ * @returns Result indicating whether versions match
+ */
+export function checkBunVersion(
+  projectRoot: string = process.cwd()
+): BunVersionCheckResult {
+  const versionFile = join(projectRoot, ".bun-version");
+  if (!existsSync(versionFile)) {
+    return { matches: true };
+  }
+
+  const expected = readFileSync(versionFile, "utf-8").trim();
+  const actual = Bun.version;
+
+  if (expected === actual) {
+    return { matches: true };
+  }
+
+  return { matches: false, expected, actual };
+}
+
 export interface PrePushOptions {
   force?: boolean;
 }
@@ -428,6 +458,24 @@ export interface PrePushOptions {
 export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   log(`${COLORS.blue}Pre-push verify${COLORS.reset} (TDD-aware)`);
   log("");
+
+  // Force flag bypasses all strict verification checks.
+  if (options.force) {
+    log(
+      `${COLORS.yellow}Force flag set${COLORS.reset} - skipping strict verification`
+    );
+    process.exit(0);
+  }
+
+  const versionCheck = checkBunVersion();
+  if (!versionCheck.matches) {
+    log(
+      `${COLORS.red}Bun version mismatch${COLORS.reset}: running ${versionCheck.actual}, pinned ${versionCheck.expected}`
+    );
+    log("Fix: bunx @outfitter/tooling upgrade-bun");
+    log("");
+    process.exit(1);
+  }
 
   const branch = getCurrentBranch();
 
@@ -455,14 +503,6 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
         process.exit(0);
       }
     }
-  }
-
-  // Force flag bypasses tests
-  if (options.force) {
-    log(
-      `${COLORS.yellow}Force flag set${COLORS.reset} - skipping strict verification`
-    );
-    process.exit(0);
   }
 
   const plan = createVerificationPlan(readPackageScripts());

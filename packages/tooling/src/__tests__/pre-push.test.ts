@@ -1,8 +1,12 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   areFilesTestOnly,
   canBypassRedPhaseByChangedFiles,
+  checkBunVersion,
   createVerificationPlan,
   hasPackageSourceChanges,
   isRedPhaseBranch,
@@ -218,5 +222,43 @@ describe("hasPackageSourceChanges", () => {
         source: "upstream",
       })
     ).toBe(false);
+  });
+});
+
+describe("checkBunVersion", () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = join(tmpdir(), `pre-push-test-${Date.now()}`);
+    mkdirSync(tempDir, { recursive: true });
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  test("returns match when .bun-version matches runtime version", () => {
+    writeFileSync(join(tempDir, ".bun-version"), `${Bun.version}\n`);
+    const result = checkBunVersion(tempDir);
+    expect(result.matches).toBe(true);
+  });
+
+  test("returns mismatch when .bun-version differs from runtime version", () => {
+    writeFileSync(join(tempDir, ".bun-version"), "0.0.1\n");
+    const result = checkBunVersion(tempDir);
+    expect(result.matches).toBe(false);
+    expect(result.expected).toBe("0.0.1");
+    expect(result.actual).toBe(Bun.version);
+  });
+
+  test("returns match when .bun-version is missing", () => {
+    const result = checkBunVersion(tempDir);
+    expect(result.matches).toBe(true);
+  });
+
+  test("trims whitespace from .bun-version content", () => {
+    writeFileSync(join(tempDir, ".bun-version"), `  ${Bun.version}  \n`);
+    const result = checkBunVersion(tempDir);
+    expect(result.matches).toBe(true);
   });
 });
