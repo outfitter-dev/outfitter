@@ -2,33 +2,14 @@
 # https://github.com/evilmartians/lefthook
 
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
-    ultracite:
-      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
-      run: bun x ultracite fix {staged_files}
-      stage_fixed: true
-
-    typecheck:
-      glob: "*.{ts,tsx}"
-      # Only typecheck packages that have staged .ts/.tsx files, rather than
-      # running turbo typecheck across all 20+ packages on every commit.
-      run: ./scripts/pre-commit-typecheck.sh {staged_files}
-
-    check-exports:
-      glob: "*.{ts,tsx}"
-      # Keep export drift detection explicit and non-mutating in pre-commit.
-      run: bun run check-exports
-
-    sync-agent-scaffolding:
-      glob: ".claude/{settings.json,hooks/*}"
-      run: ./scripts/sync-agent-scaffolding.sh
+    verify:
+      run: bun run apps/outfitter/src/cli.ts check --pre-commit {staged_files}
       stage_fixed: true
 
 pre-push:
   parallel: false
   commands:
     verify:
-      run: bun run packages/tooling/src/cli/index.ts pre-push
-    schema-drift:
-      run: bun run apps/outfitter/src/cli.ts schema diff
+      run: bun run apps/outfitter/src/cli.ts check --pre-push

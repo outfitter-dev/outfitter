@@ -96,8 +96,10 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
   input: checkInputSchema,
   cli: {
     group: "check",
-    // No `command` — this IS the base "check" command. Omitting `command`
-    // prevents schema from rendering "check check".
+    // Accept optional staged-file args for hook-driven `--pre-commit` mode.
+    // Using an argument-only command spec keeps this as the base `check`
+    // command (without rendering `check check` in schema output).
+    command: "[staged-files...]",
     description:
       "Compare local config blocks against the registry for drift detection",
     options: [
