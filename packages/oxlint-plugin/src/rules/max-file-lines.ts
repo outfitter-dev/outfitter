@@ -47,7 +47,11 @@ function countLines(sourceText: string): number {
     return 0;
   }
 
-  return sourceText.split(/\r\n|\n|\r/u).length;
+  const normalizedSourceText = sourceText
+    .replace(/\r\n/gu, "\n")
+    .replace(/\r/gu, "\n");
+  const newlineCount = normalizedSourceText.match(/\n/gu)?.length ?? 0;
+  return normalizedSourceText.endsWith("\n") ? newlineCount : newlineCount + 1;
 }
 
 export const maxFileLinesRule: RuleModule = {

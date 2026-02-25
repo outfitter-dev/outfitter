@@ -30,7 +30,7 @@ describe("oxlint plugin scaffold", () => {
       "outfitter/no-console-in-packages": "error",
       "outfitter/no-process-exit-in-packages": "error",
       "outfitter/no-process-env-in-packages": "warn",
-      "outfitter/max-file-lines": ["warn", { warn: 200, error: 400 }],
+      "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],
     });
   });
 });

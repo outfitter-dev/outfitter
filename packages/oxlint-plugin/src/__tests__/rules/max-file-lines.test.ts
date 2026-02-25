@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { maxFileLinesRule } from "../../rules/max-file-lines.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 
@@ -34,7 +35,10 @@ describe("max-file-lines", () => {
 
   test("uses default thresholds of 200 warn and 400 error", () => {
     // 201 lines should trigger warn with default thresholds
-    const lines201 = Array.from({ length: 201 }, (_, i) => `// line ${i + 1}`).join("\n");
+    const lines201 = Array.from(
+      { length: 201 },
+      (_, i) => `// line ${i + 1}`
+    ).join("\n");
 
     const warnReports = runRuleForEvent({
       event: "Program",
@@ -49,7 +53,10 @@ describe("max-file-lines", () => {
     expect(warnReports[0]?.messageId).toBe("fileTooLongWarn");
 
     // 200 lines should be fine
-    const lines200 = Array.from({ length: 200 }, (_, i) => `// line ${i + 1}`).join("\n");
+    const lines200 = Array.from(
+      { length: 200 },
+      (_, i) => `// line ${i + 1}`
+    ).join("\n");
 
     const okReports = runRuleForEvent({
       event: "Program",
@@ -182,6 +189,31 @@ describe("max-file-lines", () => {
     });
 
     expect(reports).toHaveLength(0);
+  });
+
+  test("does not overcount files that end with a trailing newline", () => {
+    const reportsAtThreshold = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5 }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\n",
+    });
+
+    expect(reportsAtThreshold).toHaveLength(0);
+
+    const reportsAboveThreshold = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5 }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\n",
+    });
+
+    expect(reportsAboveThreshold).toHaveLength(1);
+    expect(reportsAboveThreshold[0]?.messageId).toBe("fileTooLongWarn");
   });
 
   test("ignores non-package source files", () => {
