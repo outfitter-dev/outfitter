@@ -1,3 +1,4 @@
+import packageMetadata from "../package.json";
 import { rules as ruleRegistry } from "./rules/index.js";
 
 export interface OutfitterPlugin {
@@ -18,7 +19,7 @@ export interface OutfitterPlugin {
 const plugin: OutfitterPlugin = {
   meta: {
     name: "@outfitter/oxlint-plugin",
-    version: "0.1.0",
+    version: packageMetadata.version,
   },
   rules: ruleRegistry,
   configs: {},

@@ -21,9 +21,7 @@ bun add -d @outfitter/oxlint-plugin
       "specifier": "@outfitter/oxlint-plugin"
     }
   ],
-  "rules": {
-    "outfitter/no-throw-in-handler": "error"
-  }
+  "rules": {}
 }
 ```
 
@@ -35,12 +33,13 @@ import outfitter from "@outfitter/oxlint-plugin";
 export default [
   {
     plugins: { outfitter },
-    rules: {
-      "outfitter/no-throw-in-handler": "error"
-    }
+    rules: {}
   }
 ];
 ```
+
+This scaffold branch (`OS-379`) wires the plugin package and test harness.
+Rule implementations land in follow-up issues (`OS-380+`).
 
 ## Status
 
