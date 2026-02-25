@@ -30,6 +30,11 @@
   "peerDependencies": {
     "eslint": ">=9.0.0"
   },
+  "peerDependenciesMeta": {
+    "eslint": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"
