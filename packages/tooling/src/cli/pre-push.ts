@@ -459,6 +459,14 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   log(`${COLORS.blue}Pre-push verify${COLORS.reset} (TDD-aware)`);
   log("");
 
+  // Force flag bypasses all strict verification checks.
+  if (options.force) {
+    log(
+      `${COLORS.yellow}Force flag set${COLORS.reset} - skipping strict verification`
+    );
+    process.exit(0);
+  }
+
   const versionCheck = checkBunVersion();
   if (!versionCheck.matches) {
     log(
@@ -495,14 +503,6 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
         process.exit(0);
       }
     }
-  }
-
-  // Force flag bypasses tests
-  if (options.force) {
-    log(
-      `${COLORS.yellow}Force flag set${COLORS.reset} - skipping strict verification`
-    );
-    process.exit(0);
   }
 
   const plan = createVerificationPlan(readPackageScripts());
