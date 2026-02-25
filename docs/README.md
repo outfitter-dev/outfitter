@@ -38,26 +38,28 @@ Regenerate README sentinel sections with `bun run docs:sync:readme`; verify
 freshness with `bun run docs:check:readme-sentinel`.
 
 <!-- BEGIN:GENERATED:PACKAGE_LIST -->
-| Package | Description |
-|---------|-------------|
-| [`@outfitter/agents`](../packages/agents/) | DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects |
-| [`@outfitter/cli`](../packages/cli/) | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing |
-| [`@outfitter/config`](../packages/config/) | XDG-compliant config loading with schema validation for Outfitter |
-| [`@outfitter/contracts`](../packages/contracts/) | Result/Error patterns, error taxonomy, and handler contracts for Outfitter |
-| [`@outfitter/daemon`](../packages/daemon/) | Daemon lifecycle, IPC, and health checks for Outfitter |
-| [`@outfitter/docs`](../packages/docs/) | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows |
-| [`@outfitter/file-ops`](../packages/file-ops/) | Workspace detection, secure path handling, and file locking for Outfitter |
-| [`@outfitter/index`](../packages/index/) | SQLite FTS5 full-text search indexing for Outfitter |
-| [`@outfitter/logging`](../packages/logging/) | Structured logging via logtape with redaction support for Outfitter |
-| [`@outfitter/mcp`](../packages/mcp/) | MCP server framework with typed tools for Outfitter |
-| [`@outfitter/oxlint-plugin`](../packages/oxlint-plugin/) | Custom lint rules for Outfitter architecture and safety conventions |
-| [`@outfitter/presets`](../packages/presets/) | Scaffold presets and shared dependency versions for Outfitter projects |
-| [`@outfitter/schema`](../packages/schema/) | Schema introspection, surface map generation, and drift detection for Outfitter |
-| [`@outfitter/state`](../packages/state/) | Pagination cursor persistence and state management for Outfitter |
-| [`@outfitter/testing`](../packages/testing/) | Test harnesses, fixtures, and utilities for Outfitter packages |
-| [`@outfitter/tooling`](../packages/tooling/) | Dev tooling configuration presets for Outfitter projects (oxlint/oxfmt, typescript, lefthook, markdownlint) |
-| [`@outfitter/tui`](../packages/tui/) | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming |
-| [`@outfitter/types`](../packages/types/) | Branded types, type guards, and type utilities for Outfitter |
+
+| Package                                                  | Description                                                                                                 |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`@outfitter/agents`](../packages/agents/)               | DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects          |
+| [`@outfitter/cli`](../packages/cli/)                     | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing                   |
+| [`@outfitter/config`](../packages/config/)               | XDG-compliant config loading with schema validation for Outfitter                                           |
+| [`@outfitter/contracts`](../packages/contracts/)         | Result/Error patterns, error taxonomy, and handler contracts for Outfitter                                  |
+| [`@outfitter/daemon`](../packages/daemon/)               | Daemon lifecycle, IPC, and health checks for Outfitter                                                      |
+| [`@outfitter/docs`](../packages/docs/)                   | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows         |
+| [`@outfitter/file-ops`](../packages/file-ops/)           | Workspace detection, secure path handling, and file locking for Outfitter                                   |
+| [`@outfitter/index`](../packages/index/)                 | SQLite FTS5 full-text search indexing for Outfitter                                                         |
+| [`@outfitter/logging`](../packages/logging/)             | Structured logging via logtape with redaction support for Outfitter                                         |
+| [`@outfitter/mcp`](../packages/mcp/)                     | MCP server framework with typed tools for Outfitter                                                         |
+| [`@outfitter/oxlint-plugin`](../packages/oxlint-plugin/) | Custom lint rules for Outfitter architecture and safety conventions                                         |
+| [`@outfitter/presets`](../packages/presets/)             | Scaffold presets and shared dependency versions for Outfitter projects                                      |
+| [`@outfitter/schema`](../packages/schema/)               | Schema introspection, surface map generation, and drift detection for Outfitter                             |
+| [`@outfitter/state`](../packages/state/)                 | Pagination cursor persistence and state management for Outfitter                                            |
+| [`@outfitter/testing`](../packages/testing/)             | Test harnesses, fixtures, and utilities for Outfitter packages                                              |
+| [`@outfitter/tooling`](../packages/tooling/)             | Dev tooling configuration presets for Outfitter projects (oxlint/oxfmt, typescript, lefthook, markdownlint) |
+| [`@outfitter/tui`](../packages/tui/)                     | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming                |
+| [`@outfitter/types`](../packages/types/)                 | Branded types, type guards, and type utilities for Outfitter                                                |
+
 <!-- END:GENERATED:PACKAGE_LIST -->
 
 ## Quick Links

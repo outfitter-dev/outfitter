@@ -96,7 +96,7 @@ function findNotes(
   }
 
   // Sort by filename (which starts with timestamp)
-  return notes.sort((a, b) => a.filename.localeCompare(b.filename));
+  return notes.toSorted((a, b) => a.filename.localeCompare(b.filename));
 }
 
 /**

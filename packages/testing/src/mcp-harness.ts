@@ -153,11 +153,12 @@ export function createMCPTestHarness(
     server.registerTool(tool);
   }
 
-  return createMcpHarness(server, {
-    ...(options.fixturesDir !== undefined
+  return createMcpHarness(
+    server,
+    options.fixturesDir !== undefined
       ? { fixturesDir: options.fixturesDir }
-      : {}),
-  });
+      : {}
+  );
 }
 
 /**

@@ -41,8 +41,8 @@ describe("preset boundary guardrails", () => {
       match = PRESET_EXPORT_RE.exec(FLAGS_SOURCE);
     }
 
-    expect([...exportedPresetNames].sort()).toEqual(
-      [...ALLOWED_PRESET_EXPORTS].sort()
+    expect([...exportedPresetNames].toSorted()).toEqual(
+      [...ALLOWED_PRESET_EXPORTS].toSorted()
     );
   });
 });

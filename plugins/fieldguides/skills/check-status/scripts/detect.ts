@@ -209,15 +209,17 @@ async function detect(): Promise<DetectResult> {
  * @param result - Detection results to format
  * @returns Formatted text output
  */
+const statusIcon = (available: boolean) => (available ? "✓" : "✗");
+
 function formatText(result: DetectResult): string {
   const lines: string[] = ["PROJECT TOOLS", ""];
 
-  const status = (available: boolean) => (available ? "✓" : "✗");
-
-  lines.push(`${status(result.graphite)} Graphite: ${result.details.graphite}`);
-  lines.push(`${status(result.github)} GitHub: ${result.details.github}`);
-  lines.push(`${status(result.linear)} Linear: ${result.details.linear}`);
-  lines.push(`${status(result.beads)} Beads: ${result.details.beads}`);
+  lines.push(
+    `${statusIcon(result.graphite)} Graphite: ${result.details.graphite}`
+  );
+  lines.push(`${statusIcon(result.github)} GitHub: ${result.details.github}`);
+  lines.push(`${statusIcon(result.linear)} Linear: ${result.details.linear}`);
+  lines.push(`${statusIcon(result.beads)} Beads: ${result.details.beads}`);
 
   const available = [
     result.graphite && "graphite",

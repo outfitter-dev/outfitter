@@ -101,23 +101,23 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 ## Packages
 
-| Package                | Purpose                                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `@outfitter/cli`       | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing            |
-| `@outfitter/config`    | XDG-compliant config loading with schema validation for Outfitter                                    |
-| `@outfitter/contracts` | Result/Error patterns, error taxonomy, and handler contracts for Outfitter                           |
-| `@outfitter/daemon`    | Daemon lifecycle, IPC, and health checks for Outfitter                                               |
-| `@outfitter/docs`      | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows  |
-| `@outfitter/file-ops`  | Workspace detection, secure path handling, and file locking for Outfitter                            |
-| `@outfitter/index`     | SQLite FTS5 full-text search indexing for Outfitter                                                  |
-| `@outfitter/logging`   | Structured logging via logtape with redaction support for Outfitter                                  |
-| `@outfitter/mcp`       | MCP server framework with typed tools for Outfitter                                                  |
-| `@outfitter/schema`    | Schema introspection, surface map generation, and drift detection for Outfitter                      |
-| `@outfitter/state`     | Pagination cursor persistence and state management for Outfitter                                     |
-| `@outfitter/testing`   | Test harnesses, fixtures, and utilities for Outfitter packages                                       |
+| Package                | Purpose                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@outfitter/cli`       | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing             |
+| `@outfitter/config`    | XDG-compliant config loading with schema validation for Outfitter                                     |
+| `@outfitter/contracts` | Result/Error patterns, error taxonomy, and handler contracts for Outfitter                            |
+| `@outfitter/daemon`    | Daemon lifecycle, IPC, and health checks for Outfitter                                                |
+| `@outfitter/docs`      | Docs CLI, core assembly primitives, freshness checks, and host adapter for Outfitter docs workflows   |
+| `@outfitter/file-ops`  | Workspace detection, secure path handling, and file locking for Outfitter                             |
+| `@outfitter/index`     | SQLite FTS5 full-text search indexing for Outfitter                                                   |
+| `@outfitter/logging`   | Structured logging via logtape with redaction support for Outfitter                                   |
+| `@outfitter/mcp`       | MCP server framework with typed tools for Outfitter                                                   |
+| `@outfitter/schema`    | Schema introspection, surface map generation, and drift detection for Outfitter                       |
+| `@outfitter/state`     | Pagination cursor persistence and state management for Outfitter                                      |
+| `@outfitter/testing`   | Test harnesses, fixtures, and utilities for Outfitter packages                                        |
 | `@outfitter/tooling`   | Dev tooling configuration presets for Outfitter projects (oxlint, typescript, lefthook, markdownlint) |
-| `@outfitter/tui`       | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming         |
-| `@outfitter/types`     | Branded types, type guards, and type utilities for Outfitter                                         |
+| `@outfitter/tui`       | Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming          |
+| `@outfitter/types`     | Branded types, type guards, and type utilities for Outfitter                                          |
 
 ## Links
 

@@ -187,7 +187,7 @@ function createMemoryLogger(
       const mergedMetadata = {
         adapter: "memory",
         ...context,
-        ...(metadata ?? {}),
+        ...metadata,
       };
       records.push({
         category,

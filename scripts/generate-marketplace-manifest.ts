@@ -32,6 +32,9 @@ function deriveRepo(repositoryUrl: string): string {
   return match[1];
 }
 
+const q = (s: string) => `"${s}"`;
+const arr = (items: string[]) => `[${items.map(q).join(", ")}]`;
+
 async function main() {
   const file = Bun.file(SOURCE);
   if (!(await file.exists())) {
@@ -50,8 +53,6 @@ async function main() {
     .map((p) => p.name);
 
   // Build JSON manually to match Biome formatting (inline short arrays).
-  const q = (s: string) => `"${s}"`;
-  const arr = (items: string[]) => `[${items.map(q).join(", ")}]`;
   const json = [
     "{",
     `  "_generated": {`,

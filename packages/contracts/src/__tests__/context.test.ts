@@ -106,7 +106,7 @@ describe("generateRequestId()", () => {
     ids.push(generateRequestId());
 
     // IDs should be in ascending order when sorted lexicographically
-    const sorted = [...ids].sort();
+    const sorted = [...ids].toSorted();
     expect(sorted).toEqual(ids);
 
     // Additionally, first ID should be "less than" second, etc.

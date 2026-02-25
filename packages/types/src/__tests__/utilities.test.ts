@@ -22,6 +22,10 @@ import {
   type ValueOf,
 } from "../utilities.js";
 
+const noop = (): void => {
+  // intentionally empty
+};
+
 describe("utilities", () => {
   describe("RequiredKeys<T, K>", () => {
     interface Config {
@@ -457,9 +461,6 @@ describe("utilities", () => {
       }
       type Combined = Prettify<WithMethod & WithValue>;
 
-      const noop = (): void => {
-        // intentionally empty
-      };
       const obj: Combined = {
         method: noop,
         value: "test",

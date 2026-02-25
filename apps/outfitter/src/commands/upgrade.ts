@@ -1179,7 +1179,7 @@ export async function printUpgradeResults(
   if (result.codemods !== undefined) {
     const uniqueChangedFiles = [
       ...new Set(result.codemods.changedFiles),
-    ].sort();
+    ].toSorted();
     lines.push(theme.info(`Ran ${result.codemods.codemodCount} codemod(s).`));
 
     if (uniqueChangedFiles.length > 0) {

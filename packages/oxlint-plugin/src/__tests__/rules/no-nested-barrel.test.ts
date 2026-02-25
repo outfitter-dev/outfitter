@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { noNestedBarrelRule } from "../../rules/no-nested-barrel.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 

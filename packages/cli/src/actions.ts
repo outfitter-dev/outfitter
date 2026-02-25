@@ -31,9 +31,7 @@ const ARGUMENT_PREFIXES = ["<", "["];
 
 type ResolvedType<T> = T extends FlagPreset<infer R> ? R : never;
 type UnionToIntersection<U> = (
-  U extends unknown
-    ? (k: U) => void
-    : never
+  U extends unknown ? (k: U) => void : never
 ) extends (k: infer I) => void
   ? I
   : never;

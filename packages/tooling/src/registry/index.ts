@@ -7,12 +7,12 @@
  */
 
 export type {
-	AddBlockOptions,
-	AddBlockResult,
-	Block,
-	BlockDefinition,
-	FileEntry,
-	Registry,
-	RegistryBuildConfig,
+  AddBlockOptions,
+  AddBlockResult,
+  Block,
+  BlockDefinition,
+  FileEntry,
+  Registry,
+  RegistryBuildConfig,
 } from "./schema.js";
 export { BlockSchema, FileEntrySchema, RegistrySchema } from "./schema.js";

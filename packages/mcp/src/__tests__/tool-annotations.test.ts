@@ -236,6 +236,8 @@ describe("TOOL_ANNOTATIONS presets", () => {
   });
 });
 
+const noop = () => undefined;
+
 describe("adaptHandler()", () => {
   it("adapts a domain handler for use with defineTool", async () => {
     class DomainError extends Error {
@@ -254,7 +256,6 @@ describe("adaptHandler()", () => {
 
     const adapted = adaptHandler(domainHandler);
 
-    const noop = () => undefined;
     const ctx = {
       requestId: "test-123",
       logger: { info: noop, warn: noop, error: noop, debug: noop },

@@ -60,14 +60,14 @@ export function renderLlmsIndexFromMap(docsMap: DocsMap): string {
   }
 
   // Sort packages alphabetically
-  const sortedPackages = [...byPackage.keys()].sort();
+  const sortedPackages = [...byPackage.keys()].toSorted();
 
   for (const pkg of sortedPackages) {
     lines.push(`## ${pkg}`);
     const entries = byPackage.get(pkg);
     if (!entries) continue;
 
-    const sortedEntries = [...entries].sort((a, b) =>
+    const sortedEntries = [...entries].toSorted((a, b) =>
       a.outputPath.localeCompare(b.outputPath)
     );
     for (const entry of sortedEntries) {
@@ -113,7 +113,7 @@ export async function renderLlmsFullFromMap(
   // Sort entries by output path, skipping those without a package
   const sortedEntries = [...docsMap.entries]
     .filter((e) => e.package)
-    .sort((a, b) => a.outputPath.localeCompare(b.outputPath));
+    .toSorted((a, b) => a.outputPath.localeCompare(b.outputPath));
 
   for (const entry of sortedEntries) {
     const absolutePath = resolve(resolvedWorkspaceRoot, entry.outputPath);

@@ -317,7 +317,7 @@ describe("parseGlob()", () => {
       await writeFile(join(temp.path, "file3.js"), "");
 
       const result = await parseGlob("*.ts", { cwd: temp.path });
-      expect(result.sort()).toEqual(["file1.ts", "file2.ts"].sort());
+      expect(result.toSorted()).toEqual(["file1.ts", "file2.ts"].toSorted());
     } finally {
       await temp.cleanup();
     }

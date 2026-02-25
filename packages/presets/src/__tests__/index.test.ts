@@ -28,7 +28,7 @@ describe("listPresets", () => {
   test("returns sorted preset names", () => {
     const presets = listPresets();
     const names = presets.map((p) => p.name);
-    expect(names).toEqual([...names].sort());
+    expect(names).toEqual([...names].toSorted());
   });
 
   test("includes known presets", () => {

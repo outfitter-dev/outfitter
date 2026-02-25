@@ -258,8 +258,8 @@ function detectExistingCategory(pkg: PackageJsonData): "runnable" | "library" {
   }
 
   const deps = {
-    ...(pkg.dependencies ?? {}),
-    ...(pkg.devDependencies ?? {}),
+    ...pkg.dependencies,
+    ...pkg.devDependencies,
   };
   if (deps["@modelcontextprotocol/sdk"] || deps["@outfitter/mcp"]) {
     return "runnable";

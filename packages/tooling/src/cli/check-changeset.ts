@@ -17,13 +17,13 @@ import { join } from "node:path";
 
 /** Result of checking whether changesets are required */
 export interface ChangesetCheckResult {
-	readonly ok: boolean;
-	readonly missingFor: string[];
+  readonly ok: boolean;
+  readonly missingFor: string[];
 }
 
 export interface ChangesetIgnoredReference {
-	readonly file: string;
-	readonly packages: string[];
+  readonly file: string;
+  readonly packages: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -40,17 +40,17 @@ export interface ChangesetIgnoredReference {
  * @returns Sorted array of unique package names
  */
 export function getChangedPackagePaths(files: string[]): string[] {
-	const packageNames = new Set<string>();
-	const pattern = /^packages\/([^/]+)\/src\//;
+  const packageNames = new Set<string>();
+  const pattern = /^packages\/([^/]+)\/src\//;
 
-	for (const file of files) {
-		const match = pattern.exec(file);
-		if (match?.[1]) {
-			packageNames.add(match[1]);
-		}
-	}
+  for (const file of files) {
+    const match = pattern.exec(file);
+    if (match?.[1]) {
+      packageNames.add(match[1]);
+    }
+  }
 
-	return [...packageNames].sort();
+  return [...packageNames].toSorted();
 }
 
 /**
@@ -64,17 +64,17 @@ export function getChangedPackagePaths(files: string[]): string[] {
  * @returns Array of changeset filenames (e.g. `["happy-turtle.md"]`)
  */
 export function getChangedChangesetFiles(files: string[]): string[] {
-	const pattern = /^\.changeset\/([^/]+\.md)$/;
-	const results: string[] = [];
+  const pattern = /^\.changeset\/([^/]+\.md)$/;
+  const results: string[] = [];
 
-	for (const file of files) {
-		const match = pattern.exec(file);
-		if (match?.[1] && match[1] !== "README.md") {
-			results.push(match[1]);
-		}
-	}
+  for (const file of files) {
+    const match = pattern.exec(file);
+    if (match?.[1] && match[1] !== "README.md") {
+      results.push(match[1]);
+    }
+  }
 
-	return results.sort();
+  return results.toSorted();
 }
 
 /**
@@ -88,114 +88,114 @@ export function getChangedChangesetFiles(files: string[]): string[] {
  * @param changesetFiles - Changeset filenames found in `.changeset/`
  */
 export function checkChangesetRequired(
-	changedPackages: string[],
-	changesetFiles: string[],
+  changedPackages: string[],
+  changesetFiles: string[]
 ): ChangesetCheckResult {
-	if (changedPackages.length === 0) {
-		return { ok: true, missingFor: [] };
-	}
+  if (changedPackages.length === 0) {
+    return { ok: true, missingFor: [] };
+  }
 
-	if (changesetFiles.length > 0) {
-		return { ok: true, missingFor: [] };
-	}
+  if (changesetFiles.length > 0) {
+    return { ok: true, missingFor: [] };
+  }
 
-	return { ok: false, missingFor: changedPackages };
+  return { ok: false, missingFor: changedPackages };
 }
 
 export function parseIgnoredPackagesFromChangesetConfig(
-	jsonContent: string,
+  jsonContent: string
 ): string[] {
-	try {
-		const parsed = JSON.parse(jsonContent) as { ignore?: unknown };
-		if (!Array.isArray(parsed.ignore)) {
-			return [];
-		}
+  try {
+    const parsed = JSON.parse(jsonContent) as { ignore?: unknown };
+    if (!Array.isArray(parsed.ignore)) {
+      return [];
+    }
 
-		return parsed.ignore.filter(
-			(entry): entry is string => typeof entry === "string",
-		);
-	} catch {
-		return [];
-	}
+    return parsed.ignore.filter(
+      (entry): entry is string => typeof entry === "string"
+    );
+  } catch {
+    return [];
+  }
 }
 
 export function parseChangesetFrontmatterPackageNames(
-	markdownContent: string,
+  markdownContent: string
 ): string[] {
-	const frontmatterMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(markdownContent);
-	if (!frontmatterMatch?.[1]) {
-		return [];
-	}
+  const frontmatterMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(markdownContent);
+  if (!frontmatterMatch?.[1]) {
+    return [];
+  }
 
-	const packages = new Set<string>();
-	for (const line of frontmatterMatch[1].split(/\r?\n/)) {
-		const trimmed = line.trim();
-		const match = /^(["']?)(@[^"':\s]+\/[^"':\s]+)\1\s*:/.exec(trimmed);
-		if (match?.[2]) {
-			packages.add(match[2]);
-		}
-	}
+  const packages = new Set<string>();
+  for (const line of frontmatterMatch[1].split(/\r?\n/)) {
+    const trimmed = line.trim();
+    const match = /^(["']?)(@[^"':\s]+\/[^"':\s]+)\1\s*:/.exec(trimmed);
+    if (match?.[2]) {
+      packages.add(match[2]);
+    }
+  }
 
-	return [...packages].sort();
+  return [...packages].toSorted();
 }
 
 export function findIgnoredPackageReferences(input: {
-	readonly changesetFiles: readonly string[];
-	readonly ignoredPackages: readonly string[];
-	readonly readChangesetFile: (filename: string) => string;
+  readonly changesetFiles: readonly string[];
+  readonly ignoredPackages: readonly string[];
+  readonly readChangesetFile: (filename: string) => string;
 }): ChangesetIgnoredReference[] {
-	if (input.ignoredPackages.length === 0 || input.changesetFiles.length === 0) {
-		return [];
-	}
+  if (input.ignoredPackages.length === 0 || input.changesetFiles.length === 0) {
+    return [];
+  }
 
-	const ignored = new Set(input.ignoredPackages);
-	const results: ChangesetIgnoredReference[] = [];
+  const ignored = new Set(input.ignoredPackages);
+  const results: ChangesetIgnoredReference[] = [];
 
-	for (const file of input.changesetFiles) {
-		const content = input.readChangesetFile(file);
-		const referencedPackages = parseChangesetFrontmatterPackageNames(content);
-		const invalidReferences = referencedPackages.filter((pkg) =>
-			ignored.has(pkg),
-		);
-		if (invalidReferences.length > 0) {
-			results.push({ file, packages: invalidReferences.sort() });
-		}
-	}
+  for (const file of input.changesetFiles) {
+    const content = input.readChangesetFile(file);
+    const referencedPackages = parseChangesetFrontmatterPackageNames(content);
+    const invalidReferences = referencedPackages.filter((pkg) =>
+      ignored.has(pkg)
+    );
+    if (invalidReferences.length > 0) {
+      results.push({ file, packages: invalidReferences.toSorted() });
+    }
+  }
 
-	return results.sort((a, b) => a.file.localeCompare(b.file));
+  return results.toSorted((a, b) => a.file.localeCompare(b.file));
 }
 
 function loadIgnoredPackages(cwd: string): string[] {
-	const configPath = join(cwd, ".changeset", "config.json");
-	if (!existsSync(configPath)) {
-		return [];
-	}
+  const configPath = join(cwd, ".changeset", "config.json");
+  if (!existsSync(configPath)) {
+    return [];
+  }
 
-	try {
-		return parseIgnoredPackagesFromChangesetConfig(
-			readFileSync(configPath, "utf-8"),
-		);
-	} catch {
-		return [];
-	}
+  try {
+    return parseIgnoredPackagesFromChangesetConfig(
+      readFileSync(configPath, "utf-8")
+    );
+  } catch {
+    return [];
+  }
 }
 
 function getIgnoredReferencesForChangedChangesets(
-	cwd: string,
-	changesetFiles: readonly string[],
+  cwd: string,
+  changesetFiles: readonly string[]
 ): ChangesetIgnoredReference[] {
-	const ignoredPackages = loadIgnoredPackages(cwd);
-	return findIgnoredPackageReferences({
-		changesetFiles,
-		ignoredPackages,
-		readChangesetFile: (filename) => {
-			try {
-				return readFileSync(join(cwd, ".changeset", filename), "utf-8");
-			} catch {
-				return "";
-			}
-		},
-	});
+  const ignoredPackages = loadIgnoredPackages(cwd);
+  return findIgnoredPackageReferences({
+    changesetFiles,
+    ignoredPackages,
+    readChangesetFile: (filename) => {
+      try {
+        return readFileSync(join(cwd, ".changeset", filename), "utf-8");
+      } catch {
+        return "";
+      }
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -203,12 +203,12 @@ function getIgnoredReferencesForChangedChangesets(
 // ---------------------------------------------------------------------------
 
 const COLORS = {
-	reset: "\x1b[0m",
-	red: "\x1b[31m",
-	green: "\x1b[32m",
-	yellow: "\x1b[33m",
-	blue: "\x1b[34m",
-	dim: "\x1b[2m",
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  dim: "\x1b[2m",
 };
 
 // ---------------------------------------------------------------------------
@@ -216,7 +216,7 @@ const COLORS = {
 // ---------------------------------------------------------------------------
 
 export interface CheckChangesetOptions {
-	readonly skip?: boolean;
+  readonly skip?: boolean;
 }
 
 /**
@@ -233,107 +233,107 @@ export interface CheckChangesetOptions {
  * - Git diff fails (local dev without origin)
  */
 export async function runCheckChangeset(
-	options: CheckChangesetOptions = {},
+  options: CheckChangesetOptions = {}
 ): Promise<void> {
-	// Skip via flag or env var
-	if (options.skip || process.env["NO_CHANGESET"] === "1") {
-		process.stdout.write(
-			`${COLORS.dim}check-changeset skipped (NO_CHANGESET=1)${COLORS.reset}\n`,
-		);
-		process.exit(0);
-	}
+  // Skip via flag or env var
+  if (options.skip || process.env["NO_CHANGESET"] === "1") {
+    process.stdout.write(
+      `${COLORS.dim}check-changeset skipped (NO_CHANGESET=1)${COLORS.reset}\n`
+    );
+    process.exit(0);
+  }
 
-	// Skip on post-merge pushes to main
-	if (process.env["GITHUB_EVENT_NAME"] === "push") {
-		process.stdout.write(
-			`${COLORS.dim}check-changeset skipped (push event)${COLORS.reset}\n`,
-		);
-		process.exit(0);
-	}
+  // Skip on post-merge pushes to main
+  if (process.env["GITHUB_EVENT_NAME"] === "push") {
+    process.stdout.write(
+      `${COLORS.dim}check-changeset skipped (push event)${COLORS.reset}\n`
+    );
+    process.exit(0);
+  }
 
-	// Get changed files from git using array-based spawn (safe from injection)
-	const cwd = process.cwd();
-	let changedFiles: string[];
-	try {
-		const proc = Bun.spawnSync(
-			["git", "diff", "--name-only", "origin/main...HEAD"],
-			{ cwd },
-		);
-		if (proc.exitCode !== 0) {
-			// Git diff failed -- likely local dev without origin, pass silently
-			process.exit(0);
-		}
-		changedFiles = proc.stdout
-			.toString()
-			.trim()
-			.split("\n")
-			.filter((line) => line.length > 0);
-	} catch {
-		// Git not available or other error -- pass silently
-		process.exit(0);
-	}
+  // Get changed files from git using array-based spawn (safe from injection)
+  const cwd = process.cwd();
+  let changedFiles: string[];
+  try {
+    const proc = Bun.spawnSync(
+      ["git", "diff", "--name-only", "origin/main...HEAD"],
+      { cwd }
+    );
+    if (proc.exitCode !== 0) {
+      // Git diff failed -- likely local dev without origin, pass silently
+      process.exit(0);
+    }
+    changedFiles = proc.stdout
+      .toString()
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+  } catch {
+    // Git not available or other error -- pass silently
+    process.exit(0);
+  }
 
-	const changedPackages = getChangedPackagePaths(changedFiles);
+  const changedPackages = getChangedPackagePaths(changedFiles);
 
-	if (changedPackages.length === 0) {
-		process.stdout.write(
-			`${COLORS.green}No package source changes detected.${COLORS.reset}\n`,
-		);
-		process.exit(0);
-	}
+  if (changedPackages.length === 0) {
+    process.stdout.write(
+      `${COLORS.green}No package source changes detected.${COLORS.reset}\n`
+    );
+    process.exit(0);
+  }
 
-	const changesetFiles = getChangedChangesetFiles(changedFiles);
-	const check = checkChangesetRequired(changedPackages, changesetFiles);
+  const changesetFiles = getChangedChangesetFiles(changedFiles);
+  const check = checkChangesetRequired(changedPackages, changesetFiles);
 
-	if (!check.ok) {
-		// Warn but don't block — manual changesets are recommended
-		process.stderr.write(
-			`${COLORS.yellow}No changeset found.${COLORS.reset} ` +
-				"Consider adding one with `bun run changeset` for a custom changelog entry.\n\n",
-		);
-		process.stderr.write("Packages with source changes:\n\n");
+  if (!check.ok) {
+    // Warn but don't block — manual changesets are recommended
+    process.stderr.write(
+      `${COLORS.yellow}No changeset found.${COLORS.reset} ` +
+        "Consider adding one with `bun run changeset` for a custom changelog entry.\n\n"
+    );
+    process.stderr.write("Packages with source changes:\n\n");
 
-		for (const pkg of check.missingFor) {
-			process.stderr.write(
-				`  ${COLORS.yellow}@outfitter/${pkg}${COLORS.reset}\n`,
-			);
-		}
+    for (const pkg of check.missingFor) {
+      process.stderr.write(
+        `  ${COLORS.yellow}@outfitter/${pkg}${COLORS.reset}\n`
+      );
+    }
 
-		process.stderr.write(
-			`\nRun ${COLORS.blue}bun run changeset${COLORS.reset} for a custom changelog entry, ` +
-				`or add ${COLORS.blue}release:none${COLORS.reset} to skip.\n`,
-		);
-	}
+    process.stderr.write(
+      `\nRun ${COLORS.blue}bun run changeset${COLORS.reset} for a custom changelog entry, ` +
+        `or add ${COLORS.blue}release:none${COLORS.reset} to skip.\n`
+    );
+  }
 
-	const ignoredReferences = getIgnoredReferencesForChangedChangesets(
-		cwd,
-		changesetFiles,
-	);
-	if (ignoredReferences.length > 0) {
-		process.stderr.write(
-			`${COLORS.red}Invalid changeset package reference(s).${COLORS.reset}\n\n`,
-		);
-		process.stderr.write(
-			"Changesets must not reference packages listed in .changeset/config.json ignore:\n\n",
-		);
+  const ignoredReferences = getIgnoredReferencesForChangedChangesets(
+    cwd,
+    changesetFiles
+  );
+  if (ignoredReferences.length > 0) {
+    process.stderr.write(
+      `${COLORS.red}Invalid changeset package reference(s).${COLORS.reset}\n\n`
+    );
+    process.stderr.write(
+      "Changesets must not reference packages listed in .changeset/config.json ignore:\n\n"
+    );
 
-		for (const reference of ignoredReferences) {
-			process.stderr.write(
-				`  ${COLORS.yellow}${reference.file}${COLORS.reset}\n`,
-			);
-			for (const pkg of reference.packages) {
-				process.stderr.write(`    - ${pkg}\n`);
-			}
-		}
+    for (const reference of ignoredReferences) {
+      process.stderr.write(
+        `  ${COLORS.yellow}${reference.file}${COLORS.reset}\n`
+      );
+      for (const pkg of reference.packages) {
+        process.stderr.write(`    - ${pkg}\n`);
+      }
+    }
 
-		process.stderr.write(
-			`\nUpdate the affected changeset files to remove ignored packages before merging.\n`,
-		);
-		process.exit(1);
-	}
+    process.stderr.write(
+      `\nUpdate the affected changeset files to remove ignored packages before merging.\n`
+    );
+    process.exit(1);
+  }
 
-	process.stdout.write(
-		`${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`,
-	);
-	process.exit(0);
+  process.stdout.write(
+    `${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`
+  );
+  process.exit(0);
 }

@@ -17,8 +17,9 @@ import {
 } from "@outfitter/contracts";
 import type { TsDocCheckResult } from "@outfitter/tooling";
 import { z } from "zod";
-import { printCheckResults, runCheck } from "../commands/check.js";
+
 import { runCheckTsdoc } from "../commands/check-tsdoc.js";
+import { printCheckResults, runCheck } from "../commands/check.js";
 import {
   type CliOutputMode,
   resolveStructuredOutputMode,

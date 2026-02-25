@@ -1049,7 +1049,7 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
 
     if (logtapeBridgeEnabled) {
       emitViaLogtape(state.backendLogger, level, processedMessage, {
-        ...(processedMetadata ?? {}),
+        ...processedMetadata,
         [LOGGER_ID_PROPERTY]: state.loggerId,
       });
       return;

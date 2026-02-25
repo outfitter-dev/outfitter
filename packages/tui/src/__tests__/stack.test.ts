@@ -19,6 +19,8 @@ import {
   vstackItem,
 } from "../render/stack.js";
 
+const bold = (s: string) => `**${s}**`;
+
 // ============================================================================
 // Phase 0: Delimiter Registry
 // ============================================================================
@@ -176,7 +178,6 @@ describe("hstack", () => {
   });
 
   test("handles StackItem objects with style functions", () => {
-    const bold = (s: string) => `**${s}**`;
     const result = hstack([{ content: "styled", style: bold }, "plain"], {
       delimiter: "bullet",
       gap: 1,
@@ -233,7 +234,6 @@ describe("vstackItem", () => {
   });
 
   test("creates item with style function", () => {
-    const bold = (s: string) => `**${s}**`;
     const item = vstackItem("Header", [], { style: bold });
     expect(item.style).toBe(bold);
   });
@@ -418,7 +418,6 @@ describe("vstack", () => {
   });
 
   test("applies style function to content", () => {
-    const bold = (s: string) => `**${s}**`;
     const items = [vstackItem("Header", ["Body"], { style: bold })];
     const result = vstack(items, { mode: "guide" });
     const lines = result.split("\n");

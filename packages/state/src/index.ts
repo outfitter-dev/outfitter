@@ -778,6 +778,10 @@ interface StorageFormat {
  * await persistent.flush();
  * ```
  */
+const dispose = (): void => {
+  // Cleanup resources - in real implementation might unregister exit handlers
+};
+
 export async function createPersistentStore(
   options: PersistentStoreOptions
 ): Promise<PersistentStore> {
@@ -829,10 +833,6 @@ export async function createPersistentStore(
       }
       throw error;
     }
-  };
-
-  const dispose = (): void => {
-    // Cleanup resources - in real implementation might unregister exit handlers
   };
 
   return {

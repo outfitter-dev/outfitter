@@ -174,30 +174,30 @@ export interface HealthChecker {
  * }
  * ```
  */
+async function runCheck(check: HealthCheck): Promise<HealthCheckResult> {
+  try {
+    const result = await check.check();
+
+    if (result.isOk()) {
+      return { healthy: true };
+    }
+
+    return {
+      healthy: false,
+      message: result.error.message,
+    };
+  } catch (error) {
+    // Handle thrown exceptions as failures
+    return {
+      healthy: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
 export function createHealthChecker(checks: HealthCheck[]): HealthChecker {
   const registeredChecks: HealthCheck[] = [...checks];
   const startTime = Date.now();
-
-  async function runCheck(check: HealthCheck): Promise<HealthCheckResult> {
-    try {
-      const result = await check.check();
-
-      if (result.isOk()) {
-        return { healthy: true };
-      }
-
-      return {
-        healthy: false,
-        message: result.error.message,
-      };
-    } catch (error) {
-      // Handle thrown exceptions as failures
-      return {
-        healthy: false,
-        message: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
-  }
 
   return {
     async check(): Promise<HealthStatus> {

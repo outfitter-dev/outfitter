@@ -64,26 +64,18 @@ describe("logger factory contract", () => {
   });
 });
 
+function method(_message: string, _metadata?: Record<string, unknown>): void;
+function method(_metadata: Record<string, unknown>, _message: string): never;
+function method(
+  _messageOrMetadata: string | Record<string, unknown>,
+  _metadataOrMessage?: Record<string, unknown> | string
+): void {
+  return;
+}
+
+const createMethod = (): Logger["debug"] => method;
+
 function createMockLogger(): Logger {
-  const createMethod = (): Logger["debug"] => {
-    function method(
-      _message: string,
-      _metadata?: Record<string, unknown>
-    ): void;
-    function method(
-      _metadata: Record<string, unknown>,
-      _message: string
-    ): never;
-    function method(
-      _messageOrMetadata: string | Record<string, unknown>,
-      _metadataOrMessage?: Record<string, unknown> | string
-    ): void {
-      return;
-    }
-
-    return method;
-  };
-
   const createLogger = (): Logger => ({
     trace: createMethod(),
     debug: createMethod(),

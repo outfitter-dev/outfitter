@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { useErrorTaxonomyRule } from "../../rules/use-error-taxonomy.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 
@@ -70,7 +71,7 @@ describe("use-error-taxonomy", () => {
       filename: "packages/logging/src/errors.ts",
       nodes: [createClassExpressionNode("Error")],
       rule: useErrorTaxonomyRule,
-      sourceText: 'const MyError = class extends Error {};',
+      sourceText: "const MyError = class extends Error {};",
     });
 
     expect(reports).toHaveLength(1);

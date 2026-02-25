@@ -145,7 +145,7 @@ async function discoverPublishablePackages(
     });
   }
 
-  return packages.sort((a, b) => a.name.localeCompare(b.name));
+  return packages.toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 // ---------------------------------------------------------------------------

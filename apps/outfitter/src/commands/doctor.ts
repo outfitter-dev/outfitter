@@ -386,7 +386,7 @@ function discoverWorkspaceMemberPaths(
     }
   }
 
-  return [...memberPaths].sort();
+  return [...memberPaths].toSorted();
 }
 
 /** Check if the cwd is a workspace root (has workspaces field in package.json). */

@@ -139,7 +139,9 @@ describe("generateDocsMap", () => {
     }
 
     const ids = result.value.entries.map((entry) => entry.id);
-    const sorted = [...ids].sort((left, right) => left.localeCompare(right));
+    const sorted = [...ids].toSorted((left, right) =>
+      left.localeCompare(right)
+    );
     expect(ids).toEqual(sorted);
   });
 

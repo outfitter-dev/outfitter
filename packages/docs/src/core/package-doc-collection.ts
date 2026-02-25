@@ -80,7 +80,7 @@ async function discoverPackageDirectories(
       packageDirName: entry.name,
       packageRoot: join(packagesRoot, entry.name),
     }))
-    .sort((a, b) => a.packageDirName.localeCompare(b.packageDirName));
+    .toSorted((a, b) => a.packageDirName.localeCompare(b.packageDirName));
 }
 
 async function isPublishablePackage(packageRoot: string): Promise<boolean> {
@@ -152,7 +152,7 @@ async function collectDocsSubtreeSourceFiles(
     }
   }
 
-  return files.sort((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
+  return files.toSorted((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
 }
 
 async function collectPackageSourceFiles(
@@ -175,7 +175,7 @@ async function collectPackageSourceFiles(
     excludedLowercaseNames
   );
 
-  return [...rootDocsFiles, ...docsSubtreeDocsFiles].sort((a, b) =>
+  return [...rootDocsFiles, ...docsSubtreeDocsFiles].toSorted((a, b) =>
     toPosixPath(a).localeCompare(toPosixPath(b))
   );
 }
@@ -265,12 +265,12 @@ export async function collectPackageDocs(
     }
   }
 
-  const sortedFiles = files.sort((a, b) =>
+  const sortedFiles = files.toSorted((a, b) =>
     a.outputPath.localeCompare(b.outputPath)
   );
 
   return Result.ok({
-    packageNames: packageNames.sort((a, b) => a.localeCompare(b)),
+    packageNames: packageNames.toSorted((a, b) => a.localeCompare(b)),
     files: sortedFiles,
   });
 }

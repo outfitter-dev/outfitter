@@ -119,6 +119,19 @@ describe("assertNonEmpty", () => {
   });
 });
 
+const isString = (v: unknown): v is string => typeof v === "string";
+
+interface Animal {
+  type: string;
+}
+interface Dog extends Animal {
+  bark: () => string;
+  type: "dog";
+}
+const isDog = (a: Animal): a is Dog => a.type === "dog";
+
+const isValidEmail = (s: string) => s.includes("@") && s.includes(".");
+
 describe("assertMatches", () => {
   it("returns Ok when predicate passes", () => {
     const result = assertMatches(42, (n) => n > 0);
@@ -147,7 +160,6 @@ describe("assertMatches", () => {
 
   it("narrows type with type guard predicate", () => {
     const value: unknown = "test";
-    const isString = (v: unknown): v is string => typeof v === "string";
     const result = assertMatches(value, isString);
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
@@ -157,14 +169,6 @@ describe("assertMatches", () => {
   });
 
   it("narrows to subtype with type guard", () => {
-    interface Animal {
-      type: string;
-    }
-    interface Dog extends Animal {
-      bark: () => string;
-      type: "dog";
-    }
-    const isDog = (a: Animal): a is Dog => a.type === "dog";
     const animal: Animal = { type: "dog", bark: () => "woof" } as Dog;
     const result = assertMatches(animal, isDog);
     expect(result.isOk()).toBe(true);
@@ -175,7 +179,6 @@ describe("assertMatches", () => {
   });
 
   it("works with complex predicates", () => {
-    const isValidEmail = (s: string) => s.includes("@") && s.includes(".");
     const result1 = assertMatches(
       "user@example.com",
       isValidEmail,

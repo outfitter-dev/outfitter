@@ -43,11 +43,9 @@ export type PromptStep<T> = () => PromptResult<T>;
  * }
  * ```
  */
-export async function promptGroup<T extends Record<string, unknown>>(
-  steps: {
-    [K in keyof T]: PromptStep<T[K]>;
-  }
-): Promise<Result<T, CancelledError>> {
+export async function promptGroup<T extends Record<string, unknown>>(steps: {
+  [K in keyof T]: PromptStep<T[K]>;
+}): Promise<Result<T, CancelledError>> {
   const result: Partial<T> = {};
 
   for (const [key, step] of Object.entries(steps)) {

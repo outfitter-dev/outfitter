@@ -24,24 +24,24 @@ const DEFAULT_VERSION = "0.0.0";
  * regardless of code-splitting chunk depth.
  */
 function readPackageVersion(): string {
-	try {
-		const require = createRequire(import.meta.url);
-		const pkgPath = require.resolve("@outfitter/tooling/package.json");
-		const packageJson = JSON.parse(readFileSync(pkgPath, "utf8")) as {
-			version?: unknown;
-		};
+  try {
+    const require = createRequire(import.meta.url);
+    const pkgPath = require.resolve("@outfitter/tooling/package.json");
+    const packageJson = JSON.parse(readFileSync(pkgPath, "utf8")) as {
+      version?: unknown;
+    };
 
-		if (
-			typeof packageJson.version === "string" &&
-			packageJson.version.length > 0
-		) {
-			return packageJson.version;
-		}
-	} catch {
-		// Fall through to default.
-	}
+    if (
+      typeof packageJson.version === "string" &&
+      packageJson.version.length > 0
+    ) {
+      return packageJson.version;
+    }
+  } catch {
+    // Fall through to default.
+  }
 
-	return DEFAULT_VERSION;
+  return DEFAULT_VERSION;
 }
 
 /** Package version, read from package.json at load time. */

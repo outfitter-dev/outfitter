@@ -59,7 +59,7 @@ export function listPresets(): readonly PresetInfo[] {
       name: entry.name,
       path: join(presetsDir, entry.name),
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 /**

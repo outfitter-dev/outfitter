@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { snapshotLocationRule } from "../../rules/snapshot-location.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 

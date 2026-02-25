@@ -4,7 +4,7 @@
 
 /** Options for the fix command */
 interface FixOptions {
-	paths?: string[];
+  paths?: string[];
 }
 
 /**
@@ -13,13 +13,13 @@ interface FixOptions {
  * @returns Array of command arguments
  */
 export function buildFixCommand(options: FixOptions): string[] {
-	const cmd = ["ultracite", "fix"];
+  const cmd = ["ultracite", "fix"];
 
-	if (options.paths && options.paths.length > 0) {
-		cmd.push(...options.paths);
-	}
+  if (options.paths && options.paths.length > 0) {
+    cmd.push(...options.paths);
+  }
 
-	return cmd;
+  return cmd;
 }
 
 /**
@@ -27,14 +27,14 @@ export function buildFixCommand(options: FixOptions): string[] {
  * @param paths - Paths to fix
  */
 export async function runFix(paths: string[] = []): Promise<void> {
-	const cmd = buildFixCommand({ paths });
+  const cmd = buildFixCommand({ paths });
 
-	process.stdout.write(`Running: bun x ${cmd.join(" ")}\n`);
+  process.stdout.write(`Running: bun x ${cmd.join(" ")}\n`);
 
-	const proc = Bun.spawn(["bun", "x", ...cmd], {
-		stdio: ["inherit", "inherit", "inherit"],
-	});
+  const proc = Bun.spawn(["bun", "x", ...cmd], {
+    stdio: ["inherit", "inherit", "inherit"],
+  });
 
-	const exitCode = await proc.exited;
-	process.exit(exitCode);
+  const exitCode = await proc.exited;
+  process.exit(exitCode);
 }

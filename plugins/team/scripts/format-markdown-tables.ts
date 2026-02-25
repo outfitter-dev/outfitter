@@ -129,7 +129,7 @@ function formatTable(
 
   // Calculate max width for each column
   const columnCount = Math.max(...allCells.map((row) => row.length));
-  const columnWidths: number[] = new Array(columnCount).fill(3); // Minimum 3 for ---
+  const columnWidths: number[] = Array.from({ length: columnCount }, () => 3); // Minimum 3 for ---
 
   for (const row of allCells) {
     for (let col = 0; col < row.length; col++) {

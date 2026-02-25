@@ -396,7 +396,7 @@ function formatMarkdown(result: AuditResult): string {
     lines.push("");
 
     // Sort by count descending
-    const sorted = [...result.findings].sort((a, b) => b.count - a.count);
+    const sorted = [...result.findings].toSorted((a, b) => b.count - a.count);
 
     for (const finding of sorted) {
       lines.push(
