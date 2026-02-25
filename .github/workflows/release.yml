@@ -51,7 +51,7 @@ jobs:
         run: bun run version-packages
 
       - name: Refresh release LLM artifacts
-        run: bun run docs:sync:release:llms
+        run: bun run sync:docs:release:llms
 
       - name: Create release branch and PR
         env:
@@ -105,8 +105,8 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify CI Gate (checks)
-        run: bun run verify:ci:checks
+      - name: Verify CI Gate
+        run: bun run verify:ci
         env:
           NO_CHANGESET: "1"
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -115,7 +115,7 @@ jobs:
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
       - name: Verify release LLM artifacts
-        run: bun run docs:check:release:llms
+        run: bun run verify:docs:release:llms
 
       - name: Run Tests
         run: bun run test || bun run test
