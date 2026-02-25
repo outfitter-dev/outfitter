@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build & Test
+    name: Build & Verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,18 +26,18 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify CI Gate (checks)
-        run: bun run verify:ci:checks
+      - name: Build
+        run: bun run build
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
-          NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'release:none') && '1' || '0' }}
 
-      - name: Run Tests
-        run: bun run test || (rc=$?; echo "::warning::Tests exited $rc, retrying..." && bun run test)
+      - name: Verify CI Gate
+        run: bun run verify:ci
         env:
+          NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'release:none') && '1' || '0' }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_API: ${{ secrets.TURBO_API }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
