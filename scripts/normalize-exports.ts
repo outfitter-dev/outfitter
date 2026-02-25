@@ -139,7 +139,24 @@ export async function normalizeWorkspaceExports(
 }
 
 async function main(): Promise<void> {
-  const result = await normalizeWorkspaceExports();
+  const check = Bun.argv.includes("--check");
+  const result = await normalizeWorkspaceExports({ write: !check });
+
+  if (check) {
+    if (result.changedPackages.length > 0) {
+      console.error(
+        `[normalize-exports] Export ordering drift in ${result.changedPackages.length} package(s):`
+      );
+      for (const pkg of result.changedPackages) {
+        console.error(`  - ${pkg}`);
+      }
+      console.error("\nRun `bun scripts/normalize-exports.ts` to fix.");
+      process.exit(1);
+    }
+    console.log("[normalize-exports] All exports are normalized.");
+    return;
+  }
+
   if (result.changedPackages.length > 0) {
     console.log(
       `[normalize-exports] Sorted exports in ${result.changedPackages.length} package(s)`
