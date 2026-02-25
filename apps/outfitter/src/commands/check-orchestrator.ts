@@ -48,6 +48,13 @@ export interface CheckOrchestratorResult {
   readonly treeClean: boolean;
 }
 
+const SUCCESS_ADVISORY_PATTERNS: readonly RegExp[] = [
+  /\bwarn(?:ing)?\b/i,
+  /\bno changeset found\b/i,
+  /\bconsider adding one\b/i,
+  /\binvalid changeset package reference\b/i,
+];
+
 export class CheckOrchestratorError extends Error {
   readonly _tag = "CheckOrchestratorError" as const;
 
@@ -382,6 +389,33 @@ async function runStep(
   };
 }
 
+function extractSuccessAdvisory(stderr: string): string | undefined {
+  const lines = stderr
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  if (lines.length === 0) {
+    return undefined;
+  }
+
+  const advisoryLines = lines.filter((line) =>
+    SUCCESS_ADVISORY_PATTERNS.some((pattern) => pattern.test(line))
+  );
+  if (advisoryLines.length === 0) {
+    return undefined;
+  }
+
+  const maxLines = 3;
+  const visibleLines = advisoryLines.slice(0, maxLines);
+  if (advisoryLines.length > maxLines) {
+    visibleLines.push(
+      `...and ${advisoryLines.length - maxLines} more advisory line(s)`
+    );
+  }
+
+  return visibleLines.join("\n");
+}
+
 export async function runCheckOrchestrator(
   options: CheckOrchestratorOptions
 ): Promise<Result<CheckOrchestratorResult, CheckOrchestratorError>> {
@@ -395,9 +429,14 @@ export async function runCheckOrchestrator(
     }
 
     const treeBefore = readTreePaths(cwd);
-    const stepResults = await Promise.all(
-      plan.map((step) => runStep(cwd, step))
-    );
+    const stepResults: CheckOrchestratorStepResult[] = [];
+    for (const step of plan) {
+      const result = await runStep(cwd, step);
+      stepResults.push(result);
+      if (result.exitCode !== 0) {
+        break;
+      }
+    }
     const treeAfter = readTreePaths(cwd);
 
     const failedStepIds = stepResults
@@ -456,6 +495,13 @@ export async function printCheckOrchestratorResults(
       const snippet = `${step.stdout}\n${step.stderr}`.trim();
       if (snippet.length > 0) {
         process.stdout.write(`${theme.muted(snippet)}\n`);
+      }
+    } else {
+      const advisory = extractSuccessAdvisory(step.stderr);
+      if (advisory) {
+        process.stdout.write(
+          `    ${theme.warning("!")} ${theme.muted(advisory)}\n`
+        );
       }
     }
   }

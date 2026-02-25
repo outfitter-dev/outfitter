@@ -1,9 +1,61 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 
 import {
   buildCheckOrchestratorPlan,
   parseTreePaths,
+  printCheckOrchestratorResults,
+  runCheckOrchestrator,
 } from "../commands/check-orchestrator.js";
+
+function createTextStream(text: string): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(encoder.encode(text));
+      controller.close();
+    },
+  });
+}
+
+function createSpawnResult(input: {
+  exitCode: number | Promise<number>;
+  stdout?: string;
+  stderr?: string;
+}): ReturnType<typeof Bun.spawn> {
+  const exitCodePromise =
+    typeof input.exitCode === "number"
+      ? Promise.resolve(input.exitCode)
+      : input.exitCode;
+
+  return {
+    exited: exitCodePromise,
+    stdout: createTextStream(input.stdout ?? ""),
+    stderr: createTextStream(input.stderr ?? ""),
+  } as unknown as ReturnType<typeof Bun.spawn>;
+}
+
+async function captureStdout(run: () => Promise<void> | void): Promise<string> {
+  const chunks: string[] = [];
+  const originalWrite = process.stdout.write;
+  const writeShim = ((chunk: unknown): boolean => {
+    if (typeof chunk === "string") {
+      chunks.push(chunk);
+    } else if (chunk instanceof Uint8Array) {
+      chunks.push(new TextDecoder().decode(chunk));
+    } else {
+      chunks.push(String(chunk));
+    }
+    return true;
+  }) as typeof process.stdout.write;
+
+  process.stdout.write = writeShim;
+  try {
+    await run();
+    return chunks.join("");
+  } finally {
+    process.stdout.write = originalWrite;
+  }
+}
 
 describe("buildCheckOrchestratorPlan", () => {
   test("all mode includes core checks and excludes tests", () => {
@@ -136,5 +188,135 @@ describe("parseTreePaths", () => {
     // Regression: trim() before slice(3) corrupted paths
     const output = " M file.txt\nMM another.ts\n";
     expect(parseTreePaths(output)).toEqual(["another.ts", "file.txt"]);
+  });
+});
+
+describe("runCheckOrchestrator", () => {
+  test("runs plan steps sequentially", async () => {
+    const spawnSyncSpy = spyOn(Bun, "spawnSync").mockReturnValue({
+      exitCode: 0,
+      stdout: new TextEncoder().encode(""),
+      stderr: new TextEncoder().encode(""),
+    } as unknown as ReturnType<typeof Bun.spawnSync>);
+
+    const calls: string[][] = [];
+    let resolveFirstExitCode: ((value: number) => void) | undefined;
+    const firstExitCode = new Promise<number>((resolve) => {
+      resolveFirstExitCode = resolve;
+    });
+
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((command) => {
+      calls.push([...(command as string[])]);
+      if (calls.length === 1) {
+        return createSpawnResult({ exitCode: firstExitCode });
+      }
+      return createSpawnResult({ exitCode: 0 });
+    });
+
+    try {
+      const runPromise = runCheckOrchestrator({
+        cwd: process.cwd(),
+        mode: "pre-push",
+      });
+
+      // If orchestration is sequential, step 2 should not spawn before step 1 exits.
+      await Promise.resolve();
+      expect(calls).toHaveLength(1);
+
+      resolveFirstExitCode?.(0);
+      const result = await runPromise;
+      expect(result.isOk()).toBe(true);
+      expect(calls).toHaveLength(2);
+      expect(calls[0]).toEqual([
+        "bun",
+        "run",
+        "packages/tooling/src/cli/index.ts",
+        "pre-push",
+      ]);
+      expect(calls[1]).toEqual([
+        "bun",
+        "run",
+        "apps/outfitter/src/cli.ts",
+        "schema",
+        "diff",
+      ]);
+    } finally {
+      spawnSpy.mockRestore();
+      spawnSyncSpy.mockRestore();
+    }
+  });
+
+  test("stops after first failing step", async () => {
+    const spawnSyncSpy = spyOn(Bun, "spawnSync").mockReturnValue({
+      exitCode: 0,
+      stdout: new TextEncoder().encode(""),
+      stderr: new TextEncoder().encode(""),
+    } as unknown as ReturnType<typeof Bun.spawnSync>);
+
+    const calls: string[][] = [];
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((command) => {
+      calls.push([...(command as string[])]);
+      return createSpawnResult({
+        exitCode: 1,
+        stderr: "fatal",
+      });
+    });
+
+    try {
+      const result = await runCheckOrchestrator({
+        cwd: process.cwd(),
+        mode: "pre-push",
+      });
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) {
+        return;
+      }
+
+      expect(calls).toHaveLength(1);
+      expect(result.value.failedStepIds).toEqual(["pre-push-verify"]);
+      expect(result.value.steps).toHaveLength(1);
+      expect(result.value.ok).toBe(false);
+    } finally {
+      spawnSpy.mockRestore();
+      spawnSyncSpy.mockRestore();
+    }
+  });
+});
+
+describe("printCheckOrchestratorResults", () => {
+  test("surfaces advisory warnings from successful steps in human mode", async () => {
+    const output = await captureStdout(async () => {
+      await printCheckOrchestratorResults({
+        mode: "all",
+        ok: true,
+        treeClean: true,
+        mutatedPaths: [],
+        failedStepIds: [],
+        steps: [
+          {
+            id: "changeset",
+            label: "Changeset",
+            command: [
+              "bun",
+              "run",
+              "apps/outfitter/src/commands/repo.ts",
+              "check",
+              "changeset",
+              "--cwd",
+              ".",
+            ],
+            exitCode: 0,
+            stdout: "",
+            stderr:
+              "No changeset found.\nConsider adding one with `bun run changeset`.",
+            durationMs: 42,
+          },
+        ],
+      });
+    });
+
+    expect(output).toContain("Changeset");
+    expect(output).toContain("No changeset found.");
+    expect(output).toContain("Consider adding one");
   });
 });
