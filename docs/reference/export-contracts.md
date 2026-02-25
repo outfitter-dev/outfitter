@@ -49,6 +49,12 @@ build -> verify:ci (outfitter check --ci)
 
 `outfitter check --ci` orchestrates typecheck, lint/format checks, docs sentinel/link checks, export/readme/boundary checks, working-tree cleanliness, schema drift, and tests.
 
+The CI test phase uses `bun run test:ci` (via `check --ci`) with explicit concurrency guardrails and diagnostics:
+
+- `OUTFITTER_CI_TURBO_CONCURRENCY` (default `2`) controls Turbo task parallelism.
+- `OUTFITTER_CI_BUN_MAX_CONCURRENCY` (default `4`) is passed to each package test command as Bun `--max-concurrency`.
+- `OUTFITTER_CI_TURBO_LOG_ORDER` (default `stream`) and `OUTFITTER_CI_TURBO_OUTPUT_LOGS` (default `full`) keep active-task logs visible for crash forensics.
+
 This same pipeline runs locally via pre-push hook (`outfitter check --pre-push`) and in CI. Local and CI are always in parity for day-to-day PR verification.
 
 Tracked llms artifacts (`docs/llms.txt`, `docs/llms-full.txt`) are refreshed and validated in the stable release workflow rather than in every PR CI run.

@@ -54,6 +54,7 @@ yarn-error.log*
 .scratch/
 tmp/
 temp/
+.outfitter/ci/
 .outfitter/reports/
 apps/outfitter/.outfitter/surface.json
 
