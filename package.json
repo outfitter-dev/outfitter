@@ -47,7 +47,7 @@
     "check": "oxlint . && oxfmt --check .",
     "fix": "oxlint --fix .",
     "clean:artifacts": "turbo run clean --no-daemon && rm -rf .turbo",
-    "clean": "turbo run clean --no-daemon && rm -rf node_modules",
+    "clean": "turbo run clean --no-daemon && rm -rf node_modules .turbo",
     "changeset": "changeset",
     "version-packages": "changeset version && bun run sync-plugin-versions",
     "sync-plugin-versions": "bun run scripts/sync-plugin-versions.ts",
