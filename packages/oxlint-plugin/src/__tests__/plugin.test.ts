@@ -17,6 +17,7 @@ describe("oxlint plugin scaffold", () => {
       "no-process-env-in-packages",
       "no-process-exit-in-packages",
       "no-throw-in-handler",
+      "prefer-bun-api",
     ]);
   });
 
@@ -31,6 +32,7 @@ describe("oxlint plugin scaffold", () => {
       "outfitter/no-process-exit-in-packages": "error",
       "outfitter/no-process-env-in-packages": "warn",
       "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],
+      "outfitter/prefer-bun-api": "warn",
     });
   });
 });
