@@ -51,6 +51,42 @@
         "default": "./dist/commands/check.js"
       }
     },
+    "./commands/check-docs-sentinel": {
+      "import": {
+        "types": "./dist/commands/check-docs-sentinel.d.ts",
+        "default": "./dist/commands/check-docs-sentinel.js"
+      }
+    },
+    "./commands/check-orchestrator": {
+      "import": {
+        "types": "./dist/commands/check-orchestrator.d.ts",
+        "default": "./dist/commands/check-orchestrator.js"
+      }
+    },
+    "./commands/check-preset-versions": {
+      "import": {
+        "types": "./dist/commands/check-preset-versions.d.ts",
+        "default": "./dist/commands/check-preset-versions.js"
+      }
+    },
+    "./commands/check-publish-guardrails": {
+      "import": {
+        "types": "./dist/commands/check-publish-guardrails.d.ts",
+        "default": "./dist/commands/check-publish-guardrails.js"
+      }
+    },
+    "./commands/check-surface-map": {
+      "import": {
+        "types": "./dist/commands/check-surface-map.d.ts",
+        "default": "./dist/commands/check-surface-map.js"
+      }
+    },
+    "./commands/check-surface-map-format": {
+      "import": {
+        "types": "./dist/commands/check-surface-map-format.d.ts",
+        "default": "./dist/commands/check-surface-map-format.js"
+      }
+    },
     "./commands/check-tsdoc": {
       "import": {
         "types": "./dist/commands/check-tsdoc.d.ts",

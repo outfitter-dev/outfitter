@@ -10,6 +10,13 @@ import {
 } from "@outfitter/contracts";
 
 import { addAction, listBlocksAction } from "./actions/add.js";
+import {
+  checkDocsSentinelAction,
+  checkPresetVersionsAction,
+  checkPublishGuardrailsAction,
+  checkSurfaceMapAction,
+  checkSurfaceMapFormatAction,
+} from "./actions/check-automation.js";
 import { checkAction, checkTsdocAction } from "./actions/check.js";
 import { demoAction } from "./actions/demo.js";
 import {
@@ -47,6 +54,11 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(listBlocksAction)
   .add(checkAction)
   .add(checkTsdocAction)
+  .add(checkPublishGuardrailsAction)
+  .add(checkPresetVersionsAction)
+  .add(checkSurfaceMapAction)
+  .add(checkSurfaceMapFormatAction)
+  .add(checkDocsSentinelAction)
   .add(upgradeAction)
   .add(docsListAction)
   .add(docsShowAction)
