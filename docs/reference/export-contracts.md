@@ -76,14 +76,14 @@ The key sequence for export integrity:
 
 1. Create the source file in `src/`
 2. Run `bun run build` to regenerate exports
-3. Verify: `bun run apps/outfitter/src/cli.ts repo check exports --cwd .`
+3. Verify: `outfitter repo check exports --cwd .`
 4. Update the package README if documenting the new subpath
 
 ### Adding an Internal Module
 
 1. Create the source file (e.g., `src/internal/helpers.ts`)
 2. Add an exclusion pattern to `bunup.config.ts` if one does not already cover it (the `./internal/*` pattern handles most cases)
-3. Run `bun run build && bun run apps/outfitter/src/cli.ts repo check exports --cwd .` to confirm it stays out of the public surface
+3. Run `bun run build && outfitter repo check exports --cwd .` to confirm it stays out of the public surface
 
 ### Fixing Export Drift
 
@@ -113,10 +113,10 @@ import { internal } from "@outfitter/contracts/internal/helpers";
 Canonical monorepo invocation uses `outfitter repo check <subject>`:
 
 ```bash
-bun run apps/outfitter/src/cli.ts repo check exports --cwd .
-bun run apps/outfitter/src/cli.ts repo check readme --cwd .
-bun run apps/outfitter/src/cli.ts repo check tree --cwd .
-bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
+outfitter repo check exports --cwd .
+outfitter repo check readme --cwd .
+outfitter repo check tree --cwd .
+outfitter repo check boundary-invocations --cwd .
 ```
 
 Standalone package-bin invocation via `@outfitter/tooling` remains supported:
@@ -184,7 +184,7 @@ Validates that root/app scripts do not execute `packages/*/src/*` directly.
 
 ```bash
 # Canonical monorepo command
-bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
+outfitter repo check boundary-invocations --cwd .
 
 # Package bin alternative
 bunx @outfitter/tooling check-boundary-invocations
