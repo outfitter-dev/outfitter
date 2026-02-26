@@ -1,0 +1,14 @@
+[setup]
+script = '''
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Upgrade Bun to the pinned version
+curl -fsSL https://bun.sh/install | bash -s "bun-v$(cat .bun-version)"
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+./scripts/bootstrap.sh --force
+bun run build
+'''
