@@ -41,7 +41,7 @@ const addInputSchema = z.object({
 const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
 const addCwd = cwdPreset();
 
-const _addAction: ActionSpec<
+export const addAction: ActionSpec<
   AddInput & { outputMode: CliOutputMode },
   unknown
 > = defineAction({
@@ -86,51 +86,51 @@ const _addAction: ActionSpec<
     return Result.ok(result.value);
   },
 });
-export const addAction: typeof _addAction = _addAction;
 
-const _listBlocksAction: ActionSpec<{ outputMode: CliOutputMode }, unknown> =
-  defineAction({
-    id: "add.list",
+export const listBlocksAction: ActionSpec<
+  { outputMode: CliOutputMode },
+  unknown
+> = defineAction({
+  id: "add.list",
+  description: "List available blocks",
+  surfaces: ["cli"],
+  input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
+    outputMode: CliOutputMode;
+  }>,
+  cli: {
+    group: "add",
+    command: "list",
     description: "List available blocks",
-    surfaces: ["cli"],
-    input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
-      outputMode: CliOutputMode;
-    }>,
-    cli: {
-      group: "add",
-      command: "list",
-      description: "List available blocks",
-      mapInput: (context) => {
-        const outputMode = resolveOutputModeFromContext(context.flags);
-        return {
-          outputMode,
-        };
-      },
+    mapInput: (context) => {
+      const outputMode = resolveOutputModeFromContext(context.flags);
+      return {
+        outputMode,
+      };
     },
-    handler: async (input) => {
-      const result = listBlocks();
+  },
+  handler: async (input) => {
+    const result = listBlocks();
 
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "add.list" },
-          })
-        );
-      }
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "add.list" },
+        })
+      );
+    }
 
-      const structuredMode = resolveStructuredOutputMode(input.outputMode);
-      if (structuredMode) {
-        await output({ blocks: result.value }, { mode: structuredMode });
-      } else {
-        const lines = [
-          "Available blocks:",
-          ...result.value.map((block) => `  - ${block}`),
-        ];
-        await output(lines, { mode: "human" });
-      }
+    const structuredMode = resolveStructuredOutputMode(input.outputMode);
+    if (structuredMode) {
+      await output({ blocks: result.value }, { mode: structuredMode });
+    } else {
+      const lines = [
+        "Available blocks:",
+        ...result.value.map((block) => `  - ${block}`),
+      ];
+      await output(lines, { mode: "human" });
+    }
 
-      return Result.ok({ blocks: result.value });
-    },
-  });
-export const listBlocksAction: typeof _listBlocksAction = _listBlocksAction;
+    return Result.ok({ blocks: result.value });
+  },
+});

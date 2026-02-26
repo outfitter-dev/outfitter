@@ -82,93 +82,87 @@ function mapCheckAutomationInput(context: {
   };
 }
 
-const _checkPublishGuardrailsAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
-    id: "check.publish-guardrails",
+export const checkPublishGuardrailsAction: ActionSpec<
+  CheckAutomationInput,
+  unknown
+> = defineAction({
+  id: "check.publish-guardrails",
+  description:
+    "Validate publishable package manifests enforce prepublishOnly guardrails",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "publish-guardrails",
     description:
       "Validate publishable package manifests enforce prepublishOnly guardrails",
-    surfaces: ["cli"],
-    input: checkAutomationInputSchema,
-    cli: {
-      group: "check",
-      command: "publish-guardrails",
-      description:
-        "Validate publishable package manifests enforce prepublishOnly guardrails",
-      options: [
-        ...checkAutomationOutput.options,
-        ...checkAutomationCwd.options,
-      ],
-      mapInput: mapCheckAutomationInput,
-    },
-    handler: async (input) => {
-      const result = await runCheckPublishGuardrails({ cwd: input.cwd });
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.publish-guardrails" },
-          })
-        );
-      }
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckPublishGuardrails({ cwd: input.cwd });
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.publish-guardrails" },
+        })
+      );
+    }
 
-      await printCheckPublishGuardrailsResult(result.value, {
-        mode: input.outputMode,
-      });
+    await printCheckPublishGuardrailsResult(result.value, {
+      mode: input.outputMode,
+    });
 
-      if (!result.value.ok) {
-        process.exit(1);
-      }
+    if (!result.value.ok) {
+      process.exit(1);
+    }
 
-      return Result.ok(result.value);
-    },
-  });
-export const checkPublishGuardrailsAction: typeof _checkPublishGuardrailsAction =
-  _checkPublishGuardrailsAction;
+    return Result.ok(result.value);
+  },
+});
 
-const _checkPresetVersionsAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
-    id: "check.preset-versions",
+export const checkPresetVersionsAction: ActionSpec<
+  CheckAutomationInput,
+  unknown
+> = defineAction({
+  id: "check.preset-versions",
+  description:
+    "Validate preset dependency versions, registry versions, and Bun version consistency",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "preset-versions",
     description:
       "Validate preset dependency versions, registry versions, and Bun version consistency",
-    surfaces: ["cli"],
-    input: checkAutomationInputSchema,
-    cli: {
-      group: "check",
-      command: "preset-versions",
-      description:
-        "Validate preset dependency versions, registry versions, and Bun version consistency",
-      options: [
-        ...checkAutomationOutput.options,
-        ...checkAutomationCwd.options,
-      ],
-      mapInput: mapCheckAutomationInput,
-    },
-    handler: async (input) => {
-      const result = await runCheckPresetVersions({ cwd: input.cwd });
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.preset-versions" },
-          })
-        );
-      }
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckPresetVersions({ cwd: input.cwd });
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.preset-versions" },
+        })
+      );
+    }
 
-      await printCheckPresetVersionsResult(result.value, {
-        mode: input.outputMode,
-      });
+    await printCheckPresetVersionsResult(result.value, {
+      mode: input.outputMode,
+    });
 
-      if (!result.value.ok) {
-        process.exit(1);
-      }
+    if (!result.value.ok) {
+      process.exit(1);
+    }
 
-      return Result.ok(result.value);
-    },
-  });
-export const checkPresetVersionsAction: typeof _checkPresetVersionsAction =
-  _checkPresetVersionsAction;
+    return Result.ok(result.value);
+  },
+});
 
-const _checkSurfaceMapAction: ActionSpec<CheckAutomationInput, unknown> =
+export const checkSurfaceMapAction: ActionSpec<CheckAutomationInput, unknown> =
   defineAction({
     id: "check.surface-map",
     description:
@@ -208,87 +202,79 @@ const _checkSurfaceMapAction: ActionSpec<CheckAutomationInput, unknown> =
       return Result.ok(result.value);
     },
   });
-export const checkSurfaceMapAction: typeof _checkSurfaceMapAction =
-  _checkSurfaceMapAction;
 
-const _checkSurfaceMapFormatAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
-    id: "check.surface-map-format",
+export const checkSurfaceMapFormatAction: ActionSpec<
+  CheckAutomationInput,
+  unknown
+> = defineAction({
+  id: "check.surface-map-format",
+  description: "Validate canonical formatting for .outfitter/surface.json",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "surface-map-format",
     description: "Validate canonical formatting for .outfitter/surface.json",
-    surfaces: ["cli"],
-    input: checkAutomationInputSchema,
-    cli: {
-      group: "check",
-      command: "surface-map-format",
-      description: "Validate canonical formatting for .outfitter/surface.json",
-      options: [
-        ...checkAutomationOutput.options,
-        ...checkAutomationCwd.options,
-      ],
-      mapInput: mapCheckAutomationInput,
-    },
-    handler: async (input) => {
-      const result = await runCheckSurfaceMapFormat({ cwd: input.cwd });
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.surface-map-format" },
-          })
-        );
-      }
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckSurfaceMapFormat({ cwd: input.cwd });
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.surface-map-format" },
+        })
+      );
+    }
 
-      await printCheckSurfaceMapFormatResult(result.value, {
-        mode: input.outputMode,
-      });
+    await printCheckSurfaceMapFormatResult(result.value, {
+      mode: input.outputMode,
+    });
 
-      if (!result.value.ok) {
-        process.exit(1);
-      }
+    if (!result.value.ok) {
+      process.exit(1);
+    }
 
-      return Result.ok(result.value);
-    },
-  });
-export const checkSurfaceMapFormatAction: typeof _checkSurfaceMapFormatAction =
-  _checkSurfaceMapFormatAction;
+    return Result.ok(result.value);
+  },
+});
 
-const _checkDocsSentinelAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
-    id: "check.docs-sentinel",
+export const checkDocsSentinelAction: ActionSpec<
+  CheckAutomationInput,
+  unknown
+> = defineAction({
+  id: "check.docs-sentinel",
+  description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "docs-sentinel",
     description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
-    surfaces: ["cli"],
-    input: checkAutomationInputSchema,
-    cli: {
-      group: "check",
-      command: "docs-sentinel",
-      description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
-      options: [
-        ...checkAutomationOutput.options,
-        ...checkAutomationCwd.options,
-      ],
-      mapInput: mapCheckAutomationInput,
-    },
-    handler: async (input) => {
-      const result = await runCheckDocsSentinel({ cwd: input.cwd });
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.docs-sentinel" },
-          })
-        );
-      }
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckDocsSentinel({ cwd: input.cwd });
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.docs-sentinel" },
+        })
+      );
+    }
 
-      await printCheckDocsSentinelResult(result.value, {
-        mode: input.outputMode,
-      });
+    await printCheckDocsSentinelResult(result.value, {
+      mode: input.outputMode,
+    });
 
-      if (!result.value.ok) {
-        process.exit(1);
-      }
+    if (!result.value.ok) {
+      process.exit(1);
+    }
 
-      return Result.ok(result.value);
-    },
-  });
-export const checkDocsSentinelAction: typeof _checkDocsSentinelAction =
-  _checkDocsSentinelAction;
+    return Result.ok(result.value);
+  },
+});

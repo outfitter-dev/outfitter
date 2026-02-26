@@ -29,35 +29,35 @@ const doctorInputSchema = z.object({
 
 const doctorCwd = cwdPreset();
 
-const _doctorAction: ActionSpec<DoctorActionInput, unknown> = defineAction({
-  id: "doctor",
-  description: "Validate environment and dependencies",
-  surfaces: ["cli"],
-  input: doctorInputSchema,
-  cli: {
-    command: "doctor",
+export const doctorAction: ActionSpec<DoctorActionInput, unknown> =
+  defineAction({
+    id: "doctor",
     description: "Validate environment and dependencies",
-    options: [...doctorCwd.options],
-    mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
-      const { cwd: rawCwd } = doctorCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
-      return {
-        cwd,
-        outputMode,
-      };
+    surfaces: ["cli"],
+    input: doctorInputSchema,
+    cli: {
+      command: "doctor",
+      description: "Validate environment and dependencies",
+      options: [...doctorCwd.options],
+      mapInput: (context) => {
+        const outputMode = resolveOutputModeFromContext(context.flags);
+        const { cwd: rawCwd } = doctorCwd.resolve(context.flags);
+        const cwd = resolve(process.cwd(), rawCwd);
+        return {
+          cwd,
+          outputMode,
+        };
+      },
     },
-  },
-  handler: async (input) => {
-    const { outputMode, ...doctorInput } = input;
-    const result = await runDoctor(doctorInput);
-    await printDoctorResults(result, { mode: outputMode });
+    handler: async (input) => {
+      const { outputMode, ...doctorInput } = input;
+      const result = await runDoctor(doctorInput);
+      await printDoctorResults(result, { mode: outputMode });
 
-    if (result.exitCode !== 0) {
-      process.exit(result.exitCode);
-    }
+      if (result.exitCode !== 0) {
+        process.exit(result.exitCode);
+      }
 
-    return Result.ok(result);
-  },
-});
-export const doctorAction: typeof _doctorAction = _doctorAction;
+      return Result.ok(result);
+    },
+  });

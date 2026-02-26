@@ -238,7 +238,7 @@ function createInitAction(options: {
     initOptions.push(presetOption);
   }
 
-  return defineAction({
+  return defineAction<InitActionInput, unknown>({
     id: options.id,
     description: options.description,
     surfaces: ["cli"],
@@ -270,87 +270,82 @@ function createInitAction(options: {
   });
 }
 
-const _createAction: ActionSpec<{}, unknown, InternalError> = defineAction({
-  id: "create",
-  description: "Removed - use 'outfitter init' instead",
-  surfaces: ["cli"],
-  input: z.object({}).passthrough(),
-  cli: {
-    command: "create [directory]",
+export const createAction: ActionSpec<{}, unknown, InternalError> =
+  defineAction({
+    id: "create",
     description: "Removed - use 'outfitter init' instead",
-    options: [],
-    mapInput: () => ({}),
-  },
-  handler: async () =>
-    Result.err(
-      new InternalError({
-        message: [
-          "The 'create' command has been removed.",
-          "",
-          "Use 'outfitter init' instead. It supports everything 'create' did:",
-          "",
-          "  Interactive mode:    outfitter init my-project",
-          "  With preset:         outfitter init my-project --preset cli",
-          "  Skip prompts:        outfitter init my-project --preset cli --yes",
-          "  Workspace:           outfitter init my-project --preset cli --structure workspace",
-          "",
-          "See 'outfitter init --help' for full options.",
-        ].join("\n"),
-        context: { action: "create" },
-      })
-    ),
-});
-export const createAction: typeof _createAction = _createAction;
+    surfaces: ["cli"],
+    input: z.object({}).passthrough(),
+    cli: {
+      command: "create [directory]",
+      description: "Removed - use 'outfitter init' instead",
+      options: [],
+      mapInput: () => ({}),
+    },
+    handler: async () =>
+      Result.err(
+        new InternalError({
+          message: [
+            "The 'create' command has been removed.",
+            "",
+            "Use 'outfitter init' instead. It supports everything 'create' did:",
+            "",
+            "  Interactive mode:    outfitter init my-project",
+            "  With preset:         outfitter init my-project --preset cli",
+            "  Skip prompts:        outfitter init my-project --preset cli --yes",
+            "  Workspace:           outfitter init my-project --preset cli --structure workspace",
+            "",
+            "See 'outfitter init --help' for full options.",
+          ].join("\n"),
+          context: { action: "create" },
+        })
+      ),
+  });
 
-const _initAction: ReturnType<typeof createInitAction> = createInitAction({
-  id: "init",
-  description: "Create a new Outfitter project",
-  command: "[directory]",
-  includePresetOption: true,
-});
-export const initAction: typeof _initAction = _initAction;
+export const initAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
+    id: "init",
+    description: "Create a new Outfitter project",
+    command: "[directory]",
+    includePresetOption: true,
+  });
 
-const _initCliAction: ReturnType<typeof createInitAction> = createInitAction({
-  id: "init.cli",
-  description: "Create a new CLI project",
-  command: "cli [directory]",
-  presetOverride: "cli",
-});
-export const initCliAction: typeof _initCliAction = _initCliAction;
+export const initCliAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
+    id: "init.cli",
+    description: "Create a new CLI project",
+    command: "cli [directory]",
+    presetOverride: "cli",
+  });
 
-const _initMcpAction: ReturnType<typeof createInitAction> = createInitAction({
-  id: "init.mcp",
-  description: "Create a new MCP server",
-  command: "mcp [directory]",
-  presetOverride: "mcp",
-});
-export const initMcpAction: typeof _initMcpAction = _initMcpAction;
+export const initMcpAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
+    id: "init.mcp",
+    description: "Create a new MCP server",
+    command: "mcp [directory]",
+    presetOverride: "mcp",
+  });
 
-const _initDaemonAction: ReturnType<typeof createInitAction> = createInitAction(
-  {
+export const initDaemonAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
     id: "init.daemon",
     description: "Create a new daemon project",
     command: "daemon [directory]",
     presetOverride: "daemon",
-  }
-);
-export const initDaemonAction: typeof _initDaemonAction = _initDaemonAction;
+  });
 
-const _initLibraryAction: ReturnType<typeof createInitAction> =
+export const initLibraryAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.library",
     description: "Create a new library project",
     command: "library [directory]",
     presetOverride: "library",
   });
-export const initLibraryAction: typeof _initLibraryAction = _initLibraryAction;
 
-const _initFullStackAction: ReturnType<typeof createInitAction> =
+export const initFullStackAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.full-stack",
     description: "Create a full-stack workspace",
     command: "full-stack [directory]",
     presetOverride: "full-stack",
   });
-export const initFullStackAction: typeof _initFullStackAction =
-  _initFullStackAction;

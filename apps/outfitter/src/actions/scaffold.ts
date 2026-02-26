@@ -95,56 +95,56 @@ function resolveScaffoldOptions(context: {
   };
 }
 
-const _scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> = defineAction({
-  id: "scaffold",
-  description: "Add a capability to an existing project",
-  surfaces: ["cli"],
-  input: scaffoldInputSchema,
-  cli: {
-    command: "scaffold <target> [name]",
-    description:
-      "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
-    options: [
-      ...scaffoldSharedFlags.options,
-      {
-        flags: "--skip-install",
-        description: "Skip bun install",
-        defaultValue: false,
-      },
-      {
-        flags: "--with <blocks>",
-        description: "Comma-separated tooling blocks to add",
-      },
-      {
-        flags: "--no-tooling",
-        description: "Skip default tooling blocks",
-      },
-      {
-        flags: "--local",
-        description: "Use workspace:* for @outfitter dependencies",
-      },
-      {
-        flags: "--install-timeout <ms>",
-        description: "bun install timeout in milliseconds",
-      },
-    ],
-    mapInput: resolveScaffoldOptions,
-  },
-  handler: async (input) => {
-    const { outputMode, ...scaffoldInput } = input;
-    const result = await runScaffold(scaffoldInput);
+export const scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> =
+  defineAction({
+    id: "scaffold",
+    description: "Add a capability to an existing project",
+    surfaces: ["cli"],
+    input: scaffoldInputSchema,
+    cli: {
+      command: "scaffold <target> [name]",
+      description:
+        "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
+      options: [
+        ...scaffoldSharedFlags.options,
+        {
+          flags: "--skip-install",
+          description: "Skip bun install",
+          defaultValue: false,
+        },
+        {
+          flags: "--with <blocks>",
+          description: "Comma-separated tooling blocks to add",
+        },
+        {
+          flags: "--no-tooling",
+          description: "Skip default tooling blocks",
+        },
+        {
+          flags: "--local",
+          description: "Use workspace:* for @outfitter dependencies",
+        },
+        {
+          flags: "--install-timeout <ms>",
+          description: "bun install timeout in milliseconds",
+        },
+      ],
+      mapInput: resolveScaffoldOptions,
+    },
+    handler: async (input) => {
+      const { outputMode, ...scaffoldInput } = input;
+      const result = await runScaffold(scaffoldInput);
 
-    if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "scaffold" },
-        })
-      );
-    }
+      if (result.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: result.error.message,
+            context: { action: "scaffold" },
+          })
+        );
+      }
 
-    await printScaffoldResults(result.value, { mode: outputMode });
-    return Result.ok(result.value);
-  },
-});
-export const scaffoldAction: typeof _scaffoldAction = _scaffoldAction;
+      await printScaffoldResults(result.value, { mode: outputMode });
+      return Result.ok(result.value);
+    },
+  });

@@ -105,7 +105,7 @@ function resolveCheckMode(
   return requestedModes[0];
 }
 
-const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
+export const checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
   id: "check",
   description:
     "Compare local config blocks against the registry for drift detection",
@@ -253,7 +253,6 @@ const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
     return Result.ok(result.value);
   },
 });
-export const checkAction: typeof _checkAction = _checkAction;
 
 interface CheckTsDocActionInput {
   cwd: string;
@@ -311,15 +310,11 @@ export const checkTsdocOutputSchema = z.object({
 const checkTsdocOutputMode = outputModePreset({ includeJsonl: true });
 const checkTsdocJq = jqPreset();
 
-const _checkTsdocAction: ActionSpec<
+export const checkTsdocAction: ActionSpec<
   CheckTsDocActionInput,
   TsDocCheckResult,
   ValidationError | InternalError
-> = defineAction<
-  CheckTsDocActionInput,
-  TsDocCheckResult,
-  ValidationError | InternalError
->({
+> = defineAction({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
@@ -435,4 +430,3 @@ const _checkTsdocAction: ActionSpec<
     return Result.ok(result.value);
   },
 });
-export const checkTsdocAction: typeof _checkTsdocAction = _checkTsdocAction;
