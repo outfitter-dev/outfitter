@@ -27,10 +27,10 @@ import { applyJq } from "./jq-utils.js";
 /** Validated input for the docs.api action handler. */
 export interface DocsApiInput {
   readonly cwd: string;
-  readonly jq: string | undefined;
-  readonly level: "documented" | "partial" | "undocumented" | undefined;
+  readonly jq?: string | undefined;
+  readonly level?: "documented" | "partial" | "undocumented" | undefined;
   readonly outputMode: CliOutputMode;
-  readonly packages: readonly string[];
+  readonly packages: string[];
 }
 
 interface DocsApiDependencies {

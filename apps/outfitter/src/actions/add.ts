@@ -9,20 +9,10 @@ import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { cwdPreset, dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import {
-  type ActionSpec,
-  defineAction,
-  InternalError,
-  Result,
-} from "@outfitter/contracts";
+import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
-import {
-  type AddInput,
-  listBlocks,
-  printAddResults,
-  runAdd,
-} from "../commands/add.js";
+import { listBlocks, printAddResults, runAdd } from "../commands/add.js";
 import {
   type CliOutputMode,
   resolveOutputModeFromContext,
@@ -30,21 +20,28 @@ import {
 } from "../output-mode.js";
 import { outputModeSchema } from "./shared.js";
 
+interface AddActionInput {
+  readonly block: string;
+  readonly cwd?: string | undefined;
+  readonly dryRun: boolean;
+  readonly force: boolean;
+  readonly outputMode: CliOutputMode;
+}
+
 const addInputSchema = z.object({
   block: z.string(),
   force: z.boolean(),
   dryRun: z.boolean(),
   cwd: z.string().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<AddInput & { outputMode: CliOutputMode }>;
+});
 
 const addSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
 const addCwd = cwdPreset();
 
-export const addAction: ActionSpec<
-  AddInput & { outputMode: CliOutputMode },
-  unknown
-> = defineAction({
+type AddAction = ReturnType<typeof defineAction<AddActionInput, unknown>>;
+
+export const addAction: AddAction = defineAction({
   id: "add",
   description: "Add a block from the registry to your project",
   surfaces: ["cli"],
@@ -70,8 +67,11 @@ export const addAction: ActionSpec<
     },
   },
   handler: async (input) => {
-    const { outputMode, ...addInput } = input;
-    const result = await runAdd(addInput);
+    const { outputMode, cwd, ...addInput } = input;
+    const result = await runAdd({
+      ...addInput,
+      ...(cwd !== undefined ? { cwd } : {}),
+    });
 
     if (result.isErr()) {
       return Result.err(
@@ -87,16 +87,17 @@ export const addAction: ActionSpec<
   },
 });
 
-export const listBlocksAction: ActionSpec<
-  { outputMode: CliOutputMode },
-  unknown
-> = defineAction({
+const listBlocksInputSchema = z.object({ outputMode: outputModeSchema });
+
+type ListBlocksAction = ReturnType<
+  typeof defineAction<{ outputMode: CliOutputMode }, unknown>
+>;
+
+export const listBlocksAction: ListBlocksAction = defineAction({
   id: "add.list",
   description: "List available blocks",
   surfaces: ["cli"],
-  input: z.object({ outputMode: outputModeSchema }) as z.ZodType<{
-    outputMode: CliOutputMode;
-  }>,
+  input: listBlocksInputSchema,
   cli: {
     group: "add",
     command: "list",

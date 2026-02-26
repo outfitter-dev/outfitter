@@ -6,12 +6,7 @@
 
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import {
-  type ActionSpec,
-  defineAction,
-  InternalError,
-  Result,
-} from "@outfitter/contracts";
+import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printScaffoldResults, runScaffold } from "../commands/scaffold.js";
@@ -53,6 +48,10 @@ interface ScaffoldActionInput {
   with?: string | undefined;
 }
 
+type ScaffoldAction = ReturnType<
+  typeof defineAction<ScaffoldActionInput, unknown>
+>;
+
 const scaffoldInputSchema = z.object({
   target: z.string(),
   name: z.string().optional(),
@@ -65,7 +64,7 @@ const scaffoldInputSchema = z.object({
   installTimeout: z.number().optional(),
   cwd: z.string(),
   outputMode: outputModeSchema,
-}) as z.ZodType<ScaffoldActionInput>;
+});
 
 const scaffoldSharedFlags = actionCliPresets(forcePreset(), dryRunPreset());
 
@@ -95,56 +94,55 @@ function resolveScaffoldOptions(context: {
   };
 }
 
-export const scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> =
-  defineAction({
-    id: "scaffold",
-    description: "Add a capability to an existing project",
-    surfaces: ["cli"],
-    input: scaffoldInputSchema,
-    cli: {
-      command: "scaffold <target> [name]",
-      description:
-        "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
-      options: [
-        ...scaffoldSharedFlags.options,
-        {
-          flags: "--skip-install",
-          description: "Skip bun install",
-          defaultValue: false,
-        },
-        {
-          flags: "--with <blocks>",
-          description: "Comma-separated tooling blocks to add",
-        },
-        {
-          flags: "--no-tooling",
-          description: "Skip default tooling blocks",
-        },
-        {
-          flags: "--local",
-          description: "Use workspace:* for @outfitter dependencies",
-        },
-        {
-          flags: "--install-timeout <ms>",
-          description: "bun install timeout in milliseconds",
-        },
-      ],
-      mapInput: resolveScaffoldOptions,
-    },
-    handler: async (input) => {
-      const { outputMode, ...scaffoldInput } = input;
-      const result = await runScaffold(scaffoldInput);
+export const scaffoldAction: ScaffoldAction = defineAction({
+  id: "scaffold",
+  description: "Add a capability to an existing project",
+  surfaces: ["cli"],
+  input: scaffoldInputSchema,
+  cli: {
+    command: "scaffold <target> [name]",
+    description:
+      "Add a capability (cli, mcp, daemon, lib, ...) to an existing project",
+    options: [
+      ...scaffoldSharedFlags.options,
+      {
+        flags: "--skip-install",
+        description: "Skip bun install",
+        defaultValue: false,
+      },
+      {
+        flags: "--with <blocks>",
+        description: "Comma-separated tooling blocks to add",
+      },
+      {
+        flags: "--no-tooling",
+        description: "Skip default tooling blocks",
+      },
+      {
+        flags: "--local",
+        description: "Use workspace:* for @outfitter dependencies",
+      },
+      {
+        flags: "--install-timeout <ms>",
+        description: "bun install timeout in milliseconds",
+      },
+    ],
+    mapInput: resolveScaffoldOptions,
+  },
+  handler: async (input) => {
+    const { outputMode, ...scaffoldInput } = input;
+    const result = await runScaffold(scaffoldInput);
 
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "scaffold" },
-          })
-        );
-      }
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "scaffold" },
+        })
+      );
+    }
 
-      await printScaffoldResults(result.value, { mode: outputMode });
-      return Result.ok(result.value);
-    },
-  });
+    await printScaffoldResults(result.value, { mode: outputMode });
+    return Result.ok(result.value);
+  },
+});
