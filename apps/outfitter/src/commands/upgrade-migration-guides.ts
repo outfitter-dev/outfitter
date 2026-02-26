@@ -7,6 +7,7 @@ import type { PackageVersionInfo } from "./upgrade.js";
 
 type GuidePackageVersionInfo = PackageVersionInfo;
 
+/** Structured migration guide for a single package upgrade. */
 export interface MigrationGuide {
   /** Whether this is a breaking change */
   readonly breaking: boolean;

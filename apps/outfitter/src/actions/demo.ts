@@ -33,6 +33,7 @@ const demoInputSchema = z.object({
   outputMode: outputModeSchema,
 });
 
+/** Run the interactive CLI demo showcasing TUI components and output modes. */
 export const demoAction: DemoAction = defineAction({
   id: "demo",
   description: "Run the CLI demo app",

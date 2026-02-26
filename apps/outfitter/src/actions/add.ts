@@ -43,6 +43,7 @@ const addCwd = cwdPreset();
 
 type AddAction = ReturnType<typeof defineAction<AddActionInput, unknown>>;
 
+/** Add a block from the registry to the current project. */
 export const addAction: AddAction = defineAction({
   id: "add",
   description: "Add a block from the registry to your project",
@@ -88,6 +89,7 @@ type ListBlocksAction = ReturnType<
   typeof defineAction<{ outputMode: CliOutputMode }, unknown>
 >;
 
+/** List all blocks available in the registry. */
 export const listBlocksAction: ListBlocksAction = defineAction({
   id: "add.list",
   description: "List available blocks",

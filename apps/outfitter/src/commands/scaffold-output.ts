@@ -6,10 +6,15 @@ import { renderOperationPlan } from "../engine/render-plan.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { ScaffoldCommandResult } from "./scaffold.js";
 
+/** Options controlling how scaffold results are rendered (human-readable, JSON, or JSONL). */
 export interface PrintScaffoldResultsOptions {
   readonly mode?: OutputMode;
 }
 
+/**
+ * Renders scaffold results to stdout. Handles dry-run plans, structured output modes,
+ * and human-readable summaries including workspace conversion details and next steps.
+ */
 export async function printScaffoldResults(
   result: ScaffoldCommandResult,
   options?: PrintScaffoldResultsOptions

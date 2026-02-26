@@ -100,6 +100,7 @@ function resolveScaffoldOptions(context: {
   };
 }
 
+/** Add a capability (CLI, MCP, daemon, library) to an existing project. */
 export const scaffoldAction: ScaffoldAction = defineAction({
   id: "scaffold",
   description: "Add a capability to an existing project",

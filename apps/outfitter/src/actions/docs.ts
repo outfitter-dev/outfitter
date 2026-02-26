@@ -57,6 +57,7 @@ const docsListJq = jqPreset();
 
 type DocsListAction = ReturnType<typeof defineAction<DocsListInput, unknown>>;
 
+/** List documentation entries from the workspace docs map. */
 export const docsListAction: DocsListAction = defineAction({
   id: "docs.list",
   description: "List documentation entries from the docs map",
@@ -124,6 +125,7 @@ const docsShowJq = jqPreset();
 
 type DocsShowAction = ReturnType<typeof defineAction<DocsShowInput, unknown>>;
 
+/** Show a specific documentation entry by ID, including its content. */
 export const docsShowAction: DocsShowAction = defineAction({
   id: "docs.show",
   description: "Show a specific documentation entry and its content",
@@ -183,6 +185,7 @@ type DocsSearchAction = ReturnType<
   typeof defineAction<DocsSearchInput, unknown>
 >;
 
+/** Search documentation content for a query string. */
 export const docsSearchAction: DocsSearchAction = defineAction({
   id: "docs.search",
   description: "Search documentation content for a query string",
@@ -252,6 +255,7 @@ const docsApiJq = jqPreset();
 
 type DocsApiAction = ReturnType<typeof defineAction<DocsApiInput, unknown>>;
 
+/** Extract API reference from TSDoc coverage data. */
 export const docsApiAction: DocsApiAction = defineAction({
   id: "docs.api",
   description: "Extract API reference from TSDoc coverage data",
@@ -348,6 +352,7 @@ type DocsExportAction = ReturnType<
   typeof defineAction<DocsExportInput, unknown>
 >;
 
+/** Export documentation to package READMEs, llms.txt, or both. */
 export const docsExportAction: DocsExportAction = defineAction({
   id: "docs.export",
   description: "Export documentation to packages, llms.txt, or both",

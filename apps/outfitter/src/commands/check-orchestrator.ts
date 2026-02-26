@@ -15,6 +15,7 @@ import { createTheme } from "@outfitter/tui/render";
 
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
+/** Check bundle mode controlling which steps are included and whether a clean tree is enforced. */
 export type CheckOrchestratorMode = "all" | "ci" | "pre-commit" | "pre-push";
 
 interface CheckOrchestratorStep {
@@ -23,9 +24,12 @@ interface CheckOrchestratorStep {
   readonly label: string;
 }
 
+/** Options controlling which checks the orchestrator runs. */
 export interface CheckOrchestratorOptions {
+  /** Workspace root for resolving commands and tree-clean detection. */
   readonly cwd: string;
   readonly mode: CheckOrchestratorMode;
+  /** Staged file paths for pre-commit scoping. Ignored by other modes. */
   readonly stagedFiles?: readonly string[];
 }
 
@@ -39,12 +43,17 @@ interface CheckOrchestratorStepResult {
   readonly stdout: string;
 }
 
+/** Aggregate outcome of an orchestrator run including tree-clean status. */
 export interface CheckOrchestratorResult {
+  /** Step IDs that exited non-zero. */
   readonly failedStepIds: readonly string[];
   readonly mode: CheckOrchestratorMode;
+  /** Paths added or modified in the working tree during the run. */
   readonly mutatedPaths: readonly string[];
+  /** True when all steps passed and tree-clean enforcement (if applicable) succeeded. */
   readonly ok: boolean;
   readonly steps: readonly CheckOrchestratorStepResult[];
+  /** Whether the working tree was unchanged after the run completed. */
   readonly treeClean: boolean;
 }
 
@@ -55,6 +64,7 @@ const SUCCESS_ADVISORY_PATTERNS: readonly RegExp[] = [
   /\binvalid changeset package reference\b/i,
 ];
 
+/** Error raised when the check orchestrator cannot complete its run. */
 export class CheckOrchestratorError extends Error {
   readonly _tag = "CheckOrchestratorError" as const;
 
@@ -82,6 +92,12 @@ function shouldSyncAgentScaffolding(paths: readonly string[]): boolean {
   );
 }
 
+/**
+ * Build the ordered list of check steps for the given mode.
+ *
+ * Pre-commit mode scopes lint/typecheck to staged files and conditionally
+ * includes agent-scaffolding sync. All other modes run the full suite.
+ */
 export function buildCheckOrchestratorPlan(
   options: CheckOrchestratorOptions
 ): readonly CheckOrchestratorStep[] {
@@ -356,6 +372,11 @@ export function buildCheckOrchestratorPlan(
   return preCommitSteps;
 }
 
+/**
+ * Parse `git status --porcelain` output into sorted file paths.
+ *
+ * Handles rename entries by extracting the destination path.
+ */
 export function parseTreePaths(statusOutput: string): string[] {
   return statusOutput
     .split("\n")
@@ -442,6 +463,12 @@ function extractSuccessAdvisory(stderr: string): string | undefined {
   return visibleLines.join("\n");
 }
 
+/**
+ * Execute the check plan sequentially, stopping on the first failure.
+ *
+ * Captures working-tree state before and after to detect mutations.
+ * For modes other than pre-commit, a dirty tree causes an overall failure.
+ */
 export async function runCheckOrchestrator(
   options: CheckOrchestratorOptions
 ): Promise<Result<CheckOrchestratorResult, CheckOrchestratorError>> {
@@ -530,6 +557,13 @@ function toCompactResult(
   };
 }
 
+/**
+ * Render orchestrator results to stdout.
+ *
+ * Structured modes emit JSON/JSONL (optionally compact). Human mode
+ * prints a step-by-step summary with pass/fail icons, timing, advisory
+ * warnings, and mutation traceability.
+ */
 export async function printCheckOrchestratorResults(
   result: CheckOrchestratorResult,
   options: PrintCheckOrchestratorResultsOptions = {}

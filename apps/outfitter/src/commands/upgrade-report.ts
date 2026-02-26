@@ -12,6 +12,7 @@ import type {
   UpgradeResult,
 } from "./upgrade.js";
 
+/** Terminal disposition of an upgrade run (written into the report). */
 export type UpgradeReportStatus =
   | "dry_run"
   | "no_updates"
@@ -61,6 +62,7 @@ export interface UpgradeReport {
   readonly workspaceRoot: string | null;
 }
 
+/** Contextual metadata passed alongside the result when writing a report. */
 export interface WriteUpgradeReportMeta {
   readonly error?: OutfitterError;
   readonly options: UpgradeOptions;

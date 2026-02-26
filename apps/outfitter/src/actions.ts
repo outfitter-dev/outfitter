@@ -40,6 +40,7 @@ import {
 import { scaffoldAction } from "./actions/scaffold.js";
 import { upgradeAction } from "./actions/upgrade.js";
 
+/** Central action registry containing all Outfitter CLI commands. */
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(scaffoldAction)

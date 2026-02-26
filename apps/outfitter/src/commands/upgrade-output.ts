@@ -9,6 +9,7 @@ import {
 } from "./upgrade-migration-docs.js";
 import type { UpgradeResult } from "./upgrade.js";
 
+/** Options controlling how upgrade results are rendered. */
 export interface PrintUpgradeResultsOptions {
   readonly all?: boolean;
   readonly cwd?: string;
@@ -19,6 +20,9 @@ export interface PrintUpgradeResultsOptions {
 
 /**
  * Format and output upgrade results.
+ *
+ * @param result - Upgrade scan/apply result to render
+ * @param options - Display options (output mode, guide, dry-run hints)
  */
 export async function printUpgradeResults(
   result: UpgradeResult,

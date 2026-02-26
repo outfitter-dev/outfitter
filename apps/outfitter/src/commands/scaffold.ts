@@ -32,28 +32,44 @@ import {
   validateScaffoldTargetName,
 } from "./scaffold-planning.js";
 
+/** Options for the scaffold command, corresponding to CLI flags and positional arguments. */
 export interface ScaffoldOptions {
+  /** Working directory to scaffold in. */
   readonly cwd: string;
+  /** Preview changes without writing to disk. */
   readonly dryRun: boolean;
+  /** Overwrite existing files without prompting. */
   readonly force: boolean;
+  /** Timeout in milliseconds for `bun install`. */
   readonly installTimeout?: number | undefined;
+  /** Use `workspace:*` protocol for `@outfitter` dependencies. */
   readonly local?: boolean | undefined;
+  /** Override the default target directory name. */
   readonly name?: string | undefined;
+  /** Skip adding default tooling blocks. */
   readonly noTooling?: boolean | undefined;
+  /** Skip running `bun install` after scaffolding. */
   readonly skipInstall: boolean;
+  /** Target preset ID to scaffold (e.g. "cli", "mcp"). */
   readonly target: string;
+  /** Comma-separated tooling block names to include. */
   readonly with?: string | undefined;
 }
 
+/** Result of a successful `outfitter scaffold` run. */
 export interface ScaffoldCommandResult {
+  /** Tooling blocks that were added, if any. */
   readonly blocksAdded?: AddBlockResult | undefined;
+  /** Whether the project was converted from single-package to workspace. */
   readonly converted: boolean;
+  /** Present only for dry-run invocations; contains the planned operations and summary counts. */
   readonly dryRunPlan?:
     | {
         readonly operations: readonly unknown[];
         readonly summary: Record<string, number>;
       }
     | undefined;
+  /** Details of the existing package that was relocated during workspace conversion. */
   readonly movedExisting?:
     | {
         readonly from: string;
@@ -61,16 +77,23 @@ export interface ScaffoldCommandResult {
         readonly name: string;
       }
     | undefined;
+  /** Results from post-scaffold steps (install, next-step hints). */
   readonly postScaffold: PostScaffoldResult;
+  /** Absolute path to the workspace root. */
   readonly rootDir: string;
+  /** The target preset ID that was scaffolded. */
   readonly target: string;
+  /** Absolute path to the scaffolded target directory. */
   readonly targetDir: string;
+  /** Whether a new workspace pattern was added to the root package.json. */
   readonly workspacePatternsUpdated: boolean;
 }
 
+/** Error returned when scaffolding fails. */
 export class ScaffoldCommandError extends Error {
   readonly _tag = "ScaffoldCommandError" as const;
 
+  /** @param message - Human-readable description of the scaffold failure. */
   constructor(message: string) {
     super(message);
     this.name = "ScaffoldCommandError";
@@ -79,6 +102,10 @@ export class ScaffoldCommandError extends Error {
 
 export { printScaffoldResults };
 
+/**
+ * Runs the full scaffold flow: detects project structure, converts to workspace
+ * if needed, executes the preset plan, and performs post-scaffold steps.
+ */
 export async function runScaffold(
   options: ScaffoldOptions
 ): Promise<Result<ScaffoldCommandResult, ScaffoldCommandError>> {
@@ -256,6 +283,7 @@ export async function runScaffold(
 }
 
 /**
+ * Registers the `scaffold` command on a Commander program.
  * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
  */
 export function scaffoldCommand(program: Command): void {

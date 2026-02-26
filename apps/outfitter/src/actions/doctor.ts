@@ -29,6 +29,7 @@ const doctorInputSchema = z.object({
 
 const doctorCwd = cwdPreset();
 
+/** Validate the local environment, toolchain, and project dependencies. */
 export const doctorAction: DoctorAction = defineAction({
   id: "doctor",
   description: "Validate environment and dependencies",

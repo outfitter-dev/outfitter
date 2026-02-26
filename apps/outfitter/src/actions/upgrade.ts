@@ -86,6 +86,7 @@ const upgradeFlags = actionCliPresets(
   upgradeGuide
 );
 
+/** Check for available `@outfitter/*` package updates and show migration guidance. */
 export const upgradeAction: UpgradeAction = defineAction({
   id: "upgrade",
   description: "Check for @outfitter/* package updates and migration guidance",

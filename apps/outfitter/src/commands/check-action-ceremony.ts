@@ -41,24 +41,34 @@ const CEREMONY_BUDGETS: readonly CeremonyBudget[] = [
 
 type CeremonyBudgetId = (typeof CEREMONY_BUDGETS)[number]["id"];
 
+/** Options for the action-ceremony guardrail check. */
 export interface CheckActionCeremonyOptions {
+  /** Workspace root used to locate the actions directory. */
   readonly cwd: string;
 }
 
+/** Result for a single ceremony budget after scanning action sources. */
 export interface CeremonyBudgetResult {
+  /** Number of pattern occurrences found. */
   readonly count: number;
   readonly description: string;
   readonly id: string;
+  /** Maximum allowed occurrences before the budget is exceeded. */
   readonly maxCount: number;
+  /** Whether the count is within the allowed budget. */
   readonly ok: boolean;
 }
 
+/** Aggregate result of the action-ceremony check across all budgets. */
 export interface CheckActionCeremonyResult {
+  /** Resolved path to the scanned actions directory. */
   readonly actionsDir: string;
   readonly budgets: readonly CeremonyBudgetResult[];
+  /** True when every budget is within its allowed count. */
   readonly ok: boolean;
 }
 
+/** Error raised when the action-ceremony check cannot complete. */
 export class CheckActionCeremonyError extends Error {
   readonly _tag = "CheckActionCeremonyError" as const;
 
@@ -79,6 +89,13 @@ function readActionSources(actionsDir: string): readonly string[] {
     .map((entry) => resolve(actionsDir, entry));
 }
 
+/**
+ * Scan action source files and evaluate each ceremony budget.
+ *
+ * Reads all `.ts` files under the actions directory and counts pattern
+ * matches against pre-defined budgets. Returns per-budget results and
+ * an aggregate pass/fail.
+ */
 export async function runCheckActionCeremony(
   options: CheckActionCeremonyOptions
 ): Promise<Result<CheckActionCeremonyResult, CheckActionCeremonyError>> {
@@ -133,6 +150,12 @@ export async function runCheckActionCeremony(
   }
 }
 
+/**
+ * Render ceremony check results to stdout/stderr.
+ *
+ * Emits JSON/JSONL for structured modes or a human-readable summary
+ * listing any budgets that exceeded their limit.
+ */
 export async function printCheckActionCeremonyResult(
   result: CheckActionCeremonyResult,
   options?: { mode?: CliOutputMode }
@@ -205,6 +228,11 @@ function parseCliArgs(argv: readonly string[]): ParsedCliArgs {
   };
 }
 
+/**
+ * CLI entry point: parse argv, run the ceremony check, and print results.
+ *
+ * @returns Exit code (0 on success, 1 on failure or error).
+ */
 export async function runCheckActionCeremonyFromArgv(
   argv: readonly string[]
 ): Promise<number> {

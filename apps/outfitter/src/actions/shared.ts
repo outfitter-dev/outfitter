@@ -9,6 +9,7 @@ import { resolve } from "node:path";
 import { InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
+/** Zod schema for CLI output mode with "human" as the default. */
 export const outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
   .enum(["human", "json", "jsonl"])
   .default("human");
@@ -32,6 +33,12 @@ function argvContainsOutputFlag(argv: readonly string[]): boolean {
   return false;
 }
 
+/**
+ * Detect whether the user explicitly passed an output mode flag.
+ *
+ * Returns `true` when the resolved mode differs from the default,
+ * or when `-o`/`--output` appears in the raw argv.
+ */
 export function hasExplicitOutputFlag(
   flags: Record<string, unknown>,
   options: {
@@ -52,10 +59,17 @@ export function hasExplicitOutputFlag(
   return argvContainsOutputFlag(options.argv ?? process.argv.slice(2));
 }
 
+/** Coerce a flag value to a non-empty string, or `undefined`. */
 export function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+/**
+ * Resolve the `--no-tooling` / `--tooling` flag pair.
+ *
+ * Returns `true` to include tooling, `false` to skip, or `undefined`
+ * when neither flag was provided.
+ */
 export function resolveNoToolingFlag(flags: {
   readonly noTooling?: unknown;
   readonly tooling?: unknown;
@@ -75,6 +89,7 @@ export function resolveNoToolingFlag(flags: {
   return undefined;
 }
 
+/** Resolve `--local` or its `--workspace` alias to a boolean, or `undefined` when absent. */
 export function resolveLocalFlag(flags: {
   readonly local?: unknown;
   readonly workspace?: unknown;
@@ -86,6 +101,7 @@ export function resolveLocalFlag(flags: {
   return undefined;
 }
 
+/** Parse `--install-timeout` as an integer, accepting string or number input. */
 export function resolveInstallTimeoutFlag(value: unknown): number | undefined {
   if (typeof value === "string") {
     return Number.parseInt(value, 10);
@@ -102,6 +118,7 @@ interface CwdPresetResolver {
   resolve(flags: Record<string, unknown>): { cwd: string };
 }
 
+/** Resolve the working directory from a `cwdPreset`, making relative paths absolute. */
 export function resolveCwdFromPreset(
   flags: Record<string, unknown>,
   cwdPreset: CwdPresetResolver
@@ -110,6 +127,12 @@ export function resolveCwdFromPreset(
   return resolve(process.cwd(), rawCwd);
 }
 
+/**
+ * Resolve output mode with environment variable fallback.
+ *
+ * When the user did not pass an explicit flag, checks
+ * `OUTFITTER_JSONL` and `OUTFITTER_JSON` before defaulting to "human".
+ */
 export function resolveOutputModeWithEnvFallback(
   flags: Record<string, unknown>,
   explicitMode: "human" | "json" | "jsonl",
@@ -134,6 +157,7 @@ export function resolveOutputModeWithEnvFallback(
   return "human";
 }
 
+/** Resolve a boolean flag that may appear under either its camelCase key or its kebab-case alias. */
 export function resolveBooleanFlagAlias(
   flags: Record<string, unknown>,
   key: string,
@@ -146,6 +170,7 @@ interface ActionBoundaryErrorLike {
   readonly message: string;
 }
 
+/** Wrap an error at the action boundary into a tagged `InternalError`. */
 export function toActionInternalError(
   action: string,
   error: ActionBoundaryErrorLike
@@ -156,6 +181,7 @@ export function toActionInternalError(
   });
 }
 
+/** Shorthand for returning `Result.err` with a tagged `InternalError` from an action handler. */
 export function actionInternalErr<T = never>(
   action: string,
   error: ActionBoundaryErrorLike
@@ -163,6 +189,7 @@ export function actionInternalErr<T = never>(
   return Result.err<T, InternalError>(toActionInternalError(action, error));
 }
 
+/** Convert an `unknown` catch value into a tagged `InternalError`, using a fallback message for non-Error values. */
 export function toActionInternalErrorFromUnknown(
   action: string,
   error: unknown,

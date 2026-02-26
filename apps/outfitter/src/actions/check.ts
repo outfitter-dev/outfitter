@@ -124,6 +124,7 @@ function resolveCheckMode(
   return requestedModes[0];
 }
 
+/** Compare local config blocks against the registry for drift, or orchestrate a suite of checks. */
 export const checkAction: CheckAction = defineAction({
   id: "check",
   description:
@@ -266,6 +267,7 @@ const checkTsdocInputSchema = z.object({
   packages: z.array(z.string()),
 });
 
+/** Zod schema describing the output shape of a TSDoc coverage check. */
 export const checkTsdocOutputSchema: z.ZodType<TsDocCheckResult> = z.object({
   ok: z.boolean(),
   packages: z.array(
@@ -300,6 +302,7 @@ export const checkTsdocOutputSchema: z.ZodType<TsDocCheckResult> = z.object({
 const checkTsdocOutputMode = outputModePreset({ includeJsonl: true });
 const checkTsdocJq = jqPreset();
 
+/** Check TSDoc coverage on exported declarations across workspace packages. */
 export const checkTsdocAction: CheckTsdocAction = defineAction({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",

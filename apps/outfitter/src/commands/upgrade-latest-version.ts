@@ -1,5 +1,8 @@
 /**
  * Query npm registry for the latest version of a package.
+ *
+ * @param name - Full npm package name (e.g. "@outfitter/cli")
+ * @returns Trimmed version string, or `null` if the lookup fails or returns empty
  */
 export async function getLatestVersion(name: string): Promise<string | null> {
   try {
