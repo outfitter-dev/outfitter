@@ -240,20 +240,22 @@ When defining Outfitter actions, keep type declarations explicit at the export
 boundary, but avoid redundant generic ceremony inside the implementation.
 
 ```typescript
-import { type ActionSpec, defineAction } from "@outfitter/contracts";
+import { defineAction } from "@outfitter/contracts";
 import { z } from "zod";
 
 interface ListInput {
-  cwd: string;
-  outputMode: "human" | "json" | "jsonl";
+  readonly cwd: string;
+  readonly outputMode: "human" | "json" | "jsonl";
 }
 
 const listInputSchema = z.object({
   cwd: z.string(),
   outputMode: z.enum(["human", "json", "jsonl"]),
-}) as z.ZodType<ListInput>;
+});
 
-export const listAction: ActionSpec<ListInput, unknown> = defineAction({
+type ListAction = ReturnType<typeof defineAction<ListInput, unknown>>;
+
+export const listAction: ListAction = defineAction({
   id: "list",
   surfaces: ["cli"],
   input: listInputSchema,
@@ -270,8 +272,8 @@ export const listAction: ActionSpec<ListInput, unknown> = defineAction({
 
 Guideline:
 
-- Keep one explicit `ActionSpec<...>` annotation on exported actions.
-- Skip duplicate `defineAction<TInput, TOutput>` generics unless inference fails.
+- Prefer `type ActionName = ReturnType<typeof defineAction<TInput, TOutput>>`.
+- Keep one explicit exported action annotation via that alias.
 - Use `as z.ZodType<T>` only when required for `isolatedDeclarations` stability.
 
 ## Validation
