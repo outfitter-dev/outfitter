@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
-
 import { cwdPreset } from "@outfitter/cli/flags";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
@@ -15,7 +13,7 @@ import {
   type CliOutputMode,
   resolveOutputModeFromContext,
 } from "../output-mode.js";
-import { outputModeSchema } from "./shared.js";
+import { outputModeSchema, resolveCwdFromPreset } from "./shared.js";
 
 interface DoctorActionInput {
   readonly cwd: string;
@@ -42,10 +40,8 @@ export const doctorAction: DoctorAction = defineAction({
     options: [...doctorCwd.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const { cwd: rawCwd } = doctorCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
       return {
-        cwd,
+        cwd: resolveCwdFromPreset(context.flags, doctorCwd),
         outputMode,
       };
     },

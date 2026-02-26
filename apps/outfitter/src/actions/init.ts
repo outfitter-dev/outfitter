@@ -29,6 +29,7 @@ import {
 import {
   actionInternalErr,
   outputModeSchema,
+  resolveBooleanFlagAlias,
   resolveInstallTimeoutFlag,
   resolveLocalFlag,
   resolveNoToolingFlag,
@@ -163,11 +164,17 @@ function resolveInitOptions(
   const local = resolveLocalFlag(flags);
   const withBlocks = resolveStringFlag(flags.with);
   const noTooling = resolveNoToolingFlag(flags);
-  const skipInstall = Boolean(
-    flags.skipInstall ?? context.flags["skip-install"]
+  const skipInstall = resolveBooleanFlagAlias(
+    context.flags,
+    "skipInstall",
+    "skip-install"
   );
-  const skipGit = Boolean(flags.skipGit ?? context.flags["skip-git"]);
-  const skipCommit = Boolean(flags.skipCommit ?? context.flags["skip-commit"]);
+  const skipGit = resolveBooleanFlagAlias(context.flags, "skipGit", "skip-git");
+  const skipCommit = resolveBooleanFlagAlias(
+    context.flags,
+    "skipCommit",
+    "skip-commit"
+  );
   const installTimeout = resolveInstallTimeoutFlag(flags.installTimeout);
   const outputMode = resolveOutputModeFromContext(context.flags);
 

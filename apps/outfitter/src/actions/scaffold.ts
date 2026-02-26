@@ -17,6 +17,7 @@ import {
 import {
   actionInternalErr,
   outputModeSchema,
+  resolveBooleanFlagAlias,
   resolveInstallTimeoutFlag,
   resolveLocalFlag,
   resolveNoToolingFlag,
@@ -84,7 +85,11 @@ function resolveScaffoldOptions(context: {
     target: String(context.args[0] ?? ""),
     name: resolveStringFlag(context.args[1]),
     force,
-    skipInstall: Boolean(flags.skipInstall ?? context.flags["skip-install"]),
+    skipInstall: resolveBooleanFlagAlias(
+      context.flags,
+      "skipInstall",
+      "skip-install"
+    ),
     dryRun,
     ...(local !== undefined ? { local } : {}),
     with: resolveStringFlag(flags.with),

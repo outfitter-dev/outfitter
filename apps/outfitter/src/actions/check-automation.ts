@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
-
 import { cwdPreset } from "@outfitter/cli/flags";
 import { outputModePreset } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
@@ -37,8 +35,9 @@ import {
 } from "../output-mode.js";
 import {
   actionInternalErr,
-  hasExplicitOutputFlag,
   outputModeSchema,
+  resolveCwdFromPreset,
+  resolveOutputModeWithEnvFallback,
 } from "./shared.js";
 
 interface CheckAutomationInput {
@@ -64,23 +63,13 @@ function mapCheckAutomationInput(context: {
   const { outputMode: presetOutputMode } = checkAutomationOutput.resolve(
     context.flags
   );
-  const explicitOutput = hasExplicitOutputFlag(context.flags);
-
-  let outputMode: CliOutputMode;
-  if (explicitOutput) {
-    outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-  } else if (process.env["OUTFITTER_JSONL"] === "1") {
-    outputMode = "jsonl";
-  } else if (process.env["OUTFITTER_JSON"] === "1") {
-    outputMode = "json";
-  } else {
-    outputMode = "human";
-  }
-
-  const { cwd: rawCwd } = checkAutomationCwd.resolve(context.flags);
+  const outputMode = resolveOutputModeWithEnvFallback(
+    context.flags,
+    resolveStructuredOutputMode(presetOutputMode) ?? "human"
+  );
 
   return {
-    cwd: resolve(process.cwd(), rawCwd),
+    cwd: resolveCwdFromPreset(context.flags, checkAutomationCwd),
     outputMode,
   };
 }

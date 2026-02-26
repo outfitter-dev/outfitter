@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
-
 import {
   booleanFlagPreset,
   cwdPreset,
@@ -35,8 +33,9 @@ import {
 } from "../output-mode.js";
 import {
   actionInternalErr,
-  hasExplicitOutputFlag,
   outputModeSchema,
+  resolveCwdFromPreset,
+  resolveOutputModeWithEnvFallback,
   resolveStringFlag,
 } from "./shared.js";
 
@@ -175,7 +174,6 @@ export const checkAction: CheckAction = defineAction({
       const { outputMode: presetOutputMode } = checkOutputMode.resolve(
         context.flags
       );
-      const explicitOutput = hasExplicitOutputFlag(context.flags);
       const block = resolveStringFlag(context.flags["block"]);
       if (mode !== undefined && block !== undefined) {
         throw ValidationError.fromMessage(
@@ -190,26 +188,15 @@ export const checkAction: CheckAction = defineAction({
                 typeof arg === "string" && arg.trim().length > 0
             )
           : undefined;
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        // Explicit --output should always win over env fallbacks.
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (mode !== undefined) {
-        // Orchestrator mode should not inherit JSON env defaults implicitly.
-        outputMode = "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveOutputModeWithEnvFallback(
+        context.flags,
+        resolveStructuredOutputMode(presetOutputMode) ?? "human",
+        { forceHumanWhenImplicit: mode !== undefined }
+      );
       const { verbose } = checkVerbose.resolve(context.flags);
-      const { cwd: rawCwd } = checkCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
       return {
         compact,
-        cwd,
+        cwd: resolveCwdFromPreset(context.flags, checkCwd),
         verbose,
         ...(block !== undefined ? { block } : {}),
         ...(mode !== undefined ? { mode } : {}),
@@ -356,18 +343,10 @@ export const checkTsdocAction: CheckTsdocAction = defineAction({
         context.flags
       );
       const { jq } = checkTsdocJq.resolve(context.flags);
-      const explicitOutput = hasExplicitOutputFlag(context.flags);
-      let outputMode: CliOutputMode;
-      if (explicitOutput) {
-        // Explicit --output should always win over env fallbacks.
-        outputMode = resolveStructuredOutputMode(presetOutputMode) ?? "human";
-      } else if (process.env["OUTFITTER_JSONL"] === "1") {
-        outputMode = "jsonl";
-      } else if (process.env["OUTFITTER_JSON"] === "1") {
-        outputMode = "json";
-      } else {
-        outputMode = "human";
-      }
+      const outputMode = resolveOutputModeWithEnvFallback(
+        context.flags,
+        resolveStructuredOutputMode(presetOutputMode) ?? "human"
+      );
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];
       let minCoverage = 0;
