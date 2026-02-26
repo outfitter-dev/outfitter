@@ -201,6 +201,12 @@
         "default": "./dist/commands/scaffold-planning.js"
       }
     },
+    "./commands/scaffold-output": {
+      "import": {
+        "types": "./dist/commands/scaffold-output.d.ts",
+        "default": "./dist/commands/scaffold-output.js"
+      }
+    },
     "./commands/shared-deps": {
       "import": {
         "types": "./dist/commands/shared-deps.d.ts",
