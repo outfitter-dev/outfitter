@@ -28,7 +28,10 @@ import {
   readMigrationDocs,
   readMigrationDocsWithMetadata,
 } from "./upgrade-migration-docs.js";
-import type { MigrationChange } from "./upgrade-migration-frontmatter.js";
+import {
+  buildMigrationGuides,
+  type MigrationGuide,
+} from "./upgrade-migration-guides.js";
 import { analyzeUpgrades } from "./upgrade-planner.js";
 import {
   applyUpdatesToWorkspace,
@@ -88,21 +91,8 @@ export type {
   MigrationChangeType,
   MigrationFrontmatter,
 } from "./upgrade-migration-frontmatter.js";
-
-export interface MigrationGuide {
-  /** Whether this is a breaking change */
-  readonly breaking: boolean;
-  /** Structured changes from migration frontmatter, if available */
-  readonly changes?: readonly MigrationChange[];
-  /** Currently installed version */
-  readonly fromVersion: string;
-  /** The @outfitter/* package name */
-  readonly packageName: string;
-  /** Migration step strings (empty if no guide exists) */
-  readonly steps: readonly string[];
-  /** Latest available version */
-  readonly toVersion: string;
-}
+export { buildMigrationGuides };
+export type { MigrationGuide } from "./upgrade-migration-guides.js";
 
 /** Summary of codemods executed during --apply. */
 export interface CodemodSummary {
@@ -161,67 +151,6 @@ async function getLatestVersion(name: string): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-// =============================================================================
-// Migration Guide Builder
-// =============================================================================
-
-/**
- * Build structured migration guides for packages with available updates.
- *
- * For each package with an update, produces a `MigrationGuide` with steps
- * extracted from migration docs (if a migrations directory is available).
- * Packages without updates or without a resolved latest version are skipped.
- *
- * This function is pure — no side effects beyond reading migration doc files
- * when `migrationsDir` is provided.
- */
-export function buildMigrationGuides(
-  packages: readonly PackageVersionInfo[],
-  migrationsDir: string | null
-): MigrationGuide[] {
-  const guides: MigrationGuide[] = [];
-
-  for (const pkg of packages) {
-    if (!pkg.updateAvailable || pkg.latest === null) continue;
-
-    let steps: string[] = [];
-    let allChanges: MigrationChange[] | undefined;
-
-    if (migrationsDir !== null) {
-      const shortName = pkg.name.replace("@outfitter/", "");
-      const metaDocs = readMigrationDocsWithMetadata(
-        migrationsDir,
-        shortName,
-        pkg.current,
-        pkg.latest
-      );
-      steps = metaDocs.map((doc) => doc.body);
-
-      // Collect structured changes from all migration docs in range.
-      const changes: MigrationChange[] = [];
-      for (const doc of metaDocs) {
-        if (doc.frontmatter.changes) {
-          changes.push(...doc.frontmatter.changes);
-        }
-      }
-      if (changes.length > 0) {
-        allChanges = changes;
-      }
-    }
-
-    guides.push({
-      packageName: pkg.name,
-      fromVersion: pkg.current,
-      toVersion: pkg.latest,
-      breaking: pkg.breaking,
-      steps,
-      ...(allChanges !== undefined ? { changes: allChanges } : {}),
-    });
-  }
-
-  return guides;
 }
 
 // =============================================================================
