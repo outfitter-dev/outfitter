@@ -22,6 +22,7 @@
     "exports:check": "bun scripts/normalize-exports.ts --check",
     "schema:diff": "bun run apps/outfitter/src/cli.ts schema diff",
     "verify:ci": "bun run apps/outfitter/src/cli.ts check --ci",
+    "verify:stack": "./scripts/verify-stack.sh",
     "sync:docs:readme": "bun run --filter @outfitter/docs build && bun run packages/docs/dist/cli.js docs sync-readme --cwd .",
     "sync:docs": "bun run apps/outfitter/src/commands/repo.ts sync docs --cwd . && bun run sync:docs:readme",
     "docs:check": "bun run apps/outfitter/src/commands/repo.ts check docs --cwd .",
