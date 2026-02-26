@@ -13,12 +13,7 @@ import {
   dryRunPreset,
   interactionPreset,
 } from "@outfitter/cli/flags";
-import {
-  type ActionSpec,
-  defineAction,
-  InternalError,
-  Result,
-} from "@outfitter/contracts";
+import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
@@ -29,16 +24,20 @@ import {
 import { outputModeSchema } from "./shared.js";
 
 interface UpgradeActionInput {
-  all: boolean;
-  cwd: string;
-  dryRun: boolean;
-  guide: boolean;
-  guidePackages?: string[];
-  interactive: boolean;
-  noCodemods: boolean;
-  outputMode: CliOutputMode;
-  yes: boolean;
+  readonly all: boolean;
+  readonly cwd: string;
+  readonly dryRun: boolean;
+  readonly guide: boolean;
+  readonly guidePackages?: string[] | undefined;
+  readonly interactive: boolean;
+  readonly noCodemods: boolean;
+  readonly outputMode: CliOutputMode;
+  readonly yes: boolean;
 }
+
+type UpgradeAction = ReturnType<
+  typeof defineAction<UpgradeActionInput, unknown>
+>;
 
 const upgradeInputSchema = z.object({
   cwd: z.string(),
@@ -50,7 +49,7 @@ const upgradeInputSchema = z.object({
   all: z.boolean(),
   noCodemods: z.boolean(),
   outputMode: outputModeSchema,
-}) as z.ZodType<UpgradeActionInput>;
+});
 
 const upgradeCwd = cwdPreset();
 const upgradeDryRun = dryRunPreset();
@@ -85,70 +84,68 @@ const upgradeFlags = actionCliPresets(
   upgradeGuide
 );
 
-export const upgradeAction: ActionSpec<UpgradeActionInput, unknown> =
-  defineAction({
-    id: "upgrade",
+export const upgradeAction: UpgradeAction = defineAction({
+  id: "upgrade",
+  description: "Check for @outfitter/* package updates and migration guidance",
+  surfaces: ["cli"],
+  input: upgradeInputSchema,
+  cli: {
+    command: "upgrade [packages...]",
     description:
       "Check for @outfitter/* package updates and migration guidance",
-    surfaces: ["cli"],
-    input: upgradeInputSchema,
-    cli: {
-      command: "upgrade [packages...]",
-      description:
-        "Check for @outfitter/* package updates and migration guidance",
-      options: [...upgradeFlags.options],
-      mapInput: (context) => {
-        const outputMode = resolveOutputModeFromContext(context.flags);
-        const {
-          cwd: rawCwd,
-          dryRun,
-          interactive,
-          yes,
-          all,
-          noCodemods,
-          guide,
-        } = upgradeFlags.resolve(context);
-        const cwd = resolve(process.cwd(), rawCwd);
-        const guidePackages =
-          context.args.length > 0 ? (context.args as string[]) : undefined;
-        return {
-          cwd,
-          guide,
-          ...(guidePackages !== undefined ? { guidePackages } : {}),
-          dryRun,
-          yes,
-          interactive,
-          all,
-          noCodemods,
-          outputMode,
-        };
-      },
-    },
-    handler: async (input) => {
-      const { outputMode, guidePackages, ...upgradeInput } = input;
-      const result = await runUpgrade({
-        ...upgradeInput,
-        outputMode,
+    options: [...upgradeFlags.options],
+    mapInput: (context) => {
+      const outputMode = resolveOutputModeFromContext(context.flags);
+      const {
+        cwd: rawCwd,
+        dryRun,
+        interactive,
+        yes,
+        all,
+        noCodemods,
+        guide,
+      } = upgradeFlags.resolve(context);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const guidePackages =
+        context.args.length > 0 ? (context.args as string[]) : undefined;
+      return {
+        cwd,
+        guide,
         ...(guidePackages !== undefined ? { guidePackages } : {}),
-      });
-
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "upgrade" },
-          })
-        );
-      }
-
-      await printUpgradeResults(result.value, {
-        mode: outputMode,
-        guide: upgradeInput.guide,
-        cwd: upgradeInput.cwd,
-        dryRun: upgradeInput.dryRun,
-        all: upgradeInput.all,
-      });
-
-      return Result.ok(result.value);
+        dryRun,
+        yes,
+        interactive,
+        all,
+        noCodemods,
+        outputMode,
+      };
     },
-  });
+  },
+  handler: async (input) => {
+    const { outputMode, guidePackages, ...upgradeInput } = input;
+    const result = await runUpgrade({
+      ...upgradeInput,
+      outputMode,
+      ...(guidePackages !== undefined ? { guidePackages } : {}),
+    });
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "upgrade" },
+        })
+      );
+    }
+
+    await printUpgradeResults(result.value, {
+      mode: outputMode,
+      guide: upgradeInput.guide,
+      cwd: upgradeInput.cwd,
+      dryRun: upgradeInput.dryRun,
+      all: upgradeInput.all,
+    });
+
+    return Result.ok(result.value);
+  },
+});

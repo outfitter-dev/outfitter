@@ -310,8 +310,14 @@ export const docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
     },
   },
   handler: async (input) => {
-    const { outputMode, jq, ...apiInput } = input;
-    const result = await runDocsApi({ ...apiInput, outputMode, jq });
+    const { cwd, packages, level, outputMode, jq } = input;
+    const result = await runDocsApi({
+      cwd,
+      packages,
+      level,
+      outputMode,
+      jq,
+    });
 
     if (result.isErr()) {
       return result;

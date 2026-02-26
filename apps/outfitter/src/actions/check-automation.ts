@@ -8,12 +8,7 @@ import { resolve } from "node:path";
 
 import { cwdPreset } from "@outfitter/cli/flags";
 import { outputModePreset } from "@outfitter/cli/query";
-import {
-  type ActionSpec,
-  defineAction,
-  InternalError,
-  Result,
-} from "@outfitter/contracts";
+import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
@@ -47,10 +42,14 @@ interface CheckAutomationInput {
   outputMode: CliOutputMode;
 }
 
+type CheckAutomationAction = ReturnType<
+  typeof defineAction<CheckAutomationInput, unknown>
+>;
+
 const checkAutomationInputSchema = z.object({
   cwd: z.string(),
   outputMode: outputModeSchema,
-}) as z.ZodType<CheckAutomationInput>;
+});
 
 const checkAutomationOutput = outputModePreset();
 const checkAutomationCwd = cwdPreset();
@@ -82,50 +81,49 @@ function mapCheckAutomationInput(context: {
   };
 }
 
-export const checkPublishGuardrailsAction: ActionSpec<
-  CheckAutomationInput,
-  unknown
-> = defineAction({
-  id: "check.publish-guardrails",
-  description:
-    "Validate publishable package manifests enforce prepublishOnly guardrails",
-  surfaces: ["cli"],
-  input: checkAutomationInputSchema,
-  cli: {
-    group: "check",
-    command: "publish-guardrails",
+export const checkPublishGuardrailsAction: CheckAutomationAction = defineAction(
+  {
+    id: "check.publish-guardrails",
     description:
       "Validate publishable package manifests enforce prepublishOnly guardrails",
-    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
-    mapInput: mapCheckAutomationInput,
-  },
-  handler: async (input) => {
-    const result = await runCheckPublishGuardrails({ cwd: input.cwd });
-    if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.publish-guardrails" },
-        })
-      );
-    }
+    surfaces: ["cli"],
+    input: checkAutomationInputSchema,
+    cli: {
+      group: "check",
+      command: "publish-guardrails",
+      description:
+        "Validate publishable package manifests enforce prepublishOnly guardrails",
+      options: [
+        ...checkAutomationOutput.options,
+        ...checkAutomationCwd.options,
+      ],
+      mapInput: mapCheckAutomationInput,
+    },
+    handler: async (input) => {
+      const result = await runCheckPublishGuardrails({ cwd: input.cwd });
+      if (result.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: result.error.message,
+            context: { action: "check.publish-guardrails" },
+          })
+        );
+      }
 
-    await printCheckPublishGuardrailsResult(result.value, {
-      mode: input.outputMode,
-    });
+      await printCheckPublishGuardrailsResult(result.value, {
+        mode: input.outputMode,
+      });
 
-    if (!result.value.ok) {
-      process.exit(1);
-    }
+      if (!result.value.ok) {
+        process.exit(1);
+      }
 
-    return Result.ok(result.value);
-  },
-});
+      return Result.ok(result.value);
+    },
+  }
+);
 
-export const checkPresetVersionsAction: ActionSpec<
-  CheckAutomationInput,
-  unknown
-> = defineAction({
+export const checkPresetVersionsAction: CheckAutomationAction = defineAction({
   id: "check.preset-versions",
   description:
     "Validate preset dependency versions, registry versions, and Bun version consistency",
@@ -162,51 +160,44 @@ export const checkPresetVersionsAction: ActionSpec<
   },
 });
 
-export const checkSurfaceMapAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
-    id: "check.surface-map",
+export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
+  id: "check.surface-map",
+  description:
+    "Validate canonical surface map path usage (.outfitter/surface.json only)",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "surface-map",
     description:
       "Validate canonical surface map path usage (.outfitter/surface.json only)",
-    surfaces: ["cli"],
-    input: checkAutomationInputSchema,
-    cli: {
-      group: "check",
-      command: "surface-map",
-      description:
-        "Validate canonical surface map path usage (.outfitter/surface.json only)",
-      options: [
-        ...checkAutomationOutput.options,
-        ...checkAutomationCwd.options,
-      ],
-      mapInput: mapCheckAutomationInput,
-    },
-    handler: async (input) => {
-      const result = await runCheckSurfaceMap({ cwd: input.cwd });
-      if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.surface-map" },
-          })
-        );
-      }
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckSurfaceMap({ cwd: input.cwd });
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "check.surface-map" },
+        })
+      );
+    }
 
-      await printCheckSurfaceMapResult(result.value, {
-        mode: input.outputMode,
-      });
+    await printCheckSurfaceMapResult(result.value, {
+      mode: input.outputMode,
+    });
 
-      if (!result.value.ok) {
-        process.exit(1);
-      }
+    if (!result.value.ok) {
+      process.exit(1);
+    }
 
-      return Result.ok(result.value);
-    },
-  });
+    return Result.ok(result.value);
+  },
+});
 
-export const checkSurfaceMapFormatAction: ActionSpec<
-  CheckAutomationInput,
-  unknown
-> = defineAction({
+export const checkSurfaceMapFormatAction: CheckAutomationAction = defineAction({
   id: "check.surface-map-format",
   description: "Validate canonical formatting for .outfitter/surface.json",
   surfaces: ["cli"],
@@ -241,10 +232,7 @@ export const checkSurfaceMapFormatAction: ActionSpec<
   },
 });
 
-export const checkDocsSentinelAction: ActionSpec<
-  CheckAutomationInput,
-  unknown
-> = defineAction({
+export const checkDocsSentinelAction: CheckAutomationAction = defineAction({
   id: "check.docs-sentinel",
   description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
   surfaces: ["cli"],

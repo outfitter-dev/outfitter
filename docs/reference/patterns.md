@@ -234,6 +234,46 @@ if (!user) return Result.err(UserErrors.notFound(userId));
 
 This keeps handlers small, consistent, and makes errors easy to discover.
 
+## Action Definition Pattern
+
+When defining Outfitter actions, keep type declarations explicit at the export
+boundary, but avoid redundant generic ceremony inside the implementation.
+
+```typescript
+import { type ActionSpec, defineAction } from "@outfitter/contracts";
+import { z } from "zod";
+
+interface ListInput {
+  cwd: string;
+  outputMode: "human" | "json" | "jsonl";
+}
+
+const listInputSchema = z.object({
+  cwd: z.string(),
+  outputMode: z.enum(["human", "json", "jsonl"]),
+}) as z.ZodType<ListInput>;
+
+export const listAction: ActionSpec<ListInput, unknown> = defineAction({
+  id: "list",
+  surfaces: ["cli"],
+  input: listInputSchema,
+  cli: {
+    command: "list",
+    mapInput: (context) => ({
+      cwd: String(context.flags["cwd"] ?? process.cwd()),
+      outputMode: "human",
+    }),
+  },
+  handler: async (input) => runList(input),
+});
+```
+
+Guideline:
+
+- Keep one explicit `ActionSpec<...>` annotation on exported actions.
+- Skip duplicate `defineAction<TInput, TOutput>` generics unless inference fails.
+- Use `as z.ZodType<T>` only when required for `isolatedDeclarations` stability.
+
 ## Validation
 
 Use Zod schemas with `createValidator` for type-safe input validation that returns Results.

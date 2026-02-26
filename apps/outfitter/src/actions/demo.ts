@@ -4,12 +4,7 @@
  * @packageDocumentation
  */
 
-import {
-  type ActionSpec,
-  defineAction,
-  InternalError,
-  Result,
-} from "@outfitter/contracts";
+import { defineAction, InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { runDemo } from "../commands/demo.js";
@@ -20,20 +15,22 @@ import {
 import { outputModeSchema } from "./shared.js";
 
 interface DemoActionInput {
-  animate?: boolean;
-  list?: boolean;
-  outputMode: CliOutputMode;
-  section?: string;
+  readonly animate?: boolean | undefined;
+  readonly list?: boolean | undefined;
+  readonly outputMode: CliOutputMode;
+  readonly section?: string | undefined;
 }
+
+type DemoAction = ReturnType<typeof defineAction<DemoActionInput, unknown>>;
 
 const demoInputSchema = z.object({
   section: z.string().optional(),
   list: z.boolean().optional(),
   animate: z.boolean().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<DemoActionInput>;
+});
 
-export const demoAction: ActionSpec<DemoActionInput, unknown> = defineAction({
+export const demoAction: DemoAction = defineAction({
   id: "demo",
   description: "Run the CLI demo app",
   surfaces: ["cli"],

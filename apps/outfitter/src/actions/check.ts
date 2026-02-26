@@ -14,7 +14,6 @@ import {
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
 import {
   type ActionCliOption,
-  type ActionSpec,
   defineAction,
   InternalError,
   Result,
@@ -41,14 +40,34 @@ import {
 } from "./shared.js";
 
 interface CheckActionInput {
-  block?: string;
-  compact: boolean;
-  cwd: string;
-  mode?: CheckOrchestratorMode;
-  outputMode: CliOutputMode;
-  stagedFiles?: readonly string[];
-  verbose: boolean;
+  readonly block?: string | undefined;
+  readonly compact: boolean;
+  readonly cwd: string;
+  readonly mode?: CheckOrchestratorMode | undefined;
+  readonly outputMode: CliOutputMode;
+  readonly stagedFiles?: string[] | undefined;
+  readonly verbose: boolean;
 }
+
+interface CheckTsDocActionInput {
+  readonly cwd: string;
+  readonly jq?: string | undefined;
+  readonly level?: "documented" | "partial" | "undocumented" | undefined;
+  readonly minCoverage: number;
+  readonly outputMode: CliOutputMode;
+  readonly packages: string[];
+  readonly strict: boolean;
+  readonly summary: boolean;
+}
+
+type CheckAction = ReturnType<typeof defineAction<CheckActionInput, unknown>>;
+type CheckTsdocAction = ReturnType<
+  typeof defineAction<
+    CheckTsDocActionInput,
+    TsDocCheckResult,
+    ValidationError | InternalError
+  >
+>;
 
 const checkOrchestratorModes = ["all", "ci", "pre-commit", "pre-push"] as const;
 
@@ -60,7 +79,7 @@ const checkInputSchema = z.object({
   mode: z.enum(checkOrchestratorModes).optional(),
   stagedFiles: z.array(z.string()).optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<CheckActionInput>;
+});
 
 const checkVerbose = verbosePreset();
 const checkCwd = cwdPreset();
@@ -105,7 +124,7 @@ function resolveCheckMode(
   return requestedModes[0];
 }
 
-export const checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
+export const checkAction: CheckAction = defineAction({
   id: "check",
   description:
     "Compare local config blocks against the registry for drift detection",
@@ -198,7 +217,7 @@ export const checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       };
     },
   },
-  handler: async (input) => {
+  handler: async (input): Promise<Result<unknown, InternalError>> => {
     const { outputMode, mode, stagedFiles, compact, ...checkInput } = input;
 
     if (mode !== undefined) {
@@ -229,7 +248,11 @@ export const checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
       return Result.ok(orchestratorResult.value);
     }
 
-    const result = await runCheck(checkInput);
+    const { block, ...baseCheckInput } = checkInput;
+    const result = await runCheck({
+      ...baseCheckInput,
+      ...(block !== undefined ? { block } : {}),
+    });
 
     if (result.isErr()) {
       return Result.err(
@@ -254,17 +277,6 @@ export const checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
   },
 });
 
-interface CheckTsDocActionInput {
-  cwd: string;
-  jq: string | undefined;
-  level: "documented" | "partial" | "undocumented" | undefined;
-  minCoverage: number;
-  outputMode: CliOutputMode;
-  packages: readonly string[];
-  strict: boolean;
-  summary: boolean;
-}
-
 const checkTsdocInputSchema = z.object({
   strict: z.boolean(),
   minCoverage: z.number(),
@@ -274,9 +286,9 @@ const checkTsdocInputSchema = z.object({
   summary: z.boolean(),
   level: z.enum(["documented", "partial", "undocumented"]).optional(),
   packages: z.array(z.string()),
-}) as z.ZodType<CheckTsDocActionInput>;
+});
 
-export const checkTsdocOutputSchema = z.object({
+export const checkTsdocOutputSchema: z.ZodType<TsDocCheckResult> = z.object({
   ok: z.boolean(),
   packages: z.array(
     z.object({
@@ -305,16 +317,12 @@ export const checkTsdocOutputSchema = z.object({
     total: z.number(),
     percentage: z.number(),
   }),
-}) as z.ZodType<TsDocCheckResult>;
+});
 
 const checkTsdocOutputMode = outputModePreset({ includeJsonl: true });
 const checkTsdocJq = jqPreset();
 
-export const checkTsdocAction: ActionSpec<
-  CheckTsDocActionInput,
-  TsDocCheckResult,
-  ValidationError | InternalError
-> = defineAction({
+export const checkTsdocAction: CheckTsdocAction = defineAction({
   id: "check.tsdoc",
   description: "Check TSDoc coverage on exported declarations",
   surfaces: ["cli"],
@@ -407,8 +415,11 @@ export const checkTsdocAction: ActionSpec<
       };
     },
   },
-  handler: async (input) => {
-    const result = await runCheckTsdoc(input);
+  handler: async (
+    input
+  ): Promise<Result<TsDocCheckResult, ValidationError | InternalError>> => {
+    const { jq, level, ...tsdocInput } = input;
+    const result = await runCheckTsdoc({ ...tsdocInput, jq, level });
 
     if (result.isErr()) {
       if (result.error instanceof ValidationError) {
