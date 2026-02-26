@@ -58,15 +58,21 @@ jobs:
         if: steps.check.outputs.count != '0'
         run: npm install -g npm@latest
 
-      # OIDC handles npm auth by default (id-token: write).
-      # To use token-based auth instead, add NPM_TOKEN to the npm-publish environment.
-      - name: Set npm auth token (if not using OIDC)
+      # Default to OIDC trusted publishing. Only use token auth when NPM_TOKEN
+      # is explicitly provided.
+      - name: Configure npm auth mode
         if: steps.check.outputs.count != '0'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -n "$NPM_TOKEN" ]; then
+            echo "Using token-based npm auth fallback"
             echo "NODE_AUTH_TOKEN=$NPM_TOKEN" >> "$GITHUB_ENV"
+          else
+            echo "Using OIDC trusted publishing auth"
+            # setup-node may leave NODE_AUTH_TOKEN defined; clear it so npm
+            # uses OIDC trusted publishing instead of token auth.
+            echo "NODE_AUTH_TOKEN=" >> "$GITHUB_ENV"
           fi
 
       - name: Publish canary
