@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 
 import { cwdPreset } from "@outfitter/cli/flags";
 import { jqPreset, outputModePreset } from "@outfitter/cli/query";
-import { type ActionSpec, defineAction, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
@@ -47,13 +47,15 @@ const docsListInputSchema = z.object({
   package: z.string().optional(),
   jq: z.string().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<DocsListInput>;
+});
 
 const docsListCwd = cwdPreset();
 const docsListOutputMode = outputModePreset({ includeJsonl: true });
 const docsListJq = jqPreset();
 
-export const docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
+type DocsListAction = ReturnType<typeof defineAction<DocsListInput, unknown>>;
+
+export const docsListAction: DocsListAction = defineAction({
   id: "docs.list",
   description: "List documentation entries from the docs map",
   surfaces: ["cli"],
@@ -114,13 +116,15 @@ const docsShowInputSchema = z.object({
   cwd: z.string(),
   jq: z.string().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<DocsShowInput>;
+});
 
 const docsShowCwd = cwdPreset();
 const docsShowOutputMode = outputModePreset({ includeJsonl: true });
 const docsShowJq = jqPreset();
 
-export const docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
+type DocsShowAction = ReturnType<typeof defineAction<DocsShowInput, unknown>>;
+
+export const docsShowAction: DocsShowAction = defineAction({
   id: "docs.show",
   description: "Show a specific documentation entry and its content",
   surfaces: ["cli"],
@@ -171,86 +175,91 @@ const docsSearchInputSchema = z.object({
   package: z.string().optional(),
   jq: z.string().optional(),
   outputMode: outputModeSchema,
-}) as z.ZodType<DocsSearchInput>;
+});
 
 const docsSearchCwd = cwdPreset();
 const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
 const docsSearchJq = jqPreset();
 
-export const docsSearchAction: ActionSpec<DocsSearchInput, unknown> =
-  defineAction({
-    id: "docs.search",
+type DocsSearchAction = ReturnType<
+  typeof defineAction<DocsSearchInput, unknown>
+>;
+
+export const docsSearchAction: DocsSearchAction = defineAction({
+  id: "docs.search",
+  description: "Search documentation content for a query string",
+  surfaces: ["cli"],
+  input: docsSearchInputSchema,
+  cli: {
+    group: "docs",
+    command: "search <query>",
     description: "Search documentation content for a query string",
-    surfaces: ["cli"],
-    input: docsSearchInputSchema,
-    cli: {
-      group: "docs",
-      command: "search <query>",
-      description: "Search documentation content for a query string",
-      options: [
-        {
-          flags: "-k, --kind <kind>",
-          description:
-            "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
-        },
-        {
-          flags: "-p, --package <name>",
-          description: "Filter by package name",
-        },
-        ...docsSearchOutputMode.options,
-        ...docsSearchJq.options,
-        ...docsSearchCwd.options,
-      ],
-      mapInput: (context) => {
-        const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
-          context.flags
-        );
-        const { jq } = docsSearchJq.resolve(context.flags);
-        const outputMode = resolveDocsOutputMode(
-          context.flags,
-          presetOutputMode
-        );
-        const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
-        const cwd = resolve(process.cwd(), rawCwd);
-        const kind = resolveStringFlag(context.flags["kind"]);
-        const pkg = resolveStringFlag(context.flags["package"]);
-
-        return {
-          query: context.args[0] as string,
-          cwd,
-          outputMode,
-          jq,
-          ...(kind !== undefined ? { kind } : {}),
-          ...(pkg !== undefined ? { package: pkg } : {}),
-        };
+    options: [
+      {
+        flags: "-k, --kind <kind>",
+        description:
+          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
       },
-    },
-    handler: async (input) => {
-      const { outputMode, jq, ...searchInput } = input;
-      const result = await runDocsSearch({ ...searchInput, outputMode, jq });
+      {
+        flags: "-p, --package <name>",
+        description: "Filter by package name",
+      },
+      ...docsSearchOutputMode.options,
+      ...docsSearchJq.options,
+      ...docsSearchCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
+        context.flags
+      );
+      const { jq } = docsSearchJq.resolve(context.flags);
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const kind = resolveStringFlag(context.flags["kind"]);
+      const pkg = resolveStringFlag(context.flags["package"]);
 
-      if (result.isErr()) {
-        return result;
-      }
-
-      await printDocsSearchResults(result.value, { mode: outputMode, jq });
-      return Result.ok(result.value);
+      return {
+        query: context.args[0] as string,
+        cwd,
+        outputMode,
+        jq,
+        ...(kind !== undefined ? { kind } : {}),
+        ...(pkg !== undefined ? { package: pkg } : {}),
+      };
     },
-  });
+  },
+  handler: async (input) => {
+    const { outputMode, jq, ...searchInput } = input;
+    const result = await runDocsSearch({ ...searchInput, outputMode, jq });
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsSearchResults(result.value, { mode: outputMode, jq });
+    return Result.ok(result.value);
+  },
+});
 
 const docsApiInputSchema = z.object({
   cwd: z.string(),
-  level: z.enum(["documented", "partial", "undocumented"]).optional(),
-  packages: z.array(z.string()),
-  jq: z.string().optional(),
+  level: z.union([
+    z.enum(["documented", "partial", "undocumented"]),
+    z.undefined(),
+  ]),
+  packages: z.array(z.string()).readonly(),
+  jq: z.union([z.string(), z.undefined()]),
   outputMode: outputModeSchema,
-}) as z.ZodType<DocsApiInput>;
+});
 
 const docsApiCwd = cwdPreset();
 const docsApiOutputMode = outputModePreset({ includeJsonl: true });
 const docsApiJq = jqPreset();
 
-export const docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
+type DocsApiAction = ReturnType<typeof defineAction<DocsApiInput, unknown>>;
+
+export const docsApiAction: DocsApiAction = defineAction({
   id: "docs.api",
   description: "Extract API reference from TSDoc coverage data",
   surfaces: ["cli"],
@@ -339,59 +348,59 @@ const docsExportInputSchema = z.object({
   cwd: z.string(),
   target: z.enum(docsExportTargetValues).default("all"),
   outputMode: outputModeSchema,
-}) as z.ZodType<DocsExportInput>;
+});
 
 const docsExportCwd = cwdPreset();
 const docsExportOutputMode = outputModePreset({ includeJsonl: true });
 
-export const docsExportAction: ActionSpec<DocsExportInput, unknown> =
-  defineAction({
-    id: "docs.export",
+type DocsExportAction = ReturnType<
+  typeof defineAction<DocsExportInput, unknown>
+>;
+
+export const docsExportAction: DocsExportAction = defineAction({
+  id: "docs.export",
+  description: "Export documentation to packages, llms.txt, or both",
+  surfaces: ["cli"],
+  input: docsExportInputSchema,
+  cli: {
+    group: "docs",
+    command: "export",
     description: "Export documentation to packages, llms.txt, or both",
-    surfaces: ["cli"],
-    input: docsExportInputSchema,
-    cli: {
-      group: "docs",
-      command: "export",
-      description: "Export documentation to packages, llms.txt, or both",
-      options: [
-        {
-          flags: "-t, --target <target>",
-          description:
-            "Export target (packages|llms|llms-full|all, default: all)",
-        },
-        ...docsExportOutputMode.options,
-        ...docsExportCwd.options,
-      ],
-      mapInput: (context) => {
-        const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
-          context.flags
-        );
-        const outputMode = resolveDocsOutputMode(
-          context.flags,
-          presetOutputMode
-        );
-        const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
-        const cwd = resolve(process.cwd(), rawCwd);
-        const targetRaw = resolveStringFlag(context.flags["target"]);
-        const target = (targetRaw ?? "all") as DocsExportTarget;
-
-        return {
-          cwd,
-          target,
-          outputMode,
-        };
+    options: [
+      {
+        flags: "-t, --target <target>",
+        description:
+          "Export target (packages|llms|llms-full|all, default: all)",
       },
-    },
-    handler: async (input) => {
-      const { outputMode, ...exportInput } = input;
-      const result = await runDocsExport({ ...exportInput, outputMode });
+      ...docsExportOutputMode.options,
+      ...docsExportCwd.options,
+    ],
+    mapInput: (context) => {
+      const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
+        context.flags
+      );
+      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
+      const cwd = resolve(process.cwd(), rawCwd);
+      const targetRaw = resolveStringFlag(context.flags["target"]);
+      const target = (targetRaw ?? "all") as DocsExportTarget;
 
-      if (result.isErr()) {
-        return result;
-      }
-
-      await printDocsExportResults(result.value, { mode: outputMode });
-      return Result.ok(result.value);
+      return {
+        cwd,
+        target,
+        outputMode,
+      };
     },
-  });
+  },
+  handler: async (input) => {
+    const { outputMode, ...exportInput } = input;
+    const result = await runDocsExport({ ...exportInput, outputMode });
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsExportResults(result.value, { mode: outputMode });
+    return Result.ok(result.value);
+  },
+});
