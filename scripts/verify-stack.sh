@@ -23,13 +23,18 @@ log "${BLUE}verify:stack${NC} — pre-submit check for stacked branches"
 echo ""
 
 # Step 1: Regenerate surface map
+# Build step is unnecessary — Bun transpiles TypeScript on the fly, so
+# `schema generate` always reflects the current source without a prior build.
 log "1/3 ${BLUE}Regenerating surface map${NC}"
 bun run apps/outfitter/src/cli.ts schema generate
 
 # Step 2: Check for uncommitted surface map changes
+# Compare against HEAD (not the index) so staged-but-uncommitted drift is
+# also caught. This prevents the scenario where `git add` + rerun falsely
+# reports the map as up to date while HEAD still has the stale version.
 log ""
 log "2/3 ${BLUE}Checking surface map freshness${NC}"
-if ! git diff --quiet -- .outfitter/surface.json; then
+if ! git diff --quiet HEAD -- .outfitter/surface.json; then
   log ""
   log "${RED}Surface map changed after regeneration.${NC}"
   log "The committed .outfitter/surface.json is stale."

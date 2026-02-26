@@ -112,7 +112,7 @@ For schema drift, the fix is always the same:
 
 ```bash
 # On the branch that introduced the schema change
-bun run build
+# No build step needed — Bun transpiles TypeScript on the fly
 bun run apps/outfitter/src/cli.ts schema generate
 git add .outfitter/surface.json
 git commit -m "chore: regenerate surface map"
