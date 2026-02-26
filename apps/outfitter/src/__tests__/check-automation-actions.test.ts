@@ -24,6 +24,10 @@ const CHECK_AUTOMATION_ACTIONS = [
     id: "check.docs-sentinel",
     command: "docs-sentinel",
   },
+  {
+    id: "check.action-ceremony",
+    command: "action-ceremony",
+  },
 ] as const;
 
 describe("check automation action registration", () => {

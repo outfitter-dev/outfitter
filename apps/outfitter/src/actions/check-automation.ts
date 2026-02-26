@@ -10,6 +10,10 @@ import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
+  printCheckActionCeremonyResult,
+  runCheckActionCeremony,
+} from "../commands/check-action-ceremony.js";
+import {
   printCheckDocsSentinelResult,
   runCheckDocsSentinel,
 } from "../commands/check-docs-sentinel.js";
@@ -224,6 +228,38 @@ export const checkDocsSentinelAction: CheckAutomationAction = defineAction({
     }
 
     await printCheckDocsSentinelResult(result.value, {
+      mode: input.outputMode,
+    });
+
+    if (!result.value.ok) {
+      process.exit(1);
+    }
+
+    return Result.ok(result.value);
+  },
+});
+
+export const checkActionCeremonyAction: CheckAutomationAction = defineAction({
+  id: "check.action-ceremony",
+  description:
+    "Validate action ceremony guardrails in apps/outfitter/src/actions",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "action-ceremony",
+    description:
+      "Validate action ceremony guardrails in apps/outfitter/src/actions",
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckActionCeremony({ cwd: input.cwd });
+    if (result.isErr()) {
+      return actionInternalErr("check.action-ceremony", result.error);
+    }
+
+    await printCheckActionCeremonyResult(result.value, {
       mode: input.outputMode,
     });
 
