@@ -244,12 +244,9 @@ export const docsSearchAction: DocsSearchAction = defineAction({
 
 const docsApiInputSchema = z.object({
   cwd: z.string(),
-  level: z.union([
-    z.enum(["documented", "partial", "undocumented"]),
-    z.undefined(),
-  ]),
-  packages: z.array(z.string()).readonly(),
-  jq: z.union([z.string(), z.undefined()]),
+  level: z.enum(["documented", "partial", "undocumented"]).optional(),
+  packages: z.array(z.string()),
+  jq: z.string().optional(),
   outputMode: outputModeSchema,
 });
 
