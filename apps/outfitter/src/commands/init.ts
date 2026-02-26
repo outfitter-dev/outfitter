@@ -59,43 +59,67 @@ export type { InitPresetId } from "./init-option-resolution.js";
 export { printInitResults };
 
 /**
- * Options for the init command.
+ * Options for the init command, corresponding to CLI flags and positional arguments.
  */
 export interface InitOptions {
+  /** Custom binary name for CLI/daemon presets. */
   readonly bin?: string | undefined;
+  /** Preview changes without writing to disk. */
   readonly dryRun?: boolean | undefined;
+  /** Overwrite existing files without prompting. */
   readonly force: boolean;
+  /** Timeout in milliseconds for `bun install`. */
   readonly installTimeout?: number | undefined;
+  /** Use `workspace:*` protocol for `@outfitter` dependencies. */
   readonly local?: boolean | undefined;
+  /** Package name override (defaults to directory name). */
   readonly name: string | undefined;
+  /** Skip adding default tooling blocks. */
   readonly noTooling?: boolean | undefined;
+  /** Preset to scaffold from. */
   readonly preset?: InitPresetId | undefined;
+  /** Skip the initial git commit after scaffolding. */
   readonly skipCommit?: boolean | undefined;
+  /** Skip git init and initial commit entirely. */
   readonly skipGit?: boolean | undefined;
+  /** Skip running `bun install` after scaffolding. */
   readonly skipInstall?: boolean | undefined;
+  /** Whether to create a single package or a workspace. */
   readonly structure?: InitStructure | undefined;
+  /** Absolute or relative path to the target directory. */
   readonly targetDir: string;
+  /** Comma-separated tooling block names to include. */
   readonly with?: string | undefined;
+  /** Package name for the workspace root (workspace structure only). */
   readonly workspaceName?: string | undefined;
+  /** Skip interactive prompts and use defaults. */
   readonly yes?: boolean | undefined;
 }
 
 /**
- * Result of running init.
+ * Result of a successful `outfitter init` run.
  */
 export interface InitResult {
+  /** Tooling blocks that were added, if any. */
   readonly blocksAdded?: AddBlockResult | undefined;
+  /** Present only for dry-run invocations; contains the planned operations and summary counts. */
   readonly dryRunPlan?:
     | {
         readonly operations: readonly unknown[];
         readonly summary: Record<string, number>;
       }
     | undefined;
+  /** The resolved npm package name for the scaffolded project. */
   readonly packageName: string;
+  /** Results from post-scaffold steps (install, git init, next-step hints). */
   readonly postScaffold: PostScaffoldResult;
+  /** The preset that was used. */
   readonly preset: InitPresetId;
+  /** Absolute path to the scaffolded project directory. */
   readonly projectDir: string;
+  /** Absolute path to the workspace or project root. */
   readonly rootDir: string;
+  /** Whether a single package or workspace was created. */
   readonly structure: InitStructure;
 }
 
@@ -107,6 +131,7 @@ type ResolvedInitInput = ResolvedInitExecutionInput;
 export class InitError extends Error {
   readonly _tag = "InitError" as const;
 
+  /** @param message - Human-readable description of the init failure. */
   constructor(message: string) {
     super(message);
     this.name = "InitError";
@@ -379,6 +404,12 @@ async function resolveInitInput(
 // Public API
 // =============================================================================
 
+/**
+ * Runs the full init flow: resolves user input (interactive or non-interactive),
+ * looks up the target preset, and delegates to the execution pipeline.
+ * @param options - Init options from CLI flags or programmatic callers
+ * @param presetOverride - Forces a specific preset, bypassing flag resolution and prompts
+ */
 export async function runInit(
   options: InitOptions,
   presetOverride?: InitPresetId
@@ -472,6 +503,7 @@ const withCommonOptions = (command: Command): Command =>
     .option("--install-timeout <ms>", "bun install timeout in ms");
 
 /**
+ * Registers the `init` command and its preset subcommands on a Commander program.
  * @deprecated Use action-registry CLI wiring via `buildCliCommands(outfitterActions, ...)`.
  */
 export function initCommand(program: Command): void {

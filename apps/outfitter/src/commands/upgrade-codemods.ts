@@ -177,6 +177,11 @@ function resolveCodemodPath(
 
 /**
  * Run a single codemod by importing and executing its `transform` function.
+ *
+ * @param codemodPath - Absolute path to the codemod module
+ * @param targetDir - Root directory the codemod should operate on
+ * @param dryRun - When `true`, the codemod previews changes without writing
+ * @returns Codemod result with changed/skipped files, or an error
  */
 export async function runCodemod(
   codemodPath: string,

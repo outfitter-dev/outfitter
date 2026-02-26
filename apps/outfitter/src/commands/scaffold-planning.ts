@@ -48,6 +48,7 @@ interface PresetMetadata {
   readonly surfaces?: readonly ("cli" | "mcp" | "daemon")[];
 }
 
+/** Discriminated union describing the detected project layout at a given directory. */
 export type ProjectStructure =
   | {
       readonly kind: "workspace";
@@ -120,6 +121,10 @@ function extractWorkspacePatterns(pkg: PackageJsonData): readonly string[] {
   return [];
 }
 
+/**
+ * Detects whether the given directory is a workspace root, a single package,
+ * or has no package.json at all. Walks up to find workspace roots when needed.
+ */
 export function detectProjectStructure(
   cwd: string
 ): Result<ProjectStructure, string> {
@@ -264,6 +269,10 @@ function parsePresetSurfaces(
   return surfaces.length === value.length ? surfaces : undefined;
 }
 
+/**
+ * Ensures the workspace root package.json includes the given placement pattern (e.g. "apps/*").
+ * @returns `true` if the pattern was added, `false` if it already existed.
+ */
 export function ensureWorkspacePattern(
   rootDir: string,
   placement: "apps" | "packages",
@@ -344,6 +353,11 @@ function movePath(source: string, destination: string): void {
   }
 }
 
+/**
+ * Converts a single-package directory into a workspace by moving existing files
+ * into the appropriate `apps/` or `packages/` subdirectory and creating a workspace root.
+ * Rolls back on failure.
+ */
 export function convertToWorkspace(
   rootDir: string,
   existingPkg: Record<string, unknown>,
@@ -498,6 +512,10 @@ function parseBlocks(
   return blocks.length > 0 ? blocks : undefined;
 }
 
+/**
+ * Builds a scaffold plan for a target within a workspace, including preset
+ * copying, shared config injection, and optional tooling blocks.
+ */
 export function buildScaffoldPlan(
   target: TargetDefinition,
   rootDir: string,
@@ -539,6 +557,10 @@ export function buildScaffoldPlan(
   };
 }
 
+/**
+ * Validates that a scaffold target name is safe as both a directory name and an npm package name.
+ * Suggests a sanitized alternative when the name is invalid.
+ */
 export function validateScaffoldTargetName(
   targetName: string
 ): Result<void, string> {

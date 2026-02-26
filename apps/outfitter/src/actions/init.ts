@@ -273,6 +273,7 @@ function createInitAction(options: {
   });
 }
 
+/** Removed stub -- directs users to `outfitter init`. */
 export const createAction: ActionSpec<{}, unknown, InternalError> =
   defineAction({
     id: "create",
@@ -305,6 +306,7 @@ export const createAction: ActionSpec<{}, unknown, InternalError> =
       ),
   });
 
+/** Create a new Outfitter project with an optional preset. */
 export const initAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init",
@@ -313,6 +315,7 @@ export const initAction: ActionSpec<InitActionInput, unknown> =
     includePresetOption: true,
   });
 
+/** Create a new CLI project using the `cli` preset. */
 export const initCliAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.cli",
@@ -321,6 +324,7 @@ export const initCliAction: ActionSpec<InitActionInput, unknown> =
     presetOverride: "cli",
   });
 
+/** Create a new MCP server project using the `mcp` preset. */
 export const initMcpAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.mcp",
@@ -329,6 +333,7 @@ export const initMcpAction: ActionSpec<InitActionInput, unknown> =
     presetOverride: "mcp",
   });
 
+/** Create a new daemon project using the `daemon` preset. */
 export const initDaemonAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.daemon",
@@ -337,6 +342,7 @@ export const initDaemonAction: ActionSpec<InitActionInput, unknown> =
     presetOverride: "daemon",
   });
 
+/** Create a new library project using the `library` preset. */
 export const initLibraryAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.library",
@@ -345,6 +351,7 @@ export const initLibraryAction: ActionSpec<InitActionInput, unknown> =
     presetOverride: "library",
   });
 
+/** Create a full-stack workspace with CLI, MCP, daemon, and library targets. */
 export const initFullStackAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.full-stack",

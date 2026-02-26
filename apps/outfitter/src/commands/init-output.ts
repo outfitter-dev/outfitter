@@ -8,10 +8,15 @@ import { renderOperationPlan } from "../engine/render-plan.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 import type { InitResult } from "./init.js";
 
+/** Options controlling how init results are rendered (human-readable, JSON, or JSONL). */
 export interface PrintInitResultsOptions {
   readonly mode?: OutputMode;
 }
 
+/**
+ * Renders init results to stdout. Handles dry-run plans, structured output modes,
+ * and human-readable summaries with next-step guidance.
+ */
 export async function printInitResults(
   result: InitResult,
   options?: PrintInitResultsOptions

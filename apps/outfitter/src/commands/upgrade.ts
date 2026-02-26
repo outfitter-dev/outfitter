@@ -46,6 +46,7 @@ import {
 // Types
 // =============================================================================
 
+/** Input options for `runUpgrade`. */
 export interface UpgradeOptions {
   /** Include breaking changes in the upgrade */
   readonly all?: boolean;
@@ -67,6 +68,7 @@ export interface UpgradeOptions {
   readonly yes?: boolean;
 }
 
+/** Version metadata for a single installed @outfitter/* package. */
 export interface PackageVersionInfo {
   /** Whether the update contains breaking changes (major bump) */
   readonly breaking: boolean;
@@ -112,6 +114,7 @@ export interface CodemodSummary {
   readonly errors: readonly string[];
 }
 
+/** Complete output of a single upgrade run. */
 export interface UpgradeResult {
   /** Whether mutations were made (--apply was used and changes were written) */
   readonly applied: boolean;

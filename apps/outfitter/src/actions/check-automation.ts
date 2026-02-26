@@ -78,6 +78,7 @@ function mapCheckAutomationInput(context: {
   };
 }
 
+/** Validate that publishable packages enforce prepublishOnly guardrails. */
 export const checkPublishGuardrailsAction: CheckAutomationAction = defineAction(
   {
     id: "check.publish-guardrails",
@@ -115,6 +116,7 @@ export const checkPublishGuardrailsAction: CheckAutomationAction = defineAction(
   }
 );
 
+/** Validate preset dependency versions, registry versions, and Bun version consistency. */
 export const checkPresetVersionsAction: CheckAutomationAction = defineAction({
   id: "check.preset-versions",
   description:
@@ -147,6 +149,7 @@ export const checkPresetVersionsAction: CheckAutomationAction = defineAction({
   },
 });
 
+/** Validate that surface map references use the canonical root path only. */
 export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
   id: "check.surface-map",
   description:
@@ -179,6 +182,7 @@ export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
   },
 });
 
+/** Validate canonical JSON formatting of `.outfitter/surface.json`. */
 export const checkSurfaceMapFormatAction: CheckAutomationAction = defineAction({
   id: "check.surface-map-format",
   description: "Validate canonical formatting for .outfitter/surface.json",
@@ -209,6 +213,7 @@ export const checkSurfaceMapFormatAction: CheckAutomationAction = defineAction({
   },
 });
 
+/** Validate that the `docs/README.md` PACKAGE_LIST sentinel is up to date. */
 export const checkDocsSentinelAction: CheckAutomationAction = defineAction({
   id: "check.docs-sentinel",
   description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
@@ -239,6 +244,7 @@ export const checkDocsSentinelAction: CheckAutomationAction = defineAction({
   },
 });
 
+/** Validate action ceremony guardrails (TSDoc, input schemas, handler patterns). */
 export const checkActionCeremonyAction: CheckAutomationAction = defineAction({
   id: "check.action-ceremony",
   description:

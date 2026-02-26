@@ -26,10 +26,14 @@ import { applyJq } from "./jq-utils.js";
 
 /** Validated input for the docs.api action handler. */
 export interface DocsApiInput {
+  /** Workspace root used to resolve package paths. */
   readonly cwd: string;
+  /** Optional jq expression applied to structured output. */
   readonly jq?: string | undefined;
+  /** Filter declarations by documentation coverage level. */
   readonly level?: "documented" | "partial" | "undocumented" | undefined;
   readonly outputMode: CliOutputMode;
+  /** Package names to include; empty array means all packages. */
   readonly packages: string[];
 }
 

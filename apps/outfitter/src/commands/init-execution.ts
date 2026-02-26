@@ -21,8 +21,10 @@ import { runPostScaffold } from "../engine/post-scaffold.js";
 import type { TargetDefinition } from "../targets/index.js";
 import type { InitPresetId } from "./init-option-resolution.js";
 
+/** Whether the project is a standalone package or a workspace with nested packages. */
 export type InitStructure = "single" | "workspace";
 
+/** Fully resolved inputs for the init execution pipeline, after interactive/non-interactive resolution. */
 export interface ResolvedInitExecutionInput {
   readonly binName?: string | undefined;
   readonly blocksOverride?: readonly string[];
@@ -35,6 +37,7 @@ export interface ResolvedInitExecutionInput {
   readonly workspaceName?: string | undefined;
 }
 
+/** Behavioral flags controlling how the init pipeline executes (dry-run, force, skip steps). */
 export interface InitExecutionOptions {
   readonly dryRun: boolean;
   readonly force: boolean;
@@ -44,6 +47,7 @@ export interface InitExecutionOptions {
   readonly skipInstall: boolean;
 }
 
+/** Output of a successful init pipeline run, including scaffold results and post-scaffold status. */
 export interface InitExecutionResult {
   readonly blocksAdded?: AddBlockResult | undefined;
   readonly dryRunPlan?:
@@ -105,6 +109,14 @@ function buildInitPlan(
   };
 }
 
+/**
+ * Runs the full init pipeline: validates inputs, scaffolds the project structure,
+ * executes the preset plan, and performs post-scaffold steps (install, git init).
+ * @param input - Resolved user inputs (preset, structure, package name, etc.)
+ * @param target - Target definition from the preset registry
+ * @param options - Execution flags (dry-run, force, skip steps)
+ * @returns The init result on success, or an error message string on failure
+ */
 export async function executeInitPipeline(
   input: ResolvedInitExecutionInput,
   target: TargetDefinition,
