@@ -33,7 +33,43 @@ jobs:
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
       - name: Verify CI Gate
-        run: bun run verify:ci
+        run: |
+          max_attempts=3
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "::group::Attempt $attempt of $max_attempts"
+            set +e
+            bun run verify:ci 2>&1 | tee /tmp/verify-ci-output.log
+            exit_code=${PIPESTATUS[0]}
+            set -e
+            echo "::endgroup::"
+
+            if [ $exit_code -eq 0 ]; then
+              exit 0
+            fi
+
+            # Only retry on OOM: exit code 137 directly, or logged in output
+            # (the orchestrator wraps 137 into exit code 1, so check output too)
+            is_oom=false
+            if [ $exit_code -eq 137 ]; then
+              is_oom=true
+            elif grep -q 'exited (137)\|exitCode=137\|exit code 137' /tmp/verify-ci-output.log 2>/dev/null; then
+              is_oom=true
+            fi
+
+            if [ "$is_oom" = false ]; then
+              echo "::error::verify:ci failed with exit code $exit_code"
+              exit $exit_code
+            fi
+
+            if [ $attempt -eq $max_attempts ]; then
+              echo "::error::OOM (exit 137) persisted after $max_attempts attempts"
+              exit 1
+            fi
+
+            echo "::warning::OOM detected (exit 137), retrying (attempt $((attempt + 1)) of $max_attempts)..."
+            attempt=$((attempt + 1))
+          done
         env:
           NO_CHANGESET: ${{ contains(github.event.pull_request.labels.*.name, 'release:none') && '1' || '0' }}
           OUTFITTER_CI_TURBO_CONCURRENCY: "2"
