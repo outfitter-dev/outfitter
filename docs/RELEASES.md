@@ -25,9 +25,12 @@ Four principles:
 
 ## Canary Releases
 
-**Trigger:** Push to `main` that touches `.changeset/*.md` files.
+**Trigger:**
 
-**Workflow:** [`release-canary.yml`](../.github/workflows/release-canary.yml)
+- Push to `main` that touches `.changeset/*.md` files
+- Manual `workflow_dispatch` with `mode=canary` (for reruns/debugging)
+
+**Workflow:** [`release.yml`](../.github/workflows/release.yml) (`canary` job)
 
 When changeset files exist on main, the canary workflow automatically:
 
@@ -48,9 +51,9 @@ Canary versions are useful for testing unreleased changes in downstream projects
 
 ## Stable Releases
 
-**Trigger:** Manual `workflow_dispatch` followed by PR merge.
+**Trigger:** Manual `workflow_dispatch` with `mode=stable`, followed by PR merge.
 
-**Workflow:** [`release.yml`](../.github/workflows/release.yml)
+**Workflow:** [`release.yml`](../.github/workflows/release.yml) (`prepare` + `publish` jobs)
 
 Stable releases are a two-phase process:
 
@@ -137,7 +140,10 @@ Always publish through the release pipeline, never directly.
 
 ### Concurrency Guards
 
-`release-canary.yml` and `release.yml` each use their own concurrency group to prevent overlapping runs of the same workflow. Canary and stable publishes can run concurrently since they write to different dist-tags (`@canary` vs `@latest`).
+`release.yml` uses per-job concurrency groups (`release-prepare`,
+`canary-release`, `stable-release-publish`) so runs do not overlap within the
+same phase. Canary and stable publishes can run concurrently because they write
+to different dist-tags (`@canary` vs `@latest`).
 
 ### Snapshot Versioning
 
@@ -145,11 +151,10 @@ Canary versions use the format `{version}-canary-{datetime}` (configured in `.ch
 
 ## Workflows
 
-| Workflow                                                        | Trigger                            | Purpose                                                                               |
-| --------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| [`release-canary.yml`](../.github/workflows/release-canary.yml) | Push to main (changeset files)     | Publish npm `@canary` snapshots (no GitHub release)                                   |
-| [`release.yml`](../.github/workflows/release.yml)               | Manual dispatch / release PR merge | Two-phase: prepare release PR, publish `@latest`, create one canonical GitHub release |
-| [`auto-label.yml`](../.github/workflows/auto-label.yml)         | PR open/update                     | Apply release label from changeset                                                    |
+| Workflow                                                | Trigger                                                           | Purpose                                                                                                                        |
+| ------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [`release.yml`](../.github/workflows/release.yml)       | Push to main (changeset files), manual dispatch, release PR merge | Unified release workflow: canary publish (`@canary`), stable prepare, stable publish (`@latest`), and canonical GitHub release |
+| [`auto-label.yml`](../.github/workflows/auto-label.yml) | PR open/update                                                    | Apply release label from changeset                                                                                             |
 
 ## Release Labels
 
@@ -167,7 +172,8 @@ Labels still exist for human categorization, but they no longer drive automation
 
 ### No canary was published after merging
 
-The canary workflow only triggers when `.changeset/*.md` files are present on the push to main. Check that:
+The canary job only runs when `.changeset/*.md` files are present on the push
+to main (or when manually dispatched with `mode=canary`). Check that:
 
 - Your changeset file was committed and merged (not just the code)
 - The file is in `.changeset/` with a `.md` extension (not `README.md`)
@@ -192,6 +198,7 @@ This means someone ran `npm publish` directly instead of using the release pipel
 ### Need to release immediately
 
 1. Run the prepare workflow (`Actions > Release > Run workflow`)
+   with `mode=stable`
 2. Review and merge the release PR
 3. Packages publish automatically on merge
 
