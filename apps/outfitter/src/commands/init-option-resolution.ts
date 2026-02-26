@@ -45,9 +45,14 @@ export function resolvePresetFromFlags(
     return Result.ok(undefined);
   }
 
-  if (!isValidInitPreset(presetFromFlag)) {
+  const knownAvailablePresetIds = availablePresetIds.filter(isValidInitPreset);
+  const isKnownAndAvailable =
+    isValidInitPreset(presetFromFlag) &&
+    knownAvailablePresetIds.includes(presetFromFlag);
+
+  if (!isKnownAndAvailable) {
     return Result.err(
-      `Unknown preset '${presetFromFlag}'. Available presets: ${availablePresetIds.join(", ")}`
+      `Unknown preset '${presetFromFlag}'. Available presets: ${knownAvailablePresetIds.join(", ")}`
     );
   }
 
