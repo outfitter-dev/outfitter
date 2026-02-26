@@ -1,0 +1,143 @@
+name: Bun Stability Trial
+
+on:
+  workflow_dispatch:
+    inputs:
+      bun_versions:
+        description: "Comma-separated Bun versions (example: 1.3.9,1.3.10)"
+        required: false
+        default: "1.3.9,1.3.10"
+      iterations:
+        description: "Repeated test:ci runs per Bun version"
+        required: false
+        default: "10"
+      turbo_concurrency:
+        description: "Turbo task concurrency for CI tests"
+        required: false
+        default: "2"
+      bun_max_concurrency:
+        description: "Bun test-file max concurrency"
+        required: false
+        default: "4"
+
+jobs:
+  resolve-versions:
+    name: Resolve Bun Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      versions_json: ${{ steps.parse.outputs.versions_json }}
+    steps:
+      - name: Parse versions input
+        id: parse
+        shell: bash
+        env:
+          RAW_VERSIONS: ${{ github.event.inputs.bun_versions }}
+        run: |
+          set -euo pipefail
+          raw="${RAW_VERSIONS}"
+          if [ -z "$raw" ]; then
+            raw='1.3.9,1.3.10'
+          fi
+          versions_json=$(printf '%s' "$raw" | awk -F',' '
+            BEGIN { printf "["; count=0 }
+            {
+              for (i = 1; i <= NF; i++) {
+                gsub(/^[ \t]+|[ \t]+$/, "", $i)
+                if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$/) {
+                  if (count > 0) printf ","
+                  printf "\"%s\"", $i
+                  count++
+                }
+              }
+            }
+            END { printf "]" }
+          ')
+          echo "versions_json=$versions_json" >> "$GITHUB_OUTPUT"
+
+  trial:
+    name: Trial (Bun ${{ matrix.bun_version }})
+    needs: resolve-versions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bun_version: ${{ fromJson(needs.resolve-versions.outputs.versions_json) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun_version }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run repeated CI test passes
+        shell: bash
+        env:
+          ITERATIONS: ${{ github.event.inputs.iterations || '10' }}
+          OUTFITTER_CI_TURBO_CONCURRENCY: ${{ github.event.inputs.turbo_concurrency || '2' }}
+          OUTFITTER_CI_BUN_MAX_CONCURRENCY: ${{ github.event.inputs.bun_max_concurrency || '4' }}
+          OUTFITTER_CI_TURBO_LOG_ORDER: stream
+          OUTFITTER_CI_TURBO_OUTPUT_LOGS: full
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_API: ${{ secrets.TURBO_API }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p .outfitter/ci-trial
+
+          passes=0
+          failures=0
+          for i in $(seq 1 "$ITERATIONS"); do
+            echo "::group::Bun ${{ matrix.bun_version }} iteration $i/$ITERATIONS"
+            run_id="trial-${{ matrix.bun_version }}-${i}-$(date +%s)"
+            if OUTFITTER_CI_RUN_ID="$run_id" bun run test:ci; then
+              status="pass"
+              passes=$((passes + 1))
+            else
+              status="fail"
+              failures=$((failures + 1))
+            fi
+            echo "iteration=$i status=$status run_id=$run_id" >> ".outfitter/ci-trial/results-${{ matrix.bun_version }}.log"
+            echo "::endgroup::"
+          done
+
+          cat > ".outfitter/ci-trial/summary-${{ matrix.bun_version }}.json" <<JSON
+          {
+            "schema": "https://outfitter.dev/reports/bun-stability-trial/v1",
+            "bunVersion": "${{ matrix.bun_version }}",
+            "iterations": ${ITERATIONS},
+            "passed": ${passes},
+            "failed": ${failures},
+            "turboConcurrency": ${OUTFITTER_CI_TURBO_CONCURRENCY},
+            "bunMaxConcurrency": ${OUTFITTER_CI_BUN_MAX_CONCURRENCY}
+          }
+          JSON
+
+          {
+            echo "## Bun Stability Trial"
+            echo ""
+            echo "- Bun version: \`${{ matrix.bun_version }}\`"
+            echo "- Iterations: \`${ITERATIONS}\`"
+            echo "- Passed: \`${passes}\`"
+            echo "- Failed: \`${failures}\`"
+            echo "- Turbo concurrency: \`${OUTFITTER_CI_TURBO_CONCURRENCY}\`"
+            echo "- Bun max concurrency: \`${OUTFITTER_CI_BUN_MAX_CONCURRENCY}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload stability diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bun-stability-trial-${{ matrix.bun_version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            .outfitter/ci/**
+            .outfitter/ci-trial/**
+            .turbo/runs/*.json
