@@ -14,7 +14,7 @@ describe("resolveCiTestRunnerConfig", () => {
     });
 
     expect(config.rootDir).toBe("/repo");
-    expect(config.diagnosticsDir).toBe("/repo/.outfitter/ci");
+    expect(config.diagnosticsDir).toBe("/repo/.outfitter/reports/ci");
     expect(config.turboConcurrency).toBe(2);
     expect(config.bunMaxConcurrency).toBe(4);
     expect(config.logOrder).toBe("stream");

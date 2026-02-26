@@ -90,7 +90,7 @@ jobs:
           TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
         run: |
           set -euo pipefail
-          mkdir -p .outfitter/ci-trial
+          mkdir -p .outfitter/reports/ci-trial
 
           passes=0
           failures=0
@@ -104,11 +104,11 @@ jobs:
               status="fail"
               failures=$((failures + 1))
             fi
-            echo "iteration=$i status=$status run_id=$run_id" >> ".outfitter/ci-trial/results-${{ matrix.bun_version }}.log"
+            echo "iteration=$i status=$status run_id=$run_id" >> ".outfitter/reports/ci-trial/results-${{ matrix.bun_version }}.log"
             echo "::endgroup::"
           done
 
-          cat > ".outfitter/ci-trial/summary-${{ matrix.bun_version }}.json" <<JSON
+          cat > ".outfitter/reports/ci-trial/summary-${{ matrix.bun_version }}.json" <<JSON
           {
             "schema": "https://outfitter.dev/reports/bun-stability-trial/v1",
             "bunVersion": "${{ matrix.bun_version }}",
@@ -138,6 +138,6 @@ jobs:
           name: bun-stability-trial-${{ matrix.bun_version }}-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: ignore
           path: |
-            .outfitter/ci/**
-            .outfitter/ci-trial/**
+            .outfitter/reports/ci/**
+            .outfitter/reports/ci-trial/**
             .turbo/runs/*.json

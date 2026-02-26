@@ -323,4 +323,43 @@ describe("printCheckOrchestratorResults", () => {
     expect(output).toContain("No changeset found.");
     expect(output).toContain("Consider adding one");
   });
+
+  test("json compact mode omits verbose step fields", async () => {
+    const output = await captureStdout(async () => {
+      await printCheckOrchestratorResults(
+        {
+          mode: "ci",
+          ok: true,
+          treeClean: true,
+          mutatedPaths: [],
+          failedStepIds: [],
+          steps: [
+            {
+              id: "tests",
+              label: "Tests",
+              command: ["bun", "run", "test:ci"],
+              exitCode: 0,
+              stdout: "very long output",
+              stderr: "warnings",
+              durationMs: 100,
+            },
+          ],
+        },
+        { mode: "json", compact: true }
+      );
+    });
+
+    const payload = JSON.parse(output.trim()) as Record<string, unknown>;
+    const steps = payload["steps"] as Array<Record<string, unknown>>;
+    expect(Array.isArray(steps)).toBe(true);
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toEqual({
+      id: "tests",
+      label: "Tests",
+      exitCode: 0,
+      durationMs: 100,
+    });
+    expect(payload["mode"]).toBe("ci");
+    expect(payload["ok"]).toBe(true);
+  });
 });

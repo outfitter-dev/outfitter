@@ -479,7 +479,42 @@ export async function runCheckOrchestrator(
 }
 
 interface PrintCheckOrchestratorResultsOptions {
+  readonly compact?: boolean;
   readonly mode?: OutputMode;
+}
+
+interface CompactCheckOrchestratorStepResult {
+  readonly durationMs: number;
+  readonly exitCode: number;
+  readonly id: string;
+  readonly label: string;
+}
+
+interface CompactCheckOrchestratorResult {
+  readonly failedStepIds: readonly string[];
+  readonly mode: CheckOrchestratorMode;
+  readonly mutatedPaths: readonly string[];
+  readonly ok: boolean;
+  readonly steps: readonly CompactCheckOrchestratorStepResult[];
+  readonly treeClean: boolean;
+}
+
+function toCompactResult(
+  result: CheckOrchestratorResult
+): CompactCheckOrchestratorResult {
+  return {
+    mode: result.mode,
+    ok: result.ok,
+    treeClean: result.treeClean,
+    failedStepIds: result.failedStepIds,
+    mutatedPaths: result.mutatedPaths,
+    steps: result.steps.map((step) => ({
+      id: step.id,
+      label: step.label,
+      exitCode: step.exitCode,
+      durationMs: step.durationMs,
+    })),
+  };
 }
 
 export async function printCheckOrchestratorResults(
@@ -488,7 +523,8 @@ export async function printCheckOrchestratorResults(
 ): Promise<void> {
   const mode = resolveStructuredOutputMode(options.mode) ?? "human";
   if (mode === "json" || mode === "jsonl") {
-    process.stdout.write(`${JSON.stringify(result)}\n`);
+    const payload = options.compact ? toCompactResult(result) : result;
+    process.stdout.write(`${JSON.stringify(payload)}\n`);
     return;
   }
 

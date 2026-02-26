@@ -7,6 +7,7 @@ This directory documents the continuous integration and deployment workflows for
 - [Releases](../RELEASES.md) -- Version management, changesets, and npm publishing
 - [Auto-Labeling](./auto-labeling.md) -- How PRs are automatically categorized
 - [Turbo Cache](./turbo-cache.md) -- Self-hosted remote build cache setup
+- [Bun Test Stability](./bun-test-stability.md) -- CI crash hardening, diagnostics, and trial workflow
 
 ## Quick Reference
 

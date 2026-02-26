@@ -53,8 +53,9 @@ The CI test phase uses `bun run test:ci` (via `check --ci`) with explicit concur
 
 - `OUTFITTER_CI_TURBO_CONCURRENCY` (default `2`) controls Turbo task parallelism.
 - `OUTFITTER_CI_BUN_MAX_CONCURRENCY` (default `4`) is passed to each package test command as Bun `--max-concurrency`.
-- `OUTFITTER_CI_TURBO_LOG_ORDER` (default `stream`) and `OUTFITTER_CI_TURBO_OUTPUT_LOGS` (default `full`) keep active-task logs visible for crash forensics.
-- CI diagnostics are written to `.outfitter/ci/`, and failure runs upload both those files and `.turbo/runs/*.json` as workflow artifacts.
+- `scripts/ci-test-runner.ts` defaults `OUTFITTER_CI_TURBO_LOG_ORDER=stream` and `OUTFITTER_CI_TURBO_OUTPUT_LOGS=full` for crash forensics when rerunning locally.
+- Routine PR/release workflows pin `OUTFITTER_CI_TURBO_OUTPUT_LOGS=errors-only` to reduce log volume while preserving failure signal.
+- CI diagnostics are written to `.outfitter/reports/ci/`, and failure runs upload both those files and `.turbo/runs/*.json` as workflow artifacts.
 
 This same pipeline runs locally via pre-push hook (`outfitter check --pre-push`) and in CI. Local and CI are always in parity for day-to-day PR verification.
 

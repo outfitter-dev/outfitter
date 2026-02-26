@@ -129,7 +129,7 @@ export function resolveCiTestRunnerConfig(
   const env = options.env ?? process.env;
   const now = options.now ?? new Date();
   const rootDir = resolve(options.cwd);
-  const diagnosticsDir = join(rootDir, ".outfitter", "ci");
+  const diagnosticsDir = join(rootDir, ".outfitter", "reports", "ci");
 
   const logOrderRaw = env["OUTFITTER_CI_TURBO_LOG_ORDER"];
   const outputLogsRaw = env["OUTFITTER_CI_TURBO_OUTPUT_LOGS"];
