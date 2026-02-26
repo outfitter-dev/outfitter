@@ -43,6 +43,13 @@ if [[ "$CURRENT_BUN" != "$PINNED_BUN" ]]; then
   # Re-export after install
   export PATH="${BUN_INSTALL}/bin:${PATH}"
   hash -r
+
+  # Verify installation succeeded
+  INSTALLED_BUN="$(bun --version)"
+  if [[ "$INSTALLED_BUN" != "$PINNED_BUN" ]]; then
+    echo "Error: Expected Bun ${PINNED_BUN} but found ${INSTALLED_BUN} after install" >&2
+    exit 1
+  fi
 fi
 
 echo "Bun: $(bun --version)"
@@ -50,7 +57,7 @@ echo "Bun: $(bun --version)"
 # ── Persist PATH for agent phase ─────────────────────────────────────
 # Cloud agent environments run setup and agent in separate shell sessions.
 # Exports here don't carry over — write to .bashrc so the agent gets them.
-if ! grep -q 'BUN_INSTALL' ~/.bashrc 2>/dev/null; then
+if ! grep -q '# Added by agent-setup.sh' ~/.bashrc 2>/dev/null; then
   {
     echo ''
     echo '# Added by agent-setup.sh'
