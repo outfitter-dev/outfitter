@@ -4,6 +4,7 @@ name: "Release: Canary"
 # reserved for stable release trains in release.yml.
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
