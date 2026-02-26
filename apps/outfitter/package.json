@@ -195,6 +195,12 @@
         "default": "./dist/commands/scaffold.js"
       }
     },
+    "./commands/scaffold-planning": {
+      "import": {
+        "types": "./dist/commands/scaffold-planning.d.ts",
+        "default": "./dist/commands/scaffold-planning.js"
+      }
+    },
     "./commands/shared-deps": {
       "import": {
         "types": "./dist/commands/shared-deps.d.ts",
