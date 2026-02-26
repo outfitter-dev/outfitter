@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-26T04:38:16.141Z",
+  "generatedAt": "2026-02-26T22:19:34.232Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1136,6 +1136,9 @@
           "cwd": {
             "type": "string"
           },
+          "manifestOnly": {
+            "type": "boolean"
+          },
           "verbose": {
             "type": "boolean"
           },
@@ -1158,7 +1161,7 @@
             "default": "human"
           }
         },
-        "required": ["compact", "cwd", "verbose"]
+        "required": ["compact", "cwd", "manifestOnly", "verbose"]
       },
       "cli": {
         "group": "check",
@@ -1193,6 +1196,11 @@
           {
             "flags": "-b, --block <name>",
             "description": "Check a specific block only"
+          },
+          {
+            "flags": "--manifest-only",
+            "description": "Only check manifest-tracked blocks (skip file-presence heuristic)",
+            "defaultValue": false
           },
           {
             "flags": "--compact",

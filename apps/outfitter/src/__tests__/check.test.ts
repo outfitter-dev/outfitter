@@ -458,4 +458,21 @@ describe("runCheck", () => {
       expect(lefthookBlock?.status).toBe("current");
     }
   });
+
+  // =========================================================================
+  // manifestOnly skips heuristic when no manifest exists
+  // =========================================================================
+
+  test("manifestOnly returns 0 blocks when no manifest exists", async () => {
+    writeFileSync(join(testDir, ".oxlintrc.json"), '{"modified": true}');
+    writeFileSync(join(testDir, ".lefthook.yml"), "modified: true");
+
+    const result = await runCheck({ cwd: testDir, manifestOnly: true });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.totalChecked).toBe(0);
+      expect(result.value.driftedCount).toBe(0);
+    }
+  });
 });
