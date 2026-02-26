@@ -106,6 +106,19 @@ export function buildCheckOrchestratorPlan(
   if (options.mode === "all" || options.mode === "ci") {
     const steps: CheckOrchestratorStep[] = [
       {
+        id: "block-drift",
+        label: "Block drift",
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "--manifest-only",
+          "--cwd",
+          ".",
+        ],
+      },
+      {
         id: "typecheck",
         label: "Typecheck",
         command: ["bun", "run", "typecheck", "--", "--only"],
@@ -309,6 +322,19 @@ export function buildCheckOrchestratorPlan(
 
   if (options.mode === "pre-push") {
     return [
+      {
+        id: "block-drift",
+        label: "Block drift",
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "--manifest-only",
+          "--cwd",
+          ".",
+        ],
+      },
       {
         id: "pre-push-verify",
         label: "Hook verify",

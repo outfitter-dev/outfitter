@@ -35,6 +35,8 @@ export interface CheckOptions {
   readonly ci?: boolean;
   /** Working directory to check. */
   readonly cwd: string;
+  /** Only check manifest-tracked blocks; skip file-presence heuristic. */
+  readonly manifestOnly?: boolean;
   /** Output mode override. */
   readonly outputMode?: OutputMode;
   /** Show diff information for drifted files. */
@@ -477,7 +479,12 @@ function checkBlock(
 export async function runCheck(
   options: CheckOptions
 ): Promise<Result<CheckResult, CheckError>> {
-  const { cwd: rawCwd, verbose = false, block: blockFilter } = options;
+  const {
+    cwd: rawCwd,
+    verbose = false,
+    block: blockFilter,
+    manifestOnly = false,
+  } = options;
   const cwd = resolve(rawCwd);
 
   // Load registry
@@ -509,6 +516,9 @@ export async function runCheck(
       name,
       installedFrom: entry.installedFrom,
     }));
+  } else if (manifestOnly) {
+    // No manifest and manifest-only mode: nothing to check
+    blocksToCheck = [];
   } else {
     // Fallback: detect blocks by file presence
     const detected = detectBlocksByFilePresence(cwd);
