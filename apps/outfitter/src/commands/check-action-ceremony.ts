@@ -39,6 +39,8 @@ const CEREMONY_BUDGETS: readonly CeremonyBudget[] = [
   },
 ];
 
+type CeremonyBudgetId = (typeof CEREMONY_BUDGETS)[number]["id"];
+
 export interface CheckActionCeremonyOptions {
   readonly cwd: string;
 }
@@ -85,27 +87,24 @@ export async function runCheckActionCeremony(
     const actionsDir = resolve(cwd, ACTIONS_RELATIVE_DIR);
     const actionFiles = readActionSources(actionsDir);
 
-    const counts: Record<string, number> = {
-      "direct-defineAction-generics": 0,
-      "schema-zodtype-casts": 0,
-      "direct-internalerror-construction": 0,
-    };
+    const counts = Object.fromEntries(
+      CEREMONY_BUDGETS.map((budget) => [budget.id, 0] as const)
+    ) as Record<CeremonyBudgetId, number>;
 
     for (const filePath of actionFiles) {
       const file = Bun.file(filePath);
       const content = await file.text();
 
-      counts["direct-defineAction-generics"] =
-        (counts["direct-defineAction-generics"] ?? 0) +
-        countMatches(content, CEREMONY_BUDGETS[0]!.pattern);
-      counts["schema-zodtype-casts"] =
-        (counts["schema-zodtype-casts"] ?? 0) +
-        countMatches(content, CEREMONY_BUDGETS[1]!.pattern);
+      for (const budget of CEREMONY_BUDGETS) {
+        if (
+          budget.id === "direct-internalerror-construction" &&
+          filePath.endsWith("shared.ts")
+        ) {
+          continue;
+        }
 
-      if (!filePath.endsWith("shared.ts")) {
-        counts["direct-internalerror-construction"] =
-          (counts["direct-internalerror-construction"] ?? 0) +
-          countMatches(content, CEREMONY_BUDGETS[2]!.pattern);
+        counts[budget.id] =
+          (counts[budget.id] ?? 0) + countMatches(content, budget.pattern);
       }
     }
 
