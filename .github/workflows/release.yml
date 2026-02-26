@@ -170,3 +170,142 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           npx changeset tag
           git push --tags
+
+      - name: Build canonical release notes
+        if: success()
+        id: canonical
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+
+          NOTES_DIR=".outfitter/release"
+          NOTES_FILE="${NOTES_DIR}/stable-notes.md"
+          mkdir -p "$NOTES_DIR"
+
+          # Handle all merge strategies:
+          # - merge commit: use merge_commit_sha
+          # - squash/rebase: fall back to current HEAD on main
+          TARGET_SHA="${MERGE_SHA:-}"
+          if [ -z "$TARGET_SHA" ] || [ "$TARGET_SHA" = "null" ]; then
+            TARGET_SHA="$(git rev-parse HEAD)"
+          fi
+
+          OUTFITTER_VERSION="$(jq -r '.version' apps/outfitter/package.json)"
+          OUTFITTER_OLD_VERSION="$(
+            git show "${BASE_SHA}:apps/outfitter/package.json" 2>/dev/null \
+              | jq -r '.version // empty'
+          )"
+          OUTFITTER_WAS_BUMPED=0
+          if [ -n "$OUTFITTER_OLD_VERSION" ] && [ "$OUTFITTER_OLD_VERSION" != "$OUTFITTER_VERSION" ]; then
+            OUTFITTER_WAS_BUMPED=1
+          fi
+
+          OUTFITTER_TAG="outfitter@${OUTFITTER_VERSION}"
+          OUTFITTER_TAG_SHA="$(git rev-list -n 1 "${OUTFITTER_TAG}" 2>/dev/null || true)"
+
+          RELEASE_TAG="$OUTFITTER_TAG"
+          RELEASE_TITLE="Outfitter ${OUTFITTER_VERSION}"
+
+          # Use outfitter@<version> only when that tag was created for this
+          # release cycle's target commit. Otherwise create a per-run stable tag
+          # so we don't overwrite an earlier canonical release.
+          if [ "$OUTFITTER_WAS_BUMPED" -ne 1 ] || [ "$OUTFITTER_TAG_SHA" != "$TARGET_SHA" ]; then
+            RELEASE_TAG="stable-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            RELEASE_TITLE="Outfitter Stable ${GITHUB_RUN_NUMBER}"
+            if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null; then
+              EXISTING_SHA="$(git rev-list -n 1 "${RELEASE_TAG}")"
+              if [ "$EXISTING_SHA" != "$TARGET_SHA" ]; then
+                echo "::error::Fallback tag ${RELEASE_TAG} points to ${EXISTING_SHA}, expected ${TARGET_SHA}"
+                exit 1
+              fi
+            else
+              git tag "${RELEASE_TAG}" "${TARGET_SHA}"
+              git push origin "${RELEASE_TAG}"
+            fi
+          fi
+
+          {
+            echo "# ${RELEASE_TITLE}"
+            echo
+            echo "Canonical stable release for this publish cycle."
+            echo
+            echo "## Package Bumps"
+            echo
+            echo "| Package | From | To |"
+            echo "| --- | --- | --- |"
+          } > "$NOTES_FILE"
+
+          mapfile -t PACKAGE_FILES < <(
+            git diff --name-only "$BASE_SHA" "$TARGET_SHA" -- \
+              'apps/*/package.json' \
+              'packages/*/package.json' \
+              | sort -u
+          )
+
+          ROWS=0
+          for file in "${PACKAGE_FILES[@]}"; do
+            [ -z "$file" ] && continue
+
+            NEW_JSON="$(cat "$file")"
+            NAME="$(jq -r '.name // empty' <<<"$NEW_JSON")"
+            [ -z "$NAME" ] && continue
+
+            PRIVATE="$(jq -r '.private // false' <<<"$NEW_JSON")"
+            [ "$PRIVATE" = "true" ] && continue
+
+            NEW_VERSION="$(jq -r '.version // empty' <<<"$NEW_JSON")"
+            OLD_JSON="$(git show "${BASE_SHA}:${file}" 2>/dev/null || echo '{}')"
+            OLD_VERSION="$(jq -r '.version // empty' <<<"$OLD_JSON")"
+
+            if [ -z "$NEW_VERSION" ] || [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
+              continue
+            fi
+
+            printf '| `%s` | `%s` | `%s` |\n' \
+              "$NAME" \
+              "${OLD_VERSION:-n/a}" \
+              "$NEW_VERSION" \
+              >> "$NOTES_FILE"
+            ROWS=$((ROWS + 1))
+          done
+
+          if [ "$ROWS" -eq 0 ]; then
+            echo '| _(no public package version changes detected)_ | | |' >> "$NOTES_FILE"
+          fi
+
+          {
+            echo
+            echo "## Policy"
+            echo
+            echo "- Stable publishes generate one canonical GitHub release."
+            echo "- Canary publishes are npm-only (\`@canary\`) with no GitHub prerelease."
+          } >> "$NOTES_FILE"
+
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "release_title=$RELEASE_TITLE" >> "$GITHUB_OUTPUT"
+          echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+          echo "release_target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create canonical GitHub release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.canonical.outputs.release_tag }}
+          RELEASE_TITLE: ${{ steps.canonical.outputs.release_title }}
+          NOTES_FILE: ${{ steps.canonical.outputs.notes_file }}
+          RELEASE_TARGET_SHA: ${{ steps.canonical.outputs.release_target_sha }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --title "$RELEASE_TITLE" \
+              --notes-file "$NOTES_FILE"
+          else
+            gh release create "$RELEASE_TAG" \
+              --target "$RELEASE_TARGET_SHA" \
+              --title "$RELEASE_TITLE" \
+              --notes-file "$NOTES_FILE"
+          fi
