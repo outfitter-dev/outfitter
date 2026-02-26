@@ -171,6 +171,12 @@
         "default": "./dist/commands/init-option-resolution.js"
       }
     },
+    "./commands/init-output": {
+      "import": {
+        "types": "./dist/commands/init-output.d.ts",
+        "default": "./dist/commands/init-output.js"
+      }
+    },
     "./commands/jq-utils": {
       "import": {
         "types": "./dist/commands/jq-utils.d.ts",
