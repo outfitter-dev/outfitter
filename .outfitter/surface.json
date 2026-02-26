@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-25T23:03:45.794Z",
+  "generatedAt": "2026-02-26T04:38:16.141Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -1552,6 +1552,41 @@
         "group": "check",
         "command": "docs-sentinel",
         "description": "Validate docs/README.md PACKAGE_LIST sentinel freshness",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "check.action-ceremony",
+      "description": "Validate action ceremony guardrails in apps/outfitter/src/actions",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "action-ceremony",
+        "description": "Validate action ceremony guardrails in apps/outfitter/src/actions",
         "options": [
           {
             "flags": "-o, --output <mode>",
