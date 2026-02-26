@@ -408,7 +408,7 @@
     }
   },
   "scripts": {
-    "build": "bunup --filter outfitter",
+    "build": "cd ../.. && bunup --filter outfitter",
     "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
     "test": "bun test",

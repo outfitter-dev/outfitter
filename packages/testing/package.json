@@ -65,7 +65,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "bunup --filter @outfitter/testing",
+    "build": "cd ../.. && bunup --filter @outfitter/testing",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
     "test": "bun test",

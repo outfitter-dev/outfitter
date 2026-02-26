@@ -19,7 +19,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "bunup --filter @outfitter/oxlint-plugin",
+    "build": "cd ../.. && bunup --filter @outfitter/oxlint-plugin",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
     "test": "bun test",

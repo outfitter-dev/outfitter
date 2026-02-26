@@ -4,9 +4,6 @@ import { resolve } from "node:path";
 import {
   DOCS_COMMON_OPTION_FLAGS,
   DOCS_EXPORT_OPTION_FLAGS,
-} from "@outfitter/docs";
-
-import {
   createRepoCommand,
   type RepoToolingInvocation,
 } from "../commands/repo.js";

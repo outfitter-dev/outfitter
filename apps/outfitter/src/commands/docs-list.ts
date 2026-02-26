@@ -11,11 +11,11 @@ import { resolve } from "node:path";
 
 import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
-import { generateDocsMap } from "@outfitter/docs";
 import { createTheme } from "@outfitter/tui/render";
 
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
+import { loadDocsModule } from "./docs-module-loader.js";
 import type { DocsMapEntryShape } from "./docs-types.js";
 import { applyJq } from "./jq-utils.js";
 
@@ -66,7 +66,8 @@ export async function runDocsList(
 ): Promise<Result<DocsListOutput, InternalError>> {
   try {
     const cwd = resolve(input.cwd);
-    const mapResult = await generateDocsMap({ workspaceRoot: cwd });
+    const docsModule = await loadDocsModule();
+    const mapResult = await docsModule.generateDocsMap({ workspaceRoot: cwd });
 
     if (mapResult.isErr()) {
       return Result.err(

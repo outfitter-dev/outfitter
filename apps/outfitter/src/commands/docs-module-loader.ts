@@ -43,7 +43,17 @@ export interface CreateDocsCommandOptions {
   };
 }
 
-interface DocsModule {
+interface DocsResultLike<TValue> {
+  readonly error: { readonly message: string };
+  readonly isErr: () => boolean;
+  readonly value: TValue;
+}
+
+interface DocsMapLike {
+  readonly entries: readonly unknown[];
+}
+
+export interface DocsModule {
   createDocsCommand: (options?: CreateDocsCommandOptions) => Command;
   executeCheckCommand: (
     options: ExecuteCheckCommandOptions,
@@ -57,6 +67,15 @@ interface DocsModule {
     options: ExecuteSyncCommandOptions,
     io: DocsCommandIo
   ) => Promise<number>;
+  generateDocsMap: (options: {
+    readonly workspaceRoot: string;
+  }) => Promise<DocsResultLike<DocsMapLike>>;
+  generatePackageListSection: (workspaceRoot: string) => Promise<string>;
+  replaceSentinelSection: (
+    input: string,
+    sentinelId: string,
+    replacement: string
+  ) => string;
 }
 
 function resolveDocsEntrypoint(): string {
@@ -95,7 +114,10 @@ export async function loadDocsModule(): Promise<DocsModule> {
         typeof module.createDocsCommand !== "function" ||
         typeof module.executeCheckCommand !== "function" ||
         typeof module.executeSyncCommand !== "function" ||
-        typeof module.executeExportCommand !== "function"
+        typeof module.executeExportCommand !== "function" ||
+        typeof module.generateDocsMap !== "function" ||
+        typeof module.generatePackageListSection !== "function" ||
+        typeof module.replaceSentinelSection !== "function"
       ) {
         throw new Error(
           "Resolved @outfitter/docs entrypoint does not export required docs functions."
