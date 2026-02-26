@@ -16,11 +16,12 @@ The new process fixes all three: changesets are manual (you write them), canary 
 
 ## Release Philosophy
 
-Three principles:
+Four principles:
 
 1. **Changesets are manual.** You write the changeset as part of your PR, alongside the code. This means the changelog message is deliberate, reviewed, and committed before merge.
 2. **Canary is automatic.** Every push to main that includes changeset files publishes a `@canary` release. No action needed. This gives consumers a way to test unreleased changes immediately.
 3. **Stable is intentional.** You trigger a stable release when you're ready. The workflow versions packages, opens a PR for review, and publishes on merge. No surprises.
+4. **GitHub releases are stable-only and canonical.** We create a single GitHub release per stable cycle. Canary stays npm-only.
 
 ## Canary Releases
 
@@ -33,6 +34,7 @@ When changeset files exist on main, the canary workflow automatically:
 1. Builds all packages
 2. Publishes to npm with the `@canary` dist-tag
 3. Uses snapshot versioning: `x.y.z-canary-YYYYMMDDHHMMSS`
+4. Does **not** create GitHub release artifacts
 
 Changeset files are **not consumed** during canary releases. They stay in the `.changeset/` directory until a stable release consumes them.
 
@@ -68,6 +70,18 @@ Stable releases are a two-phase process:
 4. The publish job verifies llms artifacts are deterministic and up to date
 5. Packages are built, tested, and published to npm with the `@latest` dist-tag
 6. Git tags are created for each published package
+7. One canonical GitHub release is created for the stable cycle (with a package bump matrix)
+
+### GitHub Release Policy
+
+Stable publishes generate exactly one canonical GitHub release:
+
+- Preferred anchor: `outfitter@<version>` tag
+- Fallback anchor: a stable workflow tag when `outfitter` itself was not bumped
+- Notes include package `from -> to` bump rows for all public packages changed in that release PR
+
+Canary publishes do not create GitHub releases; consume canaries from npm using
+the `@canary` dist-tag.
 
 ### Requirements
 
@@ -131,11 +145,11 @@ Canary versions use the format `{version}-canary-{datetime}` (configured in `.ch
 
 ## Workflows
 
-| Workflow                                                        | Trigger                            | Purpose                                               |
-| --------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
-| [`release-canary.yml`](../.github/workflows/release-canary.yml) | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
-| [`release.yml`](../.github/workflows/release.yml)               | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
-| [`auto-label.yml`](../.github/workflows/auto-label.yml)         | PR open/update                     | Apply release label from changeset                    |
+| Workflow                                                        | Trigger                            | Purpose                                                                               |
+| --------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| [`release-canary.yml`](../.github/workflows/release-canary.yml) | Push to main (changeset files)     | Publish npm `@canary` snapshots (no GitHub release)                                   |
+| [`release.yml`](../.github/workflows/release.yml)               | Manual dispatch / release PR merge | Two-phase: prepare release PR, publish `@latest`, create one canonical GitHub release |
+| [`auto-label.yml`](../.github/workflows/auto-label.yml)         | PR open/update                     | Apply release label from changeset                                                    |
 
 ## Release Labels
 
@@ -157,6 +171,11 @@ The canary workflow only triggers when `.changeset/*.md` files are present on th
 
 - Your changeset file was committed and merged (not just the code)
 - The file is in `.changeset/` with a `.md` extension (not `README.md`)
+
+### I don't see canary builds in GitHub Releases
+
+This is expected. Canary is npm-only by policy. Install canary packages from npm
+using `@canary` (for example, `bun add @outfitter/cli@canary`).
 
 ### Prepare workflow says "No changesets found"
 

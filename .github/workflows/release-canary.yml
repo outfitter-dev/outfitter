@@ -1,5 +1,8 @@
 name: "Release: Canary"
 
+# Canary policy: publish npm snapshots only. GitHub release artifacts are
+# reserved for stable release trains in release.yml.
+
 on:
   push:
     branches:
