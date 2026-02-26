@@ -207,6 +207,12 @@
         "default": "./dist/commands/upgrade-migration-frontmatter.js"
       }
     },
+    "./commands/upgrade-migration-guides": {
+      "import": {
+        "types": "./dist/commands/upgrade-migration-guides.d.ts",
+        "default": "./dist/commands/upgrade-migration-guides.js"
+      }
+    },
     "./commands/upgrade-planner": {
       "import": {
         "types": "./dist/commands/upgrade-planner.d.ts",
