@@ -43,6 +43,7 @@ interface CheckActionInput {
   readonly block?: string | undefined;
   readonly compact: boolean;
   readonly cwd: string;
+  readonly manifestOnly: boolean;
   readonly mode?: CheckOrchestratorMode | undefined;
   readonly outputMode: CliOutputMode;
   readonly stagedFiles?: string[] | undefined;
@@ -74,6 +75,7 @@ const checkOrchestratorModes = ["all", "ci", "pre-commit", "pre-push"] as const;
 const checkInputSchema = z.object({
   compact: z.boolean(),
   cwd: z.string(),
+  manifestOnly: z.boolean(),
   verbose: z.boolean(),
   block: z.string().optional(),
   mode: z.enum(checkOrchestratorModes).optional(),
@@ -165,6 +167,12 @@ export const checkAction: CheckAction = defineAction({
         flags: "-b, --block <name>",
         description: "Check a specific block only",
       },
+      {
+        flags: "--manifest-only",
+        description:
+          "Only check manifest-tracked blocks (skip file-presence heuristic)",
+        defaultValue: false,
+      },
       ...checkCompact.options,
       ...checkOutputMode.options,
       ...checkCwd.options,
@@ -195,9 +203,11 @@ export const checkAction: CheckAction = defineAction({
         { forceHumanWhenImplicit: mode !== undefined }
       );
       const { verbose } = checkVerbose.resolve(context.flags);
+      const manifestOnly = Boolean(context.flags["manifestOnly"]);
       return {
         compact,
         cwd: resolveCwdFromPreset(context.flags, checkCwd),
+        manifestOnly,
         verbose,
         ...(block !== undefined ? { block } : {}),
         ...(mode !== undefined ? { mode } : {}),

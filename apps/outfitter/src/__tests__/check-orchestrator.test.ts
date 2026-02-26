@@ -65,11 +65,24 @@ describe("buildCheckOrchestratorPlan", () => {
     });
     const stepIds = plan.map((step) => step.id);
 
+    expect(stepIds).toContain("block-drift");
     expect(stepIds).toContain("typecheck");
     expect(stepIds).toContain("lint-and-format");
     expect(stepIds).toContain("schema-diff");
     expect(stepIds).toContain("tree-clean");
     expect(stepIds).not.toContain("tests");
+  });
+
+  test("all mode runs block-drift before typecheck", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "all",
+    });
+    const stepIds = plan.map((step) => step.id);
+    const blockDriftIndex = stepIds.indexOf("block-drift");
+    const typecheckIndex = stepIds.indexOf("typecheck");
+
+    expect(blockDriftIndex).toBeLessThan(typecheckIndex);
   });
 
   test("ci mode includes tests", () => {
@@ -86,18 +99,30 @@ describe("buildCheckOrchestratorPlan", () => {
     });
   });
 
-  test("pre-push mode runs hook verify and schema drift", () => {
+  test("pre-push mode runs block drift, hook verify, and schema drift", () => {
     const plan = buildCheckOrchestratorPlan({
       cwd: process.cwd(),
       mode: "pre-push",
     });
 
-    expect(plan).toHaveLength(2);
+    expect(plan).toHaveLength(3);
     expect(plan[0]).toMatchObject({
+      id: "block-drift",
+      command: [
+        "bun",
+        "run",
+        "apps/outfitter/src/cli.ts",
+        "check",
+        "--manifest-only",
+        "--cwd",
+        ".",
+      ],
+    });
+    expect(plan[1]).toMatchObject({
       id: "pre-push-verify",
       command: ["bun", "run", "packages/tooling/src/cli/index.ts", "pre-push"],
     });
-    expect(plan[1]).toMatchObject({
+    expect(plan[2]).toMatchObject({
       id: "schema-drift",
       command: ["bun", "run", "apps/outfitter/src/cli.ts", "schema", "diff"],
     });
@@ -230,14 +255,23 @@ describe("runCheckOrchestrator", () => {
       resolveFirstExitCode?.(0);
       const result = await runPromise;
       expect(result.isOk()).toBe(true);
-      expect(calls).toHaveLength(2);
+      expect(calls).toHaveLength(3);
       expect(calls[0]).toEqual([
+        "bun",
+        "run",
+        "apps/outfitter/src/cli.ts",
+        "check",
+        "--manifest-only",
+        "--cwd",
+        ".",
+      ]);
+      expect(calls[1]).toEqual([
         "bun",
         "run",
         "packages/tooling/src/cli/index.ts",
         "pre-push",
       ]);
-      expect(calls[1]).toEqual([
+      expect(calls[2]).toEqual([
         "bun",
         "run",
         "apps/outfitter/src/cli.ts",
@@ -277,7 +311,7 @@ describe("runCheckOrchestrator", () => {
       }
 
       expect(calls).toHaveLength(1);
-      expect(result.value.failedStepIds).toEqual(["pre-push-verify"]);
+      expect(result.value.failedStepIds).toEqual(["block-drift"]);
       expect(result.value.steps).toHaveLength(1);
       expect(result.value.ok).toBe(false);
     } finally {
