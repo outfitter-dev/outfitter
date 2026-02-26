@@ -213,10 +213,22 @@
         "default": "./dist/commands/upgrade-migration-guides.js"
       }
     },
+    "./commands/upgrade-output": {
+      "import": {
+        "types": "./dist/commands/upgrade-output.d.ts",
+        "default": "./dist/commands/upgrade-output.js"
+      }
+    },
     "./commands/upgrade-planner": {
       "import": {
         "types": "./dist/commands/upgrade-planner.d.ts",
         "default": "./dist/commands/upgrade-planner.js"
+      }
+    },
+    "./commands/upgrade-report": {
+      "import": {
+        "types": "./dist/commands/upgrade-report.d.ts",
+        "default": "./dist/commands/upgrade-report.js"
       }
     },
     "./commands/upgrade-workspace": {
