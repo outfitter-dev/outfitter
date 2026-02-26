@@ -26,7 +26,7 @@ Three principles:
 
 **Trigger:** Push to `main` that touches `.changeset/*.md` files.
 
-**Workflow:** [`canary.yml`](../.github/workflows/canary.yml)
+**Workflow:** [`release-canary.yml`](../.github/workflows/release-canary.yml)
 
 When changeset files exist on main, the canary workflow automatically:
 
@@ -123,7 +123,7 @@ Always publish through the release pipeline, never directly.
 
 ### Concurrency Guards
 
-`canary.yml` and `release.yml` each use their own concurrency group to prevent overlapping runs of the same workflow. Canary and stable publishes can run concurrently since they write to different dist-tags (`@canary` vs `@latest`).
+`release-canary.yml` and `release.yml` each use their own concurrency group to prevent overlapping runs of the same workflow. Canary and stable publishes can run concurrently since they write to different dist-tags (`@canary` vs `@latest`).
 
 ### Snapshot Versioning
 
@@ -131,11 +131,11 @@ Canary versions use the format `{version}-canary-{datetime}` (configured in `.ch
 
 ## Workflows
 
-| Workflow                                                            | Trigger                            | Purpose                                               |
-| ------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
-| [`canary.yml`](../.github/workflows/canary.yml)                     | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
-| [`release.yml`](../.github/workflows/release.yml)                   | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
-| [`changeset-labels.yml`](../.github/workflows/changeset-labels.yml) | PR with manual changeset           | Apply release label from changeset                    |
+| Workflow                                                        | Trigger                            | Purpose                                               |
+| --------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| [`release-canary.yml`](../.github/workflows/release-canary.yml) | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
+| [`release.yml`](../.github/workflows/release.yml)               | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
+| [`auto-label.yml`](../.github/workflows/auto-label.yml)         | PR open/update                     | Apply release label from changeset                    |
 
 ## Release Labels
 

@@ -51,37 +51,45 @@ package/tooling:
   - changed-files:
       - any-glob-to-any-file: packages/tooling/**
 
+package/tui:
+  - changed-files:
+      - any-glob-to-any-file: packages/tui/**
+
 package/types:
   - changed-files:
       - any-glob-to-any-file: packages/types/**
+
+package/docs:
+  - changed-files:
+      - any-glob-to-any-file: packages/docs/**
+
+package/presets:
+  - changed-files:
+      - any-glob-to-any-file: packages/presets/**
+
+package/schema:
+  - changed-files:
+      - any-glob-to-any-file: packages/schema/**
+
+package/oxlint-plugin:
+  - changed-files:
+      - any-glob-to-any-file: packages/oxlint-plugin/**
 
 # =============================================================================
 # PLUGINS
 # =============================================================================
 
-plugin/outfitter:
+plugin/fieldguides:
   - changed-files:
-      - any-glob-to-any-file: plugins/outfitter/**
+      - any-glob-to-any-file: plugins/fieldguides/**
 
-plugin/kit:
+plugin/outfitter:
   - changed-files:
       - any-glob-to-any-file: plugins/outfitter/**
 
 plugin/team:
   - changed-files:
       - any-glob-to-any-file: plugins/team/**
-
-plugin/gt:
-  - changed-files:
-      - any-glob-to-any-file: plugins/gt/**
-
-plugin/but:
-  - changed-files:
-      - any-glob-to-any-file: plugins/but/**
-
-plugin/cli-dev:
-  - changed-files:
-      - any-glob-to-any-file: plugins/cli-dev/**
 
 # =============================================================================
 # AREAS
@@ -142,8 +150,8 @@ deps:
 
 # =============================================================================
 # RELEASE
-# Note: Release labels (release:major/minor/patch) are handled by
-# changeset-labels.yml workflow which detects bump type from changeset content.
+# Note: Release labels (release:major/minor/patch) are handled by the
+# release-labels job in auto-label.yml which detects bump type from changeset content.
 # Do not add path-based release labels here.
 # =============================================================================
 

@@ -125,11 +125,10 @@ See [Releases](../RELEASES.md) for details.
 
 ## Workflows
 
-| Workflow               | Purpose                                     |
-| ---------------------- | ------------------------------------------- |
-| `auto-label.yml`       | Apply labels based on file changes          |
-| `changeset-labels.yml` | Apply release labels from manual changesets |
-| `label-sync.yml`       | Sync label definitions to GitHub            |
+| Workflow         | Purpose                                             |
+| ---------------- | --------------------------------------------------- |
+| `auto-label.yml` | Apply labels based on file changes and release type |
+| `label-sync.yml` | Sync label definitions to GitHub                    |
 
 ## Troubleshooting
 
