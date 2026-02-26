@@ -315,18 +315,6 @@
   description: Priority merge - jumps to front of queue
 
 # =============================================================================
-# GRAPHITE STACK POSITION (auto-managed)
-# =============================================================================
-
-- name: stack:base
-  color: "7c3aed"
-  description: Bottom of a Graphite stack (merge this first)
-
-- name: stack:top
-  color: "c4b5fd"
-  description: Top of a Graphite stack (may have multiple if stack splits)
-
-# =============================================================================
 # TOOLS (as-is, no prefix)
 # =============================================================================
 
