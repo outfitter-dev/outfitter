@@ -27,6 +27,7 @@ import {
   resolveOutputModeFromContext,
 } from "../output-mode.js";
 import {
+  actionInternalErr,
   outputModeSchema,
   resolveInstallTimeoutFlag,
   resolveLocalFlag,
@@ -255,12 +256,7 @@ function createInitAction(options: {
       const { outputMode, ...initInput } = input;
       const result = await runInit(initInput);
       if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: options.id },
-          })
-        );
+        return actionInternalErr(options.id, result.error);
       }
 
       await printInitResults(result.value, { mode: outputMode });

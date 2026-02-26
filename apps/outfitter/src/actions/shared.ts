@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 export const outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
@@ -93,4 +94,36 @@ export function resolveInstallTimeoutFlag(value: unknown): number | undefined {
   }
 
   return undefined;
+}
+
+interface ActionBoundaryErrorLike {
+  readonly message: string;
+}
+
+export function toActionInternalError(
+  action: string,
+  error: ActionBoundaryErrorLike
+): InternalError {
+  return new InternalError({
+    message: error.message,
+    context: { action },
+  });
+}
+
+export function actionInternalErr<T = never>(
+  action: string,
+  error: ActionBoundaryErrorLike
+): Result<T, InternalError> {
+  return Result.err<T, InternalError>(toActionInternalError(action, error));
+}
+
+export function toActionInternalErrorFromUnknown(
+  action: string,
+  error: unknown,
+  fallbackMessage: string
+): InternalError {
+  return new InternalError({
+    message: error instanceof Error ? error.message : fallbackMessage,
+    context: { action },
+  });
 }

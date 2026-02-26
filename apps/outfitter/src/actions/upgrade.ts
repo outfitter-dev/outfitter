@@ -13,7 +13,7 @@ import {
   dryRunPreset,
   interactionPreset,
 } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
@@ -21,7 +21,7 @@ import {
   type CliOutputMode,
   resolveOutputModeFromContext,
 } from "../output-mode.js";
-import { outputModeSchema } from "./shared.js";
+import { actionInternalErr, outputModeSchema } from "./shared.js";
 
 interface UpgradeActionInput {
   readonly all: boolean;
@@ -130,12 +130,7 @@ export const upgradeAction: UpgradeAction = defineAction({
     });
 
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "upgrade" },
-        })
-      );
+      return actionInternalErr("upgrade", result.error);
     }
 
     await printUpgradeResults(result.value, {

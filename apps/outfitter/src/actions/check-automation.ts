@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 
 import { cwdPreset } from "@outfitter/cli/flags";
 import { outputModePreset } from "@outfitter/cli/query";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import {
@@ -35,7 +35,11 @@ import {
   type CliOutputMode,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
-import { hasExplicitOutputFlag, outputModeSchema } from "./shared.js";
+import {
+  actionInternalErr,
+  hasExplicitOutputFlag,
+  outputModeSchema,
+} from "./shared.js";
 
 interface CheckAutomationInput {
   cwd: string;
@@ -102,12 +106,7 @@ export const checkPublishGuardrailsAction: CheckAutomationAction = defineAction(
     handler: async (input) => {
       const result = await runCheckPublishGuardrails({ cwd: input.cwd });
       if (result.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: result.error.message,
-            context: { action: "check.publish-guardrails" },
-          })
-        );
+        return actionInternalErr("check.publish-guardrails", result.error);
       }
 
       await printCheckPublishGuardrailsResult(result.value, {
@@ -140,12 +139,7 @@ export const checkPresetVersionsAction: CheckAutomationAction = defineAction({
   handler: async (input) => {
     const result = await runCheckPresetVersions({ cwd: input.cwd });
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.preset-versions" },
-        })
-      );
+      return actionInternalErr("check.preset-versions", result.error);
     }
 
     await printCheckPresetVersionsResult(result.value, {
@@ -177,12 +171,7 @@ export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
   handler: async (input) => {
     const result = await runCheckSurfaceMap({ cwd: input.cwd });
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.surface-map" },
-        })
-      );
+      return actionInternalErr("check.surface-map", result.error);
     }
 
     await printCheckSurfaceMapResult(result.value, {
@@ -212,12 +201,7 @@ export const checkSurfaceMapFormatAction: CheckAutomationAction = defineAction({
   handler: async (input) => {
     const result = await runCheckSurfaceMapFormat({ cwd: input.cwd });
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.surface-map-format" },
-        })
-      );
+      return actionInternalErr("check.surface-map-format", result.error);
     }
 
     await printCheckSurfaceMapFormatResult(result.value, {
@@ -247,12 +231,7 @@ export const checkDocsSentinelAction: CheckAutomationAction = defineAction({
   handler: async (input) => {
     const result = await runCheckDocsSentinel({ cwd: input.cwd });
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.docs-sentinel" },
-        })
-      );
+      return actionInternalErr("check.docs-sentinel", result.error);
     }
 
     await printCheckDocsSentinelResult(result.value, {
