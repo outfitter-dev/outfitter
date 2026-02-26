@@ -39,6 +39,7 @@ Top-level commands:
 - `init [directory]` - Create a new project from scratch (interactive or scripted)
 - `scaffold <target> [name]` - Add a new capability to an existing project
 - `add <block>` - Add a tooling block (`claude`, `linter`, `lefthook`, `bootstrap`, `scaffolding`)
+- `docs <subject>` - Documentation discovery and export commands (`list|show|search|api|export`)
 - `repo <action> <subject>` - Repository maintenance namespace (`check|sync|export`)
 - `upgrade` - Check installed `@outfitter/*` versions and optionally show migration guidance
 - `doctor` - Validate local environment and project dependencies
@@ -152,6 +153,7 @@ Current subjects:
 - `check changeset` - Validate required changesets for package changes
 - `check tree` - Assert no modified/untracked files
 - `check boundary-invocations` - Disallow direct `packages/*/src` execution from root/app scripts
+- `check markdown-links` - Validate markdown relative links resolve to files
 
 Examples:
 
@@ -161,6 +163,29 @@ outfitter repo sync docs --cwd .
 outfitter repo export docs --target llms
 outfitter repo check exports --json
 outfitter repo check readme
+```
+
+
+### `docs`
+
+Discover and export documentation from the workspace docs map.
+
+```bash
+outfitter docs list [options]
+outfitter docs show <id> [options]
+outfitter docs search <query> [options]
+outfitter docs api [options]
+outfitter docs export [options]
+```
+
+Examples:
+
+```bash
+outfitter docs list --kind reference
+outfitter docs show packages/cli/readme
+outfitter docs search "surface map" --package @outfitter/schema
+outfitter docs api --level undocumented --package @outfitter/cli
+outfitter docs export --target llms-full
 ```
 
 ### `upgrade`

@@ -32,10 +32,12 @@ Guides and reference documentation for the Outfitter monorepo.
 
 Each package has detailed API documentation in its own directory. The canonical
 location is `packages/<name>/README.md` (and `packages/<name>/docs/` for deep
-docs). Use `outfitter docs list` to browse the docs index, or
-`outfitter docs show <id>` to view a specific document.
+docs). Use `outfitter docs list` to browse the docs index,
+`outfitter docs show <id>` to view a specific document,
+`outfitter docs search <query>` to find matching content, and
+`outfitter docs api` to inspect API coverage.
 Regenerate README sentinel sections with `bun run sync:docs:readme`; verify
-freshness with `bun run apps/outfitter/src/cli.ts check docs-sentinel --cwd .`.
+freshness with `outfitter check docs-sentinel --cwd .`.
 
 <!-- BEGIN:GENERATED:PACKAGE_LIST -->
 

@@ -54,8 +54,8 @@ apps/outfitter/.outfitter/surface.json
 CI/pre-push guard:
 
 ```bash
-bun run apps/outfitter/src/cli.ts check surface-map --cwd .
-bun run apps/outfitter/src/cli.ts check surface-map-format --cwd .
+outfitter check surface-map --cwd .
+outfitter check surface-map-format --cwd .
 ```
 
 ## When to Regenerate
