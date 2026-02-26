@@ -165,7 +165,6 @@ outfitter repo check exports --json
 outfitter repo check readme
 ```
 
-
 ### `docs`
 
 Discover and export documentation from the workspace docs map.
@@ -182,9 +181,9 @@ Examples:
 
 ```bash
 outfitter docs list --kind reference
-outfitter docs show packages/cli/readme
-outfitter docs search "surface map" --package @outfitter/schema
-outfitter docs api --level undocumented --package @outfitter/cli
+outfitter docs show cli/README.md
+outfitter docs search "surface map" --package schema
+outfitter docs api --level undocumented --package cli
 outfitter docs export --target llms-full
 ```
 
