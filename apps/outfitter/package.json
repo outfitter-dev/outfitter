@@ -51,6 +51,12 @@
         "default": "./dist/commands/check.js"
       }
     },
+    "./commands/check-action-ceremony": {
+      "import": {
+        "types": "./dist/commands/check-action-ceremony.d.ts",
+        "default": "./dist/commands/check-action-ceremony.js"
+      }
+    },
     "./commands/check-docs-sentinel": {
       "import": {
         "types": "./dist/commands/check-docs-sentinel.d.ts",

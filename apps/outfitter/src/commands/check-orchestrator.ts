@@ -152,6 +152,19 @@ export function buildCheckOrchestratorPlan(
         ],
       },
       {
+        id: "action-ceremony",
+        label: "Action ceremony guardrails",
+        command: [
+          "bun",
+          "run",
+          "apps/outfitter/src/cli.ts",
+          "check",
+          "action-ceremony",
+          "--cwd",
+          ".",
+        ],
+      },
+      {
         id: "docs-sentinel",
         label: "Docs readme sentinel",
         command: [
