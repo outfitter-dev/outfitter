@@ -2,6 +2,231 @@ import type { BunupPlugin } from "bunup";
 import { defineWorkspace } from "bunup";
 
 /**
+ * Determines whether a built JavaScript file is an invalid bare export stub.
+ *
+ * These files contain only `export { ... };` without top-level declarations or
+ * imports for those bindings, which breaks runtime parsing. Some variants also
+ * include side-effect-only imports before the broken export block.
+ */
+function isBareExportStub(content: string): boolean {
+  const normalized = content
+    .replace(/\r\n/g, "\n")
+    .replace(/^\s*\/\/.*\n/gm, "")
+    .trim();
+
+  return /^(?:import\s*["'][^"']+["'];\s*)*export\s*\{[\s\S]*\};$/.test(
+    normalized
+  );
+}
+
+/**
+ * Resolves the source TypeScript file path from a built JavaScript file path.
+ *
+ * For example:
+ * - `packages/cli/dist/index.js` -> `packages/cli/src/index.ts`
+ */
+function resolveSourcePath(fullPath: string): string {
+  return fullPath.replace("/dist/", "/src/").replace(/\.js$/, ".ts");
+}
+
+/**
+ * Resolve the package root from a built artifact path.
+ *
+ * For example:
+ * - `packages/mcp/dist/shared/@outfitter/mcp-abc123.js` -> `packages/mcp`
+ */
+function resolvePackageRootFromDistPath(fullPath: string): string | null {
+  const distIndex = fullPath.indexOf("/dist/");
+  if (distIndex === -1) {
+    return null;
+  }
+  return fullPath.slice(0, distIndex);
+}
+
+/**
+ * Extract runtime export specifiers from a mixed `export { ... } from "..."` block.
+ *
+ * Type-only specifiers are removed so generated JavaScript remains valid.
+ */
+function toRuntimeSpecifiers(specifierBlock: string): string[] {
+  const withoutBlockComments = specifierBlock.replace(/\/\*[\s\S]*?\*\//g, "");
+  const withoutLineComments = withoutBlockComments.replace(/\/\/.*$/gm, "");
+  const rawSpecifiers = withoutLineComments
+    .split(",")
+    .map((specifier) => specifier.trim())
+    .filter(Boolean);
+
+  return rawSpecifiers
+    .filter((specifier) => !specifier.startsWith("type "))
+    .map((specifier) => specifier.replace(/\s+/g, " "));
+}
+
+/**
+ * Extract sorted runtime export binding names from a bare `export { ... };` stub.
+ *
+ * For aliased exports (`foo as bar`), the exported name (`bar`) is used.
+ */
+function parseBareStubBindings(content: string): string[] {
+  const match = content.match(/export\s*\{([\s\S]*?)\};/);
+  const specifierBlock = match?.[1];
+  if (!specifierBlock) {
+    return [];
+  }
+
+  const bindings = toRuntimeSpecifiers(specifierBlock)
+    .map((specifier) => {
+      const aliasMatch = specifier.match(
+        /^([A-Za-z_$][\w$]*|default)\s+as\s+([A-Za-z_$][\w$]*)$/
+      );
+      return aliasMatch ? aliasMatch[2] : specifier;
+    })
+    .map((binding) => binding.trim())
+    .filter((binding) => binding.length > 0);
+
+  return [...new Set(bindings)].toSorted();
+}
+
+/**
+ * Extract sorted runtime named export bindings from source `export { ... } from`.
+ *
+ * Star exports are intentionally skipped because they do not expose explicit
+ * binding names required for deterministic matching.
+ */
+function extractRuntimeNamedExports(sourceContent: string): string[] {
+  const exportFromPattern =
+    /export\s+(type\s+)?(\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["']([^"']+)["'];/g;
+  const bindings: string[] = [];
+
+  for (const match of sourceContent.matchAll(exportFromPattern)) {
+    const typeModifier = match[1];
+    const clause = match[2];
+    if (!clause || typeModifier) {
+      continue;
+    }
+
+    const trimmedClause = clause.trim();
+    if (trimmedClause.startsWith("*")) {
+      continue;
+    }
+
+    const specifierBlock = trimmedClause.slice(1, -1);
+    for (const specifier of toRuntimeSpecifiers(specifierBlock)) {
+      const aliasMatch = specifier.match(
+        /^([A-Za-z_$][\w$]*|default)\s+as\s+([A-Za-z_$][\w$]*)$/
+      );
+      bindings.push(aliasMatch ? aliasMatch[2] : specifier);
+    }
+  }
+
+  return [...new Set(bindings)].toSorted();
+}
+
+/**
+ * Determine whether a module is a pure re-export barrel.
+ *
+ * Pure barrel modules contain only side-effect imports and `export ... from`
+ * statements (plus comments/whitespace).
+ */
+function isPureReexportModule(sourceContent: string): boolean {
+  const withoutBlockComments = sourceContent.replace(/\/\*[\s\S]*?\*\//g, "");
+  const withoutLineComments = withoutBlockComments.replace(/\/\/.*$/gm, "");
+  const normalized = withoutLineComments.trim();
+
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  return /^(?:import\s*["'][^"']+["'];\s*)*(?:export\s+(?:type\s+)?(?:\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["'][^"']+["'];\s*)+$/.test(
+    normalized
+  );
+}
+
+/**
+ * Resolve a source barrel path for hashed shared chunks by matching export bindings.
+ *
+ * This is a fallback when `dist -> src` path translation cannot find a source
+ * file (for example `dist/shared/@outfitter/*.js` chunks).
+ */
+async function findSourcePathByRuntimeBindings(
+  fullPath: string,
+  builtContent: string
+): Promise<string | null> {
+  const packageRoot = resolvePackageRootFromDistPath(fullPath);
+  if (!packageRoot) {
+    return null;
+  }
+
+  const targetBindings = parseBareStubBindings(builtContent);
+  if (targetBindings.length === 0) {
+    return null;
+  }
+
+  const targetKey = targetBindings.join("|");
+  let matchedPath: string | null = null;
+
+  for await (const sourceRelativePath of new Bun.Glob("src/**/*.ts").scan(
+    packageRoot
+  )) {
+    const sourcePath = `${packageRoot}/${sourceRelativePath}`;
+    const sourceContent = await Bun.file(sourcePath).text();
+    const sourceBindings = extractRuntimeNamedExports(sourceContent);
+    if (sourceBindings.length === 0) {
+      continue;
+    }
+    if (sourceBindings.join("|") !== targetKey) {
+      continue;
+    }
+    if (matchedPath && matchedPath !== sourcePath) {
+      return null;
+    }
+    matchedPath = sourcePath;
+  }
+
+  return matchedPath;
+}
+
+/**
+ * Build runtime re-export statements from a source barrel module.
+ *
+ * Supports:
+ * - `export { ... } from "..."` (dropping type-only exports)
+ * - `export * from "..."` and `export * as name from "..."`
+ */
+function buildRuntimeReexports(sourceContent: string): string[] {
+  const lines: string[] = [];
+  const exportFromPattern =
+    /export\s+(type\s+)?(\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["']([^"']+)["'];/g;
+
+  for (const match of sourceContent.matchAll(exportFromPattern)) {
+    const typeModifier = match[1];
+    const clause = match[2];
+    const modulePath = match[3];
+
+    if (!clause || !modulePath || typeModifier) {
+      continue;
+    }
+
+    const trimmedClause = clause.trim();
+    if (trimmedClause.startsWith("*")) {
+      lines.push(`export ${trimmedClause} from "${modulePath}";`);
+      continue;
+    }
+
+    const specifierBlock = trimmedClause.slice(1, -1);
+    const runtimeSpecifiers = toRuntimeSpecifiers(specifierBlock);
+    if (runtimeSpecifiers.length === 0) {
+      continue;
+    }
+
+    lines.push(
+      `export { ${runtimeSpecifiers.join(", ")} } from "${modulePath}";`
+    );
+  }
+
+  return lines;
+}
+
+/**
  * Work around Bun duplicate export bug with re-exported entrypoints.
  * Removes duplicate export statements that appear consecutively.
  */
@@ -52,6 +277,65 @@ const stripDuplicateExports = (): BunupPlugin => ({
         }
 
         if (nextContent !== content) {
+          await Bun.write(file.fullPath, nextContent);
+        }
+      }
+    },
+  },
+});
+
+/**
+ * Repairs invalid bare export stubs emitted for barrel entrypoints.
+ *
+ * Some generated files contain only `export { ... };` with no declarations or
+ * imports, which fails parsing. This plugin reconstructs runtime re-export
+ * statements from the corresponding source barrel file.
+ */
+const repairBareBarrelExports = (): BunupPlugin => ({
+  name: "repair-bare-barrel-exports",
+  hooks: {
+    onBuildDone: async ({ files }) => {
+      for (const file of files) {
+        if (file.dts || !file.fullPath.endsWith(".js")) continue;
+
+        const builtContent = await Bun.file(file.fullPath).text();
+
+        const directSourcePath = resolveSourcePath(file.fullPath);
+        const directSourceFile = Bun.file(directSourcePath);
+        if (await directSourceFile.exists()) {
+          const sourceContent = await directSourceFile.text();
+          if (!isPureReexportModule(sourceContent)) {
+            continue;
+          }
+
+          const reexports = buildRuntimeReexports(sourceContent);
+          if (reexports.length === 0) {
+            continue;
+          }
+
+          const nextContent = `${reexports.join("\n")}\n`;
+          if (nextContent !== builtContent) {
+            await Bun.write(file.fullPath, nextContent);
+          }
+
+          continue;
+        }
+
+        if (!isBareExportStub(builtContent)) continue;
+
+        const matchedSourcePath = await findSourcePathByRuntimeBindings(
+          file.fullPath,
+          builtContent
+        );
+        if (!matchedSourcePath) continue;
+
+        const sourceFile = Bun.file(matchedSourcePath);
+        const sourceContent = await sourceFile.text();
+        const reexports = buildRuntimeReexports(sourceContent);
+        if (reexports.length === 0) continue;
+
+        const nextContent = `${reexports.join("\n")}\n`;
+        if (nextContent !== builtContent) {
           await Bun.write(file.fullPath, nextContent);
         }
       }
@@ -257,8 +541,9 @@ export default defineWorkspace(
     sourceBase: "./src",
     // Output format: ESM only (Bun ecosystem)
     format: ["esm"],
-    // Work around Bun duplicate export bug with re-exported entrypoints
-    plugins: [stripDuplicateExports()],
+    // Work around Bun duplicate export bug with re-exported entrypoints and
+    // repair invalid bare barrel stubs for runtime parsing.
+    plugins: [stripDuplicateExports(), repairBareBarrelExports()],
     // TypeScript declarations with splitting
     dts: { splitting: true },
     // Auto-generate package.json exports field
