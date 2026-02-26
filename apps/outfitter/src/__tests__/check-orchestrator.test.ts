@@ -81,6 +81,9 @@ describe("buildCheckOrchestratorPlan", () => {
 
     expect(stepIds).toContain("tests");
     expect(stepIds.at(-1)).toBe("tests");
+    expect(plan.find((step) => step.id === "tests")).toMatchObject({
+      command: ["bun", "run", "test:ci"],
+    });
   });
 
   test("pre-push mode runs hook verify and schema drift", () => {

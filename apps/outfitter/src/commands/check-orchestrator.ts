@@ -271,7 +271,7 @@ export function buildCheckOrchestratorPlan(
       steps.push({
         id: "tests",
         label: "Tests",
-        command: ["bun", "run", "test", "--", "--only"],
+        command: ["bun", "run", "test:ci"],
       });
     }
 
