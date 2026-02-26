@@ -6,10 +6,9 @@
 
 import { z } from "zod";
 
-const _outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
+export const outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
   .enum(["human", "json", "jsonl"])
   .default("human");
-export const outputModeSchema: typeof _outputModeSchema = _outputModeSchema;
 
 function argvContainsOutputFlag(argv: readonly string[]): boolean {
   for (let index = 0; index < argv.length; index++) {

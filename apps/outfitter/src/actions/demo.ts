@@ -33,7 +33,7 @@ const demoInputSchema = z.object({
   outputMode: outputModeSchema,
 }) as z.ZodType<DemoActionInput>;
 
-const _demoAction: ActionSpec<DemoActionInput, unknown> = defineAction({
+export const demoAction: ActionSpec<DemoActionInput, unknown> = defineAction({
   id: "demo",
   description: "Run the CLI demo app",
   surfaces: ["cli"],
@@ -84,4 +84,3 @@ const _demoAction: ActionSpec<DemoActionInput, unknown> = defineAction({
     }
   },
 });
-export const demoAction: typeof _demoAction = _demoAction;

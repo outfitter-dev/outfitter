@@ -53,7 +53,7 @@ const docsListCwd = cwdPreset();
 const docsListOutputMode = outputModePreset({ includeJsonl: true });
 const docsListJq = jqPreset();
 
-const _docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
+export const docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
   id: "docs.list",
   description: "List documentation entries from the docs map",
   surfaces: ["cli"],
@@ -108,7 +108,6 @@ const _docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
     return Result.ok(result.value);
   },
 });
-export const docsListAction: typeof _docsListAction = _docsListAction;
 
 const docsShowInputSchema = z.object({
   id: z.string(),
@@ -121,7 +120,7 @@ const docsShowCwd = cwdPreset();
 const docsShowOutputMode = outputModePreset({ includeJsonl: true });
 const docsShowJq = jqPreset();
 
-const _docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
+export const docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
   id: "docs.show",
   description: "Show a specific documentation entry and its content",
   surfaces: ["cli"],
@@ -164,7 +163,6 @@ const _docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
     return Result.ok(result.value);
   },
 });
-export const docsShowAction: typeof _docsShowAction = _docsShowAction;
 
 const docsSearchInputSchema = z.object({
   query: z.string(),
@@ -179,63 +177,66 @@ const docsSearchCwd = cwdPreset();
 const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
 const docsSearchJq = jqPreset();
 
-const _docsSearchAction: ActionSpec<DocsSearchInput, unknown> = defineAction({
-  id: "docs.search",
-  description: "Search documentation content for a query string",
-  surfaces: ["cli"],
-  input: docsSearchInputSchema,
-  cli: {
-    group: "docs",
-    command: "search <query>",
+export const docsSearchAction: ActionSpec<DocsSearchInput, unknown> =
+  defineAction({
+    id: "docs.search",
     description: "Search documentation content for a query string",
-    options: [
-      {
-        flags: "-k, --kind <kind>",
-        description:
-          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
-      },
-      {
-        flags: "-p, --package <name>",
-        description: "Filter by package name",
-      },
-      ...docsSearchOutputMode.options,
-      ...docsSearchJq.options,
-      ...docsSearchCwd.options,
-    ],
-    mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
-        context.flags
-      );
-      const { jq } = docsSearchJq.resolve(context.flags);
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
-      const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
-      const kind = resolveStringFlag(context.flags["kind"]);
-      const pkg = resolveStringFlag(context.flags["package"]);
+    surfaces: ["cli"],
+    input: docsSearchInputSchema,
+    cli: {
+      group: "docs",
+      command: "search <query>",
+      description: "Search documentation content for a query string",
+      options: [
+        {
+          flags: "-k, --kind <kind>",
+          description:
+            "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
+        },
+        {
+          flags: "-p, --package <name>",
+          description: "Filter by package name",
+        },
+        ...docsSearchOutputMode.options,
+        ...docsSearchJq.options,
+        ...docsSearchCwd.options,
+      ],
+      mapInput: (context) => {
+        const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
+          context.flags
+        );
+        const { jq } = docsSearchJq.resolve(context.flags);
+        const outputMode = resolveDocsOutputMode(
+          context.flags,
+          presetOutputMode
+        );
+        const { cwd: rawCwd } = docsSearchCwd.resolve(context.flags);
+        const cwd = resolve(process.cwd(), rawCwd);
+        const kind = resolveStringFlag(context.flags["kind"]);
+        const pkg = resolveStringFlag(context.flags["package"]);
 
-      return {
-        query: context.args[0] as string,
-        cwd,
-        outputMode,
-        jq,
-        ...(kind !== undefined ? { kind } : {}),
-        ...(pkg !== undefined ? { package: pkg } : {}),
-      };
+        return {
+          query: context.args[0] as string,
+          cwd,
+          outputMode,
+          jq,
+          ...(kind !== undefined ? { kind } : {}),
+          ...(pkg !== undefined ? { package: pkg } : {}),
+        };
+      },
     },
-  },
-  handler: async (input) => {
-    const { outputMode, jq, ...searchInput } = input;
-    const result = await runDocsSearch({ ...searchInput, outputMode, jq });
+    handler: async (input) => {
+      const { outputMode, jq, ...searchInput } = input;
+      const result = await runDocsSearch({ ...searchInput, outputMode, jq });
 
-    if (result.isErr()) {
-      return result;
-    }
+      if (result.isErr()) {
+        return result;
+      }
 
-    await printDocsSearchResults(result.value, { mode: outputMode, jq });
-    return Result.ok(result.value);
-  },
-});
-export const docsSearchAction: typeof _docsSearchAction = _docsSearchAction;
+      await printDocsSearchResults(result.value, { mode: outputMode, jq });
+      return Result.ok(result.value);
+    },
+  });
 
 const docsApiInputSchema = z.object({
   cwd: z.string(),
@@ -249,7 +250,7 @@ const docsApiCwd = cwdPreset();
 const docsApiOutputMode = outputModePreset({ includeJsonl: true });
 const docsApiJq = jqPreset();
 
-const _docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
+export const docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
   id: "docs.api",
   description: "Extract API reference from TSDoc coverage data",
   surfaces: ["cli"],
@@ -320,7 +321,6 @@ const _docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
     return Result.ok(result.value);
   },
 });
-export const docsApiAction: typeof _docsApiAction = _docsApiAction;
 
 const docsExportTargetValues = [
   "packages",
@@ -338,51 +338,54 @@ const docsExportInputSchema = z.object({
 const docsExportCwd = cwdPreset();
 const docsExportOutputMode = outputModePreset({ includeJsonl: true });
 
-const _docsExportAction: ActionSpec<DocsExportInput, unknown> = defineAction({
-  id: "docs.export",
-  description: "Export documentation to packages, llms.txt, or both",
-  surfaces: ["cli"],
-  input: docsExportInputSchema,
-  cli: {
-    group: "docs",
-    command: "export",
+export const docsExportAction: ActionSpec<DocsExportInput, unknown> =
+  defineAction({
+    id: "docs.export",
     description: "Export documentation to packages, llms.txt, or both",
-    options: [
-      {
-        flags: "-t, --target <target>",
-        description:
-          "Export target (packages|llms|llms-full|all, default: all)",
+    surfaces: ["cli"],
+    input: docsExportInputSchema,
+    cli: {
+      group: "docs",
+      command: "export",
+      description: "Export documentation to packages, llms.txt, or both",
+      options: [
+        {
+          flags: "-t, --target <target>",
+          description:
+            "Export target (packages|llms|llms-full|all, default: all)",
+        },
+        ...docsExportOutputMode.options,
+        ...docsExportCwd.options,
+      ],
+      mapInput: (context) => {
+        const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
+          context.flags
+        );
+        const outputMode = resolveDocsOutputMode(
+          context.flags,
+          presetOutputMode
+        );
+        const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
+        const cwd = resolve(process.cwd(), rawCwd);
+        const targetRaw = resolveStringFlag(context.flags["target"]);
+        const target = (targetRaw ?? "all") as DocsExportTarget;
+
+        return {
+          cwd,
+          target,
+          outputMode,
+        };
       },
-      ...docsExportOutputMode.options,
-      ...docsExportCwd.options,
-    ],
-    mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
-        context.flags
-      );
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
-      const { cwd: rawCwd } = docsExportCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
-      const targetRaw = resolveStringFlag(context.flags["target"]);
-      const target = (targetRaw ?? "all") as DocsExportTarget;
-
-      return {
-        cwd,
-        target,
-        outputMode,
-      };
     },
-  },
-  handler: async (input) => {
-    const { outputMode, ...exportInput } = input;
-    const result = await runDocsExport({ ...exportInput, outputMode });
+    handler: async (input) => {
+      const { outputMode, ...exportInput } = input;
+      const result = await runDocsExport({ ...exportInput, outputMode });
 
-    if (result.isErr()) {
-      return result;
-    }
+      if (result.isErr()) {
+        return result;
+      }
 
-    await printDocsExportResults(result.value, { mode: outputMode });
-    return Result.ok(result.value);
-  },
-});
-export const docsExportAction: typeof _docsExportAction = _docsExportAction;
+      await printDocsExportResults(result.value, { mode: outputMode });
+      return Result.ok(result.value);
+    },
+  });
