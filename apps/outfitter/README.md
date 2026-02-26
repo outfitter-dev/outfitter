@@ -313,7 +313,7 @@ if (result.isErr()) {
 
 ## Requirements
 
-- Bun >= 1.3.9
+- Bun >= 1.3.10
 
 ## Related Packages
 

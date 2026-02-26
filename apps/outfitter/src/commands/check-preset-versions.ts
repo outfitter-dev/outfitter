@@ -3,6 +3,7 @@ import { join, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
+import { isTypesBunVersionCompatible } from "@outfitter/tooling";
 
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
@@ -221,6 +222,16 @@ function validateBunVersionConsistency(
     }
   }
 
+  const packageManager = parsedRootPackage["packageManager"];
+  if (typeof packageManager === "string" && packageManager.startsWith("bun@")) {
+    const packageManagerVersion = normalizeVersionRange(packageManager);
+    if (packageManagerVersion !== bunVersionFile) {
+      problems.push(
+        `Bun version drift: .bun-version is ${bunVersionFile} but packageManager is ${packageManager}`
+      );
+    }
+  }
+
   let bunTypesVersion: string | undefined;
   const catalog = parsedRootPackage["catalog"];
   if (isRecord(catalog) && typeof catalog["@types/bun"] === "string") {
@@ -236,16 +247,20 @@ function validateBunVersionConsistency(
       ) ?? undefined;
   }
 
-  if (
-    bunTypesVersion &&
-    normalizeVersionRange(bunTypesVersion) !== bunVersionFile
-  ) {
-    problems.push(
-      `Bun version drift: .bun-version is ${bunVersionFile} but @types/bun is ${bunTypesVersion}`
-    );
+  if (bunTypesVersion) {
+    const normalizedTypesVersion = normalizeVersionRange(bunTypesVersion);
+    if (!isTypesBunVersionCompatible(bunVersionFile, normalizedTypesVersion)) {
+      problems.push(
+        `Bun version drift: .bun-version is ${bunVersionFile} but @types/bun is ${bunTypesVersion}`
+      );
+    }
   }
 
-  const docsToValidate = ["README.md", "apps/outfitter/README.md"] as const;
+  const docsToValidate = [
+    "README.md",
+    "apps/outfitter/README.md",
+    "docs/getting-started.md",
+  ] as const;
   for (const docPath of docsToValidate) {
     const absoluteDocPath = join(workspaceRoot, docPath);
     if (!existsSync(absoluteDocPath)) {

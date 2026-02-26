@@ -46,6 +46,12 @@ export {
   printCheckTsdocHuman,
   tsDocCheckResultSchema,
 } from "./cli/check-tsdoc.js";
+// Re-export shared Bun version compatibility helpers
+export type { ParsedSemver } from "./bun-version-compat.js";
+export {
+  isTypesBunVersionCompatible,
+  parseSemver,
+} from "./bun-version-compat.js";
 // Re-export registry types for convenience
 export type {
   AddBlockOptions,
