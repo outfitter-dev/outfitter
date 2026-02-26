@@ -26,12 +26,12 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@outfitter/oxlint-plugin#build"],
       "inputs": ["src/**", ".oxlintrc.json", ".oxfmtrc.jsonc"],
       "outputs": []
     },
     "lint:fix": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@outfitter/oxlint-plugin#build"],
       "inputs": ["src/**", ".oxlintrc.json", ".oxfmtrc.jsonc"],
       "outputs": []
     },

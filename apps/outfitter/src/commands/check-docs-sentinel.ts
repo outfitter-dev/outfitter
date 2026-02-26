@@ -2,17 +2,64 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
-import {
-  generatePackageListSection,
-  replaceSentinelSection,
-} from "@outfitter/docs";
 
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
+import { loadDocsModule } from "./docs-module-loader.js";
 
 const SECTION_ID = "PACKAGE_LIST";
 const BEGIN_TAG = `<!-- BEGIN:GENERATED:${SECTION_ID} -->`;
 const END_TAG = `<!-- END:GENERATED:${SECTION_ID} -->`;
+
+/**
+ * Escape a string for safe interpolation into a regular expression pattern.
+ */
+function escapeRegExpLiteral(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Minimal sentinel replacement fallback used for pure content comparison.
+ */
+function replaceSentinelSectionFallback(
+  input: string,
+  sentinelId: string,
+  replacement: string
+): string {
+  const beginTag = `<!-- BEGIN:GENERATED:${sentinelId} -->`;
+  const endTag = `<!-- END:GENERATED:${sentinelId} -->`;
+  const pattern = new RegExp(
+    `${escapeRegExpLiteral(beginTag)}[\\s\\S]*?${escapeRegExpLiteral(endTag)}`
+  );
+
+  if (!pattern.test(input)) {
+    return input;
+  }
+
+  return input.replace(pattern, `${beginTag}\n${replacement}\n${endTag}`);
+}
+
+/**
+ * Extract all sentinel section bodies for semantic comparison.
+ */
+function extractSentinelBodies(input: string, sentinelId: string): string[] {
+  const beginTag = `<!-- BEGIN:GENERATED:${sentinelId} -->`;
+  const endTag = `<!-- END:GENERATED:${sentinelId} -->`;
+  const pattern = new RegExp(
+    `${escapeRegExpLiteral(beginTag)}[\\s\\n\\r]*([\\s\\S]*?)[\\s\\n\\r]*${escapeRegExpLiteral(endTag)}`,
+    "g"
+  );
+
+  const bodies: string[] = [];
+  for (const match of input.matchAll(pattern)) {
+    const body = match[1];
+    if (typeof body === "string") {
+      bodies.push(body);
+    }
+  }
+
+  return bodies;
+}
 
 export type DocsReadmeSentinelCheckReason =
   | "missing-markers"
@@ -46,10 +93,24 @@ export class CheckDocsSentinelError extends Error {
 
 export function checkDocsReadmeSentinelContent(
   readmeContent: string,
-  packageListContent: string
+  packageListContent: string,
+  replaceSentinelSection: (
+    input: string,
+    sentinelId: string,
+    replacement: string
+  ) => string = replaceSentinelSectionFallback
 ): DocsReadmeSentinelCheckResult {
   if (!(readmeContent.includes(BEGIN_TAG) && readmeContent.includes(END_TAG))) {
     return { reason: "missing-markers", updatedContent: readmeContent };
+  }
+
+  const currentBodies = extractSentinelBodies(readmeContent, SECTION_ID);
+  const expectedBody = packageListContent.trim();
+  if (
+    currentBodies.length > 0 &&
+    currentBodies.every((body) => body.trim() === expectedBody)
+  ) {
+    return { reason: "up-to-date", updatedContent: readmeContent };
   }
 
   const updatedContent = replaceSentinelSection(
@@ -71,15 +132,17 @@ export async function runCheckDocsSentinel(
   try {
     const workspaceRoot = resolve(options.cwd);
     const readmePath = join(workspaceRoot, "docs", "README.md");
+    const docsModule = await loadDocsModule();
 
     const [readmeContent, packageListContent] = await Promise.all([
       readFile(readmePath, "utf8"),
-      generatePackageListSection(workspaceRoot),
+      docsModule.generatePackageListSection(workspaceRoot),
     ]);
 
     const result = checkDocsReadmeSentinelContent(
       readmeContent,
-      packageListContent
+      packageListContent,
+      docsModule.replaceSentinelSection
     );
 
     return Result.ok({

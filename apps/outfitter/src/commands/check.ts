@@ -16,7 +16,6 @@ import { output } from "@outfitter/cli";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { FileEntry, Registry } from "@outfitter/tooling";
-import { RegistrySchema } from "@outfitter/tooling";
 import { createTheme } from "@outfitter/tui/render";
 
 import { readManifest } from "../manifest.js";
@@ -153,6 +152,18 @@ interface LoadedRegistry {
 }
 
 /**
+ * Runtime guard for the registry payload read from `registry.json`.
+ */
+function isRegistryLike(value: unknown): value is Registry {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return !!record["blocks"] && typeof record["blocks"] === "object";
+}
+
+/**
  * Loads and validates the registry.
  */
 function loadRegistry(): Result<LoadedRegistry, CheckError> {
@@ -160,7 +171,13 @@ function loadRegistry(): Result<LoadedRegistry, CheckError> {
     const registryPath = getRegistryPath();
     const content = readFileSync(registryPath, "utf-8");
     const parsed = JSON.parse(content);
-    const registry = RegistrySchema.parse(parsed);
+    if (!isRegistryLike(parsed)) {
+      return Result.err(
+        new CheckError("Failed to load registry: invalid registry shape")
+      );
+    }
+
+    const registry = parsed;
     const toolingVersion = readToolingVersion(registryPath);
     return Result.ok({ registry, toolingVersion });
   } catch (error) {

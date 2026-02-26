@@ -15,6 +15,19 @@ function wrapSentinel(content: string): string {
   ].join("\n");
 }
 
+function wrapMultipleSentinels(contents: readonly string[]): string {
+  const blocks = contents.flatMap((content) => [
+    "<!-- BEGIN:GENERATED:PACKAGE_LIST -->",
+    "",
+    content,
+    "",
+    "<!-- END:GENERATED:PACKAGE_LIST -->",
+    "",
+  ]);
+
+  return ["# Docs", "", ...blocks].join("\n");
+}
+
 describe("checkDocsReadmeSentinelContent", () => {
   test("reports missing markers", () => {
     const readme = "# Docs\n\nNo sentinel here.\n";
@@ -36,5 +49,12 @@ describe("checkDocsReadmeSentinelContent", () => {
     const result = checkDocsReadmeSentinelContent(readme, "- same");
 
     expect(result.reason).toBe("up-to-date");
+  });
+
+  test("reports stale when any matching sentinel block is out of date", () => {
+    const readme = wrapMultipleSentinels(["- same", "- stale"]);
+    const result = checkDocsReadmeSentinelContent(readme, "- same");
+
+    expect(result.reason).toBe("out-of-date");
   });
 });

@@ -11,7 +11,7 @@
 
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 import {
   booleanFlagPreset,
@@ -19,13 +19,6 @@ import {
   cwdPreset,
   stringListFlagPreset,
 } from "@outfitter/cli/flags";
-import {
-  type DocsCommonCliOptions,
-  type DocsExportCliOptions,
-  resolveDocsCliOptions,
-  withDocsCommonOptions,
-  withDocsExportOptions,
-} from "@outfitter/docs";
 import { Command } from "commander";
 
 import {
@@ -36,6 +29,91 @@ import {
 } from "./docs-module-loader.js";
 
 const require = createRequire(import.meta.url);
+
+type DocsMdxMode = "strict" | "lossy";
+
+interface DocsCommonCliOptions {
+  readonly cwd?: string;
+  readonly mdxMode?: DocsMdxMode;
+  readonly outputDir?: string;
+  readonly packagesDir?: string;
+}
+
+interface DocsExportCliOptions extends DocsCommonCliOptions {
+  readonly llmsFile?: string;
+  readonly llmsFullFile?: string;
+  readonly target?: string;
+}
+
+export const DOCS_COMMON_OPTION_FLAGS = [
+  "--cwd <path>",
+  "--packages-dir <path>",
+  "--output-dir <path>",
+  "--mdx-mode <mode>",
+] as const;
+
+export const DOCS_EXPORT_OPTION_FLAGS = [
+  "--llms-file <path>",
+  "--llms-full-file <path>",
+  "--target <target>",
+] as const;
+
+/**
+ * Apply common docs CLI options to a commander subcommand.
+ */
+function withDocsCommonOptions<TCommand extends Command>(
+  command: TCommand
+): TCommand {
+  return command
+    .option(DOCS_COMMON_OPTION_FLAGS[0], "Workspace root to operate in")
+    .option(
+      DOCS_COMMON_OPTION_FLAGS[1],
+      "Packages directory relative to workspace"
+    )
+    .option(
+      DOCS_COMMON_OPTION_FLAGS[2],
+      "Output directory relative to workspace"
+    )
+    .option(DOCS_COMMON_OPTION_FLAGS[3], "MDX handling mode: strict or lossy");
+}
+
+/**
+ * Apply docs export options (including common docs options) to a subcommand.
+ */
+function withDocsExportOptions<TCommand extends Command>(
+  command: TCommand
+): TCommand {
+  return withDocsCommonOptions(command)
+    .option(
+      DOCS_EXPORT_OPTION_FLAGS[0],
+      "llms.txt output path relative to workspace"
+    )
+    .option(
+      DOCS_EXPORT_OPTION_FLAGS[1],
+      "llms-full.txt output path relative to workspace"
+    )
+    .option(
+      DOCS_EXPORT_OPTION_FLAGS[2],
+      "Export target: packages, llms, llms-full, all",
+      "all"
+    );
+}
+
+/**
+ * Resolve `cwd` options relative to the current process for CLI parity.
+ */
+function resolveDocsCliOptions<TOptions extends { cwd?: string }>(
+  options: TOptions
+): TOptions {
+  if (typeof options.cwd !== "string" || options.cwd.length === 0) {
+    return options;
+  }
+
+  return {
+    ...options,
+    cwd: resolve(process.cwd(), options.cwd),
+  };
+}
 
 export type RepoCheckSubject =
   | "docs"

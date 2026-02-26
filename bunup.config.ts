@@ -26,7 +26,15 @@ function isBareExportStub(content: string): boolean {
  * - `packages/cli/dist/index.js` -> `packages/cli/src/index.ts`
  */
 function resolveSourcePath(fullPath: string): string {
-  return fullPath.replace("/dist/", "/src/").replace(/\.js$/, ".ts");
+  if (fullPath.includes("/dist/")) {
+    return fullPath.replace("/dist/", "/src/").replace(/\.js$/, ".ts");
+  }
+
+  if (fullPath.startsWith("dist/")) {
+    return fullPath.replace(/^dist\//, "src/").replace(/\.js$/, ".ts");
+  }
+
+  return fullPath.replace(/\.js$/, ".ts");
 }
 
 /**
@@ -36,11 +44,12 @@ function resolveSourcePath(fullPath: string): string {
  * - `packages/mcp/dist/shared/@outfitter/mcp-abc123.js` -> `packages/mcp`
  */
 function resolvePackageRootFromDistPath(fullPath: string): string | null {
-  const distIndex = fullPath.indexOf("/dist/");
+  const normalized = fullPath.startsWith("./") ? fullPath.slice(2) : fullPath;
+  const distIndex = normalized.indexOf("/dist/");
   if (distIndex === -1) {
-    return null;
+    return normalized.startsWith("dist/") ? "." : null;
   }
-  return fullPath.slice(0, distIndex);
+  return normalized.slice(0, distIndex);
 }
 
 /**
@@ -59,6 +68,14 @@ function toRuntimeSpecifiers(specifierBlock: string): string[] {
   return rawSpecifiers
     .filter((specifier) => !specifier.startsWith("type "))
     .map((specifier) => specifier.replace(/\s+/g, " "));
+}
+
+/**
+ * Remove comments before statement parsing while keeping statement order.
+ */
+function stripComments(sourceContent: string): string {
+  const withoutBlockComments = sourceContent.replace(/\/\*[\s\S]*?\*\//g, "");
+  return withoutBlockComments.replace(/\/\/.*$/gm, "");
 }
 
 /**
@@ -128,9 +145,7 @@ function extractRuntimeNamedExports(sourceContent: string): string[] {
  * statements (plus comments/whitespace).
  */
 function isPureReexportModule(sourceContent: string): boolean {
-  const withoutBlockComments = sourceContent.replace(/\/\*[\s\S]*?\*\//g, "");
-  const withoutLineComments = withoutBlockComments.replace(/\/\/.*$/gm, "");
-  const normalized = withoutLineComments.trim();
+  const normalized = stripComments(sourceContent).trim();
 
   if (normalized.length === 0) {
     return false;
@@ -139,6 +154,45 @@ function isPureReexportModule(sourceContent: string): boolean {
   return /^(?:import\s*["'][^"']+["'];\s*)*(?:export\s+(?:type\s+)?(?:\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["'][^"']+["'];\s*)+$/.test(
     normalized
   );
+}
+
+/**
+ * Collect built JavaScript artifact paths for post-build repair.
+ *
+ * Bunup's hook file list can miss some generated `dist/*.js` files in certain
+ * workspace configurations, so this includes a deterministic filesystem scan.
+ */
+async function collectBuiltJavaScriptPaths(
+  files: ReadonlyArray<{ dts?: boolean; fullPath: string }>,
+  rootDir: string
+): Promise<string[]> {
+  const paths = new Set<string>();
+  const packageRoots = new Set<string>();
+
+  for (const file of files) {
+    if (file.dts || !file.fullPath.endsWith(".js")) {
+      continue;
+    }
+    paths.add(file.fullPath);
+    const packageRoot = resolvePackageRootFromDistPath(file.fullPath);
+    if (packageRoot) {
+      packageRoots.add(packageRoot);
+    }
+  }
+
+  if (packageRoots.size === 0) {
+    packageRoots.add(rootDir);
+  }
+
+  for (const packageRoot of packageRoots) {
+    for await (const relativePath of new Bun.Glob("dist/**/*.js").scan(
+      packageRoot
+    )) {
+      paths.add(`${packageRoot}/${relativePath}`);
+    }
+  }
+
+  return [...paths];
 }
 
 /**
@@ -186,22 +240,29 @@ async function findSourcePathByRuntimeBindings(
 }
 
 /**
- * Build runtime re-export statements from a source barrel module.
+ * Build runtime statements from a source barrel module.
  *
  * Supports:
+ * - `import "..."` side-effect imports
  * - `export { ... } from "..."` (dropping type-only exports)
  * - `export * from "..."` and `export * as name from "..."`
  */
 function buildRuntimeReexports(sourceContent: string): string[] {
   const lines: string[] = [];
-  const exportFromPattern =
-    /export\s+(type\s+)?(\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["']([^"']+)["'];/g;
+  const normalizedSource = stripComments(sourceContent);
+  const statementPattern =
+    /import\s*["']([^"']+)["'];|export\s+(type\s+)?(\*\s*(?:as\s+[A-Za-z_$][\w$]*)?|\{[\s\S]*?\})\s+from\s+["']([^"']+)["'];/g;
 
-  for (const match of sourceContent.matchAll(exportFromPattern)) {
-    const typeModifier = match[1];
-    const clause = match[2];
-    const modulePath = match[3];
+  for (const match of normalizedSource.matchAll(statementPattern)) {
+    const sideEffectImportPath = match[1];
+    if (sideEffectImportPath) {
+      lines.push(`import "${sideEffectImportPath}";`);
+      continue;
+    }
 
+    const typeModifier = match[2];
+    const clause = match[3];
+    const modulePath = match[4];
     if (!clause || !modulePath || typeModifier) {
       continue;
     }
@@ -294,17 +355,20 @@ const stripDuplicateExports = (): BunupPlugin => ({
 const repairBareBarrelExports = (): BunupPlugin => ({
   name: "repair-bare-barrel-exports",
   hooks: {
-    onBuildDone: async ({ files }) => {
-      for (const file of files) {
-        if (file.dts || !file.fullPath.endsWith(".js")) continue;
+    onBuildDone: async ({ files, meta }) => {
+      const paths = await collectBuiltJavaScriptPaths(files, meta.rootDir);
 
-        const builtContent = await Bun.file(file.fullPath).text();
+      for (const fullPath of paths) {
+        const builtContent = await Bun.file(fullPath).text();
 
-        const directSourcePath = resolveSourcePath(file.fullPath);
+        const directSourcePath = resolveSourcePath(fullPath);
         const directSourceFile = Bun.file(directSourcePath);
         if (await directSourceFile.exists()) {
           const sourceContent = await directSourceFile.text();
-          if (!isPureReexportModule(sourceContent)) {
+          if (
+            !isPureReexportModule(sourceContent) ||
+            !isBareExportStub(builtContent)
+          ) {
             continue;
           }
 
@@ -315,7 +379,7 @@ const repairBareBarrelExports = (): BunupPlugin => ({
 
           const nextContent = `${reexports.join("\n")}\n`;
           if (nextContent !== builtContent) {
-            await Bun.write(file.fullPath, nextContent);
+            await Bun.write(fullPath, nextContent);
           }
 
           continue;
@@ -324,7 +388,7 @@ const repairBareBarrelExports = (): BunupPlugin => ({
         if (!isBareExportStub(builtContent)) continue;
 
         const matchedSourcePath = await findSourcePathByRuntimeBindings(
-          file.fullPath,
+          fullPath,
           builtContent
         );
         if (!matchedSourcePath) continue;
@@ -336,7 +400,7 @@ const repairBareBarrelExports = (): BunupPlugin => ({
 
         const nextContent = `${reexports.join("\n")}\n`;
         if (nextContent !== builtContent) {
-          await Bun.write(file.fullPath, nextContent);
+          await Bun.write(fullPath, nextContent);
         }
       }
     },

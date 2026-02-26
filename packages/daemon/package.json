@@ -78,7 +78,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "bunup --filter @outfitter/daemon",
+    "build": "cd ../.. && bunup --filter @outfitter/daemon",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
     "test": "bun test",

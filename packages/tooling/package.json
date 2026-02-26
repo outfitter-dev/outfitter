@@ -74,7 +74,7 @@
     "build:registry": "bun run src/registry/build.ts",
     "sync:exports": "bun run scripts/sync-exports.ts",
     "sync:exports:check": "bun run scripts/sync-exports.ts --check",
-    "build": "bun run build:registry && bun run sync:exports:check && bunup --filter @outfitter/tooling",
+    "build": "bun run build:registry && bun run sync:exports:check && cd ../.. && bunup --filter @outfitter/tooling",
     "prepack": "bun run sync:exports",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
