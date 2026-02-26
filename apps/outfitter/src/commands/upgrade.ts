@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { output } from "@outfitter/cli";
@@ -22,6 +22,13 @@ import {
   findCodemodsDir,
   runCodemod,
 } from "./upgrade-codemods.js";
+import {
+  findMigrationDocsDir,
+  readMigrationBreakingFlag,
+  readMigrationDocs,
+  readMigrationDocsWithMetadata,
+} from "./upgrade-migration-docs.js";
+import type { MigrationChange } from "./upgrade-migration-frontmatter.js";
 import { analyzeUpgrades } from "./upgrade-planner.js";
 import {
   applyUpdatesToWorkspace,
@@ -29,8 +36,6 @@ import {
   runInstall,
   type VersionConflict,
 } from "./upgrade-workspace.js";
-
-const FRONTMATTER_BLOCK_REGEX = /^---\r?\n[\s\S]*?\r?\n---\r?\n*/;
 
 // =============================================================================
 // Types
@@ -70,41 +75,19 @@ export interface PackageVersionInfo {
   readonly updateAvailable: boolean;
 }
 
-/** Classification of a change within a migration. */
-export type MigrationChangeType =
-  | "renamed"
-  | "removed"
-  | "signature-changed"
-  | "moved"
-  | "deprecated"
-  | "added";
-
-/** A single structured change entry from migration frontmatter. */
-export interface MigrationChange {
-  /** Path to codemod script relative to the codemods directory. */
-  readonly codemod?: string;
-  readonly detail?: string;
-  readonly export?: string;
-  readonly from?: string;
-  readonly path?: string;
-  readonly to?: string;
-  readonly type: MigrationChangeType;
-}
-
-/** Parsed frontmatter from a migration doc. */
-export interface MigrationFrontmatter {
-  readonly breaking: boolean;
-  readonly changes?: readonly MigrationChange[];
-  readonly package: string;
-  readonly version: string;
-}
-
-/** A migration doc with parsed frontmatter and body content. */
-export interface MigrationDocWithMetadata {
-  readonly body: string;
-  readonly frontmatter: MigrationFrontmatter;
-  readonly version: string;
-}
+export {
+  findMigrationDocsDir,
+  readMigrationBreakingFlag,
+  readMigrationDocs,
+  readMigrationDocsWithMetadata,
+};
+export type { MigrationDocWithMetadata } from "./upgrade-migration-docs.js";
+export { parseMigrationFrontmatter } from "./upgrade-migration-frontmatter.js";
+export type {
+  MigrationChange,
+  MigrationChangeType,
+  MigrationFrontmatter,
+} from "./upgrade-migration-frontmatter.js";
 
 export interface MigrationGuide {
   /** Whether this is a breaking change */
@@ -178,366 +161,6 @@ async function getLatestVersion(name: string): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-// =============================================================================
-// Migration Doc Discovery
-// =============================================================================
-
-/** Known relative locations for migration docs. */
-const MIGRATION_DOC_PATHS = ["plugins/outfitter/shared/migrations"];
-
-/**
- * Find migration docs directory, checking known locations.
- *
- * Searches:
- * 1. Relative to the target cwd
- * 2. Walking up parent directories from cwd (monorepo root detection)
- * 3. Relative to the outfitter binary itself (development mode)
- */
-export function findMigrationDocsDir(
-  cwd: string,
-  binaryDir?: string
-): string | null {
-  // Check relative to target cwd
-  for (const relative of MIGRATION_DOC_PATHS) {
-    const dir = join(cwd, relative);
-    if (existsSync(dir)) return dir;
-  }
-
-  // Walk up from cwd looking for monorepo root with plugin docs
-  let current = resolve(cwd);
-  const root = resolve("/");
-  while (current !== root) {
-    const parent = resolve(current, "..");
-    if (parent === current) break;
-    current = parent;
-
-    for (const relative of MIGRATION_DOC_PATHS) {
-      const dir = join(current, relative);
-      if (existsSync(dir)) return dir;
-    }
-  }
-
-  // Check relative to the outfitter binary itself (dev mode)
-  // apps/outfitter/src/commands → ../../../.. → repo root (dev mode)
-  const resolvedBinaryDir =
-    binaryDir ?? resolve(import.meta.dir, "../../../..");
-  for (const relative of MIGRATION_DOC_PATHS) {
-    const dir = join(resolvedBinaryDir, relative);
-    if (existsSync(dir)) return dir;
-  }
-
-  return null;
-}
-
-/**
- * Read all migration docs for a package between two versions.
- *
- * Scans the migrations directory for docs matching the package name,
- * filters to versions greater than `fromVersion` and at most `toVersion`,
- * and returns their contents sorted by version ascending.
- */
-export function readMigrationDocs(
-  migrationsDir: string,
-  shortName: string,
-  fromVersion: string,
-  toVersion: string
-): string[] {
-  const glob = new Bun.Glob(`outfitter-${shortName}-*.md`);
-  const versionPattern = new RegExp(
-    `^outfitter-${shortName}-(\\d+\\.\\d+\\.\\d+)\\.md$`
-  );
-
-  const docs: { version: string; content: string }[] = [];
-
-  for (const entry of glob.scanSync({ cwd: migrationsDir })) {
-    const match = entry.match(versionPattern);
-    if (!match?.[1]) continue;
-
-    const docVersion = match[1];
-
-    // Doc version must be greater than current installed version
-    if (Bun.semver.order(docVersion, fromVersion) <= 0) continue;
-
-    // Doc version must be at most the target version
-    if (Bun.semver.order(docVersion, toVersion) > 0) continue;
-
-    const filePath = join(migrationsDir, entry);
-    let content: string;
-    try {
-      content = readFileSync(filePath, "utf-8");
-    } catch {
-      // Skip unreadable migration docs
-      continue;
-    }
-    // Strip frontmatter
-    const body = content.replace(FRONTMATTER_BLOCK_REGEX, "").trim();
-    if (body) {
-      docs.push({ version: docVersion, content: body });
-    }
-  }
-
-  // Sort by version ascending
-  docs.sort((a, b) => Bun.semver.order(a.version, b.version));
-
-  return docs.map((d) => d.content);
-}
-
-/**
- * Read the `breaking` flag for an exact migration doc version, if present.
- *
- * Returns:
- * - `true` or `false` when the frontmatter contains `breaking: ...`
- * - `undefined` when the doc is missing, unreadable, or has no valid flag
- */
-export function readMigrationBreakingFlag(
-  migrationsDir: string,
-  shortName: string,
-  version: string
-): boolean | undefined {
-  const filePath = join(migrationsDir, `outfitter-${shortName}-${version}.md`);
-
-  if (!existsSync(filePath)) {
-    return undefined;
-  }
-
-  let content: string;
-  try {
-    content = readFileSync(filePath, "utf-8");
-  } catch {
-    return undefined;
-  }
-
-  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!frontmatter?.[1]) {
-    return undefined;
-  }
-
-  const breakingLine = frontmatter[1]
-    .split(/\r?\n/)
-    .find((line) => line.trimStart().startsWith("breaking:"));
-
-  if (breakingLine === undefined) {
-    return undefined;
-  }
-
-  const rawValue = breakingLine.split(":").slice(1).join(":").trim();
-  if (rawValue === "true") return true;
-  if (rawValue === "false") return false;
-  return undefined;
-}
-
-// =============================================================================
-// Structured Frontmatter Parsing
-// =============================================================================
-
-const VALID_CHANGE_TYPES = new Set<MigrationChangeType>([
-  "renamed",
-  "removed",
-  "signature-changed",
-  "moved",
-  "deprecated",
-  "added",
-]);
-
-/**
- * Parse a YAML value, stripping optional surrounding quotes.
- */
-function parseYamlValue(raw: string): string {
-  const trimmed = raw.trim();
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-}
-
-/**
- * Parse the full frontmatter from a migration doc, including the `changes` array.
- *
- * Returns `null` if the content has no valid frontmatter or is missing
- * required fields (`package`, `version`, `breaking`).
- */
-export function parseMigrationFrontmatter(
-  content: string
-): MigrationFrontmatter | null {
-  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!fmMatch?.[1]) return null;
-
-  const fmBlock = fmMatch[1];
-  const lines = fmBlock.split(/\r?\n/);
-
-  // Parse top-level scalar fields
-  let pkg: string | undefined;
-  let version: string | undefined;
-  let breaking: boolean | undefined;
-
-  // Track where the changes array starts
-  let changesStartIdx = -1;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === undefined) continue;
-    const trimmed = line.trimStart();
-
-    if (trimmed.startsWith("package:")) {
-      pkg = parseYamlValue(trimmed.slice("package:".length));
-    } else if (trimmed.startsWith("version:")) {
-      version = parseYamlValue(trimmed.slice("version:".length));
-    } else if (trimmed.startsWith("breaking:")) {
-      const val = parseYamlValue(trimmed.slice("breaking:".length));
-      if (val === "true") breaking = true;
-      else if (val === "false") breaking = false;
-    } else if (trimmed.startsWith("changes:")) {
-      changesStartIdx = i + 1;
-    }
-  }
-
-  if (pkg === undefined || version === undefined || breaking === undefined) {
-    return null;
-  }
-
-  // Parse changes array if present
-  let changes: MigrationChange[] | undefined;
-  if (changesStartIdx >= 0) {
-    changes = parseChangesArray(lines, changesStartIdx);
-  }
-
-  return {
-    package: pkg,
-    version,
-    breaking,
-    ...(changes !== undefined ? { changes } : {}),
-  };
-}
-
-/**
- * Parse the YAML `changes` array from frontmatter lines starting at `startIdx`.
- *
- * Each item begins with `  - type: ...` and may have additional key/value pairs
- * indented under it.
- */
-function parseChangesArray(
-  lines: string[],
-  startIdx: number
-): MigrationChange[] {
-  const changes: MigrationChange[] = [];
-  let current: Record<string, string> | null = null;
-
-  for (let i = startIdx; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === undefined) continue;
-
-    // New list item: starts with "  - "
-    if (/^\s+-\s+/.test(line)) {
-      if (current !== null) {
-        const change = buildChange(current);
-        if (change) changes.push(change);
-      }
-      current = {};
-      // Parse the key/value on the same line as the dash
-      const afterDash = line.replace(/^\s+-\s+/, "");
-      const colonIdx = afterDash.indexOf(":");
-      if (colonIdx >= 0) {
-        const key = afterDash.slice(0, colonIdx).trim();
-        const val = parseYamlValue(afterDash.slice(colonIdx + 1));
-        current[key] = val;
-      }
-    } else if (current !== null && /^\s{4,}\S/.test(line)) {
-      // Continuation line for current item (indented further)
-      const trimmed = line.trim();
-      const colonIdx = trimmed.indexOf(":");
-      if (colonIdx >= 0) {
-        const key = trimmed.slice(0, colonIdx).trim();
-        const val = parseYamlValue(trimmed.slice(colonIdx + 1));
-        current[key] = val;
-      }
-    } else if (/^\S/.test(line)) {
-      // Non-indented line means we've left the changes block
-      break;
-    }
-  }
-
-  // Flush last item
-  if (current !== null) {
-    const change = buildChange(current);
-    if (change) changes.push(change);
-  }
-
-  return changes;
-}
-
-/**
- * Build a MigrationChange from a parsed key/value map.
- */
-function buildChange(raw: Record<string, string>): MigrationChange | null {
-  const type = raw["type"];
-  if (!(type && VALID_CHANGE_TYPES.has(type as MigrationChangeType))) {
-    return null;
-  }
-
-  return {
-    type: type as MigrationChangeType,
-    ...(raw["from"] ? { from: raw["from"] } : {}),
-    ...(raw["to"] ? { to: raw["to"] } : {}),
-    ...(raw["path"] ? { path: raw["path"] } : {}),
-    ...(raw["export"] ? { export: raw["export"] } : {}),
-    ...(raw["detail"] ? { detail: raw["detail"] } : {}),
-    ...(raw["codemod"] ? { codemod: raw["codemod"] } : {}),
-  };
-}
-
-/**
- * Read all migration docs for a package between two versions,
- * returning parsed frontmatter alongside the body content.
- *
- * Like `readMigrationDocs` but returns structured metadata instead of
- * plain strings. Used by the codemod infrastructure to discover
- * machine-actionable changes.
- */
-export function readMigrationDocsWithMetadata(
-  migrationsDir: string,
-  shortName: string,
-  fromVersion: string,
-  toVersion: string
-): MigrationDocWithMetadata[] {
-  const glob = new Bun.Glob(`outfitter-${shortName}-*.md`);
-  const versionPattern = new RegExp(
-    `^outfitter-${shortName}-(\\d+\\.\\d+\\.\\d+)\\.md$`
-  );
-
-  const docs: MigrationDocWithMetadata[] = [];
-
-  for (const entry of glob.scanSync({ cwd: migrationsDir })) {
-    const match = entry.match(versionPattern);
-    if (!match?.[1]) continue;
-
-    const docVersion = match[1];
-
-    if (Bun.semver.order(docVersion, fromVersion) <= 0) continue;
-    if (Bun.semver.order(docVersion, toVersion) > 0) continue;
-
-    const filePath = join(migrationsDir, entry);
-    let content: string;
-    try {
-      content = readFileSync(filePath, "utf-8");
-    } catch {
-      continue;
-    }
-
-    const frontmatter = parseMigrationFrontmatter(content);
-    if (!frontmatter) continue;
-
-    const body = content.replace(FRONTMATTER_BLOCK_REGEX, "").trim();
-    docs.push({ frontmatter, body, version: docVersion });
-  }
-
-  docs.sort((a, b) => Bun.semver.order(a.version, b.version));
-
-  return docs;
 }
 
 // =============================================================================
