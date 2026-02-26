@@ -3,14 +3,9 @@ import {
   type MigrationDocWithMetadata,
 } from "./upgrade-migration-docs.js";
 import type { MigrationChange } from "./upgrade-migration-frontmatter.js";
+import type { PackageVersionInfo } from "./upgrade.js";
 
-interface GuidePackageVersionInfo {
-  readonly breaking: boolean;
-  readonly current: string;
-  readonly latest: string | null;
-  readonly name: string;
-  readonly updateAvailable: boolean;
-}
+type GuidePackageVersionInfo = PackageVersionInfo;
 
 export interface MigrationGuide {
   /** Whether this is a breaking change */
