@@ -61,18 +61,6 @@ Some content types are auto-detected:
 | `tests` | Test files (`*.test.ts`, `__tests__/**`)      |
 | `deps`  | Dependency files (`package.json`, `bun.lock`) |
 
-### Graphite Stack Labels
-
-PRs in Graphite stacks get position labels:
-
-| Label          | Meaning                                     |
-| -------------- | ------------------------------------------- |
-| `stack:base`   | Bottom of a stack (merges directly to main) |
-| `stack:middle` | Middle of a stack                           |
-| `stack:top`    | Top of a stack                              |
-
-These are managed by `stack-labels.yml`.
-
 ## Configuration
 
 Labels are defined in two places:
@@ -140,7 +128,6 @@ See [Releases](../RELEASES.md) for details.
 | Workflow               | Purpose                                     |
 | ---------------------- | ------------------------------------------- |
 | `auto-label.yml`       | Apply labels based on file changes          |
-| `stack-labels.yml`     | Apply Graphite stack position labels        |
 | `changeset-labels.yml` | Apply release labels from manual changesets |
 | `label-sync.yml`       | Sync label definitions to GitHub            |
 
