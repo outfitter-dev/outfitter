@@ -159,6 +159,12 @@
         "default": "./dist/commands/init.js"
       }
     },
+    "./commands/init-execution": {
+      "import": {
+        "types": "./dist/commands/init-execution.d.ts",
+        "default": "./dist/commands/init-execution.js"
+      }
+    },
     "./commands/init-option-resolution": {
       "import": {
         "types": "./dist/commands/init-option-resolution.d.ts",
