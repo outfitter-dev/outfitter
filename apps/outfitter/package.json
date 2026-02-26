@@ -189,10 +189,22 @@
         "default": "./dist/commands/upgrade.js"
       }
     },
+    "./commands/upgrade-apply": {
+      "import": {
+        "types": "./dist/commands/upgrade-apply.d.ts",
+        "default": "./dist/commands/upgrade-apply.js"
+      }
+    },
     "./commands/upgrade-codemods": {
       "import": {
         "types": "./dist/commands/upgrade-codemods.d.ts",
         "default": "./dist/commands/upgrade-codemods.js"
+      }
+    },
+    "./commands/upgrade-latest-version": {
+      "import": {
+        "types": "./dist/commands/upgrade-latest-version.d.ts",
+        "default": "./dist/commands/upgrade-latest-version.js"
       }
     },
     "./commands/upgrade-migration-docs": {
