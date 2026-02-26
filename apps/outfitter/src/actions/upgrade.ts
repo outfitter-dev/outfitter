@@ -85,7 +85,10 @@ const upgradeFlags = actionCliPresets(
   upgradeGuide
 );
 
-const _upgradeAction: ActionSpec<UpgradeActionInput, unknown> = defineAction({
+const _upgradeAction: ActionSpec<UpgradeActionInput, unknown> = defineAction<
+  UpgradeActionInput,
+  unknown
+>({
   id: "upgrade",
   description: "Check for @outfitter/* package updates and migration guidance",
   surfaces: ["cli"],

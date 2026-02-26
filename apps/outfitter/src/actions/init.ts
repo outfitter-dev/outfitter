@@ -238,7 +238,7 @@ function createInitAction(options: {
     initOptions.push(presetOption);
   }
 
-  return defineAction({
+  return defineAction<InitActionInput, unknown>({
     id: options.id,
     description: options.description,
     surfaces: ["cli"],
@@ -270,7 +270,11 @@ function createInitAction(options: {
   });
 }
 
-const _createAction: ActionSpec<{}, unknown, InternalError> = defineAction({
+const _createAction: ActionSpec<{}, unknown, InternalError> = defineAction<
+  {},
+  unknown,
+  InternalError
+>({
   id: "create",
   description: "Removed - use 'outfitter init' instead",
   surfaces: ["cli"],
@@ -302,7 +306,7 @@ const _createAction: ActionSpec<{}, unknown, InternalError> = defineAction({
 });
 export const createAction: typeof _createAction = _createAction;
 
-const _initAction: ReturnType<typeof createInitAction> = createInitAction({
+const _initAction: ActionSpec<InitActionInput, unknown> = createInitAction({
   id: "init",
   description: "Create a new Outfitter project",
   command: "[directory]",
@@ -310,7 +314,7 @@ const _initAction: ReturnType<typeof createInitAction> = createInitAction({
 });
 export const initAction: typeof _initAction = _initAction;
 
-const _initCliAction: ReturnType<typeof createInitAction> = createInitAction({
+const _initCliAction: ActionSpec<InitActionInput, unknown> = createInitAction({
   id: "init.cli",
   description: "Create a new CLI project",
   command: "cli [directory]",
@@ -318,7 +322,7 @@ const _initCliAction: ReturnType<typeof createInitAction> = createInitAction({
 });
 export const initCliAction: typeof _initCliAction = _initCliAction;
 
-const _initMcpAction: ReturnType<typeof createInitAction> = createInitAction({
+const _initMcpAction: ActionSpec<InitActionInput, unknown> = createInitAction({
   id: "init.mcp",
   description: "Create a new MCP server",
   command: "mcp [directory]",
@@ -326,17 +330,16 @@ const _initMcpAction: ReturnType<typeof createInitAction> = createInitAction({
 });
 export const initMcpAction: typeof _initMcpAction = _initMcpAction;
 
-const _initDaemonAction: ReturnType<typeof createInitAction> = createInitAction(
-  {
+const _initDaemonAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
     id: "init.daemon",
     description: "Create a new daemon project",
     command: "daemon [directory]",
     presetOverride: "daemon",
-  }
-);
+  });
 export const initDaemonAction: typeof _initDaemonAction = _initDaemonAction;
 
-const _initLibraryAction: ReturnType<typeof createInitAction> =
+const _initLibraryAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.library",
     description: "Create a new library project",
@@ -345,7 +348,7 @@ const _initLibraryAction: ReturnType<typeof createInitAction> =
   });
 export const initLibraryAction: typeof _initLibraryAction = _initLibraryAction;
 
-const _initFullStackAction: ReturnType<typeof createInitAction> =
+const _initFullStackAction: ActionSpec<InitActionInput, unknown> =
   createInitAction({
     id: "init.full-stack",
     description: "Create a full-stack workspace",

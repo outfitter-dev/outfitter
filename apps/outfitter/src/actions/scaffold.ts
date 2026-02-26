@@ -95,7 +95,10 @@ function resolveScaffoldOptions(context: {
   };
 }
 
-const _scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> = defineAction({
+const _scaffoldAction: ActionSpec<ScaffoldActionInput, unknown> = defineAction<
+  ScaffoldActionInput,
+  unknown
+>({
   id: "scaffold",
   description: "Add a capability to an existing project",
   surfaces: ["cli"],

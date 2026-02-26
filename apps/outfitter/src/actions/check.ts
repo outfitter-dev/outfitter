@@ -105,7 +105,10 @@ function resolveCheckMode(
   return requestedModes[0];
 }
 
-const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction({
+const _checkAction: ActionSpec<CheckActionInput, unknown> = defineAction<
+  CheckActionInput,
+  unknown
+>({
   id: "check",
   description:
     "Compare local config blocks against the registry for drift detection",

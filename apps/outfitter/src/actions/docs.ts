@@ -53,7 +53,10 @@ const docsListCwd = cwdPreset();
 const docsListOutputMode = outputModePreset({ includeJsonl: true });
 const docsListJq = jqPreset();
 
-const _docsListAction: ActionSpec<DocsListInput, unknown> = defineAction({
+const _docsListAction: ActionSpec<DocsListInput, unknown> = defineAction<
+  DocsListInput,
+  unknown
+>({
   id: "docs.list",
   description: "List documentation entries from the docs map",
   surfaces: ["cli"],
@@ -121,7 +124,10 @@ const docsShowCwd = cwdPreset();
 const docsShowOutputMode = outputModePreset({ includeJsonl: true });
 const docsShowJq = jqPreset();
 
-const _docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction({
+const _docsShowAction: ActionSpec<DocsShowInput, unknown> = defineAction<
+  DocsShowInput,
+  unknown
+>({
   id: "docs.show",
   description: "Show a specific documentation entry and its content",
   surfaces: ["cli"],
@@ -179,7 +185,10 @@ const docsSearchCwd = cwdPreset();
 const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
 const docsSearchJq = jqPreset();
 
-const _docsSearchAction: ActionSpec<DocsSearchInput, unknown> = defineAction({
+const _docsSearchAction: ActionSpec<DocsSearchInput, unknown> = defineAction<
+  DocsSearchInput,
+  unknown
+>({
   id: "docs.search",
   description: "Search documentation content for a query string",
   surfaces: ["cli"],
@@ -249,7 +258,10 @@ const docsApiCwd = cwdPreset();
 const docsApiOutputMode = outputModePreset({ includeJsonl: true });
 const docsApiJq = jqPreset();
 
-const _docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction({
+const _docsApiAction: ActionSpec<DocsApiInput, unknown> = defineAction<
+  DocsApiInput,
+  unknown
+>({
   id: "docs.api",
   description: "Extract API reference from TSDoc coverage data",
   surfaces: ["cli"],
@@ -338,7 +350,10 @@ const docsExportInputSchema = z.object({
 const docsExportCwd = cwdPreset();
 const docsExportOutputMode = outputModePreset({ includeJsonl: true });
 
-const _docsExportAction: ActionSpec<DocsExportInput, unknown> = defineAction({
+const _docsExportAction: ActionSpec<DocsExportInput, unknown> = defineAction<
+  DocsExportInput,
+  unknown
+>({
   id: "docs.export",
   description: "Export documentation to packages, llms.txt, or both",
   surfaces: ["cli"],

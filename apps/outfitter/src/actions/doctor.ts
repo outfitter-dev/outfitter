@@ -29,7 +29,10 @@ const doctorInputSchema = z.object({
 
 const doctorCwd = cwdPreset();
 
-const _doctorAction: ActionSpec<DoctorActionInput, unknown> = defineAction({
+const _doctorAction: ActionSpec<DoctorActionInput, unknown> = defineAction<
+  DoctorActionInput,
+  unknown
+>({
   id: "doctor",
   description: "Validate environment and dependencies",
   surfaces: ["cli"],

@@ -83,7 +83,7 @@ function mapCheckAutomationInput(context: {
 }
 
 const _checkPublishGuardrailsAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
+  defineAction<CheckAutomationInput, unknown>({
     id: "check.publish-guardrails",
     description:
       "Validate publishable package manifests enforce prepublishOnly guardrails",
@@ -126,7 +126,7 @@ export const checkPublishGuardrailsAction: typeof _checkPublishGuardrailsAction 
   _checkPublishGuardrailsAction;
 
 const _checkPresetVersionsAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
+  defineAction<CheckAutomationInput, unknown>({
     id: "check.preset-versions",
     description:
       "Validate preset dependency versions, registry versions, and Bun version consistency",
@@ -169,7 +169,7 @@ export const checkPresetVersionsAction: typeof _checkPresetVersionsAction =
   _checkPresetVersionsAction;
 
 const _checkSurfaceMapAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
+  defineAction<CheckAutomationInput, unknown>({
     id: "check.surface-map",
     description:
       "Validate canonical surface map path usage (.outfitter/surface.json only)",
@@ -212,7 +212,7 @@ export const checkSurfaceMapAction: typeof _checkSurfaceMapAction =
   _checkSurfaceMapAction;
 
 const _checkSurfaceMapFormatAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
+  defineAction<CheckAutomationInput, unknown>({
     id: "check.surface-map-format",
     description: "Validate canonical formatting for .outfitter/surface.json",
     surfaces: ["cli"],
@@ -253,7 +253,7 @@ export const checkSurfaceMapFormatAction: typeof _checkSurfaceMapFormatAction =
   _checkSurfaceMapFormatAction;
 
 const _checkDocsSentinelAction: ActionSpec<CheckAutomationInput, unknown> =
-  defineAction({
+  defineAction<CheckAutomationInput, unknown>({
     id: "check.docs-sentinel",
     description: "Validate docs/README.md PACKAGE_LIST sentinel freshness",
     surfaces: ["cli"],

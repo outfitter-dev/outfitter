@@ -44,7 +44,7 @@ const addCwd = cwdPreset();
 const _addAction: ActionSpec<
   AddInput & { outputMode: CliOutputMode },
   unknown
-> = defineAction({
+> = defineAction<AddInput & { outputMode: CliOutputMode }, unknown>({
   id: "add",
   description: "Add a block from the registry to your project",
   surfaces: ["cli"],
@@ -89,7 +89,7 @@ const _addAction: ActionSpec<
 export const addAction: typeof _addAction = _addAction;
 
 const _listBlocksAction: ActionSpec<{ outputMode: CliOutputMode }, unknown> =
-  defineAction({
+  defineAction<{ outputMode: CliOutputMode }, unknown>({
     id: "add.list",
     description: "List available blocks",
     surfaces: ["cli"],
