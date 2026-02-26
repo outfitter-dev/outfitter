@@ -2,20 +2,34 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Release mode"
+        required: true
+        type: choice
+        default: stable
+        options:
+          - stable
+          - canary
   pull_request:
     types: [closed]
     branches: [main]
-
-concurrency:
-  group: release-prepare
-  cancel-in-progress: false
+  push:
+    branches: [main]
+    paths:
+      - ".changeset/*.md"
 
 jobs:
   # Phase 1: Prepare release (manual trigger)
   # Versions packages, creates a release branch, and opens a PR
   prepare:
     name: Prepare Release
-    if: github.event_name == 'workflow_dispatch'
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.mode != 'canary'
+    concurrency:
+      group: release-prepare
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -78,14 +92,96 @@ jobs:
           )" \
             --label "autorelease"
 
+  # Canary publish (npm-only)
+  # Publishes snapshot versions to npm @canary without creating GitHub releases.
+  canary:
+    name: Publish Canary
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.mode == 'canary' &&
+        github.ref == 'refs/heads/main'
+      )
+    concurrency:
+      group: canary-release
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for changesets
+        id: check
+        run: |
+          COUNT=$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No changesets found, skipping canary release"
+          else
+            echo "Found $COUNT changeset(s)"
+          fi
+
+      - name: Setup Bun
+        if: steps.check.outputs.count != '0'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        if: steps.check.outputs.count != '0'
+        run: bun install --frozen-lockfile
+
+      - name: Setup Node (for npm OIDC publish)
+        if: steps.check.outputs.count != '0'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Upgrade npm for OIDC support
+        if: steps.check.outputs.count != '0'
+        run: npm install -g npm@latest
+
+      # Default to OIDC trusted publishing. Only use token auth when NPM_TOKEN
+      # is explicitly provided.
+      - name: Configure npm auth mode
+        if: steps.check.outputs.count != '0'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "Using token-based npm auth fallback"
+            echo "NODE_AUTH_TOKEN=$NPM_TOKEN" >> "$GITHUB_ENV"
+          else
+            echo "Using OIDC trusted publishing auth"
+            # setup-node may leave NODE_AUTH_TOKEN defined; clear it so npm
+            # uses OIDC trusted publishing instead of token auth.
+            echo "NODE_AUTH_TOKEN=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Publish canary
+        if: steps.check.outputs.count != '0'
+        run: bun run release:canary
+        env:
+          NPM_CONFIG_PROVENANCE: true
+
   # Phase 2: Publish (release PR merged)
   # Builds and publishes packages to npm @latest
   publish:
     name: Publish to npm
     if: >
+      github.event_name == 'pull_request' &&
       github.event.pull_request.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'autorelease') &&
       startsWith(github.event.pull_request.head.ref, 'release/')
+    concurrency:
+      group: stable-release-publish
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     environment: npm-publish
     permissions:

@@ -16,7 +16,7 @@ This directory documents the continuous integration and deployment workflows for
 2. Run `bun changeset` to create a changeset describing the change
 3. Commit the changeset file with your PR
 4. Merge the PR -- a canary release publishes automatically to `@canary`
-5. When ready for stable, run **Actions > Release > Run workflow**
+5. When ready for stable, run **Actions > Release > Run workflow** with `mode=stable`
 6. Review and merge the release PR to publish `@latest`
 
 ### Skip a Release
@@ -25,10 +25,9 @@ Add the `release:none` label to PRs that don't need a release (docs, CI, tests).
 
 ### Workflows Overview
 
-| Workflow             | Trigger                            | Purpose                                               |
-| -------------------- | ---------------------------------- | ----------------------------------------------------- |
-| `auto-label.yml`     | PR open/update                     | Label PRs by file changes and release type            |
-| `release-canary.yml` | Push to main (changeset files)     | Publish `@canary` dist-tag                            |
-| `release.yml`        | Manual dispatch / release PR merge | Two-phase: prepare release PR, then publish `@latest` |
-| `label-sync.yml`     | Push to main                       | Sync label definitions                                |
-| `ci.yml`             | PR/push                            | Build and test                                        |
+| Workflow         | Trigger                                         | Purpose                                                              |
+| ---------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
+| `auto-label.yml` | PR open/update                                  | Label PRs by file changes and release type                           |
+| `release.yml`    | Push to main, manual dispatch, release PR merge | Unified release flow: canary publish, stable prepare, stable publish |
+| `label-sync.yml` | Push to main                                    | Sync label definitions                                               |
+| `ci.yml`         | PR/push                                         | Build and test                                                       |
