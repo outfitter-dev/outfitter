@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { runDemo } from "../commands/demo.js";
@@ -12,7 +12,10 @@ import {
   type CliOutputMode,
   resolveOutputModeFromContext,
 } from "../output-mode.js";
-import { outputModeSchema } from "./shared.js";
+import {
+  outputModeSchema,
+  toActionInternalErrorFromUnknown,
+} from "./shared.js";
 
 interface DemoActionInput {
   readonly animate?: boolean | undefined;
@@ -72,11 +75,7 @@ export const demoAction: DemoAction = defineAction({
       return Result.ok(result);
     } catch (error) {
       return Result.err(
-        new InternalError({
-          message:
-            error instanceof Error ? error.message : "Failed to run demo",
-          context: { action: "demo" },
-        })
+        toActionInternalErrorFromUnknown("demo", error, "Failed to run demo")
       );
     }
   },

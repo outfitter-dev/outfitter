@@ -34,6 +34,7 @@ import {
   resolveStructuredOutputMode,
 } from "../output-mode.js";
 import {
+  actionInternalErr,
   hasExplicitOutputFlag,
   outputModeSchema,
   resolveStringFlag,
@@ -228,12 +229,7 @@ export const checkAction: CheckAction = defineAction({
       });
 
       if (orchestratorResult.isErr()) {
-        return Result.err(
-          new InternalError({
-            message: orchestratorResult.error.message,
-            context: { action: "check" },
-          })
-        );
+        return actionInternalErr("check", orchestratorResult.error);
       }
 
       await printCheckOrchestratorResults(orchestratorResult.value, {
@@ -255,12 +251,7 @@ export const checkAction: CheckAction = defineAction({
     });
 
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check" },
-        })
-      );
+      return actionInternalErr("check", result.error);
     }
 
     await printCheckResults(result.value, {
@@ -426,12 +417,7 @@ export const checkTsdocAction: CheckTsdocAction = defineAction({
         return Result.err(result.error);
       }
 
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "check.tsdoc" },
-        })
-      );
+      return actionInternalErr("check.tsdoc", result.error);
     }
 
     if (!result.value.ok) {

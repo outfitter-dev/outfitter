@@ -6,7 +6,7 @@
 
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printScaffoldResults, runScaffold } from "../commands/scaffold.js";
@@ -15,6 +15,7 @@ import {
   resolveOutputModeFromContext,
 } from "../output-mode.js";
 import {
+  actionInternalErr,
   outputModeSchema,
   resolveInstallTimeoutFlag,
   resolveLocalFlag,
@@ -134,12 +135,7 @@ export const scaffoldAction: ScaffoldAction = defineAction({
     const result = await runScaffold(scaffoldInput);
 
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "scaffold" },
-        })
-      );
+      return actionInternalErr("scaffold", result.error);
     }
 
     await printScaffoldResults(result.value, { mode: outputMode });

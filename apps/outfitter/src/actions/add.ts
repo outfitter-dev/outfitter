@@ -9,7 +9,7 @@ import { resolve } from "node:path";
 import { output } from "@outfitter/cli";
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { cwdPreset, dryRunPreset, forcePreset } from "@outfitter/cli/flags";
-import { defineAction, InternalError, Result } from "@outfitter/contracts";
+import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { listBlocks, printAddResults, runAdd } from "../commands/add.js";
@@ -18,7 +18,7 @@ import {
   resolveOutputModeFromContext,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
-import { outputModeSchema } from "./shared.js";
+import { actionInternalErr, outputModeSchema } from "./shared.js";
 
 interface AddActionInput {
   readonly block: string;
@@ -74,12 +74,7 @@ export const addAction: AddAction = defineAction({
     });
 
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "add" },
-        })
-      );
+      return actionInternalErr("add", result.error);
     }
 
     await printAddResults(result.value, addInput.dryRun, { mode: outputMode });
@@ -113,12 +108,7 @@ export const listBlocksAction: ListBlocksAction = defineAction({
     const result = listBlocks();
 
     if (result.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: result.error.message,
-          context: { action: "add.list" },
-        })
-      );
+      return actionInternalErr("add.list", result.error);
     }
 
     const structuredMode = resolveStructuredOutputMode(input.outputMode);
