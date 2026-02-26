@@ -31,7 +31,14 @@ export interface DelimiterSet {
 /**
  * Available delimiter names.
  */
-export type DelimiterName = keyof typeof DELIMITERS;
+export type DelimiterName =
+  | "arrow"
+  | "bullet"
+  | "colon"
+  | "dot"
+  | "pipe"
+  | "slash"
+  | "space";
 
 /**
  * Registry of delimiter characters with unicode and fallback support.
@@ -47,7 +54,7 @@ export type DelimiterName = keyof typeof DELIMITERS;
  * console.log(getDelimiter("bullet")); // "•" or "*"
  * ```
  */
-export const DELIMITERS = {
+export const DELIMITERS: Readonly<Record<DelimiterName, DelimiterSet>> = {
   space: { unicode: " ", fallback: " " },
   bullet: { unicode: "•", fallback: "*" },
   dot: { unicode: "·", fallback: "." },
@@ -55,7 +62,7 @@ export const DELIMITERS = {
   arrow: { unicode: "→", fallback: "->" },
   slash: { unicode: "/", fallback: "/" },
   colon: { unicode: ":", fallback: ":" },
-} as const satisfies Record<string, DelimiterSet>;
+};
 
 /**
  * Gets a delimiter character with automatic unicode/fallback selection.

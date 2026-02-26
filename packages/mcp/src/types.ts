@@ -115,7 +115,13 @@ export interface ToolAnnotations {
  * mark the whole tool as destructive. Per-action annotations are an MCP spec
  * limitation; presets + spread cover most edge cases.
  */
-export const TOOL_ANNOTATIONS = {
+export const TOOL_ANNOTATIONS: {
+  readonly destructive: ToolAnnotations;
+  readonly openWorld: ToolAnnotations;
+  readonly readOnly: ToolAnnotations;
+  readonly write: ToolAnnotations;
+  readonly writeIdempotent: ToolAnnotations;
+} = {
   /** Read-only, safe to call repeatedly. */
   readOnly: {
     readOnlyHint: true,
@@ -151,7 +157,7 @@ export const TOOL_ANNOTATIONS = {
     idempotentHint: false,
     openWorldHint: true,
   },
-} as const satisfies Record<string, ToolAnnotations>;
+};
 
 // ============================================================================
 // Tool Definition
