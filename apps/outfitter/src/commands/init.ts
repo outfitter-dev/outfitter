@@ -43,6 +43,7 @@ import {
 } from "../targets/index.js";
 import {
   executeInitPipeline,
+  type InitStructure,
   type ResolvedInitExecutionInput,
 } from "./init-execution.js";
 import {
@@ -56,7 +57,7 @@ import {
 // Types
 // =============================================================================
 
-export type InitStructure = "single" | "workspace";
+export type { InitStructure } from "./init-execution.js";
 export type { InitPresetId } from "./init-option-resolution.js";
 
 /**
