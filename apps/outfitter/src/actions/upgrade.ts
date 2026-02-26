@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
-
 import { actionCliPresets } from "@outfitter/cli/actions";
 import {
   booleanFlagPreset,
@@ -21,7 +19,11 @@ import {
   type CliOutputMode,
   resolveOutputModeFromContext,
 } from "../output-mode.js";
-import { actionInternalErr, outputModeSchema } from "./shared.js";
+import {
+  actionInternalErr,
+  outputModeSchema,
+  resolveCwdFromPreset,
+} from "./shared.js";
 
 interface UpgradeActionInput {
   readonly all: boolean;
@@ -96,20 +98,12 @@ export const upgradeAction: UpgradeAction = defineAction({
     options: [...upgradeFlags.options],
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
-      const {
-        cwd: rawCwd,
-        dryRun,
-        interactive,
-        yes,
-        all,
-        noCodemods,
-        guide,
-      } = upgradeFlags.resolve(context);
-      const cwd = resolve(process.cwd(), rawCwd);
+      const { dryRun, interactive, yes, all, noCodemods, guide } =
+        upgradeFlags.resolve(context);
       const guidePackages =
         context.args.length > 0 ? (context.args as string[]) : undefined;
       return {
-        cwd,
+        cwd: resolveCwdFromPreset(context.flags, upgradeCwd),
         guide,
         ...(guidePackages !== undefined ? { guidePackages } : {}),
         dryRun,

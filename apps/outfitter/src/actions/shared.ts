@@ -4,6 +4,8 @@
  * @packageDocumentation
  */
 
+import { resolve } from "node:path";
+
 import { InternalError, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
@@ -94,6 +96,50 @@ export function resolveInstallTimeoutFlag(value: unknown): number | undefined {
   }
 
   return undefined;
+}
+
+interface CwdPresetResolver {
+  resolve(flags: Record<string, unknown>): { cwd: string };
+}
+
+export function resolveCwdFromPreset(
+  flags: Record<string, unknown>,
+  cwdPreset: CwdPresetResolver
+): string {
+  const { cwd: rawCwd } = cwdPreset.resolve(flags);
+  return resolve(process.cwd(), rawCwd);
+}
+
+export function resolveOutputModeWithEnvFallback(
+  flags: Record<string, unknown>,
+  explicitMode: "human" | "json" | "jsonl",
+  options: { readonly forceHumanWhenImplicit?: boolean } = {}
+): "human" | "json" | "jsonl" {
+  if (hasExplicitOutputFlag(flags)) {
+    return explicitMode;
+  }
+
+  if (options.forceHumanWhenImplicit) {
+    return "human";
+  }
+
+  if (process.env["OUTFITTER_JSONL"] === "1") {
+    return "jsonl";
+  }
+
+  if (process.env["OUTFITTER_JSON"] === "1") {
+    return "json";
+  }
+
+  return "human";
+}
+
+export function resolveBooleanFlagAlias(
+  flags: Record<string, unknown>,
+  key: string,
+  alias: string
+): boolean {
+  return Boolean(flags[key] ?? flags[alias]);
 }
 
 interface ActionBoundaryErrorLike {

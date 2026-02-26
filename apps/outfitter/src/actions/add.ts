@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 
-import { resolve } from "node:path";
-
 import { output } from "@outfitter/cli";
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { cwdPreset, dryRunPreset, forcePreset } from "@outfitter/cli/flags";
@@ -18,7 +16,11 @@ import {
   resolveOutputModeFromContext,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
-import { actionInternalErr, outputModeSchema } from "./shared.js";
+import {
+  actionInternalErr,
+  outputModeSchema,
+  resolveCwdFromPreset,
+} from "./shared.js";
 
 interface AddActionInput {
   readonly block: string;
@@ -55,13 +57,11 @@ export const addAction: AddAction = defineAction({
     mapInput: (context) => {
       const outputMode = resolveOutputModeFromContext(context.flags);
       const { force, dryRun } = addSharedFlags.resolve(context);
-      const { cwd: rawCwd } = addCwd.resolve(context.flags);
-      const cwd = resolve(process.cwd(), rawCwd);
       return {
         block: context.args[0] as string,
         force,
         dryRun,
-        cwd,
+        cwd: resolveCwdFromPreset(context.flags, addCwd),
         outputMode,
       };
     },
