@@ -50,18 +50,20 @@ import {
   INIT_TARGET_IDS,
   TARGET_REGISTRY,
   type TargetDefinition,
-  type TargetId,
 } from "../targets/index.js";
+import {
+  isBinaryPreset,
+  parseBlocks,
+  resolvePresetFromFlags,
+  type InitPresetId,
+} from "./init-option-resolution.js";
 
 // =============================================================================
 // Types
 // =============================================================================
 
 export type InitStructure = "single" | "workspace";
-export type InitPresetId = Extract<
-  TargetId,
-  "minimal" | "cli" | "mcp" | "daemon" | "library" | "full-stack"
->;
+export type { InitPresetId } from "./init-option-resolution.js";
 
 /**
  * Options for the init command.
@@ -132,54 +134,6 @@ export class InitError extends Error {
 // Input Resolution
 // =============================================================================
 
-function parseBlocks(
-  withFlag: string | undefined
-): readonly string[] | undefined {
-  if (!withFlag) {
-    return undefined;
-  }
-
-  const blocks = withFlag
-    .split(",")
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  return blocks.length > 0 ? blocks : undefined;
-}
-
-function isBinaryPreset(preset: InitPresetId): boolean {
-  return preset === "cli" || preset === "daemon";
-}
-
-function isValidInitPreset(value: string): value is InitPresetId {
-  return (
-    value === "minimal" ||
-    value === "cli" ||
-    value === "mcp" ||
-    value === "daemon" ||
-    value === "library" ||
-    value === "full-stack"
-  );
-}
-
-function resolvePresetFromFlags(
-  options: InitOptions
-): Result<InitPresetId | undefined, InitError> {
-  const presetFromFlag = options.preset as string | undefined;
-  if (presetFromFlag) {
-    if (!isValidInitPreset(presetFromFlag)) {
-      return Result.err(
-        new InitError(
-          `Unknown preset '${presetFromFlag}'. Available presets: ${INIT_TARGET_IDS.join(", ")}`
-        )
-      );
-    }
-    return Result.ok(presetFromFlag);
-  }
-
-  return Result.ok(undefined);
-}
-
 async function resolveInitInput(
   options: InitOptions,
   presetOverride?: InitPresetId
@@ -187,9 +141,12 @@ async function resolveInitInput(
   const rootDir = resolve(options.targetDir);
   const defaultName = basename(rootDir);
   const defaultPackageName = sanitizePackageName(defaultName) || defaultName;
-  const presetFromFlagsResult = resolvePresetFromFlags(options);
+  const presetFromFlagsResult = resolvePresetFromFlags(
+    options.preset as string | undefined,
+    INIT_TARGET_IDS
+  );
   if (presetFromFlagsResult.isErr()) {
-    return presetFromFlagsResult;
+    return Result.err(new InitError(presetFromFlagsResult.error));
   }
   const presetFromFlags = presetFromFlagsResult.value;
 
