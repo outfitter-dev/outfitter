@@ -4,7 +4,6 @@ script = '''
 
 set -euo pipefail
 
-# Upgrade Bun to the pinned version
 # Upgrade Bun to the pinned version (read and validate)
 BUN_VERSION=$(cat .bun-version | tr -d '[:space:]')
 if [[ -z "$BUN_VERSION" ]]; then
