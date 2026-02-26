@@ -114,37 +114,46 @@
   color: "1e3a8a"
   description: "@outfitter/tooling"
 
+- name: package/tui
+  color: "1e3a8a"
+  description: "@outfitter/tui"
+
 - name: package/types
   color: "1e3a8a"
   description: "@outfitter/types"
+
+- name: package/docs
+  color: "1e3a8a"
+  description: "@outfitter/docs"
+
+- name: package/presets
+  color: "1e3a8a"
+  description: "@outfitter/presets"
+
+- name: package/schema
+  color: "1e3a8a"
+  description: "@outfitter/schema"
+
+- name: package/oxlint-plugin
+  color: "1e3a8a"
+  description: "@outfitter/oxlint-plugin"
 
 # =============================================================================
 # PLUGINS - Claude Code plugins
 # =============================================================================
 
-- name: plugin/outfitter
+- name: plugin/fieldguides
   color: "7c3aed"
-  description: Core methodology plugin
+  description: Development methodology plugin
+  aliases: [plugin/kit]
 
-- name: plugin/kit
+- name: plugin/outfitter
   color: "7c3aed"
   description: Outfitter Stack patterns plugin
 
 - name: plugin/team
   color: "7c3aed"
   description: Internal team plugin
-
-- name: plugin/gt
-  color: "7c3aed"
-  description: Graphite workflows plugin
-
-- name: plugin/but
-  color: "7c3aed"
-  description: GitButler workflows plugin
-
-- name: plugin/cli-dev
-  color: "7c3aed"
-  description: CLI development plugin
 
 # =============================================================================
 # AREAS - Code areas (not package-specific)
