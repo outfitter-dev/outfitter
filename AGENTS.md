@@ -290,6 +290,7 @@ fix(cli): handle missing config gracefully
   - Block drift (`outfitter check`) fails the push if local config files diverge from the registry (see [block-drift.md](./docs/reference/block-drift.md))
   - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
   - Docs README sentinel drift (`outfitter check docs-sentinel`) fails the push if `docs/README.md` generated sections are stale
+- **pre-submit (stacked branches)**: Run `bun run verify:stack` before `gt submit` or `gt stack submit` to catch schema drift before it propagates through a stack. See [Stacked PR Workflow](./docs/ci-cd/stacked-pr-workflow.md).
 
 ### Changesets
 

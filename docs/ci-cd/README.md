@@ -7,6 +7,7 @@ This directory documents the continuous integration and deployment workflows for
 - [Releases](../RELEASES.md) -- Version management, changesets, and npm publishing
 - [Auto-Labeling](./auto-labeling.md) -- How PRs are automatically categorized
 - [Turbo Cache](./turbo-cache.md) -- Self-hosted remote build cache setup
+- [Stacked PR Workflow](./stacked-pr-workflow.md) -- Schema drift prevention and triage for stacked branches
 
 ## Quick Reference
 
@@ -18,6 +19,18 @@ This directory documents the continuous integration and deployment workflows for
 4. Merge the PR -- a canary release publishes automatically to `@canary`
 5. When ready for stable, run **Actions > Release > Run workflow** with `mode=stable`
 6. Review and merge the release PR to publish `@latest`
+
+### Stacked PR Pre-Submit
+
+Before submitting a stacked branch via `gt submit` or `gt stack submit`:
+
+```bash
+bun run verify:stack
+```
+
+This regenerates the surface map, checks for uncommitted drift, and runs
+pre-push verification. See [Stacked PR Workflow](./stacked-pr-workflow.md) for
+the full playbook.
 
 ### Skip a Release
 
