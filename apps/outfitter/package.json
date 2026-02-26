@@ -201,16 +201,16 @@
         "default": "./dist/commands/upgrade-migration-docs.js"
       }
     },
-    "./commands/upgrade-migration-guides": {
-      "import": {
-        "types": "./dist/commands/upgrade-migration-guides.d.ts",
-        "default": "./dist/commands/upgrade-migration-guides.js"
-      }
-    },
     "./commands/upgrade-migration-frontmatter": {
       "import": {
         "types": "./dist/commands/upgrade-migration-frontmatter.d.ts",
         "default": "./dist/commands/upgrade-migration-frontmatter.js"
+      }
+    },
+    "./commands/upgrade-migration-guides": {
+      "import": {
+        "types": "./dist/commands/upgrade-migration-guides.d.ts",
+        "default": "./dist/commands/upgrade-migration-guides.js"
       }
     },
     "./commands/upgrade-planner": {
