@@ -58,7 +58,7 @@ function writeWithBackpressure(
  * Machine-readable output requires explicit opt-in via --json flag
  * or OUTFITTER_JSON=1 environment variable.
  */
-function detectMode(format?: OutputMode): OutputMode {
+export function detectMode(format?: OutputMode): OutputMode {
   // Explicit format takes highest priority
   if (format) {
     return format;
@@ -86,7 +86,7 @@ function isValidCategory(category: string): category is ErrorCategory {
  * Safe JSON stringify that handles circular references and undefined values.
  * Wraps contracts' safeStringify with undefined → null conversion for CLI JSON output.
  */
-function safeStringify(value: unknown, pretty?: boolean): string {
+export function cliStringify(value: unknown, pretty?: boolean): string {
   // Use contracts' safeStringify which handles BigInt and circular references
   // We wrap the value to convert undefined to null for CLI JSON compatibility
   const wrappedValue = value === undefined ? null : value;
@@ -96,7 +96,7 @@ function safeStringify(value: unknown, pretty?: boolean): string {
 /**
  * Formats data for human-readable output.
  */
-function formatHuman(data: unknown): string {
+export function formatHuman(data: unknown): string {
   if (data === null || data === undefined) {
     return "";
   }
@@ -264,7 +264,7 @@ export async function output(
     case "json": {
       // Handle undefined/null explicitly
       const jsonData = data === undefined ? null : data;
-      outputText = safeStringify(jsonData, options?.pretty);
+      outputText = cliStringify(jsonData, options?.pretty);
       break;
     }
 
@@ -274,11 +274,13 @@ export async function output(
         if (data.length === 0) {
           outputText = "";
         } else {
-          outputText = data.map((item) => safeStringify(item)).join("\n");
+          outputText = renderedData
+            .map((item) => cliStringify(item))
+            .join("\n");
         }
       } else {
         // Single objects get single JSON line
-        outputText = safeStringify(data);
+        outputText = cliStringify(renderedData);
       }
       break;
     }
