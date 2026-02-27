@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { ValidationError } from "@outfitter/contracts";
 import { Option } from "commander";
 
 /** Result of unwrapping a Zod field's type chain. */
@@ -249,7 +250,38 @@ export function validateInput(
     return result.data as Record<string, unknown>;
   }
 
-  // If validation fails, return the raw picked input
-  // (callers can handle validation errors separately if needed)
-  return input;
+  // Surface Zod validation errors instead of silently falling through.
+  // When .input(schema) is used, invalid data must NEVER reach the handler.
+  const rawError = result.error as
+    | {
+        issues?: ReadonlyArray<{
+          path?: ReadonlyArray<string | number>;
+          message?: string;
+          expected?: string;
+          code?: string;
+        }>;
+      }
+    | undefined;
+
+  const rawIssues = rawError?.issues ?? [];
+  const issues = rawIssues.map((issue) => ({
+    field: (issue.path ?? []).join("."),
+    expected: issue.expected,
+    message: issue.message ?? "Unknown validation error",
+    code: issue.code,
+  }));
+
+  const fieldNames = issues.map((i) => i.field).filter(Boolean);
+  const summary =
+    fieldNames.length > 0
+      ? `Invalid input: ${fieldNames.join(", ")}`
+      : "Invalid input";
+
+  const detail = issues
+    .map((i) => (i.field ? `  ${i.field}: ${i.message}` : `  ${i.message}`))
+    .join("\n");
+
+  const message = detail ? `${summary}\n${detail}` : summary;
+
+  throw ValidationError.fromMessage(message, { issues });
 }

@@ -536,4 +536,289 @@ describe("CommandBuilder.input()", () => {
       expect(receivedFlags).toHaveProperty("verbose", true);
     });
   });
+
+  // ===========================================================================
+  // Validation error surfacing (fix-validate-input-fallthrough)
+  // ===========================================================================
+
+  describe("validation error surfacing", () => {
+    it("exits with validation error when Zod rejects invalid input (NaN for number)", async () => {
+      const cli = createCLI({ name: "test", version: "0.0.1" });
+      let handlerCalled = false;
+
+      cli.register(
+        command("run")
+          .description("Run")
+          .preset(outputModePreset({ includeJsonl: true }))
+          .input(
+            z.object({
+              count: z.number().describe("Item count"),
+            })
+          )
+          .action(async () => {
+            handlerCalled = true;
+          })
+      );
+
+      // Mock process.exit to capture exit code
+      let exitCode: number | undefined;
+      const originalExit = process.exit;
+      // @ts-expect-error - mocking process.exit
+      process.exit = (code?: number) => {
+        exitCode = code;
+        throw new Error(`process.exit(${code}) called`);
+      };
+
+      // Capture stderr output
+      const stderrChunks: string[] = [];
+      const originalStderrWrite = process.stderr.write;
+      process.stderr.write = ((chunk: string) => {
+        stderrChunks.push(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      try {
+        // Commander's Number("abc") → NaN, which Zod rejects
+        await cli.parse(["node", "test", "run", "--count", "abc"]);
+      } catch {
+        // Expected: process.exit mock throws
+      } finally {
+        process.exit = originalExit;
+        process.stderr.write = originalStderrWrite;
+      }
+
+      // Handler must NOT be called with invalid input
+      expect(handlerCalled).toBe(false);
+      // Exit code 1 = validation error category
+      expect(exitCode).toBe(1);
+      // Error message should mention the field
+      const stderrOutput = stderrChunks.join("");
+      expect(stderrOutput).toContain("count");
+    });
+
+    it("exits with structured JSON validation error in JSON mode", async () => {
+      const originalJson = process.env["OUTFITTER_JSON"];
+      process.env["OUTFITTER_JSON"] = "1";
+
+      const cli = createCLI({ name: "test", version: "0.0.1" });
+      let handlerCalled = false;
+
+      cli.register(
+        command("run")
+          .description("Run")
+          .preset(outputModePreset({ includeJsonl: true }))
+          .input(
+            z.object({
+              count: z.number().describe("Item count"),
+            })
+          )
+          .action(async () => {
+            handlerCalled = true;
+          })
+      );
+
+      let exitCode: number | undefined;
+      const originalExit = process.exit;
+      // @ts-expect-error - mocking process.exit
+      process.exit = (code?: number) => {
+        exitCode = code;
+        throw new Error(`process.exit(${code}) called`);
+      };
+
+      const stderrChunks: string[] = [];
+      const originalStderrWrite = process.stderr.write;
+      process.stderr.write = ((chunk: string) => {
+        stderrChunks.push(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      try {
+        // Commander's Number("abc") → NaN, which Zod rejects
+        await cli.parse(["node", "test", "run", "--count", "abc"]);
+      } catch {
+        // Expected: process.exit mock throws
+      } finally {
+        process.exit = originalExit;
+        process.stderr.write = originalStderrWrite;
+        if (originalJson !== undefined) {
+          process.env["OUTFITTER_JSON"] = originalJson;
+        } else {
+          delete process.env["OUTFITTER_JSON"];
+        }
+      }
+
+      expect(handlerCalled).toBe(false);
+      expect(exitCode).toBe(1);
+
+      const stderrOutput = stderrChunks.join("");
+      const parsed = JSON.parse(stderrOutput.trim());
+      expect(parsed.category).toBe("validation");
+      expect(parsed.message).toContain("count");
+    });
+
+    it("respects explicit --output json on validation errors", async () => {
+      const originalJson = process.env["OUTFITTER_JSON"];
+      const originalJsonl = process.env["OUTFITTER_JSONL"];
+      delete process.env["OUTFITTER_JSON"];
+      delete process.env["OUTFITTER_JSONL"];
+
+      const cli = createCLI({ name: "test", version: "0.0.1" });
+      let handlerCalled = false;
+
+      cli.register(
+        command("run")
+          .description("Run")
+          .preset(outputModePreset({ includeJsonl: true }))
+          .input(
+            z.object({
+              count: z.number().describe("Item count"),
+            })
+          )
+          .action(async () => {
+            handlerCalled = true;
+          })
+      );
+
+      let exitCode: number | undefined;
+      const originalExit = process.exit;
+      // @ts-expect-error - mocking process.exit
+      process.exit = (code?: number) => {
+        exitCode = code;
+        throw new Error(`process.exit(${code}) called`);
+      };
+
+      const stderrChunks: string[] = [];
+      const originalStderrWrite = process.stderr.write;
+      process.stderr.write = ((chunk: string) => {
+        stderrChunks.push(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      try {
+        await cli.parse([
+          "node",
+          "test",
+          "run",
+          "--output",
+          "json",
+          "--count",
+          "not-a-number",
+        ]);
+      } catch {
+        // Expected: process.exit mock throws
+      } finally {
+        process.exit = originalExit;
+        process.stderr.write = originalStderrWrite;
+        if (originalJson !== undefined) {
+          process.env["OUTFITTER_JSON"] = originalJson;
+        } else {
+          delete process.env["OUTFITTER_JSON"];
+        }
+        if (originalJsonl !== undefined) {
+          process.env["OUTFITTER_JSONL"] = originalJsonl;
+        } else {
+          delete process.env["OUTFITTER_JSONL"];
+        }
+      }
+
+      expect(handlerCalled).toBe(false);
+      expect(exitCode).toBe(1);
+
+      const stderrOutput = stderrChunks.join("").trim();
+      const jsonLine = stderrOutput
+        .split("\n")
+        .toReversed()
+        .find((line) => line.trim().startsWith("{"));
+      expect(jsonLine).toBeDefined();
+
+      const parsed = JSON.parse(jsonLine ?? "{}") as {
+        category: string;
+        message: string;
+      };
+      expect(parsed.category).toBe("validation");
+      expect(parsed.message).toContain("count");
+    });
+
+    it("does not exit when valid input is provided (no regression)", async () => {
+      const cli = createCLI({ name: "test", version: "0.0.1" });
+      let received: unknown;
+
+      cli.register(
+        command("run")
+          .description("Run")
+          .input(
+            z.object({
+              name: z.string().describe("User name"),
+            })
+          )
+          .action(async ({ input }) => {
+            received = input;
+          })
+      );
+
+      await cli.parse(["node", "test", "run", "--name", "Alice"]);
+      expect(received).toEqual({ name: "Alice" });
+    });
+
+    it("includes Zod issue details in error context", async () => {
+      const originalJson = process.env["OUTFITTER_JSON"];
+      process.env["OUTFITTER_JSON"] = "1";
+
+      const cli = createCLI({ name: "test", version: "0.0.1" });
+
+      cli.register(
+        command("run")
+          .description("Run")
+          .input(
+            z.object({
+              count: z.number().describe("Item count"),
+            })
+          )
+          .action(async () => {})
+      );
+
+      let exitCode: number | undefined;
+      const originalExit = process.exit;
+      // @ts-expect-error - mocking process.exit
+      process.exit = (code?: number) => {
+        exitCode = code;
+        throw new Error(`process.exit(${code}) called`);
+      };
+
+      const stderrChunks: string[] = [];
+      const originalStderrWrite = process.stderr.write;
+      process.stderr.write = ((chunk: string) => {
+        stderrChunks.push(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      try {
+        await cli.parse(["node", "test", "run", "--count", "not-a-number"]);
+      } catch {
+        // Expected: process.exit mock throws
+      } finally {
+        process.exit = originalExit;
+        process.stderr.write = originalStderrWrite;
+        if (originalJson !== undefined) {
+          process.env["OUTFITTER_JSON"] = originalJson;
+        } else {
+          delete process.env["OUTFITTER_JSON"];
+        }
+      }
+
+      expect(exitCode).toBe(1);
+      const stderrOutput = stderrChunks.join("");
+      const parsed = JSON.parse(stderrOutput.trim());
+      // Context should include Zod issue details
+      expect(parsed.context).toBeDefined();
+      expect(parsed.context.issues).toBeDefined();
+      expect(Array.isArray(parsed.context.issues)).toBe(true);
+      expect(parsed.context.issues.length).toBeGreaterThan(0);
+      // Each issue should have field, expected, and message
+      const issue = parsed.context.issues[0];
+      expect(issue.field).toBe("count");
+      expect(issue.expected).toBeDefined();
+      expect(issue.message).toBeDefined();
+    });
+  });
 });
