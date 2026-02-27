@@ -126,6 +126,8 @@ export type {
   ResolvedConfig,
   SyncHandler,
 } from "./handler.js";
+// Hint types
+export type { ActionHint, CLIHint, MCPHint } from "./hints.js";
 export type {
   Logger,
   LoggerAdapter,
