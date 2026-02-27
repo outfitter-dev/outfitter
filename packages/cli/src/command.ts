@@ -20,7 +20,9 @@ import type {
   CommandBuilder,
   CommandFlags,
   ContextFactory,
+  ErrorHintFn,
   FlagPreset,
+  SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
 
@@ -32,9 +34,22 @@ export type {
   CommandConfig,
   CommandFlags,
   ContextFactory,
+  ErrorHintFn,
   FlagPreset,
+  SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
+
+/**
+ * Internal type extending Commander's Command with hint function metadata.
+ * Used to pass stored hint functions through build() for downstream use by runHandler().
+ */
+interface CommandWithHints extends Command {
+  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  __successHintFn?: SuccessHintFn<any>;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  __errorHintFn?: ErrorHintFn<any>;
+}
 
 function parseCommandSignature(signature: string): {
   name: string;
@@ -68,6 +83,10 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private inputSchema: ZodObjectLike | undefined;
   // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private ctxFactory: ((input: any) => Promise<unknown> | unknown) | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private successHintFn: SuccessHintFn<any> | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private errorHintsFn: ErrorHintFn<any> | undefined;
   private readonly explicitLongFlags = new Set<string>();
   private schemaFlagsApplied = false;
 
@@ -134,6 +153,18 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   context<T>(factory: ContextFactory<any, T>): CommandBuilder<any, T> {
     this.ctxFactory = factory;
     return this as unknown as CommandBuilder<any, T>;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  hints(fn: SuccessHintFn<any>): this {
+    this.successHintFn = fn;
+    return this;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  onError(fn: ErrorHintFn<any>): this {
+    this.errorHintsFn = fn;
+    return this;
   }
 
   preset(preset: FlagPreset<Record<string, unknown>>): this {
@@ -203,6 +234,15 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
 
   build(): Command {
     this.applySchemaFlags();
+
+    // Store hint functions as metadata on the Command for downstream use by runHandler()
+    if (this.successHintFn) {
+      (this.cmd as CommandWithHints).__successHintFn = this.successHintFn;
+    }
+    if (this.errorHintsFn) {
+      (this.cmd as CommandWithHints).__errorHintFn = this.errorHintsFn;
+    }
+
     return this.cmd;
   }
 

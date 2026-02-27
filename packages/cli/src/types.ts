@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import type { ActionCliOption } from "@outfitter/contracts";
+import type { ActionCliOption, CLIHint } from "@outfitter/contracts";
 import type { Command } from "commander";
 
 // =============================================================================
@@ -81,6 +81,32 @@ export interface CommandConfig {
 export type ContextFactory<TInput, TContext> = (
   input: TInput extends undefined ? Record<string, unknown> : TInput
 ) => Promise<TContext> | TContext;
+
+/**
+ * Success hint function for transport-local hint generation.
+ *
+ * Called at output time (not during handler execution) with the handler's
+ * result and the validated input. Returns CLI-specific hints for the response.
+ *
+ * @typeParam TInput - Type of validated input (from .input() schema)
+ */
+export type SuccessHintFn<TInput = undefined> = (
+  result: unknown,
+  input: TInput extends undefined ? Record<string, unknown> : TInput
+) => CLIHint[];
+
+/**
+ * Error hint function for transport-local error hint generation.
+ *
+ * Called at output time (not during handler execution) with the error
+ * and the validated input. Returns CLI-specific hints for error recovery.
+ *
+ * @typeParam TInput - Type of validated input (from .input() schema)
+ */
+export type ErrorHintFn<TInput = undefined> = (
+  error: unknown,
+  input: TInput extends undefined ? Record<string, unknown> : TInput
+) => CLIHint[];
 
 /**
  * Action function executed when a command is invoked.
@@ -164,6 +190,31 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   description(text: string): this;
 
   /**
+   * Set a success hint function.
+   *
+   * The hint function is stored on the builder and invoked at output time
+   * (not during handler execution). It receives the handler's result and the
+   * validated input (or raw flags when `.input()` is not used), and returns
+   * CLI-specific hints for the response.
+   *
+   * Hint functions are transport-local — handlers remain transport-agnostic.
+   *
+   * @example
+   * ```typescript
+   * command("deploy")
+   *   .input(z.object({ env: z.string() }))
+   *   .hints((result, input) => [
+   *     {
+   *       description: `Check status for ${input.env}`,
+   *       command: `deploy status --env ${input.env}`,
+   *     },
+   *   ])
+   *   .action(async ({ input }) => { ... });
+   * ```
+   */
+  hints(fn: SuccessHintFn<TInput>): this;
+
+  /**
    * Set a Zod object schema for auto-deriving Commander flags.
    *
    * Handles the 80% case automatically:
@@ -181,6 +232,31 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   input<T extends Record<string, unknown>>(
     schema: ZodObjectLike<T>
   ): CommandBuilder<T, TContext>;
+
+  /**
+   * Set an error hint function.
+   *
+   * The hint function is stored on the builder and invoked at output time
+   * (not during handler execution). It receives the error and the validated
+   * input (or raw flags when `.input()` is not used), and returns CLI-specific
+   * hints for error recovery.
+   *
+   * Hint functions are transport-local — handlers remain transport-agnostic.
+   *
+   * @example
+   * ```typescript
+   * command("deploy")
+   *   .input(z.object({ env: z.string() }))
+   *   .onError((error, input) => [
+   *     {
+   *       description: "Retry with --force",
+   *       command: `deploy --env ${input.env} --force`,
+   *     },
+   *   ])
+   *   .action(async ({ input }) => { ... });
+   * ```
+   */
+  onError(fn: ErrorHintFn<TInput>): this;
 
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
