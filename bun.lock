@@ -297,6 +297,7 @@
       "name": "@outfitter/testing",
       "version": "0.2.5",
       "dependencies": {
+        "@outfitter/cli": "workspace:*",
         "@outfitter/contracts": "workspace:*",
         "@outfitter/mcp": "workspace:*",
         "zod": "catalog:",
