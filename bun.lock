@@ -27,7 +27,7 @@
     },
     "apps/cli-demo": {
       "name": "outfitter-cli-demo",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "bin": {
         "outfitter-demo": "./dist/cli.js",
         "cli-demo": "./dist/cli.js",
@@ -47,7 +47,7 @@
     },
     "apps/outfitter": {
       "name": "outfitter",
-      "version": "0.3.2",
+      "version": "0.3.4",
       "bin": {
         "out": "./dist/cli.js",
         "outfitter": "./dist/cli.js",
@@ -89,11 +89,10 @@
     },
     "packages/cli": {
       "name": "@outfitter/cli",
-      "version": "0.5.2",
+      "version": "0.5.3",
       "dependencies": {
         "@clack/prompts": "catalog:",
         "better-result": "catalog:",
-        "commander": "catalog:",
       },
       "devDependencies": {
         "@outfitter/config": "workspace:*",
@@ -108,12 +107,13 @@
         "@outfitter/contracts": ">=0.2.0",
         "@outfitter/schema": ">=0.1.0",
         "@outfitter/types": ">=0.2.0",
+        "commander": ">=14.0.0",
         "zod": ">=4.0.0",
       },
     },
     "packages/config": {
       "name": "@outfitter/config",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -128,7 +128,7 @@
     },
     "packages/contracts": {
       "name": "@outfitter/contracts",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "dependencies": {
         "better-result": "catalog:",
         "zod": "catalog:",
@@ -140,7 +140,7 @@
     },
     "packages/daemon": {
       "name": "@outfitter/daemon",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/file-ops": "workspace:*",
@@ -153,7 +153,7 @@
     },
     "packages/docs": {
       "name": "@outfitter/docs",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "bin": {
         "outfitter-docs": "./dist/cli.js",
       },
@@ -169,7 +169,7 @@
     },
     "packages/file-ops": {
       "name": "@outfitter/file-ops",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -181,7 +181,7 @@
     },
     "packages/index": {
       "name": "@outfitter/index",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/file-ops": "workspace:*",
@@ -193,7 +193,7 @@
     },
     "packages/logging": {
       "name": "@outfitter/logging",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "dependencies": {
         "@logtape/logtape": "catalog:",
       },
@@ -210,7 +210,7 @@
     },
     "packages/mcp": {
       "name": "@outfitter/mcp",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "dependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
         "zod": "catalog:",
@@ -230,7 +230,7 @@
     },
     "packages/oxlint-plugin": {
       "name": "@outfitter/oxlint-plugin",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@types/bun": "catalog:",
         "typescript": "catalog:",
@@ -244,7 +244,7 @@
     },
     "packages/presets": {
       "name": "@outfitter/presets",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@clack/prompts": "catalog:",
         "@logtape/logtape": "catalog:",
@@ -268,7 +268,7 @@
     },
     "packages/schema": {
       "name": "@outfitter/schema",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -283,7 +283,7 @@
     },
     "packages/state": {
       "name": "@outfitter/state",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/types": "workspace:*",
@@ -295,7 +295,7 @@
     },
     "packages/testing": {
       "name": "@outfitter/testing",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "@outfitter/mcp": "workspace:*",
@@ -308,7 +308,7 @@
     },
     "packages/tooling": {
       "name": "@outfitter/tooling",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "bin": {
         "tooling": "./dist/cli/index.js",
       },
@@ -336,7 +336,7 @@
     },
     "packages/tui": {
       "name": "@outfitter/tui",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
         "@clack/prompts": "catalog:",
         "better-result": "catalog:",
@@ -357,7 +357,7 @@
     },
     "packages/types": {
       "name": "@outfitter/types",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@outfitter/contracts": "workspace:*",
         "better-result": "catalog:",
