@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.3
+
+### Patch Changes
+
+- debf2e2: Release catch-up for the current stack after a sustained run of merged changes
+  across CLI, tooling, runtime packages, and docs workflows.
+
+  This intentionally keeps `outfitter` in the `0.3.x` line for the next stable
+  publish while bumping the rest of the actively published `@outfitter/*`
+  packages in lockstep.
+
+- Updated dependencies [98f62bd]
+- Updated dependencies [debf2e2]
+  - @outfitter/docs@0.2.0
+  - @outfitter/cli@0.5.3
+  - @outfitter/config@0.3.4
+  - @outfitter/contracts@0.4.2
+  - @outfitter/daemon@0.2.5
+  - @outfitter/logging@0.4.2
+  - @outfitter/mcp@0.4.3
+  - @outfitter/presets@0.2.1
+  - @outfitter/tooling@0.3.4
+  - @outfitter/tui@0.2.2
+  - @outfitter/types@0.2.4
+
 ## 0.3.2
 
 ### Patch Changes

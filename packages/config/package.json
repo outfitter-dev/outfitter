@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/config",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "XDG-compliant config loading with schema validation for Outfitter",
   "keywords": [
     "config",

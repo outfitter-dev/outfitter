@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/daemon",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Daemon lifecycle, IPC, and health checks for Outfitter",
   "keywords": [
     "daemon",

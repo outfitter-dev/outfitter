@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/types",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Branded types, type guards, and type utilities for Outfitter",
   "keywords": [
     "branded",

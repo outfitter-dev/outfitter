@@ -1,5 +1,19 @@
 # @outfitter/tooling
 
+## 0.3.4
+
+### Patch Changes
+
+- debf2e2: Release catch-up for the current stack after a sustained run of merged changes
+  across CLI, tooling, runtime packages, and docs workflows.
+
+  This intentionally keeps `outfitter` in the `0.3.x` line for the next stable
+  publish while bumping the rest of the actively published `@outfitter/*`
+  packages in lockstep.
+
+- Updated dependencies [debf2e2]
+  - @outfitter/cli@0.5.3
+
 ## 0.3.3
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # @outfitter/docs
 
+## 0.2.0
+
+### Minor Changes
+
+- 98f62bd: Consolidate `@outfitter/docs-core` into `@outfitter/docs` as `./core` subpath export. The `@outfitter/docs-core` package is now deprecated.
+
+### Patch Changes
+
+- debf2e2: Release catch-up for the current stack after a sustained run of merged changes
+  across CLI, tooling, runtime packages, and docs workflows.
+
+  This intentionally keeps `outfitter` in the `0.3.x` line for the next stable
+  publish while bumping the rest of the actively published `@outfitter/*`
+  packages in lockstep.
+
 ## 0.1.2
 
 ### Patch Changes

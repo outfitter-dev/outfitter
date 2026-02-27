@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/logging",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Structured logging via logtape with redaction support for Outfitter",
   "keywords": [
     "logging",
