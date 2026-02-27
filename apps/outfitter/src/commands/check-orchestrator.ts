@@ -356,7 +356,7 @@ export function buildCheckOrchestratorPlan(
   const hasStagedFiles = stagedFiles.length > 0;
   const tsFiles = stagedFiles.filter((f) => /\.(ts|tsx)$/.test(f));
   const ultraciteFiles = stagedFiles.filter((f) =>
-    /\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css)$/.test(f)
+    /\.(js|jsx|mjs|cjs|ts|tsx|mts|cts)$/.test(f)
   );
 
   const preCommitSteps: CheckOrchestratorStep[] = [];
