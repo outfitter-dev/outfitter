@@ -57,15 +57,17 @@ if [[ "$CURRENT_BUN" != "$PINNED_BUN" ]]; then
     echo "Error: Expected Bun ${PINNED_BUN} but found ${INSTALLED_BUN} after install" >&2
     exit 1
   fi
-
-  # Update the env file so the agent phase gets the right version too
-  cat > "$ENV_FILE" <<'ENVEOF'
-export BUN_INSTALL="${HOME}/.bun"
-export PATH="${BUN_INSTALL}/bin:${PATH}"
-ENVEOF
 else
   echo "Bun: ${CURRENT_BUN} (up to date)"
 fi
+
+# ── Ensure env file exists ───────────────────────────────────────────
+# Always recreate the env file. In cached containers it may have been
+# removed or never created, even though ~/.bun has the right version.
+cat > "$ENV_FILE" <<'ENVEOF'
+export BUN_INSTALL="${HOME}/.bun"
+export PATH="${BUN_INSTALL}/bin:${PATH}"
+ENVEOF
 
 # ── Dependencies ─────────────────────────────────────────────────────
 echo "Installing dependencies..."

@@ -76,8 +76,9 @@ for rc in "$HOME/.profile" "$HOME/.bashrc"; do
 done
 
 # BASH_ENV is sourced by non-interactive bash (the common agent case)
-if ! grep -q "BASH_ENV" "$HOME/.profile" 2>/dev/null; then
-  printf '\nexport BASH_ENV="%s"\n' "$ENV_FILE" >> "$HOME/.profile"
+BASH_ENV_SENTINEL="# agent-setup.sh BASH_ENV"
+if ! grep -q "$BASH_ENV_SENTINEL" "$HOME/.profile" 2>/dev/null; then
+  printf '\n%s\nexport BASH_ENV="%s"\n' "$BASH_ENV_SENTINEL" "$ENV_FILE" >> "$HOME/.profile"
 fi
 
 # ── Dependencies ─────────────────────────────────────────────────────
