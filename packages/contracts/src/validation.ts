@@ -9,7 +9,7 @@ import { ValidationError } from "./errors.js";
  * @param issues - Array of Zod validation issues
  * @returns Formatted error message string
  */
-function formatZodIssues(issues: z.ZodIssue[]): string {
+export function formatZodIssues(issues: z.ZodIssue[]): string {
   return issues
     .map((issue) => {
       const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";

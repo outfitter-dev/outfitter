@@ -181,7 +181,12 @@ export {
   serializeError,
 } from "./serialization.js";
 // Validation utilities
-export { createValidator, parseInput, validateInput } from "./validation.js";
+export {
+  createValidator,
+  formatZodIssues,
+  parseInput,
+  validateInput,
+} from "./validation.js";
 // Wrap-error utilities
 export {
   composeMappers,
