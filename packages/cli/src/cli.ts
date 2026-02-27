@@ -75,10 +75,10 @@ export function createCLI(config: CLIConfig): CLI {
   // Global --json flag available to all commands.
   // The preAction hook bridges any --json flag (global or subcommand) into
   // the OUTFITTER_JSON env var so output() auto-detects JSON mode.
-  program.option("--json", "Output as JSON", false);
+  program.option("--json", "Output as JSON");
   program.hook("preAction", (thisCommand) => {
     const allOpts = thisCommand.optsWithGlobals();
-    if (allOpts["json"] && !bridgedJsonEnvActive) {
+    if (allOpts["json"] === true && !bridgedJsonEnvActive) {
       bridgedJsonEnvPrevious = process.env["OUTFITTER_JSON"];
       process.env["OUTFITTER_JSON"] = "1";
       bridgedJsonEnvActive = true;
