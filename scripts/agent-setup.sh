@@ -56,14 +56,29 @@ echo "Bun: $(bun --version)"
 
 # ── Persist PATH for agent phase ─────────────────────────────────────
 # Cloud agent environments run setup and agent in separate shell sessions.
-# Exports here don't carry over — write to .bashrc so the agent gets them.
-if ! grep -q '# Added by agent-setup.sh' ~/.bashrc 2>/dev/null; then
-  {
-    echo ''
-    echo '# Added by agent-setup.sh'
-    echo 'export BUN_INSTALL="${HOME}/.bun"'
-    echo 'export PATH="${BUN_INSTALL}/bin:${PATH}"'
-  } >> ~/.bashrc
+# Exports here don't carry over. A single env file sourced from multiple
+# init paths ensures the agent shell finds Bun regardless of shell type:
+#   .profile    → login shells
+#   .bashrc     → interactive non-login shells
+#   BASH_ENV    → non-interactive non-login shells (scripts, subshells)
+ENV_FILE="${HOME}/.agent-env.sh"
+SENTINEL="# Added by agent-setup.sh"
+
+cat > "$ENV_FILE" <<'ENVEOF'
+export BUN_INSTALL="${HOME}/.bun"
+export PATH="${BUN_INSTALL}/bin:${PATH}"
+ENVEOF
+
+for rc in "$HOME/.profile" "$HOME/.bashrc"; do
+  if ! grep -q "$SENTINEL" "$rc" 2>/dev/null; then
+    printf '\n%s\n. "%s"\n' "$SENTINEL" "$ENV_FILE" >> "$rc"
+  fi
+done
+
+# BASH_ENV is sourced by non-interactive bash (the common agent case)
+BASH_ENV_SENTINEL="# agent-setup.sh BASH_ENV"
+if ! grep -q "$BASH_ENV_SENTINEL" "$HOME/.profile" 2>/dev/null; then
+  printf '\n%s\nexport BASH_ENV="%s"\n' "$BASH_ENV_SENTINEL" "$ENV_FILE" >> "$HOME/.profile"
 fi
 
 # ── Dependencies ─────────────────────────────────────────────────────
