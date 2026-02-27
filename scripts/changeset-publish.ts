@@ -13,6 +13,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { findRepositoryUrlViolation } from "./check-publish-manifest";
+
 interface PackageJson {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
@@ -226,6 +228,42 @@ function assertNoProtocolRanges(packages: WorkspacePackage[]): void {
   );
 }
 
+function assertValidRepositoryUrls(packages: WorkspacePackage[]): void {
+  const issues = packages
+    .filter((pkg) => !pkg.packageJson.private)
+    .map((pkg) => {
+      const violation = findRepositoryUrlViolation(pkg.packageJson);
+      return violation
+        ? {
+            packageName: pkg.name,
+            path: pkg.path,
+            ...violation,
+          }
+        : null;
+    })
+    .filter((issue): issue is NonNullable<typeof issue> => issue !== null);
+
+  if (issues.length === 0) {
+    return;
+  }
+
+  const details = issues
+    .map(
+      (issue) =>
+        `- ${issue.packageName} (${issue.path}) repository.url=${issue.actual}; expected ${issue.expected}`
+    )
+    .join("\n");
+
+  throw new Error(
+    [
+      "Publish manifest repository URL validation failed.",
+      details,
+      "",
+      "Fix repository.url to point at outfitter-dev/outfitter before publishing.",
+    ].join("\n")
+  );
+}
+
 function writePackageJson(
   path: string,
   pkg: PackageJson,
@@ -259,6 +297,7 @@ function main(): void {
   }
   console.log(`Transformed protocol refs in ${transformedCount} packages`);
   assertNoProtocolRanges(workspacePackages);
+  assertValidRepositoryUrls(workspacePackages);
 
   try {
     // Let changeset handle the actual publishing
