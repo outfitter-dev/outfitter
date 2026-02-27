@@ -188,26 +188,26 @@ async function runEmbeddedDemo(options: DemoOptions): Promise<number> {
   const mode = toOutputMode(options.outputMode);
 
   if (options.list) {
-    await output(renderListSections(), { mode });
+    await output(renderListSections(), mode);
     return 0;
   }
 
   if (options.animate) {
-    await output(renderDemo("spinner"), { mode });
+    await output(renderDemo("spinner"), mode);
     return 0;
   }
 
   if (options.section === undefined || options.section === "all") {
-    await output(renderAllDemos(), { mode });
+    await output(renderAllDemos(), mode);
     return 0;
   }
 
   if (!isPrimitiveId(options.section)) {
-    await output(renderUnknownSection(options.section), { mode });
+    await output(renderUnknownSection(options.section), mode);
     return 1;
   }
 
-  await output(renderDemo(options.section), { mode });
+  await output(renderDemo(options.section), mode);
   return 0;
 }
 

@@ -554,7 +554,7 @@ export function initCommand(program: Command): void {
       });
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 
@@ -599,7 +599,7 @@ export function initCommand(program: Command): void {
       );
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 
@@ -644,7 +644,7 @@ export function initCommand(program: Command): void {
       );
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 
@@ -691,7 +691,7 @@ export function initCommand(program: Command): void {
       );
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 
@@ -736,7 +736,7 @@ export function initCommand(program: Command): void {
       );
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 
@@ -783,7 +783,7 @@ export function initCommand(program: Command): void {
       );
 
       if (result.isErr()) {
-        exitWithError(result.error, outputOptions);
+        exitWithError(result.error, mode);
         return;
       }
 

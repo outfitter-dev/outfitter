@@ -197,14 +197,14 @@ describe("output() mode detection", () => {
     expect(captured.stdout).toContain("test");
   });
 
-  test("respects explicit mode option", async () => {
+  test("respects explicit format argument", async () => {
     setTTY({ stdout: true });
 
     const captured = await captureOutput(() => {
-      output({ name: "test" }, { mode: "json" });
+      output({ name: "test" }, "json");
     });
 
-    // Explicit json mode should override TTY detection
+    // Explicit json format should override TTY detection
     const parsed = JSON.parse(captured.stdout.trim());
     expect(parsed).toEqual({ name: "test" });
   });
@@ -236,15 +236,15 @@ describe("output() mode detection", () => {
     expect(JSON.parse(lines[0])).toEqual({ name: "test" });
   });
 
-  test("mode option takes precedence over env var", async () => {
+  test("format argument takes precedence over env var", async () => {
     process.env.OUTFITTER_JSON = "1";
     setTTY({ stdout: false });
 
     const captured = await captureOutput(() => {
-      output({ name: "test" }, { mode: "jsonl" });
+      output({ name: "test" }, "jsonl");
     });
 
-    // Explicit mode should override env var
+    // Explicit format should override env var
     // JSONL outputs one line per item (for single object, just one JSON line)
     const parsed = JSON.parse(captured.stdout.trim());
     expect(parsed).toEqual({ name: "test" });
@@ -258,7 +258,7 @@ describe("output() mode detection", () => {
 describe("output() JSON mode", () => {
   test("outputs valid JSON for single object", async () => {
     const captured = await captureOutput(() => {
-      output({ id: 1, name: "test" }, { mode: "json" });
+      output({ id: 1, name: "test" }, "json");
     });
 
     const parsed = JSON.parse(captured.stdout.trim());
@@ -272,7 +272,7 @@ describe("output() JSON mode", () => {
     ];
 
     const captured = await captureOutput(() => {
-      output(items, { mode: "json" });
+      output(items, "json");
     });
 
     const parsed = JSON.parse(captured.stdout.trim());
@@ -281,7 +281,7 @@ describe("output() JSON mode", () => {
 
   test("handles undefined gracefully", async () => {
     const captured = await captureOutput(() => {
-      output(undefined, { mode: "json" });
+      output(undefined, "json");
     });
 
     // undefined should serialize to null in JSON
@@ -291,7 +291,7 @@ describe("output() JSON mode", () => {
 
   test("handles null gracefully", async () => {
     const captured = await captureOutput(() => {
-      output(null, { mode: "json" });
+      output(null, "json");
     });
 
     const parsed = JSON.parse(captured.stdout.trim());
@@ -304,7 +304,7 @@ describe("output() JSON mode", () => {
 
     // Should not throw and should handle circular reference
     const captured = await captureOutput(() => {
-      output(circular, { mode: "json" });
+      output(circular, "json");
     });
 
     // The output should be valid JSON (circular ref replaced with placeholder)
@@ -313,7 +313,7 @@ describe("output() JSON mode", () => {
 
   test("pretty prints when pretty option is true", async () => {
     const captured = await captureOutput(() => {
-      output({ id: 1 }, { mode: "json", pretty: true });
+      output({ id: 1 }, "json", { pretty: true });
     });
 
     // Pretty printed JSON should have indentation
@@ -335,7 +335,7 @@ describe("output() JSONL mode", () => {
     ];
 
     const captured = await captureOutput(() => {
-      output(items, { mode: "jsonl" });
+      output(items, "jsonl");
     });
 
     const lines = captured.stdout.trim().split("\n");
@@ -349,7 +349,7 @@ describe("output() JSONL mode", () => {
 
   test("single objects output as single JSON line", async () => {
     const captured = await captureOutput(() => {
-      output({ id: 1, name: "single" }, { mode: "jsonl" });
+      output({ id: 1, name: "single" }, "jsonl");
     });
 
     const lines = captured.stdout.trim().split("\n");
@@ -365,7 +365,7 @@ describe("output() JSONL mode", () => {
     ];
 
     const captured = await captureOutput(() => {
-      output(items, { mode: "jsonl" });
+      output(items, "jsonl");
     });
 
     const lines = captured.stdout.trim().split("\n");
@@ -378,7 +378,7 @@ describe("output() JSONL mode", () => {
 
   test("handles empty array", async () => {
     const captured = await captureOutput(() => {
-      output([], { mode: "jsonl" });
+      output([], "jsonl");
     });
 
     // Empty array should produce no output (or empty string)
@@ -393,7 +393,7 @@ describe("output() JSONL mode", () => {
 describe("output() human mode", () => {
   test("outputs string representation for primitives", async () => {
     const captured = await captureOutput(() => {
-      output("hello world", { mode: "human" });
+      output("hello world", "human");
     });
 
     expect(captured.stdout).toContain("hello world");
@@ -401,7 +401,7 @@ describe("output() human mode", () => {
 
   test("outputs number as string", async () => {
     const captured = await captureOutput(() => {
-      output(42, { mode: "human" });
+      output(42, "human");
     });
 
     expect(captured.stdout).toContain("42");
@@ -409,7 +409,7 @@ describe("output() human mode", () => {
 
   test("outputs formatted representation for objects", async () => {
     const captured = await captureOutput(() => {
-      output({ name: "test", value: 123 }, { mode: "human" });
+      output({ name: "test", value: 123 }, "human");
     });
 
     // Human mode should include the object properties
@@ -427,7 +427,7 @@ describe("output() human mode", () => {
       },
     } as NodeJS.WritableStream;
 
-    output("error message", { mode: "human", stream: mockStderr });
+    output("error message", "human", { stream: mockStderr });
 
     expect(stderrContent).toContain("error message");
   });
@@ -449,7 +449,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error, { mode: "json" });
+          exitWithError(error, "json");
         } catch {
           // Expected: process.exit mock throws
         }
@@ -475,7 +475,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error, { mode: "json" });
+          exitWithError(error, "json");
         } catch {
           // Expected: process.exit mock throws
         }
@@ -501,7 +501,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error, { mode: "json" });
+          exitWithError(error, "json");
         } catch {
           // Expected: process.exit mock throws
         }
@@ -531,7 +531,7 @@ describe("exitWithError() error serialization (JSON mode)", () => {
     try {
       const captured = await captureOutput(() => {
         try {
-          exitWithError(error, { mode: "json" });
+          exitWithError(error, "json");
         } catch {
           // Expected: process.exit mock throws
         }
@@ -870,6 +870,216 @@ describe("exitWithError() human mode output", () => {
         captured.stderr.includes("NotFoundError") ||
           captured.stderr.includes("not found")
       ).toBe(true);
+    } finally {
+      exitMock.restore();
+    }
+  });
+});
+
+// =============================================================================
+// output() format parameter tests (OS-331)
+// =============================================================================
+
+describe("output() format parameter", () => {
+  test("accepts format as second argument", async () => {
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, "json");
+    });
+
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
+
+  test("format parameter takes precedence over env vars", async () => {
+    process.env.OUTFITTER_JSON = "1";
+
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, "human");
+    });
+
+    // Explicit "human" format should override OUTFITTER_JSON=1
+    expect(captured.stdout).not.toContain('{"name":"test"}');
+    expect(captured.stdout).toContain("name");
+    expect(captured.stdout).toContain("test");
+  });
+
+  test("format 'json' produces JSON output", async () => {
+    const captured = await captureOutput(() => {
+      output({ id: 1, value: "hello" }, "json");
+    });
+
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ id: 1, value: "hello" });
+  });
+
+  test("format 'jsonl' produces JSONL output for arrays", async () => {
+    const items = [{ a: 1 }, { b: 2 }];
+
+    const captured = await captureOutput(() => {
+      output(items, "jsonl");
+    });
+
+    const lines = captured.stdout.trim().split("\n");
+    expect(lines).toHaveLength(2);
+    expect(JSON.parse(lines[0])).toEqual({ a: 1 });
+    expect(JSON.parse(lines[1])).toEqual({ b: 2 });
+  });
+
+  test("format 'human' produces human-readable output", async () => {
+    const captured = await captureOutput(() => {
+      output("hello world", "human");
+    });
+
+    expect(captured.stdout).toContain("hello world");
+  });
+
+  test("when format is undefined, falls back to env var detection", async () => {
+    process.env.OUTFITTER_JSON = "1";
+
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, undefined);
+    });
+
+    // Should pick up OUTFITTER_JSON=1
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ name: "test" });
+  });
+
+  test("when format is undefined and no env, defaults to human", async () => {
+    delete process.env.OUTFITTER_JSON;
+    delete process.env.OUTFITTER_JSONL;
+
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, undefined);
+    });
+
+    expect(captured.stdout).not.toContain('{"name":"test"}');
+    expect(captured.stdout).toContain("name");
+    expect(captured.stdout).toContain("test");
+  });
+
+  test("format works with options (pretty print)", async () => {
+    const captured = await captureOutput(() => {
+      output({ id: 1 }, "json", { pretty: true });
+    });
+
+    // Pretty printed JSON should have indentation
+    expect(captured.stdout).toContain("\n");
+    expect(captured.stdout).toMatch(/\s{2,}/);
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed).toEqual({ id: 1 });
+  });
+
+  test("format works with custom stream option", async () => {
+    let stderrContent = "";
+    const mockStderr = {
+      write: (chunk: string | Uint8Array): boolean => {
+        stderrContent +=
+          typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+        return true;
+      },
+    } as NodeJS.WritableStream;
+
+    output("error info", "human", { stream: mockStderr });
+
+    expect(stderrContent).toContain("error info");
+  });
+
+  test("hierarchy: format > env > default", async () => {
+    // Set both env vars
+    process.env.OUTFITTER_JSON = "1";
+    process.env.OUTFITTER_JSONL = "1";
+
+    // Explicit human format should override both env vars
+    const captured = await captureOutput(() => {
+      output({ name: "test" }, "human");
+    });
+
+    expect(captured.stdout).not.toContain('{"name":"test"}');
+    expect(captured.stdout).toContain("name");
+  });
+});
+
+// =============================================================================
+// exitWithError() format parameter tests (OS-331)
+// =============================================================================
+
+describe("exitWithError() format parameter", () => {
+  test("accepts format as second argument for JSON mode", async () => {
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Invalid input"
+    );
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error, "json");
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
+
+      const parsed = JSON.parse(
+        captured.stderr.trim() || captured.stdout.trim()
+      );
+      expect(parsed.message).toBe("Invalid input");
+      expect(parsed._tag).toBe("ValidationError");
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("format 'human' produces human-readable error", async () => {
+    const error = createMockError(
+      "NotFoundError",
+      "not_found",
+      "Resource not found"
+    );
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error, "human");
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
+
+      expect(captured.stderr).toContain("NotFoundError");
+      expect(captured.stderr).toContain("Resource not found");
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("format with exit code mapping", async () => {
+    const error = createMockError(
+      "ValidationError",
+      "validation",
+      "Bad request"
+    );
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(() => {
+        try {
+          exitWithError(error, "json");
+        } catch {
+          // Expected: process.exit mock throws
+        }
+      });
+
+      const parsed = JSON.parse(captured.stderr.trim());
+      expect(parsed.message).toBe("Bad request");
+      expect(parsed._tag).toBe("ValidationError");
+
+      const capture = exitMock.getCapture();
+      expect(capture.called).toBe(true);
+      expect(capture.exitCode).toBe(1);
     } finally {
       exitMock.restore();
     }
