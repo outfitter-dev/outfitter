@@ -72,18 +72,24 @@ export interface CommandConfig {
  * Action function executed when a command is invoked.
  *
  * @typeParam TFlags - Type of parsed command flags
+ * @typeParam TInput - Type of validated input (from .input() schema)
  */
-export type CommandAction<TFlags extends CommandFlags = CommandFlags> =
-  (context: {
-    /** Parsed command-line arguments */
-    readonly args: readonly string[];
+export type CommandAction<
+  TFlags extends CommandFlags = CommandFlags,
+  TInput = undefined,
+> = (context: {
+  /** Parsed command-line arguments */
+  readonly args: readonly string[];
 
-    /** Parsed command flags */
-    readonly flags: TFlags;
+  /** Raw Commander command instance */
+  readonly command: Command;
 
-    /** Raw Commander command instance */
-    readonly command: Command;
-  }) => Promise<void> | void;
+  /** Parsed command flags */
+  readonly flags: TFlags;
+
+  /** Validated input from Zod schema (present when .input() is used) */
+  readonly input: TInput;
+}) => Promise<void> | void;
 
 /**
  * Base type for command flags.
@@ -93,11 +99,13 @@ export type CommandFlags = Record<string, unknown>;
 
 /**
  * Builder interface for constructing commands fluently.
+ *
+ * @typeParam TInput - Type of validated input when .input() is used
  */
-export interface CommandBuilder {
+export interface CommandBuilder<TInput = undefined> {
   /** Set the action handler */
   action<TFlags extends CommandFlags = CommandFlags>(
-    handler: CommandAction<TFlags>
+    handler: CommandAction<TFlags, TInput>
   ): this;
 
   /** Add command aliases */
@@ -107,6 +115,25 @@ export interface CommandBuilder {
   build(): Command;
   /** Set command description */
   description(text: string): this;
+
+  /**
+   * Set a Zod object schema for auto-deriving Commander flags.
+   *
+   * Handles the 80% case automatically:
+   * - `z.string()` → string option
+   * - `z.number()` → number option with coercion
+   * - `z.boolean()` → boolean flag
+   * - `z.enum()` → choices option
+   *
+   * `.describe()` text becomes the option description.
+   * `.default()` values become option defaults.
+   *
+   * Explicit `.option()` / `.requiredOption()` / `.argument()` calls
+   * compose alongside `.input()` — they override or supplement auto-derived flags.
+   */
+  input<T extends Record<string, unknown>>(
+    schema: ZodObjectLike<T>
+  ): CommandBuilder<T>;
 
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
@@ -120,6 +147,17 @@ export interface CommandBuilder {
     description: string,
     defaultValue?: unknown
   ): this;
+}
+
+/**
+ * Minimal interface for a Zod-like object schema.
+ * Avoids tight coupling to a specific Zod version.
+ */
+export interface ZodObjectLike<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
+  readonly shape: Record<string, unknown>;
+  safeParse(data: unknown): { success: boolean; data?: T; error?: unknown };
 }
 
 // =============================================================================
