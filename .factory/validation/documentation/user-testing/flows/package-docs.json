@@ -1,0 +1,193 @@
+{
+  "groupId": "package-docs",
+  "testedAt": "2026-02-27T21:09:53Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": ["Read", "Grep", "LS", "shell (rg-style content inspection)"],
+  "assertions": [
+    {
+      "id": "VAL-DOCS-001",
+      "title": "Error handling patterns documented",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify file presence in contracts docs directory",
+          "expected": "`packages/contracts/docs/error-handling-patterns.md` exists",
+          "observed": "File exists in `packages/contracts/docs/` (LS output)."
+        },
+        {
+          "action": "Inspect required topic coverage in the document",
+          "expected": "Covers error-boundary guidance, MCP boundary rule, taxonomy visibility, and `adaptHandler()` bridge pattern",
+          "observed": "Document contains all required sections and examples."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "packages/contracts/docs/error-handling-patterns.md:9 (Results for Domain Errors)",
+          "packages/contracts/docs/error-handling-patterns.md:32 (Throws for Protocol Violations and Startup Failures)",
+          "packages/contracts/docs/error-handling-patterns.md:54 (MCP Boundary Rule)",
+          "packages/contracts/docs/error-handling-patterns.md:79-81 (Error Taxonomy + 10-category visibility)",
+          "packages/contracts/docs/error-handling-patterns.md:98 (The `adaptHandler()` Bridge Pattern)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DOCS-002",
+      "title": "CLI patterns documented",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify file presence in CLI docs directory",
+          "expected": "`packages/cli/docs/cli-patterns.md` exists",
+          "observed": "File exists in `packages/cli/docs/` (LS output)."
+        },
+        {
+          "action": "Inspect section coverage for all required CLI topics",
+          "expected": "Includes `cli.register()` migration, `exitOverride`, `OUTFITTER_JSON` bridge, and preset composition",
+          "observed": "All four required sections are present in the doc."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "packages/cli/docs/cli-patterns.md:5 (Incremental Registration with `cli.register()`)",
+          "packages/cli/docs/cli-patterns.md:88 (`exitOverride` Behavior)",
+          "packages/cli/docs/cli-patterns.md:150 (`OUTFITTER_JSON` Environment Variable Bridge)",
+          "packages/cli/docs/cli-patterns.md:199 (Preset Composition Patterns)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DOCS-003",
+      "title": "adaptHandler use case in MCP docs",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify adaptHandler doc presence in MCP package docs",
+          "expected": "A docs/ or README section documents `adaptHandler()`",
+          "observed": "`packages/mcp/docs/adapt-handler.md` exists and contains dedicated guidance."
+        },
+        {
+          "action": "Check use-case explanation and example",
+          "expected": "Explains when to use (`Error` but not `OutfitterError`) vs direct handler usage and includes code example",
+          "observed": "Doc explicitly distinguishes both paths and includes multiple `adaptHandler` code examples."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "packages/mcp/docs/adapt-handler.md:3 (domain errors extend `Error` but not `OutfitterError`)",
+          "packages/mcp/docs/adapt-handler.md:48,119 (`handler: adaptHandler(getCommit)` code examples)",
+          "packages/mcp/docs/adapt-handler.md:71 (When to Use)",
+          "packages/mcp/docs/adapt-handler.md:77-79 (When Not to Use; pass handler directly to `defineTool()` when already OutfitterError-based)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DOCS-004",
+      "title": "registerTool post-connect notification documented",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify dynamic tool registration doc presence in MCP package",
+          "expected": "MCP docs include post-connect registration behavior",
+          "observed": "`packages/mcp/docs/dynamic-tool-registration.md` exists and is dedicated to this behavior."
+        },
+        {
+          "action": "Inspect post-connect notification and auth-gated pattern details",
+          "expected": "Explains automatic `tools/list_changed` and auth-gated registration flow",
+          "observed": "Doc describes auto-notification after `connectStdio()` and shows base-tools -> connect -> auth check -> write-tools flow."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "packages/mcp/docs/dynamic-tool-registration.md:3,9,16 (post-connect auto `tools/list_changed` behavior)",
+          "packages/mcp/docs/dynamic-tool-registration.md:30 (Auth-Gated Dynamic Registration)",
+          "packages/mcp/docs/dynamic-tool-registration.md:46,63,66 (register base tools, verify auth, register write tools)",
+          "packages/mcp/docs/dynamic-tool-registration.md:96 (clients re-fetch/discover newly registered tools)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DOCS-005",
+      "title": "Discoverability documentation",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify discoverability doc presence",
+          "expected": "A discoverability document exists",
+          "observed": "`docs/reference/discoverability.md` exists."
+        },
+        {
+          "action": "Inspect required discoverability coverage",
+          "expected": "Covers subpath export maps with one-line import descriptions, tooling surface (`check-exports`, `schema generate/diff`), and peer dependency docs",
+          "observed": "All three required coverage areas are present with concrete commands and import-path tables."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "docs/reference/discoverability.md:5 (Subpath Export Maps)",
+          "docs/reference/discoverability.md:16,66 (one-line import path descriptions in export tables)",
+          "docs/reference/discoverability.md:85 (Existing Tooling Surface)",
+          "docs/reference/discoverability.md:95 (`check-exports` command)",
+          "docs/reference/discoverability.md:125,131 (`outfitter schema generate` / `outfitter schema diff`)",
+          "docs/reference/discoverability.md:231,233 (Peer Dependencies section and required-vs-optional guidance)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DOCS-006",
+      "title": "CLI peer deps documented",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify CLI peer dependency doc presence",
+          "expected": "`@outfitter/cli` docs include peer dependency breakdown",
+          "observed": "`packages/cli/docs/peer-dependencies.md` exists and is dedicated to required/optional peers."
+        },
+        {
+          "action": "Inspect required-vs-optional peer guidance",
+          "expected": "Clearly distinguishes required peers for core API (`createCLI`, `exitWithError`) and optional peers for feature-specific surfaces (schema/action-schema usage)",
+          "observed": "Quick reference and detailed sections clearly separate required peers from optional peers and map them to specific APIs/subpaths."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "sourceRefs": [
+          "packages/cli/docs/peer-dependencies.md:3 (required vs optional split)",
+          "packages/cli/docs/peer-dependencies.md:9 (`commander` required for `createCLI()`)",
+          "packages/cli/docs/peer-dependencies.md:10 (`@outfitter/contracts` required for `exitWithError()`)",
+          "packages/cli/docs/peer-dependencies.md:12-14 (optional peers listed)",
+          "packages/cli/docs/peer-dependencies.md:79-94 (optional peers for schema subpath and Zod schema definitions)",
+          "packages/cli/docs/peer-dependencies.md:62,118-127 (subpath matrix includes flags and schema surfaces)"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 6 documentation assertions (VAL-DOCS-001 through VAL-DOCS-006): 6 passed, 0 failed, 0 blocked. Verification was performed via read-only file presence/content inspection."
+}
