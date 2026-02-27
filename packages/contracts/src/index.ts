@@ -52,6 +52,8 @@ export {
   assertDefined,
   assertMatches,
   assertNonEmpty,
+  expectErr,
+  expectOk,
   isNonEmptyArray,
   type NonEmptyArray,
 } from "./assert/index.js";
