@@ -1,7 +1,7 @@
 {
   "milestone": "documentation",
-  "round": 1,
-  "status": "fail",
+  "round": 2,
+  "status": "pass",
   "validatorsRun": {
     "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
     "typecheck": {
@@ -12,58 +12,38 @@
     "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
   },
   "reviewsSummary": {
-    "total": 7,
-    "passed": 4,
-    "failed": 3,
-    "failedFeatures": [
-      "os-339-cli-patterns-docs",
-      "os-340-discoverability-docs",
-      "os-324-peer-deps-docs"
-    ]
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
   },
-  "blockingIssues": [
-    {
-      "featureId": "os-339-cli-patterns-docs",
-      "severity": "blocking",
-      "description": "Import paths in packages/cli/docs/cli-patterns.md examples use `@outfitter/cli` for createCLI/command, but those APIs are exported from `@outfitter/cli/command` subpath (lines 12, 35, 56, 108, 207). Root exports do not include these symbols."
-    },
-    {
-      "featureId": "os-340-discoverability-docs",
-      "severity": "blocking",
-      "description": "Subpath export maps in docs/reference/discoverability.md omit `./package.json` from all four packages (@outfitter/cli, @outfitter/contracts, @outfitter/mcp, @outfitter/testing). Each package exports this path in package.json but it is not listed, violating the 'list every available import path' requirement."
-    },
-    {
-      "featureId": "os-324-peer-deps-docs",
-      "severity": "blocking",
-      "description": "In packages/cli/docs/peer-dependencies.md, the subpath-to-peer matrix (line 135) omits `commander` for `@outfitter/cli/types`, but packages/cli/src/types.ts imports `Command` from `commander` (line 8). The doc's own earlier section (line 48) lists types under commander imports, creating an internal contradiction."
-    }
-  ],
+  "blockingIssues": [],
   "appliedUpdates": [],
   "suggestedGuidanceUpdates": [
     {
       "target": "skills",
       "suggestion": "Update docs-worker skill verification step to use `bun run lint` + `bun run typecheck` instead of `bun run check`, or make the verification command configurable per-mission. The skill currently mandates `bun run check` which may not work in all environments.",
-      "evidence": "All 7 documentation feature reviews noted this mismatch. The docs-worker SKILL.md:65 prescribes `bun run check`, while mission AGENTS.md:72 documents it as crashing and recommends `bun run lint` + `bun run typecheck`. All workers correctly followed mission guidance over skill guidance.",
+      "evidence": "All 7 documentation feature reviews across round 1 noted this mismatch, and the round 2 fix worker also deviated (ran lint+typecheck instead of check). The docs-worker SKILL.md:65 prescribes `bun run check`, while mission AGENTS.md:72 documents it as crashing. All workers correctly followed mission guidance over skill guidance.",
       "isSystemic": true
     },
     {
       "target": "skills",
       "suggestion": "Add explicit import-path verification step to docs-worker skill: require workers to grep package.json exports and confirm every import path in code examples resolves to an actual export before committing.",
-      "evidence": "Feature os-339-cli-patterns-docs shipped with wrong import paths (@outfitter/cli instead of @outfitter/cli/command) despite the skill requiring cross-referencing. A stricter verification step (e.g., `bun -e 'import {...} from \"...\"'`) would catch this.",
+      "evidence": "Feature os-339-cli-patterns-docs shipped with wrong import paths in round 1 (@outfitter/cli instead of @outfitter/cli/command) despite the skill requiring cross-referencing. A stricter verification step (e.g., `bun -e 'import {...} from \"...\"'`) would have caught this.",
       "isSystemic": false
     },
     {
       "target": "skills",
-      "suggestion": "Add guidance to docs-worker skill for cross-package documentation placement (e.g., when a doc spans multiple packages, place it in docs/reference/ or docs/guides/ rather than a single package's docs/).",
-      "evidence": "Feature os-340-discoverability-docs worker had to infer placement ad hoc and explicitly requested this in their handoff skillFeedback.suggestedChanges.",
+      "suggestion": "Clarify in docs-worker skill when `bun run test` is optional for documentation-only fixes. The round 2 fix worker ran lint/typecheck only and marked followedProcedure: true, which is reasonable for docs-only changes.",
+      "evidence": "Fix feature fix-docs-accuracy worker session 7ce05de5 ran lint+typecheck but not full test suite for a docs-only change. Skill requires `bun run test` unconditionally.",
       "isSystemic": false
     }
   ],
   "rejectedObservations": [
     {
       "observation": "services.yaml `check` command still maps to `bun run check` despite mission-level documentation of crashes",
-      "reason": "The services.yaml command mapping is factual for the project. The crash is a mission-specific pre-existing issue, not a permanent project state. The command mapping correctly reflects the repo's scripts. Mission-level workarounds belong in mission AGENTS.md, not services.yaml."
+      "reason": "Already rejected in round 1. The services.yaml command mapping is factual for the project. The crash is a mission-specific pre-existing issue, not a permanent project state. The command mapping correctly reflects the repo's scripts. Mission-level workarounds belong in mission AGENTS.md, not services.yaml."
     }
   ],
-  "previousRound": null
+  "previousRound": ".factory/validation/documentation/scrutiny/synthesis.json (round 1)"
 }
