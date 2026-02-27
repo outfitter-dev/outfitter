@@ -296,10 +296,13 @@ function main(): void {
     }
   }
   console.log(`Transformed protocol refs in ${transformedCount} packages`);
-  assertNoProtocolRanges(workspacePackages);
-  assertValidRepositoryUrls(workspacePackages);
 
   try {
+    // Validate transformed manifests before publish. Keep this inside try so
+    // any validation failure still executes restoration in finally.
+    assertNoProtocolRanges(workspacePackages);
+    assertValidRepositoryUrls(workspacePackages);
+
     // Let changeset handle the actual publishing
     const publishArgs = ["changeset", "publish"];
     const tagIndex = process.argv.indexOf("--tag");
