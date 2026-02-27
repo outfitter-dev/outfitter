@@ -64,6 +64,36 @@ jobs:
       - name: Version packages
         run: bun run version-packages
 
+      - name: Compute release title
+        id: title
+        run: |
+          # Check if outfitter CLI was bumped (release train lead)
+          OUTFITTER_VERSION=""
+          if git diff --name-only -- 'apps/outfitter/package.json' | grep -q .; then
+            OUTFITTER_VERSION=$(jq -r '.version' apps/outfitter/package.json)
+          fi
+
+          # Count other public package bumps
+          OTHER=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            PRIVATE=$(jq -r '.private // false' "$file")
+            [ "$PRIVATE" = "true" ] && continue
+            OTHER=$((OTHER + 1))
+          done < <(git diff --name-only -- 'packages/*/package.json')
+
+          if [ -n "$OUTFITTER_VERSION" ] && [ "$OTHER" -gt 0 ]; then
+            TITLE="release: outfitter v${OUTFITTER_VERSION} (+${OTHER} packages)"
+          elif [ -n "$OUTFITTER_VERSION" ]; then
+            TITLE="release: outfitter v${OUTFITTER_VERSION}"
+          elif [ "$OTHER" -gt 0 ]; then
+            TITLE="release: ${OTHER} packages"
+          else
+            TITLE="chore(release): version packages"
+          fi
+
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
       - name: Build workspace artifacts
         # Release docs export commands execute the Outfitter source CLI, which
         # imports workspace packages via dist-based exports. Build first so
@@ -81,18 +111,19 @@ jobs:
       - name: Create release branch and PR
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          RELEASE_TITLE: ${{ steps.title.outputs.title }}
         run: |
           BRANCH="release/$(date +%Y%m%d-%H%M%S)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add -A
-          git commit -m "chore: version packages for release"
+          git commit -m "$RELEASE_TITLE"
           git push origin "$BRANCH"
           gh pr create \
             --base main \
             --head "$BRANCH" \
-            --title "chore: version packages for release" \
+            --title "$RELEASE_TITLE" \
             --body "$(cat <<'BODY'
           ## Release
 
