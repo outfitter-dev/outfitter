@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { findWorkspaceRangeViolations } from "./check-publish-manifest";
+import {
+  findRepositoryUrlViolation,
+  findWorkspaceRangeViolations,
+} from "./check-publish-manifest";
 
 describe("findWorkspaceRangeViolations", () => {
   test("returns empty array when no workspace ranges are present", () => {
@@ -56,5 +59,56 @@ describe("findWorkspaceRangeViolations", () => {
         range: "workspace:0.2.0",
       },
     ]);
+  });
+});
+
+describe("findRepositoryUrlViolation", () => {
+  test("returns null for canonical repository URL", () => {
+    const violation = findRepositoryUrlViolation({
+      name: "@outfitter/example",
+      repository: {
+        type: "git",
+        url: "https://github.com/outfitter-dev/outfitter.git",
+      },
+    });
+
+    expect(violation).toBeNull();
+  });
+
+  test("returns null for git+https repository URL", () => {
+    const violation = findRepositoryUrlViolation({
+      name: "@outfitter/example",
+      repository: "git+https://github.com/outfitter-dev/outfitter.git",
+    });
+
+    expect(violation).toBeNull();
+  });
+
+  test("reports violation for wrong repository URL", () => {
+    const violation = findRepositoryUrlViolation({
+      name: "@outfitter/example",
+      repository: {
+        type: "git",
+        url: "https://github.com/outfitter-dev/stack.git",
+      },
+    });
+
+    expect(violation).toEqual({
+      actual: "https://github.com/outfitter-dev/stack.git",
+      expected:
+        "https://github.com/outfitter-dev/outfitter(.git) (git+ prefix allowed)",
+    });
+  });
+
+  test("reports violation for missing repository URL", () => {
+    const violation = findRepositoryUrlViolation({
+      name: "@outfitter/example",
+    });
+
+    expect(violation).toEqual({
+      actual: "<missing>",
+      expected:
+        "https://github.com/outfitter-dev/outfitter(.git) (git+ prefix allowed)",
+    });
   });
 });
