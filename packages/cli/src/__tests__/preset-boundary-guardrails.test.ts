@@ -11,6 +11,8 @@ const PRESET_EXPORT_RE =
 
 const ALLOWED_PRESET_EXPORTS = new Set([
   "createPreset",
+  "createSchemaPreset",
+  "isSchemaPreset",
   "booleanFlagPreset",
   "enumFlagPreset",
   "numberFlagPreset",
