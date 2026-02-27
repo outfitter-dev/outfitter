@@ -1,25 +1,11 @@
 {
   "name": "@outfitter/contracts",
-  "version": "0.4.2",
   "description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
-  "keywords": [
-    "contracts",
-    "errors",
-    "outfitter",
-    "result",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/contracts"
-  },
+  "version": "0.4.2",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -131,8 +117,28 @@
         "types": "./dist/validation.d.ts",
         "default": "./dist/validation.js"
       }
+    },
+    "./wrap-error": {
+      "import": {
+        "types": "./dist/wrap-error.d.ts",
+        "default": "./dist/wrap-error.js"
+      }
     }
   },
+  "keywords": [
+    "contracts",
+    "errors",
+    "outfitter",
+    "result",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/contracts"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

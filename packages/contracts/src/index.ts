@@ -178,3 +178,10 @@ export {
 } from "./serialization.js";
 // Validation utilities
 export { createValidator, parseInput, validateInput } from "./validation.js";
+// Wrap-error utilities
+export {
+  composeMappers,
+  type ErrorMapper,
+  isOutfitterError,
+  wrapError,
+} from "./wrap-error.js";
