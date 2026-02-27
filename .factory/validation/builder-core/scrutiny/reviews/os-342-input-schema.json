@@ -1,0 +1,22 @@
+{
+  "featureId": "os-342-input-schema",
+  "reviewedAt": "2026-02-27T23:15:50Z",
+  "commitId": "048072c4",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature adds `.input(schema)`, auto-derived Commander flags, updated builder typing, tests, and a minor changeset. However, runtime input validation is not enforced: schema parse failures are silently ignored and raw input is passed to the action handler.",
+    "issues": [
+      {
+        "file": "packages/cli/src/schema-input.ts",
+        "line": 252,
+        "severity": "blocking",
+        "description": "`validateInput()` falls back to returning raw picked flags when `schema.safeParse()` fails (lines 247-254). This lets invalid data reach `.action()` (wired at `packages/cli/src/command.ts:165`), violating the feature requirement that `.input()` provide a validated typed input object."
+      }
+    ]
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit 048072c4 for os-342-input-schema. Auto-derivation/composition/type-surface work is present, but the implementation fails the core validation contract because Zod parse failures are not surfaced and invalid input can still reach handlers."
+}
