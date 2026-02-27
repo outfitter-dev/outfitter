@@ -1,0 +1,62 @@
+{
+  "milestone": "utilities",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": { "passed": true, "command": "bun run typecheck", "exitCode": 0 },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Fixed import verification guidance in user-testing.md: changed from root-level `bun -e \"import '@outfitter/...'\"` (which fails in this monorepo) to package-local verification via `cd packages/<pkg> && bun -e \"import './src/index.ts'\"`. Also noted format:fix crash alongside check crash.",
+      "sourceFeature": "os-332-parse-input, os-334-result-from-fetch, os-335-expect-ok-err"
+    },
+    {
+      "target": "library",
+      "description": "Added normalize-exports build pipeline documentation to architecture.md explaining that bunup auto-mutates package.json export maps during build.",
+      "sourceFeature": "os-333-wrap-error"
+    }
+  ],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Fix library-worker skill: remove `bun run check` from example handoff since the procedural text already warns against using it (tokio panic). The contradictory guidance confused 3/5 workers in this milestone.",
+      "evidence": "Reviews for os-333-wrap-error, os-334-result-from-fetch, and os-291-shared-deps-result all flagged the same contradiction: SKILL.md line ~64 says 'Do NOT use bun run check' but example handoff at line ~122 includes it as a successful command.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Update library-worker skill export verification to use package-local imports instead of root-level workspace imports. Change `bun -e \"const m = await import('@outfitter/<pkg>')...\"` to `cd packages/<pkg> && bun -e \"const m = await import('./src/index.ts')...\"` since workspace package resolution doesn't work from repo root with `bun -e`.",
+      "evidence": "Reviews for os-332-parse-input, os-334-result-from-fetch, and os-335-expect-ok-err all report the same failure: root-level import verification fails with 'Cannot find module @outfitter/contracts'. Workers had to independently discover the package-local fallback.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Document non-interactive changeset creation in library-worker skill. Workers in exec mode cannot run interactive `bun changeset` and must directly create `.changeset/<name>.md` files. Add a note or example showing the direct file creation approach.",
+      "evidence": "Review for os-332-parse-input observed that worker created changeset file directly via file creation tool rather than running `bun changeset` as prescribed by the skill.",
+      "isSystemic": false
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Add `bun run format:fix` to the list of commands that crash with tokio panic, alongside `bun run check` and `bun run format:check`. Workers should use `bun run lint` and `bun run typecheck` separately for validation.",
+      "evidence": "Review for os-291-shared-deps-result reports that worker transcript explicitly notes `bun run format:fix` crashed with `tokio-runtime-worker panicked`, but mission AGENTS.md only documents the crash for `bun run check`/`format:check`.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "user-testing library guidance repeats the same root-level import check that failed",
+      "reason": "duplicate — same issue as the export verification skill observation; already applied as library update in this synthesis"
+    }
+  ],
+  "previousRound": null
+}

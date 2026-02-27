@@ -1,0 +1,26 @@
+{
+  "featureId": "os-335-expect-ok-err",
+  "reviewedAt": "2026-02-27T19:28:48Z",
+  "commitId": "952d6133c9d72ff41bbc8a6600b38917bf442b02",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature contract: expectOk()/expectErr() were added in @outfitter/contracts assert utilities with correct Ok/Err narrowing behavior and descriptive throws, exported from the package root, covered by focused Bun tests, and accompanied by a minor changeset.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "library-worker export verification guidance is incomplete for this repo: the suggested `bun -e` import check does not indicate required working directory, and running from repo root failed for this feature.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:72-75 suggests `bun -e \"const m = await import('@outfitter/<pkg>')...\"`; transcript skeleton for session 5e95409e-1e11-4d27-966e-396a03831f5c shows root invocation at line 337 then failure `Cannot find module '@outfitter/contracts'` at line 344 before retrying from package context."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Shared testing guidance currently states import verification should run from repo root, but that instruction is inaccurate for this monorepo setup.",
+      "evidence": ".factory/library/user-testing.md:70-73 says work from repo root and run import verification from repo root; the same command fails with `Cannot find module '@outfitter/contracts'` (transcript line 344), and local reproduction from repo root produced the same error."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed os-335-expect-ok-err at commit 952d6133c9d72ff41bbc8a6600b38917bf442b02. Code changes satisfy the requested behavior and exports with solid test coverage; no code defects found. Logged shared-state documentation/skill guidance gaps around import-verification working directory."
+}
