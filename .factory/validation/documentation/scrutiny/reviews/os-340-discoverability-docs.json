@@ -1,0 +1,38 @@
+{
+  "featureId": "os-340-discoverability-docs",
+  "reviewedAt": "2026-02-27T20:49:41Z",
+  "commitId": "4221c796ee722f4c0a608c36bf20403e858880f4",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The new discoverability guide is comprehensive for tooling and peer dependency coverage, but it does not satisfy the \"list every available import path\" requirement because all four export maps omit the `.../package.json` subpath that is present in each package's exports.",
+    "issues": [
+      {
+        "file": "docs/reference/discoverability.md",
+        "line": 11,
+        "severity": "blocking",
+        "description": "Subpath export maps are incomplete: the tables omit `@outfitter/cli/package.json`, `@outfitter/contracts/package.json`, `@outfitter/mcp/package.json`, and `@outfitter/testing/package.json`. Each package exports `\"./package.json\"` (`packages/cli/package.json:77`, `packages/contracts/package.json:78`, `packages/mcp/package.json:50`, `packages/testing/package.json:48`). This violates the feature requirement to list every available import path and leaves each package map short by one path."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`docs-worker` does not document where cross-package docs should live (for example `docs/reference/`), so workers must infer destination ad hoc.",
+      "evidence": "Skill scope emphasizes package-level docs (`.factory/skills/docs-worker/SKILL.md:14-17,45`), and this worker explicitly requested adding cross-package location guidance in `handoff.skillFeedback.suggestedChanges`."
+    },
+    {
+      "area": "skills",
+      "observation": "`docs-worker` still prescribes `bun run check` in its verification step, which conflicts with mission-level known-quirk guidance and can send workers into avoidable troubleshooting.",
+      "evidence": "Skill step 5 requires `bun run check` (`.factory/skills/docs-worker/SKILL.md:63-66`), while mission guidance says `bun run check` crashes and recommends `bun run lint` + `bun run typecheck` (`/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:67-73`; `.factory/library/user-testing.md:84-87`)."
+    },
+    {
+      "area": "services",
+      "observation": "The shared command map still advertises `check: bun run check` despite mission documentation marking that command as broken in this environment.",
+      "evidence": "`.factory/services.yaml:7` maps `check` to `bun run check`, but mission docs record the pre-existing check crash (`AGENTS.md:72`, `.factory/library/user-testing.md:86`)."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Failing review: the discoverability doc misses one exported import path (`/package.json`) in each of the four package maps, so the \"every available import path\" requirement is not fully met. Tooling and peer-dependency coverage is otherwise strong."
+}

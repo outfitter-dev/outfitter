@@ -1,0 +1,28 @@
+{
+  "featureId": "os-324-peer-deps-docs",
+  "reviewedAt": "2026-02-27T20:49:26Z",
+  "commitId": "efb08f15",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature added the requested peer-dependency documentation, but one subpath mapping is inconsistent with source imports and with the document's own earlier section.",
+    "issues": [
+      {
+        "file": "packages/cli/docs/peer-dependencies.md",
+        "line": 135,
+        "severity": "blocking",
+        "description": "The matrix row for `@outfitter/cli/types` omits `commander`, but `packages/cli/src/types.ts` imports `Command` from `commander` (line 8), and the same doc lists `@outfitter/cli/types` under \"Subpaths that import `commander`\" (line 48). This violates the requirement to verify the mapping against source imports."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker skill's verification procedure still directs workers to run `bun run check`, which conflicts with this mission's AGENTS guidance that `bun run check` is currently crashing and should be replaced with `bun run lint` + `bun run typecheck`.",
+      "evidence": "Skill command: .factory/skills/docs-worker/SKILL.md:65; mission guidance: /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the feature metadata, handoff, commit efb08f15 diff, transcript skeleton, and docs-worker skill. Status is fail due to a blocking inconsistency in the subpath-to-peer matrix for `@outfitter/cli/types` vs `commander`."
+}
