@@ -69,20 +69,39 @@ export interface CommandConfig {
 }
 
 /**
+ * Factory function for constructing command context.
+ *
+ * Called after schema validation (if `.input()` is used), before the handler.
+ * When `.input()` is used, receives the validated typed input.
+ * When `.input()` is not used, receives the raw parsed flags.
+ *
+ * @typeParam TInput - Type of validated input (from .input() schema)
+ * @typeParam TContext - Type of the constructed context object
+ */
+export type ContextFactory<TInput, TContext> = (
+  input: TInput extends undefined ? Record<string, unknown> : TInput
+) => Promise<TContext> | TContext;
+
+/**
  * Action function executed when a command is invoked.
  *
  * @typeParam TFlags - Type of parsed command flags
  * @typeParam TInput - Type of validated input (from .input() schema)
+ * @typeParam TContext - Type of context object (from .context() factory)
  */
 export type CommandAction<
   TFlags extends CommandFlags = CommandFlags,
   TInput = undefined,
+  TContext = undefined,
 > = (context: {
   /** Parsed command-line arguments */
   readonly args: readonly string[];
 
   /** Raw Commander command instance */
   readonly command: Command;
+
+  /** Context object constructed by .context() factory (undefined when .context() is not used) */
+  readonly ctx: TContext;
 
   /** Parsed command flags */
   readonly flags: TFlags;
@@ -101,11 +120,12 @@ export type CommandFlags = Record<string, unknown>;
  * Builder interface for constructing commands fluently.
  *
  * @typeParam TInput - Type of validated input when .input() is used
+ * @typeParam TContext - Type of context object when .context() is used
  */
-export interface CommandBuilder<TInput = undefined> {
+export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   /** Set the action handler */
   action<TFlags extends CommandFlags = CommandFlags>(
-    handler: CommandAction<TFlags, TInput>
+    handler: CommandAction<TFlags, TInput, TContext>
   ): this;
 
   /** Add command aliases */
@@ -113,6 +133,33 @@ export interface CommandBuilder<TInput = undefined> {
 
   /** Build the underlying Commander command */
   build(): Command;
+
+  /**
+   * Set an async context factory.
+   *
+   * The factory is called after schema validation (if `.input()` is used),
+   * before the handler. It receives the validated typed input (or raw parsed
+   * flags when `.input()` is not used) and returns a typed context object.
+   *
+   * Context factory errors are caught and produce proper exit codes.
+   *
+   * @typeParam T - Type of the context object returned by the factory
+   *
+   * @example
+   * ```typescript
+   * command("deploy")
+   *   .input(z.object({ env: z.string() }))
+   *   .context(async (input) => ({
+   *     config: await loadConfig(input.env),
+   *     client: createClient(input.env),
+   *   }))
+   *   .action(async ({ input, ctx }) => {
+   *     await ctx.client.deploy(ctx.config);
+   *   });
+   * ```
+   */
+  context<T>(factory: ContextFactory<TInput, T>): CommandBuilder<TInput, T>;
+
   /** Set command description */
   description(text: string): this;
 
@@ -133,7 +180,7 @@ export interface CommandBuilder<TInput = undefined> {
    */
   input<T extends Record<string, unknown>>(
     schema: ZodObjectLike<T>
-  ): CommandBuilder<T>;
+  ): CommandBuilder<T, TContext>;
 
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;

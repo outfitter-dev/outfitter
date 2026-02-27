@@ -7,6 +7,7 @@
 import { Command } from "commander";
 
 import { createCLI as createCLIImpl } from "./cli.js";
+import { exitWithError } from "./output.js";
 import {
   createCommanderOption,
   deriveFlags,
@@ -18,6 +19,7 @@ import type {
   CommandAction,
   CommandBuilder,
   CommandFlags,
+  ContextFactory,
   FlagPreset,
   ZodObjectLike,
 } from "./types.js";
@@ -29,6 +31,7 @@ export type {
   CommandBuilder,
   CommandConfig,
   CommandFlags,
+  ContextFactory,
   FlagPreset,
   ZodObjectLike,
 } from "./types.js";
@@ -59,10 +62,12 @@ export function createCLI(config: CLIConfig): CLI {
   return createCLIImpl(config);
 }
 
-// eslint-disable-next-line typescript/no-explicit-any -- internal impl; public API is typed via CommandBuilder<TInput>
-class CommandBuilderImpl implements CommandBuilder<any> {
+// eslint-disable-next-line typescript/no-explicit-any -- internal impl; public API is typed via CommandBuilder<TInput, TContext>
+class CommandBuilderImpl implements CommandBuilder<any, any> {
   private readonly cmd: Command;
   private inputSchema: ZodObjectLike | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private ctxFactory: ((input: any) => Promise<unknown> | unknown) | undefined;
   private readonly explicitLongFlags = new Set<string>();
   private schemaFlagsApplied = false;
 
@@ -125,6 +130,12 @@ class CommandBuilderImpl implements CommandBuilder<any> {
     return this as unknown as CommandBuilder<T>;
   }
 
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  context<T>(factory: ContextFactory<any, T>): CommandBuilder<any, T> {
+    this.ctxFactory = factory;
+    return this as unknown as CommandBuilder<any, T>;
+  }
+
   preset(preset: FlagPreset<Record<string, unknown>>): this {
     for (const opt of preset.options) {
       // Track preset flags as explicit too — they override schema-derived flags
@@ -152,9 +163,10 @@ class CommandBuilderImpl implements CommandBuilder<any> {
 
   // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   action<TFlags extends CommandFlags = CommandFlags>(
-    handler: CommandAction<TFlags, any>
+    handler: CommandAction<TFlags, any, any>
   ): this {
     const schema = this.inputSchema;
+    const contextFactory = this.ctxFactory;
     this.applySchemaFlags();
 
     this.cmd.action(async (...args: unknown[]) => {
@@ -164,11 +176,26 @@ class CommandBuilderImpl implements CommandBuilder<any> {
 
       const input = schema ? validateInput(flags, schema) : undefined;
 
-      await (handler as CommandAction<TFlags, unknown>)({
+        // Construct context if factory is provided
+        if (contextFactory) {
+          // When .input() is used, pass validated input; otherwise pass raw flags
+          const factoryArg = input !== undefined ? input : flags;
+          ctx = await contextFactory(factoryArg);
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        const { mode } = resolveOutputMode(
+          flags as unknown as Record<string, unknown>
+        );
+        exitWithError(error, mode);
+      }
+
+      await (handler as CommandAction<TFlags, unknown, unknown>)({
         args: positional,
         flags,
         command,
         input,
+        ctx,
       });
     });
     return this;
