@@ -83,6 +83,8 @@ export {
   toEnvelope,
   toHttpResponse,
 } from "./envelope.js";
+// Fetch-to-Result helper
+export { fromFetch } from "./from-fetch.js";
 // Errors
 export {
   AlreadyExistsError,

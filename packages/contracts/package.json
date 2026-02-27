@@ -57,6 +57,12 @@
         "default": "./dist/errors.js"
       }
     },
+    "./from-fetch": {
+      "import": {
+        "types": "./dist/from-fetch.d.ts",
+        "default": "./dist/from-fetch.js"
+      }
+    },
     "./handler": {
       "import": {
         "types": "./dist/handler.d.ts",
