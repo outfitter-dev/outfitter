@@ -301,6 +301,6 @@ export async function printDemoResults(
   options?: { mode?: OutputMode }
 ): Promise<void> {
   if (result.output) {
-    await output(result.output, { mode: options?.mode ?? "human" });
+    await output(result.output, options?.mode ?? "human");
   }
 }

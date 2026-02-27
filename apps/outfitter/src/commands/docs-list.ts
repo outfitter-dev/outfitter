@@ -140,7 +140,7 @@ export async function printDocsListResults(
       });
       process.stdout.write(filtered);
     } else {
-      await output(result, { mode: structuredMode });
+      await output(result, structuredMode);
     }
     return;
   }
@@ -150,7 +150,7 @@ export async function printDocsListResults(
 
   if (result.total === 0) {
     lines.push(theme.muted("No documentation entries found."));
-    await output(lines, { mode: "human" });
+    await output(lines, "human");
     return;
   }
 
@@ -168,5 +168,5 @@ export async function printDocsListResults(
     lines.push("");
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

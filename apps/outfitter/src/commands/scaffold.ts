@@ -319,7 +319,6 @@ export function scaffoldCommand(program: Command): void {
         const mode: OutputMode | undefined = resolvedFlags.json
           ? "json"
           : undefined;
-        const outputOptions = mode ? { mode } : undefined;
         const result = await runScaffold({
           target,
           name,
@@ -336,11 +335,11 @@ export function scaffoldCommand(program: Command): void {
         });
 
         if (result.isErr()) {
-          exitWithError(result.error, outputOptions);
+          exitWithError(result.error, mode);
           return;
         }
 
-        await printScaffoldResults(result.value, outputOptions);
+        await printScaffoldResults(result.value, mode ? { mode } : undefined);
       }
     );
 }

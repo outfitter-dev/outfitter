@@ -438,7 +438,7 @@ export async function printAddResults(
         dependencies: result.dependencies,
         devDependencies: result.devDependencies,
       },
-      { mode: structuredMode }
+      structuredMode
     );
     return;
   }
@@ -485,7 +485,7 @@ export async function printAddResults(
     }
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }
 
 /**
