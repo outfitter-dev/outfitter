@@ -138,7 +138,7 @@ jobs:
           BODY
           )" \
             --label "autorelease")
-          PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]*$')
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
           gh pr merge --auto --squash --delete-branch "$PR_NUMBER"
 
   # Canary publish (npm-only)
