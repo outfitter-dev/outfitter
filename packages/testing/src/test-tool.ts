@@ -10,6 +10,7 @@
 import {
   type HandlerContext,
   type OutfitterError,
+  formatZodIssues,
   Result,
   ValidationError,
 } from "@outfitter/contracts";
@@ -90,12 +91,7 @@ export async function testTool<TInput, TOutput, TError extends OutfitterError>(
   const parseResult = tool.inputSchema.safeParse(input);
 
   if (!parseResult.success) {
-    const errorMessages = parseResult.error.issues
-      .map(
-        (issue: { path: PropertyKey[]; message: string }) =>
-          `${issue.path.join(".")}: ${issue.message}`
-      )
-      .join("; ");
+    const errorMessages = formatZodIssues(parseResult.error.issues);
 
     return Result.err(
       new ValidationError({
