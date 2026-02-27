@@ -100,19 +100,26 @@ export {
   ERROR_CODES,
   // Types
   type ErrorCategory,
+  type ErrorCategoryMeta,
   type ErrorCode,
+  // Unified metadata helper
+  errorCategoryMeta,
   // Maps
   exitCodeMap,
   // Helper functions
   getExitCode,
   getStatusCode,
   InternalError,
+  // JSON-RPC code map (MCP protocol)
+  jsonRpcCodeMap,
   type KitErrorProps,
   NetworkError,
   NotFoundError,
   type OutfitterError,
   PermissionError,
   RateLimitError,
+  // Retryable flag map (agent safety)
+  retryableMap,
   type SerializedError,
   statusCodeMap,
   TimeoutError,
