@@ -1,0 +1,15 @@
+{
+  "featureId": "os-344-hints-on-error",
+  "reviewedAt": "2026-02-27T23:14:49Z",
+  "commitId": "31ab3f8c",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature contract: `.hints(fn)` and `.onError(fn)` were added to `CommandBuilder`, typed as transport-local hint functions returning `CLIHint[]`, stored on the builder/command metadata (not invoked during build/handler execution), covered by focused tests, and shipped with a minor changeset.",
+    "issues": []
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit 31ab3f8c and found the feature complete against its description and expected behavior. No blocking or non-blocking code issues were identified, and no shared-state documentation gaps were observed from this implementation transcript."
+}

@@ -1,0 +1,21 @@
+{
+  "featureId": "os-343-context-factory",
+  "reviewedAt": "2026-02-27T23:16:37Z",
+  "commitId": "2d7e5a67",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature contract. In `packages/cli/src/command.ts`, the context factory runs after schema validation and before handler execution (`validateInput` then `contextFactory`, lines 177-185), passes `ctx` into the action context (lines 192-198), and routes context-factory failures through `exitWithError` (lines 186-189) for taxonomy-based exit code handling. In `packages/cli/src/types.ts`, `ContextFactory<TInput, TContext>` was added and `CommandBuilder`/`CommandAction` now carry `TContext` into `.action()` (`ctx` field), satisfying typed context flow requirements. A minor changeset was added.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`library-worker` export verification guidance is partially misaligned with this repo for subpath/type-only checks; it can send workers into avoidable debugging.",
+      "evidence": "Transcript skeleton for session `6512c875-a515-4df2-87ae-0e8ab6d7f5dd` shows `bun -e` import from repo root failing with `Cannot find module '@outfitter/cli/command'` and follow-up clarification that type-only exports are not visible at runtime. `.factory/library/user-testing.md` already documents package-directory verification for imports, which the skill currently omits."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass. The feature correctly implements `.context(factory)` runtime flow, error handling, and generic type propagation into `.action()` handlers, with tests and changeset present."
+}

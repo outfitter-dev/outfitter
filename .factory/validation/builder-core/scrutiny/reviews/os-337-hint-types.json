@@ -1,0 +1,21 @@
+{
+  "featureId": "os-337-hint-types",
+  "reviewedAt": "2026-02-27T23:15:28Z",
+  "commitId": "d75b90d290ef83bf0fe5eeb2fb450d462b73e555",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches feature requirements: ActionHint/CLIHint/MCPHint are defined with the required shapes, exported from the contracts root and the new /hints subpath, and a minor changeset was added. The hint module is type-only and introduces no runtime behavior.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker skill's Red-phase requirement is not realistic for type-only features in this repo: type-only imports in Bun tests do not force a failing runtime test, and contracts package typecheck excludes src/__tests__, so workers cannot reliably demonstrate a red test before implementation.",
+      "evidence": "Session 4a76a3e6-7134-475a-914a-ecc2fe8dcb51 transcript notes: tests passed with `import type` before implementation, then confirms package typecheck still passes because tests are excluded from tsconfig. Handoff `skillFeedback.suggestedChanges` calls out this exact gap."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit d75b90d290ef83bf0fe5eeb2fb450d462b73e555 for os-337-hint-types. Feature is correctly implemented and meets expected behavior; review passes. One skill-procedure gap was identified for handling type-only TDD red-phase expectations."
+}
