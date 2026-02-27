@@ -1,6 +1,6 @@
 {
   "name": "outfitter",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Outfitter umbrella CLI for scaffolding and project management",
   "keywords": [
     "bun",
