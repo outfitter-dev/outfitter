@@ -64,6 +64,17 @@ jobs:
       - name: Version packages
         run: bun run version-packages
 
+      - name: Build workspace artifacts
+        # Release docs export commands execute the Outfitter source CLI, which
+        # imports workspace packages via dist-based exports. Build first so
+        # clean runners have the required runtime artifacts.
+        run: bun run build
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_API: ${{ secrets.TURBO_API }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+
       - name: Refresh release LLM artifacts
         run: bun run sync:docs:release:llms
 
