@@ -26,6 +26,7 @@ Every `@outfitter/*` package uses Node.js [subpath exports](https://nodejs.org/a
 | `@outfitter/cli/text`               | ANSI-aware text utilities — `stripAnsi`, `getStringWidth`, `wrapText`, `truncateText`, `padText`, `pluralize`, `slugify`                                                                                                                                                   |
 | `@outfitter/cli/types`              | Shared type surface — CLI config, command, flag preset, output mode, and error type re-exports                                                                                                                                                                             |
 | `@outfitter/cli/verbs`              | Standard verb-family conventions (`VERB_FAMILIES`, `resolveVerb`, `applyVerb`)                                                                                                                                                                                             |
+| `@outfitter/cli/package.json`       | Package manifest (name, version, exports, peer dependencies)                                                                                                                                                                                                               |
 
 ### @outfitter/contracts
 
@@ -51,19 +52,21 @@ Every `@outfitter/*` package uses Node.js [subpath exports](https://nodejs.org/a
 | `@outfitter/contracts/serialization`    | Error serialization/deserialization and safe JSON helpers (`safeStringify`, `safeParse`)                                    |
 | `@outfitter/contracts/validation`       | Zod-to-Result validation (`createValidator`, `validateInput`, `parseInput`)                                                 |
 | `@outfitter/contracts/wrap-error`       | Unknown error normalization (`wrapError`, `composeMappers`, `isOutfitterError`)                                             |
+| `@outfitter/contracts/package.json`     | Package manifest (name, version, exports, dependencies)                                                                     |
 
 ### @outfitter/mcp
 
-| Import Path                 | Description                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `@outfitter/mcp`            | Barrel export combining all MCP server, tool, and transport surfaces                                              |
-| `@outfitter/mcp/actions`    | Convert action registries to MCP tool definitions (`buildMcpTools`)                                               |
-| `@outfitter/mcp/core-tools` | Built-in MCP tools — `defineDocsTool`, `defineConfigTool`, `defineQueryTool`, `createCoreTools`                   |
-| `@outfitter/mcp/logging`    | Log-level bridge between Outfitter and MCP levels (`mapLogLevelToMcp`, `shouldEmitLog`)                           |
-| `@outfitter/mcp/schema`     | Zod-to-JSON-Schema re-export from `@outfitter/contracts/schema`                                                   |
-| `@outfitter/mcp/server`     | Core MCP server — `createMcpServer`, `defineTool`, `defineResource`, `defineResourceTemplate`, `definePrompt`     |
-| `@outfitter/mcp/transport`  | SDK transport bridge (`createSdkServer`, `connectStdio`) and response helpers (`wrapToolResult`, `wrapToolError`) |
-| `@outfitter/mcp/types`      | MCP type system — `ToolDefinition`, `McpServer`, `McpError`, `TOOL_ANNOTATIONS`, `adaptHandler`                   |
+| Import Path                   | Description                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `@outfitter/mcp`              | Barrel export combining all MCP server, tool, and transport surfaces                                              |
+| `@outfitter/mcp/actions`      | Convert action registries to MCP tool definitions (`buildMcpTools`)                                               |
+| `@outfitter/mcp/core-tools`   | Built-in MCP tools — `defineDocsTool`, `defineConfigTool`, `defineQueryTool`, `createCoreTools`                   |
+| `@outfitter/mcp/logging`      | Log-level bridge between Outfitter and MCP levels (`mapLogLevelToMcp`, `shouldEmitLog`)                           |
+| `@outfitter/mcp/schema`       | Zod-to-JSON-Schema re-export from `@outfitter/contracts/schema`                                                   |
+| `@outfitter/mcp/server`       | Core MCP server — `createMcpServer`, `defineTool`, `defineResource`, `defineResourceTemplate`, `definePrompt`     |
+| `@outfitter/mcp/transport`    | SDK transport bridge (`createSdkServer`, `connectStdio`) and response helpers (`wrapToolResult`, `wrapToolError`) |
+| `@outfitter/mcp/types`        | MCP type system — `ToolDefinition`, `McpServer`, `McpError`, `TOOL_ANNOTATIONS`, `adaptHandler`                   |
+| `@outfitter/mcp/package.json` | Package manifest (name, version, exports, peer dependencies)                                                      |
 
 ### @outfitter/testing
 
@@ -77,6 +80,7 @@ Every `@outfitter/*` package uses Node.js [subpath exports](https://nodejs.org/a
 | `@outfitter/testing/mock-factories` | Mock factories for tests (`createTestLogger`, `createTestConfig`, `createTestContext`)                |
 | `@outfitter/testing/test-command`   | CLI wiring test helper (`testCommand`) — runs CLI with captured output, no side effects               |
 | `@outfitter/testing/test-tool`      | MCP tool test helper (`testTool`) — validates input schema and invokes handler                        |
+| `@outfitter/testing/package.json`   | Package manifest (name, version, exports, dependencies)                                               |
 
 ## Existing Tooling Surface
 
@@ -243,14 +247,14 @@ Packages that require peer dependencies are listed below. Install the required p
 }
 ```
 
-| Peer                   | Required For                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| `commander`            | **Required** — `createCLI`, `command()`, all CLI construction                       |
-| `@outfitter/contracts` | **Required** — `output()`, `exitWithError()`, error taxonomy, type definitions      |
-| `@outfitter/config`    | **Required** — Environment/verbose resolution in `./output`, terminal detection     |
-| `@outfitter/schema`    | Optional — Schema introspection via `./schema` subpath only                         |
-| `zod`                  | Optional — Action schema definitions via `./actions` (transitive via `contracts`)   |
-| `@outfitter/types`     | Optional — Version alignment only (not directly imported)                           |
+| Peer                   | Required For                                                                      |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `commander`            | **Required** — `createCLI`, `command()`, all CLI construction                     |
+| `@outfitter/contracts` | **Required** — `output()`, `exitWithError()`, error taxonomy, type definitions    |
+| `@outfitter/config`    | **Required** — Environment/verbose resolution in `./output`, terminal detection   |
+| `@outfitter/schema`    | Optional — Schema introspection via `./schema` subpath only                       |
+| `zod`                  | Optional — Action schema definitions via `./actions` (transitive via `contracts`) |
+| `@outfitter/types`     | Optional — Version alignment only (not directly imported)                         |
 
 See [CLI peer dependency details](../../packages/cli/docs/peer-dependencies.md) for the full subpath-to-peer matrix.
 

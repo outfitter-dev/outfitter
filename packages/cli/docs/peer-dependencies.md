@@ -4,8 +4,8 @@
 
 ## Quick Reference
 
-| Peer                   | Status       | Needed For                                        |
-| ---------------------- | ------------ | ------------------------------------------------- |
+| Peer                   | Status       | Needed For                                         |
+| ---------------------- | ------------ | -------------------------------------------------- |
 | `commander`            | **Required** | `createCLI()`, `command()`, all CLI construction   |
 | `@outfitter/contracts` | **Required** | `output()`, `exitWithError()`, error taxonomy      |
 | `@outfitter/config`    | **Required** | Environment/verbose resolution, terminal detection |
@@ -39,13 +39,13 @@ Commander is the underlying CLI framework. Every CLI-building entry point depend
 
 **Subpaths that import `commander`:**
 
-| Subpath                      | Usage                                           |
-| ---------------------------- | ----------------------------------------------- |
-| `@outfitter/cli/command`     | `createCLI()`, `command()` builder               |
-| `@outfitter/cli/actions`     | `buildCliCommands()` action-to-command wiring    |
-| `@outfitter/cli/completion`  | Shell completion script generation               |
-| `@outfitter/cli/schema`      | `createSchemaCommand()` introspection subcommand |
-| `@outfitter/cli/types`       | Type-only import for `Command` type              |
+| Subpath                     | Usage                                            |
+| --------------------------- | ------------------------------------------------ |
+| `@outfitter/cli/command`    | `createCLI()`, `command()` builder               |
+| `@outfitter/cli/actions`    | `buildCliCommands()` action-to-command wiring    |
+| `@outfitter/cli/completion` | Shell completion script generation               |
+| `@outfitter/cli/schema`     | `createSchemaCommand()` introspection subcommand |
+| `@outfitter/cli/types`      | Type-only import for `Command` type              |
 
 ### `@outfitter/contracts` ≥0.2.0
 
@@ -53,15 +53,15 @@ Provides the error taxonomy, exit code mapping, and Result-pattern types used th
 
 **Subpaths that import `@outfitter/contracts`:**
 
-| Subpath                  | Usage                                                      |
-| ------------------------ | ---------------------------------------------------------- |
+| Subpath                  | Usage                                                        |
+| ------------------------ | ------------------------------------------------------------ |
 | `@outfitter/cli`         | Root export — `output()` uses `exitCodeMap`, `safeStringify` |
-| `@outfitter/cli/output`  | `exitWithError()` maps `ErrorCategory` to exit codes       |
-| `@outfitter/cli/input`   | `ValidationError` for input parsing failures               |
-| `@outfitter/cli/actions` | `ActionRegistry`, `validateInput`, `createContext`          |
-| `@outfitter/cli/flags`   | `ActionCliOption` type for preset definitions               |
-| `@outfitter/cli/types`   | `ActionCliOption` type re-exports                           |
-| `@outfitter/cli/schema`  | `ActionSurface` type                                        |
+| `@outfitter/cli/output`  | `exitWithError()` maps `ErrorCategory` to exit codes         |
+| `@outfitter/cli/input`   | `ValidationError` for input parsing failures                 |
+| `@outfitter/cli/actions` | `ActionRegistry`, `validateInput`, `createContext`           |
+| `@outfitter/cli/flags`   | `ActionCliOption` type for preset definitions                |
+| `@outfitter/cli/types`   | `ActionCliOption` type re-exports                            |
+| `@outfitter/cli/schema`  | `ActionSurface` type                                         |
 
 ### `@outfitter/config` ≥0.3.0
 
@@ -69,10 +69,10 @@ Provides environment profile resolution (`OUTFITTER_ENV`) and environment variab
 
 **Subpaths that import `@outfitter/config`:**
 
-| Subpath                            | Usage                                                |
-| ---------------------------------- | ---------------------------------------------------- |
-| `@outfitter/cli/output`            | `getEnvironment()`, `getEnvironmentDefaults()` for verbose and output mode resolution |
-| `@outfitter/cli/terminal/detection`| `getEnvBoolean()` for color/TTY detection            |
+| Subpath                             | Usage                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `@outfitter/cli/output`             | `getEnvironment()`, `getEnvironmentDefaults()` for verbose and output mode resolution |
+| `@outfitter/cli/terminal/detection` | `getEnvBoolean()` for color/TTY detection                                             |
 
 Since `output()` is part of the root export (`@outfitter/cli`), this peer is required for basic usage.
 
@@ -99,7 +99,7 @@ import { defineAction } from "@outfitter/contracts";
 
 const myAction = defineAction({
   id: "my.action",
-  input: z.object({ name: z.string() }),  // ← requires zod
+  input: z.object({ name: z.string() }), // ← requires zod
   output: z.object({ id: z.string() }),
   // ...
 });
@@ -117,22 +117,22 @@ Which peers are needed for each import path:
 
 | Subpath                             | `commander` | `contracts` | `config` | `schema` | `zod` | `types` |
 | ----------------------------------- | :---------: | :---------: | :------: | :------: | :---: | :-----: |
-| `@outfitter/cli`                    |             | ✓           | ✓        |          |       |         |
-| `@outfitter/cli/command`            | ✓           |             |          |          |       |         |
-| `@outfitter/cli/output`             |             | ✓           | ✓        |          |       |         |
-| `@outfitter/cli/input`              |             | ✓           |          |          |       |         |
-| `@outfitter/cli/flags`              |             | ✓           |          |          |       |         |
+| `@outfitter/cli`                    |             |      ✓      |    ✓     |          |       |         |
+| `@outfitter/cli/command`            |      ✓      |             |          |          |       |         |
+| `@outfitter/cli/output`             |             |      ✓      |    ✓     |          |       |         |
+| `@outfitter/cli/input`              |             |      ✓      |          |          |       |         |
+| `@outfitter/cli/flags`              |             |      ✓      |          |          |       |         |
 | `@outfitter/cli/query`              |             |             |          |          |       |         |
-| `@outfitter/cli/actions`            | ✓           | ✓           |          |          | ✓*    |         |
-| `@outfitter/cli/schema`             | ✓           | ✓           |          | ✓        |       |         |
-| `@outfitter/cli/completion`         | ✓           |             |          |          |       |         |
+| `@outfitter/cli/actions`            |      ✓      |      ✓      |          |          |  ✓\*  |         |
+| `@outfitter/cli/schema`             |      ✓      |      ✓      |          |    ✓     |       |         |
+| `@outfitter/cli/completion`         |      ✓      |             |          |          |       |         |
 | `@outfitter/cli/pagination`         |             |             |          |          |       |         |
 | `@outfitter/cli/colors`             |             |             |          |          |       |         |
 | `@outfitter/cli/text`               |             |             |          |          |       |         |
-| `@outfitter/cli/terminal`           |             |             | ✓        |          |       |         |
-| `@outfitter/cli/terminal/detection` |             |             | ✓        |          |       |         |
+| `@outfitter/cli/terminal`           |             |             |    ✓     |          |       |         |
+| `@outfitter/cli/terminal/detection` |             |             |    ✓     |          |       |         |
 | `@outfitter/cli/verbs`              |             |             |          |          |       |         |
-| `@outfitter/cli/types`              |             | ✓           |          |          |       |         |
+| `@outfitter/cli/types`              |      ✓      |      ✓      |          |          |       |         |
 
 \* `zod` is available transitively via `@outfitter/contracts`.
 
