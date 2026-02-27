@@ -170,6 +170,7 @@ describe("buildCheckOrchestratorPlan", () => {
         "apps/outfitter/src/cli.ts",
         ".github/workflows/ci.yml",
         "package.json",
+        "packages/cli/src/utils.mjs",
       ],
     });
 
@@ -182,6 +183,7 @@ describe("buildCheckOrchestratorPlan", () => {
         "fix",
         "apps/outfitter/src/cli.ts",
         "package.json",
+        "packages/cli/src/utils.mjs",
       ],
     });
   });
