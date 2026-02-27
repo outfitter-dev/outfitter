@@ -1,0 +1,87 @@
+{
+  "groupId": "migration-docs",
+  "testedAt": "2026-02-27T21:09:35Z",
+  "credentials": {
+    "account": "not-applicable",
+    "namespace": "not-applicable"
+  },
+  "toolsUsed": ["Read", "Grep", "shell"],
+  "assertions": [
+    {
+      "id": "VAL-CROSS-001",
+      "title": "Migration docs cover breaking changes",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Check migration document presence",
+          "expected": "A migration doc exists in docs/ or package-level docs",
+          "observed": "docs/migration-v0.4.md exists and is readable"
+        },
+        {
+          "action": "Verify OS-323 coverage",
+          "expected": "--json default false->undefined change documented with before/after and migration steps",
+          "observed": "Section 1 documents default change and includes Before/After blocks plus Migration steps (heading line 5; markers at lines 11, 22, 33)"
+        },
+        {
+          "action": "Verify OS-322 coverage",
+          "expected": "Commander peer dependency change documented with before/after and migration steps",
+          "observed": "Section 2 documents commander move to peerDependencies with Before/After dependency snippets and Migration steps (heading line 42; markers at lines 47, 59, 70)"
+        },
+        {
+          "action": "Verify OS-331 coverage",
+          "expected": "output() format positional parameter change documented with before/after and migration steps",
+          "observed": "Section 3 documents output()/exitWithError() signature updates with Before/After code and Migration steps (heading line 76; markers at lines 83, 94, 107, 116, 131)"
+        },
+        {
+          "action": "Verify OS-421 coverage",
+          "expected": "Output-mode resolver centralization and helper removals documented with before/after and migration steps",
+          "observed": "Section 4 documents resolveOutputMode centralization, removed helper APIs, Before/After code, and Migration steps (heading line 141; markers at lines 153, 168, 191)"
+        },
+        {
+          "action": "Verify OS-291 coverage",
+          "expected": "dependency-versions Result-returning behavior documented with before/after and migration steps",
+          "observed": "Section 5 documents resolvePresetDependencyVersions() returning Result instead of throwing, with Before/After code and Migration steps (heading line 201; markers at lines 207, 220, 234)"
+        }
+      ],
+      "evidence": {
+        "files": ["docs/migration-v0.4.md"],
+        "sectionHeadings": [
+          "docs/migration-v0.4.md:5",
+          "docs/migration-v0.4.md:42",
+          "docs/migration-v0.4.md:76",
+          "docs/migration-v0.4.md:141",
+          "docs/migration-v0.4.md:201"
+        ],
+        "beforeAfterMarkers": [
+          "docs/migration-v0.4.md:11",
+          "docs/migration-v0.4.md:22",
+          "docs/migration-v0.4.md:47",
+          "docs/migration-v0.4.md:59",
+          "docs/migration-v0.4.md:83",
+          "docs/migration-v0.4.md:94",
+          "docs/migration-v0.4.md:107",
+          "docs/migration-v0.4.md:116",
+          "docs/migration-v0.4.md:153",
+          "docs/migration-v0.4.md:168",
+          "docs/migration-v0.4.md:207",
+          "docs/migration-v0.4.md:220"
+        ],
+        "migrationStepMarkers": [
+          "docs/migration-v0.4.md:33",
+          "docs/migration-v0.4.md:70",
+          "docs/migration-v0.4.md:131",
+          "docs/migration-v0.4.md:191",
+          "docs/migration-v0.4.md:234"
+        ],
+        "additionalApiChangesDocumented": [
+          "docs/migration-v0.4.md:105",
+          "docs/migration-v0.4.md:244"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-CROSS-001): passed. Migration docs exist and cover all required breaking changes with before/after examples and migration steps."
+}
