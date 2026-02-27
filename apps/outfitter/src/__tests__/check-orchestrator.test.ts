@@ -128,11 +128,49 @@ describe("buildCheckOrchestratorPlan", () => {
     });
   });
 
-  test("pre-commit mode passes all staged files to ultracite but only TS files to typecheck", () => {
+  test("pre-commit mode filters staged files for ultracite and typecheck", () => {
     const plan = buildCheckOrchestratorPlan({
       cwd: process.cwd(),
       mode: "pre-commit",
       stagedFiles: ["apps/outfitter/src/cli.ts", "README.md"],
+    });
+
+    expect(plan[0]).toMatchObject({
+      id: "ultracite-fix",
+      command: ["bun", "x", "ultracite", "fix", "apps/outfitter/src/cli.ts"],
+    });
+    expect(plan[1]).toMatchObject({
+      id: "typecheck",
+      command: [
+        "./scripts/pre-commit-typecheck.sh",
+        "apps/outfitter/src/cli.ts",
+      ],
+    });
+  });
+
+  test("pre-commit mode skips ultracite and typecheck when only non-JS/TS files staged", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["scripts/agent-setup.sh", "scripts/agent-maintenance.sh"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).not.toContain("ultracite-fix");
+    expect(stepIds).not.toContain("typecheck");
+    expect(stepIds).toContain("exports");
+  });
+
+  test("pre-commit mode passes only supported files to ultracite in mixed commits", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: [
+        "scripts/setup.sh",
+        "apps/outfitter/src/cli.ts",
+        ".github/workflows/ci.yml",
+        "packages/cli/src/utils.mjs",
+      ],
     });
 
     expect(plan[0]).toMatchObject({
@@ -142,15 +180,8 @@ describe("buildCheckOrchestratorPlan", () => {
         "x",
         "ultracite",
         "fix",
-        "README.md",
         "apps/outfitter/src/cli.ts",
-      ],
-    });
-    expect(plan[1]).toMatchObject({
-      id: "typecheck",
-      command: [
-        "./scripts/pre-commit-typecheck.sh",
-        "apps/outfitter/src/cli.ts",
+        "packages/cli/src/utils.mjs",
       ],
     });
   });
@@ -163,7 +194,6 @@ describe("buildCheckOrchestratorPlan", () => {
     });
     const stepIds = plan.map((step) => step.id);
 
-    expect(stepIds).toContain("ultracite-fix");
     expect(stepIds).not.toContain("typecheck");
     expect(stepIds).toContain("exports");
   });

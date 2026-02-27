@@ -355,21 +355,31 @@ export function buildCheckOrchestratorPlan(
 
   const hasStagedFiles = stagedFiles.length > 0;
   const tsFiles = stagedFiles.filter((f) => /\.(ts|tsx)$/.test(f));
+  const ultraciteFiles = stagedFiles.filter((f) =>
+    /\.(js|jsx|mjs|cjs|ts|tsx|mts|cts)$/.test(f)
+  );
 
-  const preCommitSteps: CheckOrchestratorStep[] = [
-    {
+  const preCommitSteps: CheckOrchestratorStep[] = [];
+
+  if (ultraciteFiles.length > 0) {
+    preCommitSteps.push({
       id: "ultracite-fix",
       label: "Ultracite fix",
-      command: hasStagedFiles
-        ? ["bun", "x", "ultracite", "fix", ...stagedFiles]
-        : ["bun", "x", "ultracite", "fix", "."],
-    },
-    {
-      id: "exports",
-      label: "Exports",
-      command: ["bun", "run", "check-exports"],
-    },
-  ];
+      command: ["bun", "x", "ultracite", "fix", ...ultraciteFiles],
+    });
+  } else if (!hasStagedFiles) {
+    preCommitSteps.push({
+      id: "ultracite-fix",
+      label: "Ultracite fix",
+      command: ["bun", "x", "ultracite", "fix", "."],
+    });
+  }
+
+  preCommitSteps.push({
+    id: "exports",
+    label: "Exports",
+    command: ["bun", "run", "check-exports"],
+  });
 
   if (tsFiles.length > 0) {
     // Insert typecheck before exports (index 1)
