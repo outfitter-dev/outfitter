@@ -91,7 +91,15 @@ export function injectSharedConfig(
   try {
     const content = readFileSync(packageJsonPath, "utf-8");
     const parsed = JSON.parse(content) as Record<string, unknown>;
-    const dependencyVersions = resolvePresetDependencyVersions();
+    const versionsResult = resolvePresetDependencyVersions();
+    if (versionsResult.isErr()) {
+      return Result.err(
+        new ScaffoldError(
+          `Failed to resolve dependency versions: ${versionsResult.error.message}`
+        )
+      );
+    }
+    const dependencyVersions = versionsResult.value;
     applyResolvedDependencyVersions(parsed, dependencyVersions);
 
     const existingDevDeps =

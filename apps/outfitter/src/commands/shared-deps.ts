@@ -24,8 +24,13 @@ function requireVersion(name: string): string {
 }
 
 function requireInternalVersion(name: string): string {
-  const versions = resolvePresetDependencyVersions();
-  const version = versions.internal[name];
+  const result = resolvePresetDependencyVersions();
+  if (result.isErr()) {
+    throw new Error(
+      `Failed to resolve dependency versions: ${result.error.message}`
+    );
+  }
+  const version = result.value.internal[name];
   if (!version) {
     throw new Error(
       `Missing internal version for "${name}" — not found in workspace packages or outfitter's own dependencies`
