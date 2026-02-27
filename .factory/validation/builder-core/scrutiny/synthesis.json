@@ -1,13 +1,13 @@
 {
   "milestone": "builder-core",
-  "round": 1,
-  "status": "fail",
+  "round": 2,
+  "status": "pass",
   "validatorsRun": {
     "test": {
       "passed": true,
       "command": "bun run test",
       "exitCode": 0,
-      "details": "40 tasks successful, all tests passed across 23 packages"
+      "details": "40 tasks successful, all tests passed across 23 packages (749 tests in outfitter app, 419 in contracts, etc.)"
     },
     "typecheck": {
       "passed": true,
@@ -23,37 +23,14 @@
     }
   },
   "reviewsSummary": {
-    "total": 4,
-    "passed": 3,
-    "failed": 1,
-    "failedFeatures": [
-      "os-342-input-schema"
-    ]
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
   },
-  "blockingIssues": [
-    {
-      "featureId": "os-342-input-schema",
-      "severity": "blocking",
-      "description": "validateInput() in packages/cli/src/schema-input.ts (lines 247-254) falls back to returning raw picked flags when schema.safeParse() fails. This means invalid data can reach the .action() handler via the `input` field (packages/cli/src/command.ts:208), violating the feature requirement that .input(schema) provides a validated typed input object. The function should either surface the validation error (e.g., call exitWithError with a ValidationError) or return a Result type so the caller can handle it.",
-      "file": "packages/cli/src/schema-input.ts",
-      "line": 252
-    }
-  ],
+  "blockingIssues": [],
   "appliedUpdates": [],
-  "suggestedGuidanceUpdates": [
-    {
-      "target": "skills",
-      "suggestion": "Update library-worker skill to clarify TDD red-phase expectations for type-only features. In this Bun monorepo, type-only imports in tests do not fail at runtime, and package tsconfig excludes test files from typecheck. Workers should be told that for type-only features, the 'red' phase can be demonstrated by showing a typecheck failure in a non-test file that imports the not-yet-existing type, rather than requiring a failing runtime test.",
-      "evidence": "Session 4a76a3e6 (os-337-hint-types) transcript shows tests passed with `import type` before implementation, and package typecheck still passed because tests are excluded from tsconfig. Worker handoff skillFeedback.suggestedChanges called out this exact gap.",
-      "isSystemic": true
-    },
-    {
-      "target": "skills",
-      "suggestion": "Update library-worker skill export verification guidance to account for monorepo/type-only export realities. Current guidance leads workers to attempt `bun -e` imports from repo root which fail for subpath exports and type-only modules. Guidance should reference .factory/library/user-testing.md which documents using package-directory-relative verification instead.",
-      "evidence": "Session 6512c875 (os-343-context-factory) transcript shows `bun -e` import from repo root failing with 'Cannot find module' for subpath exports. .factory/library/user-testing.md already documents the correct approach but the skill doesn't reference it.",
-      "isSystemic": true
-    }
-  ],
+  "suggestedGuidanceUpdates": [],
   "rejectedObservations": [],
   "previousRound": null
 }

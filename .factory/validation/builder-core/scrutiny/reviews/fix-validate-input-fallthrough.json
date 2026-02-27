@@ -1,0 +1,15 @@
+{
+  "featureId": "fix-validate-input-fallthrough",
+  "reviewedAt": "2026-02-27T23:33:36Z",
+  "commitId": "3ae3d629",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Reviewed original commit 048072c4 and fix commit 3ae3d629. The fix removes the silent fallthrough in validateInput() by calling exitWithError(ValidationError.fromMessage(...)) on schema.safeParse() failure, preventing invalid data from reaching .action(). Added tests verify invalid input exits with validation error (including JSON mode) and that valid input still passes through correctly.",
+    "issues": []
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": ".factory/validation/builder-core/scrutiny/reviews/os-342-input-schema.json",
+  "summary": "Pass. The prior blocking issue is resolved: validateInput() now surfaces Zod validation failures via exitWithError() instead of returning raw input, invalid input is blocked from handlers, and regression coverage for valid input is present."
+}
