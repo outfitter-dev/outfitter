@@ -1,0 +1,150 @@
+{
+  "groupId": "output-mode",
+  "testedAt": "2026-02-27T18:49:05Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "rg",
+    "file inspection"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-OUTPUT-001",
+      "title": "Docs output mode respects env var fallback",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Search docs output-mode tests with `rg -l 'resolveDocsOutputMode|docs.*output.*mode|docs.*env.*fallback' apps/outfitter/src/__tests__/`",
+          "expected": "Find tests validating docs output mode env fallback behavior",
+          "observed": "Found `apps/outfitter/src/__tests__/docs-output-mode.test.ts` with centralized resolver coverage."
+        },
+        {
+          "action": "Run `bun test src/__tests__/docs-output-mode.test.ts src/__tests__/output-mode-parity.test.ts src/__tests__/json-parity.test.ts`",
+          "expected": "Docs output mode env fallback and Commander default interactions pass",
+          "observed": "All 9 docs-output-mode tests passed, including `OUTFITTER_JSON=1 works when Commander default sets output to 'human'` and the JSONL equivalent."
+        },
+        {
+          "action": "Run full app suite with `cd apps/outfitter && bun test`",
+          "expected": "No regressions in docs output-mode flow",
+          "observed": "Suite passed (739 pass / 0 fail), including docs list env fallback assertions."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "testOutput": "docs-output-mode.test.ts: 9 pass / 0 fail; includes env fallback for OUTFITTER_JSON and OUTFITTER_JSONL when output flag is implicit/Commander-default."
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-OUTPUT-002",
+      "title": "Output mode resolution centralized with explicitness tracking",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect `packages/cli/src/query.ts`",
+          "expected": "Single resolver returns resolved mode plus source metadata",
+          "observed": "`resolveOutputMode(flags, config)` returns `{ mode, source }` with source in `flag | env | default`, and includes explicit `--output` detection logic."
+        },
+        {
+          "action": "Check action-level env detection with `rg 'OUTFITTER_JSON|OUTFITTER_JSONL' apps/outfitter/src/actions`",
+          "expected": "No per-action env var fallback branches",
+          "observed": "No matches found in actions directory."
+        },
+        {
+          "action": "Check action delegation with `rg 'resolveOutputMode' apps/outfitter/src/actions`",
+          "expected": "Actions delegate output mode resolution to shared resolver",
+          "observed": "All output-aware actions import/call `resolveOutputMode` from `@outfitter/cli/query` (check/docs/add/init/upgrade/scaffold/demo/doctor)."
+        },
+        {
+          "action": "Verify removed legacy files/helpers",
+          "expected": "`apps/outfitter/src/actions/docs-output-mode.ts` deleted and shared output fallback helper removed",
+          "observed": "`docs-output-mode.ts` is absent; `actions/shared.ts` contains no env fallback/output-mode resolution helper."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "testOutput": "json-parity/output-mode-parity suites passed; resolver source metadata assertions pass.",
+        "codeInspection": "Central entry point: packages/cli/src/query.ts::resolveOutputMode() with OutputModeSource tracking."
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-OUTPUT-003",
+      "title": "Cross-command output mode parity via CLI-path tests",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Locate parity suite with `rg -l 'parity|cross-command' apps/outfitter/src/__tests__/`",
+          "expected": "Dedicated cross-command parity test file exists",
+          "observed": "Found `apps/outfitter/src/__tests__/output-mode-parity.test.ts`."
+        },
+        {
+          "action": "Inspect parity suite",
+          "expected": "CLI-path parity checks across action groups for default human, env fallback, and explicit output override",
+          "observed": "Suite iterates action groups (check/check-automation/docs/add/init/upgrade/scaffold/demo/doctor) using action `mapInput` path and tests default, `OUTFITTER_JSON=1`, `OUTFITTER_JSONL=1`, explicit `--output`, and legacy `--json/--jsonl`."
+        },
+        {
+          "action": "Run parity suite (`bun test ...output-mode-parity.test.ts ...`)",
+          "expected": "Parity cases pass",
+          "observed": "Parity and related resolver tests passed (194 pass / 0 fail across 3 files), including end-to-end parity checks and source metadata consistency assertions."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "testOutput": "output-mode-parity.test.ts passed with explicit logs for env fallback, explicit override, default human mode, and integration assertions."
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CROSS-002",
+      "title": "Integrated output mode chain works end-to-end",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run integration tests containing `--json` -> resolver -> output chain",
+          "expected": "Tests verify chain behavior end-to-end",
+          "observed": "`output-mode-parity.test.ts` includes `end-to-end output chain integration` cases; all passed."
+        },
+        {
+          "action": "Run real CLI with explicit `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd /Users/mg/Developer/outfitter/stack --json | head -3`",
+          "expected": "Structured JSON output",
+          "observed": "Output begins with JSON object: `{\"entries\":[...],\"total\":21}`."
+        },
+        {
+          "action": "Run same CLI without `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd /Users/mg/Developer/outfitter/stack | head -8`",
+          "expected": "Default human-readable output",
+          "observed": "Output begins with human text banner: `Documentation Entries (21)` and formatted list rows."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "testOutput": "output-mode-parity integration block passed; CLI invocation confirms JSON with `--json` and human output without it."
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "The suggested command `bun run src/index.ts ...` produced no CLI output because `src/index.ts` is programmatic exports; the runnable CLI entry is `src/cli.ts`.",
+      "resolved": true,
+      "resolution": "Switched to `bun run src/cli.ts ...` for end-to-end CLI verification.",
+      "affectedAssertions": [
+        "VAL-CROSS-002"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 4 assertions (VAL-OUTPUT-001, VAL-OUTPUT-002, VAL-OUTPUT-003, VAL-CROSS-002): 4 passed, 0 failed, 0 blocked."
+}
