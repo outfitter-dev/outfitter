@@ -1,0 +1,36 @@
+{
+  "flowId": "testing-helpers",
+  "assertions": {
+    "VAL-TEST-001": {
+      "status": "pass",
+      "evidence": [
+        "Import verification (packages/testing): `testCommand: function testTool: function` (exit 0) via `bun -e \"const m = await import('./src/index.ts')...\"`.",
+        "`cd packages/testing && bun test` passed (61 pass, 0 fail); includes `src/__tests__/test-command.test.ts` coverage for stdout/stderr/exitCode, success/error paths, global restoration, and no output leakage.",
+        "Source inspection: `packages/testing/src/test-command.ts` returns `captureCLI(...)` (CliTestResult: stdout/stderr/exitCode) and restores temporary env overrides in `finally`.",
+        "Source inspection: `packages/testing/src/cli-helpers.ts` intercepts `process.stdout.write`, `process.stderr.write`, `process.exit`, then restores all globals in `finally`.",
+        "`cd /Users/mg/Developer/outfitter/stack && bun run typecheck` passed (34 successful tasks, exit 0)."
+      ],
+      "issues": []
+    },
+    "VAL-TEST-002": {
+      "status": "pass",
+      "evidence": [
+        "Import verification confirms `testTool` is exported from `packages/testing/src/index.ts`.",
+        "`cd packages/testing && bun test` passed (61 pass, 0 fail); includes `src/__tests__/test-tool.test.ts` cases proving invalid input returns error without handler call and valid input invokes handler exactly once.",
+        "Source inspection: `packages/testing/src/test-tool.ts` validates with `tool.inputSchema.safeParse(input)` before handler execution.",
+        "Source inspection: validation failure returns `Result.err(new ValidationError(...))` and does not call handler; success path performs a single `return tool.handler(parseResult.data, ctx)` call.",
+        "`cd /Users/mg/Developer/outfitter/stack && bun run typecheck` passed (34 successful tasks, exit 0)."
+      ],
+      "issues": []
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": [
+    "bun -e",
+    "bun test",
+    "rg",
+    "Read",
+    "bun run typecheck"
+  ]
+}
