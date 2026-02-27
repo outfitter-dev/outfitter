@@ -19,6 +19,7 @@ import {
   text,
 } from "@clack/prompts";
 import { exitWithError } from "@outfitter/cli";
+import { resolveOutputMode as resolveOutputModeFromFlags } from "@outfitter/cli/query";
 import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
@@ -474,10 +475,10 @@ const resolveLocal = (flags: InitCommandFlags): boolean | undefined => {
 };
 
 const resolveOutputMode = (flags: InitCommandFlags): OutputMode | undefined => {
-  if (flags.json) {
-    return "json";
-  }
-  return undefined;
+  const { mode } = resolveOutputModeFromFlags(
+    flags as unknown as Record<string, unknown>
+  );
+  return mode === "human" ? undefined : mode;
 };
 
 const withCommonOptions = (command: Command): Command =>
