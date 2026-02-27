@@ -21,22 +21,17 @@ describe("bootstrap", () => {
   });
 
   describe("force (mocked subprocesses)", () => {
-    let spawnSpy: ReturnType<typeof spyOn>;
-
-    beforeEach(() => {
-      spawnSpy = spyOn(Bun, "spawnSync").mockReturnValue({
+    function mockSpawnSync() {
+      return spyOn(Bun, "spawnSync").mockReturnValue({
         exitCode: 0,
         stdout: Buffer.from(""),
         stderr: Buffer.from(""),
         success: true,
       } as ReturnType<typeof Bun.spawnSync>);
-    });
-
-    afterEach(() => {
-      spawnSpy.mockRestore();
-    });
+    }
 
     test("calls extend callback when provided", async () => {
+      using _spawnSpy = mockSpawnSync();
       let extendCalled = false;
 
       await Bun.write(join(tempDir, "node_modules/.keep"), "");
@@ -54,6 +49,7 @@ describe("bootstrap", () => {
     });
 
     test("bypasses fast-path", async () => {
+      using _spawnSpy = mockSpawnSync();
       let extendCalled = false;
 
       await Bun.write(join(tempDir, "node_modules/.keep"), "");
@@ -71,6 +67,8 @@ describe("bootstrap", () => {
     });
 
     test("completes without error in quiet mode", async () => {
+      using _spawnSpy = mockSpawnSync();
+
       await Bun.write(join(tempDir, "node_modules/.keep"), "");
       await Bun.write(join(tempDir, "package.json"), "{}");
 

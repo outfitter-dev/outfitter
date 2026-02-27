@@ -256,7 +256,7 @@ describe("runCheckTsdoc", () => {
     const workspace = createWorkspace(
       "/** Doc. */\nexport function alpha() {}"
     );
-    const spawnSpy = spyOn(Bun, "spawn").mockImplementation(() => {
+    using _spawnSpy = spyOn(Bun, "spawn").mockImplementation(() => {
       throw new Error("ENOENT: spawn jq");
     });
 
@@ -269,7 +269,6 @@ describe("runCheckTsdoc", () => {
       expect(result.isOk()).toBe(true);
       expect(stderr).toContain("jq is not installed");
     } finally {
-      spawnSpy.mockRestore();
       rmSync(workspace.cwd, { recursive: true, force: true });
     }
   });

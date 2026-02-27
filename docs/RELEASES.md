@@ -64,16 +64,23 @@ Stable releases are a two-phase process:
 3. The workflow refreshes tracked LLM artifacts (`docs/llms.txt`, `docs/llms-full.txt`)
 4. A `release/YYYYMMDD-HHMMSS` branch is created with version bumps, changelog updates, and any llms artifact updates
 5. A PR is opened against `main` with the `autorelease` label
+6. Auto-merge is enabled on the PR (squash strategy, branch auto-deleted)
+
+The prepare phase uses `--no-verify` for git commit and push to prevent local
+hooks (e.g. `verify:ci`) from interfering in the CI environment.
 
 ### Phase 2: Publish
 
-1. Review the release PR — check version bumps, changelog entries, and CI status
-2. Merge the PR
-3. The publish job detects the `autorelease` label and `release/` branch prefix
-4. The publish job verifies llms artifacts are deterministic and up to date
-5. Packages are built, tested, and published to npm with the `@latest` dist-tag
-6. Git tags are created for each published package
-7. One canonical GitHub release is created for the stable cycle (with a package bump matrix)
+1. The release PR merges automatically once all required checks and branch protection rules pass
+2. The publish job detects the `autorelease` label and `release/` branch prefix
+3. The publish job verifies llms artifacts are deterministic and up to date
+4. Packages are built, tested, and published to npm with the `@latest` dist-tag
+5. Git tags are created for each published package
+6. One canonical GitHub release is created for the stable cycle (with a package bump matrix)
+
+> **Note:** While auto-merge handles the typical flow, you can still review and
+> manually merge the PR if needed. Auto-merge respects all branch protection
+> rules — the PR will not merge until required status checks are green.
 
 ### GitHub Release Policy
 

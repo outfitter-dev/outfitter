@@ -123,9 +123,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add -A
-          git commit -m "$RELEASE_TITLE"
-          git push origin "$BRANCH"
-          gh pr create \
+          git commit --no-verify -m "$RELEASE_TITLE"
+          git push --no-verify origin "$BRANCH"
+          PR_URL=$(gh pr create \
             --base main \
             --head "$BRANCH" \
             --title "$RELEASE_TITLE" \
@@ -134,10 +134,12 @@ jobs:
 
           This PR was created by the release workflow. Merging it will publish all versioned packages to npm.
 
-          **Review the changelog entries and version bumps below, then merge to publish.**
+          Auto-merge is enabled. The PR will merge automatically once all required checks pass.
           BODY
           )" \
-            --label "autorelease"
+            --label "autorelease")
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          gh pr merge --auto --squash --delete-branch "$PR_NUMBER"
 
   # Canary publish (npm-only)
   # Publishes snapshot versions to npm @canary without creating GitHub releases.
