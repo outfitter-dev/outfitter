@@ -5,7 +5,11 @@
  */
 
 import { cwdPreset } from "@outfitter/cli/flags";
-import { jqPreset, outputModePreset } from "@outfitter/cli/query";
+import {
+  jqPreset,
+  outputModePreset,
+  resolveOutputMode,
+} from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
@@ -36,7 +40,6 @@ import {
   runDocsShow,
 } from "../commands/docs-show.js";
 import { checkTsdocOutputSchema } from "./check.js";
-import { resolveDocsOutputMode } from "./docs-output-mode.js";
 import {
   outputModeSchema,
   resolveCwdFromPreset,
@@ -82,11 +85,8 @@ export const docsListAction: DocsListAction = defineAction({
       ...docsListCwd.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsListOutputMode.resolve(
-        context.flags
-      );
       const { jq } = docsListJq.resolve(context.flags);
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const kind = resolveStringFlag(context.flags["kind"]);
       const pkg = resolveStringFlag(context.flags["package"]);
 
@@ -141,11 +141,8 @@ export const docsShowAction: DocsShowAction = defineAction({
       ...docsShowCwd.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsShowOutputMode.resolve(
-        context.flags
-      );
       const { jq } = docsShowJq.resolve(context.flags);
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
 
       return {
         id: context.args[0] as string,
@@ -210,11 +207,8 @@ export const docsSearchAction: DocsSearchAction = defineAction({
       ...docsSearchCwd.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsSearchOutputMode.resolve(
-        context.flags
-      );
       const { jq } = docsSearchJq.resolve(context.flags);
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const kind = resolveStringFlag(context.flags["kind"]);
       const pkg = resolveStringFlag(context.flags["package"]);
 
@@ -281,11 +275,8 @@ export const docsApiAction: DocsApiAction = defineAction({
       ...docsApiCwd.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsApiOutputMode.resolve(
-        context.flags
-      );
       const { jq } = docsApiJq.resolve(context.flags);
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
 
       // Resolve --level flag
       const levelRaw = context.flags["level"];
@@ -372,10 +363,7 @@ export const docsExportAction: DocsExportAction = defineAction({
       ...docsExportCwd.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = docsExportOutputMode.resolve(
-        context.flags
-      );
-      const outputMode = resolveDocsOutputMode(context.flags, presetOutputMode);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const targetRaw = resolveStringFlag(context.flags["target"]);
       const target = (targetRaw ?? "all") as DocsExportTarget;
 

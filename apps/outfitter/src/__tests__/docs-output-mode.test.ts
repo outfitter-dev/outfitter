@@ -1,40 +1,49 @@
 /**
- * Tests for docs output mode resolution helper.
+ * Tests verifying docs output mode resolution via the centralized resolver.
+ *
+ * These tests validate that the centralized `resolveOutputMode()` handles
+ * the same scenarios that `resolveDocsOutputMode()` used to handle,
+ * including Commander default detection and env var fallback.
  *
  * @packageDocumentation
  */
 
 import { describe, expect, test } from "bun:test";
 
-import { resolveDocsOutputMode } from "../actions/docs-output-mode.js";
+import { resolveOutputMode } from "@outfitter/cli/query";
 
-describe("resolveDocsOutputMode", () => {
+describe("docs output mode via resolveOutputMode", () => {
   test("uses explicit --output when present", () => {
     const originalJson = process.env["OUTFITTER_JSON"];
+    const originalArgv = process.argv;
     process.env["OUTFITTER_JSON"] = "1";
+    process.argv = ["bun", "outfitter", "docs", "list", "--output", "json"];
 
     try {
-      const mode = resolveDocsOutputMode({ output: "json" }, "json");
+      const { mode, source } = resolveOutputMode({ output: "json" });
       expect(mode).toBe("json");
+      expect(source).toBe("flag");
     } finally {
       if (originalJson === undefined) {
         delete process.env["OUTFITTER_JSON"];
       } else {
         process.env["OUTFITTER_JSON"] = originalJson;
       }
+
+      process.argv = originalArgv;
     }
   });
 
   test("falls back to human for invalid explicit output", () => {
-    const mode = resolveDocsOutputMode({ output: "nope" }, "human");
+    const originalArgv = process.argv;
+    process.argv = ["bun", "outfitter", "docs", "list", "--output", "nope"];
 
-    expect(mode).toBe("human");
-  });
-
-  test("falls back to human for explicit non-structured preset mode", () => {
-    const mode = resolveDocsOutputMode({ output: "table" }, "table");
-
-    expect(mode).toBe("human");
+    try {
+      const { mode } = resolveOutputMode({ output: "nope" });
+      expect(mode).toBe("human");
+    } finally {
+      process.argv = originalArgv;
+    }
   });
 
   test("uses OUTFITTER_JSONL when output is omitted", () => {
@@ -44,8 +53,9 @@ describe("resolveDocsOutputMode", () => {
     process.env["OUTFITTER_JSON"] = "1";
 
     try {
-      const mode = resolveDocsOutputMode({}, "human");
+      const { mode, source } = resolveOutputMode({});
       expect(mode).toBe("jsonl");
+      expect(source).toBe("env");
     } finally {
       if (originalJsonl === undefined) {
         delete process.env["OUTFITTER_JSONL"];
@@ -68,8 +78,9 @@ describe("resolveDocsOutputMode", () => {
     process.env["OUTFITTER_JSON"] = "1";
 
     try {
-      const mode = resolveDocsOutputMode({}, "human");
+      const { mode, source } = resolveOutputMode({});
       expect(mode).toBe("json");
+      expect(source).toBe("env");
     } finally {
       if (originalJsonl === undefined) {
         delete process.env["OUTFITTER_JSONL"];
@@ -92,8 +103,9 @@ describe("resolveDocsOutputMode", () => {
     delete process.env["OUTFITTER_JSON"];
 
     try {
-      const mode = resolveDocsOutputMode({}, "human");
+      const { mode, source } = resolveOutputMode({});
       expect(mode).toBe("human");
+      expect(source).toBe("default");
     } finally {
       if (originalJsonl === undefined) {
         delete process.env["OUTFITTER_JSONL"];
@@ -116,10 +128,9 @@ describe("resolveDocsOutputMode", () => {
     delete process.env["OUTFITTER_JSONL"];
 
     try {
-      // Commander sets flags.output = "human" as default even when user
-      // did not pass --output. The resolver must detect this is not explicit.
-      const mode = resolveDocsOutputMode({ output: "human" }, "human");
+      const { mode, source } = resolveOutputMode({ output: "human" });
       expect(mode).toBe("json");
+      expect(source).toBe("env");
     } finally {
       if (originalJson === undefined) {
         delete process.env["OUTFITTER_JSON"];
@@ -142,10 +153,9 @@ describe("resolveDocsOutputMode", () => {
     delete process.env["OUTFITTER_JSON"];
 
     try {
-      // Commander sets flags.output = "human" as default even when user
-      // did not pass --output. The resolver must detect this is not explicit.
-      const mode = resolveDocsOutputMode({ output: "human" }, "human");
+      const { mode, source } = resolveOutputMode({ output: "human" });
       expect(mode).toBe("jsonl");
+      expect(source).toBe("env");
     } finally {
       if (originalJson === undefined) {
         delete process.env["OUTFITTER_JSON"];
@@ -165,12 +175,12 @@ describe("resolveDocsOutputMode", () => {
     const originalJson = process.env["OUTFITTER_JSON"];
     const originalArgv = process.argv;
     process.env["OUTFITTER_JSON"] = "1";
-    // Simulate user explicitly passing --output human on the command line
     process.argv = ["bun", "outfitter", "docs", "list", "--output", "human"];
 
     try {
-      const mode = resolveDocsOutputMode({ output: "human" }, "human");
+      const { mode, source } = resolveOutputMode({ output: "human" });
       expect(mode).toBe("human");
+      expect(source).toBe("flag");
     } finally {
       if (originalJson === undefined) {
         delete process.env["OUTFITTER_JSON"];
@@ -189,9 +199,9 @@ describe("resolveDocsOutputMode", () => {
     delete process.env["OUTFITTER_JSONL"];
 
     try {
-      // Commander default: flags.output = "human", presetOutputMode = "human"
-      const mode = resolveDocsOutputMode({ output: "human" }, "human");
+      const { mode, source } = resolveOutputMode({ output: "human" });
       expect(mode).toBe("human");
+      expect(source).toBe("default");
     } finally {
       if (originalJson === undefined) {
         delete process.env["OUTFITTER_JSON"];

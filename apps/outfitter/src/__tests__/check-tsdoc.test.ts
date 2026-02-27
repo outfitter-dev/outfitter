@@ -160,16 +160,15 @@ describe("check-tsdoc mapInput", () => {
     expect(mapped.outputMode).toBe("jsonl");
   });
 
-  test("--json flag is superseded by --output preset (Commander always populates --output default)", () => {
+  test("legacy --json flag is supported by centralized resolver", () => {
     const action = outfitterActions.get("check.tsdoc");
-    // In real Commander usage, --output is always present with default "human".
-    // Legacy --json flag is effectively dead — outputModePreset owns output mode.
+    // The centralized resolver treats --json as a legacy flag source.
     const mapped = action?.cli?.mapInput?.({
       args: [],
       flags: { json: true },
     }) as { outputMode: string };
 
-    expect(mapped.outputMode).toBe("human");
+    expect(mapped.outputMode).toBe("json");
   });
 
   test("falls back to OUTFITTER_JSON when --output is omitted", () => {
@@ -194,13 +193,20 @@ describe("check-tsdoc mapInput", () => {
   });
 
   test("explicit --output beats legacy --json fallback", () => {
-    const action = outfitterActions.get("check.tsdoc");
-    const mapped = action?.cli?.mapInput?.({
-      args: [],
-      flags: { output: "human", json: true },
-    }) as { outputMode: string };
+    const originalArgv = process.argv;
+    process.argv = ["bun", "outfitter", "check", "tsdoc", "--output", "human"];
 
-    expect(mapped.outputMode).toBe("human");
+    try {
+      const action = outfitterActions.get("check.tsdoc");
+      const mapped = action?.cli?.mapInput?.({
+        args: [],
+        flags: { output: "human", json: true },
+      }) as { outputMode: string };
+
+      expect(mapped.outputMode).toBe("human");
+    } finally {
+      process.argv = originalArgv;
+    }
   });
 
   test("maps --jq flag", () => {

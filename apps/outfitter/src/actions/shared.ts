@@ -14,51 +14,6 @@ export const outputModeSchema: z.ZodType<"human" | "json" | "jsonl"> = z
   .enum(["human", "json", "jsonl"])
   .default("human");
 
-function argvContainsOutputFlag(argv: readonly string[]): boolean {
-  for (let index = 0; index < argv.length; index++) {
-    const arg = argv[index];
-    if (!arg) {
-      continue;
-    }
-
-    if (arg === "-o" || arg === "--output") {
-      return true;
-    }
-
-    if (arg.startsWith("--output=") || arg.startsWith("-o=")) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Detect whether the user explicitly passed an output mode flag.
- *
- * Returns `true` when the resolved mode differs from the default,
- * or when `-o`/`--output` appears in the raw argv.
- */
-export function hasExplicitOutputFlag(
-  flags: Record<string, unknown>,
-  options: {
-    readonly argv?: readonly string[];
-    readonly defaultMode?: "human" | "json" | "jsonl";
-  } = {}
-): boolean {
-  const mode = flags["output"];
-  if (typeof mode !== "string") {
-    return false;
-  }
-
-  const defaultMode = options.defaultMode ?? "human";
-  if (mode !== defaultMode) {
-    return true;
-  }
-
-  return argvContainsOutputFlag(options.argv ?? process.argv.slice(2));
-}
-
 /** Coerce a flag value to a non-empty string, or `undefined`. */
 export function resolveStringFlag(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
@@ -125,36 +80,6 @@ export function resolveCwdFromPreset(
 ): string {
   const { cwd: rawCwd } = cwdPreset.resolve(flags);
   return resolve(process.cwd(), rawCwd);
-}
-
-/**
- * Resolve output mode with environment variable fallback.
- *
- * When the user did not pass an explicit flag, checks
- * `OUTFITTER_JSONL` and `OUTFITTER_JSON` before defaulting to "human".
- */
-export function resolveOutputModeWithEnvFallback(
-  flags: Record<string, unknown>,
-  explicitMode: "human" | "json" | "jsonl",
-  options: { readonly forceHumanWhenImplicit?: boolean } = {}
-): "human" | "json" | "jsonl" {
-  if (hasExplicitOutputFlag(flags)) {
-    return explicitMode;
-  }
-
-  if (options.forceHumanWhenImplicit) {
-    return "human";
-  }
-
-  if (process.env["OUTFITTER_JSONL"] === "1") {
-    return "jsonl";
-  }
-
-  if (process.env["OUTFITTER_JSON"] === "1") {
-    return "json";
-  }
-
-  return "human";
 }
 
 /** Resolve a boolean flag that may appear under either its camelCase key or its kebab-case alias. */
