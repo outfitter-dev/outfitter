@@ -243,16 +243,16 @@ Packages that require peer dependencies are listed below. Install the required p
 }
 ```
 
-| Peer                   | Required For                                                                |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `commander`            | **Core** — `createCLI`, `command()`, all CLI functionality                  |
-| `@outfitter/contracts` | **Core** — Result types, error taxonomy, handler contracts used throughout  |
-| `zod`                  | **Core** — Schema validation in `./query`, `./schema`, `./actions` subpaths |
-| `@outfitter/config`    | Config loading via `./command` — environment profile resolution             |
-| `@outfitter/schema`    | Schema introspection via `./schema` subpath                                 |
-| `@outfitter/types`     | Branded types used in type definitions                                      |
+| Peer                   | Required For                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `commander`            | **Required** — `createCLI`, `command()`, all CLI construction                       |
+| `@outfitter/contracts` | **Required** — `output()`, `exitWithError()`, error taxonomy, type definitions      |
+| `@outfitter/config`    | **Required** — Environment/verbose resolution in `./output`, terminal detection     |
+| `@outfitter/schema`    | Optional — Schema introspection via `./schema` subpath only                         |
+| `zod`                  | Optional — Action schema definitions via `./actions` (transitive via `contracts`)   |
+| `@outfitter/types`     | Optional — Version alignment only (not directly imported)                           |
 
-See also: [CLI peer dependency details](../../packages/cli/docs/peer-dependencies.md) (when available).
+See [CLI peer dependency details](../../packages/cli/docs/peer-dependencies.md) for the full subpath-to-peer matrix.
 
 ### @outfitter/mcp
 
