@@ -9,7 +9,8 @@ Advanced patterns for `@outfitter/cli` covering incremental migration, Commander
 ### Builder-Style Commands
 
 ```typescript
-import { createCLI, command, output } from "@outfitter/cli";
+import { createCLI, command } from "@outfitter/cli/command";
+import { output } from "@outfitter/cli/output";
 
 const cli = createCLI({
   name: "myapp",
@@ -32,7 +33,7 @@ await cli.parse();
 ### Raw Commander Commands
 
 ```typescript
-import { createCLI } from "@outfitter/cli";
+import { createCLI } from "@outfitter/cli/command";
 import { Command } from "commander";
 
 const cli = createCLI({ name: "myapp", version: "1.0.0" });
@@ -53,7 +54,7 @@ await cli.parse();
 ### Mixing Both Styles
 
 ```typescript
-import { createCLI, command } from "@outfitter/cli";
+import { createCLI, command } from "@outfitter/cli/command";
 import { Command } from "commander";
 
 const cli = createCLI({ name: "myapp", version: "1.0.0" });
@@ -105,7 +106,7 @@ When Commander would exit (help display, version output, parse errors), it throw
 The `CLIConfig` interface provides two hooks:
 
 ```typescript
-import { createCLI } from "@outfitter/cli";
+import { createCLI } from "@outfitter/cli/command";
 
 const cli = createCLI({
   name: "myapp",
@@ -163,7 +164,7 @@ expect(exitCode).toBe(0);
 `output()` detects mode from environment variables — it doesn't receive flags directly. The bridge means any command using `output()` automatically respects `--json` without extra wiring:
 
 ```typescript
-import { output } from "@outfitter/cli";
+import { output } from "@outfitter/cli/output";
 
 // No need for conditional format logic:
 // ❌ if (opts.json) output(data, "json"); else output(data);
@@ -204,7 +205,7 @@ Flag presets bundle option definitions with typed resolvers. Compose them to bui
 Apply a preset to a command with `.preset()`:
 
 ```typescript
-import { command } from "@outfitter/cli";
+import { command } from "@outfitter/cli/command";
 import { outputModePreset } from "@outfitter/cli/query";
 
 const mode = outputModePreset({ includeJsonl: true });
