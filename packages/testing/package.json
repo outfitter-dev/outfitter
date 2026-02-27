@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/testing",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Test harnesses, fixtures, and utilities for Outfitter packages",
   "keywords": [
     "fixtures",

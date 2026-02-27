@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/schema",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Schema introspection, surface map generation, and drift detection for Outfitter",
   "keywords": [
     "introspection",

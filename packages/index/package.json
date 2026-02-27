@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/index",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "SQLite FTS5 full-text search indexing for Outfitter",
   "keywords": [
     "fts5",
