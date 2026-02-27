@@ -219,12 +219,14 @@ describe("Signal Handling", () => {
     // Track if signal handlers are registered
     const originalOn = process.on.bind(process);
     const registeredSignals: string[] = [];
-    const onSpy = spyOn(process, "on").mockImplementation((event, listener) => {
-      if (event === "SIGTERM" || event === "SIGINT") {
-        registeredSignals.push(event as string);
+    using _onSpy = spyOn(process, "on").mockImplementation(
+      (event, listener) => {
+        if (event === "SIGTERM" || event === "SIGINT") {
+          registeredSignals.push(event as string);
+        }
+        return originalOn(event, listener);
       }
-      return originalOn(event, listener);
-    });
+    );
 
     await daemon.start();
 
@@ -233,7 +235,6 @@ describe("Signal Handling", () => {
 
     // Cleanup
     await daemon.stop();
-    onSpy.mockRestore();
   });
 
   it("removes signal handlers on stop", async () => {
@@ -242,7 +243,7 @@ describe("Signal Handling", () => {
 
     const originalOff = process.off.bind(process);
     const removedSignals: string[] = [];
-    const offSpy = spyOn(process, "off").mockImplementation(
+    using _offSpy = spyOn(process, "off").mockImplementation(
       (event, listener) => {
         if (event === "SIGTERM" || event === "SIGINT") {
           removedSignals.push(event as string);
@@ -256,8 +257,6 @@ describe("Signal Handling", () => {
 
     expect(removedSignals).toContain("SIGTERM");
     expect(removedSignals).toContain("SIGINT");
-
-    offSpy.mockRestore();
   });
 
   it("handles SIGTERM signal gracefully", async () => {
