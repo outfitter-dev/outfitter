@@ -347,17 +347,28 @@ jobs:
           fi
 
           OUTFITTER_VERSION="$(jq -r '.version' apps/outfitter/package.json)"
+          OUTFITTER_TAG="outfitter@${OUTFITTER_VERSION}"
+          OUTFITTER_TAG_SHA="$(git rev-list -n 1 "${OUTFITTER_TAG}" 2>/dev/null || true)"
           BASE_SHA_FALLBACK="${BASE_SHA:-}"
           if [ -z "$BASE_SHA_FALLBACK" ] || [ "$BASE_SHA_FALLBACK" = "null" ]; then
-            PREV_TAG="$(
-              git tag --list 'outfitter@*' --sort=-creatordate \
-                | grep -v "^outfitter@${OUTFITTER_VERSION}$" \
-                | head -n 1 || true
-            )"
-            if [ -n "$PREV_TAG" ]; then
-              BASE_SHA_FALLBACK="$(git rev-list -n 1 "$PREV_TAG")"
+            # Manual stable publish recovery has no PR base SHA. If the current
+            # outfitter tag points to an older commit, treat this as a package-
+            # only release and compare against that tag's commit.
+            if [ -n "$OUTFITTER_TAG_SHA" ] && [ "$OUTFITTER_TAG_SHA" != "$TARGET_SHA" ]; then
+              BASE_SHA_FALLBACK="$OUTFITTER_TAG_SHA"
             else
-              BASE_SHA_FALLBACK="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+              PREV_TAG="$(
+                git tag --list 'outfitter@*' --sort=-creatordate \
+                  | grep -v "^${OUTFITTER_TAG}$" \
+                  | head -n 1 || true
+              )"
+              if [ -n "$PREV_TAG" ]; then
+                BASE_SHA_FALLBACK="$(git rev-list -n 1 "$PREV_TAG")"
+              elif git rev-parse "${TARGET_SHA}^" >/dev/null 2>&1; then
+                BASE_SHA_FALLBACK="$(git rev-parse "${TARGET_SHA}^")"
+              else
+                BASE_SHA_FALLBACK="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+              fi
             fi
           fi
           BASE_SHA="$BASE_SHA_FALLBACK"
@@ -372,9 +383,6 @@ jobs:
           if [ -n "$OUTFITTER_OLD_VERSION" ] && [ "$OUTFITTER_OLD_VERSION" != "$OUTFITTER_VERSION" ]; then
             OUTFITTER_WAS_BUMPED=1
           fi
-
-          OUTFITTER_TAG="outfitter@${OUTFITTER_VERSION}"
-          OUTFITTER_TAG_SHA="$(git rev-list -n 1 "${OUTFITTER_TAG}" 2>/dev/null || true)"
 
           RELEASE_TAG="$OUTFITTER_TAG"
           RELEASE_TITLE="Outfitter ${OUTFITTER_VERSION}"
