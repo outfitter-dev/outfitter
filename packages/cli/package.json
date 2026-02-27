@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/cli",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
   "keywords": [
     "bun",

@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/tui",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
   "keywords": [
     "bun",

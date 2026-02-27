@@ -20,7 +20,7 @@ title: @outfitter/agents
 >
 > # Or add individual blocks
 > npx outfitter add claude      # Claude Code settings & hooks
-> npx outfitter add biome       # Biome configuration
+> npx outfitter add linter      # oxlint/oxfmt configuration
 > npx outfitter add lefthook    # Git hooks
 > npx outfitter add bootstrap   # Bootstrap script
 > ```
@@ -48,6 +48,7 @@ await initAgentDocs();
 ```
 
 This creates:
+
 - `AGENTS.md` — Guidelines for AI agents working in your project
 - `CLAUDE.md` — Project-level instructions for Claude
 - `.claude/CLAUDE.md` — Additional Claude-specific guidance
@@ -69,10 +70,10 @@ Initialize agent documentation in a directory.
 
 ```typescript
 interface InitOptions {
-  target?: string;   // Target directory (default: cwd)
-  merge?: boolean;   // Merge with existing files (default: false)
-  force?: boolean;   // Overwrite existing files (default: false)
-  quiet?: boolean;   // Suppress output (default: false)
+  target?: string; // Target directory (default: cwd)
+  merge?: boolean; // Merge with existing files (default: false)
+  force?: boolean; // Overwrite existing files (default: false)
+  quiet?: boolean; // Suppress output (default: false)
 }
 
 // Basic initialization
@@ -89,6 +90,7 @@ await initAgentDocs({ force: true });
 ```
 
 **Behavior:**
+
 - Without `force` or `merge`, existing files are skipped
 - With `merge`, only `settings.json` is merged; other files are skipped
 - With `force`, all files are overwritten
@@ -99,10 +101,10 @@ Run development environment bootstrap with optional extensions.
 
 ```typescript
 interface BootstrapOptions {
-  tools?: string[];                  // Additional tools to install
-  extend?: () => Promise<void>;      // Project-specific setup
-  force?: boolean;                   // Skip checks, run full bootstrap
-  quiet?: boolean;                   // Suppress output (for CI)
+  tools?: string[]; // Additional tools to install
+  extend?: () => Promise<void>; // Project-specific setup
+  force?: boolean; // Skip checks, run full bootstrap
+  quiet?: boolean; // Suppress output (for CI)
 }
 
 // Basic bootstrap
@@ -126,11 +128,13 @@ await bootstrap({ quiet: true });
 ```
 
 **Core tools installed:**
+
 - `gh` — GitHub CLI
 - `gt` — Graphite CLI for stacked PRs
 - `markdownlint-cli2` — Markdown linting
 
 **Authentication checks:**
+
 - GitHub CLI (`gh auth status` or `GH_TOKEN`/`GITHUB_TOKEN`)
 - Graphite CLI (`gt auth status` or `GT_AUTH_TOKEN`)
 
@@ -157,6 +161,7 @@ const merged = mergeSettings(existingSettings, defaultSettings);
 ```
 
 **Merge behavior:**
+
 - Arrays are concatenated and deduplicated
 - Objects are recursively merged
 - User values take precedence over defaults
@@ -173,15 +178,19 @@ Guidelines for AI agents working in your codebase:
 Guidelines for AI agents and developers working in this repository.
 
 ## Project Overview
+
 [Project description and context]
 
 ## Project Structure
+
 [Directory layout and conventions]
 
 ## Commands
+
 [Build, test, lint commands]
 
 ## Architecture
+
 [Key patterns and decisions]
 ```
 
@@ -267,11 +276,11 @@ bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ qui
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GH_TOKEN` | GitHub CLI authentication token |
-| `GITHUB_TOKEN` | Alternative GitHub token (fallback) |
-| `GT_AUTH_TOKEN` | Graphite CLI authentication token |
+| Variable        | Description                         |
+| --------------- | ----------------------------------- |
+| `GH_TOKEN`      | GitHub CLI authentication token     |
+| `GITHUB_TOKEN`  | Alternative GitHub token (fallback) |
+| `GT_AUTH_TOKEN` | Graphite CLI authentication token   |
 
 ## Platform Support
 
@@ -295,11 +304,11 @@ CLI commands default to human-readable output. Machine-readable formats are opt-
 
 ## Available Modes
 
-| Mode | Flag | Description |
-|------|------|-------------|
+| Mode    | Flag             | Description                                   |
+| ------- | ---------------- | --------------------------------------------- |
 | `human` | `--output human` | Formatted text for terminal display (default) |
-| `json` | `--output json` | Single JSON object or array |
-| `jsonl` | `--output jsonl` | Newline-delimited JSON (one object per line) |
+| `json`  | `--output json`  | Single JSON object or array                   |
+| `jsonl` | `--output jsonl` | Newline-delimited JSON (one object per line)  |
 
 ## Selecting a Mode
 
@@ -369,18 +378,18 @@ This document catalogs CLI patterns discovered in waymark and firewatch codebase
 
 **Key files analyzed**:
 
-| File | Purpose |
-|------|---------|
-| `src/exit-codes.ts` | Standardized exit code constants |
-| `src/errors.ts` | CliError class with exit code mapping |
-| `src/program.ts` | Commander.js program builder, command registration |
-| `src/utils/output.ts` | JSON/JSONL/text rendering helpers |
-| `src/utils/stdin.ts` | stdin stream reading utilities |
-| `src/utils/terminal.ts` | TTY detection, color support detection |
-| `src/utils/flags/*.ts` | Flag parsing utilities (json, string-list, iterator) |
-| `src/utils/display/pagination.ts` | Basic pagination (slice-based) |
-| `src/utils/display/formatters/styles.ts` | Chalk-based styling utilities |
-| `src/types.ts` | GlobalOptions, CommandContext types |
+| File                                     | Purpose                                              |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `src/exit-codes.ts`                      | Standardized exit code constants                     |
+| `src/errors.ts`                          | CliError class with exit code mapping                |
+| `src/program.ts`                         | Commander.js program builder, command registration   |
+| `src/utils/output.ts`                    | JSON/JSONL/text rendering helpers                    |
+| `src/utils/stdin.ts`                     | stdin stream reading utilities                       |
+| `src/utils/terminal.ts`                  | TTY detection, color support detection               |
+| `src/utils/flags/*.ts`                   | Flag parsing utilities (json, string-list, iterator) |
+| `src/utils/display/pagination.ts`        | Basic pagination (slice-based)                       |
+| `src/utils/display/formatters/styles.ts` | Chalk-based styling utilities                        |
+| `src/types.ts`                           | GlobalOptions, CommandContext types                  |
 
 ### firewatch/apps/cli
 
@@ -388,14 +397,14 @@ This document catalogs CLI patterns discovered in waymark and firewatch codebase
 
 **Key files analyzed**:
 
-| File | Purpose |
-|------|---------|
-| `bin/fw.ts` | Entrypoint with graceful shutdown handlers |
-| `src/index.ts` | Commander.js program with extensive option parsing |
-| `src/utils/json.ts` | JSONL output with backpressure handling |
-| `src/utils/tty.ts` | TTY detection with env var overrides |
-| `src/utils/color.ts` | Lazy-initialized ansis color handling |
-| `src/commands/ack.ts` | Command example with structured output |
+| File                  | Purpose                                            |
+| --------------------- | -------------------------------------------------- |
+| `bin/fw.ts`           | Entrypoint with graceful shutdown handlers         |
+| `src/index.ts`        | Commander.js program with extensive option parsing |
+| `src/utils/json.ts`   | JSONL output with backpressure handling            |
+| `src/utils/tty.ts`    | TTY detection with env var overrides               |
+| `src/utils/color.ts`  | Lazy-initialized ansis color handling              |
+| `src/commands/ack.ts` | Command example with structured output             |
 
 ---
 
@@ -509,7 +518,7 @@ export function shouldOutputJson(
 ```typescript
 export function shouldUseColor(noColorFlag?: boolean): boolean {
   if (noColorFlag) return false;
-  if (hasNoColor()) return false;  // NO_COLOR env
+  if (hasNoColor()) return false; // NO_COLOR env
   if (hasForceColor()) return true; // FORCE_COLOR env
   if (!process.stdout.isTTY) return false;
   if (isDumbTerminal()) return false; // TERM=dumb
@@ -867,9 +876,11 @@ export async function createProgram(): Promise<Command> {
     .configureHelp({
       formatHelp: buildCustomHelpFormatter(),
     })
-    .addOption(new Option("--scope <scope>", "config scope")
-      .choices(["default", "project", "user"])
-      .default("default"))
+    .addOption(
+      new Option("--scope <scope>", "config scope")
+        .choices(["default", "project", "user"])
+        .default("default")
+    )
     .option("--config <path>", "load additional config file")
     .option("--cache", "use scan cache")
     .option("--no-input", "fail if interactive input required")
@@ -888,7 +899,9 @@ export async function createProgram(): Promise<Command> {
       else if (opts.quiet) logger.level = "error";
     });
 
-  registerCommands(program, { /* handlers */ });
+  registerCommands(program, {
+    /* handlers */
+  });
 
   return program;
 }
@@ -922,7 +935,9 @@ program
   .option("--debug", "Enable debug logging")
   .option("--no-color", "Disable color output")
   .addHelpText("after", "Examples:\n  ...")
-  .action(async (options) => { /* ... */ });
+  .action(async (options) => {
+    /* ... */
+  });
 ```
 
 **Key insight**: `enablePositionalOptions()` for better positional arg handling. Example text in help.
@@ -957,8 +972,14 @@ function setupShutdownHandlers(): void {
   };
 
   process.on("exit", shutdown);
-  process.on("SIGINT", () => { shutdown(); process.exit(0); });
-  process.on("SIGTERM", () => { shutdown(); process.exit(0); });
+  process.on("SIGINT", () => {
+    shutdown();
+    process.exit(0);
+  });
+  process.on("SIGTERM", () => {
+    shutdown();
+    process.exit(0);
+  });
   process.on("uncaughtException", (err) => {
     console.error("Uncaught exception:", err);
     shutdown();
@@ -996,11 +1017,14 @@ Outfitter should generalize this pattern:
 
 ```typescript
 // @outfitter/cli output mode detection
-export function resolveOutputMode(options: {
-  json?: boolean;
-  jsonl?: boolean;
-  text?: boolean;
-}, config?: { defaultFormat?: "human" | "json" }): OutputMode {
+export function resolveOutputMode(
+  options: {
+    json?: boolean;
+    jsonl?: boolean;
+    text?: boolean;
+  },
+  config?: { defaultFormat?: "human" | "json" }
+): OutputMode {
   // Explicit flags first
   if (options.json) return "json";
   if (options.jsonl) return "jsonl";
@@ -1027,14 +1051,14 @@ export function resolveOutputMode(options: {
 // @outfitter/cli exit codes (mapped from ErrorCategory)
 export const ExitCode = {
   success: 0,
-  validation: 1,     // Bad input, invalid flags
-  not_found: 2,      // Resource not found
-  conflict: 3,       // State conflict, version mismatch
-  permission: 4,     // Auth/authz failure
-  io: 5,             // File/network/database I/O
-  transient: 6,      // Retry-able failure
-  internal: 7,       // Bug, unexpected state
-  cancelled: 8,      // User cancelled (Ctrl+C handled separately)
+  validation: 1, // Bad input, invalid flags
+  not_found: 2, // Resource not found
+  conflict: 3, // State conflict, version mismatch
+  permission: 4, // Auth/authz failure
+  io: 5, // File/network/database I/O
+  transient: 6, // Retry-able failure
+  internal: 7, // Bug, unexpected state
+  cancelled: 8, // User cancelled (Ctrl+C handled separately)
 } as const;
 ```
 
@@ -1120,6 +1144,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark/firewatch have offset-based pagination but no state persistence.
 
 **Outfitter implementation needed**:
+
 - State storage in `@outfitter/state` (XDG state directory)
 - Per-command cursor serialization
 - `--next` flag that loads last cursor
@@ -1132,6 +1157,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Neither repo implements this.
 
 **Outfitter implementation needed**:
+
 - State keyed by `(command, context)` tuple
 - Default context when not specified
 - State isolation between contexts
@@ -1143,6 +1169,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Neither repo implements this systematically.
 
 **Outfitter implementation needed**:
+
 - `expandFileArg()` utility that reads `@path` files
 - Integration with `collectIds()` for multi-ID collection
 - Support for `@-` reading from stdin
@@ -1154,6 +1181,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has workspace detection but no constrained glob expansion.
 
 **Outfitter implementation needed**:
+
 - `parseGlob()` that enforces paths stay within workspace
 - Integration with `@outfitter/file-ops` for `secureResolvePath()`
 - Error on glob patterns that escape workspace
@@ -1165,6 +1193,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark/firewatch use thrown exceptions.
 
 **Outfitter implementation needed**:
+
 - CLI adapter converts `Result.err()` to appropriate exit code
 - Structured error serialization for `--json` output
 - Error envelope format: `{ ok: false, error: { _tag, message, ... } }`
@@ -1176,6 +1205,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has formatters but no shape abstraction. Firewatch has no abstraction.
 
 **Outfitter implementation needed**:
+
 - `@outfitter/tui/render` shapes
 - `@outfitter/cli` output() function that auto-selects renderer
 - Integration with `--json`, `--jsonl`, `--tree`, `--table` flags
@@ -1187,6 +1217,7 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 **What exists**: Waymark has some handler separation. Firewatch mixes command logic with output.
 
 **Outfitter implementation needed**:
+
 - Clear handler interface: `(input, ctx) => Promise<Result<T, E>>`
 - CLI adapter that maps flags to handler input
 - Handler knows nothing about output format
@@ -1197,18 +1228,18 @@ These features are defined in SPEC.md but do NOT exist in waymark or firewatch. 
 
 Based on SPEC.md and existing patterns:
 
-| Priority | Feature | Source | Notes |
-|----------|---------|--------|-------|
-| P0 | Exit code constants | waymark | Extend with full error category mapping |
-| P0 | Output mode detection | firewatch | Generalize env var pattern |
-| P0 | TTY/color detection | both | Combine best of both |
-| P0 | JSONL with backpressure | firewatch | Critical for streaming |
-| P1 | Commander.js patterns | waymark | Option conflicts, hooks, help customization |
-| P1 | CSV parsing utilities | firewatch | Standardize include/exclude pattern |
-| P1 | Signal handlers | both | Combine with cleanup hooks |
-| P1 | stdin reading | waymark | Extend for @- convention |
-| P2 | Spinner integration | waymark | stderr-based, quiet-aware |
-| P2 | Custom help formatting | waymark | May not need for v1 |
+| Priority | Feature                 | Source    | Notes                                       |
+| -------- | ----------------------- | --------- | ------------------------------------------- |
+| P0       | Exit code constants     | waymark   | Extend with full error category mapping     |
+| P0       | Output mode detection   | firewatch | Generalize env var pattern                  |
+| P0       | TTY/color detection     | both      | Combine best of both                        |
+| P0       | JSONL with backpressure | firewatch | Critical for streaming                      |
+| P1       | Commander.js patterns   | waymark   | Option conflicts, hooks, help customization |
+| P1       | CSV parsing utilities   | firewatch | Standardize include/exclude pattern         |
+| P1       | Signal handlers         | both      | Combine with cleanup hooks                  |
+| P1       | stdin reading           | waymark   | Extend for @- convention                    |
+| P2       | Spinner integration     | waymark   | stderr-based, quiet-aware                   |
+| P2       | Custom help formatting  | waymark   | May not need for v1                         |
 
 ---
 
@@ -1284,11 +1315,11 @@ output(errors, { stream: process.stderr });
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `mode` | `OutputMode` | auto | Force a specific output mode |
-| `stream` | `WritableStream` | `stdout` | Stream to write to |
-| `pretty` | `boolean` | `false` | Pretty-print JSON output |
+| Option   | Type             | Default  | Description                  |
+| -------- | ---------------- | -------- | ---------------------------- |
+| `mode`   | `OutputMode`     | auto     | Force a specific output mode |
+| `stream` | `WritableStream` | `stdout` | Stream to write to           |
+| `pretty` | `boolean`        | `false`  | Pretty-print JSON output     |
 
 **Output Modes:**
 
@@ -1336,10 +1367,10 @@ const ids = await collectIds(args.ids, {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `allowFile` | `boolean` | `true` | Allow `@file` expansion |
-| `allowStdin` | `boolean` | `true` | Allow `@-` for stdin |
+| Option       | Type      | Default | Description             |
+| ------------ | --------- | ------- | ----------------------- |
+| `allowFile`  | `boolean` | `true`  | Allow `@file` expansion |
+| `allowStdin` | `boolean` | `true`  | Allow `@-` for stdin    |
 
 #### `expandFileArg(input, options?)`
 
@@ -1360,11 +1391,11 @@ const content = await expandFileArg(args.content, {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `encoding` | `BufferEncoding` | `utf-8` | File encoding |
-| `maxSize` | `number` | - | Maximum file size in bytes |
-| `trim` | `boolean` | `false` | Trim whitespace |
+| Option     | Type             | Default | Description                |
+| ---------- | ---------------- | ------- | -------------------------- |
+| `encoding` | `BufferEncoding` | `utf-8` | File encoding              |
+| `maxSize`  | `number`         | -       | Maximum file size in bytes |
+| `trim`     | `boolean`        | `false` | Trim whitespace            |
 
 #### `parseGlob(pattern, options?)`
 
@@ -1382,13 +1413,13 @@ const files = await parseGlob("src/**/*.ts", {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cwd` | `string` | `process.cwd()` | Working directory |
-| `ignore` | `string[]` | `[]` | Patterns to exclude |
-| `onlyFiles` | `boolean` | `false` | Only match files |
-| `onlyDirectories` | `boolean` | `false` | Only match directories |
-| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
+| Option            | Type       | Default         | Description            |
+| ----------------- | ---------- | --------------- | ---------------------- |
+| `cwd`             | `string`   | `process.cwd()` | Working directory      |
+| `ignore`          | `string[]` | `[]`            | Patterns to exclude    |
+| `onlyFiles`       | `boolean`  | `false`         | Only match files       |
+| `onlyDirectories` | `boolean`  | `false`         | Only match directories |
+| `followSymlinks`  | `boolean`  | `false`         | Follow symbolic links  |
 
 #### `parseKeyValue(input)`
 
@@ -1447,15 +1478,15 @@ if (result.isOk()) {
 
 **Filter Operators:**
 
-| Prefix | Operator | Description |
-|--------|----------|-------------|
-| (none) | `eq` | Equals (default) |
-| `!` | `ne` | Not equals |
-| `>` | `gt` | Greater than |
-| `<` | `lt` | Less than |
-| `>=` | `gte` | Greater than or equal |
-| `<=` | `lte` | Less than or equal |
-| `~` | `contains` | Contains substring |
+| Prefix | Operator   | Description           |
+| ------ | ---------- | --------------------- |
+| (none) | `eq`       | Equals (default)      |
+| `!`    | `ne`       | Not equals            |
+| `>`    | `gt`       | Greater than          |
+| `<`    | `lt`       | Less than             |
+| `>=`   | `gte`      | Greater than or equal |
+| `<=`   | `lte`      | Less than or equal    |
+| `~`    | `contains` | Contains substring    |
 
 #### `parseSortSpec(input)`
 
@@ -1496,13 +1527,13 @@ if (result.isOk()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `trim` | `boolean` | `false` | Trim whitespace |
+| Option      | Type      | Default | Description          |
+| ----------- | --------- | ------- | -------------------- |
+| `trim`      | `boolean` | `false` | Trim whitespace      |
 | `lowercase` | `boolean` | `false` | Convert to lowercase |
-| `minLength` | `number` | - | Minimum length |
-| `maxLength` | `number` | - | Maximum length |
-| `pattern` | `RegExp` | - | Required pattern |
+| `minLength` | `number`  | -       | Minimum length       |
+| `maxLength` | `number`  | -       | Maximum length       |
+| `pattern`   | `RegExp`  | -       | Required pattern     |
 
 #### `confirmDestructive(options)`
 
@@ -1594,7 +1625,12 @@ if (flags.reset) {
 Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../cli/conventions.md) for the complete catalog.
 
 ```typescript
-import { composePresets, verbosePreset, cwdPreset, forcePreset } from "@outfitter/cli/flags";
+import {
+  composePresets,
+  verbosePreset,
+  cwdPreset,
+  forcePreset,
+} from "@outfitter/cli/flags";
 import { outputModePreset } from "@outfitter/cli/query";
 
 const preset = composePresets(verbosePreset(), cwdPreset(), forcePreset());
@@ -1610,6 +1646,7 @@ command("deploy")
 **Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`
 
 **Additional modules:**
+
 - `@outfitter/cli/verbs` — Standard verb families (`create`, `modify`, `remove`, `list`, `show`)
 - `@outfitter/cli/query` — Output mode and jq expression presets
 - `@outfitter/cli/completion` — Shell completion script generation
@@ -1618,19 +1655,20 @@ command("deploy")
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OUTFITTER_ENV` | Environment profile (`development`, `production`, `test`) | `production` |
-| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`) | - |
-| `OUTFITTER_JSON` | Set to `1` to force JSON output | - |
-| `OUTFITTER_JSONL` | Set to `1` to force JSONL output (takes priority over JSON) | - |
-| `XDG_STATE_HOME` | State directory for pagination | Platform-specific |
+| Variable            | Description                                                 | Default           |
+| ------------------- | ----------------------------------------------------------- | ----------------- |
+| `OUTFITTER_ENV`     | Environment profile (`development`, `production`, `test`)   | `production`      |
+| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`)                          | -                 |
+| `OUTFITTER_JSON`    | Set to `1` to force JSON output                             | -                 |
+| `OUTFITTER_JSONL`   | Set to `1` to force JSONL output (takes priority over JSON) | -                 |
+| `XDG_STATE_HOME`    | State directory for pagination                              | Platform-specific |
 
 ### `resolveVerbose(verbose?)`
 
 Resolve verbose mode from environment configuration. Use this instead of hardcoding verbosity so your CLI responds to `OUTFITTER_ENV` and `OUTFITTER_VERBOSE` automatically.
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
 2. Explicit `verbose` parameter (from `--verbose` CLI flag)
 3. `OUTFITTER_ENV` profile defaults (`true` in development)
@@ -1677,18 +1715,18 @@ The bridge uses `optsWithGlobals()` so global and subcommand `--json` flags both
 
 Exit codes are automatically determined from error categories:
 
-| Category | Exit Code |
-|----------|-----------|
-| `validation` | 1 |
-| `not_found` | 2 |
-| `conflict` | 3 |
-| `permission` | 4 |
-| `timeout` | 5 |
-| `rate_limit` | 6 |
-| `network` | 7 |
-| `internal` | 8 |
-| `auth` | 9 |
-| `cancelled` | 130 |
+| Category     | Exit Code |
+| ------------ | --------- |
+| `validation` | 1         |
+| `not_found`  | 2         |
+| `conflict`   | 3         |
+| `permission` | 4         |
+| `timeout`    | 5         |
+| `rate_limit` | 6         |
+| `network`    | 7         |
+| `internal`   | 8         |
+| `auth`       | 9         |
+| `cancelled`  | 130       |
 
 ### Tagged Errors
 
@@ -1706,9 +1744,18 @@ exitWithError(error); // Exits with code 2
 All types are exported for TypeScript consumers:
 
 ```typescript
-import type { CLIConfig, CommandConfig, CommandAction, CommandFlags } from "@outfitter/cli/command";
+import type {
+  CLIConfig,
+  CommandConfig,
+  CommandAction,
+  CommandFlags,
+} from "@outfitter/cli/command";
 import type { OutputMode, OutputOptions } from "@outfitter/cli/output";
-import type { CollectIdsOptions, ExpandFileOptions, ParseGlobOptions } from "@outfitter/cli/input";
+import type {
+  CollectIdsOptions,
+  ExpandFileOptions,
+  ParseGlobOptions,
+} from "@outfitter/cli/input";
 import type { PaginationState, CursorOptions } from "@outfitter/cli/pagination";
 ```
 
@@ -1787,11 +1834,13 @@ if (result.isOk()) {
 ```
 
 **Parameters:**
+
 - `appName` - Application name for XDG directory lookup
 - `schema` - Zod schema for validation
 - `options.searchPaths` - Custom search paths (overrides XDG defaults)
 
 **Search Order:**
+
 1. Custom `searchPaths` if provided
 2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
 3. `~/.config/{appName}/config.{ext}`
@@ -1816,6 +1865,7 @@ const result = resolveConfig(AppSchema, {
 ```
 
 **Parameters:**
+
 - `schema` - Zod schema for validation
 - `sources` - Configuration sources to merge
 
@@ -1841,6 +1891,7 @@ if (result.isOk()) {
 ```
 
 **Parameters:**
+
 - `content` - Raw file content
 - `filename` - Filename (extension determines parser)
 
@@ -1907,6 +1958,7 @@ const merged = deepMerge(defaults, overrides);
 ```
 
 **Merge Behavior:**
+
 - Recursively merges nested plain objects
 - Arrays are replaced (not concatenated)
 - `null` explicitly replaces the target value
@@ -1922,10 +1974,10 @@ Configuration sources for multi-layer resolution.
 
 ```typescript
 interface ConfigSources<T> {
-  defaults?: Partial<T>;  // Lowest precedence
-  file?: Partial<T>;      // From config file
-  env?: Partial<T>;       // Environment variables
-  flags?: Partial<T>;     // CLI flags (highest)
+  defaults?: Partial<T>; // Lowest precedence
+  file?: Partial<T>; // From config file
+  env?: Partial<T>; // Environment variables
+  flags?: Partial<T>; // CLI flags (highest)
 }
 ```
 
@@ -1935,7 +1987,7 @@ Options for `loadConfig()`.
 
 ```typescript
 interface LoadConfigOptions {
-  searchPaths?: string[];  // Custom search paths
+  searchPaths?: string[]; // Custom search paths
 }
 ```
 
@@ -1984,11 +2036,11 @@ const prodDefaults = getEnvironmentDefaults("production");
 // { logLevel: null, verbose: false, errorDetail: "message" }
 ```
 
-| Setting | `development` | `production` | `test` |
-|---------|--------------|-------------|--------|
-| logLevel | `"debug"` | `null` | `null` |
-| verbose | `true` | `false` | `false` |
-| errorDetail | `"full"` | `"message"` | `"full"` |
+| Setting     | `development` | `production` | `test`   |
+| ----------- | ------------- | ------------ | -------- |
+| logLevel    | `"debug"`     | `null`       | `null`   |
+| verbose     | `true`        | `false`      | `false`  |
+| errorDetail | `"full"`      | `"message"`  | `"full"` |
 
 ### Types
 
@@ -2014,12 +2066,12 @@ interface EnvironmentDefaults {
 
 This package follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) for locating configuration files.
 
-| Variable | macOS/Linux Default | Purpose |
-|----------|---------------------|---------|
-| `XDG_CONFIG_HOME` | `~/.config` | User-specific configuration |
-| `XDG_DATA_HOME` | `~/.local/share` | User-specific data files |
-| `XDG_CACHE_HOME` | `~/.cache` | Non-essential cached data |
-| `XDG_STATE_HOME` | `~/.local/state` | Persistent state (logs, history) |
+| Variable          | macOS/Linux Default | Purpose                          |
+| ----------------- | ------------------- | -------------------------------- |
+| `XDG_CONFIG_HOME` | `~/.config`         | User-specific configuration      |
+| `XDG_DATA_HOME`   | `~/.local/share`    | User-specific data files         |
+| `XDG_CACHE_HOME`  | `~/.cache`          | Non-essential cached data        |
+| `XDG_STATE_HOME`  | `~/.local/state`    | Persistent state (logs, history) |
 
 ---
 
@@ -2045,13 +2097,13 @@ Higher precedence sources override lower ones. Nested objects are deep-merged.
 
 ## Supported File Formats
 
-| Extension | Parser | Notes |
-|-----------|--------|-------|
-| `.toml` | smol-toml | Preferred for configuration |
-| `.yaml`, `.yml` | yaml | YAML anchors/aliases supported |
-| `.json` | JSON.parse | Strict parsing |
-| `.jsonc` | json5 | JSON with comments and trailing commas |
-| `.json5` | json5 | Comments and trailing commas allowed |
+| Extension       | Parser     | Notes                                  |
+| --------------- | ---------- | -------------------------------------- |
+| `.toml`         | smol-toml  | Preferred for configuration            |
+| `.yaml`, `.yml` | yaml       | YAML anchors/aliases supported         |
+| `.json`         | JSON.parse | Strict parsing                         |
+| `.jsonc`        | json5      | JSON with comments and trailing commas |
+| `.json5`        | json5      | Comments and trailing commas allowed   |
 
 ---
 
@@ -2129,18 +2181,18 @@ Outfitter uses 10 error categories to classify all failure modes. Each category 
 
 ## Category Reference
 
-| Category | Exit Code | HTTP Status | Description |
-|----------|-----------|-------------|-------------|
-| `validation` | 1 | 400 | Invalid input, schema violation, constraint failure |
-| `not_found` | 2 | 404 | Requested resource does not exist |
-| `conflict` | 3 | 409 | Resource state conflict (e.g., duplicate creation) |
-| `permission` | 4 | 403 | Insufficient permissions for the operation |
-| `timeout` | 5 | 504 | Operation exceeded its time limit |
-| `rate_limit` | 6 | 429 | Request rate exceeded, try again later |
-| `network` | 7 | 502 | Network or upstream service failure |
-| `internal` | 8 | 500 | Unexpected internal error |
-| `auth` | 9 | 401 | Authentication required or invalid credentials |
-| `cancelled` | 130 | 499 | Operation cancelled by user (POSIX: 128 + SIGINT) |
+| Category     | Exit Code | HTTP Status | Description                                         |
+| ------------ | --------- | ----------- | --------------------------------------------------- |
+| `validation` | 1         | 400         | Invalid input, schema violation, constraint failure |
+| `not_found`  | 2         | 404         | Requested resource does not exist                   |
+| `conflict`   | 3         | 409         | Resource state conflict (e.g., duplicate creation)  |
+| `permission` | 4         | 403         | Insufficient permissions for the operation          |
+| `timeout`    | 5         | 504         | Operation exceeded its time limit                   |
+| `rate_limit` | 6         | 429         | Request rate exceeded, try again later              |
+| `network`    | 7         | 502         | Network or upstream service failure                 |
+| `internal`   | 8         | 500         | Unexpected internal error                           |
+| `auth`       | 9         | 401         | Authentication required or invalid credentials      |
+| `cancelled`  | 130       | 499         | Operation cancelled by user (POSIX: 128 + SIGINT)   |
 
 ## Usage
 
@@ -2158,7 +2210,7 @@ NotFoundError.create("user", userId);
 ```typescript
 import { getExitCode, getStatusCode } from "@outfitter/contracts";
 
-getExitCode("not_found");   // 2
+getExitCode("not_found"); // 2
 getStatusCode("not_found"); // 404
 ```
 
@@ -2214,7 +2266,10 @@ import {
 } from "@outfitter/contracts";
 
 // Define a handler
-const getNote: Handler<{ id: string }, Note, NotFoundError> = async (input, ctx) => {
+const getNote: Handler<{ id: string }, Note, NotFoundError> = async (
+  input,
+  ctx
+) => {
   const note = await db.notes.find(input.id);
   if (!note) return Result.err(NotFoundError.create("note", input.id));
   return Result.ok(note);
@@ -2229,21 +2284,21 @@ const result = await getNote({ id: "abc123" }, ctx);
 
 All error classes provide a static `create()` factory method that generates a consistent message from structured parameters. Use `create()` for structured errors and the constructor for custom messages.
 
-| Error Class | `create()` Signature | Generated Message |
-|---|---|---|
-| `ValidationError` | `create(field, reason, context?)` | `"email: format invalid"` |
-| `ValidationError` | `fromMessage(message, context?)` | *(your message as-is)* |
-| `AmbiguousError` | `create(what, candidates, context?)` | `"Ambiguous heading: 2 matches found"` |
-| `NotFoundError` | `create(resourceType, resourceId, context?)` | `"note not found: abc123"` |
+| Error Class          | `create()` Signature                         | Generated Message                         |
+| -------------------- | -------------------------------------------- | ----------------------------------------- |
+| `ValidationError`    | `create(field, reason, context?)`            | `"email: format invalid"`                 |
+| `ValidationError`    | `fromMessage(message, context?)`             | _(your message as-is)_                    |
+| `AmbiguousError`     | `create(what, candidates, context?)`         | `"Ambiguous heading: 2 matches found"`    |
+| `NotFoundError`      | `create(resourceType, resourceId, context?)` | `"note not found: abc123"`                |
 | `AlreadyExistsError` | `create(resourceType, resourceId, context?)` | `"file already exists: notes/meeting.md"` |
-| `ConflictError` | `create(message, context?)` | *(your message as-is)* |
-| `PermissionError` | `create(message, context?)` | *(your message as-is)* |
-| `TimeoutError` | `create(operation, timeoutMs)` | `"database query timed out after 5000ms"` |
-| `RateLimitError` | `create(message, retryAfterSeconds?)` | *(your message as-is)* |
-| `NetworkError` | `create(message, context?)` | *(your message as-is)* |
-| `InternalError` | `create(message, context?)` | *(your message as-is)* |
-| `AuthError` | `create(message, reason?)` | *(your message as-is)* |
-| `CancelledError` | `create(message)` | *(your message as-is)* |
+| `ConflictError`      | `create(message, context?)`                  | _(your message as-is)_                    |
+| `PermissionError`    | `create(message, context?)`                  | _(your message as-is)_                    |
+| `TimeoutError`       | `create(operation, timeoutMs)`               | `"database query timed out after 5000ms"` |
+| `RateLimitError`     | `create(message, retryAfterSeconds?)`        | _(your message as-is)_                    |
+| `NetworkError`       | `create(message, context?)`                  | _(your message as-is)_                    |
+| `InternalError`      | `create(message, context?)`                  | _(your message as-is)_                    |
+| `AuthError`          | `create(message, reason?)`                   | _(your message as-is)_                    |
+| `CancelledError`     | `create(message)`                            | _(your message as-is)_                    |
 
 ### Message Casing
 
@@ -2371,6 +2426,7 @@ const daemonDir = getDaemonDir("waymark");
 ```
 
 Path resolution follows XDG standards:
+
 - `$XDG_RUNTIME_DIR` takes precedence if set
 - Linux: Falls back to `/run/user/<uid>`
 - macOS: Uses `$TMPDIR`
@@ -2432,8 +2488,8 @@ if (pid !== undefined) {
 
 ```typescript
 interface LockHandle {
-  readonly lockPath: string;  // Path to the lock file
-  readonly pid: number;       // PID that owns the lock
+  readonly lockPath: string; // Path to the lock file
+  readonly pid: number; // PID that owns the lock
 }
 ```
 
@@ -2449,8 +2505,8 @@ import { createDaemon, type DaemonOptions } from "@outfitter/daemon";
 const options: DaemonOptions = {
   name: "my-daemon",
   pidFile: "/var/run/my-daemon.pid",
-  logger: myLogger,           // Optional @outfitter/logging instance
-  shutdownTimeout: 10000,     // Optional, default: 5000ms
+  logger: myLogger, // Optional @outfitter/logging instance
+  shutdownTimeout: 10000, // Optional, default: 5000ms
 };
 
 const daemon = createDaemon(options);
@@ -2476,8 +2532,8 @@ if (startResult.isErr()) {
 }
 
 // Check running state
-console.log("Running:", daemon.isRunning());  // true
-console.log("State:", daemon.state);          // "running"
+console.log("Running:", daemon.isRunning()); // true
+console.log("State:", daemon.state); // "running"
 
 // Stop gracefully (also triggered by SIGTERM/SIGINT)
 const stopResult = await daemon.stop();
@@ -2490,14 +2546,15 @@ if (stopResult.isErr()) {
 
 The daemon follows a state machine:
 
-| State | Description |
-|-------|-------------|
-| `stopped` | Initial state, daemon not running |
+| State      | Description                                  |
+| ---------- | -------------------------------------------- |
+| `stopped`  | Initial state, daemon not running            |
 | `starting` | Transitioning to running (creating PID file) |
-| `running` | Daemon is active and processing |
-| `stopping` | Graceful shutdown in progress |
+| `running`  | Daemon is active and processing              |
+| `stopping` | Graceful shutdown in progress                |
 
 State transitions:
+
 - `stopped` -> `starting` -> `running` (via `start()`)
 - `running` -> `stopping` -> `stopped` (via `stop()` or signal)
 - `starting` -> `stopped` (if start fails)
@@ -2650,7 +2707,7 @@ checker.register({
 ```typescript
 const status = await checker.check();
 
-console.log("Overall healthy:", status.healthy);  // true only if ALL checks pass
+console.log("Overall healthy:", status.healthy); // true only if ALL checks pass
 console.log("Uptime (seconds):", status.uptime);
 console.log("Checks:", status.checks);
 // {
@@ -2678,13 +2735,13 @@ interface HealthCheck {
 
 interface HealthCheckResult {
   healthy: boolean;
-  message?: string;  // Error message on failure
+  message?: string; // Error message on failure
 }
 
 interface HealthStatus {
-  healthy: boolean;                          // true only if ALL checks pass
+  healthy: boolean; // true only if ALL checks pass
   checks: Record<string, HealthCheckResult>; // Individual results
-  uptime: number;                            // Seconds since checker created
+  uptime: number; // Seconds since checker created
 }
 
 interface HealthChecker {
@@ -2709,11 +2766,11 @@ const error = new DaemonError({
 
 // Error codes
 type DaemonErrorCode =
-  | "ALREADY_RUNNING"    // Daemon start requested but already running
-  | "NOT_RUNNING"        // Daemon stop requested but not running
-  | "SHUTDOWN_TIMEOUT"   // Graceful shutdown exceeded timeout
-  | "PID_ERROR"          // PID file operations failed
-  | "START_FAILED";      // Daemon failed to start
+  | "ALREADY_RUNNING" // Daemon start requested but already running
+  | "NOT_RUNNING" // Daemon stop requested but not running
+  | "SHUTDOWN_TIMEOUT" // Graceful shutdown exceeded timeout
+  | "PID_ERROR" // PID file operations failed
+  | "START_FAILED"; // Daemon failed to start
 ```
 
 ### Connection Errors
@@ -2754,11 +2811,11 @@ const lockError = new LockError({
 
 ## Platform Support
 
-| Platform | Socket Type | Runtime Dir |
-|----------|-------------|-------------|
-| Linux | Unix domain socket | `$XDG_RUNTIME_DIR` or `/run/user/<uid>` |
-| macOS | Unix domain socket | `$TMPDIR` |
-| Windows | Named pipe | `%TEMP%` |
+| Platform | Socket Type        | Runtime Dir                             |
+| -------- | ------------------ | --------------------------------------- |
+| Linux    | Unix domain socket | `$XDG_RUNTIME_DIR` or `/run/user/<uid>` |
+| macOS    | Unix domain socket | `$TMPDIR`                               |
+| Windows  | Named pipe         | `%TEMP%`                                |
 
 ## Related Packages
 
@@ -2841,7 +2898,7 @@ import {
   securePath,
   glob,
   withLock,
-  atomicWrite
+  atomicWrite,
 } from "@outfitter/file-ops";
 
 // Find workspace root by marker files (.git, package.json)
@@ -2859,7 +2916,7 @@ if (rootResult.isOk()) {
 // Find files with glob patterns
 const files = await glob("**/*.ts", {
   cwd: "/project",
-  ignore: ["node_modules/**", "**/*.test.ts"]
+  ignore: ["node_modules/**", "**/*.test.ts"],
 });
 
 // Atomic write with file locking
@@ -2885,16 +2942,16 @@ if (result.isOk()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option    | Type       | Default                    | Description                            |
+| --------- | ---------- | -------------------------- | -------------------------------------- |
 | `markers` | `string[]` | `[".git", "package.json"]` | Marker files/directories to search for |
-| `stopAt` | `string` | filesystem root | Stop searching at this directory |
+| `stopAt`  | `string`   | filesystem root            | Stop searching at this directory       |
 
 ```typescript
 // Custom markers for Rust or Python projects
 const result = await findWorkspaceRoot(startPath, {
   markers: ["Cargo.toml", "pyproject.toml"],
-  stopAt: "/home/user"
+  stopAt: "/home/user",
 });
 ```
 
@@ -2927,12 +2984,12 @@ console.log(outside); // false
 
 #### Security Model
 
-| Attack Vector | Protection |
-|--------------|------------|
-| Path traversal (`../`) | Blocked by all security functions |
-| Null bytes (`\x00`) | Rejected immediately |
-| Absolute paths | Blocked when relative expected |
-| Escape from base directory | Defense-in-depth verification |
+| Attack Vector              | Protection                        |
+| -------------------------- | --------------------------------- |
+| Path traversal (`../`)     | Blocked by all security functions |
+| Null bytes (`\x00`)        | Rejected immediately              |
+| Absolute paths             | Blocked when relative expected    |
+| Escape from base directory | Defense-in-depth verification     |
 
 #### `securePath(path, basePath)`
 
@@ -2947,9 +3004,9 @@ if (result.isOk()) {
 }
 
 // These all return ValidationError:
-securePath("../etc/passwd", base);      // Traversal sequence
-securePath("/etc/passwd", base);        // Absolute path
-securePath("file\x00.txt", base);       // Null byte
+securePath("../etc/passwd", base); // Traversal sequence
+securePath("/etc/passwd", base); // Absolute path
+securePath("file\x00.txt", base); // Null byte
 ```
 
 **UNSAFE pattern - never do this:**
@@ -2986,8 +3043,8 @@ if (result.isOk()) {
 }
 
 // Rejects dangerous segments
-resolveSafePath("/app", "..", "etc");     // Error: traversal
-resolveSafePath("/app", "/etc/passwd");   // Error: absolute segment
+resolveSafePath("/app", "..", "etc"); // Error: traversal
+resolveSafePath("/app", "/etc/passwd"); // Error: absolute segment
 ```
 
 ### Glob Patterns
@@ -3003,7 +3060,7 @@ const result = await glob("**/*.ts", { cwd: "/project" });
 // Exclude test files and node_modules
 const result = await glob("**/*.ts", {
   cwd: "/project",
-  ignore: ["**/*.test.ts", "**/node_modules/**"]
+  ignore: ["**/*.test.ts", "**/node_modules/**"],
 });
 
 // Include dot files
@@ -3012,28 +3069,28 @@ const result = await glob("**/.*", { cwd: "/project", dot: true });
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cwd` | `string` | `process.cwd()` | Base directory for matching |
-| `ignore` | `string[]` | `[]` | Patterns to exclude |
-| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
-| `dot` | `boolean` | `false` | Include dot files |
+| Option           | Type       | Default         | Description                 |
+| ---------------- | ---------- | --------------- | --------------------------- |
+| `cwd`            | `string`   | `process.cwd()` | Base directory for matching |
+| `ignore`         | `string[]` | `[]`            | Patterns to exclude         |
+| `followSymlinks` | `boolean`  | `false`         | Follow symbolic links       |
+| `dot`            | `boolean`  | `false`         | Include dot files           |
 
 **Pattern Syntax:**
 
-| Pattern | Matches |
-|---------|---------|
-| `*` | Any characters except `/` |
-| `**` | Any characters including `/` (recursive) |
-| `{a,b}` | Alternation (matches `a` or `b`) |
-| `[abc]` | Character class (matches `a`, `b`, or `c`) |
-| `!pattern` | Negation (in ignore array) |
+| Pattern    | Matches                                    |
+| ---------- | ------------------------------------------ |
+| `*`        | Any characters except `/`                  |
+| `**`       | Any characters including `/` (recursive)   |
+| `{a,b}`    | Alternation (matches `a` or `b`)           |
+| `[abc]`    | Character class (matches `a`, `b`, or `c`) |
+| `!pattern` | Negation (in ignore array)                 |
 
 ```typescript
 // Negation patterns in ignore array
 const result = await glob("src/**/*.ts", {
   cwd: "/project",
-  ignore: ["**/*.ts", "!**/index.ts"]  // Ignore all except index.ts
+  ignore: ["**/*.ts", "!**/index.ts"], // Ignore all except index.ts
 });
 ```
 
@@ -3100,9 +3157,9 @@ if (await isLocked("/data/file.db")) {
 
 ```typescript
 interface FileLock {
-  path: string;      // Path to the locked file
-  lockPath: string;  // Path to the .lock file
-  pid: number;       // Process ID holding the lock
+  path: string; // Path to the locked file
+  lockPath: string; // Path to the .lock file
+  pid: number; // Process ID holding the lock
   timestamp: number; // When lock was acquired
 }
 ```
@@ -3124,21 +3181,21 @@ if (result.isErr()) {
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `createParentDirs` | `boolean` | `true` | Create parent directories if needed |
+| Option                | Type      | Default | Description                         |
+| --------------------- | --------- | ------- | ----------------------------------- |
+| `createParentDirs`    | `boolean` | `true`  | Create parent directories if needed |
 | `preservePermissions` | `boolean` | `false` | Keep permissions from existing file |
-| `mode` | `number` | `0o644` | File mode for new files |
+| `mode`                | `number`  | `0o644` | File mode for new files             |
 
 ```typescript
 // Preserve executable permissions
 await atomicWrite("/scripts/run.sh", newContent, {
-  preservePermissions: true
+  preservePermissions: true,
 });
 
 // Create nested directories automatically
 await atomicWrite("/data/deep/nested/file.json", content, {
-  createParentDirs: true
+  createParentDirs: true,
 });
 ```
 
@@ -3150,7 +3207,7 @@ Serializes and writes JSON data atomically.
 const result = await atomicWriteJson("/data/config.json", {
   name: "app",
   version: "1.0.0",
-  settings: { debug: false }
+  settings: { debug: false },
 });
 ```
 
@@ -3173,12 +3230,12 @@ if (result.isOk()) {
 
 **Error Types:**
 
-| Error | Functions | When |
-|-------|-----------|------|
-| `NotFoundError` | `findWorkspaceRoot`, `getRelativePath` | No workspace marker found |
-| `ValidationError` | `securePath`, `isPathSafe`, `resolveSafePath`, `atomicWriteJson` | Invalid path or data |
-| `ConflictError` | `acquireLock`, `withLock` | File already locked |
-| `InternalError` | `glob`, `releaseLock`, `withLock`, `atomicWrite` | Filesystem or system error |
+| Error             | Functions                                                        | When                       |
+| ----------------- | ---------------------------------------------------------------- | -------------------------- |
+| `NotFoundError`   | `findWorkspaceRoot`, `getRelativePath`                           | No workspace marker found  |
+| `ValidationError` | `securePath`, `isPathSafe`, `resolveSafePath`, `atomicWriteJson` | Invalid path or data       |
+| `ConflictError`   | `acquireLock`, `withLock`                                        | File already locked        |
+| `InternalError`   | `glob`, `releaseLock`, `withLock`, `atomicWrite`                 | Filesystem or system error |
 
 ## Dependencies
 
@@ -3251,12 +3308,12 @@ Creates an FTS5 full-text search index.
 
 ```typescript
 interface IndexOptions {
-  path: string;                   // Path to SQLite database file
-  tableName?: string;             // FTS5 table name (default: "documents")
-  tokenizer?: TokenizerType;      // Tokenizer (default: "unicode61")
-  tool?: string;                  // Tool identifier for metadata
-  toolVersion?: string;           // Tool version for metadata
-  migrations?: IndexMigrationRegistry;  // Optional migration registry
+  path: string; // Path to SQLite database file
+  tableName?: string; // FTS5 table name (default: "documents")
+  tokenizer?: TokenizerType; // Tokenizer (default: "unicode61")
+  tool?: string; // Tool identifier for metadata
+  toolVersion?: string; // Tool version for metadata
+  migrations?: IndexMigrationRegistry; // Optional migration registry
 }
 
 const index = createIndex<MyMetadata>({
@@ -3268,11 +3325,11 @@ const index = createIndex<MyMetadata>({
 
 ### Tokenizer Types
 
-| Tokenizer | Use Case |
-|-----------|----------|
-| `unicode61` | Default, Unicode-aware word tokenization |
-| `porter` | English text with stemming (finds "running" when searching "run") |
-| `trigram` | Substring matching, typo tolerance |
+| Tokenizer   | Use Case                                                          |
+| ----------- | ----------------------------------------------------------------- |
+| `unicode61` | Default, Unicode-aware word tokenization                          |
+| `porter`    | English text with stemming (finds "running" when searching "run") |
+| `trigram`   | Substring matching, typo tolerance                                |
 
 ### Index Methods
 
@@ -3302,9 +3359,9 @@ interface Index<T = unknown> {
 
 ```typescript
 interface IndexDocument {
-  id: string;                           // Unique document ID
-  content: string;                      // Searchable text
-  metadata?: Record<string, unknown>;   // Optional metadata (stored as JSON)
+  id: string; // Unique document ID
+  content: string; // Searchable text
+  metadata?: Record<string, unknown>; // Optional metadata (stored as JSON)
 }
 
 await index.add({
@@ -3322,9 +3379,9 @@ await index.add({
 
 ```typescript
 interface SearchQuery {
-  query: string;    // FTS5 query string
-  limit?: number;   // Max results (default: 25)
-  offset?: number;  // Skip results for pagination (default: 0)
+  query: string; // FTS5 query string
+  limit?: number; // Max results (default: 25)
+  offset?: number; // Skip results for pagination (default: 0)
 }
 
 // Simple search
@@ -3342,24 +3399,24 @@ const paged = await index.search({
 
 FTS5 supports powerful query syntax:
 
-| Syntax | Example | Description |
-|--------|---------|-------------|
-| Terms | `typescript bun` | Match all terms (implicit AND) |
-| Phrase | `"error handling"` | Exact phrase match |
-| OR | `ts OR typescript` | Match either term |
-| NOT | `typescript NOT javascript` | Exclude term |
-| Prefix | `type*` | Prefix matching |
-| Grouping | `(react OR vue) AND typescript` | Complex queries |
+| Syntax   | Example                         | Description                    |
+| -------- | ------------------------------- | ------------------------------ |
+| Terms    | `typescript bun`                | Match all terms (implicit AND) |
+| Phrase   | `"error handling"`              | Exact phrase match             |
+| OR       | `ts OR typescript`              | Match either term              |
+| NOT      | `typescript NOT javascript`     | Exclude term                   |
+| Prefix   | `type*`                         | Prefix matching                |
+| Grouping | `(react OR vue) AND typescript` | Complex queries                |
 
 ### Search Results
 
 ```typescript
 interface SearchResult<T = unknown> {
-  id: string;           // Document ID
-  content: string;      // Full document content
-  score: number;        // BM25 relevance (negative; closer to 0 = better match)
-  metadata?: T;         // Document metadata
-  highlights?: string[];  // Matching snippets with <b> tags
+  id: string; // Document ID
+  content: string; // Full document content
+  score: number; // BM25 relevance (negative; closer to 0 = better match)
+  metadata?: T; // Document metadata
+  highlights?: string[]; // Matching snippets with <b> tags
 }
 
 const results = await index.search({ query: "hello world" });
@@ -3429,7 +3486,7 @@ interface IndexMigrationRegistry {
 }
 
 interface IndexMigrationContext {
-  db: Database;  // bun:sqlite Database instance
+  db: Database; // bun:sqlite Database instance
 }
 ```
 
@@ -3439,10 +3496,10 @@ Indexes store metadata for tracking provenance:
 
 ```typescript
 interface IndexMetadata {
-  version: number;      // Schema version
-  created: string;      // ISO timestamp
-  tool: string;         // Creating tool identifier
-  toolVersion: string;  // Creating tool version
+  version: number; // Schema version
+  created: string; // ISO timestamp
+  tool: string; // Creating tool identifier
+  toolVersion: string; // Creating tool version
 }
 ```
 
@@ -3470,6 +3527,7 @@ if (result.isErr()) {
 ```
 
 Common error scenarios:
+
 - Index closed after `close()` called
 - Invalid table name or tokenizer
 - SQLite errors (disk full, permissions)
@@ -3680,7 +3738,7 @@ Routes logs to stdout/stderr based on level:
 
 - `trace`, `debug`, `info` -> stdout
 - `warn`, `error`, `fatal` -> stderr
- - Falls back to `console.*` when process streams are unavailable (edge/serverless)
+- Falls back to `console.*` when process streams are unavailable (edge/serverless)
 
 ```typescript
 import { createConsoleSink } from "@outfitter/logging";
@@ -3699,9 +3757,9 @@ const jsonLogger = createLogger({
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `colors` | `boolean` | auto-detect | Enable ANSI colors |
+| Option      | Type        | Default                   | Description          |
+| ----------- | ----------- | ------------------------- | -------------------- |
+| `colors`    | `boolean`   | auto-detect               | Enable ANSI colors   |
 | `formatter` | `Formatter` | `createPrettyFormatter()` | Custom log formatter |
 
 ### File Sink
@@ -3822,6 +3880,7 @@ Resolve the log level from environment configuration. Use this instead of hardco
 Accepts `LogLevel` or a plain `string` — useful when forwarding CLI flags or MCP values without casting. Invalid strings are ignored and fall through to the next precedence level.
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_LOG_LEVEL` environment variable
 2. Explicit `level` parameter
 3. `OUTFITTER_ENV` profile defaults (`"debug"` in development)
@@ -3914,19 +3973,20 @@ customLogger.info("Hello from custom backend");
 
 ## Runtime Compatibility
 
-| Export | Node.js | Bun | Edge/V8 Isolates | Notes |
-|---|---|---|---|---|
-| `createLogger` | Yes | Yes | Yes | Universal |
-| `createConsoleSink` | Yes | Yes | Yes | Falls back to `console.*` when `process` unavailable |
-| `createFileSink` | No | Yes | No | Requires `Bun.file` / `Bun.write` |
-| `createJsonFormatter` | Yes | Yes | Yes | Universal |
-| `createPrettyFormatter` | Yes | Yes | Yes | Universal |
-| `resolveLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
-| `resolveOutfitterLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
-| `configureRedaction` | Yes | Yes | Yes | Universal |
-| `flush` | Yes | Yes | Yes | Universal |
+| Export                     | Node.js | Bun | Edge/V8 Isolates | Notes                                                |
+| -------------------------- | ------- | --- | ---------------- | ---------------------------------------------------- |
+| `createLogger`             | Yes     | Yes | Yes              | Universal                                            |
+| `createConsoleSink`        | Yes     | Yes | Yes              | Falls back to `console.*` when `process` unavailable |
+| `createFileSink`           | No      | Yes | No               | Requires `Bun.file` / `Bun.write`                    |
+| `createJsonFormatter`      | Yes     | Yes | Yes              | Universal                                            |
+| `createPrettyFormatter`    | Yes     | Yes | Yes              | Universal                                            |
+| `resolveLogLevel`          | Yes     | Yes | Yes              | Guards `process.env` access                          |
+| `resolveOutfitterLogLevel` | Yes     | Yes | Yes              | Guards `process.env` access                          |
+| `configureRedaction`       | Yes     | Yes | Yes              | Universal                                            |
+| `flush`                    | Yes     | Yes | Yes              | Universal                                            |
 
 Edge-runtime notes:
+
 - `resolveLogLevel()` safely returns defaults when `process` is undefined
 - `createConsoleSink()` auto-detects TTY via `process.stdout?.isTTY` with graceful fallback
 
@@ -3934,32 +3994,32 @@ Edge-runtime notes:
 
 ### Functions
 
-| Function                | Description                                         |
-| ----------------------- | --------------------------------------------------- |
-| `createLogger`          | Create a configured logger instance                 |
-| `createChildLogger`     | Create a child logger with merged context           |
-| `resolveLogLevel`       | Resolve log level from env vars and profile         |
-| `configureRedaction`    | Configure global redaction patterns and keys        |
-| `flush`                 | Flush all pending log writes across all sinks       |
-| `createJsonFormatter`   | Create a JSON formatter for structured output       |
-| `createPrettyFormatter` | Create a human-readable formatter with colors       |
-| `createConsoleSink`     | Create a console sink (stdout/stderr routing)       |
-| `createFileSink`        | Create a file sink with buffered writes             |
+| Function                | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `createLogger`          | Create a configured logger instance           |
+| `createChildLogger`     | Create a child logger with merged context     |
+| `resolveLogLevel`       | Resolve log level from env vars and profile   |
+| `configureRedaction`    | Configure global redaction patterns and keys  |
+| `flush`                 | Flush all pending log writes across all sinks |
+| `createJsonFormatter`   | Create a JSON formatter for structured output |
+| `createPrettyFormatter` | Create a human-readable formatter with colors |
+| `createConsoleSink`     | Create a console sink (stdout/stderr routing) |
+| `createFileSink`        | Create a file sink with buffered writes       |
 
 ### Types
 
-| Type                     | Description                                     |
-| ------------------------ | ----------------------------------------------- |
-| `LogLevel`               | Union of log level strings                      |
-| `LogRecord`              | Structured log record with timestamp/metadata   |
-| `LoggerConfig`           | Configuration options for `createLogger`        |
-| `LoggerInstance`         | Logger interface with level methods             |
-| `RedactionConfig`        | Per-logger redaction configuration              |
-| `GlobalRedactionConfig`  | Global redaction patterns and keys              |
-| `Formatter`              | Interface for log record formatting             |
-| `Sink`                   | Interface for log output destinations           |
-| `PrettyFormatterOptions` | Options for human-readable formatter            |
-| `FileSinkOptions`        | Options for file sink configuration             |
+| Type                     | Description                                   |
+| ------------------------ | --------------------------------------------- |
+| `LogLevel`               | Union of log level strings                    |
+| `LogRecord`              | Structured log record with timestamp/metadata |
+| `LoggerConfig`           | Configuration options for `createLogger`      |
+| `LoggerInstance`         | Logger interface with level methods           |
+| `RedactionConfig`        | Per-logger redaction configuration            |
+| `GlobalRedactionConfig`  | Global redaction patterns and keys            |
+| `Formatter`              | Interface for log record formatting           |
+| `Sink`                   | Interface for log output destinations         |
+| `PrettyFormatterOptions` | Options for human-readable formatter          |
+| `FileSinkOptions`        | Options for file sink configuration           |
 
 ## Upgrading
 
@@ -4031,9 +4091,9 @@ Creates an MCP server instance.
 
 ```typescript
 interface McpServerOptions {
-  name: string;           // Server name for MCP handshake
-  version: string;        // Server version (semver)
-  logger?: Logger;        // Optional structured logger (BYO)
+  name: string; // Server name for MCP handshake
+  version: string; // Server version (semver)
+  logger?: Logger; // Optional structured logger (BYO)
   defaultLogLevel?: McpLogLevel | null; // Default log forwarding level
 }
 
@@ -4117,6 +4177,7 @@ const server = createMcpServer({
 MCP servers can forward log messages to the connected client. The default log level is resolved from environment configuration:
 
 **Precedence** (highest wins):
+
 1. `OUTFITTER_LOG_LEVEL` environment variable
 2. `options.defaultLogLevel`
 3. `OUTFITTER_ENV` profile defaults (`"debug"` in development, `null` otherwise)
@@ -4153,11 +4214,11 @@ Helper for defining typed tools with better type inference.
 
 ```typescript
 interface ToolDefinition<TInput, TOutput, TError> {
-  name: string;                    // Unique tool name (kebab-case)
-  description: string;             // Human-readable description
-  inputSchema: z.ZodType<TInput>;  // Zod schema for validation
+  name: string; // Unique tool name (kebab-case)
+  description: string; // Human-readable description
+  inputSchema: z.ZodType<TInput>; // Zod schema for validation
   handler: Handler<TInput, TOutput, TError>;
-  deferLoading?: boolean;          // Default: true
+  deferLoading?: boolean; // Default: true
 }
 
 const getUserTool = defineTool({
@@ -4180,10 +4241,10 @@ Helper for defining MCP resources.
 
 ```typescript
 interface ResourceDefinition {
-  uri: string;           // Unique resource URI
-  name: string;          // Human-readable name
-  description?: string;  // Optional description
-  mimeType?: string;     // Content MIME type
+  uri: string; // Unique resource URI
+  name: string; // Human-readable name
+  description?: string; // Optional description
+  mimeType?: string; // Content MIME type
   handler?: ResourceReadHandler; // Optional resources/read handler
 }
 
@@ -4232,7 +4293,11 @@ interface McpServer {
 
   // Invocation
   readResource(uri: string): Promise<Result<ResourceContent[], McpError>>;
-  invokeTool<T>(name: string, input: unknown, options?: InvokeToolOptions): Promise<Result<T, McpError>>;
+  invokeTool<T>(
+    name: string,
+    input: unknown,
+    options?: InvokeToolOptions
+  ): Promise<Result<T, McpError>>;
 
   // Lifecycle
   start(): Promise<void>;
@@ -4246,7 +4311,7 @@ Extended handler context for MCP tools with additional metadata:
 
 ```typescript
 interface McpHandlerContext extends HandlerContext {
-  toolName?: string;  // Name of the tool being invoked
+  toolName?: string; // Name of the tool being invoked
 }
 ```
 
@@ -4349,7 +4414,9 @@ const listTool = defineTool({
   description: "List all items",
   inputSchema: z.object({}),
   annotations: TOOL_ANNOTATIONS.readOnly,
-  handler: async (input, ctx) => { /* ... */ },
+  handler: async (input, ctx) => {
+    /* ... */
+  },
 });
 
 // Spread and override for edge cases
@@ -4358,17 +4425,19 @@ const searchTool = defineTool({
   description: "Search external APIs",
   inputSchema: z.object({ q: z.string() }),
   annotations: { ...TOOL_ANNOTATIONS.readOnly, openWorldHint: true },
-  handler: async (input, ctx) => { /* ... */ },
+  handler: async (input, ctx) => {
+    /* ... */
+  },
 });
 ```
 
-| Preset | readOnly | destructive | idempotent | openWorld |
-|--------|----------|-------------|------------|-----------|
-| `readOnly` | true | false | true | false |
-| `write` | false | false | false | false |
-| `writeIdempotent` | false | false | true | false |
-| `destructive` | false | true | true | false |
-| `openWorld` | false | false | false | true |
+| Preset            | readOnly | destructive | idempotent | openWorld |
+| ----------------- | -------- | ----------- | ---------- | --------- |
+| `readOnly`        | true     | false       | true       | false     |
+| `write`           | false    | false       | false      | false     |
+| `writeIdempotent` | false    | false       | true       | false     |
+| `destructive`     | false    | true        | true       | false     |
+| `openWorld`       | false    | false       | false      | true      |
 
 For multi-action tools, use the most conservative union of hints. Per-action annotations are an MCP spec limitation.
 
@@ -4431,12 +4500,12 @@ const { server: sdkServer, toolsList, callTool } = createSdkServer(mcpServer);
 
 Tools return Results with typed errors. The framework automatically translates `OutfitterError` categories to JSON-RPC error codes:
 
-| Category | JSON-RPC Code | Description |
-|----------|--------------|-------------|
-| `validation` | -32602 | Invalid params |
-| `not_found` | -32601 | Method not found |
-| `permission` | -32600 | Invalid request |
-| `internal` | -32603 | Internal error |
+| Category     | JSON-RPC Code | Description      |
+| ------------ | ------------- | ---------------- |
+| `validation` | -32602        | Invalid params   |
+| `not_found`  | -32601        | Method not found |
+| `permission` | -32600        | Invalid request  |
+| `internal`   | -32603        | Internal error   |
 
 ```typescript
 const result = await server.invokeTool("get-user", { userId: "123" });
@@ -4500,6 +4569,7 @@ Add your MCP server to Claude Desktop:
 ```
 
 Config location:
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Linux: `~/.config/claude/claude_desktop_config.json`
@@ -4513,6 +4583,60 @@ Run `outfitter upgrade --guide` for version-specific migration instructions, or 
 - [@outfitter/contracts](../contracts/README.md) — Result types and error taxonomy
 - [@outfitter/logging](../logging/README.md) — Structured logging
 - [@outfitter/config](../config/README.md) — Configuration loading
+
+---
+path: docs/packages/oxlint-plugin/README.md
+package: oxlint-plugin
+title: @outfitter/oxlint-plugin
+---
+
+# @outfitter/oxlint-plugin
+
+Custom lint rules for Outfitter architecture and safety conventions.
+
+This package is designed to be consumed by Oxlint JS plugins (`jsPlugins`) and
+ESLint v9+ flat config.
+
+## Installation
+
+```bash
+bun add -d @outfitter/oxlint-plugin
+```
+
+## Usage (Oxlint)
+
+```json
+{
+  "jsPlugins": [
+    {
+      "name": "outfitter",
+      "specifier": "@outfitter/oxlint-plugin"
+    }
+  ],
+  "rules": {}
+}
+```
+
+## Usage (ESLint flat config)
+
+```js
+import outfitter from "@outfitter/oxlint-plugin";
+
+export default [
+  {
+    plugins: { outfitter },
+    rules: {},
+  },
+];
+```
+
+This scaffold branch (`OS-379`) wires the plugin package and test harness.
+Rule implementations land in follow-up issues (`OS-380+`).
+
+## Status
+
+`OS-379` scaffolds the package and test harness. Rules are implemented in
+follow-up issues (`OS-380+`).
 
 ---
 path: docs/packages/presets/README.md
@@ -4574,7 +4698,11 @@ bun add @outfitter/schema zod
 ## Quick Start
 
 ```typescript
-import { createActionRegistry, defineAction, Result } from "@outfitter/contracts";
+import {
+  createActionRegistry,
+  defineAction,
+  Result,
+} from "@outfitter/contracts";
 import { generateSurfaceMap } from "@outfitter/schema/surface";
 import { z } from "zod";
 
@@ -4598,13 +4726,13 @@ console.log(surface.actions.map((a) => a.id));
 
 ## Subpath Exports
 
-| Subpath | What's In It |
-|---------|---------------|
-| `@outfitter/schema` | Full public API from all modules |
-| `@outfitter/schema/manifest` | `generateManifest`, `ActionManifest*` types |
-| `@outfitter/schema/surface` | `generateSurfaceMap`, snapshot path + read/write helpers |
-| `@outfitter/schema/diff` | `diffSurfaceMaps`, diff result types |
-| `@outfitter/schema/markdown` | `formatManifestMarkdown`, markdown formatting options |
+| Subpath                      | What's In It                                             |
+| ---------------------------- | -------------------------------------------------------- |
+| `@outfitter/schema`          | Full public API from all modules                         |
+| `@outfitter/schema/manifest` | `generateManifest`, `ActionManifest*` types              |
+| `@outfitter/schema/surface`  | `generateSurfaceMap`, snapshot path + read/write helpers |
+| `@outfitter/schema/diff`     | `diffSurfaceMaps`, diff result types                     |
+| `@outfitter/schema/markdown` | `formatManifestMarkdown`, markdown formatting options    |
 
 ## Core Workflows
 
@@ -4661,7 +4789,10 @@ if (diff.hasChanges) {
 ```typescript
 import { formatManifestMarkdown } from "@outfitter/schema/markdown";
 
-const manifest = generateManifest(registry, { surface: "mcp", version: "1.0.0" });
+const manifest = generateManifest(registry, {
+  surface: "mcp",
+  version: "1.0.0",
+});
 
 const markdown = formatManifestMarkdown(manifest, {
   surface: "mcp",
@@ -4734,14 +4865,14 @@ if (cursorResult.isOk()) {
 
 Cursors are intentionally **opaque** to consumers. They are immutable, frozen objects that encapsulate pagination state.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Unique identifier for storage lookup |
-| `position` | `number` | Current offset in the result set |
-| `metadata` | `Record<string, unknown>` | Optional user-defined context |
-| `ttl` | `number` | Time-to-live in milliseconds (optional) |
-| `expiresAt` | `number` | Computed Unix timestamp for expiry (if TTL set) |
-| `createdAt` | `number` | Unix timestamp when cursor was created |
+| Property    | Type                      | Description                                     |
+| ----------- | ------------------------- | ----------------------------------------------- |
+| `id`        | `string`                  | Unique identifier for storage lookup            |
+| `position`  | `number`                  | Current offset in the result set                |
+| `metadata`  | `Record<string, unknown>` | Optional user-defined context                   |
+| `ttl`       | `number`                  | Time-to-live in milliseconds (optional)         |
+| `expiresAt` | `number`                  | Computed Unix timestamp for expiry (if TTL set) |
+| `createdAt` | `number`                  | Unix timestamp when cursor was created          |
 
 ### Why Opaque?
 
@@ -4787,7 +4918,11 @@ if (result.isOk()) {
 ### Example: Paginated Handler
 
 ```typescript
-import { createCursor, createCursorStore, advanceCursor } from "@outfitter/state";
+import {
+  createCursor,
+  createCursorStore,
+  advanceCursor,
+} from "@outfitter/state";
 import { Result } from "@outfitter/contracts";
 
 const store = createCursorStore();
@@ -4842,11 +4977,11 @@ const issuesStore = createScopedStore(store, "linear:issues");
 const prsStore = createScopedStore(store, "github:prs");
 
 // Cursors are isolated - same ID won't conflict
-issuesStore.set(issueCursor);  // Stored as "linear:issues:cursor-id"
-prsStore.set(prCursor);        // Stored as "github:prs:cursor-id"
+issuesStore.set(issueCursor); // Stored as "linear:issues:cursor-id"
+prsStore.set(prCursor); // Stored as "github:prs:cursor-id"
 
 // Each scope manages its own cursors
-issuesStore.clear();  // Only clears issue cursors
+issuesStore.clear(); // Only clears issue cursors
 ```
 
 ### Nested Scopes
@@ -4859,8 +4994,8 @@ const githubStore = createScopedStore(store, "github");
 const issuesStore = createScopedStore(githubStore, "issues");
 const prsStore = createScopedStore(githubStore, "prs");
 
-issuesStore.getScope();  // "github:issues"
-prsStore.getScope();     // "github:prs"
+issuesStore.getScope(); // "github:issues"
+prsStore.getScope(); // "github:prs"
 ```
 
 ### Scoped Store Behavior
@@ -4875,15 +5010,15 @@ if (cursor.isOk()) {
   scoped.set(cursor.value);
 
   // Underlying store has prefixed ID
-  store.list();  // ["my-scope:abc123"]
+  store.list(); // ["my-scope:abc123"]
 
   // Scoped store returns clean ID
-  scoped.list();  // ["abc123"]
+  scoped.list(); // ["abc123"]
 
   // Get returns cursor with clean ID
   const result = scoped.get("abc123");
   if (result.isOk()) {
-    result.value.id;  // "abc123" (not "my-scope:abc123")
+    result.value.id; // "abc123" (not "my-scope:abc123")
   }
 }
 ```
@@ -4949,7 +5084,7 @@ const result = createCursor({
 
 if (result.isOk()) {
   const cursor = result.value;
-  cursor.ttl;       // 3600000
+  cursor.ttl; // 3600000
   cursor.expiresAt; // Unix timestamp (e.g., 1706000000000)
 }
 ```
@@ -4981,7 +5116,7 @@ Cursors created without a TTL never expire:
 ```typescript
 const result = createCursor({ position: 0 });
 if (result.isOk()) {
-  result.value.ttl;       // undefined
+  result.value.ttl; // undefined
   result.value.expiresAt; // undefined
   isExpired(result.value); // always false
 }
@@ -4991,24 +5126,24 @@ if (result.isOk()) {
 
 ### Functions
 
-| Function | Description |
-|----------|-------------|
-| `createCursor(options)` | Create a new immutable pagination cursor |
+| Function                          | Description                               |
+| --------------------------------- | ----------------------------------------- |
+| `createCursor(options)`           | Create a new immutable pagination cursor  |
 | `advanceCursor(cursor, position)` | Create a new cursor with updated position |
-| `isExpired(cursor)` | Check if a cursor has expired |
-| `createCursorStore()` | Create an in-memory cursor store |
-| `createPersistentStore(options)` | Create a disk-backed cursor store |
-| `createScopedStore(store, scope)` | Create a namespace-isolated cursor store |
+| `isExpired(cursor)`               | Check if a cursor has expired             |
+| `createCursorStore()`             | Create an in-memory cursor store          |
+| `createPersistentStore(options)`  | Create a disk-backed cursor store         |
+| `createScopedStore(store, scope)` | Create a namespace-isolated cursor store  |
 
 ### Interfaces
 
-| Interface | Description |
-|-----------|-------------|
-| `Cursor` | Immutable pagination cursor |
-| `CreateCursorOptions` | Options for `createCursor()` |
-| `CursorStore` | Base interface for cursor stores |
-| `ScopedStore` | Cursor store with namespace isolation |
-| `PersistentStore` | Cursor store with disk persistence |
+| Interface                | Description                           |
+| ------------------------ | ------------------------------------- |
+| `Cursor`                 | Immutable pagination cursor           |
+| `CreateCursorOptions`    | Options for `createCursor()`          |
+| `CursorStore`            | Base interface for cursor stores      |
+| `ScopedStore`            | Cursor store with namespace isolation |
+| `PersistentStore`        | Cursor store with disk persistence    |
 | `PersistentStoreOptions` | Options for `createPersistentStore()` |
 
 ## Error Handling
@@ -5031,7 +5166,7 @@ if (getResult.isErr()) {
   // NotFoundError: Cursor not found: nonexistent
   console.error(getResult.error.message);
   console.log(getResult.error.resourceType); // "cursor"
-  console.log(getResult.error.resourceId);   // "nonexistent"
+  console.log(getResult.error.resourceId); // "nonexistent"
 }
 ```
 
@@ -5140,6 +5275,7 @@ const config = createConfig({
 ```
 
 Notes:
+
 - Arrays are replaced, not merged.
 - `undefined` override values are ignored (defaults remain).
 
@@ -5245,7 +5381,7 @@ const server: McpServer = {
     },
   ],
   async invoke(toolName, input) {
-    const tool = this.tools.find(t => t.name === toolName);
+    const tool = this.tools.find((t) => t.name === toolName);
     if (!tool) throw new Error(`Tool not found: ${toolName}`);
     return tool.handler(input);
   },
@@ -5307,7 +5443,11 @@ Import specific modules directly for smaller bundles:
 
 ```typescript
 // Just fixtures
-import { createFixture, withTempDir, withEnv } from "@outfitter/testing/fixtures";
+import {
+  createFixture,
+  withTempDir,
+  withEnv,
+} from "@outfitter/testing/fixtures";
 ```
 
 All harness utilities are available from the main package export:
@@ -5320,29 +5460,29 @@ import { createCliHarness, createMcpHarness } from "@outfitter/testing";
 
 ### Fixtures
 
-| Export | Description |
-|--------|-------------|
-| `createFixture<T>(defaults)` | Create a fixture factory with deep merge support |
-| `withTempDir<T>(fn)` | Run callback with auto-cleaned temp directory |
-| `withEnv<T>(vars, fn)` | Run callback with temporary environment variables |
+| Export                       | Description                                       |
+| ---------------------------- | ------------------------------------------------- |
+| `createFixture<T>(defaults)` | Create a fixture factory with deep merge support  |
+| `withTempDir<T>(fn)`         | Run callback with auto-cleaned temp directory     |
+| `withEnv<T>(vars, fn)`       | Run callback with temporary environment variables |
 
 ### CLI Harness
 
-| Export | Description |
-|--------|-------------|
-| `createCliHarness(command)` | Create a CLI test harness |
-| `CliHarness` | Interface for CLI harness |
-| `CliResult` | Interface for command execution result |
+| Export                      | Description                            |
+| --------------------------- | -------------------------------------- |
+| `createCliHarness(command)` | Create a CLI test harness              |
+| `CliHarness`                | Interface for CLI harness              |
+| `CliResult`                 | Interface for command execution result |
 
 ### MCP Harness
 
-| Export | Description |
-|--------|-------------|
-| `createMcpHarness(server)` | Create an MCP test harness |
-| `McpHarness` | Interface for MCP harness |
-| `McpServer` | Interface for MCP server |
-| `McpTool` | Interface for tool definition |
-| `McpToolHandler` | Type for tool handler functions |
+| Export                     | Description                     |
+| -------------------------- | ------------------------------- |
+| `createMcpHarness(server)` | Create an MCP test harness      |
+| `McpHarness`               | Interface for MCP harness       |
+| `McpServer`                | Interface for MCP server        |
+| `McpTool`                  | Interface for tool definition   |
+| `McpToolHandler`           | Type for tool handler functions |
 
 ## Related Packages
 
@@ -5366,7 +5506,7 @@ Dev tooling configuration presets and CLI for Outfitter projects.
 
 ## Features
 
-- **Configuration Presets**: Biome, TypeScript, Lefthook, and markdownlint configs
+- **Configuration Presets**: oxlint, TypeScript, Lefthook, and markdownlint configs
 - **CLI Commands**: Initialize configs, upgrade Bun, TDD-aware pre-push hooks
 - **Registry System**: Composable config blocks for scaffolding
 
@@ -5377,7 +5517,8 @@ bun add -D @outfitter/tooling
 ```
 
 Peer dependencies (optional):
-- `ultracite` — Biome wrapper for formatting/linting
+
+- `ultracite` — oxlint/oxfmt wrapper for formatting/linting
 - `lefthook` — Git hooks
 - `markdownlint-cli2` — Markdown linting
 
@@ -5385,7 +5526,7 @@ Peer dependencies (optional):
 
 ### `tooling init`
 
-Initialize tooling configuration in the current project. Copies preset configs for Biome, TypeScript, Lefthook, and markdownlint.
+Initialize tooling configuration in the current project. Copies preset configs for oxlint, TypeScript, Lefthook, and markdownlint.
 
 ```bash
 bunx @outfitter/tooling init
@@ -5412,6 +5553,7 @@ bunx @outfitter/tooling fix src/
 ### `tooling upgrade-bun [version]`
 
 Upgrade Bun version across the project. Updates:
+
 - `.bun-version`
 - `engines.bun` in all package.json files
 - `@types/bun` dependency versions (leaves "latest" alone)
@@ -5433,11 +5575,13 @@ bunx @outfitter/tooling upgrade-bun 1.4.0 --no-install
 TDD-aware pre-push strict verification hook. Detects RED phase branches and skips verification by design.
 
 RED phase branches follow these patterns:
+
 - `*-tests` (e.g., `feature/auth-tests`)
 - `*/tests` (e.g., `feature/auth/tests`)
 - `*_tests` (e.g., `feature/auth_tests`)
 
 Verification order:
+
 1. Run `verify:ci` if present.
 2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
 
@@ -5531,16 +5675,6 @@ bunx @outfitter/tooling check-readme-imports --json
 
 ## Configuration Presets
 
-### Biome
-
-Extends our Biome config in your `biome.json`:
-
-```json
-{
-  "extends": ["@outfitter/tooling/biome.json"]
-}
-```
-
 ### TypeScript
 
 Extends our TypeScript config in your `tsconfig.json`:
@@ -5569,6 +5703,7 @@ extends:
 ```
 
 Default hooks:
+
 - **pre-commit**: Runs ultracite on staged files, typechecks
 - **pre-push**: Runs TDD-aware strict verification via `tooling pre-push`
 
@@ -5586,8 +5721,9 @@ cp node_modules/@outfitter/tooling/.markdownlint-cli2.jsonc .
 The tooling package includes a registry of composable config blocks for the `outfitter` CLI scaffolding system.
 
 Available blocks:
+
 - `claude` — Claude Code settings and hooks
-- `biome` — Biome/Ultracite configuration
+- `linter` — oxlint/Ultracite configuration
 - `lefthook` — Git hooks configuration
 - `markdownlint` — Markdown linting configuration
 - `bootstrap` — Project bootstrap script
@@ -5607,13 +5743,17 @@ bun run apps/outfitter/src/cli.ts repo check boundary-invocations --cwd .
 
 ## Exports
 
-| Export | Description |
-|--------|-------------|
-| `./biome.json` | Biome configuration preset |
-| `./tsconfig.preset.json` | TypeScript preset (general) |
-| `./tsconfig.preset.bun.json` | TypeScript preset (Bun) |
-| `./lefthook.yml` | Lefthook hooks configuration |
-| `./.markdownlint-cli2.jsonc` | markdownlint configuration |
+| Export                       | Description                            |
+| ---------------------------- | -------------------------------------- |
+| `./registry`                 | Tooling block registry API             |
+| `./tsconfig`                 | Alias for `./tsconfig.preset.json`     |
+| `./tsconfig-bun`             | Alias for `./tsconfig.preset.bun.json` |
+| `./tsconfig.preset.json`     | TypeScript preset (general)            |
+| `./tsconfig.preset.bun.json` | TypeScript preset (Bun)                |
+| `./lefthook`                 | Alias for `./lefthook.yml`             |
+| `./lefthook.yml`             | Lefthook hooks configuration           |
+| `./.markdownlint-cli2`       | Alias for `./.markdownlint-cli2.jsonc` |
+| `./.markdownlint-cli2.jsonc` | markdownlint configuration             |
 
 ## Related
 
@@ -5658,10 +5798,12 @@ import { renderList } from "@outfitter/tui/list";
 import { renderBox } from "@outfitter/tui/box";
 
 // Render a table
-console.log(renderTable([
-  { name: "config", status: "loaded", entries: 12 },
-  { name: "cache", status: "warm", entries: 847 },
-]));
+console.log(
+  renderTable([
+    { name: "config", status: "loaded", entries: 12 },
+    { name: "cache", status: "warm", entries: 847 },
+  ])
+);
 
 // Render a bullet list
 console.log(renderList(["First item", "Second item", "Third item"]));
@@ -5676,63 +5818,63 @@ Every module is available as a subpath import. No deep imports into `dist/` need
 
 ### Rendering Primitives
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/render` | All rendering utilities (tables, lists, boxes, trees, formatting, layout, shapes) |
-| `@outfitter/tui/table` | `renderTable`, `TableOptions` |
-| `@outfitter/tui/list` | `renderList`, `ListOptions`, `ListStyle` |
-| `@outfitter/tui/box` | `renderBox`, `createBox`, `BoxOptions` |
-| `@outfitter/tui/tree` | `renderTree`, `TreeOptions`, `TREE_GUIDES` |
-| `@outfitter/tui/borders` | `BORDERS`, `getBorderCharacters`, `drawHorizontalLine` |
+| Subpath                  | What's In It                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `@outfitter/tui/render`  | All rendering utilities (tables, lists, boxes, trees, formatting, layout, shapes) |
+| `@outfitter/tui/table`   | `renderTable`, `TableOptions`                                                     |
+| `@outfitter/tui/list`    | `renderList`, `ListOptions`, `ListStyle`                                          |
+| `@outfitter/tui/box`     | `renderBox`, `createBox`, `BoxOptions`                                            |
+| `@outfitter/tui/tree`    | `renderTree`, `TreeOptions`, `TREE_GUIDES`                                        |
+| `@outfitter/tui/borders` | `BORDERS`, `getBorderCharacters`, `drawHorizontalLine`                            |
 
 ### Themes
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/theme` | `createVisualTheme`, `defaultTheme`, `roundedTheme`, `boldTheme`, `minimalTheme` |
-| `@outfitter/tui/theme/presets` | All preset themes |
-| `@outfitter/tui/theme/presets/default` | Default theme only |
-| `@outfitter/tui/theme/presets/rounded` | Rounded theme only |
-| `@outfitter/tui/theme/presets/bold` | Bold theme only |
-| `@outfitter/tui/theme/presets/minimal` | Minimal theme only |
-| `@outfitter/tui/theme/context` | `createThemedContext`, `getContextTheme` |
-| `@outfitter/tui/theme/create` | `createVisualTheme` factory |
-| `@outfitter/tui/theme/resolve` | `resolveGlyph`, `resolveStateMarker` |
+| Subpath                                | What's In It                                                                     |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `@outfitter/tui/theme`                 | `createVisualTheme`, `defaultTheme`, `roundedTheme`, `boldTheme`, `minimalTheme` |
+| `@outfitter/tui/theme/presets`         | All preset themes                                                                |
+| `@outfitter/tui/theme/presets/default` | Default theme only                                                               |
+| `@outfitter/tui/theme/presets/rounded` | Rounded theme only                                                               |
+| `@outfitter/tui/theme/presets/bold`    | Bold theme only                                                                  |
+| `@outfitter/tui/theme/presets/minimal` | Minimal theme only                                                               |
+| `@outfitter/tui/theme/context`         | `createThemedContext`, `getContextTheme`                                         |
+| `@outfitter/tui/theme/create`          | `createVisualTheme` factory                                                      |
+| `@outfitter/tui/theme/resolve`         | `resolveGlyph`, `resolveStateMarker`                                             |
 
 ### Streaming Output
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/streaming` | `createSpinner`, `createStreamWriter`, `ANSI` |
-| `@outfitter/tui/streaming/spinner` | `createSpinner`, `Spinner`, `SpinnerOptions` |
-| `@outfitter/tui/streaming/writer` | `createStreamWriter`, `StreamWriter` |
-| `@outfitter/tui/streaming/ansi` | ANSI escape sequence constants |
+| Subpath                            | What's In It                                  |
+| ---------------------------------- | --------------------------------------------- |
+| `@outfitter/tui/streaming`         | `createSpinner`, `createStreamWriter`, `ANSI` |
+| `@outfitter/tui/streaming/spinner` | `createSpinner`, `Spinner`, `SpinnerOptions`  |
+| `@outfitter/tui/streaming/writer`  | `createStreamWriter`, `StreamWriter`          |
+| `@outfitter/tui/streaming/ansi`    | ANSI escape sequence constants                |
 
 ### Interactive Prompts
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/prompt` | `promptText`, `promptSelect`, `promptConfirm`, `promptGroup`, `validators` |
-| `@outfitter/tui/prompt/text` | `promptText`, `promptPassword` |
-| `@outfitter/tui/prompt/select` | `promptSelect`, `promptMultiSelect` |
-| `@outfitter/tui/prompt/confirm` | `promptConfirm` |
-| `@outfitter/tui/prompt/group` | `promptGroup` |
-| `@outfitter/tui/prompt/validators` | Validation helpers |
-| `@outfitter/tui/confirm` | `confirmDestructive` (destructive operation confirmation) |
+| Subpath                            | What's In It                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `@outfitter/tui/prompt`            | `promptText`, `promptSelect`, `promptConfirm`, `promptGroup`, `validators` |
+| `@outfitter/tui/prompt/text`       | `promptText`, `promptPassword`                                             |
+| `@outfitter/tui/prompt/select`     | `promptSelect`, `promptMultiSelect`                                        |
+| `@outfitter/tui/prompt/confirm`    | `promptConfirm`                                                            |
+| `@outfitter/tui/prompt/group`      | `promptGroup`                                                              |
+| `@outfitter/tui/prompt/validators` | Validation helpers                                                         |
+| `@outfitter/tui/confirm`           | `confirmDestructive` (destructive operation confirmation)                  |
 
 ### Presets
 
-| Subpath | What's In It |
-|---------|-------------|
+| Subpath                          | What's In It                                     |
+| -------------------------------- | ------------------------------------------------ |
 | `@outfitter/tui/preset/standard` | Table + list + box + colors (most common bundle) |
-| `@outfitter/tui/preset/full` | Standard + tree + borders |
+| `@outfitter/tui/preset/full`     | Standard + tree + borders                        |
 
 ### Demo Infrastructure
 
-| Subpath | What's In It |
-|---------|-------------|
-| `@outfitter/tui/demo` | `renderDemo`, `renderAllDemos`, primitive metadata |
-| `@outfitter/tui/demo/section` | Section helpers for building demos |
+| Subpath                       | What's In It                                       |
+| ----------------------------- | -------------------------------------------------- |
+| `@outfitter/tui/demo`         | `renderDemo`, `renderAllDemos`, primitive metadata |
+| `@outfitter/tui/demo/section` | Section helpers for building demos                 |
 
 ## Themes
 
@@ -5812,13 +5954,14 @@ if (name.isOk()) {
 // Grouped prompts for wizard-style flows
 const config = await promptGroup({
   name: () => promptText({ message: "Name:" }),
-  template: () => promptSelect({
-    message: "Template:",
-    options: [
-      { value: "basic", label: "Basic" },
-      { value: "full", label: "Full Stack" },
-    ],
-  }),
+  template: () =>
+    promptSelect({
+      message: "Template:",
+      options: [
+        { value: "basic", label: "Basic" },
+        { value: "full", label: "Full Stack" },
+      ],
+    }),
   debug: () => promptConfirm({ message: "Enable debug mode?" }),
 });
 ```
@@ -5870,10 +6013,10 @@ import {
 
 `@outfitter/tui` extracts visual rendering concerns from `@outfitter/cli`. The split:
 
-| Package | Responsibility |
-|---------|---------------|
+| Package          | Responsibility                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
 | `@outfitter/cli` | Output modes, input parsing, pagination, terminal detection, colors, text utilities, command building |
-| `@outfitter/tui` | Tables, lists, boxes, trees, borders, themes, spinners, streaming, prompts |
+| `@outfitter/tui` | Tables, lists, boxes, trees, borders, themes, spinners, streaming, prompts                            |
 
 `@outfitter/cli` provides the foundation (colors, text, terminal). `@outfitter/tui` builds visual components on top.
 

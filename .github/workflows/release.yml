@@ -11,13 +11,17 @@ on:
         options:
           - stable
           - canary
+      stable_operation:
+        description: "Stable operation (manual runs only)"
+        required: true
+        type: choice
+        default: prepare
+        options:
+          - prepare
+          - publish
   pull_request:
     types: [closed]
     branches: [main]
-  push:
-    branches: [main]
-    paths:
-      - ".changeset/*.md"
 
 jobs:
   # Phase 1: Prepare release (manual trigger)
@@ -26,7 +30,8 @@ jobs:
     name: Prepare Release
     if: >
       github.event_name == 'workflow_dispatch' &&
-      github.event.inputs.mode != 'canary'
+      github.event.inputs.mode == 'stable' &&
+      github.event.inputs.stable_operation == 'prepare'
     concurrency:
       group: release-prepare
       cancel-in-progress: false
@@ -64,24 +69,66 @@ jobs:
       - name: Version packages
         run: bun run version-packages
 
+      - name: Compute release title
+        id: title
+        run: |
+          # Check if outfitter CLI was bumped (release train lead)
+          OUTFITTER_VERSION=""
+          if git diff --name-only -- 'apps/outfitter/package.json' | grep -q .; then
+            OUTFITTER_VERSION=$(jq -r '.version' apps/outfitter/package.json)
+          fi
+
+          # Count other public package bumps
+          OTHER=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            PRIVATE=$(jq -r '.private // false' "$file")
+            [ "$PRIVATE" = "true" ] && continue
+            OTHER=$((OTHER + 1))
+          done < <(git diff --name-only -- 'packages/*/package.json')
+
+          if [ -n "$OUTFITTER_VERSION" ] && [ "$OTHER" -gt 0 ]; then
+            TITLE="release: outfitter v${OUTFITTER_VERSION} (+${OTHER} packages)"
+          elif [ -n "$OUTFITTER_VERSION" ]; then
+            TITLE="release: outfitter v${OUTFITTER_VERSION}"
+          elif [ "$OTHER" -gt 0 ]; then
+            TITLE="release: ${OTHER} packages"
+          else
+            TITLE="chore(release): version packages"
+          fi
+
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
+      - name: Build workspace artifacts
+        # Release docs export commands execute the Outfitter source CLI, which
+        # imports workspace packages via dist-based exports. Build first so
+        # clean runners have the required runtime artifacts.
+        run: bun run build
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_API: ${{ secrets.TURBO_API }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+
       - name: Refresh release LLM artifacts
         run: bun run sync:docs:release:llms
 
       - name: Create release branch and PR
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          RELEASE_TITLE: ${{ steps.title.outputs.title }}
         run: |
           BRANCH="release/$(date +%Y%m%d-%H%M%S)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add -A
-          git commit --no-verify -m "chore: version packages for release"
+          git commit --no-verify -m "$RELEASE_TITLE"
           git push --no-verify origin "$BRANCH"
           PR_URL=$(gh pr create \
             --base main \
             --head "$BRANCH" \
-            --title "chore: version packages for release" \
+            --title "$RELEASE_TITLE" \
             --body "$(cat <<'BODY'
           ## Release
 
@@ -99,12 +146,9 @@ jobs:
   canary:
     name: Publish Canary
     if: >
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (
-        github.event_name == 'workflow_dispatch' &&
-        github.event.inputs.mode == 'canary' &&
-        github.ref == 'refs/heads/main'
-      )
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.mode == 'canary' &&
+      github.ref == 'refs/heads/main'
     concurrency:
       group: canary-release
       cancel-in-progress: false
@@ -177,10 +221,18 @@ jobs:
   publish:
     name: Publish to npm
     if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.labels.*.name, 'autorelease') &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.merged == true &&
+        contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+        startsWith(github.event.pull_request.head.ref, 'release/')
+      ) ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.mode == 'stable' &&
+        github.event.inputs.stable_operation == 'publish' &&
+        github.ref == 'refs/heads/main'
+      )
     concurrency:
       group: stable-release-publish
       cancel-in-progress: false
@@ -290,44 +342,63 @@ jobs:
 
           # Handle all merge strategies:
           # - merge commit: use merge_commit_sha
-          # - squash/rebase: fall back to current HEAD on main
+          # - squash/rebase/manual dispatch: fall back to current HEAD on main
           TARGET_SHA="${MERGE_SHA:-}"
           if [ -z "$TARGET_SHA" ] || [ "$TARGET_SHA" = "null" ]; then
             TARGET_SHA="$(git rev-parse HEAD)"
           fi
 
           OUTFITTER_VERSION="$(jq -r '.version' apps/outfitter/package.json)"
+          OUTFITTER_TAG="outfitter@${OUTFITTER_VERSION}"
+          OUTFITTER_TAG_SHA="$(git rev-list -n 1 "${OUTFITTER_TAG}" 2>/dev/null || true)"
+          BASE_SHA_FALLBACK="${BASE_SHA:-}"
+          if [ -z "$BASE_SHA_FALLBACK" ] || [ "$BASE_SHA_FALLBACK" = "null" ]; then
+            # Manual stable publish recovery has no PR base SHA. If the current
+            # outfitter tag points to an older commit, treat this as a package-
+            # only release and compare against that tag's commit.
+            if [ -n "$OUTFITTER_TAG_SHA" ] && [ "$OUTFITTER_TAG_SHA" != "$TARGET_SHA" ]; then
+              BASE_SHA_FALLBACK="$OUTFITTER_TAG_SHA"
+            else
+              PREV_TAG="$(
+                git tag --list 'outfitter@*' --sort=-creatordate \
+                  | grep -v "^${OUTFITTER_TAG}$" \
+                  | head -n 1 || true
+              )"
+              if [ -n "$PREV_TAG" ]; then
+                BASE_SHA_FALLBACK="$(git rev-list -n 1 "$PREV_TAG")"
+              elif git rev-parse "${TARGET_SHA}^" >/dev/null 2>&1; then
+                BASE_SHA_FALLBACK="$(git rev-parse "${TARGET_SHA}^")"
+              else
+                BASE_SHA_FALLBACK="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+              fi
+            fi
+          fi
+          BASE_SHA="$BASE_SHA_FALLBACK"
+
           OUTFITTER_OLD_VERSION="$(
-            git show "${BASE_SHA}:apps/outfitter/package.json" 2>/dev/null \
-              | jq -r '.version // empty'
+            (
+              git show "${BASE_SHA}:apps/outfitter/package.json" 2>/dev/null \
+                | jq -r '.version // empty'
+            ) || true
           )"
           OUTFITTER_WAS_BUMPED=0
           if [ -n "$OUTFITTER_OLD_VERSION" ] && [ "$OUTFITTER_OLD_VERSION" != "$OUTFITTER_VERSION" ]; then
             OUTFITTER_WAS_BUMPED=1
           fi
 
-          OUTFITTER_TAG="outfitter@${OUTFITTER_VERSION}"
-          OUTFITTER_TAG_SHA="$(git rev-list -n 1 "${OUTFITTER_TAG}" 2>/dev/null || true)"
-
           RELEASE_TAG="$OUTFITTER_TAG"
           RELEASE_TITLE="Outfitter ${OUTFITTER_VERSION}"
+          SKIP_RELEASE=0
 
-          # Use outfitter@<version> only when that tag was created for this
-          # release cycle's target commit. Otherwise create a per-run stable tag
-          # so we don't overwrite an earlier canonical release.
-          if [ "$OUTFITTER_WAS_BUMPED" -ne 1 ] || [ "$OUTFITTER_TAG_SHA" != "$TARGET_SHA" ]; then
-            RELEASE_TAG="stable-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-            RELEASE_TITLE="Outfitter Stable ${GITHUB_RUN_NUMBER}"
-            if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null; then
-              EXISTING_SHA="$(git rev-list -n 1 "${RELEASE_TAG}")"
-              if [ "$EXISTING_SHA" != "$TARGET_SHA" ]; then
-                echo "::error::Fallback tag ${RELEASE_TAG} points to ${EXISTING_SHA}, expected ${TARGET_SHA}"
-                exit 1
-              fi
-            else
-              git tag "${RELEASE_TAG}" "${TARGET_SHA}"
-              git push origin "${RELEASE_TAG}"
-            fi
+          if [ "$OUTFITTER_WAS_BUMPED" -ne 1 ]; then
+            SKIP_RELEASE=1
+          fi
+
+          # Canonical GitHub release must map to outfitter@<version> on the
+          # current release commit; do not create fallback stable-* releases.
+          if [ "$SKIP_RELEASE" -eq 0 ] && [ "$OUTFITTER_TAG_SHA" != "$TARGET_SHA" ]; then
+            echo "::error::Expected ${OUTFITTER_TAG} to point at ${TARGET_SHA}, found ${OUTFITTER_TAG_SHA:-<missing>}"
+            exit 1
           fi
 
           {
@@ -367,7 +438,7 @@ jobs:
               continue
             fi
 
-            printf '| `%s` | `%s` | `%s` |\n' \
+            printf "| \`%s\` | \`%s\` | \`%s\` |\n" \
               "$NAME" \
               "${OLD_VERSION:-n/a}" \
               "$NEW_VERSION" \
@@ -387,13 +458,16 @@ jobs:
             echo "- Canary publishes are npm-only (\`@canary\`) with no GitHub prerelease."
           } >> "$NOTES_FILE"
 
-          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          echo "release_title=$RELEASE_TITLE" >> "$GITHUB_OUTPUT"
-          echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
-          echo "release_target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          {
+            echo "release_tag=$RELEASE_TAG"
+            echo "release_title=$RELEASE_TITLE"
+            echo "notes_file=$NOTES_FILE"
+            echo "release_target_sha=$TARGET_SHA"
+            echo "skip_release=$SKIP_RELEASE"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create canonical GitHub release
-        if: success()
+        if: success() && steps.canonical.outputs.skip_release != '1'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.canonical.outputs.release_tag }}

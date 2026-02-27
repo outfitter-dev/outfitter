@@ -415,20 +415,16 @@ describe("doctor command result structure", () => {
       JSON.stringify({ name: "my-app", version: "1.0.0" }, null, 2)
     );
 
-    const readSpy = spyOn(fs, "readFileSync");
-    try {
-      runDoctor({ cwd: tempDir });
+    using readSpy = spyOn(fs, "readFileSync");
+    runDoctor({ cwd: tempDir });
 
-      const targetPath = join(tempDir, "package.json");
-      const packageReads = readSpy.mock.calls.filter((call) => {
-        const pathArg = call[0];
-        return typeof pathArg === "string" && pathArg === targetPath;
-      });
+    const targetPath = join(tempDir, "package.json");
+    const packageReads = readSpy.mock.calls.filter((call) => {
+      const pathArg = call[0];
+      return typeof pathArg === "string" && pathArg === targetPath;
+    });
 
-      expect(packageReads).toHaveLength(1);
-    } finally {
-      readSpy.mockRestore();
-    }
+    expect(packageReads).toHaveLength(1);
   });
 });
 

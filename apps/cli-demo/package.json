@@ -1,6 +1,6 @@
 {
   "name": "outfitter-cli-demo",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "CLI demo app for @outfitter/cli and @outfitter/tui primitives",
   "keywords": [
