@@ -1,0 +1,11 @@
+commands:
+  install: bun install
+  build: bun run build
+  test: bun run test
+  typecheck: bun run typecheck
+  lint: bun run lint
+  check: bun run check
+  format: bun run format:fix
+  clean: bun run clean
+
+services: {}
