@@ -1,0 +1,34 @@
+{
+  "flowId": "contracts-utilities",
+  "assertions": {
+    "VAL-UTIL-001": {
+      "status": "pass",
+      "evidence": "Targeted tests passed: `bun test src/__tests__/parse-input.test.ts` (8 pass, 0 fail), including `infers generic T from schema — no manual type args needed`. Full contracts suite passed: `cd packages/contracts && bun test` -> 410 pass, 0 fail. Typecheck passed: `cd /Users/mg/Developer/outfitter/stack && bun run typecheck` (includes `@outfitter/contracts:typecheck`). Export verification passed: `cd packages/contracts && bun -e ...` reported `parseInput: function`. Source verification: `packages/contracts/src/validation.ts` defines `parseInput<TSchema extends z.ZodType>(schema, data): Result<z.infer<TSchema>, ValidationError>` and returns `Result.ok(parsed)` / `Result.err(new ValidationError(...))`.",
+      "issues": []
+    },
+    "VAL-UTIL-002": {
+      "status": "pass",
+      "evidence": "Targeted tests passed: `bun test src/__tests__/wrap-error.test.ts` (25 pass, 0 fail) covering typed passthrough same reference, mapper not called for typed errors, mapper handling for untyped errors, InternalError fallback, string wrapping, mapper order, and short-circuit behavior. Full contracts suite passed (410 pass). Source verification: `packages/contracts/src/wrap-error.ts` returns typed Outfitter errors unchanged before mapper execution, applies mapper only for untyped input, defaults to `InternalError`, and `composeMappers(...mappers)` iterates in declared order and returns first non-undefined result.",
+      "issues": []
+    },
+    "VAL-UTIL-003": {
+      "status": "pass",
+      "evidence": "Targeted tests passed: `bun test src/__tests__/from-fetch.test.ts` (22 pass, 0 fail), including explicit mappings 401->auth, 403->permission, 404->not_found, 408/504->timeout, 409->conflict, 429->rate_limit, 502/503->network, plus 5xx->internal fallback and 2xx Ok behavior. Full contracts suite passed (410 pass). Export verification passed: `fromFetch: function`. Source verification: `packages/contracts/src/from-fetch.ts` maps required statuses and returns `Result.ok(response)` for 2xx, with 4xx fallback to validation and 5xx fallback to internal.",
+      "issues": []
+    },
+    "VAL-UTIL-004": {
+      "status": "pass",
+      "evidence": "Targeted tests passed: `bun test src/__tests__/expect-result.test.ts` (19 pass, 0 fail), covering success narrowing for `expectOk`/`expectErr`, descriptive thrown failures for opposite variant, custom message support, and Bun assertion compatibility (`toThrow`, `toBe`, `toEqual`). Full contracts suite passed (410 pass). Export verification passed: `expectOk: function`, `expectErr: function` from package index. Source verification: `packages/contracts/src/assert/index.ts` defines `expectOk`/`expectErr` with Result narrowing and descriptive throw messages.",
+      "issues": []
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": [
+    "bun test",
+    "bun run typecheck",
+    "bun -e",
+    "rg",
+    "Read"
+  ]
+}

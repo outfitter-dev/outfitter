@@ -1,0 +1,13 @@
+{
+  "flowId": "dependency-versions",
+  "assertions": {
+    "VAL-UTIL-005": {
+      "status": "pass",
+      "evidence": "Code inspection: apps/outfitter/src/engine/dependency-versions.ts exports resolvePresetDependencyVersions(): Result<ResolvedPresetDependencyVersions, InternalError>, catches failures and returns Result.err(InternalError.create(...)), and contains no throw statements (rg \\\"\\bthrow\\b\\\" in that file returned no matches). clearResolvedVersionsCache() exists and is exercised by tests. Caller inspection via rg: apps/outfitter/src/engine/config.ts handles Result with isErr() and returns Result.err(ScaffoldError), and apps/outfitter/src/commands/shared-deps.ts handles Result with isErr() before reading value. Test output: cd /Users/mg/Developer/outfitter/stack/apps/outfitter && bun test => 749 pass, 0 fail (exit 0). Explicit failure-path tests: bun test src/__tests__/dependency-versions.test.ts => 10 pass including: returns Err with InternalError when package root cannot be found; returns Err when getResolvedVersions throws; failure result is not cached — retry is possible; never throws — always returns Result; never throws even when readFileSync fails. Type safety: cd /Users/mg/Developer/outfitter/stack && bun run typecheck => 34 successful tasks, exit 0.",
+      "issues": []
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["bun test", "bun run typecheck", "rg", "Read"]
+}
