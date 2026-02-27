@@ -5,7 +5,7 @@
  */
 
 import { cwdPreset } from "@outfitter/cli/flags";
-import { outputModePreset } from "@outfitter/cli/query";
+import { outputModePreset, resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
@@ -33,15 +33,11 @@ import {
   printCheckSurfaceMapResult,
   runCheckSurfaceMap,
 } from "../commands/check-surface-map.js";
-import {
-  type CliOutputMode,
-  resolveStructuredOutputMode,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
   resolveCwdFromPreset,
-  resolveOutputModeWithEnvFallback,
 } from "./shared.js";
 
 interface CheckAutomationInput {
@@ -64,13 +60,7 @@ const checkAutomationCwd = cwdPreset();
 function mapCheckAutomationInput(context: {
   readonly flags: Record<string, unknown>;
 }): CheckAutomationInput {
-  const { outputMode: presetOutputMode } = checkAutomationOutput.resolve(
-    context.flags
-  );
-  const outputMode = resolveOutputModeWithEnvFallback(
-    context.flags,
-    resolveStructuredOutputMode(presetOutputMode) ?? "human"
-  );
+  const { mode: outputMode } = resolveOutputMode(context.flags);
 
   return {
     cwd: resolveCwdFromPreset(context.flags, checkAutomationCwd),

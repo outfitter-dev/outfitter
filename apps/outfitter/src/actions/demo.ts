@@ -4,14 +4,12 @@
  * @packageDocumentation
  */
 
+import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { runDemo } from "../commands/demo.js";
-import {
-  type CliOutputMode,
-  resolveOutputModeFromContext,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   outputModeSchema,
   toActionInternalErrorFromUnknown,
@@ -55,7 +53,7 @@ export const demoAction: DemoAction = defineAction({
       },
     ],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const section = context.args[0] as string | undefined;
       return {
         ...(section !== undefined ? { section } : {}),

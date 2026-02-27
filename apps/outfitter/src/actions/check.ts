@@ -9,7 +9,11 @@ import {
   cwdPreset,
   verbosePreset,
 } from "@outfitter/cli/flags";
-import { jqPreset, outputModePreset } from "@outfitter/cli/query";
+import {
+  jqPreset,
+  outputModePreset,
+  resolveOutputMode,
+} from "@outfitter/cli/query";
 import {
   type ActionCliOption,
   defineAction,
@@ -27,15 +31,11 @@ import {
 } from "../commands/check-orchestrator.js";
 import { runCheckTsdoc } from "../commands/check-tsdoc.js";
 import { printCheckResults, runCheck } from "../commands/check.js";
-import {
-  type CliOutputMode,
-  resolveStructuredOutputMode,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
   resolveCwdFromPreset,
-  resolveOutputModeWithEnvFallback,
   resolveStringFlag,
 } from "./shared.js";
 
@@ -180,9 +180,6 @@ export const checkAction: CheckAction = defineAction({
     mapInput: (context) => {
       const mode = resolveCheckMode(context.flags);
       const { compact } = checkCompact.resolve(context.flags);
-      const { outputMode: presetOutputMode } = checkOutputMode.resolve(
-        context.flags
-      );
       const block = resolveStringFlag(context.flags["block"]);
       if (mode !== undefined && block !== undefined) {
         throw ValidationError.fromMessage(
@@ -197,11 +194,9 @@ export const checkAction: CheckAction = defineAction({
                 typeof arg === "string" && arg.trim().length > 0
             )
           : undefined;
-      const outputMode = resolveOutputModeWithEnvFallback(
-        context.flags,
-        resolveStructuredOutputMode(presetOutputMode) ?? "human",
-        { forceHumanWhenImplicit: mode !== undefined }
-      );
+      const { mode: outputMode } = resolveOutputMode(context.flags, {
+        forceHumanWhenImplicit: mode !== undefined,
+      });
       const { verbose } = checkVerbose.resolve(context.flags);
       const manifestOnly = Boolean(context.flags["manifestOnly"]);
       return {
@@ -352,14 +347,8 @@ export const checkTsdocAction: CheckTsdocAction = defineAction({
       ...checkTsdocJq.options,
     ],
     mapInput: (context) => {
-      const { outputMode: presetOutputMode } = checkTsdocOutputMode.resolve(
-        context.flags
-      );
       const { jq } = checkTsdocJq.resolve(context.flags);
-      const outputMode = resolveOutputModeWithEnvFallback(
-        context.flags,
-        resolveStructuredOutputMode(presetOutputMode) ?? "human"
-      );
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const minCoverageRaw =
         context.flags["minCoverage"] ?? context.flags["min-coverage"];
       let minCoverage = 0;
