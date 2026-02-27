@@ -98,28 +98,38 @@ describe("getChangedChangesetFiles", () => {
 });
 
 describe("checkChangesetRequired", () => {
-  test("returns ok when changeset files exist", () => {
+  test("returns ok when all changed packages are covered", () => {
     const result = checkChangesetRequired(
       ["cli", "contracts"],
-      ["happy-turtle.md"]
+      ["@outfitter/cli", "@outfitter/contracts"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
 
-  test("returns ok when multiple changeset files exist", () => {
+  test("fails when only a subset of changed packages are covered", () => {
     const result = checkChangesetRequired(
-      ["cli"],
-      ["happy-turtle.md", "brave-fox.md"]
+      ["cli", "contracts", "schema"],
+      ["@outfitter/cli", "@outfitter/contracts"]
     );
-    expect(result).toEqual({ ok: true, missingFor: [] });
+    expect(result).toEqual({ ok: false, missingFor: ["schema"] });
   });
 
-  test("fails when packages changed but no changeset files", () => {
+  test("fails when packages changed but no packages are covered", () => {
     const result = checkChangesetRequired(["cli", "contracts"], []);
     expect(result).toEqual({
       ok: false,
       missingFor: ["cli", "contracts"],
     });
+  });
+
+  test("ignores changed packages excluded via changeset config", () => {
+    const result = checkChangesetRequired(
+      ["agents", "tooling"],
+      ["@outfitter/tooling"],
+      ["@outfitter/agents"]
+    );
+
+    expect(result).toEqual({ ok: true, missingFor: [] });
   });
 
   test("returns ok when no packages changed", () => {
