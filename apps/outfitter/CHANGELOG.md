@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.4
+
+### Patch Changes
+
+- Updated dependencies [ea916e5]
+  - @outfitter/oxlint-plugin@0.1.1
+
 ## 0.3.3
 
 ### Patch Changes
