@@ -1,0 +1,34 @@
+{
+  "milestone": "testing-primitives",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": { "passed": true, "command": "bun run typecheck", "exitCode": 0 },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "nonBlockingIssues": [
+    {
+      "featureId": "os-336-test-command-tool",
+      "severity": "non_blocking",
+      "description": "testCommand() restores previously-unset env vars via `process.env[key] = undefined` instead of `delete process.env[key]`. This leaves the key present on process.env (Object.hasOwn returns true), which is inconsistent with fixtures.ts:withEnv() in the same package that correctly uses `delete`. The value is correctly undefined, so no functional impact for typical usage, but key-presence leakage violates strict 'fully restored' semantics.",
+      "suggestedFix": "Change line 89 in test-command.ts from `process.env[key] = undefined` to `delete process.env[key]` to match the withEnv() pattern in fixtures.ts."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [],
+  "rejectedObservations": [
+    {
+      "observation": "Environment restoration semantics are not explicitly documented in mission shared state, and this led to inconsistent restoration behavior in new code.",
+      "reason": "This is a minor code-level inconsistency within a single package, not a systemic cross-worker issue. The correct pattern (delete) already exists in fixtures.ts in the same package. Adding AGENTS.md guidance for this edge case would be over-prescriptive."
+    }
+  ],
+  "previousRound": null
+}
