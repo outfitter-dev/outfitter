@@ -1,0 +1,26 @@
+{
+  "featureId": "os-420-docs-output-mode-fix",
+  "reviewedAt": "2026-02-27T18:38:02Z",
+  "commitId": "294a74e2c45edfef10a350ec8b127c87f496dfa8",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation satisfies OS-420/VAL-OUTPUT-001: resolveDocsOutputMode now uses hasExplicitOutputFlag so Commander default output values no longer suppress OUTFITTER_JSON/OUTFITTER_JSONL env fallback, and tests cover Commander-default plus explicit-flag precedence scenarios.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker verification procedure still mandates `bun run check`, but mission guidance says `bun run check` is currently broken and workers should use lint/typecheck separately. This creates conflicting guidance.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/library-worker/SKILL.md (Step 5 requires `bun run check`); /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md (Known Pre-Existing Issues: `bun run check` crashes); transcript skeleton for worker f953359e-9a98-4668-b8fc-0486a22e672b shows the worker using `bun run lint` and `bun run typecheck` instead."
+    },
+    {
+      "area": "services",
+      "observation": "services.yaml still advertises `check: bun run check` despite mission-level guidance that this command crashes in the current environment.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/services.yaml includes `check: bun run check`; /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md documents the tokio panic and recommends using lint/typecheck separately."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed feature os-420-docs-output-mode-fix via features metadata, handoff, transcript skeleton, skill instructions, and commit diff. The code change is correct and complete for the stated behavior, with no defects found; report status is pass."
+}

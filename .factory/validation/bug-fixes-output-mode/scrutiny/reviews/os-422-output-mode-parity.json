@@ -1,0 +1,33 @@
+{
+  "featureId": "os-422-output-mode-parity",
+  "reviewedAt": "2026-02-27T18:39:53Z",
+  "commitId": "b1c347c52ba4a133cc1d3fabb5eaaab8950e4db1",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The feature adds a comprehensive parity suite that exercises output-mode resolution through action mapInput across all non-deprecated action groups, covers required scenarios (default human, OUTFITTER_JSON fallback, explicit --output override), and removes the last legacy duplicate branch by delegating commands/init.ts output resolution to the shared resolver.",
+    "issues": [
+      {
+        "file": "apps/outfitter/src/__tests__/output-mode-parity.test.ts",
+        "line": 284,
+        "severity": "non_blocking",
+        "description": "The \"end-to-end output chain\" section validates resolver/mapped mode consistency but does not invoke @outfitter/cli output rendering directly, so this specific suite does not itself execute the final output() formatting stage mentioned in its comment."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker verification procedure still prescribes bun run check as a mandatory step, but mission AGENTS documents this command as currently broken due a pre-existing oxfmt panic. This mismatch can cause unnecessary work/noise during worker verification.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:65-68 requires bun run check; mission AGENTS.md:76 states bun run check crashes and instructs bun run lint + bun run typecheck; worker-transcripts.jsonl:6 shows this worker handling the formatter crash path during verification."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Mission shared architecture notes on output-mode centralization are stale after OS-421/OS-422 completion.",
+      "evidence": ".factory/library/architecture.md:30-32 still says output mode is split and centralization is a goal; current code uses centralized resolveOutputMode in action mapInput paths (apps/outfitter/src/actions/add.ts:59, apps/outfitter/src/actions/docs.ts:89, apps/outfitter/src/actions/init.ts:177), and this feature delegates legacy init resolver in apps/outfitter/src/commands/init.ts:477."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed handoff, commit b1c347c, transcript skeleton, and skill usage. Implementation is in-scope and functionally complete for OS-422 with one non-blocking coverage caveat (output() stage not directly asserted in the new parity file)."
+}
