@@ -7,6 +7,7 @@
 import { Command } from "commander";
 
 import { createCLI as createCLIImpl } from "./cli.js";
+import { isSchemaPreset } from "./flags.js";
 import { exitWithError } from "./output.js";
 import { resolveOutputMode } from "./query.js";
 import {
@@ -15,6 +16,7 @@ import {
   validateInput,
 } from "./schema-input.js";
 import type {
+  AnyPreset,
   CLI,
   CLIConfig,
   CommandAction,
@@ -23,11 +25,13 @@ import type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
 
 export type {
+  AnyPreset,
   CLI,
   CLIConfig,
   CommandAction,
@@ -37,6 +41,7 @@ export type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
@@ -89,6 +94,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private errorHintsFn: ErrorHintFn<any> | undefined;
   private readonly explicitLongFlags = new Set<string>();
+  private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
   private schemaFlagsApplied = false;
 
   constructor(signature: string) {
@@ -168,8 +174,15 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this;
   }
 
-  preset(preset: FlagPreset<Record<string, unknown>>): this {
-    for (const opt of preset.options) {
+  preset(preset: AnyPreset<Record<string, unknown>>): this {
+    if (isSchemaPreset(preset)) {
+      // Schema-driven preset: store for lazy flag derivation in applySchemaFlags()
+      this.schemaPresets.push(preset);
+      return this;
+    }
+
+    // FlagPreset: add options directly to Commander (existing behavior)
+    for (const opt of (preset as FlagPreset<Record<string, unknown>>).options) {
       // Track preset flags as explicit too — they override schema-derived flags
       const longMatch = opt.flags.match(/--([a-z][a-z0-9-]*)/i);
       if (longMatch) {
@@ -253,9 +266,15 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
    * Apply schema-derived flags to the Commander command.
    * Called lazily so that explicit .option()/.requiredOption()/.preset() calls
    * made after .input() are properly tracked as overrides.
+   *
+   * Derives flags from both .input() schema AND schema presets.
    */
   private applySchemaFlags(): void {
-    if (this.schemaFlagsApplied || !this.inputSchema) return;
+    if (this.schemaFlagsApplied) return;
+
+    // Nothing to derive if neither .input() nor schema presets are used
+    if (!this.inputSchema && this.schemaPresets.length === 0) return;
+
     this.schemaFlagsApplied = true;
 
     // Also collect long flags already registered on the Commander command
@@ -267,11 +286,27 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       }
     }
 
-    const derived = deriveFlags(this.inputSchema, existingLongs);
+    // Derive flags from .input() schema
+    if (this.inputSchema) {
+      const derived = deriveFlags(this.inputSchema, existingLongs);
+      for (const flag of derived) {
+        const option = createCommanderOption(flag, this.inputSchema);
+        this.cmd.addOption(option);
+        // Track the derived long flag so schema preset fields
+        // with the same name don't duplicate it
+        existingLongs.add(flag.longFlag);
+      }
+    }
 
-    for (const flag of derived) {
-      const option = createCommanderOption(flag, this.inputSchema);
-      this.cmd.addOption(option);
+    // Derive flags from schema presets
+    for (const schemaPreset of this.schemaPresets) {
+      const derived = deriveFlags(schemaPreset.schema, existingLongs);
+      for (const flag of derived) {
+        const option = createCommanderOption(flag, schemaPreset.schema);
+        this.cmd.addOption(option);
+        // Track to prevent duplicates across multiple schema presets
+        existingLongs.add(flag.longFlag);
+      }
     }
   }
 }

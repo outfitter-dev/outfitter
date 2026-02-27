@@ -21,6 +21,8 @@ import type {
   PaginationFlags,
   PaginationPresetConfig,
   ProjectionFlags,
+  SchemaPreset,
+  SchemaPresetConfig,
   StrictFlags,
   StringListFlagPresetConfig,
   TimeWindowFlags,
@@ -54,6 +56,52 @@ export function createPreset<TResolved extends Record<string, unknown>>(
   };
   (preset as InternalPreset)[PRESET_IDS] = [config.id];
   return preset;
+}
+
+/**
+ * Create a schema-driven preset using a Zod schema fragment.
+ *
+ * Instead of declaring Commander options manually, the schema fragment
+ * is introspected to auto-derive flags (same as `.input()`). The resolve
+ * function maps raw Commander flags into typed values.
+ *
+ * @param config - Preset configuration with id, schema, and resolver
+ * @returns A schema preset that can be applied to commands via `.preset()`
+ *
+ * @example
+ * ```typescript
+ * const outputPreset = createSchemaPreset({
+ *   id: "output-format",
+ *   schema: z.object({
+ *     format: z.enum(["json", "text"]).default("text").describe("Output format"),
+ *     pretty: z.boolean().default(false).describe("Pretty print"),
+ *   }),
+ *   resolve: (flags) => ({
+ *     format: String(flags["format"] ?? "text"),
+ *     pretty: Boolean(flags["pretty"]),
+ *   }),
+ * });
+ * ```
+ */
+export function createSchemaPreset<TResolved extends Record<string, unknown>>(
+  config: SchemaPresetConfig<TResolved>
+): SchemaPreset<TResolved> {
+  return {
+    id: config.id,
+    schema: config.schema,
+    resolve: config.resolve,
+  };
+}
+
+/**
+ * Type guard to check whether a preset is a schema-driven preset.
+ */
+export function isSchemaPreset(
+  preset:
+    | FlagPreset<Record<string, unknown>>
+    | SchemaPreset<Record<string, unknown>>
+): preset is SchemaPreset<Record<string, unknown>> {
+  return "schema" in preset && !("options" in preset);
 }
 
 // Utility types for composing preset resolved types
@@ -837,6 +885,7 @@ export function paginationPreset(
 }
 
 export type {
+  AnyPreset,
   BooleanFlagPresetConfig,
   ColorFlags,
   ColorMode,
@@ -851,6 +900,8 @@ export type {
   PaginationFlags,
   PaginationPresetConfig,
   ProjectionFlags,
+  SchemaPreset,
+  SchemaPresetConfig,
   StrictFlags,
   StringListFlagPresetConfig,
   TimeWindowFlags,

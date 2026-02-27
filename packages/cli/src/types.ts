@@ -261,8 +261,14 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
 
-  /** Apply a flag preset (adds its options to the command) */
-  preset(preset: FlagPreset<Record<string, unknown>>): this;
+  /**
+   * Apply a preset to the command.
+   *
+   * Accepts either a `FlagPreset` (Commander option definitions with resolver)
+   * or a `SchemaPreset` (Zod schema fragment with resolver). Schema presets
+   * auto-derive Commander flags from the schema, composing with `.input()`.
+   */
+  preset(preset: AnyPreset<Record<string, unknown>>): this;
 
   /** Add a required option */
   requiredOption(
@@ -350,6 +356,48 @@ export interface FlagPresetConfig<TResolved extends Record<string, unknown>> {
   /** Resolve raw Commander flags into typed values */
   readonly resolve: (flags: Record<string, unknown>) => TResolved;
 }
+
+/**
+ * A schema-driven preset that uses a Zod schema fragment for flag derivation.
+ *
+ * Instead of declaring Commander options manually, the schema fragment is
+ * introspected to auto-derive flags (same as `.input()`). The schema merges
+ * with `.input()` schema automatically when both are used.
+ *
+ * Eliminates the need for separate `.resolve()` / `preAction` hooks.
+ */
+export interface SchemaPreset<TResolved extends Record<string, unknown>> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolve raw Commander flags into typed values */
+  readonly resolve: (flags: Record<string, unknown>) => TResolved;
+
+  /** Zod schema fragment defining the preset's flags */
+  readonly schema: ZodObjectLike;
+}
+
+/**
+ * Configuration for creating a schema-driven preset.
+ */
+export interface SchemaPresetConfig<TResolved extends Record<string, unknown>> {
+  /** Unique identifier for deduplication */
+  readonly id: string;
+
+  /** Resolve raw Commander flags into typed values */
+  readonly resolve: (flags: Record<string, unknown>) => TResolved;
+
+  /** Zod schema fragment defining the preset's flags */
+  readonly schema: ZodObjectLike;
+}
+
+/**
+ * Union type for any preset accepted by `.preset()`.
+ * Includes both flag-based presets and schema-driven presets.
+ */
+export type AnyPreset<
+  TResolved extends Record<string, unknown> = Record<string, unknown>,
+> = FlagPreset<TResolved> | SchemaPreset<TResolved>;
 
 /**
  * Configuration for creating a custom boolean flag preset.
