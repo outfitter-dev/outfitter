@@ -80,26 +80,33 @@ export function getChangedChangesetFiles(files: string[]): string[] {
 /**
  * Determine whether a changeset is required and present.
  *
- * Returns `ok: true` when either no packages were changed or at least one
- * changeset file exists. Returns `ok: false` with the list of changed
- * packages when changesets are missing.
+ * Returns `ok: true` when every changed package is covered by at least one
+ * changeset (excluding ignored packages). Returns `ok: false` with the list
+ * of changed packages that are missing coverage.
  *
  * @param changedPackages - Package names with source changes
- * @param changesetFiles - Changeset filenames found in `.changeset/`
+ * @param coveredPackages - Package names found in changeset frontmatter
+ * @param ignoredPackages - Package names excluded via `.changeset/config.json`
  */
 export function checkChangesetRequired(
   changedPackages: string[],
-  changesetFiles: string[]
+  coveredPackages: string[],
+  ignoredPackages: string[] = []
 ): ChangesetCheckResult {
-  if (changedPackages.length === 0) {
+  const requiredPackages = changedPackages.filter(
+    (pkg) => !ignoredPackages.includes(`@outfitter/${pkg}`)
+  );
+
+  if (requiredPackages.length === 0) {
     return { ok: true, missingFor: [] };
   }
 
-  if (changesetFiles.length > 0) {
-    return { ok: true, missingFor: [] };
-  }
+  const covered = new Set(coveredPackages);
+  const missingFor = requiredPackages.filter(
+    (pkg) => !covered.has(`@outfitter/${pkg}`)
+  );
 
-  return { ok: false, missingFor: changedPackages };
+  return { ok: missingFor.length === 0, missingFor };
 }
 
 export function parseIgnoredPackagesFromChangesetConfig(
@@ -180,6 +187,30 @@ function loadIgnoredPackages(cwd: string): string[] {
   }
 }
 
+function readChangesetFile(cwd: string, filename: string): string {
+  try {
+    return readFileSync(join(cwd, ".changeset", filename), "utf-8");
+  } catch {
+    return "";
+  }
+}
+
+function getCoveredPackagesForChangedChangesets(
+  cwd: string,
+  changesetFiles: readonly string[]
+): string[] {
+  const coveredPackages = new Set<string>();
+
+  for (const file of changesetFiles) {
+    const content = readChangesetFile(cwd, file);
+    for (const pkg of parseChangesetFrontmatterPackageNames(content)) {
+      coveredPackages.add(pkg);
+    }
+  }
+
+  return [...coveredPackages].toSorted();
+}
+
 function getIgnoredReferencesForChangedChangesets(
   cwd: string,
   changesetFiles: readonly string[]
@@ -188,13 +219,7 @@ function getIgnoredReferencesForChangedChangesets(
   return findIgnoredPackageReferences({
     changesetFiles,
     ignoredPackages,
-    readChangesetFile: (filename) => {
-      try {
-        return readFileSync(join(cwd, ".changeset", filename), "utf-8");
-      } catch {
-        return "";
-      }
-    },
+    readChangesetFile: (filename) => readChangesetFile(cwd, filename),
   });
 }
 
@@ -288,15 +313,23 @@ export async function runCheckChangeset(
   }
 
   const changesetFiles = getChangedChangesetFiles(changedFiles);
-  const check = checkChangesetRequired(changedPackages, changesetFiles);
+  const coveredPackages = getCoveredPackagesForChangedChangesets(
+    cwd,
+    changesetFiles
+  );
+  const ignoredPackages = loadIgnoredPackages(cwd);
+  const check = checkChangesetRequired(
+    changedPackages,
+    coveredPackages,
+    ignoredPackages
+  );
 
   if (!check.ok) {
-    // Warn but don't block — manual changesets are recommended
     process.stderr.write(
-      `${COLORS.yellow}No changeset found.${COLORS.reset} ` +
-        "Consider adding one with `bun run changeset` for a custom changelog entry.\n\n"
+      `${COLORS.red}Missing changeset coverage.${COLORS.reset} ` +
+        "Each changed package must be referenced in at least one changeset.\n\n"
     );
-    process.stderr.write("Packages with source changes:\n\n");
+    process.stderr.write("Uncovered packages:\n\n");
 
     for (const pkg of check.missingFor) {
       process.stderr.write(
@@ -304,10 +337,16 @@ export async function runCheckChangeset(
       );
     }
 
+    const suggestedPackages = check.missingFor
+      .map((pkg) => `"@outfitter/${pkg}"`)
+      .join(" ");
+
     process.stderr.write(
-      `\nRun ${COLORS.blue}bun run changeset${COLORS.reset} for a custom changelog entry, ` +
-        `or add ${COLORS.blue}release:none${COLORS.reset} to skip.\n`
+      `\nRun ${COLORS.blue}bun run changeset${COLORS.reset} and include ${suggestedPackages}.\n` +
+        `To bypass in CI, set ${COLORS.blue}NO_CHANGESET=1${COLORS.reset}.\n`
     );
+    process.exitCode = 1;
+    return;
   }
 
   const ignoredReferences = getIgnoredReferencesForChangedChangesets(
