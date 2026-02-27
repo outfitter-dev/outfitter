@@ -1,0 +1,58 @@
+{
+  "groupId": "contracts-types",
+  "testedAt": "2026-02-27T23:39:37Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": ["shell", "bun", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-BUILD-001",
+      "title": "ActionHint types exported from contracts",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect `packages/contracts/src/hints.ts` and verify interface definitions",
+          "expected": "`ActionHint`, `CLIHint`, and `MCPHint` exist with required/optional fields and inheritance",
+          "observed": "Found `ActionHint` (`description: string`, `params?: Record<string, unknown>`), `CLIHint extends ActionHint` (`command: string`), and `MCPHint extends ActionHint` (`tool: string`, `input?: unknown`)."
+        },
+        {
+          "action": "Inspect `packages/contracts/src/index.ts` and `packages/contracts/package.json` exports",
+          "expected": "Types exported from package root and `@outfitter/contracts/hints` subpath",
+          "observed": "Root export present: `export type { ActionHint, CLIHint, MCPHint } from \"./hints.js\";` and package subpath export present at `./hints` with `types: ./dist/hints.d.ts` and `default: ./dist/hints.js`."
+        },
+        {
+          "action": "Run import verification commands",
+          "expected": "Type imports resolve from both root and subpath",
+          "observed": "`bun --cwd packages/contracts -e \"import type { ActionHint, CLIHint, MCPHint } from '@outfitter/contracts'; ...\"` printed `root-type-import-ok true`; `bun --cwd packages/contracts -e \"import type { ActionHint, CLIHint, MCPHint } from '@outfitter/contracts/hints'; ...\"` printed `hints-subpath-type-import-ok true`."
+        },
+        {
+          "action": "Run validators: `bun run typecheck` (repo root) and `bun test` (packages/contracts)",
+          "expected": "Typecheck and package tests pass",
+          "observed": "`bun run typecheck` exited 0 (`34 successful, 34 total`); `cd packages/contracts && bun test` exited 0 (`419 pass, 0 fail`)."
+        },
+        {
+          "action": "Verify hints module has no runtime code",
+          "expected": "Type-only definitions with no runtime exports",
+          "observed": "`rg 'export\\s+(const|function|class|enum|let|var)\\b' packages/contracts/src/hints.ts` returned no matches; `packages/contracts/dist/hints.js` contains only `// @bun` (no runtime implementation)."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "typecheck": "pass: bun run typecheck (exit 0)",
+        "importVerification": [
+          "pass: bun --cwd packages/contracts -e \"import type { ActionHint, CLIHint, MCPHint } from '@outfitter/contracts'; ...\" -> root-type-import-ok true",
+          "pass: bun --cwd packages/contracts -e \"import type { ActionHint, CLIHint, MCPHint } from '@outfitter/contracts/hints'; ...\" -> hints-subpath-type-import-ok true"
+        ],
+        "testOutput": "pass: cd packages/contracts && bun test -> 419 pass / 0 fail"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-BUILD-001): 1 passed, 0 failed, 0 blocked."
+}
