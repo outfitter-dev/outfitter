@@ -177,4 +177,4 @@ export {
   serializeError,
 } from "./serialization.js";
 // Validation utilities
-export { createValidator, validateInput } from "./validation.js";
+export { createValidator, parseInput, validateInput } from "./validation.js";
