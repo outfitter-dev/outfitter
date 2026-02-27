@@ -1,0 +1,31 @@
+{
+  "featureId": "os-332-parse-input",
+  "reviewedAt": "2026-02-27T19:29:24Z",
+  "commitId": "e9ca259cd25137322fcf57bc7d0a24f895facfe6",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature requirements: parseInput(schema, data) was added in contracts validation utilities, wraps safeParse into Result<z.infer<TSchema>, ValidationError>, is exported from package root, has dedicated tests for valid/invalid parsing and inference behavior, and includes a minor changeset.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker export-verification command is unreliable in this monorepo context: it instructs importing '@outfitter/<pkg>' from eval, but that import failed for this worker session and required local dist/source import fallbacks.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:75 recommends `bun -e \"const m = await import('@outfitter/<pkg>')...\"`; worker transcript for session 66c88133-6b69-4937-a639-64283549c331 shows `Cannot find module '@outfitter/contracts'` for that command, then verifies via packages/contracts dist/source imports."
+    },
+    {
+      "area": "knowledge",
+      "observation": "User-testing library guidance currently repeats the same root-level package import check that failed in this mission, so the shared testing knowledge is partially inaccurate for local validation runs.",
+      "evidence": ".factory/library/user-testing.md:42 lists `bun -e \"const m = await import('@outfitter/contracts'); ...\"`; transcript for session 66c88133-6b69-4937-a639-64283549c331 records this command failing with module resolution error."
+    },
+    {
+      "area": "skills",
+      "observation": "The skill prescribes interactive `bun changeset`, but worker sessions in exec mode may need a documented non-interactive alternative (direct changeset file creation) to avoid procedural ambiguity.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:85 instructs `bun changeset`; transcript for session 66c88133-6b69-4937-a639-64283549c331 shows creation of `.changeset/add-parse-input.md` directly via file creation tool."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit e9ca259cd25137322fcf57bc7d0a24f895facfe6 for os-332-parse-input and found the feature correctly implemented and tested with no code defects identified against stated expectations. Logged shared-state documentation/skill procedure gaps around export verification and changeset workflow in this execution environment."
+}
