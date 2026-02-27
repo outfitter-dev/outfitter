@@ -1,0 +1,21 @@
+{
+  "featureId": "os-331-output-format",
+  "reviewedAt": "2026-02-27T18:38:11Z",
+  "commitId": "7c092736e84e28e7e3f52547438fd78d510bddf3",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation satisfies OS-331 and VAL-BUG-003: `output()` now accepts optional `format` as the second argument with precedence format > env > default human; `OutputOptions.mode` was removed; callsites were migrated; comprehensive output/exitWithError tests and a changeset were added.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`library-worker` verification guidance remains partially out of sync with mission-level constraints: it mandates unconditional `bun run test` and `bun run check`, while mission AGENTS documents known pre-existing full-suite failures and directs workers to use `bun run lint` and `bun run typecheck` instead of `bun run check`.",
+      "evidence": "Skill: /Users/mg/Developer/outfitter/stack/.factory/skills/library-worker/SKILL.md:58-66; mission constraints: /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75-76; this feature handoff verification list: /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T18-04-40-500Z__os-331-output-format__b202957a-d508-4d1d-ad33-5669f1adafb7.json:21-29."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed feature os-331-output-format via feature metadata, worker handoff, commit diff, transcript skeleton, and shared-state docs. No code defects found; the required API change, precedence behavior, tests, and changeset are present."
+}
