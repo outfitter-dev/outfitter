@@ -1,0 +1,17 @@
+{
+  "milestone": "misc-1",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "notes": "No assertions to test — the misc-1 milestone contains only edge-case bug fixes (misc-safety-edge-cases, misc-completeness-edge-cases) that do not fulfill any validation contract assertions. All 33 validation contract assertions were already passed in prior milestones (streaming, safety, completeness, reference). Environment verified: build, test (1245 tests, 0 failures), typecheck, and lint all pass cleanly.",
+  "appliedUpdates": [],
+  "previousRound": null
+}
