@@ -37,6 +37,15 @@ Outfitter is opinionated infrastructure for the Bun ecosystem. The patterns assu
 
 **The core idea:** handlers are pure functions returning `Result` types. CLI and MCP are thin adapters over the same logic. Write the handler once, expose it everywhere.
 
+## v0.6 Highlights (Streaming, Safety, Completeness)
+
+- **Streaming (`@outfitter/cli`, `@outfitter/contracts`, `@outfitter/mcp`)** — NDJSON output with `--stream`, transport-agnostic `ctx.progress` on `HandlerContext`, and MCP progress adapter support (`notifications/progress`).
+- **Safety (`@outfitter/cli`, `@outfitter/mcp`)** — `.destructive(true)` auto-adds `--dry-run`, `.readOnly(true)` / `.idempotent(true)` metadata maps to MCP annotations, and error envelopes include `retryable` + `retry_after`.
+- **Completeness (`@outfitter/cli`)** — output truncation adds pagination hints and full-output file pointers, and `.relatedTo()` builds an action graph for tier-4 related-command hints.
+- **Reference project (`examples/reference/`)** — end-to-end example showing v0.4-v0.6 patterns across shared handlers, CLI, and MCP.
+
+For migration details and before/after examples, see [v0.6 Migration](docs/migration-v0.6.md).
+
 ## v0.5 Highlights (Builder Pattern)
 
 - **Builder core (`@outfitter/cli`)** — `.input(schema)` auto-derives flags from Zod, `.context(factory)` adds typed async context, `.hints()` / `.onError()` keep hints transport-local, `createSchemaPreset()` enables schema-driven presets, and `runHandler()` + `output.envelope()` unify lifecycle/output/exit mapping.
@@ -101,6 +110,7 @@ Developer-facing tools built on the runtime.
 | [Migration](docs/migration.md)                                                  | Adopting Outfitter or upgrading versions                                                                                                   |
 | [v0.4 Migration](docs/migration-v0.4.md)                                        | Upgrade for Foundation v0.4 changes (`--json` default, output format param, `resolveOutputMode()`, commander peer dep)                     |
 | [v0.5 Migration](docs/migration-v0.5.md)                                        | Upgrade for Builder Pattern + agent-navigable envelope changes (`.input()`, `.context()`, hints, `runHandler()`, typed resource templates) |
+| [v0.6 Migration](docs/migration-v0.6.md)                                        | Upgrade for Streaming, Safety, and Completeness (`--stream`, `ctx.progress`, `.destructive()`, truncation, `.relatedTo()`, MCP progress)   |
 | [Discoverability](docs/reference/discoverability.md)                            | Understand subpath exports, tooling, and package discoverability                                                                           |
 | [Error Handling Patterns](packages/contracts/docs/error-handling-patterns.md)   | Apply `parseInput()`, `wrapError()`, and `fromFetch()` in Result-first flows                                                               |
 | [CLI Patterns](packages/cli/docs/cli-patterns.md)                               | Follow CLI output/queryability patterns and conventions                                                                                    |
