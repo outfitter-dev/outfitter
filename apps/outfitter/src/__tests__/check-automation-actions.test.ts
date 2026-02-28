@@ -28,6 +28,10 @@ const CHECK_AUTOMATION_ACTIONS = [
     id: "check.action-ceremony",
     command: "action-ceremony",
   },
+  {
+    id: "check.action-registry",
+    command: "action-registry",
+  },
 ] as const;
 
 describe("check automation action registration", () => {
