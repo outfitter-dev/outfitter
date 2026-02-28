@@ -1,0 +1,26 @@
+{
+  "featureId": "os-347-error-enrichment",
+  "reviewedAt": "2026-02-28T00:22:35Z",
+  "commitId": "3e889e500b908b8f496ac51da9f2258f66087370",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation fully satisfies the feature requirements: jsonRpcCodeMap and retryableMap were added for all 10 ErrorCategory values, exitCodeMap/statusCodeMap remained unchanged, errorCategoryMeta(category) returns the required 4-field object, exports were added at contracts root, and a minor changeset was included.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker procedure requires running full-suite `bun run test`, but this run only executed package tests plus typecheck/lint while handoff.skillFeedback still marked followedProcedure=true. Procedure or guidance may need clarification for missions with known pre-existing full-suite failures.",
+      "evidence": ".factory/skills/library-worker/SKILL.md (Step 5 includes `bun run test`); /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl entry for workerSessionId e005444a-7f80-4e09-a044-34c4de093a28 shows `cd packages/contracts && bun test`, `bun run typecheck`, and `bun run lint`, but no full-suite `bun run test`."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Mission shared architecture notes still describe only exit/status error maps; they do not yet capture the new jsonRpcCodeMap/retryableMap/errorCategoryMeta metadata pattern introduced by this feature, which may reduce discoverability for later workers.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/library/architecture.md (Error Taxonomy section) vs commit 3e889e500b908b8f496ac51da9f2258f66087370 updates in packages/contracts/src/errors.ts."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review passed with no blocking code issues. Feature implementation matches the stated scope and expected behavior; only shared-state/process documentation gaps were noted."
+}

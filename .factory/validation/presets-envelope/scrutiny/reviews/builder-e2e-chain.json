@@ -1,0 +1,28 @@
+{
+  "featureId": "builder-e2e-chain",
+  "reviewedAt": "2026-02-28T00:24:21Z",
+  "commitId": "80af48a6c4fffaa798ae14e0fd7340517a3eb94a",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation satisfies the feature intent: it adds a dedicated CLI integration test suite that exercises the full builder + runHandler lifecycle in JSON and human modes, covers schema validation, context construction, hint emission, envelope output, preset composition, and error envelopes with category/message.",
+    "issues": [
+      {
+        "file": "packages/cli/src/__tests__/builder-e2e.test.ts",
+        "line": 518,
+        "severity": "non_blocking",
+        "description": "In the schema-validation failure test, `handlerCalled` is set after `cli.parse(...)` returns (line 531) rather than inside the command action, so the assertion does not directly prove handler non-invocation. The test still validates behavior via stderr/exit-code checks, but this particular guard is weaker than intended."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker skill enforces a strict red-phase requirement that tests must fail first, but this does not map cleanly to integration-test-only features that validate already-implemented behavior across components.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/library-worker/SKILL.md (Step 2, lines 28-35) requires failing tests first; handoff skill feedback for this feature explicitly notes red/green is not a natural fit for pure integration checks (/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T00-17-13-827Z__builder-e2e-chain__5a5c0c7c-4837-40f9-8f96-d0f6f4231fdc.json, lines 108-110)."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review passed. The feature’s core validation goals are covered by the new integration tests, with one non-blocking test-assertion quality note and one skill-guidance observation for shared-state refinement."
+}

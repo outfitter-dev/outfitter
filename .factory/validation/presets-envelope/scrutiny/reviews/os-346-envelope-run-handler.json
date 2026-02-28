@@ -1,0 +1,28 @@
+{
+  "featureId": "os-346-envelope-run-handler",
+  "reviewedAt": "2026-02-28T00:24:48Z",
+  "commitId": "8dea19a6c8f9f20ea0da1a7ab7ef6c392f43304f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature introduces envelope constructors and a runHandler lifecycle helper, but runHandler does not honor environment-driven output mode resolution when format is omitted, causing machine-output regressions.",
+    "issues": [
+      {
+        "file": "packages/cli/src/envelope.ts",
+        "line": 393,
+        "severity": "blocking",
+        "description": "runHandler computes JSON mode from explicit format only (`format === \"json\" || format === \"jsonl\"`) and bypasses output.ts mode detection. With no format and `OUTFITTER_JSON=1`/`OUTFITTER_JSONL=1`, it emits human text instead of a JSON envelope (reproduced from packages/cli: `OUTFITTER_JSON=1 bun -e \"...runHandler(...)\"` printed `status: deployed`; error path printed `Error: bad input`). This breaks the CLI output-mode contract and machine parseability."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker procedure does not explicitly call out validating env-driven output modes for new CLI output bridges, which let this regression slip despite otherwise strong coverage.",
+      "evidence": "Skill guidance in .factory/skills/library-worker/SKILL.md is general on edge cases; packages/cli/src/__tests__/envelope.test.ts covers explicit `format: \"json\"`/`\"human\"` but no omitted-format + `OUTFITTER_JSON`/`OUTFITTER_JSONL` case."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed feature os-346-envelope-run-handler at commit 8dea19a6c8f9f20ea0da1a7ab7ef6c392f43304f. Found a blocking output-mode bug: runHandler ignores env-based JSON mode when format is omitted, producing human output where JSON envelopes are expected."
+}

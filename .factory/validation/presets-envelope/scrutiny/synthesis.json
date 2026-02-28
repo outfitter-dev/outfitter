@@ -1,0 +1,66 @@
+{
+  "milestone": "presets-envelope",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 5,
+    "passed": 2,
+    "failed": 3,
+    "failedFeatures": ["os-345-schema-presets", "os-346-envelope-run-handler", "os-348-self-doc-hints"]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "os-345-schema-presets",
+      "severity": "blocking",
+      "description": "Schema preset fields are not merged into the .input() validation schema and schema preset resolvers are never executed in the builder lifecycle. The action() handler validates only against this.inputSchema, while .preset() stores schema presets only for flag derivation. Parsing --query hi --limit 7 yields input {query: 'hi'} with preset field omitted, and --limit abc is accepted as NaN. This contradicts the OS-345 contract that schema fragments compose with .input() (merged schema)."
+    },
+    {
+      "featureId": "os-346-envelope-run-handler",
+      "severity": "blocking",
+      "description": "runHandler() determines JSON mode from explicit format parameter only (format === 'json' || format === 'jsonl') and bypasses output.ts env-based mode detection. When format is omitted and OUTFITTER_JSON=1 or OUTFITTER_JSONL=1 is set, it emits human text instead of JSON envelope, breaking the CLI output-mode contract and machine parseability."
+    },
+    {
+      "featureId": "os-348-self-doc-hints",
+      "severity": "blocking",
+      "description": "Root self-doc mode only checks --json / OUTFITTER_JSON / OUTFITTER_JSONL flags and does not detect non-TTY/piped execution. Piped runs without explicit JSON env/flag fall through to program.outputHelp() instead of emitting JSON command-tree output, violating VAL-HINT-001 requirement for piped/JSON mode vs TTY help mode."
+    }
+  ],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Updated .factory/library/architecture.md Error Taxonomy section to document jsonRpcCodeMap, retryableMap, and errorCategoryMeta() pattern added by OS-347.",
+      "sourceFeature": "os-347-error-enrichment"
+    }
+  ],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Clarify in library-worker skill that full-suite `bun run test` is the required validation step (not just package-scoped tests). Workers marking followedProcedure=true while skipping full-suite should be flagged.",
+      "evidence": "Features os-345-schema-presets and os-347-error-enrichment both ran only package-scoped tests but reported followedProcedure: true. The skill procedure step 5 requires `bun run test` which runs the full Turbo suite.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Add to library-worker skill: when implementing CLI output bridges (e.g., runHandler, envelope functions), test env-driven output mode resolution (OUTFITTER_JSON, OUTFITTER_JSONL) with omitted format parameter, not just explicit format.",
+      "evidence": "Feature os-346-envelope-run-handler tests covered explicit format: 'json'/'human' but missed the omitted-format + env var path, letting a blocking regression through.",
+      "isSystemic": false
+    },
+    {
+      "target": "skills",
+      "suggestion": "Add exception or alternative flow in library-worker skill for pure integration-test features where the strict red-green-refactor TDD cycle doesn't naturally apply (tests validate already-implemented behavior across components).",
+      "evidence": "Feature builder-e2e-chain worker noted red/green is not a natural fit for integration checks. The library-worker skill Step 2 requires failing tests first, which doesn't map to this type of feature.",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": null
+}
