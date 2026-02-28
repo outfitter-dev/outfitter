@@ -225,6 +225,12 @@
         "default": "./dist/commands/upgrade-apply.js"
       }
     },
+    "./commands/upgrade-codemod-builder": {
+      "import": {
+        "types": "./dist/commands/upgrade-codemod-builder.d.ts",
+        "default": "./dist/commands/upgrade-codemod-builder.js"
+      }
+    },
     "./commands/upgrade-codemods": {
       "import": {
         "types": "./dist/commands/upgrade-codemods.d.ts",
