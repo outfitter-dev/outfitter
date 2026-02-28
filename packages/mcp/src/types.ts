@@ -894,34 +894,15 @@ export interface McpServer {
 // Handler Context Extension
 // ============================================================================
 
-// ============================================================================
-// Progress Reporting
-// ============================================================================
-
-/**
- * Reporter for sending progress updates to clients.
- */
-export interface ProgressReporter {
-  /**
-   * Report progress for the current operation.
-   * @param progress - Current progress value
-   * @param total - Optional total value (for percentage calculation)
-   * @param message - Optional human-readable status message
-   */
-  report(progress: number, total?: number, message?: string): void;
-}
-
-// ============================================================================
-// Handler Context Extension
-// ============================================================================
-
 /**
  * Extended handler context for MCP tools.
  * Includes MCP-specific information in addition to standard HandlerContext.
  */
 export interface McpHandlerContext extends HandlerContext {
   /** Progress reporter, present when client provides a progressToken */
-  progress?: ProgressReporter;
+  progress?: {
+    report(progress: number, total?: number, message?: string): void;
+  };
   /** The name of the tool being invoked */
   toolName?: string;
 }

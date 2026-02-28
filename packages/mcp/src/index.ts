@@ -93,7 +93,6 @@ export {
   type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
-  type ProgressReporter,
   type PromptArgument,
   type PromptDefinition,
   type PromptHandler,

@@ -282,7 +282,7 @@ count = 42
     });
 
     it("returns Result.ok with validated config on success", async () => {
-      const result = await loadConfig("test-app", TestConfigSchema, {
+      const result = loadConfig("test-app", TestConfigSchema, {
         searchPaths: ["/tmp/test-config"],
       });
 
@@ -295,7 +295,7 @@ count = 42
 
     it("loads config from XDG_CONFIG_HOME/{appName}/config.toml", async () => {
       process.env.XDG_CONFIG_HOME = "/tmp/xdg-config-test";
-      const result = await loadConfig("myapp", TestConfigSchema);
+      const result = loadConfig("myapp", TestConfigSchema);
 
       // Expected path: /tmp/xdg-config-test/myapp/config.toml
       expect(result.isOk()).toBe(true);
@@ -308,7 +308,7 @@ count = 42
         count: z.number().int().positive(),
       });
 
-      const result = await loadConfig("strict-app", StrictSchema);
+      const result = loadConfig("strict-app", StrictSchema);
 
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
@@ -321,10 +321,7 @@ count = 42
 
   describe("error handling", () => {
     it("returns Result.err(NotFoundError) when config file is missing", async () => {
-      const result = await loadConfig(
-        "nonexistent-app-12345",
-        TestConfigSchema
-      );
+      const result = loadConfig("nonexistent-app-12345", TestConfigSchema);
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -335,7 +332,7 @@ count = 42
 
     it("returns Result.err(ValidationError) for invalid schema", async () => {
       // Assuming a config file exists but has invalid data
-      const result = await loadConfig("invalid-config-app", TestConfigSchema);
+      const result = loadConfig("invalid-config-app", TestConfigSchema);
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -345,7 +342,7 @@ count = 42
     });
 
     it("ValidationError includes field path for nested validation failures", async () => {
-      const result = await loadConfig("bad-nested-app", TestConfigSchema);
+      const result = loadConfig("bad-nested-app", TestConfigSchema);
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -358,7 +355,7 @@ count = 42
 
     it("returns Result.err for malformed config files", async () => {
       // Test with a syntactically invalid TOML/YAML/JSON
-      const result = await loadConfig("malformed-app", TestConfigSchema);
+      const result = loadConfig("malformed-app", TestConfigSchema);
 
       expect(result.isErr()).toBe(true);
     });
@@ -370,7 +367,7 @@ count = 42
       // 1. $XDG_CONFIG_HOME/{appName}/config.{toml,yaml,yml,json,jsonc,json5}
       // 2. ~/.config/{appName}/config.{toml,yaml,yml,json,jsonc,json5}
       // 3. ./{appName}.config.{toml,yaml,yml,json,jsonc,json5} (project-local)
-      const result = await loadConfig("ordered-app", TestConfigSchema);
+      const result = loadConfig("ordered-app", TestConfigSchema);
 
       // Test verifies the precedence is respected
       expect(result.isOk() || result.isErr()).toBe(true);
@@ -378,13 +375,13 @@ count = 42
 
     it("prefers TOML over YAML over JSON when multiple formats exist", async () => {
       // If config.toml and config.yaml both exist, TOML should win
-      const result = await loadConfig("multi-format-app", TestConfigSchema);
+      const result = loadConfig("multi-format-app", TestConfigSchema);
 
       expect(result.isOk() || result.isErr()).toBe(true);
     });
 
     it("accepts custom searchPaths option", async () => {
-      const result = await loadConfig("custom-app", TestConfigSchema, {
+      const result = loadConfig("custom-app", TestConfigSchema, {
         searchPaths: ["/custom/path1", "/custom/path2"],
       });
 
