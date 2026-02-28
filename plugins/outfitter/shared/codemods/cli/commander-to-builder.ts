@@ -42,6 +42,8 @@ interface ParsedOption {
   readonly key: string;
   /** Whether the option is negated (--no-xxx) */
   readonly negated: boolean;
+  /** Whether the value argument uses optional brackets [value] */
+  readonly optionalValue: boolean;
   /** Whether this was a .requiredOption() */
   readonly required: boolean;
   /** "string" | "boolean" | "number" */
@@ -66,18 +68,35 @@ const IGNORED_DIRECTORIES = new Set([
   "out",
 ]);
 
+/**
+ * Command directory patterns to restrict scanning.
+ *
+ * Only scans directories that are likely to contain CLI command definitions:
+ * - `apps/* /src/commands/` — app-level command directories
+ * - `src/commands/` — when targetDir is already an app
+ * - `commands/` — flat command directories
+ *
+ * This avoids false positives on library implementation files in `packages/`
+ * that happen to use Commander patterns internally.
+ */
+const COMMAND_DIR_GLOBS = [
+  "apps/*/src/commands/**/*.{ts,tsx,mts}",
+  "src/commands/**/*.{ts,tsx,mts}",
+  "commands/**/*.{ts,tsx,mts}",
+];
+
 function collectSourceFiles(dir: string): string[] {
   const files: string[] = [];
-  const glob = new Bun.Glob("**/*.{ts,tsx,mts}");
+  const seen = new Set<string>();
 
-  for (const entry of glob.scanSync({ cwd: dir })) {
-    const parts = entry.split("/");
-    if (parts.some((p) => IGNORED_DIRECTORIES.has(p))) continue;
-    // Only scan files likely to contain Commander commands
-    if (!entry.includes("command") && !entry.includes("cmd")) {
-      // Be inclusive: scan all .ts files under src/
-      files.push(entry);
-    } else {
+  for (const pattern of COMMAND_DIR_GLOBS) {
+    const glob = new Bun.Glob(pattern);
+
+    for (const entry of glob.scanSync({ cwd: dir })) {
+      const parts = entry.split("/");
+      if (parts.some((p) => IGNORED_DIRECTORIES.has(p))) continue;
+      if (seen.has(entry)) continue;
+      seen.add(entry);
       files.push(entry);
     }
   }
@@ -168,7 +187,10 @@ function parseOptionCall(
   const negated = flags.includes("--no-");
 
   // Determine type from the flag pattern
-  const hasValueArg = /<[^>]+>/.test(flags);
+  // <value> = required string, [value] = optional string, no value = boolean
+  const hasRequiredValueArg = /<[^>]+>/.test(flags);
+  const hasOptionalValueArg = /\[[^\]]+\]/.test(flags);
+  const hasValueArg = hasRequiredValueArg || hasOptionalValueArg;
   let type: "boolean" | "number" | "string" = hasValueArg
     ? "string"
     : "boolean";
@@ -190,15 +212,6 @@ function parseOptionCall(
       type = "number";
     } else if (isQuotedStringLiteral(defaultRaw)) {
       defaultValue = defaultRaw;
-    } else if (defaultRaw === "parseInt" || defaultRaw === "Number") {
-      // Parser function — this is a number type
-      return {
-        key,
-        type: "number",
-        description,
-        required: isRequired,
-        negated,
-      };
     } else {
       defaultValue = defaultRaw;
     }
@@ -211,6 +224,7 @@ function parseOptionCall(
     defaultValue,
     required: isRequired,
     negated,
+    optionalValue: hasOptionalValueArg,
   };
 }
 
@@ -348,7 +362,8 @@ function kebabToCamel(str: string): string {
 
 /** Generate a Zod schema field from a parsed option. */
 function generateSchemaField(option: ParsedOption): string {
-  const { key, type, description, defaultValue, negated } = option;
+  const { key, type, description, defaultValue, negated, optionalValue } =
+    option;
 
   let field: string;
 
@@ -369,7 +384,11 @@ function generateSchemaField(option: ParsedOption): string {
     default: {
       if (defaultValue !== undefined) {
         field = `${key}: z.string().default(${defaultValue}).describe("${escapeString(description)}")`;
+      } else if (optionalValue) {
+        // Square bracket [value] → optional
+        field = `${key}: z.string().optional().describe("${escapeString(description)}")`;
       } else {
+        // Angle bracket <value> → required
         field = `${key}: z.string().describe("${escapeString(description)}")`;
       }
       break;
@@ -377,6 +396,15 @@ function generateSchemaField(option: ParsedOption): string {
   }
 
   return field;
+}
+
+/** Generate a Zod schema field from a parsed positional argument. */
+function generateArgumentSchemaField(arg: ParsedArgument): string {
+  const { name, description, required } = arg;
+  if (required) {
+    return `${name}: z.string().describe("${escapeString(description)}")`;
+  }
+  return `${name}: z.string().optional().describe("${escapeString(description)}")`;
 }
 
 function escapeString(str: string): string {
@@ -424,13 +452,17 @@ function transformFile(content: string): TransformResult {
     }
   }
 
-  // If no options found, nothing to transform
-  if (options.length === 0) {
+  // If no options and no arguments found, nothing to transform
+  if (options.length === 0 && positionalArgs.length === 0) {
     return { content, changed: false };
   }
 
-  // Generate the Zod schema
-  const schemaFields = options.map((opt) => `  ${generateSchemaField(opt)},`);
+  // Generate the Zod schema — positional args first, then options
+  const argFields = positionalArgs.map(
+    (arg) => `  ${generateArgumentSchemaField(arg)},`
+  );
+  const optFields = options.map((opt) => `  ${generateSchemaField(opt)},`);
+  const schemaFields = [...argFields, ...optFields];
   const schemaName = "inputSchema";
   const schemaBlock = [
     `const ${schemaName} = z.object({`,
@@ -441,12 +473,9 @@ function transformFile(content: string): TransformResult {
   // Build the transformed content
   let result = content;
 
-  // Remove .option() and .requiredOption() lines and insert .input(schema)
-  const optionLinePattern =
-    /^\s*\.(?:option|requiredOption)\(\s*"[^"]+"\s*,\s*"[^"]*"(?:\s*,\s*(?:"(?:[^"\\]|\\.)*"|[^)]+))?\s*\)\s*$/;
-
+  // Remove .option()/.requiredOption()/.argument() lines and insert .input(schema)
   const newLines: string[] = [];
-  let removedOptions = false;
+  let removedDeclarations = false;
   let insertedInput = false;
 
   for (let i = 0; i < lines.length; i++) {
@@ -458,12 +487,18 @@ function transformFile(content: string): TransformResult {
       (trimmed.includes(".option(") || trimmed.includes(".requiredOption(")) &&
       parseOptionCall(trimmed, trimmed.includes(".requiredOption("))
     ) {
-      removedOptions = true;
+      removedDeclarations = true;
+      continue;
+    }
+
+    // Remove .argument() lines (now converted to schema fields)
+    if (trimmed.includes(".argument(") && parseArgumentCall(trimmed)) {
+      removedDeclarations = true;
       continue;
     }
 
     // Insert .input(schema) before .action()
-    if (trimmed.includes(".action(") && removedOptions && !insertedInput) {
+    if (trimmed.includes(".action(") && !insertedInput) {
       // Find the indentation of the .action() line
       const indent = line.match(/^(\s*)/)?.[1] ?? "    ";
       newLines.push(`${indent}.input(${schemaName})`);
@@ -496,22 +531,6 @@ function transformFile(content: string): TransformResult {
       const afterInsert = result.slice(lastImportIndex);
       result = beforeInsert + "\n" + schemaBlock + "\n" + afterInsert;
     }
-  }
-
-  // Add positional argument comments if any
-  if (positionalArgs.length > 0) {
-    const argComments = positionalArgs
-      .map(
-        (arg) =>
-          `// TODO: positional argument "${arg.name}" — use explicit .argument("${arg.required ? `<${arg.name}>` : `[${arg.name}]`}", "${arg.description}")`
-      )
-      .join("\n");
-
-    // Insert comments before the schema block
-    result = result.replace(
-      `const ${schemaName} = z.object({`,
-      `${argComments}\n\nconst ${schemaName} = z.object({`
-    );
   }
 
   // Ensure zod import
