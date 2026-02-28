@@ -334,4 +334,35 @@ describe("testCommand() — backward compatibility", () => {
     expect(result.stdout).toContain("present");
     expect(process.env["MY_TEST_VAR"]).toBeUndefined();
   });
+
+  it("restores OUTFITTER_JSON when env and json both set it", async () => {
+    // Regression: when options.env includes OUTFITTER_JSON and options.json
+    // is also true, the backup value must be the original (pre-modification)
+    // value, not the value set by options.env.
+    const originalValue = process.env["OUTFITTER_JSON"];
+
+    const cli = makeCli();
+    cli.register(
+      command("json-test")
+        .description("Check JSON env")
+        .action(async () => {
+          await runHandler({
+            command: "json-test",
+            handler: async () => Result.ok({ tested: true }),
+          });
+        })
+    );
+
+    const result = await testCommand(cli, ["json-test"], {
+      env: { OUTFITTER_JSON: "0" },
+      json: true,
+    });
+
+    // json: true should win (OUTFITTER_JSON=1 during execution)
+    expect(result.envelope).toBeDefined();
+    expect(result.envelope?.ok).toBe(true);
+
+    // After execution, OUTFITTER_JSON should be restored to its original value
+    expect(process.env["OUTFITTER_JSON"]).toBe(originalValue);
+  });
 });

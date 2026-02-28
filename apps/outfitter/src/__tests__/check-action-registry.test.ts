@@ -49,28 +49,29 @@ describe("runCheckActionRegistry", () => {
     );
   });
 
-  test("registered array contains command files imported by actions", async () => {
+  test("registered array contains command files referenced by actual registry .add() chain", async () => {
     const result = await runCheckActionRegistry({ cwd: workspaceRoot });
 
     expect(result.isOk()).toBe(true);
     if (result.isErr()) return;
 
     // These files are known to be imported by action definition files
+    // that have actions added to the createActionRegistry().add() chain
     const knownRegistered = [
-      "check.ts",
-      "check-tsdoc.ts",
-      "check-action-ceremony.ts",
-      "check-docs-sentinel.ts",
-      "check-preset-versions.ts",
-      "check-publish-guardrails.ts",
-      "check-surface-map.ts",
-      "check-surface-map-format.ts",
-      "demo.ts",
-      "doctor.ts",
-      "init.ts",
-      "scaffold.ts",
-      "upgrade.ts",
-      "add.ts",
+      "apps/outfitter/src/commands/check.ts",
+      "apps/outfitter/src/commands/check-tsdoc.ts",
+      "apps/outfitter/src/commands/check-action-ceremony.ts",
+      "apps/outfitter/src/commands/check-docs-sentinel.ts",
+      "apps/outfitter/src/commands/check-preset-versions.ts",
+      "apps/outfitter/src/commands/check-publish-guardrails.ts",
+      "apps/outfitter/src/commands/check-surface-map.ts",
+      "apps/outfitter/src/commands/check-surface-map-format.ts",
+      "apps/outfitter/src/commands/demo.ts",
+      "apps/outfitter/src/commands/doctor.ts",
+      "apps/outfitter/src/commands/init.ts",
+      "apps/outfitter/src/commands/scaffold.ts",
+      "apps/outfitter/src/commands/upgrade.ts",
+      "apps/outfitter/src/commands/add.ts",
     ];
 
     for (const file of knownRegistered) {
@@ -78,26 +79,33 @@ describe("runCheckActionRegistry", () => {
     }
   });
 
-  test("unregistered array contains helper files not imported by actions", async () => {
+  test("unregistered array contains helper files not in the registry", async () => {
     const result = await runCheckActionRegistry({ cwd: workspaceRoot });
 
     expect(result.isOk()).toBe(true);
     if (result.isErr()) return;
 
-    // jq-utils.ts and docs-types.ts are known helper files
-    expect(result.value.unregistered).toContain("jq-utils.ts");
-    expect(result.value.unregistered).toContain("docs-types.ts");
+    // jq-utils.ts and docs-types.ts are known helper files not in the registry
+    expect(result.value.unregistered).toContain(
+      "apps/outfitter/src/commands/jq-utils.ts"
+    );
+    expect(result.value.unregistered).toContain(
+      "apps/outfitter/src/commands/docs-types.ts"
+    );
   });
 
-  test("each unregistered entry includes the file path", async () => {
+  test("each entry includes relative file path", async () => {
     const result = await runCheckActionRegistry({ cwd: workspaceRoot });
 
     expect(result.isOk()).toBe(true);
     if (result.isErr()) return;
 
-    // All entries should be filenames with .ts extension
+    // All entries should include the relative path prefix
     for (const file of result.value.unregistered) {
-      expect(file).toMatch(/\.ts$/);
+      expect(file).toMatch(/^apps\/outfitter\/src\/commands\/.+\.ts$/);
+    }
+    for (const file of result.value.registered) {
+      expect(file).toMatch(/^apps\/outfitter\/src\/commands\/.+\.ts$/);
     }
   });
 
