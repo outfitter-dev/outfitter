@@ -1,0 +1,21 @@
+{
+  "featureId": "fix-reference-scrutiny",
+  "reviewedAt": "2026-02-28T17:24:20Z",
+  "commitId": "3f26c58fc5384882ba52dbca2199c3e8222870be",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The fix commit fully addresses both prior blocking findings. In examples/reference/src/cli.ts, the create command now invokes the v0.5 .context() builder API and uses context-derived values in the action path. In docs/migration-v0.6.md, sections 6 and 7 now include explicit Before/After code pairs showing pre-v0.6 manual/no-truncation patterns and v0.6 truncateOutput() + TruncationOptions usage.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The library-worker skill remains package-centric for code features and does not cleanly fit mixed example+docs scrutiny-fix work; this led to a declared procedure mismatch (red phase skipped) while still marking followedProcedure=true.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:28-33,56-58,71-79 requires failing tests and package/export checks; handoff /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-20-23-326Z__fix-reference-scrutiny__4ed7d1c8-e4eb-4a94-a499-db0409e203a1.json:44-49 records followedProcedure=true plus deviation for skipped red phase."
+    }
+  ],
+  "addressesFailureFrom": ".factory/validation/reference/scrutiny/reviews/os-358-reference-project.json; .factory/validation/reference/scrutiny/reviews/migration-v06-docs.json",
+  "summary": "Pass: fix-reference-scrutiny resolves both original blockers by adding real .context() usage in the reference CLI and adding missing before/after code pairs for sections 6 and 7 in the v0.6 migration guide."
+}
