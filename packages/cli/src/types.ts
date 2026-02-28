@@ -315,6 +315,29 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
    */
   onError(fn: ErrorHintFn<TInput>): this;
 
+  /**
+   * Declare a relationship to another command for action graph navigation.
+   *
+   * Relationships build a navigable action graph (tier-4 hints) that agents
+   * use to discover workflows. Success envelopes include related next-actions
+   * from graph neighbors; error envelopes include remediation paths.
+   *
+   * Multiple `.relatedTo()` calls accumulate — each declares a separate edge.
+   *
+   * @param target - Name of the related command
+   * @param options - Optional relationship metadata (description)
+   *
+   * @example
+   * ```typescript
+   * command("deploy")
+   *   .description("Deploy application")
+   *   .relatedTo("status", { description: "Check deployment status" })
+   *   .relatedTo("rollback", { description: "Rollback if needed" })
+   *   .action(async ({ flags }) => { ... });
+   * ```
+   */
+  relatedTo(target: string, options?: RelatedToOptions): this;
+
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
 
@@ -354,6 +377,24 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
     description: string,
     defaultValue?: unknown
   ): this;
+}
+
+/**
+ * Options for declaring a command relationship via `.relatedTo()`.
+ */
+export interface RelatedToOptions {
+  /** Description of the relationship (used in hints) */
+  readonly description?: string;
+}
+
+/**
+ * A stored relationship declaration from `.relatedTo()`.
+ */
+export interface RelatedToDeclaration {
+  /** Target command name */
+  readonly target: string;
+  /** Description of the relationship */
+  readonly description?: string;
 }
 
 /**
