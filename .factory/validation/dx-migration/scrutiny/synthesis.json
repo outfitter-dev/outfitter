@@ -1,0 +1,109 @@
+{
+  "milestone": "dx-migration",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 5,
+    "passed": 1,
+    "failed": 4,
+    "failedFeatures": [
+      "os-235-registry-scanner",
+      "os-351-enhanced-test-helpers",
+      "os-352-upgrade-codemod",
+      "migration-v05-docs"
+    ]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "os-235-registry-scanner",
+      "severity": "blocking",
+      "description": "Scanner infers registration from action-file imports rather than actual `outfitterActions` registry entries in actions.ts. A command imported by an action file but never added to the registry will be falsely reported as registered."
+    },
+    {
+      "featureId": "os-235-registry-scanner",
+      "severity": "blocking",
+      "description": "Unregistered commands reported as basenames only (e.g., `jq-utils.ts`), not full file paths as required by the feature description."
+    },
+    {
+      "featureId": "os-351-enhanced-test-helpers",
+      "severity": "blocking",
+      "description": "Environment restore bug in testCommand when `options.env` includes `OUTFITTER_JSON` and `options.json` is also true: backup value gets overwritten by the json-mode env set, causing restore to leak the temporary value instead of the original."
+    },
+    {
+      "featureId": "os-352-upgrade-codemod",
+      "severity": "blocking",
+      "description": "Codemod only injects `.input(schema)` before existing `.action(...)` — never emits `.handler()` or `.context()` as required by VAL-DX-004."
+    },
+    {
+      "featureId": "os-352-upgrade-codemod",
+      "severity": "blocking",
+      "description": "Positional `.argument()` declarations not converted into schema fields. Files with only `.argument()` and no `.option()` are returned unchanged."
+    },
+    {
+      "featureId": "os-352-upgrade-codemod",
+      "severity": "blocking",
+      "description": "Optional-vs-required semantics not preserved: schema generation ignores the `required` flag and emits `z.string()` for non-defaulted options, making previously optional inputs required after codemod."
+    },
+    {
+      "featureId": "os-352-upgrade-codemod",
+      "severity": "blocking",
+      "description": "Over-broad file targeting causes false positives on non-command implementation files (e.g., packages/cli/src/command.ts, packages/cli/src/cli.ts) in dry-run against repo root."
+    },
+    {
+      "featureId": "migration-v05-docs",
+      "severity": "blocking",
+      "description": "docs/migration-v0.5.md line ~706 states testCommand `input` bypasses CLI parsing, but implementation converts input to CLI args and still calls `cli.parse(...)`. Misleading for migration users."
+    },
+    {
+      "featureId": "migration-v05-docs",
+      "severity": "blocking",
+      "description": "docs/migration-v0.5.md line ~794 states codemod transforms to `.input(schema).handler().context()`, but source codemod targets `.input(schema).action()`. Factual mismatch."
+    }
+  ],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Removed stale claim about '3 pre-existing unrelated test failures' from user-testing.md — full suite now passes cleanly (788+437 tests, 0 failures).",
+      "sourceFeature": "os-351-enhanced-test-helpers"
+    },
+    {
+      "target": "library",
+      "description": "Fixed stale `output.envelope()` reference in architecture.md — actual API is `createSuccessEnvelope()` / `createErrorEnvelope()` in packages/cli/src/envelope.ts.",
+      "sourceFeature": "migration-v05-docs"
+    }
+  ],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Fix internal inconsistency in library-worker and docs-worker skills about `bun run check`: procedure says 'do NOT use bun run check' but example handoff includes `bun run check` with exitCode 0. Remove `bun run check` from example handoffs.",
+      "evidence": "Observed by os-351 and migration-v05-docs reviewers. library-worker SKILL.md:65 says avoid, but line 129 example shows it. docs-worker SKILL.md has same pattern.",
+      "isSystemic": true
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Clarify the v0.5 builder target API shape: the builder uses `.action()` (not `.handler()`) as the terminal method. The validation contract references `.handler().context()` but the implementation uses `.action()` with `.context()` composed separately. Future features and docs should use consistent terminology.",
+      "evidence": "Mission AGENTS.md lines 75-79 describe builder around `.action()` + `.context()`, while validation-contract.md line 80 requires `.handler().context()`. This mismatch contributed to os-352 codemod drift and migration-v05-docs factual errors.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "services.yaml advertises `bun run check` which crashes",
+      "reason": "Pre-existing repo-level issue not caused by this milestone. services.yaml reflects the canonical repo command; the crash is a pre-existing oxfmt bug documented elsewhere."
+    },
+    {
+      "observation": "Mission AGENTS pre-existing-issues section stale for OS-351 env cleanup behavior (process.env[key] = undefined vs delete)",
+      "reason": "Mission-specific context, not shared state. Mission AGENTS.md is managed by the orchestrator."
+    }
+  ],
+  "previousRound": null
+}

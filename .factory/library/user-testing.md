@@ -31,6 +31,7 @@ This is a **library monorepo** with no web UI or running services. All user test
 | `@outfitter/contracts` | `bun run test --filter=@outfitter/contracts` |
 | `@outfitter/testing`   | `bun run test --filter=@outfitter/testing`   |
 | `@outfitter/mcp`       | `bun run test --filter=@outfitter/mcp`       |
+| `@outfitter/config`    | `bun run test --filter=@outfitter/config`    |
 | `outfitter` (app)      | `bun run test --filter=outfitter`            |
 | All                    | `bun run test`                               |
 
@@ -84,4 +85,3 @@ cd apps/outfitter && bun run src/index.ts schema --help
 **Known quirks:**
 
 - `bun run check` and `bun run format:fix` crash with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately for validation
-- 3 pre-existing unrelated test failures in full suite (Registry Build Output, createOutfitterLoggerFactory) — ignore these
