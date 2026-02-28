@@ -67,6 +67,8 @@ export interface InitOptions {
   readonly bin?: string | undefined;
   /** Preview changes without writing to disk. */
   readonly dryRun?: boolean | undefined;
+  /** Example name to overlay pattern-rich scaffold files (e.g., "todo" for cli, "files" for mcp). */
+  readonly example?: string | undefined;
   /** Overwrite existing files without prompting. */
   readonly force: boolean;
   /** Timeout in milliseconds for `bun install`. */
@@ -213,6 +215,7 @@ async function resolveInitInput(
       ...(blocksOverride ? { blocksOverride } : {}),
       ...(workspaceName ? { workspaceName } : {}),
       ...(options.bin ? { binName: options.bin } : {}),
+      ...(options.example ? { example: options.example } : {}),
     });
   }
 
@@ -398,6 +401,7 @@ async function resolveInitInput(
     ...(blocksOverride ? { blocksOverride } : {}),
     ...(workspaceName ? { workspaceName } : {}),
     ...(binName ? { binName } : {}),
+    ...(options.example ? { example: options.example } : {}),
   });
 }
 
@@ -449,6 +453,7 @@ export async function runInit(
 interface InitCommandFlags {
   bin?: string;
   dryRun?: boolean;
+  example?: string;
   force?: boolean;
   installTimeout?: number;
   json?: boolean;
@@ -485,6 +490,10 @@ const withCommonOptions = (command: Command): Command =>
   command
     .option("-n, --name <name>", "Package name (defaults to directory name)")
     .option("-b, --bin <name>", "Binary name (defaults to project name)")
+    .option(
+      "-e, --example <name>",
+      "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
+    )
     .option(
       "-p, --preset <preset>",
       "Preset to use (minimal|cli|mcp|daemon|library|full-stack)"
@@ -544,6 +553,7 @@ export function initCommand(program: Command): void {
         force: resolvedFlags.force ?? false,
         with: resolvedFlags.with,
         noTooling: resolvedFlags.noTooling,
+        example: resolvedFlags.example,
         yes: resolvedFlags.yes,
         dryRun: Boolean(resolvedFlags.dryRun),
         skipInstall: Boolean(resolvedFlags.skipInstall),
@@ -587,6 +597,7 @@ export function initCommand(program: Command): void {
           force: resolvedFlags.force ?? false,
           with: resolvedFlags.with,
           noTooling: resolvedFlags.noTooling,
+          example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
           skipInstall: Boolean(resolvedFlags.skipInstall),
@@ -632,6 +643,7 @@ export function initCommand(program: Command): void {
           force: resolvedFlags.force ?? false,
           with: resolvedFlags.with,
           noTooling: resolvedFlags.noTooling,
+          example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
           skipInstall: Boolean(resolvedFlags.skipInstall),
@@ -679,6 +691,7 @@ export function initCommand(program: Command): void {
           force: resolvedFlags.force ?? false,
           with: resolvedFlags.with,
           noTooling: resolvedFlags.noTooling,
+          example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
           skipInstall: Boolean(resolvedFlags.skipInstall),
@@ -724,6 +737,7 @@ export function initCommand(program: Command): void {
           force: resolvedFlags.force ?? false,
           with: resolvedFlags.with,
           noTooling: resolvedFlags.noTooling,
+          example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
           skipInstall: Boolean(resolvedFlags.skipInstall),
@@ -771,6 +785,7 @@ export function initCommand(program: Command): void {
           force: resolvedFlags.force ?? false,
           with: resolvedFlags.with,
           noTooling: resolvedFlags.noTooling,
+          example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
           skipInstall: Boolean(resolvedFlags.skipInstall),

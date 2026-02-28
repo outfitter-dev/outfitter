@@ -111,6 +111,30 @@ export async function executePlan(
           break;
         }
 
+        case "copy-example-overlay": {
+          const exampleTargetDir = change.targetDir;
+          const examplePresetPath = join(presetsDir, change.preset);
+          if (!existsSync(examplePresetPath)) {
+            return Result.err(
+              new ScaffoldError(
+                `Example overlay '${change.preset}' not found in ${presetsDir}`
+              )
+            );
+          }
+
+          const exampleResult = copyPresetFiles(
+            examplePresetPath,
+            exampleTargetDir,
+            plan.values,
+            options,
+            { allowOverwrite: true }
+          );
+          if (exampleResult.isErr()) {
+            return exampleResult;
+          }
+          break;
+        }
+
         case "inject-shared-config": {
           if (!projectDir) {
             break;

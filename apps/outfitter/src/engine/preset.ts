@@ -152,7 +152,8 @@ export function copyPresetFiles(
       const canOverlay =
         allowOverwrite &&
         (!targetExists ||
-          Boolean(copyOptions?.overwritablePaths?.has(targetPath)));
+          !copyOptions?.overwritablePaths ||
+          copyOptions.overwritablePaths.has(targetPath));
 
       if (targetExists && !options.force && !canOverlay) {
         if (options.collector) {
