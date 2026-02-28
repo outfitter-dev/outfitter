@@ -122,10 +122,21 @@ export function buildCLI() {
     .build();
 
   // ─── create ───────────────────────────────────────────────────────────
-  // Demonstrates: .input() with Zod schema (v0.5), runHandler with envelope
+  // Demonstrates: .input() with Zod schema (v0.5), .context() factory (v0.5),
+  //               runHandler with envelope
   const createCmd = command("create")
     .description("Create a new task")
     .input(CreateTaskInput)
+    .context(async (input) => {
+      // Context factory: derive computed data from validated input.
+      // Normalizes tags to lowercase and prepares a creation timestamp
+      // so the handler receives ready-to-use, pre-processed values.
+      const normalizedTags = input.tags.map((t: string) => t.toLowerCase());
+      return {
+        normalizedTags,
+        createdAt: new Date().toISOString(),
+      };
+    })
     .preset(outputModePreset())
     .relatedTo("list", { description: "List all tasks" })
     .relatedTo("update", { description: "Update task status" })
@@ -142,12 +153,17 @@ export function buildCLI() {
         },
       ];
     })
-    .action(async ({ input, flags }) => {
+    .action(async ({ input, flags, ctx }) => {
       const { mode } = resolveOutputMode(flags as Record<string, unknown>);
+      // Use context-derived normalizedTags for the handler input
+      const enrichedInput = {
+        ...(input ?? { title: "", tags: [] }),
+        tags: ctx?.normalizedTags ?? input?.tags ?? [],
+      };
       await runHandler({
         command: "task create",
         handler: createTask,
-        input: input ?? { title: "", tags: [] },
+        input: enrichedInput,
         format: mode,
       });
     })

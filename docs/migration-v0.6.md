@@ -457,6 +457,40 @@ import type { ErrorEnvelope } from "@outfitter/cli/envelope";
 Array output can now be truncated when a `limit` option is configured. Truncated
 responses include metadata and pagination hints for continuation.
 
+**Before (v0.5):**
+
+```typescript
+// No built-in truncation — manual array slicing, no metadata, no pagination hints
+const handler = async (input: { limit?: number }) => {
+  const allItems = await fetchItems();
+  const items = input.limit ? allItems.slice(0, input.limit) : allItems;
+  // Agents have no way to know output was truncated or how to get the rest
+  return Result.ok(items);
+};
+```
+
+**After (v0.6):**
+
+```typescript
+import { truncateOutput } from "@outfitter/cli/truncation";
+
+const handler = async (input: { limit?: number; offset?: number }) => {
+  const allItems = await fetchItems();
+  const truncated = truncateOutput(allItems, {
+    limit: input.limit,
+    offset: input.offset,
+    commandName: "list",
+  });
+  // truncated.data — the sliced items
+  // truncated.metadata — { showing, total, truncated: true } when above limit
+  // truncated.hints — pagination CLIHints for continuation
+  return Result.ok({
+    items: truncated.data,
+    ...(truncated.metadata ? { _truncation: truncated.metadata } : {}),
+  });
+};
+```
+
 **New module:** `@outfitter/cli/truncation`
 
 ```typescript
@@ -536,6 +570,43 @@ Agents can execute these hints directly to page through results.
 When output is very large (exceeding the file pointer threshold), the full
 result is written to a temp file and a file pointer is included in the
 truncation metadata.
+
+**Before (v0.5):**
+
+```typescript
+// No file pointer support — very large output either overwhelms the terminal
+// or is silently lost when manually truncated
+const handler = async (input: { limit?: number }) => {
+  const allItems = await searchItems(input.query);
+  // Manual slicing discards the rest with no way to recover it
+  const items = input.limit ? allItems.slice(0, input.limit) : allItems;
+  return Result.ok(items);
+};
+```
+
+**After (v0.6):**
+
+```typescript
+import { truncateOutput } from "@outfitter/cli/truncation";
+
+const handler = async (input: { limit?: number }) => {
+  const allItems = await searchItems(input.query);
+  const result = truncateOutput(allItems, {
+    limit: input.limit ?? 50,
+    commandName: "search",
+    filePointerThreshold: 1000, // write full output to file when total > 1000
+  });
+  // When total > filePointerThreshold:
+  //   result.metadata.full_output === "/tmp/outfitter-output-<ts>-<rand>.json"
+  // Agents read the file pointer to access the complete result
+  return Result.ok({
+    items: result.data,
+    ...(result.metadata ? { _truncation: result.metadata } : {}),
+  });
+};
+```
+
+### Usage
 
 ```typescript
 import {
