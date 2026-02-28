@@ -20,7 +20,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { CLIHint } from "@outfitter/contracts";
-import { safeStringify } from "@outfitter/contracts";
+
+import { cliStringify } from "./output.js";
 
 // =============================================================================
 // Constants
@@ -140,7 +141,7 @@ function writeFullOutput(
 ): { path: string } | { error: string } {
   try {
     const filePath = generateTempFilePath(tempDir);
-    const content = safeStringify(data, 2);
+    const content = cliStringify(data, true);
     writeFileSync(filePath, content, "utf-8");
     return { path: filePath };
   } catch (err) {

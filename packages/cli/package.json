@@ -118,6 +118,12 @@
         "default": "./dist/text.js"
       }
     },
+    "./truncation": {
+      "import": {
+        "types": "./dist/truncation.d.ts",
+        "default": "./dist/truncation.js"
+      }
+    },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
