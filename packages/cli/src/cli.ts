@@ -6,6 +6,8 @@
 
 import { Command } from "commander";
 
+import { buildCommandTree } from "./hints.js";
+import { output } from "./output.js";
 import type { CLI, CLIConfig, CommandBuilder } from "./types.js";
 
 function isCommanderHelp(error: { code?: string }): boolean {
@@ -95,6 +97,22 @@ export function createCLI(config: CLIConfig): CLI {
   // Force Commander to throw instead of exiting so parse() can route all exits
   // through the configured onExit hook (including async cleanup).
   program.exitOverride();
+
+  // Self-documenting root command: when no subcommand is given, output the
+  // command tree as JSON (piped/JSON mode) or help text (TTY mode).
+  program.action(async () => {
+    const isJsonMode =
+      program.opts()["json"] === true ||
+      process.env["OUTFITTER_JSON"] === "1" ||
+      process.env["OUTFITTER_JSONL"] === "1";
+
+    if (isJsonMode) {
+      const tree = buildCommandTree(program);
+      await output(tree, "json");
+    } else {
+      program.outputHelp();
+    }
+  });
 
   const parse = async (argv?: readonly string[]): Promise<void> => {
     try {
