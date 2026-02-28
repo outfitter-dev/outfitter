@@ -243,11 +243,13 @@ describe("Full builder chain E2E", () => {
         callOrder.indexOf("handler")
       );
 
-      // Verify input was parsed and validated
+      // Verify input was parsed and validated.
+      // Schema preset resolver values are composed into input.
       expect(capturedInput).toEqual({
         env: "prod",
         replicas: 3,
         dryRun: false,
+        verbose: true,
       });
 
       // Verify context was constructed from input
@@ -306,11 +308,12 @@ describe("Full builder chain E2E", () => {
         await cli.parse(["node", "test", "deploy", "--env", "staging"]);
       });
 
-      // Defaults applied
+      // Defaults applied. Schema preset resolver values are composed into input.
       expect(capturedInput).toEqual({
         env: "staging",
         replicas: 1,
         dryRun: false,
+        verbose: false,
       });
 
       // Context derived from staging env
@@ -501,6 +504,7 @@ describe("Full builder chain E2E", () => {
 
       try {
         const cli = createCLI({ name: "test", version: "0.0.1" });
+        let handlerCalled = false;
 
         cli.register(
           command("deploy")
@@ -510,12 +514,12 @@ describe("Full builder chain E2E", () => {
             .hints(deploySuccessHints)
             .preset(verbosityPreset)
             .action(async () => {
-              // Should never be called
+              // Track invocation inside the action for a stronger guarantee
+              handlerCalled = true;
               throw new Error("Handler should not be called");
             })
         );
 
-        let handlerCalled = false;
         const captured = await captureOutput(async () => {
           try {
             // --replicas "abc" → NaN after Commander coercion → Zod rejects
@@ -528,13 +532,13 @@ describe("Full builder chain E2E", () => {
               "--replicas",
               "abc",
             ]);
-            handlerCalled = true;
           } catch {
             // process.exit mock throws
           }
         });
 
-        // Handler should not be invoked on validation failure
+        // Handler should not be invoked on validation failure —
+        // assertion is inside the action handler for stronger non-invocation guarantee
         expect(handlerCalled).toBe(false);
         // Exit code 1 = validation error
         expect(exitMock.getCapture().exitCode).toBe(1);

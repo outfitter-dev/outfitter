@@ -685,3 +685,101 @@ describe("Envelope type narrowing", () => {
     }
   });
 });
+
+// =============================================================================
+// runHandler() env-var mode detection
+// =============================================================================
+
+describe("runHandler() env-var mode detection", () => {
+  let originalEnv: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    originalEnv = { ...process.env };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+    delete process.env["OUTFITTER_JSON"];
+    delete process.env["OUTFITTER_JSONL"];
+  });
+
+  test("respects OUTFITTER_JSON=1 when format is omitted", async () => {
+    process.env["OUTFITTER_JSON"] = "1";
+
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "test",
+        handler: async () => Result.ok({ status: "done" }),
+        input: {},
+      });
+    });
+
+    // With OUTFITTER_JSON=1 and no explicit format, output should be JSON envelope
+    const envelope = JSON.parse(captured.stdout.trim());
+    expect(envelope.ok).toBe(true);
+    expect(envelope.command).toBe("test");
+    expect(envelope.result).toEqual({ status: "done" });
+  });
+
+  test("respects OUTFITTER_JSONL=1 when format is omitted", async () => {
+    process.env["OUTFITTER_JSONL"] = "1";
+
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "test",
+        handler: async () => Result.ok({ message: "hello" }),
+        input: {},
+      });
+    });
+
+    // With OUTFITTER_JSONL=1 and no explicit format, output should be JSON
+    const envelope = JSON.parse(captured.stdout.trim());
+    expect(envelope.ok).toBe(true);
+    expect(envelope.result).toEqual({ message: "hello" });
+  });
+
+  test("explicit format overrides env vars", async () => {
+    process.env["OUTFITTER_JSON"] = "1";
+
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "test",
+        handler: async () => Result.ok({ status: "done" }),
+        input: {},
+        format: "human",
+      });
+    });
+
+    // Explicit format: "human" should override OUTFITTER_JSON=1
+    // Human mode writes to stdout directly, not as JSON envelope
+    expect(captured.stdout).not.toContain('"ok"');
+    expect(captured.stdout).toContain("done");
+  });
+
+  test("error path respects OUTFITTER_JSON=1 when format is omitted", async () => {
+    process.env["OUTFITTER_JSON"] = "1";
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(new ValidationError({ message: "bad input" })),
+            input: {},
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      // Error envelope should be JSON on stderr
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.ok).toBe(false);
+      expect(envelope.error.message).toBe("bad input");
+    } finally {
+      exitMock.restore();
+    }
+  });
+});

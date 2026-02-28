@@ -100,11 +100,14 @@ export function createCLI(config: CLIConfig): CLI {
 
   // Self-documenting root command: when no subcommand is given, output the
   // command tree as JSON (piped/JSON mode) or help text (TTY mode).
+  // When piped (non-TTY) and no explicit JSON flag, default to JSON output
+  // so agents and scripts get structured data without requiring --json.
   program.action(async () => {
     const isJsonMode =
       program.opts()["json"] === true ||
       process.env["OUTFITTER_JSON"] === "1" ||
-      process.env["OUTFITTER_JSONL"] === "1";
+      process.env["OUTFITTER_JSONL"] === "1" ||
+      !process.stdout.isTTY;
 
     if (isJsonMode) {
       const tree = buildCommandTree(program);
