@@ -1,0 +1,23 @@
+{
+  "flowId": "ref-structure-ci-lint",
+  "assertions": {
+    "VAL-REF-001": {
+      "status": "fail",
+      "evidence": "examples/reference/package.json exists and defines test/lint/typecheck scripts; rg --files shows source and tests under examples/reference/src; cd examples/reference && bun test passed (52 pass, 0 fail); cd examples/reference && bun run build failed with: Script not found \"build\".",
+      "details": "Standalone reference project exists and tests run independently, but the required build script is missing, so it does not fully meet the assertion requirement for buildability via project scripts."
+    },
+    "VAL-REF-003": {
+      "status": "pass",
+      "evidence": "turbo.json defines a test task; root package.json workspaces include \"examples/*\"; bun run test from repo root output includes @outfitter/reference in package scope and @outfitter/reference:test execution with 'Ran 52 tests across 4 files. [158.00ms]' (captured in /tmp/ref-structure-ci-lint-bun-run-test.log).",
+      "details": "Reference project is part of Turbo's workspace/task graph and is executed during root test runs."
+    },
+    "VAL-REF-004": {
+      "status": "pass",
+      "evidence": "examples/reference/.oxlintrc.json includes jsPlugins entry { name: \"outfitter\", specifier: \"@outfitter/oxlint-plugin\" }; cd examples/reference && bunx oxlint -c .oxlintrc.json returned 'Found 0 warnings and 0 errors.'",
+      "details": "Reference lint config is wired to @outfitter/oxlint-plugin and lint passes with zero errors."
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["shell"]
+}
