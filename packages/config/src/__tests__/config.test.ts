@@ -1084,3 +1084,177 @@ describe("Env Prefix Mapping", () => {
     }
   });
 });
+
+// ============================================================================
+// loadConfig() Optional Schema Tests (OS-350)
+// ============================================================================
+
+describe("loadConfig() without schema (optional schema)", () => {
+  const SCHEMA_OPTIONAL_DIR = "/tmp/config-schema-optional-test";
+
+  beforeAll(() => {
+    mkdirSync(`${SCHEMA_OPTIONAL_DIR}/myapp`, { recursive: true });
+    mkdirSync(`${SCHEMA_OPTIONAL_DIR}/yaml-app`, { recursive: true });
+
+    writeFileSync(
+      `${SCHEMA_OPTIONAL_DIR}/myapp/config.toml`,
+      `[server]
+port = 3000
+host = "localhost"
+`
+    );
+
+    writeFileSync(
+      `${SCHEMA_OPTIONAL_DIR}/yaml-app/config.yaml`,
+      `server:
+  port: 8080
+  host: "0.0.0.0"
+features:
+  - auth
+  - logging
+`
+    );
+  });
+
+  afterAll(() => {
+    rmSync(SCHEMA_OPTIONAL_DIR, { recursive: true, force: true });
+  });
+
+  it("returns raw parsed config when called without schema", () => {
+    const result = loadConfig("myapp", {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const config = result.value as Record<string, unknown>;
+      expect(config).toHaveProperty("server");
+      const server = config["server"] as Record<string, unknown>;
+      expect(server["port"]).toBe(3000);
+      expect(server["host"]).toBe("localhost");
+    }
+  });
+
+  it("returns unvalidated config (no schema enforcement)", () => {
+    // Without schema, any parsed config is returned as-is — even if
+    // it wouldn't pass a strict schema validation
+    const result = loadConfig("myapp", {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // The raw config includes whatever was in the file
+      const config = result.value as Record<string, unknown>;
+      expect(typeof config).toBe("object");
+    }
+  });
+
+  it("returns Result<unknown, ...> type when no schema provided", () => {
+    const result = loadConfig("myapp", {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    // The result should be ok with raw unknown data
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // We can't access .server directly (type is unknown), need to cast
+      const val: unknown = result.value;
+      expect(val).toBeTruthy();
+    }
+  });
+
+  it("still locates and parses YAML config without schema", () => {
+    const result = loadConfig("yaml-app", {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const config = result.value as Record<string, unknown>;
+      const server = config["server"] as Record<string, unknown>;
+      expect(server["port"]).toBe(8080);
+      expect(server["host"]).toBe("0.0.0.0");
+      // Arrays should be parsed correctly
+      expect(config["features"]).toEqual(["auth", "logging"]);
+    }
+  });
+
+  it("returns NotFoundError when config file is missing (without schema)", () => {
+    const result = loadConfig("nonexistent-app-schema-optional", {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("NotFoundError");
+    }
+  });
+
+  it("works with just appName (no schema, no options)", () => {
+    // This should attempt to find config at default XDG paths
+    // and return NotFoundError since the app doesn't exist there
+    const result = loadConfig("nonexistent-schema-optional-app-xyz");
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("NotFoundError");
+    }
+  });
+
+  it("with schema still works as before (backward compatible)", () => {
+    const schema = z.object({
+      server: z.object({
+        port: z.number(),
+        host: z.string(),
+      }),
+    });
+
+    const result = loadConfig("myapp", schema, {
+      searchPaths: [SCHEMA_OPTIONAL_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // With schema, the type is inferred from the schema
+      expect(result.value.server.port).toBe(3000);
+      expect(result.value.server.host).toBe("localhost");
+    }
+  });
+
+  it("handles extends without schema", () => {
+    // Create an extends chain without schema
+    const extendsDir = `${SCHEMA_OPTIONAL_DIR}/extends-test`;
+    mkdirSync(`${extendsDir}/base`, { recursive: true });
+    mkdirSync(`${extendsDir}/child`, { recursive: true });
+
+    writeFileSync(
+      `${extendsDir}/base/config.toml`,
+      `port = 3000
+host = "localhost"
+`
+    );
+
+    writeFileSync(
+      `${extendsDir}/child/config.toml`,
+      `extends = "../base/config.toml"
+port = 8080
+name = "child-app"
+`
+    );
+
+    const result = loadConfig("child", {
+      searchPaths: [extendsDir],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const config = result.value as Record<string, unknown>;
+      expect(config["port"]).toBe(8080); // overridden by child
+      expect(config["host"]).toBe("localhost"); // from base
+      expect(config["name"]).toBe("child-app"); // only in child
+    }
+
+    rmSync(extendsDir, { recursive: true, force: true });
+  });
+});
