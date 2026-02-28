@@ -9,76 +9,10 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./schema": {
+    ".": {
       "import": {
-        "types": "./dist/schema.d.ts",
-        "default": "./dist/schema.js"
-      }
-    },
-    "./handler": {
-      "import": {
-        "types": "./dist/handler.d.ts",
-        "default": "./dist/handler.js"
-      }
-    },
-    "./recovery": {
-      "import": {
-        "types": "./dist/recovery.d.ts",
-        "default": "./dist/recovery.js"
-      }
-    },
-    "./logging": {
-      "import": {
-        "types": "./dist/logging.d.ts",
-        "default": "./dist/logging.js"
-      }
-    },
-    "./assert": {
-      "import": {
-        "types": "./dist/assert/index.d.ts",
-        "default": "./dist/assert/index.js"
-      }
-    },
-    "./result/utilities": {
-      "import": {
-        "types": "./dist/result/utilities.d.ts",
-        "default": "./dist/result/utilities.js"
-      }
-    },
-    "./result": {
-      "import": {
-        "types": "./dist/result/index.d.ts",
-        "default": "./dist/result/index.js"
-      }
-    },
-    "./errors": {
-      "import": {
-        "types": "./dist/errors.d.ts",
-        "default": "./dist/errors.js"
-      }
-    },
-    "./context": {
-      "import": {
-        "types": "./dist/context.d.ts",
-        "default": "./dist/context.js"
-      }
-    },
-    "./capabilities": {
-      "import": {
-        "types": "./dist/capabilities.d.ts",
-        "default": "./dist/capabilities.js"
-      }
-    },
-    "./stream": {
-      "import": {
-        "types": "./dist/stream.d.ts",
-        "default": "./dist/stream.js"
-      }
-    },
-    "./wrap-error": {
-      "import": {
-        "types": "./dist/wrap-error.d.ts",
-        "default": "./dist/wrap-error.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./actions": {
@@ -87,28 +21,28 @@
         "default": "./dist/actions.js"
       }
     },
-    "./redactor": {
-      "import": {
-        "types": "./dist/redactor.d.ts",
-        "default": "./dist/redactor.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./validation": {
-      "import": {
-        "types": "./dist/validation.d.ts",
-        "default": "./dist/validation.js"
-      }
-    },
     "./adapters": {
       "import": {
         "types": "./dist/adapters.d.ts",
         "default": "./dist/adapters.js"
+      }
+    },
+    "./assert": {
+      "import": {
+        "types": "./dist/assert/index.d.ts",
+        "default": "./dist/assert/index.js"
+      }
+    },
+    "./capabilities": {
+      "import": {
+        "types": "./dist/capabilities.d.ts",
+        "default": "./dist/capabilities.js"
+      }
+    },
+    "./context": {
+      "import": {
+        "types": "./dist/context.d.ts",
+        "default": "./dist/context.js"
       }
     },
     "./envelope": {
@@ -117,16 +51,10 @@
         "default": "./dist/envelope.js"
       }
     },
-    "./resilience": {
+    "./errors": {
       "import": {
-        "types": "./dist/resilience.d.ts",
-        "default": "./dist/resilience.js"
-      }
-    },
-    "./serialization": {
-      "import": {
-        "types": "./dist/serialization.d.ts",
-        "default": "./dist/serialization.js"
+        "types": "./dist/errors.d.ts",
+        "default": "./dist/errors.js"
       }
     },
     "./from-fetch": {
@@ -135,13 +63,85 @@
         "default": "./dist/from-fetch.js"
       }
     },
+    "./handler": {
+      "import": {
+        "types": "./dist/handler.d.ts",
+        "default": "./dist/handler.js"
+      }
+    },
     "./hints": {
       "import": {
         "types": "./dist/hints.d.ts",
         "default": "./dist/hints.js"
       }
     },
-    "./package.json": "./package.json"
+    "./logging": {
+      "import": {
+        "types": "./dist/logging.d.ts",
+        "default": "./dist/logging.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./recovery": {
+      "import": {
+        "types": "./dist/recovery.d.ts",
+        "default": "./dist/recovery.js"
+      }
+    },
+    "./redactor": {
+      "import": {
+        "types": "./dist/redactor.d.ts",
+        "default": "./dist/redactor.js"
+      }
+    },
+    "./resilience": {
+      "import": {
+        "types": "./dist/resilience.d.ts",
+        "default": "./dist/resilience.js"
+      }
+    },
+    "./result": {
+      "import": {
+        "types": "./dist/result/index.d.ts",
+        "default": "./dist/result/index.js"
+      }
+    },
+    "./result/utilities": {
+      "import": {
+        "types": "./dist/result/utilities.d.ts",
+        "default": "./dist/result/utilities.js"
+      }
+    },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
+    "./serialization": {
+      "import": {
+        "types": "./dist/serialization.d.ts",
+        "default": "./dist/serialization.js"
+      }
+    },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      }
+    },
+    "./validation": {
+      "import": {
+        "types": "./dist/validation.d.ts",
+        "default": "./dist/validation.js"
+      }
+    },
+    "./wrap-error": {
+      "import": {
+        "types": "./dist/wrap-error.d.ts",
+        "default": "./dist/wrap-error.js"
+      }
+    }
   },
   "keywords": [
     "contracts",

@@ -678,3 +678,89 @@ describe("handler receives progress callback via context", () => {
     expect(progressWasProvided).toBe(false);
   });
 });
+
+// =============================================================================
+// safeStringify safety — BigInt, circular refs, sensitive data redaction
+// =============================================================================
+
+describe("writeNdjsonLine() safety via safeStringify", () => {
+  test("serializes BigInt values as strings instead of crashing", async () => {
+    const captured = await captureOutput(() => {
+      writeNdjsonLine({ type: "progress", count: 9007199254740993n });
+    });
+
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed.count).toBe("9007199254740993");
+  });
+
+  test("handles circular references with [Circular] marker", async () => {
+    const obj: Record<string, unknown> = { type: "progress", name: "scan" };
+    obj["self"] = obj;
+
+    const captured = await captureOutput(() => {
+      writeNdjsonLine(obj);
+    });
+
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed.self).toBe("[Circular]");
+    expect(parsed.type).toBe("progress");
+  });
+
+  test("redacts sensitive keys in stream data", async () => {
+    const captured = await captureOutput(() => {
+      writeNdjsonLine({
+        type: "progress",
+        apiKey: "test-key-placeholder",
+        data: "safe",
+      });
+    });
+
+    const parsed = JSON.parse(captured.stdout.trim());
+    expect(parsed.apiKey).toBe("[REDACTED]");
+    expect(parsed.data).toBe("safe");
+  });
+
+  test("BigInt values in streamed result envelope serialize correctly", async () => {
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "count",
+        handler: async () => Result.ok({ total: BigInt(123456789012345678n) }),
+        format: "json",
+        stream: true,
+      });
+    });
+
+    const lines = parseNdjsonLines(captured.stdout);
+    const envelope = lines[lines.length - 1] as Record<string, unknown>;
+    expect(envelope["ok"]).toBe(true);
+    const result = envelope["result"] as Record<string, unknown>;
+    expect(result["total"]).toBe("123456789012345678");
+  });
+
+  test("circular references in streamed progress events produce valid NDJSON", async () => {
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "scan",
+        handler: async (_input, ctx) => {
+          const event: Record<string, unknown> = {
+            type: "progress" as const,
+            current: 1,
+            total: 5,
+          };
+          event["ref"] = event;
+          ctx?.progress?.(event as unknown as StreamEvent);
+          return Result.ok({ done: true });
+        },
+        format: "json",
+        stream: true,
+      });
+    });
+
+    const rawLines = captured.stdout
+      .split("\n")
+      .filter((l) => l.trim().length > 0);
+    for (const line of rawLines) {
+      expect(() => JSON.parse(line)).not.toThrow();
+    }
+  });
+});
