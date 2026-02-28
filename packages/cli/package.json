@@ -94,6 +94,12 @@
         "default": "./dist/schema-input.js"
       }
     },
+    "./streaming": {
+      "import": {
+        "types": "./dist/streaming.d.ts",
+        "default": "./dist/streaming.js"
+      }
+    },
     "./terminal": {
       "import": {
         "types": "./dist/terminal/index.d.ts",

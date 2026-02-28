@@ -24,11 +24,17 @@ import type {
   CLIHint,
   ErrorCategory,
   OutfitterError,
+  ProgressCallback,
 } from "@outfitter/contracts";
 import { exitCodeMap } from "@outfitter/contracts";
 import type { Result } from "better-result";
 
 import { detectMode, formatHuman, output } from "./output.js";
+import {
+  createNdjsonProgress,
+  writeNdjsonLine,
+  writeStreamEnvelope,
+} from "./streaming.js";
 import type { OutputMode } from "./types.js";
 
 // =============================================================================
@@ -202,6 +208,16 @@ export interface RunHandlerOptions<
 
   /** Error hint function — called with (error, input) */
   readonly onError?: (error: unknown, input: TInput) => CLIHint[];
+  /**
+   * Enable NDJSON streaming mode.
+   *
+   * When `true`, the handler receives a `progress` callback via context
+   * and the CLI writes progress events as NDJSON lines to stdout.
+   * The final line is the standard command envelope (success or error).
+   *
+   * `--stream` is orthogonal to output mode — it controls delivery, not serialization.
+   */
+  readonly stream?: boolean;
 }
 
 // =============================================================================
@@ -354,6 +370,7 @@ export async function runHandler<
     contextFactory,
     hints: hintsFn,
     onError: onErrorFn,
+    stream: isStreaming = false,
   } = options;
 
   const inputValue = input as TInput;
@@ -364,11 +381,33 @@ export async function runHandler<
   const resolvedFormat = format ?? detectMode();
   const isJsonMode = resolvedFormat === "json" || resolvedFormat === "jsonl";
 
+  // Stream mode: emit start event as the first NDJSON line
+  let progressCallback: ProgressCallback | undefined;
+  if (isStreaming) {
+    const startEvent: StreamStartEvent = {
+      type: "start",
+      command: commandName,
+      ts: new Date().toISOString(),
+    };
+    writeNdjsonLine(startEvent);
+    progressCallback = createNdjsonProgress(commandName);
+  }
+
   // 1. Context factory (if provided)
   let context: TContext;
   if (contextFactory) {
     try {
-      context = await contextFactory(inputValue);
+      const rawContext = await contextFactory(inputValue);
+      // Inject progress callback into context when streaming is active
+      if (isStreaming && rawContext && typeof rawContext === "object") {
+        context = Object.assign(
+          Object.create(Object.getPrototypeOf(rawContext)),
+          rawContext,
+          { progress: progressCallback }
+        ) as TContext;
+      } else {
+        context = rawContext;
+      }
     } catch (err) {
       // Context factory failure → error envelope → exit
       const error = err instanceof Error ? err : new Error(String(err));
@@ -385,9 +424,21 @@ export async function runHandler<
         message,
         errorHints
       );
+
+      if (isStreaming) {
+        // In stream mode, write error envelope to stdout as NDJSON and exit
+        writeStreamEnvelope(envelope);
+        const exitCode = getExitCode(category);
+        // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+        process.exit(exitCode);
+      }
+
       outputErrorEnvelope(envelope, isJsonMode);
       return; // unreachable — outputErrorEnvelope calls process.exit
     }
+  } else if (isStreaming) {
+    // No context factory, but streaming is active — create a minimal context with progress
+    context = { progress: progressCallback } as TContext;
   } else {
     context = undefined as TContext;
   }
@@ -412,6 +463,14 @@ export async function runHandler<
       message,
       errorHints
     );
+
+    if (isStreaming) {
+      writeStreamEnvelope(envelope);
+      const exitCode = getExitCode(category);
+      // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+      process.exit(exitCode);
+    }
+
     outputErrorEnvelope(envelope, isJsonMode);
     return; // unreachable
   }
@@ -429,7 +488,13 @@ export async function runHandler<
       successHints
     );
 
-    // 4. Output formatting
+    if (isStreaming) {
+      // Stream mode: write terminal envelope as the last NDJSON line
+      writeStreamEnvelope(envelope);
+      return;
+    }
+
+    // 4. Output formatting (non-stream path)
     if (isJsonMode) {
       await output(envelope, resolvedFormat);
     } else {
@@ -454,6 +519,14 @@ export async function runHandler<
       message,
       errorHints
     );
+
+    if (isStreaming) {
+      writeStreamEnvelope(envelope);
+      const exitCode = getExitCode(category);
+      // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+      process.exit(exitCode);
+    }
+
     outputErrorEnvelope(envelope, isJsonMode);
   }
 }
