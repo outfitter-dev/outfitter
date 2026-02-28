@@ -1,0 +1,84 @@
+{
+  "groupId": "test-helpers",
+  "testedAt": "2026-02-28T03:09:11.651037+00:00",
+  "credentials": {
+    "account": "n/a (shell validation)",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "ripgrep",
+    "code inspection",
+    "bun -e import verification"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-DX-002",
+      "title": "testCommand() supports schema, context, and hints",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/testing && bun test 2>&1",
+          "expected": "Tests for enhanced testCommand() behavior pass, including input/context/envelope-hints behavior",
+          "observed": "Pass. Output includes test-command-enhanced cases: input option, context option, envelope return, and 'returns envelope with hints from JSON output'."
+        },
+        {
+          "action": "Inspect packages/testing/src/test-command.ts",
+          "expected": "API supports input, context, and envelope return with hint-compatible envelope parsing",
+          "observed": "Pass. TestCommandOptions defines input/context/json; TestCommandResult defines envelope; implementation converts input to args, injects context via getTestContext(), and parses JSON envelope from stdout/stderr."
+        },
+        {
+          "action": "Inspect packages/testing/src/__tests__/test-command-enhanced.test.ts",
+          "expected": "Coverage verifies input conversion, context injection, and envelope hints assertion",
+          "observed": "Pass. Tests include describe blocks for input option, context option, and envelope return, including explicit hints assertion."
+        }
+      ],
+      "evidence": {
+        "testOutput": "bun test v1.3.10: 86 pass, 0 fail. Includes testCommand() enhanced tests for input option, context option, envelope return, and envelope hints.",
+        "codeInspection": [
+          "packages/testing/src/test-command.ts: TestCommandOptions has input/context/json; TestCommandResult has envelope",
+          "packages/testing/src/test-command.ts: inputToArgs(), parseEnvelope(), getTestContext(), context injection and cleanup"
+        ],
+        "importVerification": "cd packages/testing && bun -e \"const m = await import('./src/index.ts'); console.log('testCommand', typeof m.testCommand);\" => testCommand function"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DX-003",
+      "title": "testTool() supports schema, context, and hints",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/testing && bun test 2>&1",
+          "expected": "Tests covering schema validation, context injection, and hints support pass",
+          "observed": "Pass. Output includes testTool() tests for invalid input/schema mismatch, context injection, custom context overrides, and hints support."
+        },
+        {
+          "action": "Inspect packages/testing/src/test-tool.ts",
+          "expected": "Implementation validates schema, supports context injection, and exposes hints for assertions",
+          "observed": "Pass. Uses inputSchema.safeParse() for validation, merges options.context into HandlerContext, and attaches hints when options.hints is provided and result is Ok."
+        },
+        {
+          "action": "Inspect packages/testing/src/__tests__/test-tool-enhanced.test.ts and test-tool.test.ts",
+          "expected": "Coverage includes schema validation, context behavior, and hints assertions",
+          "observed": "Pass. Enhanced tests validate context injection and hints behavior; baseline tests validate invalid-input/schema errors and custom context overrides."
+        }
+      ],
+      "evidence": {
+        "testOutput": "bun test v1.3.10: 86 pass, 0 fail. Includes testTool() coverage for schema validation, context injection, and hints support.",
+        "codeInspection": [
+          "packages/testing/src/test-tool.ts: TestToolOptions has context and hints",
+          "packages/testing/src/test-tool.ts: safeParse validation + ValidationError path",
+          "packages/testing/src/test-tool.ts: context override merge via Object.assign(ctxOverrides, options.context)",
+          "packages/testing/src/test-tool.ts: optional hints attached on successful results"
+        ],
+        "importVerification": "cd packages/testing && bun -e \"const m = await import('./src/index.ts'); console.log('testTool', typeof m.testTool);\" => testTool function"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions (VAL-DX-002, VAL-DX-003): both passed. @outfitter/testing suite passed (86/86), and code inspection confirms schema/context/hints support in testCommand() and testTool()."
+}
