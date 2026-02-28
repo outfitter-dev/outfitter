@@ -5,6 +5,7 @@
   "description": "Reference project demonstrating v0.4-v0.6 Outfitter integration",
   "type": "module",
   "scripts": {
+    "build": "bun run typecheck",
     "test": "bun test",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
