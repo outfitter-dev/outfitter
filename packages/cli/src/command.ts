@@ -47,6 +47,17 @@ export type {
 } from "./types.js";
 
 /**
+ * Command metadata for safety signals (readOnly, idempotent).
+ * Stored on Commander commands and surfaced in the command tree.
+ */
+export interface CommandMetadata {
+  /** When true, the command does not modify any state */
+  readonly readOnly?: boolean;
+  /** When true, calling the command multiple times with the same input has the same effect */
+  readonly idempotent?: boolean;
+}
+
+/**
  * Internal type extending Commander's Command with hint function metadata.
  * Used to pass stored hint functions through build() for downstream use by runHandler().
  */
@@ -55,6 +66,8 @@ interface CommandWithHints extends Command {
   __successHintFn?: SuccessHintFn<any>;
   // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
   __errorHintFn?: ErrorHintFn<any>;
+  /** Safety metadata signals stored by .readOnly() and .idempotent() */
+  __metadata?: CommandMetadata;
 }
 
 /**
@@ -161,6 +174,8 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
   private schemaFlagsApplied = false;
   private _destructive = false;
+  private _readOnly = false;
+  private _idempotent = false;
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -241,6 +256,16 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
 
   destructive(isDest: boolean): this {
     this._destructive = isDest;
+    return this;
+  }
+
+  readOnly(isReadOnly: boolean): this {
+    this._readOnly = isReadOnly;
+    return this;
+  }
+
+  idempotent(isIdempotent: boolean): this {
+    this._idempotent = isIdempotent;
     return this;
   }
 
@@ -349,6 +374,18 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     }
     if (this.errorHintsFn) {
       (this.cmd as CommandWithHints).__errorHintFn = this.errorHintsFn;
+    }
+
+    // Store safety metadata signals on the Command for buildCommandTree() to surface
+    const metadata: CommandMetadata = {};
+    if (this._readOnly) {
+      (metadata as { readOnly: boolean }).readOnly = true;
+    }
+    if (this._idempotent) {
+      (metadata as { idempotent: boolean }).idempotent = true;
+    }
+    if (metadata.readOnly !== undefined || metadata.idempotent !== undefined) {
+      (this.cmd as CommandWithHints).__metadata = metadata;
     }
 
     return this.cmd;
