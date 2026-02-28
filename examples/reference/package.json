@@ -1,0 +1,28 @@
+{
+  "name": "@outfitter/reference",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reference project demonstrating v0.4-v0.6 Outfitter integration",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@outfitter/cli": "workspace:*",
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/mcp": "workspace:*",
+    "better-result": "catalog:",
+    "commander": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  }
+}

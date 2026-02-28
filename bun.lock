@@ -75,6 +75,22 @@
         "@types/node": "catalog:",
       },
     },
+    "examples/reference": {
+      "name": "@outfitter/reference",
+      "version": "0.1.0",
+      "dependencies": {
+        "@outfitter/cli": "workspace:*",
+        "@outfitter/contracts": "workspace:*",
+        "@outfitter/mcp": "workspace:*",
+        "better-result": "catalog:",
+        "commander": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/agents": {
       "name": "@outfitter/agents",
       "version": "0.1.0",
@@ -513,6 +529,8 @@
     "@outfitter/oxlint-plugin": ["@outfitter/oxlint-plugin@workspace:packages/oxlint-plugin"],
 
     "@outfitter/presets": ["@outfitter/presets@workspace:packages/presets"],
+
+    "@outfitter/reference": ["@outfitter/reference@workspace:examples/reference"],
 
     "@outfitter/schema": ["@outfitter/schema@workspace:packages/schema"],
 
