@@ -1,0 +1,15 @@
+{
+  "featureId": "fix-presets-envelope-issues",
+  "reviewedAt": "2026-02-28T00:46:14Z",
+  "commitId": "5639656e89163e9fdcc798fa5a84c716a5bf97b1",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Fix commit fully addresses the three prior blocking scrutiny failures and the E2E assertion concern. In `packages/cli/src/command.ts`, schema preset fragments are now merged into the validation path and schema preset resolvers are executed in `action()` with resolved values composed into validated input. In `packages/cli/src/envelope.ts`, `runHandler()` now resolves mode from env vars when `format` is omitted (explicit format still wins). In `packages/cli/src/cli.ts`, root self-doc mode now includes non-TTY detection (`!process.stdout.isTTY`) so piped root invocations default to JSON output. The builder E2E non-invocation guard now tracks invocation inside the action handler itself (`packages/cli/src/__tests__/builder-e2e.test.ts`).",
+    "issues": []
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": ".factory/validation/presets-envelope/scrutiny/reviews/os-345-schema-presets.json; .factory/validation/presets-envelope/scrutiny/reviews/os-346-envelope-run-handler.json; .factory/validation/presets-envelope/scrutiny/reviews/os-348-self-doc-hints.json",
+  "summary": "Pass. Reviewed fix feature `fix-presets-envelope-issues` against prior failed reviews for OS-345, OS-346, and OS-348 and confirmed the blocking defects are resolved in code and covered by targeted test updates. Transcript skeleton and diff were reviewed; no new blocking or non-blocking defects were identified in scope."
+}
