@@ -1,0 +1,101 @@
+{
+  "groupId": "destructive-dryrun",
+  "testedAt": "2026-02-28T16:04:58Z",
+  "credentials": {
+    "account": "shell-local",
+    "namespace": "safety-destructive-dryrun"
+  },
+  "toolsUsed": ["bun test", "bun -e", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-SAFE-001",
+      "title": ".destructive(true) auto-adds --dry-run flag",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run destructive-focused tests",
+          "expected": "Tests for auto-add, dedupe, and default non-destructive behavior pass",
+          "observed": "`cd packages/cli && bun test --filter destructive` passed (17 pass, 0 fail), including named cases for auto-add, dedupe via .option()/dryRunPreset(), and default/no .destructive() behavior"
+        },
+        {
+          "action": "Inspect destructive test coverage",
+          "expected": "Coverage includes auto-add, no-duplicate, and default non-destructive assertions",
+          "observed": "`packages/cli/src/__tests__/destructive.test.ts` includes explicit tests for all three requirements"
+        },
+        {
+          "action": "Capture command help output from a destructive command",
+          "expected": "Help shows a single --dry-run flag",
+          "observed": "Help output contains `--dry-run   Preview changes without applying (destructive command safety)` and `DRY_RUN_OPTION_COUNT=1`"
+        }
+      ],
+      "evidence": {
+        "testOutput": "bun test v1.3.10: 17 pass, 0 fail (src/__tests__/destructive.test.ts)",
+        "helpSnapshot": "Usage: delete [options] ... --dry-run   Preview changes without applying (destructive command safety) ... (default: false)",
+        "codeInspection": [
+          "packages/cli/src/command.ts: applyDestructiveFlag() auto-adds --dry-run and deduplicates existing flag",
+          "packages/cli/src/types.ts: CommandBuilder.destructive() API documented with default non-destructive behavior"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-SAFE-002",
+      "title": "Dry-run executes with zero side effects and includes real-command hint",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run existing dry-run hint tests",
+          "expected": "Dry-run path includes CLIHint command without --dry-run",
+          "observed": "`destructive.test.ts` cases passed for dry-run hint inclusion, preserving other flags, and composing with user hints"
+        },
+        {
+          "action": "Run integration check with mutable in-memory state",
+          "expected": "With --dry-run, state remains unchanged and envelope includes real-command hint",
+          "observed": "`bun -e` integration output: `afterDryRun: 0`, `dryRunHasHint: true`, `dryRunHintCommand: \"cleanup --count 2\"`"
+        },
+        {
+          "action": "Inspect envelope implementation",
+          "expected": "Dry-run hint is appended when dryRun=true",
+          "observed": "`packages/cli/src/envelope.ts` `runHandler()` appends `buildDryRunHint()` only when `dryRun` is true"
+        }
+      ],
+      "evidence": {
+        "integrationCheck": "{ \"afterDryRun\": 0, \"dryRunHasHint\": true, \"dryRunHintCommand\": \"cleanup --count 2\" }",
+        "hintAssertionTests": "src/__tests__/destructive.test.ts (runHandler() dry-run hint describe block)",
+        "codeInspection": "packages/cli/src/envelope.ts: buildDryRunHint() strips --dry-run from process.argv and runHandler() appends hint in dry-run mode"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-SAFE-003",
+      "title": "Live destructive execution works normally",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run existing live-path tests",
+          "expected": "Without --dry-run, envelope is standard and no dry-run hint is present",
+          "observed": "`destructive.test.ts` live-path tests passed (`without --dry-run, no dry-run hint`, `live path executes normally with standard envelope`)"
+        },
+        {
+          "action": "Run paired dry-run vs live integration check",
+          "expected": "Live run applies side effects and returns normal success result",
+          "observed": "`bun -e` integration output: `afterLive: 2`, `liveHasHints: false`, `liveResult: { deleted: 2, deletedCount: 2 }`"
+        },
+        {
+          "action": "Inspect envelope implementation for live behavior",
+          "expected": "No dry-run hint when dryRun=false",
+          "observed": "`runHandler()` only appends dry-run hint inside `if (isDryRun)`"
+        }
+      ],
+      "evidence": {
+        "pairedIntegration": "{ \"afterDryRun\": 0, \"afterLive\": 2, \"liveHasHints\": false, \"liveResult\": { \"deleted\": 2, \"deletedCount\": 2 } }",
+        "testCoverage": "src/__tests__/destructive.test.ts (runHandler() live destructive execution + E2E live flow)",
+        "codeInspection": "packages/cli/src/envelope.ts: dry-run hint path guarded by `if (isDryRun)`"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 3 assertions (VAL-SAFE-001, VAL-SAFE-002, VAL-SAFE-003): all 3 passed via destructive test suite, targeted integration checks, and source inspection."
+}
