@@ -1,15 +1,15 @@
 /**
  * Action registry completeness scanner.
  *
- * Cross-references `apps/outfitter/src/commands/` files against imports in
- * `apps/outfitter/src/actions/` to find command files not represented in
- * the action registry.
+ * Cross-references `apps/outfitter/src/commands/` files against the actual
+ * `createActionRegistry().add()` chain in `apps/outfitter/src/actions.ts`
+ * to find command files not represented in the action registry.
  *
  * @packageDocumentation
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
 
@@ -18,6 +18,7 @@ import { resolveStructuredOutputMode } from "../output-mode.js";
 
 const COMMANDS_RELATIVE_DIR = "apps/outfitter/src/commands";
 const ACTIONS_RELATIVE_DIR = "apps/outfitter/src/actions";
+const REGISTRY_RELATIVE_PATH = "apps/outfitter/src/actions.ts";
 const LOCAL_REGISTRY_RELATIVE_PATH = "src/actions.ts";
 const LOCAL_COMMANDS_RELATIVE_DIR = "src/commands";
 
@@ -67,8 +68,7 @@ export class CheckActionRegistryError extends Error {
 function extractCommandImports(content: string): Set<string> {
   const imports = new Set<string>();
   // Match imports like: from "../commands/check.js" or from "../commands/check.ts"
-  const importPattern =
-    /from\s+["']\.\.\/commands\/([^"']+)\.(js|ts)["']/g;
+  const importPattern = /from\s+["']\.\.\/commands\/([^"']+)\.(js|ts)["']/g;
   let match: RegExpExecArray | null;
   while ((match = importPattern.exec(content)) !== null) {
     const basename = match[1];
@@ -77,6 +77,45 @@ function extractCommandImports(content: string): Set<string> {
     }
   }
   return imports;
+}
+
+/**
+ * Parse the action registry file (`actions.ts`) to determine which action
+ * symbols are registered via `.add()` and which source files they come from.
+ *
+ * Returns the set of action definition file basenames (with `.ts` extension)
+ * that contain at least one action added to the registry.
+ */
+function extractRegisteredActionFiles(registryContent: string): Set<string> {
+  // 1. Parse import statements: import { sym1, sym2 } from "./actions/foo.js"
+  const importMap = new Map<string, string>();
+  const importPattern =
+    /import\s+\{([^}]+)\}\s+from\s+["']\.\/actions\/([^"']+)\.(js|ts)["']/g;
+  let match: RegExpExecArray | null;
+  while ((match = importPattern.exec(registryContent)) !== null) {
+    const symbols = match[1]!.split(",").map((s) => s.trim());
+    const file = `${match[2]}.ts`;
+    for (const sym of symbols) {
+      // Handle `type Foo` imports — skip them
+      const cleaned = sym.replace(/^type\s+/, "");
+      if (cleaned) {
+        importMap.set(cleaned, file);
+      }
+    }
+  }
+
+  // 2. Parse .add(symbolName) calls from the registry chain
+  const addPattern = /\.add\((\w+)\)/g;
+  const registeredFiles = new Set<string>();
+  while ((match = addPattern.exec(registryContent)) !== null) {
+    const symbol = match[1]!;
+    const file = importMap.get(symbol);
+    if (file) {
+      registeredFiles.add(file);
+    }
+  }
+
+  return registeredFiles;
 }
 
 /**
@@ -92,7 +131,7 @@ function listTsFiles(dir: string): readonly string[] {
         !entry.startsWith("__") &&
         !entry.endsWith(".test.ts")
     )
-    .sort();
+    .toSorted();
 }
 
 /**
@@ -138,25 +177,29 @@ function resolveWorkspaceRoot(cwd: string): string {
 }
 
 /**
- * Scan action definition files and cross-reference against command files.
+ * Scan the actual action registry and cross-reference against command files.
  *
- * Reads all `.ts` files under both the actions and commands directories.
- * Parses import statements in action files to determine which command files
- * are referenced. Returns per-file classification and an aggregate pass/fail.
+ * Parses the `createActionRegistry().add()` chain in `actions.ts` to determine
+ * which action symbols are registered, traces them back to their source action
+ * definition files, and extracts which command files those definitions import.
+ * Returns per-file classification (with relative paths) and an aggregate pass/fail.
  */
 export async function runCheckActionRegistry(
   options: CheckActionRegistryOptions
 ): Promise<Result<CheckActionRegistryResult, CheckActionRegistryError>> {
   try {
-    const cwd = resolve(options.cwd);
-    const commandsDir = resolve(cwd, COMMANDS_RELATIVE_DIR);
-    const actionsDir = resolve(cwd, ACTIONS_RELATIVE_DIR);
+    const workspaceRoot = resolveWorkspaceRoot(options.cwd);
+    const commandsDir = resolve(workspaceRoot, COMMANDS_RELATIVE_DIR);
+    const actionsDir = resolve(workspaceRoot, ACTIONS_RELATIVE_DIR);
+    const registryPath = resolve(workspaceRoot, REGISTRY_RELATIVE_PATH);
 
-    // Read all action files and extract their command imports
-    const actionFiles = listTsFiles(actionsDir);
+    // 1. Parse the registry file to find which action files have registered actions
+    const registryContent = readFileSync(registryPath, "utf-8");
+    const registeredActionFiles = extractRegisteredActionFiles(registryContent);
+
+    // 2. Only read action files that contribute registered actions
     const referencedCommands = new Set<string>();
-
-    for (const actionFile of actionFiles) {
+    for (const actionFile of registeredActionFiles) {
       const filePath = resolve(actionsDir, actionFile);
       const content = readFileSync(filePath, "utf-8");
       const imports = extractCommandImports(content);
@@ -165,18 +208,19 @@ export async function runCheckActionRegistry(
       }
     }
 
-    // List all command files
+    // 3. List all command files
     const commandFiles = listTsFiles(commandsDir);
 
-    // Classify each command file
+    // 4. Classify each command file using relative paths
     const registered: string[] = [];
     const unregistered: string[] = [];
 
     for (const file of commandFiles) {
+      const relativePath = join(COMMANDS_RELATIVE_DIR, file);
       if (referencedCommands.has(file)) {
-        registered.push(file);
+        registered.push(relativePath);
       } else {
-        unregistered.push(file);
+        unregistered.push(relativePath);
       }
     }
 
@@ -192,9 +236,7 @@ export async function runCheckActionRegistry(
     });
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to scan action registry";
+      error instanceof Error ? error.message : "Failed to scan action registry";
     return Result.err(new CheckActionRegistryError(message));
   }
 }
