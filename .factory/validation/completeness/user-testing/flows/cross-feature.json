@@ -1,0 +1,161 @@
+{
+  "groupId": "cross-feature",
+  "testedAt": "2026-02-28T16:38:26Z",
+  "credentials": {
+    "account": "not-applicable-shell",
+    "namespace": "completeness-cross-feature"
+  },
+  "toolsUsed": ["shell", "bun test", "rg", "code inspection"],
+  "assertions": [
+    {
+      "id": "VAL-CROSS-001",
+      "title": "--stream + destructive dry-run composition",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Search for dedicated tests",
+          "expected": "Cross-feature tests include VAL-CROSS-001 coverage",
+          "observed": "Found VAL-CROSS-001 describe block and test cases in packages/cli/src/__tests__/cross-feature-integration.test.ts"
+        },
+        {
+          "action": "Run filtered test block",
+          "expected": "VAL-CROSS-001 tests pass",
+          "observed": "bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-001\" -> 5 pass, 0 fail"
+        },
+        {
+          "action": "Inspect assertions in test code",
+          "expected": "Streaming events emit, dry-run hint removes --dry-run, state unchanged",
+          "observed": "Tests assert start/step/progress NDJSON events, real-command hint without --dry-run, and sideEffectExecuted remains false"
+        }
+      ],
+      "evidence": {
+        "testFile": "packages/cli/src/__tests__/cross-feature-integration.test.ts",
+        "terminalTranscript": [
+          "cd packages/cli && bun test --filter \"cross-feature-integration\"",
+          "cd packages/cli && bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-001\""
+        ],
+        "stateAssertion": "test(\"state remains unchanged (handler only performs preview)\") passed; sideEffectExecuted === false"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CROSS-002",
+      "title": "--stream + retryable error composition",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Search for retryable streaming error tests",
+          "expected": "VAL-CROSS-002 tests cover retryable metadata and NDJSON",
+          "observed": "Found tests for rate_limit/timeout/network retryable handling, retry_after, valid NDJSON stream lines, and mapped exit codes"
+        },
+        {
+          "action": "Run filtered test block",
+          "expected": "VAL-CROSS-002 tests pass",
+          "observed": "bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-002\" -> 6 pass, 0 fail"
+        },
+        {
+          "action": "Inspect assertions in test code",
+          "expected": "Error envelope includes retryable=true and correct exit code with pre-error NDJSON events",
+          "observed": "Tests assert error.retryable true for retryable categories, retry_after for rate_limit, exitCodeMap category match, and non-envelope lines typed as start/step/progress"
+        }
+      ],
+      "evidence": {
+        "testFile": "packages/cli/src/__tests__/cross-feature-integration.test.ts",
+        "terminalTranscript": [
+          "cd packages/cli && bun test --filter \"cross-feature-integration\"",
+          "cd packages/cli && bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-002\""
+        ],
+        "integrationEvidence": "rate_limit and timeout stream-envelope tests assert retryable metadata and expected exit codes"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CROSS-003",
+      "title": "Truncation + streaming coherence",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Search for truncation+stream tests",
+          "expected": "VAL-CROSS-003 tests validate truncation metadata, hints, and stream consistency",
+          "observed": "Found tests asserting showing/total/truncated metadata, pagination hints, NDJSON parseability, and progress count coherence"
+        },
+        {
+          "action": "Run filtered test block",
+          "expected": "VAL-CROSS-003 tests pass",
+          "observed": "bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-003\" -> 4 pass, 0 fail"
+        },
+        {
+          "action": "Inspect assertions in test code",
+          "expected": "Final envelope truncation metadata and hints are coherent with streamed progress events",
+          "observed": "Tests assert progress reports full totals while envelope returns truncated subset and actionable --offset/--limit hints"
+        }
+      ],
+      "evidence": {
+        "testFile": "packages/cli/src/__tests__/cross-feature-integration.test.ts",
+        "terminalTranscript": [
+          "cd packages/cli && bun test --filter \"cross-feature-integration\"",
+          "cd packages/cli && bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-003\""
+        ],
+        "integrationEvidence": "large-output stream tests validate truncation metadata and pagination hints in final envelope"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CROSS-004",
+      "title": "Graph hints compose with safety metadata",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Search for graph+safety composition tests",
+          "expected": "VAL-CROSS-004 tests verify graph hints can coexist with safety/retry fields",
+          "observed": "Found tests for success/error envelopes, schema conflict checks, JSON round-trips, and streamed envelopes with graph hints + retry metadata"
+        },
+        {
+          "action": "Run filtered test block",
+          "expected": "VAL-CROSS-004 tests pass",
+          "observed": "bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-004\" -> 6 pass, 0 fail"
+        },
+        {
+          "action": "Inspect assertions in test code",
+          "expected": "Tier-4 hints and safety/retry metadata render together without schema conflicts",
+          "observed": "Tests assert graph hints present with retryable/retry_after fields and successful JSON serialization/deserialization"
+        }
+      ],
+      "evidence": {
+        "testFile": "packages/cli/src/__tests__/cross-feature-integration.test.ts",
+        "terminalTranscript": [
+          "cd packages/cli && bun test --filter \"cross-feature-integration\"",
+          "cd packages/cli && bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-004\""
+        ],
+        "fixtureEvidence": "combined fixture tests cover graphSuccessHints/graphErrorHints with dry-run and retry metadata in shared envelopes"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "`bun test --filter \"VAL-CROSS-001\"` did not match because Bun filter matches file patterns, not test names.",
+      "resolved": true,
+      "resolution": "Used `bun test src/__tests__/cross-feature-integration.test.ts -t \"VAL-CROSS-00X\"` to scope by assertion label.",
+      "affectedAssertions": [
+        "VAL-CROSS-001",
+        "VAL-CROSS-002",
+        "VAL-CROSS-003",
+        "VAL-CROSS-004"
+      ]
+    },
+    {
+      "description": "Using escaped alternation (`\\|`) in rg pattern returned no matches in this shell context.",
+      "resolved": true,
+      "resolution": "Used unescaped alternation (`|`) to locate target tests successfully.",
+      "affectedAssertions": [
+        "VAL-CROSS-001",
+        "VAL-CROSS-002",
+        "VAL-CROSS-003",
+        "VAL-CROSS-004"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 4 assertions (VAL-CROSS-001..004): 4 passed, 0 failed, 0 blocked. Cross-feature integration coverage exists and targeted filtered runs passed for each assertion."
+}

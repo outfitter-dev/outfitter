@@ -1,0 +1,31 @@
+{
+  "milestone": "completeness",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-CTX-001",
+    "VAL-CTX-002",
+    "VAL-CTX-003",
+    "VAL-CTX-004",
+    "VAL-CTX-005",
+    "VAL-GRAPH-001",
+    "VAL-GRAPH-002",
+    "VAL-GRAPH-003",
+    "VAL-GRAPH-004",
+    "VAL-GRAPH-005",
+    "VAL-CROSS-001",
+    "VAL-CROSS-002",
+    "VAL-CROSS-003",
+    "VAL-CROSS-004"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
