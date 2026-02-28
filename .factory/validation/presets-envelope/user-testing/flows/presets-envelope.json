@@ -1,0 +1,127 @@
+{
+  "groupId": "presets-envelope",
+  "testedAt": "2026-02-28T00:51:04Z",
+  "credentials": {
+    "account": "n/a-shell-validation",
+    "namespace": "presets-envelope"
+  },
+  "toolsUsed": ["shell", "bun test", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-PRESET-001",
+      "title": ".preset() accepts schema-driven presets with resolvers",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused preset tests: bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/schema-preset.test.ts",
+          "expected": "Schema-driven preset tests pass, including resolver behavior and schema merge with .input()",
+          "observed": "Passes include: 'preset schema merges with .input() schema automatically', 'schema preset resolvers are executed and values composed into input', and 'multiple schema preset resolvers compose into input'."
+        },
+        {
+          "action": "Run E2E builder test: bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/builder-e2e.test.ts",
+          "expected": "Full-chain preset composition works in real command flow",
+          "observed": "Pass includes: 'schema-driven preset composes with .input() schema and is accessible via flags'."
+        },
+        {
+          "action": "Inspect command builder implementation",
+          "expected": ".input() schema and schema-presets are merged and preset resolvers are applied to input",
+          "observed": "packages/cli/src/command.ts shows merged schema construction in buildMergedSchema() and resolver composition via Object.assign(input, resolved)."
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "schema-preset.test.ts: (pass) CommandBuilder.preset() with schema-driven presets > preset schema merges with .input() schema automatically",
+          "schema-preset.test.ts: (pass) schema preset merge and resolver execution > schema preset resolvers are executed and values composed into input",
+          "builder-e2e.test.ts: (pass) Full builder chain E2E > preset composition in full chain > schema-driven preset composes with .input() schema and is accessible via flags"
+        ],
+        "codeInspection": [
+          "packages/cli/src/command.ts:68 buildMergedSchema(...) merges .input() schema with schema preset fragments",
+          "packages/cli/src/command.ts:295 executes schema preset resolvers; line 302 composes values into input via Object.assign(input, resolved)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-PRESET-002",
+      "title": "output.envelope() wraps payload in structured envelope",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused envelope tests: bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/envelope.test.ts",
+          "expected": "Envelope structure is { ok, command, result?/error?, hints? } with optional hints omitted when empty",
+          "observed": "Passes include success/error envelope shape checks and hints-omission checks for no hints and empty hints arrays."
+        },
+        {
+          "action": "Verify JSON envelope output tests",
+          "expected": "JSON mode emits full envelope in success and error paths",
+          "observed": "Passes include 'runHandler() JSON mode output > renders full envelope as JSON on success' and '...on error'."
+        },
+        {
+          "action": "Inspect envelope implementation",
+          "expected": "Envelope constructors include ok/command/result|error and only include hints when non-empty",
+          "observed": "packages/cli/src/envelope.ts defines SuccessEnvelope/ErrorEnvelope and add hints only when hints.length > 0."
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "envelope.test.ts: (pass) createSuccessEnvelope() > wraps payload in { ok: true, command, result } structure",
+          "envelope.test.ts: (pass) createErrorEnvelope() > wraps error in { ok: false, command, error } structure",
+          "envelope.test.ts: (pass) createSuccessEnvelope() > hints field is absent (not empty array) when no hints",
+          "envelope.test.ts: (pass) createErrorEnvelope() > hints field is absent (not empty array) when no hints",
+          "envelope.test.ts: (pass) runHandler() JSON mode output > renders full envelope as JSON on success",
+          "envelope.test.ts: (pass) runHandler() JSON mode output > renders full envelope as JSON on error"
+        ],
+        "jsonOutputVerification": [
+          "packages/cli/src/__tests__/envelope.test.ts:618 verifies success JSON envelope equals { ok: true, command, result }",
+          "packages/cli/src/__tests__/envelope.test.ts:635 verifies error JSON envelope equals { ok: false, command, error: { category, message } }"
+        ],
+        "codeInspection": [
+          "packages/cli/src/envelope.ts:44 SuccessEnvelope and line 56 ErrorEnvelope define structured envelope contract",
+          "packages/cli/src/envelope.ts:113 and 151 only include hints when non-empty, keeping hints absent otherwise"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-PRESET-003",
+      "title": "runHandler() bridges builder to CLI output lifecycle",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused envelope lifecycle tests: bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/envelope.test.ts",
+          "expected": "runHandler handles success and error lifecycle with correct envelope and exit mapping",
+          "observed": "Passes include success envelope, error envelope with category/message, context factory behavior, and mapped exit codes."
+        },
+        {
+          "action": "Run builder E2E lifecycle tests: bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/builder-e2e.test.ts",
+          "expected": "End-to-end lifecycle order and output are validated from builder chain through runHandler",
+          "observed": "Passes include 'context → handler → Result → envelope → output → exit code' and error-path lifecycle test with onError + exit code."
+        },
+        {
+          "action": "Inspect runHandler implementation",
+          "expected": "Implementation executes context factory, invokes handler, unwraps Result, builds envelope, formats output, maps exit code",
+          "observed": "packages/cli/src/envelope.ts documents and implements the full lifecycle and error exit code mapping via outputErrorEnvelope()."
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "envelope.test.ts: (pass) runHandler() success path > produces ok: true with result for successful handler",
+          "envelope.test.ts: (pass) runHandler() error path > produces ok: false with error category and message",
+          "envelope.test.ts: (pass) runHandler() error path > exits with mapped exit code from error taxonomy",
+          "envelope.test.ts: (pass) runHandler() context factory > calls context factory before handler",
+          "builder-e2e.test.ts: (pass) runHandler() bridges full lifecycle > context → handler → Result → envelope → output → exit code",
+          "builder-e2e.test.ts: (pass) runHandler() bridges full lifecycle > error path: context → handler (err) → onError → envelope → exit"
+        ],
+        "codeInspection": [
+          "packages/cli/src/envelope.ts:361-363 documents lifecycle sequence; runHandler implementation starts at line 392",
+          "packages/cli/src/envelope.ts:467-499 performs Result unwrap and success/error envelope construction",
+          "packages/cli/src/envelope.ts:509+ outputErrorEnvelope maps category to exit code and exits"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 3 assertions (VAL-PRESET-001/002/003) via shell-based test execution and code inspection. All 3 passed with focused test evidence and implementation verification."
+}
