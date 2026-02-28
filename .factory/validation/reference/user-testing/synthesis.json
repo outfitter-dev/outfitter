@@ -1,0 +1,21 @@
+{
+  "milestone": "reference",
+  "round": 1,
+  "status": "fail",
+  "assertionsSummary": {
+    "total": 5,
+    "passed": 4,
+    "failed": 1,
+    "blocked": 0
+  },
+  "passedAssertions": ["VAL-REF-002", "VAL-REF-003", "VAL-REF-004", "VAL-REF-005"],
+  "failedAssertions": [
+    {
+      "id": "VAL-REF-001",
+      "reason": "Reference project at examples/reference/ exists with package.json, source files, and tests (52 pass), but has no 'build' script. The assertion requires the project 'can be built and tested independently'. While typecheck and test work, 'bun run build' fails with 'Script not found'. As a Bun example project that runs .ts natively, a build script may not be needed, but the assertion technically requires buildability."
+    }
+  ],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
