@@ -1,0 +1,24 @@
+{
+  "milestone": "presets-envelope",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-PRESET-001",
+    "VAL-PRESET-002",
+    "VAL-PRESET-003",
+    "VAL-ERR-001",
+    "VAL-HINT-001",
+    "VAL-HINT-002",
+    "VAL-CROSS-001"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
