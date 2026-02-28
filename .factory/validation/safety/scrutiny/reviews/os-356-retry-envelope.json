@@ -1,0 +1,28 @@
+{
+  "featureId": "os-356-retry-envelope",
+  "reviewedAt": "2026-02-28T15:56:06Z",
+  "commitId": "c90713d98fc76a4d9278c3c0b0f289d1fb918a79",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature mostly lands the requested envelope fields and changeset, but retry_after is not constrained to rate_limit/RateLimitError, so non-delay categories can incorrectly emit retry_after.",
+    "issues": [
+      {
+        "file": "packages/cli/src/envelope.ts",
+        "line": 176,
+        "severity": "blocking",
+        "description": "createErrorEnvelope() includes retry_after whenever retryAfterSeconds is passed, regardless of error category. This allows non-delay errors (for example, validation) to include retry_after, violating the requirement that non-delay errors omit retry_after and that it come from RateLimitError.retryAfterSeconds only."
+      },
+      {
+        "file": "packages/cli/src/envelope.ts",
+        "line": 347,
+        "severity": "blocking",
+        "description": "extractRetryAfterSeconds() duck-types any error object with a numeric retryAfterSeconds. runHandler() forwards this value in all error paths, so retry_after is not restricted to rate_limit/RateLimitError semantics."
+      }
+    ]
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit c90713d98fc76a4d9278c3c0b0f289d1fb918a79 and worker transcript for os-356-retry-envelope. Marked as fail due to blocking retry_after gating issue on non-delay categories."
+}

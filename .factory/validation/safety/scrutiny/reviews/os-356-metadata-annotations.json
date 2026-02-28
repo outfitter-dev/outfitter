@@ -1,0 +1,21 @@
+{
+  "featureId": "os-356-metadata-annotations",
+  "reviewedAt": "2026-02-28T15:55:29Z",
+  "commitId": "c4aed878",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature requirements: CommandBuilder now supports readOnly/idempotent metadata signals, command-tree JSON includes metadata, MCP tool construction maps readOnly/idempotent to readOnlyHint/idempotentHint, and a minor changeset was added for affected packages.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Validator command execution in practice is using shell pipelines that can mask non-zero exit codes; this can make handoff exitCode values unreliable.",
+      "evidence": "Transcript skeleton shows commands like `bun test --filter=@outfitter/cli 2>&1 | tail -10`. Handoff verification then reports `exitCode: 0` while the same entry states `4016 pass, 2 fail` for that command."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit c4aed878 for os-356-metadata-annotations and found the feature behavior complete and correctly wired across CLI command metadata, command-tree JSON, and MCP annotations. No code defects were identified for VAL-SAFE-004/005."
+}
