@@ -1,0 +1,39 @@
+{
+  "featureId": "migration-v06-docs",
+  "reviewedAt": "2026-02-28T17:13:08Z",
+  "commitId": "c23297fb",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The migration guide is comprehensive and cross-referenced to real v0.6 APIs, but it does not satisfy a key acceptance criterion: each required entry must include both before/after code and migration steps.",
+    "issues": [
+      {
+        "file": "docs/migration-v0.6.md",
+        "line": 446,
+        "severity": "blocking",
+        "description": "Section 6 (Output Truncation and Pagination Hints) includes migration steps but no before/after code pair. The feature requirement states each of the 8 entries must include before/after code and migration steps."
+      },
+      {
+        "file": "docs/migration-v0.6.md",
+        "line": 525,
+        "severity": "blocking",
+        "description": "Section 7 (File Pointers for Large Output) includes migration steps but no before/after code pair, violating the same per-entry requirement."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker skill procedure requires lint + typecheck + test, but this run recorded only lint while still reporting followedProcedure=true.",
+      "evidence": ".factory/skills/docs-worker/SKILL.md:64-71 requires bun run lint, bun run typecheck, and bun run test; handoff file /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-07-55-945Z__migration-v06-docs__2f362eb7-602c-49b0-9730-5e5ef4bbf011.json:16 records only bun run lint under verification.commandsRun."
+    },
+    {
+      "area": "conventions",
+      "observation": "Mission shared guidance has an outdated NDJSON progress example that includes a 'name' field not present in the actual StreamProgressEvent contract.",
+      "evidence": "/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75 shows progress event with \"name\"; packages/contracts/src/stream.ts:78-89 defines StreamProgressEvent with only type/current/total/message."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed worker session 2f362eb7-602c-49b0-9730-5e5ef4bbf011 and commit c23297fb. Feature fails acceptance due to missing before/after code pairs in required entries 6 and 7; all other required topic areas are present."
+}
