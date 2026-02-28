@@ -426,7 +426,7 @@ export function createCmd(): Command {
     expect(zodImports).toHaveLength(1);
   });
 
-  test("handles .argument() declarations with comment", async () => {
+  test("handles .argument() declarations as schema fields", async () => {
     writeTarget(
       "commands/get.ts",
       `import { Command } from "commander";
@@ -447,12 +447,13 @@ export function createGetCommand(): Command {
     expect(result.isOk()).toBe(true);
 
     const updated = readTarget("commands/get.ts");
-    // Should still generate schema for the option
+    // Should generate schema for both the argument and option
+    expect(updated).toContain('id: z.string().describe("Item ID")');
     expect(updated).toContain(
       'json: z.boolean().default(false).describe("Output as JSON")'
     );
-    // Should add a comment about the positional argument
-    expect(updated).toContain("// TODO: positional argument");
+    // Should NOT add TODO comments — arguments are now schema fields
+    expect(updated).not.toContain("// TODO: positional argument");
   });
 });
 
@@ -500,5 +501,328 @@ export function createComplex(): Command {
       expect(result.value.skippedFiles).toContain("src/commands/complex.ts");
       expect(result.value.changedFiles).not.toContain("src/commands/utils.ts");
     }
+  });
+});
+
+// =============================================================================
+// Fix #1: Positional .argument() converted to schema fields
+// =============================================================================
+
+describe("positional argument conversion to schema fields", () => {
+  test("converts file with only .argument() (no .option()) to schema", async () => {
+    writeTarget(
+      "commands/show.ts",
+      `import { Command } from "commander";
+
+export function createShowCommand(): Command {
+  return new Command("show")
+    .description("Show an item")
+    .argument("<id>", "Item ID")
+    .action((id) => {
+      console.log(id);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.changedFiles).toContain("src/commands/show.ts");
+    }
+
+    const updated = readTarget("commands/show.ts");
+    expect(updated).toContain("z.object(");
+    expect(updated).toContain('id: z.string().describe("Item ID")');
+    expect(updated).toContain(".input(inputSchema)");
+  });
+
+  test("converts required <arg> to z.string() and optional [arg] to z.string().optional()", async () => {
+    writeTarget(
+      "commands/copy.ts",
+      `import { Command } from "commander";
+
+export function createCopyCommand(): Command {
+  return new Command("copy")
+    .description("Copy items")
+    .argument("<source>", "Source path")
+    .argument("[destination]", "Destination path")
+    .action((source, dest) => {
+      console.log(source, dest);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/copy.ts");
+    expect(updated).toContain("z.object(");
+    expect(updated).toContain('source: z.string().describe("Source path")');
+    expect(updated).toContain(
+      'destination: z.string().optional().describe("Destination path")'
+    );
+  });
+
+  test("converts .argument() alongside .option() into combined schema", async () => {
+    writeTarget(
+      "commands/get.ts",
+      `import { Command } from "commander";
+
+export function createGetCommand(): Command {
+  return new Command("get")
+    .description("Get an item")
+    .argument("<id>", "Item ID")
+    .option("--json", "Output as JSON")
+    .action((id, flags) => {
+      console.log(id, flags);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/get.ts");
+    expect(updated).toContain("z.object(");
+    // Positional arg should be a schema field, not a TODO comment
+    expect(updated).toContain('id: z.string().describe("Item ID")');
+    expect(updated).toContain(
+      'json: z.boolean().default(false).describe("Output as JSON")'
+    );
+    expect(updated).not.toContain("// TODO: positional argument");
+  });
+});
+
+// =============================================================================
+// Fix #2: Optional vs required semantics for options
+// =============================================================================
+
+describe("optional vs required option semantics", () => {
+  test("square bracket option generates z.string().optional()", async () => {
+    writeTarget(
+      "commands/filter.ts",
+      `import { Command } from "commander";
+
+export function createFilterCommand(): Command {
+  return new Command("filter")
+    .description("Filter items")
+    .option("--tag [value]", "Filter by tag")
+    .action((flags) => {
+      console.log(flags.tag);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/filter.ts");
+    expect(updated).toContain(
+      'tag: z.string().optional().describe("Filter by tag")'
+    );
+  });
+
+  test("angle bracket option generates z.string() (required)", async () => {
+    writeTarget(
+      "commands/create.ts",
+      `import { Command } from "commander";
+
+export function createCreateCommand(): Command {
+  return new Command("create")
+    .description("Create an item")
+    .option("--name <name>", "Item name")
+    .action((flags) => {
+      console.log(flags.name);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/create.ts");
+    // Required string: no .optional()
+    expect(updated).toContain('name: z.string().describe("Item name")');
+    expect(updated).not.toContain("z.string().optional()");
+  });
+
+  test("mixed optional and required options preserve semantics", async () => {
+    writeTarget(
+      "commands/query.ts",
+      `import { Command } from "commander";
+
+export function createQueryCommand(): Command {
+  return new Command("query")
+    .description("Query items")
+    .option("--search <term>", "Search term")
+    .option("--limit [count]", "Max results")
+    .option("--verbose", "Verbose output")
+    .action((flags) => {
+      console.log(flags);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/query.ts");
+    expect(updated).toContain('search: z.string().describe("Search term")');
+    expect(updated).toContain(
+      'limit: z.string().optional().describe("Max results")'
+    );
+    expect(updated).toContain(
+      'verbose: z.boolean().default(false).describe("Verbose output")'
+    );
+  });
+});
+
+// =============================================================================
+// Fix #3: Over-broad file targeting
+// =============================================================================
+
+describe("file targeting restrictions", () => {
+  test("skips files in packages/ directories (library code)", async () => {
+    // Write a file that looks like it has Commander patterns but is in packages/
+    writeTarget(
+      "../packages/cli/src/command.ts",
+      `import { Command } from "commander";
+
+export function command(name: string): Command {
+  return new Command(name)
+    .option("--help", "Show help")
+    .action(() => {});
+}
+`
+    );
+
+    // Write an actual command file in apps/*/src/commands/
+    writeTarget(
+      "../apps/myapp/src/commands/greet.ts",
+      `import { Command } from "commander";
+
+export function createGreetCommand(): Command {
+  return new Command("greet")
+    .option("--name <name>", "Name")
+    .action(() => {});
+}
+`
+    );
+
+    // Run codemod targeting the temp root (not src/)
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should NOT transform packages/ files
+      const changedPaths = result.value.changedFiles;
+      expect(changedPaths.every((f) => !f.includes("packages/"))).toBe(true);
+      // Should transform apps/ command files
+      expect(changedPaths.some((f) => f.includes("apps/"))).toBe(true);
+    }
+  });
+
+  test("only scans apps/*/src/commands/ and src/commands/ directories", async () => {
+    // Library implementation file that happens to have Commander patterns
+    writeTarget(
+      "lib/commander-wrapper.ts",
+      `import { Command } from "commander";
+
+export function wrapCommand(cmd: Command): Command {
+  return cmd.option("--verbose", "Verbose").action(() => {});
+}
+`
+    );
+
+    // Actual command file
+    writeTarget(
+      "commands/deploy.ts",
+      `import { Command } from "commander";
+
+export function createDeployCommand(): Command {
+  return new Command("deploy")
+    .option("--env <env>", "Target environment")
+    .action(() => {});
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      // Should transform actual command file
+      expect(result.value.changedFiles).toContain("src/commands/deploy.ts");
+      // Should NOT transform library wrapper
+      expect(result.value.changedFiles).not.toContain(
+        "src/lib/commander-wrapper.ts"
+      );
+    }
+  });
+});
+
+// =============================================================================
+// Fix #4: .input(schema) placement before .action()
+// =============================================================================
+
+describe(".input(schema) placement before .action()", () => {
+  test("inserts .input(schema) directly before .action() for argument-only files", async () => {
+    writeTarget(
+      "commands/delete.ts",
+      `import { Command } from "commander";
+
+export function createDeleteCommand(): Command {
+  return new Command("delete")
+    .description("Delete an item")
+    .argument("<id>", "Item ID")
+    .action((id) => {
+      console.log("Deleting", id);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/delete.ts");
+    // .input() should appear before .action()
+    const inputIndex = updated.indexOf(".input(inputSchema)");
+    const actionIndex = updated.indexOf(".action(");
+    expect(inputIndex).toBeGreaterThan(-1);
+    expect(actionIndex).toBeGreaterThan(-1);
+    expect(inputIndex).toBeLessThan(actionIndex);
+  });
+
+  test("inserts .input(schema) before .action() with mixed arguments and options", async () => {
+    writeTarget(
+      "commands/update.ts",
+      `import { Command } from "commander";
+
+export function createUpdateCommand(): Command {
+  return new Command("update")
+    .description("Update an item")
+    .argument("<id>", "Item ID")
+    .option("--force", "Force update")
+    .action((id, flags) => {
+      console.log(id, flags);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/update.ts");
+    const inputIndex = updated.indexOf(".input(inputSchema)");
+    const actionIndex = updated.indexOf(".action(");
+    expect(inputIndex).toBeGreaterThan(-1);
+    expect(actionIndex).toBeGreaterThan(-1);
+    expect(inputIndex).toBeLessThan(actionIndex);
   });
 });
