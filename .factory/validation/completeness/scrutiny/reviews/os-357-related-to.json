@@ -1,0 +1,22 @@
+{
+  "featureId": "os-357-related-to",
+  "reviewedAt": "2026-02-28T16:29:27Z",
+  "commitId": "383d814836537d983d82ad94d81646a20174b7bb",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature adds .relatedTo() on CommandBuilder, stores relationship metadata on commands, introduces action-graph helpers and tier-4 hint generators, and includes a minor changeset with targeted tests. However, the action graph implementation does not traverse nested commands, so it does not actually cover all registered commands.",
+    "issues": [
+      {
+        "file": "packages/cli/src/hints.ts",
+        "line": 424,
+        "severity": "blocking",
+        "description": "buildActionGraph only iterates program.commands (top-level) and never recurses into subcommands. This omits nested registered commands from graph nodes/edges, can mislabel valid nested targets as unknown, and yields incomplete tier-4 hints for real CLIs with grouped subcommands."
+      }
+    ]
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Fail: implementation is close, but graph construction misses nested registered commands, which leaves the OS-357 requirement ('all registered commands') partially unmet."
+}
