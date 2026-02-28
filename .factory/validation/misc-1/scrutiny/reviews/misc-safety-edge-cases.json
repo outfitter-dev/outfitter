@@ -1,0 +1,26 @@
+{
+  "featureId": "misc-safety-edge-cases",
+  "reviewedAt": "2026-02-28T17:59:22Z",
+  "commitId": "ccaedbf4f0aea76574f637f38dbd4ceccc3e7a39",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Reviewed commit ccaedbf4f0aea76574f637f38dbd4ceccc3e7a39 and confirmed all three requested safety edge-case fixes are implemented in the correct locations with focused regression tests. The changes make destructive flag application order-agnostic by deferring to build(), strip --dry-run=<value> variants from dry-run hints, and guard retry_after emission to rate_limit only.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "services",
+      "observation": "Shared command metadata is inconsistent: .factory/services.yaml still advertises `check: bun run check`, while mission AGENTS documents this command as a known crashing path and directs workers to use lint + typecheck instead.",
+      "evidence": ".factory/services.yaml:7 defines `check: bun run check`; mission AGENTS.md:24-27 says `bun run check` crashes with tokio panic and should not be used."
+    },
+    {
+      "area": "knowledge",
+      "observation": "The library architecture notes document CommandBuilder methods but do not capture that CLI registration auto-invokes builder.build(). The reviewed worker had to inspect cli.ts directly to confirm this behavior before implementing the ordering fix.",
+      "evidence": ".factory/library/architecture.md:36-42 lists CommandBuilder API but not register-time build behavior; transcript skeleton for session 6cea9fee-66b2-4d4b-8743-9ef3e1f4f7e1 shows multiple cli.ts register()/build() inspection calls."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Feature review passed. Implementation matches the misc-safety-edge-cases requirements, tests were added for each edge case, and no code-level blocking/non-blocking defects were found in the committed changes."
+}
