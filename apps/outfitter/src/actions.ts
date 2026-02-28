@@ -39,7 +39,7 @@ import {
   initMcpAction,
 } from "./actions/init.js";
 import { scaffoldAction } from "./actions/scaffold.js";
-import { upgradeAction } from "./actions/upgrade.js";
+import { upgradeAction, upgradeCodemodAction } from "./actions/upgrade.js";
 
 /** Central action registry containing all Outfitter CLI commands. */
 export const outfitterActions: ActionRegistry = createActionRegistry()
@@ -65,6 +65,7 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(checkActionCeremonyAction)
   .add(checkActionRegistryAction)
   .add(upgradeAction)
+  .add(upgradeCodemodAction)
   .add(docsListAction)
   .add(docsShowAction)
   .add(docsSearchAction)

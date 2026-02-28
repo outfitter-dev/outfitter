@@ -1,5 +1,8 @@
 /**
- * Upgrade action definition.
+ * Upgrade action definitions.
+ *
+ * Includes the main `upgrade` command (version scanning and migration)
+ * and the `upgrade codemod` subcommand (Commander-to-builder transformation).
  *
  * @packageDocumentation
  */
@@ -15,6 +18,10 @@ import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
+import {
+  printUpgradeCodemodBuilderResult,
+  runUpgradeCodemodBuilder,
+} from "../commands/upgrade-codemod-builder.js";
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
 import type { CliOutputMode } from "../output-mode.js";
 import {
@@ -91,7 +98,8 @@ export const upgradeAction: UpgradeAction = defineAction({
   surfaces: ["cli"],
   input: upgradeInputSchema,
   cli: {
-    command: "upgrade [packages...]",
+    group: "upgrade",
+    command: "[packages...]",
     description:
       "Check for @outfitter/* package updates and migration guidance",
     options: [...upgradeFlags.options],
@@ -133,6 +141,74 @@ export const upgradeAction: UpgradeAction = defineAction({
       dryRun: upgradeInput.dryRun,
       all: upgradeInput.all,
     });
+
+    return Result.ok(result.value);
+  },
+});
+
+// =============================================================================
+// upgrade codemod action
+// =============================================================================
+
+interface UpgradeCodemodInput {
+  readonly cwd: string;
+  readonly dryRun: boolean;
+  readonly outputMode: CliOutputMode;
+}
+
+type UpgradeCodemodAction = ReturnType<
+  typeof defineAction<UpgradeCodemodInput, unknown>
+>;
+
+const upgradeCodemodInputSchema = z.object({
+  cwd: z.string(),
+  dryRun: z.boolean(),
+  outputMode: outputModeSchema,
+});
+
+const codemodCwd = cwdPreset();
+const codemodDryRun = dryRunPreset();
+const codemodFlags = actionCliPresets(codemodCwd, codemodDryRun);
+
+/** Run Commander-to-builder codemod transformation on a target directory. */
+export const upgradeCodemodAction: UpgradeCodemodAction = defineAction({
+  id: "upgrade.codemod",
+  description:
+    "Transform Commander .command().action() patterns to builder .input(schema).action()",
+  surfaces: ["cli"],
+  input: upgradeCodemodInputSchema,
+  cli: {
+    group: "upgrade",
+    command: "codemod",
+    description:
+      "Transform Commander .command().action() patterns to builder .input(schema).action()",
+    options: [...codemodFlags.options],
+    mapInput: (context) => {
+      const { mode: outputMode } = resolveOutputMode(context.flags);
+      return {
+        cwd: resolveCwdFromPreset(context.flags, codemodCwd),
+        dryRun: codemodFlags.resolve(context).dryRun,
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode, ...codemodInput } = input;
+    const result = await runUpgradeCodemodBuilder(codemodInput);
+
+    if (result.isErr()) {
+      return actionInternalErr("upgrade.codemod", result.error);
+    }
+
+    await printUpgradeCodemodBuilderResult(result.value, {
+      mode: outputMode,
+    });
+
+    if (!result.value.ok) {
+      return actionInternalErr("upgrade.codemod", {
+        message: `Codemod completed with ${result.value.errors.length} error(s)`,
+      });
+    }
 
     return Result.ok(result.value);
   },
