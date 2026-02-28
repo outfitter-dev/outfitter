@@ -14,6 +14,10 @@ import {
   runCheckActionCeremony,
 } from "../commands/check-action-ceremony.js";
 import {
+  printCheckActionRegistryResult,
+  runCheckActionRegistry,
+} from "../commands/check-action-registry.js";
+import {
   printCheckDocsSentinelResult,
   runCheckDocsSentinel,
 } from "../commands/check-docs-sentinel.js";
@@ -256,6 +260,39 @@ export const checkActionCeremonyAction: CheckAutomationAction = defineAction({
     }
 
     await printCheckActionCeremonyResult(result.value, {
+      mode: input.outputMode,
+    });
+
+    if (!result.value.ok) {
+      process.exit(1);
+    }
+
+    return Result.ok(result.value);
+  },
+});
+
+/** Scan command files and cross-reference against action registry imports. */
+export const checkActionRegistryAction: CheckAutomationAction = defineAction({
+  id: "check.action-registry",
+  description:
+    "Cross-reference command files against action registry for completeness",
+  surfaces: ["cli"],
+  input: checkAutomationInputSchema,
+  cli: {
+    group: "check",
+    command: "action-registry",
+    description:
+      "Cross-reference command files against action registry for completeness",
+    options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
+    mapInput: mapCheckAutomationInput,
+  },
+  handler: async (input) => {
+    const result = await runCheckActionRegistry({ cwd: input.cwd });
+    if (result.isErr()) {
+      return actionInternalErr("check.action-registry", result.error);
+    }
+
+    await printCheckActionRegistryResult(result.value, {
       mode: input.outputMode,
     });
 

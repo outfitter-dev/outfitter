@@ -12,6 +12,7 @@ import {
 import { addAction, listBlocksAction } from "./actions/add.js";
 import {
   checkActionCeremonyAction,
+  checkActionRegistryAction,
   checkDocsSentinelAction,
   checkPresetVersionsAction,
   checkPublishGuardrailsAction,
@@ -62,6 +63,7 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(checkSurfaceMapFormatAction)
   .add(checkDocsSentinelAction)
   .add(checkActionCeremonyAction)
+  .add(checkActionRegistryAction)
   .add(upgradeAction)
   .add(docsListAction)
   .add(docsShowAction)
