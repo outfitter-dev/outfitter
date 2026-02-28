@@ -133,6 +133,14 @@ export type {
   ResolvedConfig,
   SyncHandler,
 } from "./handler.js";
+// Streaming types
+export type {
+  ProgressCallback,
+  StreamEvent,
+  StreamProgressEvent,
+  StreamStartEvent,
+  StreamStepEvent,
+} from "./stream.js";
 // Hint types
 export type { ActionHint, CLIHint, MCPHint } from "./hints.js";
 export type {
