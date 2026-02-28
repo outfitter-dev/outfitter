@@ -52,6 +52,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import type { TaggedErrorClass } from "@outfitter/contracts";
 import {
+  formatZodIssues,
   NotFoundError,
   Result,
   TaggedError,
@@ -543,16 +544,13 @@ export function resolveConfig<T>(
   const parseResult = schema.safeParse(merged);
 
   if (!parseResult.success) {
-    const issues = parseResult.error.issues;
-    const firstIssue = issues[0];
-    const path = firstIssue?.path?.join(".") ?? "";
-    const message = firstIssue?.message ?? "Validation failed";
-    const fullMessage = path ? `${path}: ${message}` : message;
+    const fullMessage = formatZodIssues(parseResult.error.issues);
+    const firstPath = parseResult.error.issues[0]?.path?.join(".");
 
     return Result.err(
       new ValidationError({
         message: fullMessage,
-        ...(path ? { field: path } : {}),
+        ...(firstPath ? { field: firstPath } : {}),
       })
     );
   }
@@ -826,16 +824,13 @@ export function loadConfig<T>(
   const validateResult = schema.safeParse(parsed);
 
   if (!validateResult.success) {
-    const issues = validateResult.error.issues;
-    const firstIssue = issues[0];
-    const path = firstIssue?.path?.join(".") ?? "";
-    const message = firstIssue?.message ?? "Validation failed";
-    const fullMessage = path ? `${path}: ${message}` : message;
+    const fullMessage = formatZodIssues(validateResult.error.issues);
+    const firstPath = validateResult.error.issues[0]?.path?.join(".");
 
     return Result.err(
       new ValidationError({
         message: fullMessage,
-        ...(path ? { field: path } : {}),
+        ...(firstPath ? { field: firstPath } : {}),
       })
     );
   }

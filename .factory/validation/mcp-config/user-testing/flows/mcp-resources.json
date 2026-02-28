@@ -1,0 +1,81 @@
+{
+  "groupId": "mcp-resources",
+  "testedAt": "2026-02-28T01:18:30Z",
+  "credentials": {
+    "account": "n/a (shell validation)",
+    "namespace": "n/a"
+  },
+  "toolsUsed": ["bun test", "bun -e", "Grep", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-MCP-001",
+      "title": "defineResource() provides first-class MCP resource support",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test`",
+          "expected": "MCP package tests pass, including resource definition/validation/error-handling coverage",
+          "observed": "Pass (165 passed, 0 failed). Includes `src/__tests__/define-resource.test.ts` coverage for defineResource(), defineResourceTemplate(), paramSchema validation, typed params, and error translation."
+        },
+        {
+          "action": "Run `bun -e` import verification from packages/mcp",
+          "expected": "`defineResource` and `defineResourceTemplate` are exported from package entry",
+          "observed": "Import output confirms `hasDefineResource: true`, `hasDefineResourceTemplate: true`, and both exports are functions."
+        },
+        {
+          "action": "Inspect implementation in `packages/mcp/src/server.ts` and `packages/mcp/src/index.ts`",
+          "expected": "Typed resource definitions, schema validation before handler invocation, registration APIs, and framework error handling are present",
+          "observed": "`defineResourceTemplate()` wraps typed handlers and validates URI vars via `paramSchema.safeParse`; invalid params return `ValidationError`. `readResource()` wraps handler execution in try/catch and translates failures to `McpError`. `registerResource()` and `registerResourceTemplate()` are implemented on `McpServer`; both helpers exported via `src/index.ts`."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (library tests)",
+        "testOutput": "`bun test` in packages/mcp completed with 165 pass / 0 fail.",
+        "importVerification": "`bun -e \"const m = await import('./src/index.ts')\"` confirms `defineResource` + `defineResourceTemplate` exports.",
+        "codeReferences": [
+          "packages/mcp/src/index.ts (exports createMcpServer, defineResource, defineResourceTemplate)",
+          "packages/mcp/src/server.ts (defineResourceTemplate wraps handler and runs paramSchema.safeParse)",
+          "packages/mcp/src/server.ts (readResource executes handlers with try/catch and translates to McpError)",
+          "packages/mcp/src/server.ts (registerResource, registerResourceTemplate methods)"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-MCP-002",
+      "title": "defineResource() integrates with existing MCP server",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Review MCP harness tests in `packages/mcp/src/__tests__/transport.test.ts` after running `bun test`",
+          "expected": "Resources registered on `createMcpServer()` are listable/readable via MCP client",
+          "observed": "Pass. `supports resources and prompts registered after SDK server creation` uses `Client` + `InMemoryTransport`, verifies `client.listResources()` and `client.readResource()` return registered resource data."
+        },
+        {
+          "action": "Review resource integration tests in `packages/mcp/src/__tests__/define-resource.test.ts`",
+          "expected": "Resources/templates defined via helpers are served by server and integrated into resource read/list paths",
+          "observed": "Pass. Integration tests verify static resource priority vs template matching and confirm `getResources()` + `getResourceTemplates()` include registered entries."
+        },
+        {
+          "action": "Verify schema validation executes before handler invocation",
+          "expected": "Invalid URI template parameters fail validation and prevent handler call",
+          "observed": "Pass. `define-resource.test.ts` case `returns validation error when template variables fail schema` confirms invalid UUID input returns error and `handlerCalled` remains false."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (in-memory MCP transport harness)",
+        "testOutput": "`bun test` in packages/mcp includes passing harness/integration tests: `transport.test.ts` and `define-resource.test.ts`.",
+        "mcpHarness": "`packages/mcp/src/__tests__/transport.test.ts` uses SDK `Client` + `InMemoryTransport` to list/read resources through `createSdkServer(createMcpServer(...))`.",
+        "validationEvidence": "`packages/mcp/src/server.ts` validates template variables with `paramSchema.safeParse`; test confirms invalid params block handler execution."
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions (VAL-MCP-001, VAL-MCP-002): 2 passed, 0 failed, 0 blocked."
+}

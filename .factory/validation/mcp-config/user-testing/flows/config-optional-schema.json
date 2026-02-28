@@ -1,0 +1,61 @@
+{
+  "groupId": "config-optional-schema",
+  "testedAt": "2026-02-28T01:32:04Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell (bun test)",
+    "shell (bun -e import check)",
+    "Grep/Read (code inspection)",
+    "shell (bun run typecheck --filter=@outfitter/config)"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-CFG-001",
+      "title": "loadConfig() schema parameter is optional",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run config package tests (`cd packages/config && bun test`)",
+          "expected": "Config tests pass and include optional-schema coverage",
+          "observed": "82 tests passed (0 failed). Output includes: `loadConfig() without schema (optional schema)`, `returns raw parsed config when called without schema`, and `with schema still works as before (backward compatible)`."
+        },
+        {
+          "action": "Verify `loadConfig` export (`cd packages/config && bun -e ...`)",
+          "expected": "`loadConfig` is exported as a function",
+          "observed": "Command output: `hasLoadConfig: true`."
+        },
+        {
+          "action": "Inspect tests in `packages/config/src/__tests__/config.test.ts`",
+          "expected": "Tests exist for no-schema raw return, schema-based validation path, and backward compatibility",
+          "observed": "Found tests: `returns raw parsed config when called without schema`, `returns unvalidated config (no schema enforcement)`, `returns Result<unknown, ...> type when no schema provided`, `validates config against Zod schema`, and `with schema still works as before (backward compatible)`."
+        },
+        {
+          "action": "Inspect implementation signature in `packages/config/src/index.ts`",
+          "expected": "Schema parameter is optional while schema-based overloads remain supported",
+          "observed": "Overloads include `(appName)`, `(appName, options)`, `(appName, schema)`, `(appName, schema, options)`. Implementation uses `schemaOrOptions?: ZodSchema<T> | LoadConfigOptions` and returns raw parsed config when schema is absent; validates when schema is provided."
+        },
+        {
+          "action": "Run package-scoped typecheck (`cd repo && bun run typecheck --filter=@outfitter/config`)",
+          "expected": "Typecheck succeeds",
+          "observed": "Turbo typecheck completed successfully for `@outfitter/config` (`tsc --noEmit`, exit code 0)."
+        }
+      ],
+      "evidence": {
+        "testOutput": "`bun test` in packages/config: 82 pass, 0 fail. Includes optional-schema and backward-compatibility test cases.",
+        "importCheck": "`hasLoadConfig: true`",
+        "codeInspection": [
+          "packages/config/src/__tests__/config.test.ts: describe block `loadConfig() without schema (optional schema)` with explicit no-schema and backward-compatibility tests",
+          "packages/config/src/index.ts: loadConfig overloads and implementation parameter `schemaOrOptions?: ZodSchema<T> | LoadConfigOptions`"
+        ],
+        "typecheck": "`bun run typecheck --filter=@outfitter/config` succeeded (Turbo tasks successful, exit code 0)."
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-CFG-001): 1 passed, 0 failed, 0 blocked."
+}

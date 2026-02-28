@@ -10,6 +10,7 @@
 import { getEnvironment, getEnvironmentDefaults } from "@outfitter/config";
 import type { HandlerContext, OutfitterError } from "@outfitter/contracts";
 import {
+  formatZodIssues,
   generateRequestId,
   Result,
   ValidationError,
@@ -208,14 +209,15 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 
   // Create handler context for tool invocations
   function createHandlerContext(
-    toolName: string,
+    label: string,
     requestId: string,
     signal?: AbortSignal,
-    progressToken?: string | number
+    progressToken?: string | number,
+    loggerMeta?: Record<string, string>
   ): HandlerContext {
     const ctx: HandlerContext = {
       requestId,
-      logger: logger.child({ tool: toolName, requestId }),
+      logger: logger.child(loggerMeta ?? { tool: label, requestId }),
       cwd: process.cwd(),
       env: process.env as Record<string, string | undefined>,
     };
@@ -526,12 +528,10 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         }
 
         const requestId = generateRequestId();
-        const ctx: HandlerContext = {
+        const ctx = createHandlerContext(uri, requestId, undefined, undefined, {
+          resource: uri,
           requestId,
-          logger: logger.child({ resource: uri, requestId }),
-          cwd: process.cwd(),
-          env: process.env as Record<string, string | undefined>,
-        };
+        });
 
         try {
           const result = await resource.handler(uri, ctx);
@@ -555,15 +555,13 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         const variables = matchUriTemplate(template.uriTemplate, uri);
         if (variables) {
           const templateRequestId = generateRequestId();
-          const templateCtx: HandlerContext = {
-            requestId: templateRequestId,
-            logger: logger.child({
-              resource: uri,
-              requestId: templateRequestId,
-            }),
-            cwd: process.cwd(),
-            env: process.env as Record<string, string | undefined>,
-          };
+          const templateCtx = createHandlerContext(
+            uri,
+            templateRequestId,
+            undefined,
+            undefined,
+            { resource: uri, requestId: templateRequestId }
+          );
 
           try {
             const result = await template.handler(uri, variables, templateCtx);
@@ -618,9 +616,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       // Validate input
       const parseResult = tool.zodSchema.safeParse(input);
       if (!parseResult.success) {
-        const errorMessages = parseResult.error.issues
-          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-          .join("; ");
+        const errorMessages = formatZodIssues(parseResult.error.issues);
 
         logger.warn("Input validation failed", {
           tool: toolName,
@@ -938,9 +934,7 @@ export function defineResourceTemplate<TParams>(
     ) => {
       const parseResult = paramSchema.safeParse(variables);
       if (!parseResult.success) {
-        const errorMessages = parseResult.error.issues
-          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-          .join("; ");
+        const errorMessages = formatZodIssues(parseResult.error.issues);
 
         return Result.err(
           new ValidationError({
