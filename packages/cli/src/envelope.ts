@@ -28,7 +28,7 @@ import type {
 import { exitCodeMap } from "@outfitter/contracts";
 import type { Result } from "better-result";
 
-import { output } from "./output.js";
+import { detectMode, formatHuman, output } from "./output.js";
 import type { OutputMode } from "./types.js";
 
 // =============================================================================
@@ -275,25 +275,9 @@ function formatEnvelopeHuman(envelope: CommandEnvelope): {
     const parts: string[] = [];
 
     // Format the result
-    const result = envelope.result;
-    if (result !== null && result !== undefined) {
-      if (typeof result === "string") {
-        parts.push(result);
-      } else if (typeof result === "number" || typeof result === "boolean") {
-        parts.push(String(result));
-      } else if (Array.isArray(result)) {
-        parts.push(
-          result
-            .map((item) =>
-              typeof item === "object" && item !== null
-                ? formatObject(item as Record<string, unknown>)
-                : String(item)
-            )
-            .join("\n")
-        );
-      } else if (typeof result === "object") {
-        parts.push(formatObject(result as Record<string, unknown>));
-      }
+    const formatted = formatHuman(envelope.result);
+    if (formatted) {
+      parts.push(formatted);
     }
 
     // Format hints as suggestions
@@ -328,23 +312,6 @@ function formatEnvelopeHuman(envelope: CommandEnvelope): {
   }
 
   return { stdout: "", stderr: parts.join("\n") };
-}
-
-/**
- * Simple key: value formatting for objects (matches output.ts formatHuman).
- */
-function formatObject(obj: Record<string, unknown>): string {
-  const lines: string[] = [];
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      lines.push(`${key}: ${formatObject(value as Record<string, unknown>)}`);
-    } else if (Array.isArray(value)) {
-      lines.push(`${key}: ${value.join(", ")}`);
-    } else {
-      lines.push(`${key}: ${String(value)}`);
-    }
-  }
-  return lines.join("\n");
 }
 
 // =============================================================================
@@ -400,7 +367,12 @@ export async function runHandler<
   } = options;
 
   const inputValue = input as TInput;
-  const isJsonMode = format === "json" || format === "jsonl";
+
+  // Resolve output mode: explicit format > env vars > default (human).
+  // When format is omitted, check OUTFITTER_JSON/OUTFITTER_JSONL env vars
+  // consistent with output.ts detectMode() conventions.
+  const resolvedFormat = format ?? detectMode();
+  const isJsonMode = resolvedFormat === "json" || resolvedFormat === "jsonl";
 
   // 1. Context factory (if provided)
   let context: TContext;
@@ -469,7 +441,7 @@ export async function runHandler<
 
     // 4. Output formatting
     if (isJsonMode) {
-      await output(envelope, format);
+      await output(envelope, resolvedFormat);
     } else {
       const formatted = formatEnvelopeHuman(envelope);
       if (formatted.stdout) {

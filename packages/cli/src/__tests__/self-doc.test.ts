@@ -304,4 +304,95 @@ describe("self-documenting root command", () => {
       expect(output).toContain("status");
     });
   });
+
+  // ===========================================================================
+  // Piped (non-TTY) detection — JSON output when piped
+  // ===========================================================================
+
+  describe("piped (non-TTY) detection", () => {
+    test("outputs JSON command tree when piped (non-TTY) even without --json flag", async () => {
+      const originalIsTTY = process.stdout.isTTY;
+
+      try {
+        // Simulate piped/non-TTY environment
+        Object.defineProperty(process.stdout, "isTTY", {
+          value: undefined,
+          writable: true,
+          configurable: true,
+        });
+
+        const cli = createCLI({
+          name: "my-tool",
+          version: "1.0.0",
+          description: "A test CLI tool",
+          onExit: () => {},
+        });
+
+        cli.register(
+          command("list")
+            .description("List all items")
+            .action(async () => {})
+        );
+
+        const captured = await captureOutput(async () => {
+          await cli.parse(["node", "my-tool"]);
+        });
+
+        // When piped, should output structured JSON command tree
+        const tree = JSON.parse(captured.stdout.trim());
+        expect(tree.name).toBe("my-tool");
+        expect(tree.version).toBe("1.0.0");
+        expect(tree.commands).toBeArray();
+      } finally {
+        // Restore isTTY
+        Object.defineProperty(process.stdout, "isTTY", {
+          value: originalIsTTY,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
+    test("TTY mode still outputs help text when isTTY is true", async () => {
+      const originalIsTTY = process.stdout.isTTY;
+
+      try {
+        // Simulate TTY environment
+        Object.defineProperty(process.stdout, "isTTY", {
+          value: true,
+          writable: true,
+          configurable: true,
+        });
+
+        const cli = createCLI({
+          name: "my-tool",
+          version: "1.0.0",
+          description: "A test CLI tool",
+          onExit: () => {},
+        });
+
+        cli.register(
+          command("list")
+            .description("List items")
+            .action(async () => {})
+        );
+
+        const captured = await captureOutput(async () => {
+          await cli.parse(["node", "my-tool"]);
+        });
+
+        // TTY should output help text, not JSON
+        const output = captured.stdout + captured.stderr;
+        expect(output).toContain("my-tool");
+        // Should NOT be valid JSON envelope
+        expect(() => JSON.parse(captured.stdout.trim())).toThrow();
+      } finally {
+        Object.defineProperty(process.stdout, "isTTY", {
+          value: originalIsTTY,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+  });
 });

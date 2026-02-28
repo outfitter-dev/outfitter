@@ -132,7 +132,8 @@ describe("CommandBuilder.preset() with schema-driven presets", () => {
     );
 
     await cli.parse(["node", "test", "run", "--name", "Alice", "--verbose"]);
-    expect(receivedInput).toEqual({ name: "Alice" });
+    // With merged schema, preset resolver values are composed into input
+    expect(receivedInput).toEqual({ name: "Alice", verbose: true });
     expect(receivedFlags?.["verbose"]).toBe(true);
   });
 
@@ -217,7 +218,8 @@ describe("CommandBuilder.preset() with schema-driven presets", () => {
       "--offset",
       "5",
     ]);
-    expect(receivedInput).toEqual({ query: "hello" });
+    // With merged schema, preset resolver values are composed into input
+    expect(receivedInput).toEqual({ query: "hello", limit: 10, offset: 5 });
     expect(receivedFlags?.["limit"]).toBe(10);
     expect(receivedFlags?.["offset"]).toBe(5);
   });
@@ -436,5 +438,169 @@ describe("schema preset edge cases", () => {
     await cli.parse(["node", "test", "run", "--limit", "50"]);
     // Number coercion from schema-derived flag
     expect(receivedFlags?.["limit"]).toBe(50);
+  });
+});
+
+// =============================================================================
+// Schema preset merge: resolvers executed & values composed into input
+// =============================================================================
+
+describe("schema preset merge and resolver execution", () => {
+  it("schema preset fields are merged into input validation schema", async () => {
+    const preset = createSchemaPreset({
+      id: "verbosity",
+      schema: z.object({
+        verbose: z.boolean().default(false).describe("Verbose output"),
+      }),
+      resolve: (flags) => ({
+        verbose: Boolean(flags["verbose"]),
+      }),
+    });
+
+    const cli = createCLI({ name: "test", version: "0.0.1" });
+    let receivedInput: Record<string, unknown> | undefined;
+
+    cli.register(
+      command("run")
+        .description("Run")
+        .input(z.object({ name: z.string().describe("Name") }))
+        .preset(preset)
+        .action(async ({ input }) => {
+          receivedInput = input as Record<string, unknown>;
+        })
+    );
+
+    await cli.parse(["node", "test", "run", "--name", "Alice", "--verbose"]);
+
+    // Preset fields should be merged into the validated input via resolver
+    expect(receivedInput).toBeDefined();
+    expect(receivedInput?.["name"]).toBe("Alice");
+    // Resolver-resolved preset value is now composed into input
+    expect(receivedInput?.["verbose"]).toBe(true);
+  });
+
+  it("schema preset resolvers are executed and values composed into input", async () => {
+    const preset = createSchemaPreset({
+      id: "pagination",
+      schema: z.object({
+        limit: z.number().default(20).describe("Max results"),
+      }),
+      resolve: (flags) => ({
+        limit: Number(flags["limit"] ?? 20),
+      }),
+    });
+
+    const cli = createCLI({ name: "test", version: "0.0.1" });
+    let receivedInput: Record<string, unknown> | undefined;
+
+    cli.register(
+      command("search")
+        .description("Search")
+        .input(z.object({ query: z.string().describe("Search query") }))
+        .preset(preset)
+        .action(async ({ input }) => {
+          receivedInput = input as Record<string, unknown>;
+        })
+    );
+
+    await cli.parse([
+      "node",
+      "test",
+      "search",
+      "--query",
+      "hello",
+      "--limit",
+      "10",
+    ]);
+
+    // Resolver should have been executed and resolved value merged into input
+    expect(receivedInput?.["query"]).toBe("hello");
+    expect(receivedInput?.["limit"]).toBe(10);
+  });
+
+  it("multiple schema preset resolvers compose into input", async () => {
+    const verbosePreset = createSchemaPreset({
+      id: "verbosity",
+      schema: z.object({
+        verbose: z.boolean().default(false).describe("Verbose output"),
+      }),
+      resolve: (flags) => ({
+        verbose: Boolean(flags["verbose"]),
+      }),
+    });
+
+    const formatPreset = createSchemaPreset({
+      id: "format",
+      schema: z.object({
+        format: z
+          .enum(["json", "text"])
+          .default("text")
+          .describe("Output format"),
+      }),
+      resolve: (flags) => ({
+        format: (flags["format"] as string) ?? "text",
+      }),
+    });
+
+    const cli = createCLI({ name: "test", version: "0.0.1" });
+    let receivedInput: Record<string, unknown> | undefined;
+
+    cli.register(
+      command("run")
+        .description("Run")
+        .input(z.object({ name: z.string().describe("Name") }))
+        .preset(verbosePreset)
+        .preset(formatPreset)
+        .action(async ({ input }) => {
+          receivedInput = input as Record<string, unknown>;
+        })
+    );
+
+    await cli.parse([
+      "node",
+      "test",
+      "run",
+      "--name",
+      "Alice",
+      "--verbose",
+      "--format",
+      "json",
+    ]);
+
+    // All resolved values composed into input
+    expect(receivedInput?.["name"]).toBe("Alice");
+    expect(receivedInput?.["verbose"]).toBe(true);
+    expect(receivedInput?.["format"]).toBe("json");
+  });
+
+  it("preset defaults are applied when flags are omitted", async () => {
+    const preset = createSchemaPreset({
+      id: "verbosity",
+      schema: z.object({
+        verbose: z.boolean().default(false).describe("Verbose output"),
+      }),
+      resolve: (flags) => ({
+        verbose: Boolean(flags["verbose"]),
+      }),
+    });
+
+    const cli = createCLI({ name: "test", version: "0.0.1" });
+    let receivedInput: Record<string, unknown> | undefined;
+
+    cli.register(
+      command("run")
+        .description("Run")
+        .input(z.object({ name: z.string().describe("Name") }))
+        .preset(preset)
+        .action(async ({ input }) => {
+          receivedInput = input as Record<string, unknown>;
+        })
+    );
+
+    await cli.parse(["node", "test", "run", "--name", "Bob"]);
+
+    // Preset default (false) should be composed into input via resolver
+    expect(receivedInput?.["name"]).toBe("Bob");
+    expect(receivedInput?.["verbose"]).toBe(false);
   });
 });
