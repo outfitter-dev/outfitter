@@ -688,10 +688,10 @@ const result = await testCommand(cli, ["greet", "--name", "World"], {
 import { testCommand } from "@outfitter/testing";
 
 const result = await testCommand(cli, ["greet"], {
-  input: { name: "World" },        // Pre-parsed, schema-validated input
-  context: { db: mockDb },          // Mock context object
-  json: true,                       // Force JSON output for envelope parsing
-  env: { OUTFITTER_ENV: "test" },   // Still supported
+  input: { name: "World" }, // Converted to CLI args (--name World)
+  context: { db: mockDb }, // Mock context object
+  json: true, // Force JSON output for envelope parsing
+  env: { OUTFITTER_ENV: "test" }, // Still supported
 });
 
 // result: TestCommandResult extends CliTestResult
@@ -701,11 +701,11 @@ expect(result.envelope?.result).toEqual({ greeting: "Hello, World!" });
 
 **New options:**
 
-| Option    | Type                               | Purpose                           |
-| --------- | ---------------------------------- | --------------------------------- |
-| `input`   | `Record<string, unknown>`          | Pre-parsed input (bypasses CLI parsing) |
-| `context` | `Record<string, unknown>`          | Mock context object               |
-| `json`    | `boolean`                          | Force JSON output for envelope    |
+| Option    | Type                      | Purpose                                  |
+| --------- | ------------------------- | ---------------------------------------- |
+| `input`   | `Record<string, unknown>` | Pre-parsed input (converted to CLI args) |
+| `context` | `Record<string, unknown>` | Mock context object                      |
+| `json`    | `boolean`                 | Force JSON output for envelope           |
 
 **New return type:** `TestCommandResult` extends `CliTestResult` with:
 
@@ -789,7 +789,7 @@ registered, non-zero if gaps are found.
 ### `outfitter upgrade` — Commander-to-Builder Codemod
 
 Automated codemod that detects `.command().action()` patterns and transforms
-them to `.input(schema).handler().context()`:
+them to `.input(schema).action()`:
 
 ```bash
 outfitter upgrade --cwd . --codemods
