@@ -1,0 +1,34 @@
+{
+  "featureId": "os-356-destructive-dryrun",
+  "reviewedAt": "2026-02-28T15:55:59Z",
+  "commitId": "fa0e90a84dd389b850ca36e73f7bfb83ded247da",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation covers the requested scope: `CommandBuilder.destructive(isDest)` was added, `--dry-run` is auto-added with deduplication, `runHandler()` gained a `dryRun` option that appends a real-command CLI hint, types were updated, tests were added, and a minor changeset is present. I found two edge-case issues that are non-blocking for the primary acceptance criteria.",
+    "issues": [
+      {
+        "file": "packages/cli/src/command.ts",
+        "line": 311,
+        "severity": "non_blocking",
+        "description": "`action()` eagerly calls `applyDestructiveFlag()`, which makes `.destructive()` order-sensitive. Repro: `command('x').destructive(true).action(...).destructive(false).build()` still includes `--dry-run` (verified via Bun runtime check). This can surprise callers expecting the latest `.destructive(false)` call to win before build-time finalization."
+      },
+      {
+        "file": "packages/cli/src/envelope.ts",
+        "line": 297,
+        "severity": "non_blocking",
+        "description": "`buildDryRunHint()` removes only the exact token `--dry-run` from `process.argv`. It can produce a non-actionable or still-dry-run hint in edge cases (e.g., custom argv contexts resulting in empty command, or alternate dry-run spellings such as `--dry-run=true`/aliases)."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker's export verification bypassed package entrypoint verification guidance in the skill, indicating the procedure may be interpreted inconsistently.",
+      "evidence": "Skill step 6 in `.factory/skills/library-worker/SKILL.md` says to verify importability from `./src/index.ts` or built output. Handoff verification command used `import('./src/command.ts')` instead."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review completed for `os-356-destructive-dryrun` at commit `fa0e90a84dd389b850ca36e73f7bfb83ded247da`. Core requirements are implemented and validated in tests; status is pass with two non-blocking edge-case findings and one skill-procedure observation."
+}
