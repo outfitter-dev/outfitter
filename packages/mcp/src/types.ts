@@ -439,6 +439,79 @@ export interface ResourceTemplateDefinition {
 }
 
 // ============================================================================
+// Typed Resource Template Definition
+// ============================================================================
+
+/**
+ * Handler for reading a typed resource template's content.
+ *
+ * @param uri - The matched URI
+ * @param params - Validated and parsed template parameters (typed via Zod schema)
+ * @param ctx - Handler context
+ */
+export type TypedResourceTemplateReadHandler<TParams> = (
+  uri: string,
+  params: TParams,
+  ctx: HandlerContext
+) => Promise<Result<ResourceContent[], OutfitterError>>;
+
+/**
+ * Typed definition of an MCP resource template with Zod schema validation.
+ *
+ * Parallel to `ToolDefinition` — the `paramSchema` validates URI template
+ * variables before handler invocation, providing type-safe parameters
+ * and automatic coercion (e.g., string → number via `z.coerce.number()`).
+ *
+ * @typeParam TParams - The validated parameter type (inferred from Zod schema)
+ *
+ * @example
+ * ```typescript
+ * const userTemplate = defineResourceTemplate({
+ *   uriTemplate: "db:///users/{userId}/posts/{postId}",
+ *   name: "User Post",
+ *   paramSchema: z.object({
+ *     userId: z.string().min(1),
+ *     postId: z.coerce.number().int().positive(),
+ *   }),
+ *   handler: async (uri, params, ctx) => {
+ *     // params is { userId: string; postId: number } — validated and coerced
+ *     const post = await getPost(params.userId, params.postId);
+ *     return Result.ok([{ uri, text: JSON.stringify(post) }]);
+ *   },
+ * });
+ * ```
+ */
+export interface TypedResourceTemplateDefinition<TParams> {
+  /** Optional completion handlers keyed by parameter name. */
+  complete?: Record<string, CompletionHandler>;
+
+  /** Optional description. */
+  description?: string;
+
+  /**
+   * Handler for reading matched resources.
+   * Receives validated and coerced parameters (typed via `paramSchema`).
+   */
+  handler: TypedResourceTemplateReadHandler<TParams>;
+
+  /** Optional MIME type. */
+  mimeType?: string;
+
+  /** Human-readable name for the template. */
+  name: string;
+
+  /**
+   * Zod schema for validating and parsing URI template parameters.
+   * Variables extracted from the URI template are validated against this schema
+   * before being passed to the handler. Supports coercion (e.g., `z.coerce.number()`).
+   */
+  paramSchema: z.ZodType<TParams>;
+
+  /** URI template with `{param}` placeholders (RFC 6570 Level 1). */
+  uriTemplate: string;
+}
+
+// ============================================================================
 // Prompt Definition
 // ============================================================================
 

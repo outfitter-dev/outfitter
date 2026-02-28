@@ -110,4 +110,6 @@ export {
   TOOL_ANNOTATIONS,
   type ToolAnnotations,
   type ToolDefinition,
+  type TypedResourceTemplateDefinition,
+  type TypedResourceTemplateReadHandler,
 } from "./types.js";
