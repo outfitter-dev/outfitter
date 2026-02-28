@@ -46,6 +46,34 @@ v0.5 adds: `.input(schema)`, `.context(factory)`, `.hints(fn)`, `.onError(fn)` +
 
 Key design: `.input(schema)` auto-derives Commander flags from Zod schema (80% case). Explicit declarations override/supplement. `.context(factory)` receives typed input post-validation. `.hints()/.onError()` are transport-local (not in handler).
 
+**Build lifecycle:** `register()` in `packages/cli/src/cli.ts` auto-invokes `builder.build()`, which finalizes all deferred operations (e.g., destructive flag application). This means builder method ordering is agnostic — `.destructive(true)` can appear before or after `.action()` because flag reconciliation happens at build time, not eagerly.
+
+## Streaming Protocol (v0.6)
+
+`ctx.progress` is a transport-agnostic callback on HandlerContext. When streaming is active, the transport adapter provides the callback. When not active, `ctx.progress` is undefined.
+
+CLI adapter: NDJSON lines to stdout with type discriminators (start, step, progress). Terminal line is standard CommandEnvelope.
+
+MCP adapter: translates ctx.progress calls to `notifications/progress` via SDK (requires progressToken from client).
+
+`--stream` is orthogonal to output mode — controls delivery, not serialization.
+
+## Safety Primitives (v0.6)
+
+`.destructive(true)` auto-adds `--dry-run`. Dry-run path: preview only, response includes CLIHint to execute without `--dry-run`.
+
+`readOnly`/`idempotent` metadata on commands maps to MCP `readOnlyHint`/`idempotentHint` tool annotations. Included in self-documenting root command tree.
+
+Error envelopes include `retryable` (from retryableMap) and `retry_after` (from RateLimitError.retryAfterSeconds) when applicable.
+
+## Action Graph (v0.6)
+
+`.relatedTo(target, options?)` on CommandBuilder declares relationships between commands. Builds navigable action graph. Tier-4 hints: success hints use graph neighbors for next-actions, error hints include remediation paths.
+
+## Context Protection (v0.6)
+
+Output truncation when `limit` configured. Above limit: truncate with `{ showing, total, truncated: true }` + pagination hints + file pointer for full output. Structured output remains parseable.
+
 ## MCP Resource Support (existing)
 
 `packages/mcp/src/server.ts` already has: `registerResource()`, `registerResourceTemplate()`, `readResource()`, `subscribe/unsubscribe/notify`. Types: `ResourceDefinition`, `ResourceTemplateDefinition`. v0.5 adds `defineResource()` convenience with Zod schema validation (parallel to `defineTool()`).

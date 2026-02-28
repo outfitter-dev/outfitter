@@ -1,0 +1,26 @@
+{
+  "featureId": "misc-completeness-edge-cases",
+  "reviewedAt": "2026-02-28T18:01:48Z",
+  "commitId": "3746c150a0c3dcbf5758d19beed42c0ee380086b",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Reviewed commit 3746c150a0c3dcbf5758d19beed42c0ee380086b against the feature scope and expected behaviors. The implementation adds tempDir safety validation with fallback behavior in truncation, recursive nested-command traversal in buildActionGraph, replaces the hardcoded dry-run boolean in the cross-feature test with a flag-derived value, and adds optional truncation configuration on OutputOptions. Added/updated tests in the same commit align with the requested edge cases.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "services",
+      "observation": "Shared command metadata still advertises `bun run check` even though mission guidance marks it as a known crashing command and directs workers to lint+typecheck instead.",
+      "evidence": ".factory/services.yaml defines `check: bun run check`; mission AGENTS.md (Known Pre-Existing Issues) states `bun run check` crashes with tokio panic and should be avoided."
+    },
+    {
+      "area": "knowledge",
+      "observation": "The shared architecture notes do not explicitly state that dry-run state is carried via runHandler options rather than HandlerContext, which caused extra source spelunking during implementation/review of the dry-run test fix.",
+      "evidence": ".factory/library/architecture.md documents safety primitives but not dry-run transport in runHandler; transcript skeleton for worker session 8b607ec6-c593-471c-817d-bfadf530211d shows targeted reads of packages/cli/src/envelope.ts and packages/contracts/src/handler.ts to resolve this behavior."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Feature review passed. The committed changes cover the four misc completeness edge cases with corresponding tests, and no code-level blocking or non-blocking defects were found in the implementation diff."
+}
