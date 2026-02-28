@@ -233,12 +233,12 @@ describe("VAL-CROSS-001: --stream + destructive --dry-run", () => {
     process.argv = ["node", "test", "delete-files", "--dry-run"];
 
     let sideEffectExecuted = false;
+    const isDryRun = process.argv.includes("--dry-run");
 
     const captured = await captureOutput(async () => {
       await runHandler({
         command: "delete-files",
         handler: async (_input, ctx) => {
-          const isDryRun = true; // Simulated from flags
           ctx?.progress?.({
             type: "step",
             name: "analyze",
@@ -252,7 +252,7 @@ describe("VAL-CROSS-001: --stream + destructive --dry-run", () => {
         },
         format: "json",
         stream: true,
-        dryRun: true,
+        dryRun: isDryRun,
       });
     });
 

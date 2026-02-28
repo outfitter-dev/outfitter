@@ -419,39 +419,61 @@ export function buildActionGraph(program: Command): ActionGraph {
   const edges: ActionGraphEdge[] = [];
   const warnings: string[] = [];
 
-  // Collect all command names as a set for target validation
+  // Collect all command names (recursively) as a set for target validation.
+  // Uses full paths (e.g., "check tsdoc") so nested subcommands produce
+  // runnable node IDs and valid edge targets.
   const commandNames = new Set<string>();
-  for (const cmd of program.commands) {
-    const name = (cmd as Command).name();
-    commandNames.add(name);
-  }
 
-  // Walk commands and extract relationship declarations
-  for (const cmd of program.commands) {
-    const name = (cmd as Command).name();
-    nodes.push(name);
-
-    const relatedTo = (
-      cmd as Command & { __relatedTo?: RelatedToDeclaration[] }
-    ).__relatedTo;
-    if (relatedTo) {
-      for (const decl of relatedTo) {
-        const edge: ActionGraphEdge = {
-          from: name,
-          to: decl.target,
-          ...(decl.description ? { description: decl.description } : {}),
-        };
-        edges.push(edge);
-
-        // Warn about unknown targets (but still add the edge)
-        if (!commandNames.has(decl.target)) {
-          warnings.push(
-            `Unknown relationship target "${decl.target}" from command "${name}"`
-          );
-        }
+  function collectCommandNames(cmds: readonly Command[], prefix = ""): void {
+    for (const cmd of cmds) {
+      const leaf = (cmd as Command).name();
+      const fullName = prefix ? `${prefix} ${leaf}` : leaf;
+      commandNames.add(fullName);
+      // Recurse into subcommands (for group commands like "check tsdoc")
+      if (cmd.commands.length > 0) {
+        collectCommandNames(cmd.commands, fullName);
       }
     }
   }
+
+  collectCommandNames(program.commands);
+
+  // Walk commands recursively and extract relationship declarations
+  function walkCommands(cmds: readonly Command[], prefix = ""): void {
+    for (const cmd of cmds) {
+      const leaf = (cmd as Command).name();
+      const fullName = prefix ? `${prefix} ${leaf}` : leaf;
+      nodes.push(fullName);
+
+      const relatedTo = (
+        cmd as Command & { __relatedTo?: RelatedToDeclaration[] }
+      ).__relatedTo;
+      if (relatedTo) {
+        for (const decl of relatedTo) {
+          const edge: ActionGraphEdge = {
+            from: fullName,
+            to: decl.target,
+            ...(decl.description ? { description: decl.description } : {}),
+          };
+          edges.push(edge);
+
+          // Warn about unknown targets (but still add the edge)
+          if (!commandNames.has(decl.target)) {
+            warnings.push(
+              `Unknown relationship target "${decl.target}" from command "${fullName}"`
+            );
+          }
+        }
+      }
+
+      // Recurse into subcommands (for group commands like "check tsdoc")
+      if (cmd.commands.length > 0) {
+        walkCommands(cmd.commands, fullName);
+      }
+    }
+  }
+
+  walkCommands(program.commands);
 
   return {
     nodes,

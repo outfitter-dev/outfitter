@@ -17,7 +17,7 @@
 
 import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join, normalize } from "node:path";
 
 import type { CLIHint } from "@outfitter/contracts";
 
@@ -119,6 +119,47 @@ export interface TruncationResult<T = unknown> {
 // =============================================================================
 // Implementation
 // =============================================================================
+
+/**
+ * Pattern matching unsafe path components:
+ * - `..` traversal segments (e.g., `/../`, `\..`, etc.)
+ */
+const PATH_TRAVERSAL_PATTERN = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
+
+/**
+ * Validate that a tempDir path is safe for writing.
+ *
+ * A safe tempDir must be:
+ * - An absolute path (starts with /)
+ * - Free of `..` traversal segments after normalization
+ *
+ * Returns the validated (normalized) path, or undefined if unsafe.
+ */
+function validateTempDir(dir: string): string | undefined {
+  // Must be an absolute path
+  if (!isAbsolute(dir)) {
+    return undefined;
+  }
+
+  // Normalize to resolve any `.` or `..` segments
+  const normalized = normalize(dir);
+
+  // normalize() on POSIX fully resolves all `..` segments, so this check
+  // should never match — kept as a defense-in-depth safety net only.
+  if (PATH_TRAVERSAL_PATTERN.test(normalized)) {
+    return undefined;
+  }
+
+  // Also reject if the normalized path differs significantly from input
+  // (e.g., /tmp/safe/../../../etc normalizes to /etc — outside expected dir)
+  // Check that the normalized result is still under a reasonable root
+  // by verifying no `..` pattern existed in the original input
+  if (PATH_TRAVERSAL_PATTERN.test(dir)) {
+    return undefined;
+  }
+
+  return normalized;
+}
 
 /**
  * Generate a unique temp file path for full output persistence.
@@ -267,7 +308,11 @@ export function truncateOutput<T>(
   let fullOutput: string | undefined;
 
   if (total > filePointerThreshold) {
-    const tempDir = options.tempDir ?? tmpdir();
+    // Validate custom tempDir; fall back to OS tmpdir if unsafe
+    const rawTempDir = options.tempDir;
+    const tempDir = rawTempDir
+      ? (validateTempDir(rawTempDir) ?? tmpdir())
+      : tmpdir();
 
     if (rawTempDir && !validateTempDir(rawTempDir)) {
       hints.push({
