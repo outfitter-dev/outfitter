@@ -1,0 +1,185 @@
+{
+  "groupId": "context-protection",
+  "testedAt": "2026-02-28T16:39:44Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "rg",
+    "code inspection",
+    "bun -e import verification"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-CTX-001",
+      "title": "Output truncation is configurable and off by default",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect truncation implementation in packages/cli/src/truncation.ts",
+          "expected": "Without limit, output is emitted fully; below/equal limit output is untouched",
+          "observed": "Implementation returns original data when `limit === undefined` and when `total <= limit` (with no positive offset)."
+        },
+        {
+          "action": "Run targeted truncation tests",
+          "expected": "Default + boundary behavior tests pass",
+          "observed": "`cd packages/cli && bun test --filter truncation` passed 36/36 including all VAL-CTX-001 cases (no limit, undefined limit, below limit, equal limit, empty array)."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "packages/cli/src/__tests__/truncation.test.ts:58",
+          "PASS: truncation off by default (VAL-CTX-001) suite"
+        ],
+        "source": [
+          "packages/cli/src/truncation.ts:231",
+          "packages/cli/src/truncation.ts:242"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CTX-002",
+      "title": "Above-limit output is explicitly truncated",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run VAL-CTX-002 tests in truncation.test.ts",
+          "expected": "Exceeding limit produces truncated data and metadata with showing/total/truncated",
+          "observed": "Targeted test run passed including metadata assertions and offset variants."
+        },
+        {
+          "action": "Verify structured-output parseability checks",
+          "expected": "JSON/JSONL stay machine-parseable after truncation",
+          "observed": "`structured output (JSON) remains parseable after truncation` and `structured output (JSONL) remains parseable after truncation` both passed."
+        },
+        {
+          "action": "Run cross-feature truncation stream checks",
+          "expected": "Envelope carrying truncation metadata remains valid JSON",
+          "observed": "`bun test src/__tests__/cross-feature-integration.test.ts --filter truncation` passed; includes `truncation metadata and pagination hints are valid JSON in stream`."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "packages/cli/src/__tests__/truncation.test.ts:129",
+          "packages/cli/src/__tests__/truncation.test.ts:191",
+          "packages/cli/src/__tests__/truncation.test.ts:202",
+          "packages/cli/src/__tests__/cross-feature-integration.test.ts:726"
+        ],
+        "source": [
+          "packages/cli/src/truncation.ts:253",
+          "packages/cli/src/truncation.ts:283"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CTX-003",
+      "title": "Truncation includes pagination continuation hints",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run pagination-hint unit tests",
+          "expected": "Truncated output includes CLIHint with actionable continuation command",
+          "observed": "VAL-CTX-003 tests passed, asserting hint presence and commands with `--offset`/`--limit` including offset progression."
+        },
+        {
+          "action": "Run envelope-level truncation integration tests",
+          "expected": "Hints are present in envelope and executable",
+          "observed": "Cross-feature truncation test passed with envelope hint assertions containing `--offset 10` and `--limit 10`."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "packages/cli/src/__tests__/truncation.test.ts:220",
+          "packages/cli/src/__tests__/truncation.test.ts:221",
+          "packages/cli/src/__tests__/cross-feature-integration.test.ts:640",
+          "packages/cli/src/__tests__/cross-feature-integration.test.ts:721"
+        ],
+        "source": [
+          "packages/cli/src/truncation.ts:155",
+          "packages/cli/src/truncation.ts:165"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CTX-004",
+      "title": "File pointers for very large output",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run file-pointer suite in truncation tests",
+          "expected": "Very large output includes `full_output` path, file exists, and contains complete JSON payload",
+          "observed": "VAL-CTX-004 tests all passed: pointer emitted above threshold, file existence confirmed, file content parsed and length verified."
+        },
+        {
+          "action": "Inspect file-pointer generation path",
+          "expected": "Code writes full output to temp file and adds pointer metadata",
+          "observed": "`writeFullOutput()` writes safeStringify payload; metadata includes `full_output` when write succeeds and total exceeds threshold."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "packages/cli/src/__tests__/truncation.test.ts:321",
+          "packages/cli/src/__tests__/truncation.test.ts:336",
+          "packages/cli/src/__tests__/truncation.test.ts:346"
+        ],
+        "source": [
+          "packages/cli/src/truncation.ts:137",
+          "packages/cli/src/truncation.ts:268",
+          "packages/cli/src/truncation.ts:284"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CTX-005",
+      "title": "File pointer write failure degrades gracefully",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run fault-injection tests with invalid tempDir",
+          "expected": "On write failure, command still returns truncated data + metadata and does not crash",
+          "observed": "VAL-CTX-005 tests passed: truncated output returned, `truncated: true`, and no crash path observed."
+        },
+        {
+          "action": "Verify warning-hint and no-pointer behavior",
+          "expected": "Warning hint included and `full_output` omitted when write fails",
+          "observed": "Tests passed for warning hint presence and `metadata.full_output` being undefined on write failure."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "packages/cli/src/__tests__/truncation.test.ts:412",
+          "packages/cli/src/__tests__/truncation.test.ts:413",
+          "packages/cli/src/__tests__/truncation.test.ts:430"
+        ],
+        "source": [
+          "packages/cli/src/truncation.ts:270",
+          "packages/cli/src/truncation.ts:277"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "`truncateOutput` is exported via the `@outfitter/cli/truncation` subpath, not from the root `@outfitter/cli` index export; root-index import check returned undefined symbols.",
+      "resolved": true,
+      "resolution": "Verified subpath import directly: `cd packages/cli && bun -e \"const m = await import('./src/truncation.ts'); ...\"` returned function/number types as expected.",
+      "affectedAssertions": [
+        "VAL-CTX-001",
+        "VAL-CTX-002",
+        "VAL-CTX-003",
+        "VAL-CTX-004",
+        "VAL-CTX-005"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 5 assertions (VAL-CTX-001..005): all 5 passed. Evidence collected from targeted truncation and cross-feature test runs, source inspection, grep-based coverage checks, and import verification for the truncation module subpath export."
+}
