@@ -624,6 +624,19 @@ function getDefaultSearchPaths(appName: string): string[] {
 }
 
 /**
+ * Check if a value is a Zod schema (has `safeParse` method).
+ * @internal
+ */
+function isZodSchema(value: unknown): value is ZodSchema {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "safeParse" in value &&
+    typeof (value as Record<string, unknown>)["safeParse"] === "function"
+  );
+}
+
+/**
  * Load configuration for an application from XDG-compliant paths.
  *
  * Search order (first found wins):
@@ -633,11 +646,60 @@ function getDefaultSearchPaths(appName: string): string[] {
  *
  * File format preference: `.toml` > `.yaml` > `.yml` > `.json` > `.jsonc` > `.json5`
  *
+ * When called without a schema, returns the raw parsed config as `unknown`.
+ * When called with a schema, returns the validated typed config.
+ *
+ * @param appName - Application name for XDG directory lookup
+ * @returns Result containing raw config or NotFoundError/ParseError/CircularExtendsError
+ *
+ * @example
+ * ```typescript
+ * // Without schema — returns raw parsed config
+ * const result = loadConfig("myapp");
+ * if (result.isOk()) {
+ *   const config = result.value; // type: unknown
+ * }
+ * ```
+ */
+export function loadConfig(
+  appName: string
+): Result<
+  unknown,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
+>;
+
+/**
+ * Load configuration for an application from XDG-compliant paths.
+ *
+ * @param appName - Application name for XDG directory lookup
+ * @param options - Configuration options (custom search paths)
+ * @returns Result containing raw config or NotFoundError/ParseError/CircularExtendsError
+ *
+ * @example
+ * ```typescript
+ * // Without schema, with custom search paths
+ * const result = loadConfig("myapp", { searchPaths: ["/etc/myapp"] });
+ * ```
+ */
+export function loadConfig(
+  appName: string,
+  options: LoadConfigOptions
+): Result<
+  unknown,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
+>;
+
+/**
+ * Load configuration for an application from XDG-compliant paths.
+ *
  * @typeParam T - The configuration type (inferred from schema)
  * @param appName - Application name for XDG directory lookup
  * @param schema - Zod schema for validation
- * @param options - Optional configuration (custom search paths)
- * @returns Result containing validated config or NotFoundError/ValidationError/ParseError
+ * @returns Result containing validated config or NotFoundError/ValidationError/ParseError/CircularExtendsError
  *
  * @example
  * ```typescript
@@ -647,26 +709,37 @@ function getDefaultSearchPaths(appName: string): string[] {
  * const AppConfigSchema = z.object({
  *   apiKey: z.string(),
  *   timeout: z.number().default(5000),
- *   features: z.object({
- *     darkMode: z.boolean().default(false),
- *   }),
  * });
  *
- * // Searches ~/.config/myapp/config.{toml,yaml,json,...}
- * const result = await loadConfig("myapp", AppConfigSchema);
- *
+ * const result = loadConfig("myapp", AppConfigSchema);
  * if (result.isOk()) {
- *   console.log("API Key:", result.value.apiKey);
- *   console.log("Timeout:", result.value.timeout);
- * } else {
- *   console.error("Failed to load config:", result.error.message);
+ *   console.log(result.value.apiKey); // typed!
  * }
  * ```
+ */
+export function loadConfig<T>(
+  appName: string,
+  schema: ZodSchema<T>
+): Result<
+  T,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ValidationError>
+  | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
+>;
+
+/**
+ * Load configuration for an application from XDG-compliant paths.
+ *
+ * @typeParam T - The configuration type (inferred from schema)
+ * @param appName - Application name for XDG directory lookup
+ * @param schema - Zod schema for validation
+ * @param options - Configuration options (custom search paths)
+ * @returns Result containing validated config or NotFoundError/ValidationError/ParseError/CircularExtendsError
  *
  * @example
  * ```typescript
- * // With custom search paths
- * const result = await loadConfig("myapp", AppConfigSchema, {
+ * const result = loadConfig("myapp", AppConfigSchema, {
  *   searchPaths: ["/etc/myapp", "/opt/myapp/config"],
  * });
  * ```
@@ -674,14 +747,41 @@ function getDefaultSearchPaths(appName: string): string[] {
 export function loadConfig<T>(
   appName: string,
   schema: ZodSchema<T>,
-  options?: LoadConfigOptions
+  options: LoadConfigOptions
 ): Result<
   T,
   | InstanceType<typeof NotFoundError>
   | InstanceType<typeof ValidationError>
   | InstanceType<typeof ParseError>
   | InstanceType<typeof CircularExtendsError>
+>;
+
+// Implementation
+export function loadConfig<T>(
+  appName: string,
+  schemaOrOptions?: ZodSchema<T> | LoadConfigOptions,
+  maybeOptions?: LoadConfigOptions
+): Result<
+  T | unknown,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ValidationError>
+  | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
 > {
+  // Resolve arguments: determine if second arg is schema or options
+  let schema: ZodSchema<T> | undefined;
+  let options: LoadConfigOptions | undefined;
+
+  if (schemaOrOptions !== undefined) {
+    if (isZodSchema(schemaOrOptions)) {
+      schema = schemaOrOptions as ZodSchema<T>;
+      options = maybeOptions;
+    } else {
+      // Second arg is LoadConfigOptions
+      options = schemaOrOptions as LoadConfigOptions;
+    }
+  }
+
   // Determine search paths
   const searchPaths = options?.searchPaths
     ? options.searchPaths.map((p) => join(p, appName))
@@ -715,8 +815,14 @@ export function loadConfig<T>(
     return Result.err(loadResult.error);
   }
 
-  // Validate against schema
   const parsed = loadResult.unwrap();
+
+  // Without schema: return raw parsed config
+  if (!schema) {
+    return Result.ok(parsed as unknown);
+  }
+
+  // With schema: validate against it
   const validateResult = schema.safeParse(parsed);
 
   if (!validateResult.success) {
