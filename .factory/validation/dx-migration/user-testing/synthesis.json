@@ -1,0 +1,23 @@
+{
+  "milestone": "dx-migration",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-DX-001",
+    "VAL-DX-002",
+    "VAL-DX-003",
+    "VAL-DX-004",
+    "VAL-DX-005",
+    "VAL-CROSS-002"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
