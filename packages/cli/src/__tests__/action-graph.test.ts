@@ -281,6 +281,79 @@ describe("Edge cases (VAL-GRAPH-003)", () => {
     expect(graph.nodes.length).toBe(0);
     expect(graph.edges.length).toBe(0);
   });
+
+  test("nested subcommands in groups are traversed", () => {
+    const program = new Command("cli");
+
+    // Create a group command with nested subcommands
+    const group = new Command("check").description("Check commands");
+    group.addCommand(
+      command("tsdoc")
+        .description("Check TSDoc")
+        .relatedTo("lint", { description: "Run lint" })
+        .action(async () => {})
+        .build()
+    );
+    group.addCommand(
+      command("deps")
+        .description("Check dependencies")
+        .action(async () => {})
+        .build()
+    );
+    program.addCommand(group);
+
+    // Also add a top-level command
+    program.addCommand(
+      command("lint")
+        .description("Lint")
+        .action(async () => {})
+        .build()
+    );
+
+    const graph = buildActionGraph(program);
+
+    // Should include nested subcommands as full paths
+    expect(graph.nodes).toContain("check tsdoc");
+    expect(graph.nodes).toContain("check deps");
+    expect(graph.nodes).toContain("lint");
+
+    // Should include edges from nested subcommands using full paths
+    expect(
+      graph.edges.some((e) => e.from === "check tsdoc" && e.to === "lint")
+    ).toBe(true);
+  });
+
+  test("deeply nested subcommands are traversed", () => {
+    const program = new Command("cli");
+
+    const level1 = new Command("check").description("Check commands");
+    const level2 = new Command("deep").description("Deep group");
+    level2.addCommand(
+      command("leaf")
+        .description("Leaf command")
+        .relatedTo("other")
+        .action(async () => {})
+        .build()
+    );
+    level1.addCommand(level2);
+    program.addCommand(level1);
+
+    program.addCommand(
+      command("other")
+        .description("Other")
+        .action(async () => {})
+        .build()
+    );
+
+    const graph = buildActionGraph(program);
+
+    // Should find nested leaf command with full path
+    expect(graph.nodes).toContain("check deep leaf");
+    expect(graph.nodes).toContain("other");
+    expect(
+      graph.edges.some((e) => e.from === "check deep leaf" && e.to === "other")
+    ).toBe(true);
+  });
 });
 
 // =============================================================================
