@@ -821,6 +821,7 @@ describe("Full builder chain E2E", () => {
           error: {
             category: "not_found",
             message: 'Environment "invalid" not found',
+            retryable: false,
           },
           hints: [
             {

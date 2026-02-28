@@ -26,7 +26,11 @@ import type {
   OutfitterError,
   ProgressCallback,
 } from "@outfitter/contracts";
-import { exitCodeMap, safeStringify } from "@outfitter/contracts";
+import {
+  errorCategoryMeta,
+  exitCodeMap,
+  safeStringify,
+} from "@outfitter/contracts";
 import type { Result } from "better-result";
 
 import { detectMode, formatHuman, output } from "./output.js";
@@ -58,6 +62,8 @@ export interface SuccessEnvelope<T = unknown> {
  * Structured error envelope wrapping a command failure.
  *
  * The `hints` field is absent (not an empty array) when there are no hints.
+ * The `retryable` field indicates whether the error is transient and safe to retry.
+ * The `retry_after` field is only present for rate_limit errors with a known delay.
  */
 export interface ErrorEnvelope {
   readonly ok: false;
@@ -65,6 +71,8 @@ export interface ErrorEnvelope {
   readonly error: {
     readonly category: ErrorCategory;
     readonly message: string;
+    readonly retryable: boolean;
+    readonly retry_after?: number;
   };
   readonly hints?: CLIHint[];
 }
@@ -127,11 +135,15 @@ export function createSuccessEnvelope<T>(
  * Create an error envelope wrapping a command failure.
  *
  * The `hints` field is omitted when hints is undefined, null, or empty.
+ * The `retryable` field is derived from the error category metadata.
+ * The `retry_after` field is included only when `retryAfterSeconds` is provided
+ * (typically from a `RateLimitError`).
  *
  * @param command - Command name
  * @param category - Error category from the taxonomy
  * @param message - Human-readable error message
  * @param hints - Optional CLI hints for error recovery
+ * @param retryAfterSeconds - Optional retry delay in seconds (from RateLimitError)
  * @returns An error envelope
  *
  * @example
@@ -139,18 +151,41 @@ export function createSuccessEnvelope<T>(
  * const envelope = createErrorEnvelope("deploy", "validation", "Missing env", [
  *   { description: "Specify env", command: "deploy --env prod" },
  * ]);
+ * // envelope.error.retryable === false
+ *
+ * const rateLimitEnvelope = createErrorEnvelope(
+ *   "fetch",
+ *   "rate_limit",
+ *   "Too many requests",
+ *   undefined,
+ *   60
+ * );
+ * // rateLimitEnvelope.error.retryable === true, retry_after === 60
  * ```
  */
 export function createErrorEnvelope(
   command: string,
   category: ErrorCategory,
   message: string,
-  hints?: CLIHint[]
+  hints?: CLIHint[],
+  retryAfterSeconds?: number
 ): ErrorEnvelope {
+  const meta = errorCategoryMeta(category);
+
+  const errorField: ErrorEnvelope["error"] =
+    retryAfterSeconds != null
+      ? {
+          category,
+          message,
+          retryable: meta.retryable,
+          retry_after: retryAfterSeconds,
+        }
+      : { category, message, retryable: meta.retryable };
+
   const envelope: ErrorEnvelope = {
     ok: false,
     command,
-    error: { category, message },
+    error: errorField,
   };
 
   // Only add hints if non-empty — absent, not empty array
@@ -307,6 +342,22 @@ function extractMessage(error: unknown): string {
 }
 
 /**
+ * Extract retryAfterSeconds from an error object (if present).
+ * Works with RateLimitError instances and duck-typed errors.
+ */
+function extractRetryAfterSeconds(error: unknown): number | undefined {
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    "retryAfterSeconds" in error &&
+    typeof (error as Record<string, unknown>)["retryAfterSeconds"] === "number"
+  ) {
+    return (error as Record<string, unknown>)["retryAfterSeconds"] as number;
+  }
+  return undefined;
+}
+
+/**
  * Get exit code for an error category.
  */
 function getExitCode(category: ErrorCategory): number {
@@ -457,6 +508,7 @@ export async function runHandler<
       const error = err instanceof Error ? err : new Error(String(err));
       const category = extractCategory(error);
       const message = extractMessage(error);
+      const retryAfter = extractRetryAfterSeconds(error);
 
       const errorHints = onErrorFn
         ? safeCallHintFn(() => onErrorFn(error, inputValue))
@@ -466,7 +518,8 @@ export async function runHandler<
         commandName,
         category,
         message,
-        errorHints
+        errorHints,
+        retryAfter
       );
 
       if (isStreaming) {
@@ -496,6 +549,7 @@ export async function runHandler<
     const error = err instanceof Error ? err : new Error(String(err));
     const category = extractCategory(error);
     const message = extractMessage(error);
+    const retryAfter = extractRetryAfterSeconds(error);
 
     const errorHints = onErrorFn
       ? safeCallHintFn(() => onErrorFn(error, inputValue))
@@ -505,7 +559,8 @@ export async function runHandler<
       commandName,
       category,
       message,
-      errorHints
+      errorHints,
+      retryAfter
     );
 
     if (isStreaming) {
@@ -562,6 +617,7 @@ export async function runHandler<
     const error = result.error;
     const category = extractCategory(error);
     const message = extractMessage(error);
+    const retryAfter = extractRetryAfterSeconds(error);
 
     const errorHints = onErrorFn
       ? safeCallHintFn(() => onErrorFn(error, inputValue))
@@ -571,7 +627,8 @@ export async function runHandler<
       commandName,
       category,
       message,
-      errorHints
+      errorHints,
+      retryAfter
     );
 
     if (isStreaming) {
