@@ -1,0 +1,28 @@
+{
+  "featureId": "os-354-progress-types",
+  "reviewedAt": "2026-02-28T14:49:58Z",
+  "commitId": "04ab6c15db32b832fb76e7c2b82d65b841337405",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation fulfills OS-354 part 1 and VAL-STREAM-006: HandlerContext now has optional progress callback, StreamEvent/ProgressCallback types are defined and exported, createContext supports progress, and focused tests cover transport-agnostic handler behavior with and without streaming. Changeset bump is minor as required.",
+    "issues": [
+      {
+        "file": "packages/mcp/src/__tests__/progress.test.ts",
+        "line": 29,
+        "severity": "non_blocking",
+        "description": "Temporary `as unknown as ProgressReporter` casts were introduced in MCP progress tests (also at lines 89, 132, 173 in this commit), which bypasses static type guarantees for the progress API until the MCP adapter migration is completed."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The `library-worker` skill's export verification guidance is inaccurate for type-only exports.",
+      "evidence": "`.factory/skills/library-worker/SKILL.md` step 6 says export verification should print `function` (or `object` for types) and `undefined` means missing export, but this feature's handoff records `ProgressCallback: undefined` as expected because type aliases are erased at runtime."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass. The feature cleanly adds transport-agnostic progress types and optional `ctx.progress` in contracts with appropriate tests and a minor changeset. One non-blocking temporary MCP test cast was identified, and one skill-doc guidance gap was observed."
+}
