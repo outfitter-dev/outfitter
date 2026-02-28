@@ -1,0 +1,82 @@
+{
+  "groupId": "metadata-annotations",
+  "testedAt": "2026-02-28T16:04:27Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": ["shell", "bun test", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-SAFE-004",
+      "title": "Read-only and idempotent metadata on commands",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test`",
+          "expected": "CLI package tests pass, including metadata coverage",
+          "observed": "Passed (742 pass, 0 fail), including metadata-related tests."
+        },
+        {
+          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/metadata.test.ts`",
+          "expected": "Targeted metadata tests pass and verify command-tree JSON metadata fields",
+          "observed": "Passed (12 pass, 0 fail), including assertions that readOnly/idempotent appear in command tree output and defaults omit metadata."
+        },
+        {
+          "action": "Inspect `packages/cli/src/__tests__/metadata.test.ts`, `packages/cli/src/command.ts`, and `packages/cli/src/hints.ts`",
+          "expected": "Tests and implementation confirm metadata declaration and inclusion in root command tree JSON",
+          "observed": "Confirmed: `.readOnly()`/`.idempotent()` store metadata on command (`__metadata`) and `buildCommandTree()` includes metadata in nodes."
+        },
+        {
+          "action": "Run command-tree JSON inspection via Bun eval",
+          "expected": "Self-documenting root command JSON contains metadata fields",
+          "observed": "Output: `{\"name\":\"test-cli\",\"version\":\"1.0.0\",\"commands\":[{\"name\":\"list\",\"description\":\"List resources\",\"metadata\":{\"readOnly\":true,\"idempotent\":true}}]}`"
+        }
+      ],
+      "evidence": {
+        "testOutput": "`packages/cli` full suite: 742 pass, 0 fail. Targeted metadata test file: 12 pass, 0 fail.",
+        "commandTreeJsonInspection": "Root command JSON includes `metadata.readOnly: true` and `metadata.idempotent: true` for declared command.",
+        "codeInspection": [
+          "packages/cli/src/__tests__/metadata.test.ts",
+          "packages/cli/src/command.ts",
+          "packages/cli/src/hints.ts"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-SAFE-005",
+      "title": "Safety metadata maps to MCP tool annotations",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test`",
+          "expected": "MCP package tests pass, including metadata annotation mapping tests",
+          "observed": "Passed (181 pass, 0 fail), including `metadata-annotations.test.ts`."
+        },
+        {
+          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test src/__tests__/metadata-annotations.test.ts`",
+          "expected": "Targeted tests verify readOnly -> readOnlyHint and idempotent -> idempotentHint",
+          "observed": "Passed (6 pass, 0 fail), covering readOnly mapping, idempotent mapping, combined mapping, and no-annotation cases."
+        },
+        {
+          "action": "Inspect `packages/mcp/src/__tests__/metadata-annotations.test.ts` and `packages/mcp/src/actions.ts`",
+          "expected": "Test and implementation confirm mapping in tool listing path",
+          "observed": "Confirmed: `buildAnnotations()` maps `mcp.readOnly === true` to `annotations.readOnlyHint = true` and `mcp.idempotent === true` to `annotations.idempotentHint = true`, and `buildMcpTools()` includes those annotations in listed tools."
+        }
+      ],
+      "evidence": {
+        "testOutput": "`packages/mcp` full suite: 181 pass, 0 fail. Targeted metadata-annotations test file: 6 pass, 0 fail.",
+        "mcpToolAnnotationAssertion": "`metadata-annotations.test.ts` asserts `tools[0].annotations.readOnlyHint` and `tools[0].annotations.idempotentHint` values from `buildMcpTools(registry)` output.",
+        "codeInspection": [
+          "packages/mcp/src/__tests__/metadata-annotations.test.ts",
+          "packages/mcp/src/actions.ts"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions (VAL-SAFE-004, VAL-SAFE-005): both passed. CLI metadata signals are present in root command tree JSON, and MCP annotation mapping correctly sets readOnlyHint/idempotentHint in listed tools."
+}

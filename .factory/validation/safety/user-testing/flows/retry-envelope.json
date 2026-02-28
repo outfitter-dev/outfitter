@@ -1,0 +1,72 @@
+{
+  "groupId": "retry-envelope",
+  "testedAt": "2026-02-28T16:04:43Z",
+  "credentials": {
+    "account": "not-applicable-shell",
+    "namespace": "not-applicable-shell"
+  },
+  "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-SAFE-006",
+      "title": "Error envelopes expose retryability and retry_after",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run package test suite: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test",
+          "expected": "Envelope tests covering retryable and retry_after behavior pass",
+          "observed": "CLI suite passed (742 pass, 0 fail), including createErrorEnvelope/runHandler tests for retryable and retry_after fields"
+        },
+        {
+          "action": "Run package test suite: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test",
+          "expected": "Contracts tests validating retryability metadata pass",
+          "observed": "Contracts suite passed (447 pass, 0 fail), including retryableMap and errorCategoryMeta tests across all categories"
+        },
+        {
+          "action": "Inspect CLI envelope tests in packages/cli/src/__tests__/envelope.test.ts",
+          "expected": "Tests verify retryable boolean, retry_after presence for rate-limit with delay, and retry_after omission otherwise",
+          "observed": "Found explicit tests for all error categories' retryable values, retry_after present with retryAfterSeconds, and retry_after omitted for non-delay errors"
+        },
+        {
+          "action": "Inspect envelope construction in packages/cli/src/envelope.ts",
+          "expected": "Error envelope includes retryable from category metadata and optional retry_after derived from retryAfterSeconds",
+          "observed": "createErrorEnvelope() uses errorCategoryMeta(category).retryable and conditionally adds retry_after only when retryAfterSeconds is provided; runHandler extracts retryAfterSeconds from error and passes it into createErrorEnvelope()"
+        },
+        {
+          "action": "Inspect contracts metadata in packages/contracts/src/errors.ts and tests in packages/contracts/src/__tests__/error-enrichment.test.ts",
+          "expected": "retryable map and metadata helper define/validate category retryability used by envelope layer",
+          "observed": "retryableMap defines booleans for all 10 categories (timeout/rate_limit/network true; others false), errorCategoryMeta() returns retryable, and tests assert map completeness plus expected transient/permanent category behavior"
+        },
+        {
+          "action": "Run import verification from package directories",
+          "expected": "Relevant retry/envelope APIs are importable",
+          "observed": "bun -e checks succeeded: contracts exports errorCategoryMeta/retryableMap/RateLimitError; cli envelope module exports createErrorEnvelope/runHandler"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "cd packages/cli && bun test -> 742 pass, 0 fail; includes createErrorEnvelope retryable tests for validation/not_found/conflict/permission/timeout/rate_limit/network/internal/auth/cancelled",
+          "cd packages/cli && bun test -> includes createErrorEnvelope retry_after tests: present when retryAfterSeconds provided; omitted otherwise",
+          "cd packages/cli && bun test -> includes runHandler retry envelope tests for validation/timeout/network/rate_limit(with and without retryAfterSeconds)/not_found",
+          "cd packages/contracts && bun test -> 447 pass, 0 fail; includes retryableMap and errorCategoryMeta tests",
+          "cd packages/contracts && bun -e import check -> { errorCategoryMeta: 'function', retryableMap: 'object', RateLimitError: 'function' }",
+          "cd packages/cli && bun -e import check -> { createErrorEnvelope: 'function', runHandler: 'function' }"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)",
+        "codeReferences": [
+          "packages/cli/src/envelope.ts: ErrorEnvelope type includes error.retryable and optional error.retry_after",
+          "packages/cli/src/envelope.ts: createErrorEnvelope() derives retryable from errorCategoryMeta(category)",
+          "packages/cli/src/envelope.ts: createErrorEnvelope() adds retry_after only when retryAfterSeconds != null",
+          "packages/cli/src/envelope.ts: runHandler() extracts retryAfterSeconds from error and forwards it into createErrorEnvelope()",
+          "packages/contracts/src/errors.ts: retryableMap defines retryability for all ErrorCategory values",
+          "packages/contracts/src/errors.ts: errorCategoryMeta() returns retryable from retryableMap"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-SAFE-006): 1 passed, 0 failed, 0 blocked, 0 skipped."
+}
