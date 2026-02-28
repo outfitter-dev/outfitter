@@ -223,6 +223,51 @@ export type JqFlags = {
   readonly jq: string | undefined;
 };
 
+// =============================================================================
+// Stream Preset
+// =============================================================================
+
+/**
+ * Resolved stream flags from CLI input.
+ */
+// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+export type StreamFlags = {
+  /** Whether NDJSON streaming mode is enabled */
+  readonly stream: boolean;
+};
+
+/**
+ * NDJSON streaming flag preset.
+ *
+ * Adds: `--stream`
+ * Resolves: `{ stream: boolean }`
+ *
+ * When enabled, the CLI writes progress events as newline-delimited JSON
+ * (NDJSON) to stdout. The final line is the standard command envelope.
+ *
+ * `--stream` is orthogonal to output mode — it controls delivery, not
+ * serialization. Works alongside `--output human|json|jsonl` and env vars.
+ */
+export function streamPreset(): FlagPreset<StreamFlags> {
+  return createPreset({
+    id: "stream",
+    options: [
+      {
+        flags: "--stream",
+        description: "Stream progress events as NDJSON to stdout",
+        defaultValue: false,
+      },
+    ],
+    resolve: (flags) => ({
+      stream: Boolean(flags["stream"]),
+    }),
+  });
+}
+
+// =============================================================================
+// JQ Preset
+// =============================================================================
+
 /**
  * JQ expression flag preset.
  *
