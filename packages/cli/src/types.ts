@@ -225,6 +225,28 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   destructive(isDest: boolean): this;
 
   /**
+   * Mark the command as idempotent.
+   *
+   * When `true`, indicates that calling this command multiple times with the
+   * same input produces the same effect (PUT-like semantics). This metadata
+   * is included in the self-documenting command tree (JSON mode) and maps to
+   * `idempotentHint` in MCP tool annotations.
+   *
+   * Default (no `.idempotent()` call) is non-idempotent.
+   *
+   * @param isIdempotent - Whether the command is idempotent
+   *
+   * @example
+   * ```typescript
+   * command("set")
+   *   .description("Set a configuration value")
+   *   .idempotent(true)
+   *   .action(async ({ flags }) => { ... });
+   * ```
+   */
+  idempotent(isIdempotent: boolean): this;
+
+  /**
    * Set a success hint function.
    *
    * The hint function is stored on the builder and invoked at output time
@@ -295,6 +317,27 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
 
   /** Add a command option/flag */
   option(flags: string, description: string, defaultValue?: unknown): this;
+
+  /**
+   * Mark the command as read-only.
+   *
+   * When `true`, indicates that this command does not modify any state.
+   * This metadata is included in the self-documenting command tree (JSON mode)
+   * and maps to `readOnlyHint` in MCP tool annotations.
+   *
+   * Default (no `.readOnly()` call) is non-read-only.
+   *
+   * @param isReadOnly - Whether the command is read-only
+   *
+   * @example
+   * ```typescript
+   * command("list")
+   *   .description("List all resources")
+   *   .readOnly(true)
+   *   .action(async ({ flags }) => { ... });
+   * ```
+   */
+  readOnly(isReadOnly: boolean): this;
 
   /**
    * Apply a preset to the command.
