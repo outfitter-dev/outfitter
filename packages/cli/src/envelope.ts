@@ -26,7 +26,7 @@ import type {
   OutfitterError,
   ProgressCallback,
 } from "@outfitter/contracts";
-import { exitCodeMap } from "@outfitter/contracts";
+import { exitCodeMap, safeStringify } from "@outfitter/contracts";
 import type { Result } from "better-result";
 
 import { detectMode, formatHuman, output } from "./output.js";
@@ -551,7 +551,7 @@ function outputErrorEnvelope(
   const exitCode = getExitCode(envelope.error.category);
 
   if (isJsonMode) {
-    process.stderr.write(`${JSON.stringify(envelope)}\n`);
+    process.stderr.write(`${safeStringify(envelope)}\n`);
   } else {
     const formatted = formatEnvelopeHuman(envelope);
     if (formatted.stderr) {

@@ -18,6 +18,7 @@
 import type { ProgressCallback, StreamEvent } from "@outfitter/contracts";
 
 import type { CommandEnvelope } from "./envelope.js";
+import { cliStringify } from "./output.js";
 
 // =============================================================================
 // Types
@@ -43,7 +44,7 @@ export type StreamLine = StreamEvent | CommandEnvelope;
  * @param data - Any JSON-serializable value to write as a single NDJSON line
  */
 export function writeNdjsonLine(data: unknown): void {
-  process.stdout.write(`${JSON.stringify(data)}\n`);
+  process.stdout.write(`${cliStringify(data)}\n`);
 }
 
 /**
