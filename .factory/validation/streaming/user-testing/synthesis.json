@@ -1,0 +1,25 @@
+{
+  "milestone": "streaming",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-STREAM-001",
+    "VAL-STREAM-002",
+    "VAL-STREAM-003",
+    "VAL-STREAM-004",
+    "VAL-STREAM-005",
+    "VAL-STREAM-006",
+    "VAL-STREAM-007",
+    "VAL-STREAM-008"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
