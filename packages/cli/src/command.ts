@@ -324,7 +324,6 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     const contextFactory = this.ctxFactory;
     const presets = [...this.schemaPresets];
     this.applySchemaFlags();
-    this.applyDestructiveFlag();
 
     // Build a merged validation schema that includes both .input() fields
     // and schema preset fields. This ensures preset Zod fragments are

@@ -910,6 +910,62 @@ describe("createErrorEnvelope() retry_after field", () => {
     expect("retry_after" in envelope.error).toBe(false);
     expect(envelope.error.retryable).toBe(false);
   });
+
+  // --- Defense-in-depth: category guard for retry_after (edge case #3) ---
+
+  test("omits retry_after for non-rate-limit errors even if retryAfterSeconds is provided", () => {
+    // Defense-in-depth: if retryAfterSeconds somehow gets passed for a non-rate_limit error,
+    // the envelope should NOT include retry_after
+    const envelope = createErrorEnvelope(
+      "test",
+      "timeout",
+      "Timed out",
+      undefined,
+      30
+    );
+
+    expect("retry_after" in envelope.error).toBe(false);
+    expect(envelope.error.retryable).toBe(true);
+  });
+
+  test("omits retry_after for validation errors even if retryAfterSeconds is provided", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "validation",
+      "Bad input",
+      undefined,
+      60
+    );
+
+    expect("retry_after" in envelope.error).toBe(false);
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("omits retry_after for internal errors even if retryAfterSeconds is provided", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "internal",
+      "Server error",
+      undefined,
+      10
+    );
+
+    expect("retry_after" in envelope.error).toBe(false);
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retry_after for rate_limit when retryAfterSeconds is provided", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "rate_limit",
+      "Too many requests",
+      undefined,
+      60
+    );
+
+    expect(envelope.error.retry_after).toBe(60);
+    expect(envelope.error.retryable).toBe(true);
+  });
 });
 
 // =============================================================================

@@ -203,6 +203,53 @@ describe("CommandBuilder.destructive()", () => {
     expect(cmd.options.map((o) => o.long)).toContain("--dry-run");
     expect(cmd.options.map((o) => o.long)).toContain("--force");
   });
+
+  // --- Order-agnostic builder tests (edge case #1) ---
+
+  test(".destructive(false) after .action() correctly removes --dry-run flag", () => {
+    const cmd = command("delete")
+      .description("Delete resources")
+      .destructive(true)
+      .action(async () => {})
+      .destructive(false)
+      .build();
+
+    const optionNames = cmd.options.map((o) => o.long);
+    expect(optionNames).not.toContain("--dry-run");
+  });
+
+  test(".destructive(true) after .action() correctly adds --dry-run flag", () => {
+    const cmd = command("delete")
+      .description("Delete resources")
+      .action(async () => {})
+      .destructive(true)
+      .build();
+
+    const optionNames = cmd.options.map((o) => o.long);
+    expect(optionNames).toContain("--dry-run");
+  });
+
+  test("builder ordering is agnostic — .destructive() before or after .action() yields same result", () => {
+    // destructive(true) before action
+    const cmdBefore = command("delete")
+      .description("Delete resources")
+      .destructive(true)
+      .action(async () => {})
+      .build();
+
+    // destructive(true) after action
+    const cmdAfter = command("delete")
+      .description("Delete resources")
+      .action(async () => {})
+      .destructive(true)
+      .build();
+
+    const beforeFlags = cmdBefore.options.map((o) => o.long);
+    const afterFlags = cmdAfter.options.map((o) => o.long);
+
+    expect(beforeFlags).toContain("--dry-run");
+    expect(afterFlags).toContain("--dry-run");
+  });
 });
 
 // =============================================================================
@@ -294,6 +341,56 @@ describe("runHandler() dry-run hint", () => {
       (h: { command: string }) => !h.command.includes("--dry-run")
     );
     expect(dryRunHint).toBeDefined();
+  });
+
+  // --- --dry-run=true variant tests (edge case #2) ---
+
+  test("buildDryRunHint strips --dry-run=true variant", async () => {
+    process.argv = ["node", "test", "delete", "--id", "abc", "--dry-run=true"];
+
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "delete",
+        handler: async () => Result.ok({ preview: true }),
+        format: "json",
+        dryRun: true,
+      });
+    });
+
+    const envelope = JSON.parse(captured.stdout.trim());
+    expect(envelope.hints).toBeDefined();
+
+    const dryRunHint = envelope.hints.find(
+      (h: { description: string }) =>
+        h.description.toLowerCase().includes("without") ||
+        h.description.toLowerCase().includes("execute")
+    );
+    expect(dryRunHint).toBeDefined();
+    expect(dryRunHint.command).not.toContain("--dry-run");
+  });
+
+  test("buildDryRunHint strips --dry-run=false variant", async () => {
+    process.argv = ["node", "test", "delete", "--id", "abc", "--dry-run=false"];
+
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "delete",
+        handler: async () => Result.ok({ preview: true }),
+        format: "json",
+        dryRun: true,
+      });
+    });
+
+    const envelope = JSON.parse(captured.stdout.trim());
+    expect(envelope.hints).toBeDefined();
+
+    const dryRunHint = envelope.hints.find(
+      (h: { description: string }) =>
+        h.description.toLowerCase().includes("without") ||
+        h.description.toLowerCase().includes("execute")
+    );
+    expect(dryRunHint).toBeDefined();
+    expect(dryRunHint.command).not.toContain("--dry-run");
   });
 });
 
