@@ -899,10 +899,6 @@ export interface McpServer {
  * Includes MCP-specific information in addition to standard HandlerContext.
  */
 export interface McpHandlerContext extends HandlerContext {
-  /** Progress reporter, present when client provides a progressToken */
-  progress?: {
-    report(progress: number, total?: number, message?: string): void;
-  };
   /** The name of the tool being invoked */
   toolName?: string;
 }

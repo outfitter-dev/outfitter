@@ -8,11 +8,8 @@ import { describe, expect, it } from "bun:test";
 import { Result } from "@outfitter/contracts";
 import { z } from "zod";
 
-import {
-  createMcpServer,
-  defineTool,
-  type ProgressReporter,
-} from "../index.js";
+import { createMcpServer, defineTool } from "../index.js";
+import type { ProgressReporter } from "../types.js";
 
 describe("Progress Tokens", () => {
   it("handler receives progress reporter when token present", async () => {
@@ -29,7 +26,10 @@ describe("Progress Tokens", () => {
         description: "A long-running task with progress reporting",
         inputSchema: z.object({}),
         handler: async (_input, ctx) => {
-          receivedProgress = ctx.progress;
+          // TODO: os-354-mcp-progress will adapt to ProgressCallback/StreamEvent
+          receivedProgress = ctx.progress as unknown as
+            | ProgressReporter
+            | undefined;
           return Result.ok({ done: true });
         },
       })
@@ -86,7 +86,12 @@ describe("Progress Tokens", () => {
         description: "Task that reports progress updates",
         inputSchema: z.object({}),
         handler: async (_input, ctx) => {
-          ctx.progress?.report(50, 100, "Halfway done");
+          // TODO: os-354-mcp-progress will adapt to ProgressCallback/StreamEvent
+          (ctx.progress as unknown as ProgressReporter | undefined)?.report(
+            50,
+            100,
+            "Halfway done"
+          );
           return Result.ok({ done: true });
         },
       })
@@ -124,7 +129,10 @@ describe("Progress Tokens", () => {
         description: "Task without progress token support",
         inputSchema: z.object({}),
         handler: async (_input, ctx) => {
-          receivedProgress = ctx.progress;
+          // TODO: os-354-mcp-progress will adapt to ProgressCallback/StreamEvent
+          receivedProgress = ctx.progress as unknown as
+            | ProgressReporter
+            | undefined;
           return Result.ok({ done: true });
         },
       })
@@ -162,10 +170,14 @@ describe("Progress Tokens", () => {
         description: "Task with multiple progress reports",
         inputSchema: z.object({}),
         handler: async (_input, ctx) => {
-          ctx.progress?.report(25, 100);
-          ctx.progress?.report(50, 100);
-          ctx.progress?.report(75, 100);
-          ctx.progress?.report(100, 100, "Complete");
+          // TODO: os-354-mcp-progress will adapt to ProgressCallback/StreamEvent
+          const reporter = ctx.progress as unknown as
+            | ProgressReporter
+            | undefined;
+          reporter?.report(25, 100);
+          reporter?.report(50, 100);
+          reporter?.report(75, 100);
+          reporter?.report(100, 100, "Complete");
           return Result.ok({ done: true });
         },
       })
