@@ -1,0 +1,15 @@
+{
+  "featureId": "os-353-example-flag",
+  "reviewedAt": "2026-02-28T02:36:51Z",
+  "commitId": "797ab1bb",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Reviewed handoff, transcript skeleton, and commit 797ab1bb across actions, init pipeline, engine copy flow, tests, and example preset templates. Implementation fully covers the feature scope: --example is wired through init CLI/action input, validated per preset, overlays are applied during scaffold planning/execution, both cli-todo and mcp-files examples are added with the required v0.5 patterns, and a minor changeset was included.",
+    "issues": []
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "PASS: Feature os-353-example-flag meets the described behavior and expected outcomes. No blocking or non-blocking defects were identified in the reviewed implementation, and no additional shared-state gaps were observed from the available evidence."
+}

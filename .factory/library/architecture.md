@@ -42,7 +42,7 @@ Current CommandBuilder API (packages/cli/src/command.ts):
 
 Current `.action()` handler receives `{ args, flags, command }`. `.preset()` accepts `FlagPreset` with options array and resolve function.
 
-v0.5 adds: `.input(schema)`, `.context(factory)`, `.hints(fn)`, `.onError(fn)` + `runHandler()` bridge + `output.envelope()`.
+v0.5 adds: `.input(schema)`, `.context(factory)`, `.hints(fn)`, `.onError(fn)` + `runHandler()` bridge + `createSuccessEnvelope()` / `createErrorEnvelope()` (in `packages/cli/src/envelope.ts`).
 
 Key design: `.input(schema)` auto-derives Commander flags from Zod schema (80% case). Explicit declarations override/supplement. `.context(factory)` receives typed input post-validation. `.hints()/.onError()` are transport-local (not in handler).
 

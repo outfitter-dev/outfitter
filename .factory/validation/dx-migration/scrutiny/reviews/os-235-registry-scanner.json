@@ -1,0 +1,34 @@
+{
+  "featureId": "os-235-registry-scanner",
+  "reviewedAt": "2026-02-28T02:35:56Z",
+  "commitId": "50ac09a8b05425eb8039bdd86f3761e9cdc5de02",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature adds a new check action, command scanner, tests, and a minor changeset, but two acceptance requirements are not fully met: the scanner does not validate against actual action-registry entries, and unregistered commands are not reported with per-item file paths.",
+    "issues": [
+      {
+        "file": "apps/outfitter/src/commands/check-action-registry.ts",
+        "line": 111,
+        "severity": "blocking",
+        "description": "Registry completeness is inferred from imports in `apps/outfitter/src/actions/*.ts` (`actionFiles = listTsFiles(actionsDir)` + `extractCommandImports`) rather than from the real registry composition in `apps/outfitter/src/actions.ts` (`createActionRegistry().add(...)`). A command can be marked registered if imported by an action file even when that action is never added to `outfitterActions`, so the check does not reliably enforce 'represented in the action registry' (VAL-DX-001)."
+      },
+      {
+        "file": "apps/outfitter/src/commands/check-action-registry.ts",
+        "line": 191,
+        "severity": "blocking",
+        "description": "The requirement calls for reporting unregistered commands with file paths, but output emits only basenames (e.g., `jq-utils.ts`), and the structured `unregistered` field is also basename-only. This omits the per-command path detail requested in the feature description."
+      },
+      {
+        "file": "apps/outfitter/src/__tests__/check-action-registry.test.ts",
+        "line": 52,
+        "severity": "non_blocking",
+        "description": "Tests codify import-based registration semantics (`registered array contains command files imported by actions`) and do not include a regression case where an action file imports a command but the action is missing from `outfitterActions`; this leaves the core false-negative scenario untested."
+      }
+    ]
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Review failed: the implementation adds command scanning and wiring, but it currently checks action-file imports instead of true registry entries and does not report unregistered commands as file paths, so the feature is not fully compliant with VAL-DX-001 expectations."
+}
