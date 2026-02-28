@@ -1,0 +1,28 @@
+{
+  "featureId": "cross-feature-integration",
+  "reviewedAt": "2026-02-28T16:28:49Z",
+  "commitId": "7389c6f9",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Commit adds a dedicated cross-feature integration suite covering VAL-CROSS-001 through VAL-CROSS-004 with assertions for streamed NDJSON events, dry-run hinting, retryable error metadata + exit codes, truncation metadata/pagination hints, and coexistence of tier-4 graph hints with safety metadata. Coverage matches the feature description overall.",
+    "issues": [
+      {
+        "file": "packages/cli/src/__tests__/cross-feature-integration.test.ts",
+        "line": 241,
+        "severity": "non_blocking",
+        "description": "The state-preservation check hardcodes `const isDryRun = true` inside the handler, so it does not exercise actual dry-run flag plumbing; a regression in how `--dry-run` is propagated could slip past this specific assertion."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`library-worker` requires a strict red phase ('write failing tests first'), but this feature is an integration-validation test-only task where behavior already exists and tests are expected to pass immediately. The transcript shows tests were authored and then passed on first run, yet `skillFeedback.followedProcedure` remained true. The skill could explicitly document test-only exceptions to avoid false procedural mismatch.",
+      "evidence": "Skill procedure section 'Write Failing Tests (Red Phase)' in .factory/skills/library-worker/SKILL.md vs transcript skeleton for workerSessionId 7d4043a1-59f8-4ed9-b96f-89e02d0953a3 showing first targeted run of cross-feature tests was passing."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit 7389c6f9 and associated worker transcript/handoff for cross-feature-integration. The new 21-test suite substantively covers all four VAL-CROSS objectives; no blocking defects found. One non-blocking test-strength gap was noted around simulated dry-run state preservation, plus one skill-procedure documentation gap for test-only tasks."
+}
