@@ -1,7 +1,7 @@
 {
   "milestone": "streaming",
-  "round": 1,
-  "status": "fail",
+  "round": 2,
+  "status": "pass",
   "validatorsRun": {
     "test": {
       "passed": true,
@@ -23,42 +23,19 @@
     }
   },
   "reviewsSummary": {
-    "total": 3,
-    "passed": 2,
-    "failed": 1,
-    "failedFeatures": ["os-354-cli-ndjson"]
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
   },
-  "blockingIssues": [
-    {
-      "featureId": "os-354-cli-ndjson",
-      "severity": "blocking",
-      "description": "NDJSON streaming adapter (packages/cli/src/streaming.ts:46) uses raw JSON.stringify in writeNdjsonLine(), bypassing the CLI's safeStringify path used for non-stream JSON output. safeStringify handles BigInt conversion, circular reference detection, and sensitive data redaction. While stream events themselves are well-typed simple objects unlikely to trigger these cases, the terminal envelope (which flows through the same writeNdjsonLine) could contain handler result data that should be redacted. This is a serialization parity gap between stream and non-stream output paths.",
-      "file": "packages/cli/src/streaming.ts",
-      "line": 46,
-      "suggestedFix": "Replace JSON.stringify with safeStringify (imported from @outfitter/contracts/serialization or the CLI's local wrapper in output.ts) in writeNdjsonLine(). This ensures consistent redaction and BigInt/circular handling in stream mode."
-    }
-  ],
-  "nonBlockingIssues": [
-    {
-      "featureId": "os-354-cli-ndjson",
-      "severity": "non_blocking",
-      "description": "Streaming context injection in envelope.ts:451 clones rawContext via object spread ({ ...rawContext, progress }), which drops prototype chain and non-enumerable properties. Class/prototype-based contexts can lose behavior when stream is enabled.",
-      "file": "packages/cli/src/envelope.ts",
-      "line": 451
-    },
-    {
-      "featureId": "os-354-progress-types",
-      "severity": "non_blocking",
-      "description": "Temporary 'as unknown as ProgressReporter' casts in MCP progress tests (packages/mcp/src/__tests__/progress.test.ts lines 29, 89, 132, 173). These bypass static type guarantees but are expected to be cleaned up in os-354-mcp-progress.",
-      "file": "packages/mcp/src/__tests__/progress.test.ts"
-    }
-  ],
+  "blockingIssues": [],
+  "nonBlockingIssues": [],
   "appliedUpdates": [],
   "suggestedGuidanceUpdates": [
     {
       "target": "AGENTS.md",
       "suggestion": "Add convention: 'All new JSON/NDJSON serialization paths must use safeStringify (from @outfitter/contracts) rather than raw JSON.stringify, to ensure consistent BigInt handling, circular reference detection, and sensitive data redaction across all output modes including streaming.'",
-      "evidence": "os-354-cli-ndjson introduced writeNdjsonLine() with raw JSON.stringify while the non-stream output path uses safeStringify. Reviewer flagged this as a serialization parity gap.",
+      "evidence": "os-354-cli-ndjson introduced writeNdjsonLine() with raw JSON.stringify while the non-stream output path uses safeStringify. This was caught in round 1 review and fixed in fix-streaming-safe-stringify. Pattern-level guidance prevents recurrence.",
       "isSystemic": true
     },
     {
@@ -66,17 +43,14 @@
       "suggestion": "Update library-worker skill's export verification guidance (step 6) to clarify that type-only exports (type aliases, interfaces) are erased at runtime and will show 'undefined' in runtime checks — this is expected and not an indication of missing exports. The skill should recommend checking .d.ts output or TypeScript AST instead.",
       "evidence": "os-354-progress-types worker handoff records ProgressCallback: undefined as 'expected' because type aliases are erased at runtime, but the skill guidance implies undefined means missing export.",
       "isSystemic": true
-    }
-  ],
-  "rejectedObservations": [
-    {
-      "observation": "Testing guidance in .factory/library/user-testing.md is internally inconsistent for package-scoped tests (mixes bun test --filter and bun run test --filter)",
-      "reason": "The inconsistency is minor and both forms work. The library file already has a note at line 81 that says 'Use bun test ... not bun run test'. This is a pre-existing documentation quirk, not caused by streaming features. Not actionable for this milestone."
     },
     {
-      "observation": ".factory/services.yaml lists check: bun run check but mission guidance says this command crashes",
-      "reason": "Already documented in both .factory/library/user-testing.md line 87 and mission AGENTS.md as a known pre-existing issue. The services.yaml entry exists for when the bug is fixed. No change needed."
+      "target": "skills",
+      "suggestion": "Consider adding TDD enforcement verification in scrutiny reviews: the fix-streaming-safe-stringify worker marked followedProcedure: true in handoff but transcript shows implementation edits before test additions, violating the library-worker Red-Green-Refactor sequence.",
+      "evidence": "Transcript skeleton for worker session e3690af0-2520-4edc-9a64-39535e4d9462 shows Edit calls in packages/cli/src/streaming.ts and packages/cli/src/envelope.ts before test additions in packages/cli/src/__tests__/streaming.test.ts.",
+      "isSystemic": false
     }
   ],
-  "previousRound": null
+  "rejectedObservations": [],
+  "previousRound": ".factory/validation/streaming/scrutiny/synthesis.json (round 1)"
 }
