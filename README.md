@@ -37,6 +37,17 @@ Outfitter is opinionated infrastructure for the Bun ecosystem. The patterns assu
 
 **The core idea:** handlers are pure functions returning `Result` types. CLI and MCP are thin adapters over the same logic. Write the handler once, expose it everywhere.
 
+## v0.5 Highlights (Builder Pattern)
+
+- **Builder core (`@outfitter/cli`)** — `.input(schema)` auto-derives flags from Zod, `.context(factory)` adds typed async context, `.hints()` / `.onError()` keep hints transport-local, `createSchemaPreset()` enables schema-driven presets, and `runHandler()` + `output.envelope()` unify lifecycle/output/exit mapping.
+- **Agent-navigable UX (`@outfitter/cli`)** — self-documenting root command and tiered hint generation (command tree, error category recovery, schema-derived params).
+- **Contracts (`@outfitter/contracts`)** — canonical `ActionHint` / `CLIHint` / `MCPHint` types plus enriched `ErrorCategory` metadata via `errorCategoryMeta()`.
+- **MCP (`@outfitter/mcp`)** — `defineResourceTemplate()` now supports Zod-validated typed URI template params.
+- **Config + Testing** — `loadConfig()` schema argument is now optional; `testCommand()` / `testTool()` include new `input`, `context`, `json`, `envelope`, and hints support.
+- **DX** — `outfitter check action-registry`, `outfitter upgrade --codemods`, and richer starter examples (`outfitter init cli ... --example todo`, `outfitter init mcp ... --example files`).
+
+For migration details and before/after examples, see [v0.5 Migration](docs/migration-v0.5.md).
+
 ## Packages
 
 Three tiers, one goal: shared infrastructure that works for humans and machines.
@@ -49,10 +60,10 @@ Three tiers, one goal: shared infrastructure that works for humans and machines.
 
 APIs everything else depends on.
 
-| Package                | What it does                                   |
-| ---------------------- | ---------------------------------------------- |
+| Package                | What it does                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `@outfitter/contracts` | Result/Error patterns, handler contract, and utilities like `parseInput()`, `wrapError()`, `fromFetch()`, `expectOk()`, `expectErr()` |
-| `@outfitter/types`     | Type utilities and branded types               |
+| `@outfitter/types`     | Type utilities and branded types                                                                                                      |
 
 ### Runtime (Active)
 
@@ -75,26 +86,27 @@ The building blocks for applications.
 
 Developer-facing tools built on the runtime.
 
-| Package              | What it does                          |
-| -------------------- | ------------------------------------- |
-| `outfitter`          | Umbrella CLI for scaffolding projects |
+| Package              | What it does                                                               |
+| -------------------- | -------------------------------------------------------------------------- |
+| `outfitter`          | Umbrella CLI for scaffolding projects                                      |
 | `@outfitter/testing` | Test harnesses for CLI and MCP, including `testCommand()` and `testTool()` |
 
 ## Documentation
 
-| Guide                                      | When to read it                                   |
-| ------------------------------------------ | ------------------------------------------------- |
-| [Getting Started](docs/getting-started.md) | Build your first CLI, MCP server, or daemon       |
-| [Patterns](docs/reference/patterns.md)     | Understand handlers, Result types, error taxonomy |
-| [Architecture](docs/ARCHITECTURE.md)       | How packages fit together                         |
-| [Migration](docs/migration.md)             | Adopting Outfitter or upgrading versions          |
-| [v0.4 Migration](docs/migration-v0.4.md)   | Upgrade for Foundation v0.4 changes (`--json` default, output format param, `resolveOutputMode()`, commander peer dep) |
-| [Discoverability](docs/reference/discoverability.md) | Understand subpath exports, tooling, and package discoverability |
-| [Error Handling Patterns](packages/contracts/docs/error-handling-patterns.md) | Apply `parseInput()`, `wrapError()`, and `fromFetch()` in Result-first flows |
-| [CLI Patterns](packages/cli/docs/cli-patterns.md) | Follow CLI output/queryability patterns and conventions |
-| [Peer Dependencies](packages/cli/docs/peer-dependencies.md) | Use and validate peer dependency strategy for CLI packages |
-| [MCP `adaptHandler()`](packages/mcp/docs/adapt-handler.md) | Bridge shared handlers to MCP tools safely |
-| [MCP Dynamic Tool Registration](packages/mcp/docs/dynamic-tool-registration.md) | Implement `registerTool()` patterns for MCP surfaces |
+| Guide                                                                           | When to read it                                                                                                                            |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Getting Started](docs/getting-started.md)                                      | Build your first CLI, MCP server, or daemon                                                                                                |
+| [Patterns](docs/reference/patterns.md)                                          | Understand handlers, Result types, error taxonomy                                                                                          |
+| [Architecture](docs/ARCHITECTURE.md)                                            | How packages fit together                                                                                                                  |
+| [Migration](docs/migration.md)                                                  | Adopting Outfitter or upgrading versions                                                                                                   |
+| [v0.4 Migration](docs/migration-v0.4.md)                                        | Upgrade for Foundation v0.4 changes (`--json` default, output format param, `resolveOutputMode()`, commander peer dep)                     |
+| [v0.5 Migration](docs/migration-v0.5.md)                                        | Upgrade for Builder Pattern + agent-navigable envelope changes (`.input()`, `.context()`, hints, `runHandler()`, typed resource templates) |
+| [Discoverability](docs/reference/discoverability.md)                            | Understand subpath exports, tooling, and package discoverability                                                                           |
+| [Error Handling Patterns](packages/contracts/docs/error-handling-patterns.md)   | Apply `parseInput()`, `wrapError()`, and `fromFetch()` in Result-first flows                                                               |
+| [CLI Patterns](packages/cli/docs/cli-patterns.md)                               | Follow CLI output/queryability patterns and conventions                                                                                    |
+| [Peer Dependencies](packages/cli/docs/peer-dependencies.md)                     | Use and validate peer dependency strategy for CLI packages                                                                                 |
+| [MCP `adaptHandler()`](packages/mcp/docs/adapt-handler.md)                      | Bridge shared handlers to MCP tools safely                                                                                                 |
+| [MCP Dynamic Tool Registration](packages/mcp/docs/dynamic-tool-registration.md) | Implement `registerTool()` patterns for MCP surfaces                                                                                       |
 
 ## Development
 

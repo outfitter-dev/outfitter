@@ -146,9 +146,8 @@ describe("runCheckActionRegistry", () => {
     expect(result.isOk()).toBe(true);
     if (result.isErr()) return;
 
-    // The ok field reflects whether any "primary" command files are missing
-    // (helper/utility files are expected to be unregistered)
-    expect(typeof result.value.ok).toBe("boolean");
+    // ok is false because the test fixtures intentionally include unregistered commands
+    expect(result.value.ok).toBe(false);
   });
 });
 

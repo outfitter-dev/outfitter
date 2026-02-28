@@ -18,6 +18,10 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import {
+  runUpgradeCodemodBuilder,
+  type UpgradeCodemodBuilderResult,
+} from "../commands/upgrade-codemod-builder.js";
 import { runCodemod } from "../commands/upgrade-codemods.js";
 
 // =============================================================================
@@ -824,5 +828,56 @@ export function createUpdateCommand(): Command {
     expect(inputIndex).toBeGreaterThan(-1);
     expect(actionIndex).toBeGreaterThan(-1);
     expect(inputIndex).toBeLessThan(actionIndex);
+  });
+});
+
+// =============================================================================
+// runUpgradeCodemodBuilder (public API)
+// =============================================================================
+
+describe("runUpgradeCodemodBuilder", () => {
+  let builderTempDir: string;
+
+  beforeEach(() => {
+    builderTempDir = createTempDir();
+    mkdirSync(join(builderTempDir, "commands"), { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanupTempDir(builderTempDir);
+  });
+
+  test("dry-run returns Ok result with structured shape", async () => {
+    writeFileSync(
+      join(builderTempDir, "commands", "hello.ts"),
+      `import { Command } from "commander";
+
+export function createHelloCommand(): Command {
+  return new Command("hello")
+    .description("Say hello")
+    .option("--name <name>", "Your name")
+    .action((flags) => {
+      console.log(flags.name);
+    });
+}
+`
+    );
+
+    const result = await runUpgradeCodemodBuilder({
+      cwd: builderTempDir,
+      dryRun: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) return;
+
+    const value: UpgradeCodemodBuilderResult = result.value;
+    expect(value.dryRun).toBe(true);
+    expect(value.ok).toBe(true);
+    expect(value.totalChanged).toBeGreaterThanOrEqual(0);
+    expect(value.totalSkipped).toBeGreaterThanOrEqual(0);
+    expect(Array.isArray(value.changedFiles)).toBe(true);
+    expect(Array.isArray(value.skippedFiles)).toBe(true);
+    expect(Array.isArray(value.errors)).toBe(true);
   });
 });
