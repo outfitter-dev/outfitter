@@ -221,6 +221,17 @@ export interface RunHandlerOptions<
   readonly stream?: boolean;
 
   /**
+   * Indicate that this is a dry-run invocation of a destructive command.
+   *
+   * When `true`, the success envelope includes a CLIHint with the command
+   * to execute without `--dry-run` (preview-then-commit pattern).
+   *
+   * The handler is responsible for checking the dry-run flag and performing
+   * preview-only logic. This option only controls hint generation in the envelope.
+   */
+  readonly dryRun?: boolean;
+
+  /**
    * Parsed argv to use for dry-run hint generation.
    *
    * Defaults to `process.argv.slice(2)`. Pass explicit argv when using
@@ -233,6 +244,28 @@ export interface RunHandlerOptions<
 // =============================================================================
 // Internal Helpers
 // =============================================================================
+
+/**
+ * Build a CLIHint for executing the current command without --dry-run.
+ *
+ * Strips the --dry-run flag and its variants (--dry-run=true, --dry-run=false, etc.),
+ * producing a hint like: `delete --id abc --force` (without --dry-run).
+ *
+ * @param argv - Parsed argv to strip --dry-run from. Defaults to `process.argv.slice(2)`.
+ */
+function buildDryRunHint(
+  argv: readonly string[] = process.argv.slice(2)
+): CLIHint | undefined {
+  const filteredArgs = argv.filter(
+    (arg) => arg !== "--dry-run" && !arg.startsWith("--dry-run=")
+  );
+  const command = filteredArgs.join(" ");
+  if (!command) return undefined;
+  return {
+    description: "Execute without dry-run",
+    command,
+  };
+}
 
 /**
  * Default error category for errors that aren't OutfitterError.
@@ -381,6 +414,7 @@ export async function runHandler<
     hints: hintsFn,
     onError: onErrorFn,
     stream: isStreaming = false,
+    dryRun: isDryRun = false,
     argv,
   } = options;
 
@@ -488,9 +522,19 @@ export async function runHandler<
   // 3. Result unwrap → envelope construction
   if (result.isOk()) {
     // Success path
-    const successHints = hintsFn
+    let successHints = hintsFn
       ? safeCallHintFn(() => hintsFn(result.value, inputValue))
       : undefined;
+
+    // Append dry-run hint when in dry-run mode (preview-then-commit pattern)
+    if (isDryRun) {
+      const dryRunHint = buildDryRunHint(argv);
+      if (dryRunHint) {
+        successHints = successHints
+          ? [...successHints, dryRunHint]
+          : [dryRunHint];
+      }
+    }
 
     const envelope = createSuccessEnvelope(
       commandName,

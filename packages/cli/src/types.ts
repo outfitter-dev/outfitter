@@ -190,6 +190,41 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
   description(text: string): this;
 
   /**
+   * Mark the command as destructive.
+   *
+   * When `isDest` is `true`, a `--dry-run` flag is auto-added to the command
+   * (deduplicated if already present from `.option()` or `.preset()`).
+   * The handler is responsible for checking the dry-run flag and performing
+   * preview-only logic when active.
+   *
+   * When used with `runHandler({ dryRun: true })`, the response envelope
+   * includes a CLIHint with the command to execute without `--dry-run`
+   * (preview-then-commit pattern).
+   *
+   * Default (no `.destructive()` call) is non-destructive.
+   *
+   * @param isDest - Whether the command is destructive
+   *
+   * @example
+   * ```typescript
+   * command("delete")
+   *   .description("Delete resources")
+   *   .destructive(true)
+   *   .action(async ({ flags }) => {
+   *     const isDryRun = Boolean(flags.dryRun);
+   *     await runHandler({
+   *       command: "delete",
+   *       handler: async (input) => isDryRun
+   *         ? Result.ok({ preview: true, count: 5 })
+   *         : deleteResources(input),
+   *       dryRun: isDryRun,
+   *     });
+   *   });
+   * ```
+   */
+  destructive(isDest: boolean): this;
+
+  /**
    * Set a success hint function.
    *
    * The hint function is stored on the builder and invoked at output time

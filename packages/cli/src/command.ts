@@ -160,6 +160,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private readonly explicitLongFlags = new Set<string>();
   private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
   private schemaFlagsApplied = false;
+  private _destructive = false;
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -238,6 +239,11 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this;
   }
 
+  destructive(isDest: boolean): this {
+    this._destructive = isDest;
+    return this;
+  }
+
   preset(preset: AnyPreset<Record<string, unknown>>): this {
     if (isSchemaPreset(preset)) {
       // Schema-driven preset: store for lazy flag derivation in applySchemaFlags()
@@ -278,6 +284,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     const contextFactory = this.ctxFactory;
     const presets = [...this.schemaPresets];
     this.applySchemaFlags();
+    this.applyDestructiveFlag();
 
     // Build a merged validation schema that includes both .input() fields
     // and schema preset fields. This ensures preset Zod fragments are
@@ -334,6 +341,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
 
   build(): Command {
     this.applySchemaFlags();
+    this.applyDestructiveFlag();
 
     // Store hint functions as metadata on the Command for downstream use by runHandler()
     if (this.successHintFn) {
@@ -392,6 +400,25 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
         existingLongs.add(flag.longFlag);
       }
     }
+  }
+
+  /**
+   * Auto-add --dry-run flag when the command is marked destructive.
+   * Deduplicates if --dry-run is already present from .option(), .preset(),
+   * or .input() schema.
+   */
+  private applyDestructiveFlag(): void {
+    if (!this._destructive) return;
+
+    // Check if --dry-run already exists on the Commander command
+    const hasDryRun = this.cmd.options.some((o) => o.long === "--dry-run");
+    if (hasDryRun) return;
+
+    this.cmd.option(
+      "--dry-run",
+      "Preview changes without applying (destructive command safety)",
+      false
+    );
   }
 }
 
