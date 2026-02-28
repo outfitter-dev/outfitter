@@ -9,10 +9,22 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./schema": {
+    ".": {
       "import": {
-        "types": "./dist/schema.d.ts",
-        "default": "./dist/schema.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./actions": {
+      "import": {
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
+      }
+    },
+    "./colors": {
+      "import": {
+        "types": "./dist/colors/index.d.ts",
+        "default": "./dist/colors/index.js"
       }
     },
     "./command": {
@@ -21,10 +33,65 @@
         "default": "./dist/command.js"
       }
     },
-    "./colors": {
+    "./completion": {
       "import": {
-        "types": "./dist/colors/index.d.ts",
-        "default": "./dist/colors/index.js"
+        "types": "./dist/completion.d.ts",
+        "default": "./dist/completion.js"
+      }
+    },
+    "./envelope": {
+      "import": {
+        "types": "./dist/envelope.d.ts",
+        "default": "./dist/envelope.js"
+      }
+    },
+    "./flags": {
+      "import": {
+        "types": "./dist/flags.d.ts",
+        "default": "./dist/flags.js"
+      }
+    },
+    "./hints": {
+      "import": {
+        "types": "./dist/hints.d.ts",
+        "default": "./dist/hints.js"
+      }
+    },
+    "./input": {
+      "import": {
+        "types": "./dist/input.d.ts",
+        "default": "./dist/input.js"
+      }
+    },
+    "./output": {
+      "import": {
+        "types": "./dist/output.d.ts",
+        "default": "./dist/output.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./pagination": {
+      "import": {
+        "types": "./dist/pagination.d.ts",
+        "default": "./dist/pagination.js"
+      }
+    },
+    "./query": {
+      "import": {
+        "types": "./dist/query.d.ts",
+        "default": "./dist/query.js"
+      }
+    },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
+    "./schema-input": {
+      "import": {
+        "types": "./dist/schema-input.d.ts",
+        "default": "./dist/schema-input.js"
       }
     },
     "./terminal": {
@@ -39,10 +106,10 @@
         "default": "./dist/terminal/detection.js"
       }
     },
-    "./schema-input": {
+    "./text": {
       "import": {
-        "types": "./dist/schema-input.d.ts",
-        "default": "./dist/schema-input.js"
+        "types": "./dist/text.d.ts",
+        "default": "./dist/text.js"
       }
     },
     "./types": {
@@ -51,79 +118,12 @@
         "default": "./dist/types.js"
       }
     },
-    "./actions": {
-      "import": {
-        "types": "./dist/actions.d.ts",
-        "default": "./dist/actions.js"
-      }
-    },
-    "./flags": {
-      "import": {
-        "types": "./dist/flags.d.ts",
-        "default": "./dist/flags.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./query": {
-      "import": {
-        "types": "./dist/query.d.ts",
-        "default": "./dist/query.js"
-      }
-    },
-    "./completion": {
-      "import": {
-        "types": "./dist/completion.d.ts",
-        "default": "./dist/completion.js"
-      }
-    },
-    "./output": {
-      "import": {
-        "types": "./dist/output.d.ts",
-        "default": "./dist/output.js"
-      }
-    },
-    "./envelope": {
-      "import": {
-        "types": "./dist/envelope.d.ts",
-        "default": "./dist/envelope.js"
-      }
-    },
     "./verbs": {
       "import": {
         "types": "./dist/verbs.d.ts",
         "default": "./dist/verbs.js"
       }
-    },
-    "./pagination": {
-      "import": {
-        "types": "./dist/pagination.d.ts",
-        "default": "./dist/pagination.js"
-      }
-    },
-    "./hints": {
-      "import": {
-        "types": "./dist/hints.d.ts",
-        "default": "./dist/hints.js"
-      }
-    },
-    "./text": {
-      "import": {
-        "types": "./dist/text.d.ts",
-        "default": "./dist/text.js"
-      }
-    },
-    "./input": {
-      "import": {
-        "types": "./dist/input.d.ts",
-        "default": "./dist/input.js"
-      }
-    },
-    "./package.json": "./package.json"
+    }
   },
   "keywords": [
     "bun",
