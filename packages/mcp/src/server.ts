@@ -23,6 +23,7 @@ import {
 import type { z } from "zod";
 
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
+import { createMcpProgressCallback } from "./progress.js";
 import { zodToJsonSchema } from "./schema.js";
 import {
   type CompletionRef,
@@ -227,21 +228,14 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       ctx.signal = signal;
     }
 
-    // Add progress reporter when token is present and SDK server is bound
+    // Add progress callback when token is present and SDK server is bound.
+    // Uses the modular MCP progress adapter (packages/mcp/src/progress.ts)
+    // which translates StreamEvent → notifications/progress.
     if (progressToken !== undefined && sdkServer) {
-      (ctx as { progress?: unknown }).progress = {
-        report(progress: number, total?: number, message?: string) {
-          sdkServer?.notification?.({
-            method: "notifications/progress",
-            params: {
-              progressToken,
-              progress,
-              ...(total !== undefined ? { total } : {}),
-              ...(message ? { message } : {}),
-            },
-          });
-        },
+      const sender = (notification: unknown): void => {
+        sdkServer?.notification?.(notification);
       };
+      ctx.progress = createMcpProgressCallback(progressToken, sender);
     }
 
     return ctx;
