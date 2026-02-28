@@ -9,7 +9,11 @@
 
 import { getEnvironment, getEnvironmentDefaults } from "@outfitter/config";
 import type { HandlerContext, OutfitterError } from "@outfitter/contracts";
-import { generateRequestId, Result } from "@outfitter/contracts";
+import {
+  generateRequestId,
+  Result,
+  ValidationError,
+} from "@outfitter/contracts";
 import {
   createOutfitterLoggerFactory,
   createPrettyFormatter,
@@ -35,6 +39,7 @@ import {
   type SerializedTool,
   type ToolAnnotations,
   type ToolDefinition,
+  type TypedResourceTemplateDefinition,
 } from "./types.js";
 
 // ============================================================================
@@ -876,18 +881,82 @@ export function defineResource(
 }
 
 /**
- * Define a resource template.
+ * Define a resource template with optional Zod schema validation.
  *
- * Helper function for creating resource template definitions
- * with URI pattern matching.
+ * When `paramSchema` is provided, URI template variables are validated
+ * and coerced before handler invocation — parallel to how `defineTool()`
+ * validates input via `inputSchema`. Invalid parameters produce an
+ * McpError with code -32602 (Invalid params) and the handler is never called.
  *
- * @param definition - Resource template definition object
- * @returns The same resource template definition
+ * @param definition - Resource template definition with optional `paramSchema`
+ * @returns A `ResourceTemplateDefinition` compatible with `registerResourceTemplate()`
+ *
+ * @example
+ * ```typescript
+ * // With Zod schema validation (recommended for typed params)
+ * const userTemplate = defineResourceTemplate({
+ *   uriTemplate: "db:///users/{userId}/posts/{postId}",
+ *   name: "User Post",
+ *   paramSchema: z.object({
+ *     userId: z.string().min(1),
+ *     postId: z.coerce.number().int().positive(),
+ *   }),
+ *   handler: async (uri, params, ctx) => {
+ *     // params is typed as { userId: string; postId: number }
+ *     return Result.ok([{ uri, text: JSON.stringify(params) }]);
+ *   },
+ * });
+ *
+ * // Without schema (backward compatible)
+ * const simpleTemplate = defineResourceTemplate({
+ *   uriTemplate: "db:///items/{itemId}",
+ *   name: "Item",
+ *   handler: async (uri, variables) =>
+ *     Result.ok([{ uri, text: variables.itemId }]),
+ * });
+ * ```
  */
+export function defineResourceTemplate<TParams>(
+  definition: TypedResourceTemplateDefinition<TParams>
+): ResourceTemplateDefinition;
 export function defineResourceTemplate(
   definition: ResourceTemplateDefinition
+): ResourceTemplateDefinition;
+export function defineResourceTemplate<TParams>(
+  definition:
+    | TypedResourceTemplateDefinition<TParams>
+    | ResourceTemplateDefinition
 ): ResourceTemplateDefinition {
-  return definition;
+  // When paramSchema is present, wrap handler with validation
+  if ("paramSchema" in definition && definition.paramSchema !== undefined) {
+    const { paramSchema, handler: typedHandler, ...rest } = definition;
+
+    const wrappedHandler: ResourceTemplateDefinition["handler"] = async (
+      uri,
+      variables,
+      ctx
+    ) => {
+      const parseResult = paramSchema.safeParse(variables);
+      if (!parseResult.success) {
+        const errorMessages = parseResult.error.issues
+          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+          .join("; ");
+
+        return Result.err(
+          new ValidationError({
+            message: `Invalid resource parameters: ${errorMessages}`,
+            field: "params",
+          })
+        );
+      }
+
+      return typedHandler(uri, parseResult.data as TParams, ctx);
+    };
+
+    return { ...rest, handler: wrappedHandler };
+  }
+
+  return definition as ResourceTemplateDefinition;
 }
 
 /**
