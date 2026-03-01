@@ -211,6 +211,29 @@ function formatErrorHuman(error: Error): string {
   return error.message;
 }
 
+function applyOutputTruncation(
+  data: unknown,
+  truncation: OutputOptions["truncation"]
+): unknown {
+  if (!truncation || !Array.isArray(data)) {
+    return data;
+  }
+
+  const rawOffset = truncation.offset;
+  const offset =
+    typeof rawOffset === "number" && Number.isFinite(rawOffset)
+      ? Math.max(0, rawOffset)
+      : 0;
+
+  const rawLimit = truncation.limit;
+  if (typeof rawLimit !== "number" || !Number.isFinite(rawLimit)) {
+    return data;
+  }
+
+  const limit = Math.max(0, rawLimit);
+  return data.slice(offset, offset + limit);
+}
+
 // =============================================================================
 // Public API
 // =============================================================================
@@ -257,21 +280,22 @@ export async function output(
 ): Promise<void> {
   const mode = detectMode(format);
   const stream = options?.stream ?? process.stdout;
+  const renderedData = applyOutputTruncation(data, options?.truncation);
 
   let outputText: string;
 
   switch (mode) {
     case "json": {
       // Handle undefined/null explicitly
-      const jsonData = data === undefined ? null : data;
+      const jsonData = renderedData === undefined ? null : renderedData;
       outputText = cliStringify(jsonData, options?.pretty);
       break;
     }
 
     case "jsonl": {
       // Arrays get one JSON object per line
-      if (Array.isArray(data)) {
-        if (data.length === 0) {
+      if (Array.isArray(renderedData)) {
+        if (renderedData.length === 0) {
           outputText = "";
         } else {
           outputText = data.map((item) => cliStringify(item)).join("\n");
@@ -284,7 +308,7 @@ export async function output(
     }
 
     default: {
-      outputText = formatHuman(data);
+      outputText = formatHuman(renderedData);
       break;
     }
   }
