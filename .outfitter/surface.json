@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-26T22:19:34.232Z",
+  "generatedAt": "2026-03-01T00:35:07.005Z",
   "surfaces": ["cli"],
   "actions": [
     {
@@ -115,6 +115,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -184,6 +187,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -266,6 +273,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -335,6 +345,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -413,6 +427,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -482,6 +499,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -560,6 +581,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -629,6 +653,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -707,6 +735,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -776,6 +807,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -854,6 +889,9 @@
           "bin": {
             "type": "string"
           },
+          "example": {
+            "type": "string"
+          },
           "preset": {
             "type": "string",
             "enum": [
@@ -923,6 +961,10 @@
           {
             "flags": "-b, --bin <name>",
             "description": "Binary name (defaults to project name)"
+          },
+          {
+            "flags": "-e, --example <name>",
+            "description": "Scaffold with a pattern-rich example (cli: todo; mcp: files)"
           },
           {
             "flags": "--local",
@@ -1609,6 +1651,41 @@
       }
     },
     {
+      "id": "check.action-registry",
+      "description": "Cross-reference command files against action registry for completeness",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd"]
+      },
+      "cli": {
+        "group": "check",
+        "command": "action-registry",
+        "description": "Cross-reference command files against action registry for completeness",
+        "options": [
+          {
+            "flags": "-o, --output <mode>",
+            "description": "Output mode (human, json)",
+            "defaultValue": "human"
+          },
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          }
+        ]
+      }
+    },
+    {
       "id": "upgrade",
       "description": "Check for @outfitter/* package updates and migration guidance",
       "surfaces": ["cli"],
@@ -1659,7 +1736,8 @@
         ]
       },
       "cli": {
-        "command": "upgrade [packages...]",
+        "group": "upgrade",
+        "command": "[packages...]",
         "description": "Check for @outfitter/* package updates and migration guidance",
         "options": [
           {
@@ -1697,6 +1775,44 @@
           {
             "flags": "--guide",
             "description": "Show migration instructions for available updates. Pass package names to filter.",
+            "defaultValue": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "upgrade.codemod",
+      "description": "Transform Commander .command().action() patterns to builder .input(schema).action()",
+      "surfaces": ["cli"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": ["human", "json", "jsonl"],
+            "default": "human"
+          }
+        },
+        "required": ["cwd", "dryRun"]
+      },
+      "cli": {
+        "group": "upgrade",
+        "command": "codemod",
+        "description": "Transform Commander .command().action() patterns to builder .input(schema).action()",
+        "options": [
+          {
+            "flags": "--cwd <path>",
+            "description": "Working directory"
+          },
+          {
+            "flags": "--dry-run",
+            "description": "Preview changes without applying",
             "defaultValue": false
           }
         ]
