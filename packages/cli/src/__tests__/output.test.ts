@@ -251,6 +251,30 @@ describe("output() mode detection", () => {
   });
 });
 
+describe("output() truncation option", () => {
+  test("applies truncation limit/offset before JSON serialization", async () => {
+    const captured = await captureOutput(() =>
+      output([1, 2, 3, 4, 5], "json", {
+        truncation: { limit: 2, offset: 1 },
+      })
+    );
+
+    const parsed = JSON.parse(captured.stdout.trim()) as number[];
+    expect(parsed).toEqual([2, 3]);
+  });
+
+  test("does not truncate non-array data", async () => {
+    const captured = await captureOutput(() =>
+      output({ ok: true }, "json", {
+        truncation: { limit: 1 },
+      })
+    );
+
+    const parsed = JSON.parse(captured.stdout.trim()) as { ok: boolean };
+    expect(parsed).toEqual({ ok: true });
+  });
+});
+
 // =============================================================================
 // output() JSON Mode Tests
 // =============================================================================
