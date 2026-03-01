@@ -14,6 +14,11 @@ import { basename, dirname, join, resolve } from "node:path";
 import type { OutfitterError } from "@outfitter/contracts";
 import { InternalError, Result } from "@outfitter/contracts";
 
+import {
+  getWorkspacePatterns,
+  hasWorkspacesField,
+} from "../engine/workspace.js";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -118,31 +123,6 @@ export function detectWorkspaceRoot(
   return Result.ok(null);
 }
 
-/**
- * Check if a parsed package.json has a `workspaces` field
- * in either array or object format.
- */
-function hasWorkspacesField(pkg: PackageDeps): boolean {
-  const workspaces = pkg.workspaces;
-
-  if (Array.isArray(workspaces) && workspaces.length > 0) {
-    return true;
-  }
-
-  if (
-    workspaces &&
-    typeof workspaces === "object" &&
-    !Array.isArray(workspaces)
-  ) {
-    const packages = (workspaces as { packages?: unknown }).packages;
-    if (Array.isArray(packages) && packages.length > 0) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 // =============================================================================
 // Manifest Collection
 // =============================================================================
@@ -152,29 +132,9 @@ function hasWorkspacesField(pkg: PackageDeps): boolean {
  * a list of glob patterns targeting package.json files.
  */
 function resolveWorkspacePatterns(pkg: PackageDeps): string[] {
-  const workspaces = pkg.workspaces;
-
-  let patterns: unknown[];
-  if (Array.isArray(workspaces)) {
-    patterns = workspaces;
-  } else if (
-    workspaces &&
-    typeof workspaces === "object" &&
-    !Array.isArray(workspaces)
-  ) {
-    const packages = (workspaces as { packages?: unknown }).packages;
-    if (Array.isArray(packages)) {
-      patterns = packages;
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-
-  return patterns
-    .filter((p): p is string => typeof p === "string")
-    .map(normalizeWorkspacePattern);
+  return [...getWorkspacePatterns(pkg.workspaces)].map(
+    normalizeWorkspacePattern
+  );
 }
 
 /**

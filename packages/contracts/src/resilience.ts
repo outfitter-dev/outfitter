@@ -1,6 +1,6 @@
 import { Result } from "better-result";
 
-import { type OutfitterError, TimeoutError } from "./errors.js";
+import { InternalError, type OutfitterError, TimeoutError } from "./errors.js";
 
 /**
  * Options for retry behavior.
@@ -113,6 +113,13 @@ export async function retry<T>(
   options?: RetryOptions
 ): Promise<Result<T, OutfitterError>> {
   const maxAttempts = options?.maxAttempts ?? 3;
+
+  if (maxAttempts <= 0) {
+    return Result.err(
+      InternalError.create("maxAttempts must be >= 1", { maxAttempts })
+    );
+  }
+
   const initialDelayMs = options?.initialDelayMs ?? 1000;
   const maxDelayMs = options?.maxDelayMs ?? 30_000;
   const backoffMultiplier = options?.backoffMultiplier ?? 2;
@@ -173,10 +180,11 @@ export async function retry<T>(
   // Should not reach here since loop will always either:
   // 1. Return success result
   // 2. Return error result when maxAttempts reached or error not retryable
-  // But TypeScript needs a return, and lastError will always be defined if we get here
-  // because we only exit the loop early on success or error condition
-  throw new Error(
-    "Unexpected: retry loop completed without returning a result"
+  // But TypeScript needs a return for exhaustiveness
+  return Result.err(
+    InternalError.create(
+      "Unexpected: retry loop completed without returning a result"
+    )
   );
 }
 

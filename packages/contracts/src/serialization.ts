@@ -23,6 +23,7 @@ import {
   DEFAULT_PATTERNS,
   DEFAULT_SENSITIVE_KEYS,
 } from "./redactor.js";
+import { formatZodIssues } from "./validation.js";
 
 /**
  * Options for error serialization.
@@ -384,6 +385,12 @@ export function deserializeError(data: SerializedError): OutfitterError {
   }
 }
 
+/** Module-scope redactor singleton — avoids re-creating on every call. */
+const defaultRedactor = createRedactor({
+  patterns: [...DEFAULT_PATTERNS],
+  keys: [...DEFAULT_SENSITIVE_KEYS],
+});
+
 /**
  * Safely stringify any value to JSON.
  *
@@ -403,12 +410,6 @@ export function deserializeError(data: SerializedError): OutfitterError {
 export function safeStringify(value: unknown, space?: number): string {
   const seen = new WeakSet<object>();
 
-  // Create a default redactor for sensitive data
-  const redactor = createRedactor({
-    patterns: [...DEFAULT_PATTERNS],
-    keys: [...DEFAULT_SENSITIVE_KEYS],
-  });
-
   const replacer = (key: string, val: unknown): unknown => {
     // Handle BigInt
     if (typeof val === "bigint") {
@@ -426,7 +427,7 @@ export function safeStringify(value: unknown, space?: number): string {
     // Redact sensitive key values (key is empty string for root)
     if (
       key !== "" &&
-      redactor.isSensitiveKey(key) &&
+      defaultRedactor.isSensitiveKey(key) &&
       val !== null &&
       val !== undefined
     ) {
@@ -435,7 +436,7 @@ export function safeStringify(value: unknown, space?: number): string {
 
     // Redact sensitive patterns in strings
     if (typeof val === "string") {
-      return redactor.redactString(val);
+      return defaultRedactor.redactString(val);
     }
 
     return val;
@@ -492,16 +493,9 @@ export function safeParse<T = unknown>(
     return Result.ok(parseResult.data);
   }
 
-  const issues = parseResult.error.issues
-    .map((issue) => {
-      const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
-      return `${path}: ${issue.message}`;
-    })
-    .join("; ");
-
   return Result.err(
     new ValidationError({
-      message: `Schema validation failed: ${issues}`,
+      message: `Schema validation failed: ${formatZodIssues(parseResult.error.issues)}`,
     })
   );
 }
