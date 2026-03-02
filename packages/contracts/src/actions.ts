@@ -34,6 +34,8 @@ export interface ActionCliSpec<TInput = unknown> {
 export interface ActionMcpSpec<TInput = unknown> {
   readonly deferLoading?: boolean;
   readonly description?: string;
+  /** When true, the action modifies or deletes data */
+  readonly destructive?: boolean;
   /** When true, calling the action multiple times with the same input has the same effect */
   readonly idempotent?: boolean;
   readonly mapInput?: (input: unknown) => TInput;
