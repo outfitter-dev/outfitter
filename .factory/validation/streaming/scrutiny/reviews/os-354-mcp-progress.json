@@ -1,7 +1,7 @@
 {
   "featureId": "os-354-mcp-progress",
   "reviewedAt": "2026-02-28T14:51:09Z",
-  "commitId": "3b7d1d61a080e368520ef631024d37672804906f",
+  "commitId": "e6f18a3ee185361b477a2f5166cf854a787ebbc3",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "pass",

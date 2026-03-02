@@ -1,7 +1,7 @@
 {
   "featureId": "fix-streaming-safe-stringify",
   "reviewedAt": "2026-02-28T15:16:50Z",
-  "commitId": "53afa5ec",
+  "commitId": "5bf0f72eb69e534a9aae42c30c409acff854621c",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "pass",
@@ -17,5 +17,5 @@
     }
   ],
   "addressesFailureFrom": ".factory/validation/streaming/scrutiny/reviews/os-354-cli-ndjson.json",
-  "summary": "Reviewed both diffs (original `044b3989` and fix `53afa5ec`) plus the fix transcript skeleton and handoff. The blocking failure from the prior review is addressed: stream NDJSON serialization now routes through `safeStringify`, required safety behaviors are covered by new tests, and envelope JSON error serialization was also made consistent."
+  "summary": "Reviewed both diffs (original `a0bbcc4f06dfe7bc30788208e09371cd3970ef3e` and fix `5bf0f72eb69e534a9aae42c30c409acff854621c`) plus the fix transcript skeleton and handoff. The blocking failure from the prior review is addressed: stream NDJSON serialization now routes through `safeStringify`, required safety behaviors are covered by new tests, and envelope JSON error serialization was also made consistent."
 }

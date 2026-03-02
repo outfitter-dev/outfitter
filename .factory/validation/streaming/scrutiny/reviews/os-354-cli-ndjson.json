@@ -1,7 +1,7 @@
 {
   "featureId": "os-354-cli-ndjson",
   "reviewedAt": "2026-02-28T14:52:44Z",
-  "commitId": "044b3989",
+  "commitId": "a0bbcc4f06dfe7bc30788208e09371cd3970ef3e",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "fail",
