@@ -309,6 +309,36 @@ describe("Tier 2: error category mapping", () => {
         true
       );
     });
+
+    test("conflict hint uses commandName to produce runnable command", () => {
+      const hints = errorRecoveryHints("conflict", "my-cli", "update");
+      expect(hints[0]?.command).toBe("my-cli update --force");
+    });
+
+    test("conflict hint without commandName keeps placeholder", () => {
+      const hints = errorRecoveryHints("conflict", "my-cli");
+      expect(hints[0]?.command).toBe("my-cli <previous-command> --force");
+    });
+
+    test("retryable categories use commandName when provided", () => {
+      const categories: ErrorCategory[] = [
+        "timeout",
+        "network",
+        "rate_limit",
+        "cancelled",
+      ];
+
+      for (const category of categories) {
+        const hints = errorRecoveryHints(category, "my-cli", "deploy");
+        const hint = hints[0];
+        expect(hint?.command).toBe("my-cli deploy");
+      }
+    });
+
+    test("retryable categories without commandName keep placeholder", () => {
+      const hints = errorRecoveryHints("timeout", "my-cli");
+      expect(hints[0]?.command).toBe("my-cli <previous-command>");
+    });
   });
 });
 
