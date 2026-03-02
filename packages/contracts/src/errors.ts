@@ -869,11 +869,9 @@ export class CancelledError extends CancelledErrorBase {
 }
 
 /**
- * Union type of all concrete error class instances.
- *
- * @deprecated Use `OutfitterError` instead. This alias will be removed in v1.0.
+ * Canonical union type of all concrete error class instances.
  */
-export type AnyKitError =
+export type OutfitterError =
   | InstanceType<typeof ValidationError>
   | InstanceType<typeof AmbiguousError>
   | InstanceType<typeof AssertionError>
@@ -889,6 +887,6 @@ export type AnyKitError =
   | InstanceType<typeof CancelledError>;
 
 /**
- * Canonical union type of all concrete error class instances.
+ * @deprecated Use `OutfitterError` instead. This alias will be removed in v1.0.
  */
-export type OutfitterError = AnyKitError;
+export type AnyKitError = OutfitterError;
