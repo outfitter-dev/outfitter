@@ -1,0 +1,28 @@
+{
+  "featureId": "os-339-cli-patterns-docs",
+  "reviewedAt": "2026-02-27T20:48:55Z",
+  "commitId": "8528aaccbc383c007c3ad27b1212751ef81c2808",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The new guide covers all required topic areas with strong detail, but it contains blocking import-path errors in multiple examples: `createCLI`/`command` are imported from `@outfitter/cli` even though those APIs are exported from the `@outfitter/cli/command` subpath.",
+    "issues": [
+      {
+        "file": "packages/cli/docs/cli-patterns.md",
+        "line": 12,
+        "severity": "blocking",
+        "description": "Example imports for `createCLI`/`command` use `@outfitter/cli` (also at lines 35, 56, 108, and 207). Root exports map to `dist/index.js` and do not export those APIs; they are exported via `./command`. This violates the feature expectation that examples use correct import paths."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker procedure requires checking package export maps and runnable imports, but this feature still shipped invalid import paths in examples. The skill likely needs a stricter/explicit verification step for example import paths.",
+      "evidence": ".factory/skills/docs-worker/SKILL.md (cross-reference and runnable example requirements) vs packages/cli/docs/cli-patterns.md:12,35,56,108,207 and packages/cli/package.json:29-33,47-51"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review failed: required topics are documented, but blocking import-path inaccuracies prevent the feature from meeting expected behavior."
+}

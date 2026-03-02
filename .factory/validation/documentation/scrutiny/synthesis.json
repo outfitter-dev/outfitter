@@ -1,0 +1,49 @@
+{
+  "milestone": "documentation",
+  "round": 2,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Update docs-worker skill verification step to use `bun run lint` + `bun run typecheck` instead of `bun run check`, or make the verification command configurable per-mission. The skill currently mandates `bun run check` which may not work in all environments.",
+      "evidence": "All 7 documentation feature reviews across round 1 noted this mismatch, and the round 2 fix worker also deviated (ran lint+typecheck instead of check). The docs-worker SKILL.md:65 prescribes `bun run check`, while mission AGENTS.md:72 documents it as crashing. All workers correctly followed mission guidance over skill guidance.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Add explicit import-path verification step to docs-worker skill: require workers to grep package.json exports and confirm every import path in code examples resolves to an actual export before committing.",
+      "evidence": "Feature os-339-cli-patterns-docs shipped with wrong import paths in round 1 (@outfitter/cli instead of @outfitter/cli/command) despite the skill requiring cross-referencing. A stricter verification step (e.g., `bun -e 'import {...} from \"...\"'`) would have caught this.",
+      "isSystemic": false
+    },
+    {
+      "target": "skills",
+      "suggestion": "Clarify in docs-worker skill when `bun run test` is optional for documentation-only fixes. The round 2 fix worker ran lint/typecheck only and marked followedProcedure: true, which is reasonable for docs-only changes.",
+      "evidence": "Fix feature fix-docs-accuracy worker session 7ce05de5 ran lint+typecheck but not full test suite for a docs-only change. Skill requires `bun run test` unconditionally.",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "services.yaml `check` command still maps to `bun run check` despite mission-level documentation of crashes",
+      "reason": "Already rejected in round 1. The services.yaml command mapping is factual for the project. The crash is a mission-specific pre-existing issue, not a permanent project state. The command mapping correctly reflects the repo's scripts. Mission-level workarounds belong in mission AGENTS.md, not services.yaml."
+    }
+  ],
+  "previousRound": ".factory/validation/documentation/scrutiny/synthesis.json (round 1)"
+}
