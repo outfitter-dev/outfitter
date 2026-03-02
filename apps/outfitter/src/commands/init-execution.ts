@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
@@ -9,6 +9,7 @@ import {
   deriveBinName,
   deriveProjectName,
   executePlan,
+  getPresetsBaseDir,
   isPathWithin,
   resolveAuthor,
   resolveYear,
@@ -25,14 +26,47 @@ import type { InitPresetId } from "./init-option-resolution.js";
 // Example Overlays
 // =============================================================================
 
-/**
- * Maps preset IDs to their available example overlay names.
- * Each example has a directory under `packages/presets/presets/_examples/<preset>-<example>/`.
- */
-const PRESET_EXAMPLES: ReadonlyMap<string, readonly string[]> = new Map([
-  ["cli", ["todo"]],
-  ["mcp", ["files"]],
-]);
+let cachedPresetExamples: ReadonlyMap<string, readonly string[]> | undefined;
+
+function discoverPresetExamples(): ReadonlyMap<string, readonly string[]> {
+  const examplesRoot = join(getPresetsBaseDir(), "_examples");
+  if (!existsSync(examplesRoot)) {
+    return new Map();
+  }
+
+  const examplesByPreset = new Map<string, string[]>();
+
+  for (const entry of readdirSync(examplesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const separatorIndex = entry.name.indexOf("-");
+    if (separatorIndex <= 0 || separatorIndex >= entry.name.length - 1) {
+      continue;
+    }
+
+    const preset = entry.name.slice(0, separatorIndex);
+    const example = entry.name.slice(separatorIndex + 1);
+    const existing = examplesByPreset.get(preset) ?? [];
+    existing.push(example);
+    examplesByPreset.set(preset, existing);
+  }
+
+  return new Map(
+    [...examplesByPreset.entries()].map(([preset, examples]) => [
+      preset,
+      [...new Set(examples)].toSorted(),
+    ])
+  );
+}
+
+function getPresetExamples(): ReadonlyMap<string, readonly string[]> {
+  if (!cachedPresetExamples) {
+    cachedPresetExamples = discoverPresetExamples();
+  }
+  return cachedPresetExamples;
+}
 
 /**
  * Validates an `--example` flag value against the preset's available examples.
@@ -42,11 +76,12 @@ export function validateExample(
   preset: string,
   example: string
 ): Result<string, string> {
-  const available = PRESET_EXAMPLES.get(preset);
+  const presetExamples = getPresetExamples();
+  const available = presetExamples.get(preset);
   if (!available || available.length === 0) {
     return Result.err(
       `Preset '${preset}' has no available examples. ` +
-        `Only these presets support --example: ${[...PRESET_EXAMPLES.keys()].join(", ")}`
+        `Only these presets support --example: ${[...presetExamples.keys()].join(", ")}`
     );
   }
 
