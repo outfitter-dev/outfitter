@@ -28,6 +28,7 @@ import type {
 import { exitCodeMap, safeStringify } from "@outfitter/contracts";
 import type {
   ProgressCallback,
+  StreamEvent,
   StreamStartEvent,
 } from "@outfitter/contracts/stream";
 import type { Result } from "better-result";
@@ -217,6 +218,8 @@ export interface RunHandlerOptions<
    * When `true`, the handler receives a `progress` callback via context
    * and the CLI writes progress events as NDJSON lines to stdout.
    * The final line is the standard command envelope (success or error).
+   * The CLI owns the initial `start` event, so handlers should emit only
+   * `step` and `progress` events through `ctx.progress`.
    *
    * `--stream` is orthogonal to output mode — it controls delivery, not serialization.
    */
@@ -393,7 +396,14 @@ export async function runHandler<
       ts: new Date().toISOString(),
     };
     writeNdjsonLine(startEvent);
-    progressCallback = createNdjsonProgress(commandName);
+    const writeProgress = createNdjsonProgress(commandName);
+    progressCallback = (event: StreamEvent): void => {
+      // The adapter emits the first start event; ignore duplicate handler starts.
+      if (event.type === "start") {
+        return;
+      }
+      writeProgress(event);
+    };
   }
 
   // 1. Context factory (if provided)

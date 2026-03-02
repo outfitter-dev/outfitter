@@ -376,6 +376,38 @@ describe("runHandler() with stream", () => {
     expect((lines[4] as Record<string, unknown>)["ok"]).toBe(true);
   });
 
+  test("ignores handler-emitted start events to prevent duplicates", async () => {
+    const captured = await captureOutput(async () => {
+      await runHandler({
+        command: "deploy",
+        handler: async (_input, ctx) => {
+          ctx?.progress?.({
+            type: "start",
+            command: "handler-start",
+            ts: "2026-03-02T00:00:00.000Z",
+          });
+          ctx?.progress?.({
+            type: "progress",
+            current: 1,
+            total: 1,
+            message: "Working",
+          });
+          return Result.ok({ status: "done" });
+        },
+        format: "json",
+        stream: true,
+      });
+    });
+
+    const lines = parseNdjsonLines(captured.stdout) as Array<
+      Record<string, unknown>
+    >;
+    const startEvents = lines.filter((line) => line["type"] === "start");
+
+    expect(startEvents).toHaveLength(1);
+    expect(startEvents[0]?.["command"]).toBe("deploy");
+  });
+
   test("no events after envelope on success", async () => {
     const captured = await captureOutput(async () => {
       await runHandler({
