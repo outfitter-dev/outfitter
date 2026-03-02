@@ -2,8 +2,8 @@
   "groupId": "contracts-types",
   "testedAt": "2026-02-27T23:39:37Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "N/A",
+    "namespace": "N/A"
   },
   "toolsUsed": ["shell", "bun", "rg", "Read"],
   "assertions": [

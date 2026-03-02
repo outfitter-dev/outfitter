@@ -26,7 +26,9 @@
     "total": 1,
     "passed": 1,
     "failed": 0,
-    "failedFeatures": []
+    "failedFeatures": [],
+    "scope": "round-2 rereview artifacts only (not all files under scrutiny/reviews)",
+    "allReviewFilesInDirectory": 5
   },
   "blockingIssues": [],
   "appliedUpdates": [],
