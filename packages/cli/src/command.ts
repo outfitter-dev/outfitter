@@ -5,6 +5,7 @@
  */
 
 import { Command } from "commander";
+import { z } from "zod";
 
 import { createCLI as createCLIImpl } from "./cli.js";
 import { isSchemaPreset } from "./flags.js";
