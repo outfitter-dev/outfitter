@@ -100,8 +100,8 @@ Developer-facing tools built on the runtime.
 | `outfitter`          | Umbrella CLI for scaffolding projects                                      |
 | `@outfitter/testing` | Test harnesses for CLI and MCP, including `testCommand()` and `testTool()` |
 | `@outfitter/docs`    | Docs CLI, assembly primitives, freshness checks, and host adapter          |
-| `@outfitter/presets`  | Scaffold presets and shared dependency versions                            |
-| `@outfitter/tooling` | Dev tooling presets (oxlint, typescript, lefthook, markdownlint)            |
+| `@outfitter/presets` | Scaffold presets and shared dependency versions                            |
+| `@outfitter/tooling` | Dev tooling presets (oxlint, typescript, lefthook, markdownlint)           |
 
 ## Documentation
 

@@ -251,7 +251,9 @@ const userTemplate = defineResourceTemplate({
   name: "User Profile",
   handler: async (uri, variables, ctx) => {
     const profile = await getProfile(variables.userId);
-    return Result.ok([{ uri, text: JSON.stringify(profile), mimeType: "application/json" }]);
+    return Result.ok([
+      { uri, text: JSON.stringify(profile), mimeType: "application/json" },
+    ]);
   },
 });
 
@@ -334,7 +336,12 @@ const tool = defineTool({
       ctx.progress?.({ type: "progress", current: i + 1, total: files.length });
     }
 
-    ctx.progress?.({ type: "step", name: "complete", status: "done", duration_ms: 150 });
+    ctx.progress?.({
+      type: "step",
+      name: "complete",
+      status: "done",
+      duration_ms: 150,
+    });
 
     return Result.ok({ indexed: files.length });
   },
@@ -358,9 +365,8 @@ The progress callback uses the same `StreamEvent` types from `@outfitter/contrac
 ```typescript
 import { createMcpProgressCallback } from "@outfitter/mcp/progress";
 
-const progress = createMcpProgressCallback(
-  "tok-123",
-  (notification) => sdkServer.notification(notification)
+const progress = createMcpProgressCallback("tok-123", (notification) =>
+  sdkServer.notification(notification)
 );
 ```
 

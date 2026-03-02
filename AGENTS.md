@@ -149,10 +149,14 @@ command("deploy <env>")
   .description("Deploy to environment")
   .input(z.object({ env: z.string(), force: z.boolean().default(false) }))
   .context((input) => loadDeployConfig(input.env))
-  .destructive(true)                                  // auto-adds --dry-run
+  .destructive(true) // auto-adds --dry-run
   .relatedTo("status", { description: "Check status" })
-  .hints((result) => [{ description: "View logs", command: `logs --env ${result.env}` }])
-  .onError((err) => [{ description: "Rollback", command: `rollback --env ${err.env}` }])
+  .hints((result) => [
+    { description: "View logs", command: `logs --env ${result.env}` },
+  ])
+  .onError((err) => [
+    { description: "Rollback", command: `rollback --env ${err.env}` },
+  ])
   .action(async ({ flags, input, ctx }) => {
     await runHandler({
       command: "deploy",
@@ -167,17 +171,17 @@ command("deploy <env>")
 
 **Builder methods:**
 
-| Method | Purpose |
-| --- | --- |
-| `.input(schema)` | Zod schema for validated input; auto-derives `--flags` from schema fields |
-| `.context(factory)` | Async factory called after validation; result passed as `ctx` to action |
-| `.preset(preset)` | Attach a flag preset (`outputModePreset()`, `cwdPreset()`, `streamPreset()`, etc.) |
-| `.hints(fn)` | Success hint function — generates `CLIHint[]` for the success envelope |
-| `.onError(fn)` | Error hint function — generates `CLIHint[]` for the error envelope |
-| `.destructive(true)` | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execute-without-dry-run hint |
-| `.readOnly(true)` | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint` |
-| `.idempotent(true)` | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint` |
-| `.relatedTo(target, opts)` | Declares relationship to another command for action graph hints |
+| Method                     | Purpose                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `.input(schema)`           | Zod schema for validated input; auto-derives `--flags` from schema fields                   |
+| `.context(factory)`        | Async factory called after validation; result passed as `ctx` to action                     |
+| `.preset(preset)`          | Attach a flag preset (`outputModePreset()`, `cwdPreset()`, `streamPreset()`, etc.)          |
+| `.hints(fn)`               | Success hint function — generates `CLIHint[]` for the success envelope                      |
+| `.onError(fn)`             | Error hint function — generates `CLIHint[]` for the error envelope                          |
+| `.destructive(true)`       | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execute-without-dry-run hint |
+| `.readOnly(true)`          | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint`              |
+| `.idempotent(true)`        | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint`              |
+| `.relatedTo(target, opts)` | Declares relationship to another command for action graph hints                             |
 
 ### Streaming
 
@@ -185,7 +189,11 @@ Handlers emit real-time progress via `ctx.progress` (an optional `ProgressCallba
 
 ```typescript
 const handler: Handler<Input, Output> = async (input, ctx) => {
-  ctx.progress?.({ type: "start", command: "process", ts: new Date().toISOString() });
+  ctx.progress?.({
+    type: "start",
+    command: "process",
+    ts: new Date().toISOString(),
+  });
   for (let i = 0; i < items.length; i++) {
     await processItem(items[i]);
     ctx.progress?.({ type: "progress", current: i + 1, total: items.length });
@@ -209,12 +217,12 @@ Error envelopes include `retryable` (derived from error category) and `retry_aft
 
 **Hint tiers** (accumulated in order):
 
-| Tier | Source | Generator | Description |
-| --- | --- | --- | --- |
-| 1 | Command tree | `commandTreeHints()` | "What can I do?" |
-| 2 | Error category | `errorRecoveryHints()` | Standard recovery actions |
-| 3 | Zod schema | `schemaHintParams()` | Parameter shapes for agents |
-| 4 | Action graph | `graphSuccessHints()` / `graphErrorHints()` | Related commands via `.relatedTo()` |
+| Tier | Source         | Generator                                   | Description                         |
+| ---- | -------------- | ------------------------------------------- | ----------------------------------- |
+| 1    | Command tree   | `commandTreeHints()`                        | "What can I do?"                    |
+| 2    | Error category | `errorRecoveryHints()`                      | Standard recovery actions           |
+| 3    | Zod schema     | `schemaHintParams()`                        | Parameter shapes for agents         |
+| 4    | Action graph   | `graphSuccessHints()` / `graphErrorHints()` | Related commands via `.relatedTo()` |
 
 ### Output Truncation
 
@@ -223,7 +231,11 @@ Array output can be truncated with pagination hints using `truncateOutput()` fro
 ```typescript
 import { truncateOutput } from "@outfitter/cli/truncation";
 
-const truncated = truncateOutput(items, { limit: 20, offset: 0, commandName: "list" });
+const truncated = truncateOutput(items, {
+  limit: 20,
+  offset: 0,
+  commandName: "list",
+});
 // truncated.data — sliced items
 // truncated.metadata — { showing, total, truncated: true } when above limit
 // truncated.hints — CLIHint[] for pagination continuation
@@ -248,7 +260,9 @@ const userTemplate = defineResourceTemplate({
   uriTemplate: "db:///users/{userId}",
   name: "User",
   schema: z.object({ userId: z.string() }),
-  handler: async ({ userId }) => ({ text: JSON.stringify(await getUser(userId)) }),
+  handler: async ({ userId }) => ({
+    text: JSON.stringify(await getUser(userId)),
+  }),
 });
 ```
 
@@ -331,14 +345,14 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 
 ### Blessed Dependencies
 
-| Concern           | Package                    |
-| ----------------- | -------------------------- |
-| Result type       | `better-result`            |
-| Schema validation | `zod`                      |
-| CLI parsing       | `commander`                |
-| Logging           | `@logtape/logtape`         |
-| MCP protocol      | `@modelcontextprotocol/sdk`|
-| Prompts           | `@clack/prompts`           |
+| Concern           | Package                     |
+| ----------------- | --------------------------- |
+| Result type       | `better-result`             |
+| Schema validation | `zod`                       |
+| CLI parsing       | `commander`                 |
+| Logging           | `@logtape/logtape`          |
+| MCP protocol      | `@modelcontextprotocol/sdk` |
+| Prompts           | `@clack/prompts`            |
 
 Versions are managed via Bun workspace catalogs in the root `package.json`. Check there for current pins.
 

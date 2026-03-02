@@ -428,10 +428,14 @@ import { runHandler } from "@outfitter/cli/envelope";
 command("delete <id>")
   .description("Delete a resource")
   .input(z.object({ id: z.string(), force: z.boolean().default(false) }))
-  .destructive(true)        // auto-adds --dry-run flag
+  .destructive(true) // auto-adds --dry-run flag
   .relatedTo("list", { description: "List remaining resources" })
-  .hints((result, input) => [{ description: "Verify", command: `show ${input.id}` }])
-  .onError((error, input) => [{ description: "Check exists", command: `show ${input.id}` }])
+  .hints((result, input) => [
+    { description: "Verify", command: `show ${input.id}` },
+  ])
+  .onError((error, input) => [
+    { description: "Check exists", command: `show ${input.id}` },
+  ])
   .action(async ({ input, flags }) => {
     await runHandler({
       command: "delete",
@@ -445,16 +449,16 @@ command("delete <id>")
 
 **Safety metadata methods:**
 
-| Method             | Effect                                                          |
-| ------------------ | --------------------------------------------------------------- |
-| `.destructive()`   | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execution hint |
-| `.readOnly()`      | Surfaces in command tree JSON and maps to MCP `readOnlyHint`    |
-| `.idempotent()`    | Surfaces in command tree JSON and maps to MCP `idempotentHint`  |
-| `.relatedTo()`     | Declares action graph edges for tier-4 hint generation          |
-| `.input(schema)`   | Zod schema for auto-derived flags and validation                |
-| `.context(factory)` | Async factory for handler context construction                 |
-| `.hints(fn)`       | Success hint function called with `(result, input)`             |
-| `.onError(fn)`     | Error hint function called with `(error, input)`                |
+| Method              | Effect                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `.destructive()`    | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execution hint |
+| `.readOnly()`       | Surfaces in command tree JSON and maps to MCP `readOnlyHint`                  |
+| `.idempotent()`     | Surfaces in command tree JSON and maps to MCP `idempotentHint`                |
+| `.relatedTo()`      | Declares action graph edges for tier-4 hint generation                        |
+| `.input(schema)`    | Zod schema for auto-derived flags and validation                              |
+| `.context(factory)` | Async factory for handler context construction                                |
+| `.hints(fn)`        | Success hint function called with `(result, input)`                           |
+| `.onError(fn)`      | Error hint function called with `(error, input)`                              |
 
 ## Conventions
 

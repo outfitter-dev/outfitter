@@ -170,7 +170,12 @@ const handler: Handler<Input, Output> = async (input, ctx) => {
     ctx.progress?.({ type: "progress", current: i + 1, total: items.length });
   }
 
-  ctx.progress?.({ type: "step", name: "cleanup", status: "complete", duration_ms: 12 });
+  ctx.progress?.({
+    type: "step",
+    name: "cleanup",
+    status: "complete",
+    duration_ms: 12,
+  });
 
   return Result.ok({ processed: items.length });
 };
