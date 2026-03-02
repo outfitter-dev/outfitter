@@ -130,7 +130,7 @@ const PATH_TRAVERSAL_PATTERN = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
  * Validate that a tempDir path is safe for writing.
  *
  * A safe tempDir must be:
- * - An absolute path (starts with /)
+ * - An absolute path (per `node:path` for the current platform)
  * - Free of `..` traversal segments after normalization
  *
  * Returns the validated (normalized) path, or undefined if unsafe.

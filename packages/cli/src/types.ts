@@ -798,7 +798,7 @@ export interface OutputOptions {
   /**
    * Optional truncation configuration metadata.
    *
-   * `output()` does not apply truncation automatically in this branch.
+   * `output()` does not apply truncation automatically.
    * Pass this configuration to `truncateOutput()` before calling `output()`.
    *
    * @example
