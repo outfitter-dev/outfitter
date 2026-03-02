@@ -1,0 +1,28 @@
+{
+  "featureId": "os-358-reference-project",
+  "reviewedAt": "2026-02-28T17:13:12Z",
+  "commitId": "c777dd3b",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The reference project is substantial and demonstrates most requested v0.4-v0.6 capabilities (runHandler envelope, streaming via ctx.progress, safety metadata, relatedTo graph, truncation, MCP defineResource, lint wiring, and workspace integration). However, it does not actually demonstrate the required `.context()` builder API, so acceptance criteria are not fully met.",
+    "issues": [
+      {
+        "file": "examples/reference/src/cli.ts",
+        "line": 65,
+        "severity": "blocking",
+        "description": "The feature explicitly requires builder-pattern usage of `.input()/.context()/.hints()/.onError()`, but no command chain invokes `.context()`. `cli.ts` uses `.input()`, `.hints()`, and `.onError()` only (command chains starting at lines 65, 126, 158, 184, and 213), and searching for `^\\s*\\.context\\(` returns no matches."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The `library-worker` skill procedure is package-centric and assumes changes under `packages/<pkg>`. For reference/example-project work under `examples/`, the strict red-phase and package-specific verification guidance is not always a natural fit.",
+      "evidence": "Handoff `/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-03-34-192Z__os-358-reference-project__67e8fdb0-69d2-494e-96bb-33962035dab4.json` includes `skillFeedback.suggestedChanges[0]` noting this mismatch for the reference project."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Fail: implementation covers most requested integration points, but misses a required `.context()` builder demonstration in the reference CLI."
+}

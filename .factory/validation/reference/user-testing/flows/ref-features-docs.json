@@ -1,0 +1,18 @@
+{
+  "flowId": "ref-features-docs",
+  "assertions": {
+    "VAL-REF-002": {
+      "status": "pass",
+      "evidence": "Inspected examples/reference/src/cli.ts, handlers.ts, schemas.ts, mcp.ts, and index.ts; all required v0.4-v0.6 feature patterns are present with concrete source locations.",
+      "details": "Feature checklist with file:line mapping:\n- Output mode patterns (v0.4): examples/reference/src/cli.ts:68 (outputModePreset modes), 85/157/188/214/238 (resolveOutputMode), 184/209 ('--output' in actionable hints).\n- Builder/envelope/hints (v0.5): cli.ts:65/127/174/200/229 (command builder usage), 67/129/176/202/231 (.input), 130 (.context), 74/143 (.hints), 181/206 (.onError), 88/163/189/217/241 (runHandler envelope usage).\n- Streaming with ctx.progress + --stream (v0.6): cli.ts:69/233 (streamPreset), 86/239 (stream flag read), 119/246 (runHandler stream option); handlers.ts:234-235 (start event), 241/250/258/281-282 (step events), 274-275 (progress events).\n- Safety primitives (v0.6): cli.ts:204 (.destructive(true)), 215/220/222 (dryRun wiring), 70/234 (.readOnly(true)), 71/178 (.idempotent(true)); mcp.ts:48-49/76/91 (readOnlyHint/idempotentHint/destructiveHint annotations).\n- Context protection (v0.6): cli.ts:24 (truncateOutput import), 96-103 (limit/offset truncation call), 110 (_truncation metadata), schemas.ts:44-45 (limit/offset input schema).\n- Action graph .relatedTo() (v0.6): cli.ts:72-73, 141-142, 179-180, 205, 235."
+    },
+    "VAL-REF-005": {
+      "status": "pass",
+      "evidence": "docs/migration-v0.6.md exists and was reviewed end-to-end; required topics and before/after migration examples are present.",
+      "details": "Coverage confirmed by section headings and markers: streaming protocol + ctx.progress (section 1, line 6), --stream (section 2, line 83), safety primitives (.destructive / readOnly / idempotent; sections 3-4, lines 168/246), context protection (truncation/pagination + file pointers; sections 6-7, lines 446/559), action graph (.relatedTo; section 8, line 662), breaking changes mention (line 3). Before/After + Migration steps exist for each required area: section 1 (39/51/74), section 2 (109/122/161), section 3 (174/189/238), section 4 (251/263/322), section 6 (451/463/550), section 7 (565/578/653), section 8 (669/682/769)."
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["shell", "read"]
+}

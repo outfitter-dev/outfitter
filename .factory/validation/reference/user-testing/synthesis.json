@@ -1,0 +1,22 @@
+{
+  "milestone": "reference",
+  "round": 2,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-REF-001",
+    "VAL-REF-002",
+    "VAL-REF-003",
+    "VAL-REF-004",
+    "VAL-REF-005"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}

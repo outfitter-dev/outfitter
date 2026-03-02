@@ -1,0 +1,55 @@
+{
+  "milestone": "reference",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 2,
+    "passed": 0,
+    "failed": 2,
+    "failedFeatures": ["os-358-reference-project", "migration-v06-docs"]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "os-358-reference-project",
+      "severity": "blocking",
+      "description": "Reference project does not demonstrate .context() builder API. Feature description explicitly requires builder-pattern usage of .input()/.context()/.hints()/.onError(), but no command chain in examples/reference/src/cli.ts invokes .context(). The API exists and is well-tested in @outfitter/cli — it just needs to be used in at least one command in the reference project."
+    },
+    {
+      "featureId": "migration-v06-docs",
+      "severity": "blocking",
+      "description": "Migration doc sections 6 (Output Truncation) and 7 (File Pointers) lack explicit before/after code pairs. Feature description requires each of 8 entries to include before/after code and migration steps. These sections have migration steps and new API code but no 'Before (v0.5)' / 'After (v0.6)' contrast. Note: truncation and file pointers are entirely new features (no prior API existed), so 'before' would show the absence of the feature or manual approaches."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "The library-worker skill procedure is package-centric and assumes changes under packages/<pkg>. For reference/example-project work under examples/, the strict red-phase and package-specific verification guidance is not always a natural fit. Consider adding a note or alternate workflow for examples/ work.",
+      "evidence": "Feature os-358-reference-project worker session handoff noted this mismatch. The worker's skillFeedback.suggestedChanges flagged that the library-worker skill's package-centric focus doesn't align with example project creation.",
+      "isSystemic": false
+    },
+    {
+      "target": "skills",
+      "suggestion": "The docs-worker skill procedure requires lint + typecheck + test in verification, but the migration-v06-docs worker only ran lint while reporting followedProcedure=true. Consider enforcing all three validators or clarifying which are required for docs-only changes.",
+      "evidence": "docs-worker skill (.factory/skills/docs-worker/SKILL.md lines 64-71) requires bun run lint, bun run typecheck, and bun run test. Handoff for worker session 2f362eb7 records only bun run lint under verification.commandsRun.",
+      "isSystemic": false
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Update the NDJSON progress event example in mission AGENTS.md Streaming Design Context section to remove the 'name' field from the progress event, since StreamProgressEvent in packages/contracts/src/stream.ts only has type/current/total/message fields.",
+      "evidence": "AGENTS.md line 75 shows progress event with 'name' field; packages/contracts/src/stream.ts:78-89 defines StreamProgressEvent with only type, current, total, message (no name).",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": null
+}
