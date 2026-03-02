@@ -202,15 +202,6 @@ export interface RunHandlerOptions<
 
   /** Error hint function — called with (error, input) */
   readonly onError?: (error: unknown, input: TInput) => CLIHint[];
-
-  /**
-   * Parsed argv to use for dry-run hint generation.
-   *
-   * Defaults to `process.argv.slice(2)`. Pass explicit argv when using
-   * `cli.parse(customArgv)` to ensure the dry-run hint reconstructs the
-   * correct command.
-   */
-  readonly argv?: readonly string[];
 }
 
 // =============================================================================
