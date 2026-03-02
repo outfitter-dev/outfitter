@@ -894,24 +894,36 @@ export interface McpServer {
 // Handler Context Extension
 // ============================================================================
 
+type HandlerProgress = HandlerContext extends { progress?: infer P }
+  ? P
+  : never;
+
+type LegacyProgressReporter = {
+  report(progress: number, total?: number, message?: string): void;
+};
+
+/**
+ * Backward-compatible progress reporter type.
+ *
+ * - When `HandlerContext.progress` exists (streaming branches), this becomes
+ *   `ProgressCallback & { report(...) }`.
+ * - When it does not exist (older branches), this falls back to
+ *   `{ report(...) }`.
+ */
+export type ProgressReporter = [HandlerProgress] extends [never]
+  ? LegacyProgressReporter
+  : NonNullable<HandlerProgress> & LegacyProgressReporter;
+
 /**
  * Extended handler context for MCP tools.
  * Includes MCP-specific information in addition to standard HandlerContext.
  */
 export interface McpHandlerContext extends Omit<HandlerContext, "progress"> {
   /** Progress reporter, present when client provides a progressToken */
-  progress?: {
-    report(progress: number, total?: number, message?: string): void;
-  };
+  progress?: ProgressReporter;
   /** The name of the tool being invoked */
   toolName?: string;
 }
-
-/**
- * Backward-compatible alias for progress reporter shape.
- * Prefer `McpHandlerContext['progress']` for new code.
- */
-export type ProgressReporter = NonNullable<McpHandlerContext["progress"]>;
 
 // ============================================================================
 // Handler Adapter

@@ -23,6 +23,7 @@ import {
 import type { z } from "zod";
 
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
+import { createMcpProgressCallback } from "./progress.js";
 import { zodToJsonSchema } from "./schema.js";
 import {
   type CompletionRef,
@@ -228,21 +229,39 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       ctx.signal = signal;
     }
 
-    // Add progress reporter when token is present and SDK server is bound
+    // Add progress callback when token is present and SDK server is bound.
+    // Uses the modular MCP progress adapter (packages/mcp/src/progress.ts)
+    // which translates StreamEvent → notifications/progress.
     if (progressToken !== undefined && sdkServer) {
-      ctx.progress = {
-        report(progress: number, total?: number, message?: string) {
-          sdkServer?.notification?.({
-            method: "notifications/progress",
-            params: {
-              progressToken,
-              progress,
-              ...(total !== undefined ? { total } : {}),
-              ...(message ? { message } : {}),
-            },
+      const sender = (notification: unknown): void => {
+        const maybePromise = sdkServer?.notification?.(notification);
+        if (
+          typeof maybePromise === "object" &&
+          maybePromise !== null &&
+          "then" in maybePromise
+        ) {
+          void (maybePromise as Promise<unknown>).catch((error: unknown) => {
+            logger.warn("Failed to send MCP progress notification", {
+              error: error instanceof Error ? error.message : String(error),
+            });
           });
-        },
+        }
       };
+      const streamProgress = createMcpProgressCallback(progressToken, sender);
+      const progress = streamProgress as unknown as NonNullable<
+        McpHandlerContext["progress"]
+      >;
+      progress.report = (value: number, total?: number, message?: string) => {
+        // Route legacy report() through the same callback so the adapter's
+        // internal progress state stays in sync with StreamEvent calls.
+        streamProgress({
+          type: "progress",
+          current: value,
+          total: total ?? value,
+          ...(message !== undefined ? { message } : {}),
+        });
+      };
+      ctx.progress = progress;
     }
 
     return ctx;

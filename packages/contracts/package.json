@@ -124,6 +124,12 @@
         "default": "./dist/serialization.js"
       }
     },
+    "./stream": {
+      "import": {
+        "types": "./dist/stream.d.ts",
+        "default": "./dist/stream.js"
+      }
+    },
     "./validation": {
       "import": {
         "types": "./dist/validation.d.ts",
