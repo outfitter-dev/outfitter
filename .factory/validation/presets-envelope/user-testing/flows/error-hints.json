@@ -1,0 +1,118 @@
+{
+  "groupId": "error-hints",
+  "testedAt": "2026-02-28T00:52:01Z",
+  "credentials": {
+    "account": "not-applicable-shell",
+    "namespace": "presets-envelope/error-hints"
+  },
+  "toolsUsed": ["shell"],
+  "assertions": [
+    {
+      "id": "VAL-ERR-001",
+      "title": "ErrorCategory enriched with JSON-RPC codes and retryable flags",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused enrichment tests: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test src/__tests__/error-enrichment.test.ts",
+          "expected": "jsonRpcCodeMap and retryableMap coverage passes; existing exit/status maps remain unchanged",
+          "observed": "18 pass, 0 fail (includes jsonRpcCodeMap, retryableMap, errorCategoryMeta, and existing map preservation checks)"
+        },
+        {
+          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test",
+          "expected": "@outfitter/contracts test suite passes",
+          "observed": "437 pass, 0 fail"
+        },
+        {
+          "action": "Verify exports/imports: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun -e \"const m = await import('./src/index.ts'); ...\"",
+          "expected": "jsonRpcCodeMap/retryableMap/exitCodeMap/statusCodeMap/errorCategoryMeta exported and populated for all 10 categories",
+          "observed": "exportsPresent=true, categories=10, allHaveJsonRpc=true, allHaveRetryable=true; sampleValidation={exitCode:1,statusCode:400,jsonRpcCode:-32602,retryable:false}; sampleTimeout={exitCode:5,statusCode:504,jsonRpcCode:-32001,retryable:true}"
+        },
+        {
+          "action": "Inspect mapping source and exports (packages/contracts/src/errors.ts, packages/contracts/src/index.ts)",
+          "expected": "exitCode/statusCode preserved; jsonRpcCode and retryable mappings present for all categories and exported",
+          "observed": "exitCodeMap and statusCodeMap unchanged; jsonRpcCodeMap and retryableMap defined as Record<ErrorCategory, ...>; errorCategoryMeta returns all 4 fields; exports confirmed in index.ts"
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "packages/contracts bun test src/__tests__/error-enrichment.test.ts -> 18 pass, 0 fail",
+          "packages/contracts bun test -> 437 pass, 0 fail"
+        ],
+        "importVerification": "Direct import from ./src/index.ts confirms required maps/helpers exported and populated across all categories",
+        "codeInspection": "packages/contracts/src/errors.ts and packages/contracts/src/index.ts"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-HINT-001",
+      "title": "Self-documenting root command outputs command tree",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused self-doc tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/self-doc.test.ts",
+          "expected": "No-subcommand root output verified for JSON mode/piped mode and TTY help mode, including command descriptions/options",
+          "observed": "9 pass, 0 fail (includes JSON tree output, schema-derived options, piped non-TTY JSON default, and TTY help text cases)"
+        },
+        {
+          "action": "Invoke createCLI without subcommand in non-TTY shell via bun -e",
+          "expected": "Structured JSON command tree output",
+          "observed": "Output was JSON tree with name/version/description/commands; included command descriptions and options (e.g., --limit <n>)"
+        },
+        {
+          "action": "Invoke createCLI without subcommand while forcing process.stdout.isTTY=true via bun -e",
+          "expected": "Human-readable help output",
+          "observed": "Output was Commander help text (Usage, Options, Commands) including registered command list"
+        },
+        {
+          "action": "Inspect implementation in packages/cli/src/cli.ts",
+          "expected": "Root action emits command tree in JSON mode/piped mode and help text in TTY mode",
+          "observed": "isJsonMode checks --json/env/non-TTY; JSON path uses buildCommandTree+output(..., 'json'); TTY path calls program.outputHelp()"
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "packages/cli bun test src/__tests__/self-doc.test.ts -> 9 pass, 0 fail"
+        ],
+        "cliInvocation": [
+          "Non-TTY invocation printed JSON command tree with command descriptions/options",
+          "TTY-forced invocation printed help text with usage/options/commands"
+        ],
+        "codeInspection": "packages/cli/src/cli.ts and packages/cli/src/__tests__/self-doc.test.ts"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-HINT-002",
+      "title": "Hint generation tiers 1-3 operational",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run focused hint-tier tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/hint-tiers.test.ts",
+          "expected": "Tier 1 command tree introspection, Tier 2 error recovery mapping, Tier 3 schema-derived params all pass",
+          "observed": "24 pass, 0 fail; output includes explicit Tier 1/2/3 test groups and assertions"
+        },
+        {
+          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test",
+          "expected": "No regressions in @outfitter/cli",
+          "observed": "659 pass, 0 fail"
+        },
+        {
+          "action": "Inspect hint implementation in packages/cli/src/hints.ts",
+          "expected": "Tier 1/2/3 functions implemented with intended behavior",
+          "observed": "Tier 1: buildCommandTree + commandTreeHints; Tier 2: errorRecoveryHints via category map with retryable params; Tier 3: schemaHintParams from Zod schema shape/description"
+        }
+      ],
+      "evidence": {
+        "testOutput": [
+          "packages/cli bun test src/__tests__/hint-tiers.test.ts -> 24 pass, 0 fail",
+          "packages/cli bun test -> 659 pass, 0 fail"
+        ],
+        "codeInspection": "packages/cli/src/hints.ts and packages/cli/src/__tests__/hint-tiers.test.ts"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 3 assertions (VAL-ERR-001, VAL-HINT-001, VAL-HINT-002): all 3 passed with required shell-based evidence from focused tests, package tests, import verification, CLI invocation, and code inspection."
+}

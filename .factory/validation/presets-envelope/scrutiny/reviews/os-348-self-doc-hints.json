@@ -1,0 +1,22 @@
+{
+  "featureId": "os-348-self-doc-hints",
+  "reviewedAt": "2026-02-28T00:24:27Z",
+  "commitId": "302e7fa4",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "Feature implementation is substantial (self-doc root action, hint-tier module, tests, and changeset), but one required behavior from VAL-HINT-001 is not met.",
+    "issues": [
+      {
+        "file": "packages/cli/src/cli.ts",
+        "line": 104,
+        "severity": "blocking",
+        "description": "The root no-subcommand mode check only considers `--json`, `OUTFITTER_JSON`, and `OUTFITTER_JSONL`. It does not detect non-TTY/piped execution, so piped runs without explicit JSON env/flag fall through to `program.outputHelp()` instead of emitting JSON command tree output, which violates the required 'piped/JSON mode vs TTY help mode' behavior."
+      }
+    ]
+  },
+  "sharedStateObservations": [],
+  "addressesFailureFrom": null,
+  "summary": "Review failed: VAL-HINT-001 is not fully satisfied because piped (non-TTY) root invocations are not mapped to JSON command-tree output."
+}
