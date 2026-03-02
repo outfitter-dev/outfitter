@@ -1,0 +1,85 @@
+{
+  "groupId": "cli-input-schema",
+  "testedAt": "2026-02-27T23:39:47Z",
+  "credentials": {
+    "account": "not-applicable-shell-validation",
+    "namespace": "not-applicable-shell-validation"
+  },
+  "toolsUsed": ["shell", "bun", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-BUILD-002",
+      "title": ".input(schema) auto-derives Commander flags from Zod schema",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify `.input(schema)` exists on CommandBuilder",
+          "expected": "`CommandBuilder.input()` is implemented",
+          "observed": "Found `input<T extends Record<string, unknown>>(schema: ZodObjectLike<T>): CommandBuilder<T>` in `packages/cli/src/command.ts` (line ~144)."
+        },
+        {
+          "action": "Inspect schema derivation logic",
+          "expected": "string/number/boolean/enum mapping; `.describe()` and `.default()` wiring",
+          "observed": "`deriveFlags()` + `createCommanderOption()` in `packages/cli/src/schema-input.ts` implement string/number/boolean/enum mapping, number coercion via `option.argParser(Number)`, enum choices via `option.choices(...)`, description from `.describe()`, and defaults via `.default()`."
+        },
+        {
+          "action": "Verify tests cover mapping and metadata behavior",
+          "expected": "Tests for z.string/z.number/z.boolean/z.enum plus `.describe()` and `.default()`",
+          "observed": "`packages/cli/src/__tests__/command-input.test.ts` includes: `derives a string option from z.string()`, `derives a number option with coercion from z.number()`, `derives a boolean flag from z.boolean()`, `derives a choices option from z.enum()`, `uses .describe() text as option description`, and default tests for number/string fields."
+        },
+        {
+          "action": "Run CLI package tests",
+          "expected": "All relevant tests pass",
+          "observed": "`cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test` passed (561 pass, 0 fail), including all `CommandBuilder.input()` auto-derive/default/describe tests."
+        },
+        {
+          "action": "Run repository typecheck",
+          "expected": "TypeScript validation passes",
+          "observed": "`cd /Users/mg/Developer/outfitter/stack && bun run typecheck` completed successfully (Turbo: 34 successful, 34 total)."
+        }
+      ],
+      "evidence": {
+        "testOutput": "packages/cli bun test: 561 pass, 0 fail; includes CommandBuilder.input() derivation tests",
+        "typecheck": "bun run typecheck: success (34/34 tasks)",
+        "codeInspection": "packages/cli/src/command.ts and packages/cli/src/schema-input.ts"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-BUILD-003",
+      "title": ".input() composes with explicit Commander declarations",
+      "status": "fail",
+      "steps": [
+        {
+          "action": "Verify tests for explicit `.option()`, `.argument()`, `.requiredOption()` composition with `.input()`",
+          "expected": "Coverage for all three explicit declaration APIs",
+          "observed": "Found `.option()` composition tests and one `.argument()` composition test in `packages/cli/src/__tests__/command-input.test.ts`; no `.requiredOption()` + `.input()` test found (grep returned no matches)."
+        },
+        {
+          "action": "Verify override behavior tests",
+          "expected": "Explicit declarations override/supplement auto-derived flags",
+          "observed": "Found passing tests: `explicit .option() overrides auto-derived flag for same name` and `explicit .option() supplements auto-derived flags` in `command-input.test.ts`."
+        },
+        {
+          "action": "Verify positional args, aliases, variadic params coverage",
+          "expected": "Tests demonstrate positional + alias + variadic explicit declarations with `.input()`",
+          "observed": "Found positional args coverage (`explicit .argument() works alongside .input()`) and alias usage through `-f` in option override test; no variadic explicit declaration test found."
+        },
+        {
+          "action": "Run CLI package tests for mixed auto+explicit parsing evidence",
+          "expected": "Passing output demonstrates mixed parsing behavior",
+          "observed": "`bun test` output includes passing mixed tests for `.option()` override/supplement and `.argument()` alongside `.input()`, but not `.requiredOption()`/variadic scenarios."
+        }
+      ],
+      "evidence": {
+        "testOutput": "packages/cli bun test includes passing mixed `.input()` + `.option()` + `.argument()` tests",
+        "codeInspection": "No `.requiredOption()` + `.input()` test and no variadic explicit declaration test found via grep in packages/cli/src/__tests__",
+        "typecheck": "bun run typecheck: success"
+      },
+      "issues": "Assertion criteria require explicit `.requiredOption()` composition and variadic explicit declaration coverage; those test cases were not found in current test suite evidence."
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions for builder-core input schema: VAL-BUILD-002 passed with source + test + typecheck evidence; VAL-BUILD-003 failed due to missing `.requiredOption()` and variadic explicit-composition test coverage evidence."
+}

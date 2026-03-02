@@ -1,0 +1,103 @@
+{
+  "groupId": "cli-context-hints",
+  "testedAt": "2026-02-27T23:39:30Z",
+  "credentials": {
+    "account": "N/A",
+    "namespace": "builder-core"
+  },
+  "toolsUsed": ["Read", "Grep (rg)", "bun test", "bun run typecheck"],
+  "assertions": [
+    {
+      "id": "VAL-BUILD-004",
+      "title": ".context(factory) receives typed input and returns typed context",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect CommandBuilder source for .context() API",
+          "expected": "Method exists and accepts async/sync factory with typed input",
+          "observed": "Confirmed in packages/cli/src/types.ts and packages/cli/src/command.ts (.context<T>(factory: ContextFactory<TInput, T>) API; implementation stores factory)"
+        },
+        {
+          "action": "Inspect action pipeline for handler context injection",
+          "expected": "Validated input passed to context factory and resulting ctx passed to handler with input",
+          "observed": "Confirmed in packages/cli/src/command.ts (factoryArg uses validated input when present; handler called with both input and ctx)"
+        },
+        {
+          "action": "Inspect error handling path for context factory failures",
+          "expected": "Context factory errors are caught and mapped to proper exit behavior",
+          "observed": "Confirmed in packages/cli/src/command.ts: context factory wrapped in try/catch with exitWithError(error)"
+        },
+        {
+          "action": "Run CLI package tests",
+          "expected": "Context tests pass including error and exit-code behavior",
+          "observed": "cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test => 561 pass, 0 fail; includes command-context tests for typed input, ctx passing, and exit-code mapping"
+        },
+        {
+          "action": "Run repository typecheck",
+          "expected": "Generic typing/inference compiles successfully",
+          "observed": "cd /Users/mg/Developer/outfitter/stack && bun run typecheck => exit code 0 (34 successful tasks)"
+        }
+      ],
+      "evidence": {
+        "codeInspection": [
+          "packages/cli/src/types.ts:81 defines ContextFactory<TInput, TContext> with typed input and typed context return",
+          "packages/cli/src/types.ts:187 defines context<T>(factory: ContextFactory<TInput, T>): CommandBuilder<TInput, T>",
+          "packages/cli/src/command.ts:216 invokes contextFactory with validated input (or raw flags fallback), and packages/cli/src/command.ts:223-229 passes input + ctx into handler",
+          "packages/cli/src/command.ts:219 catches context factory errors via exitWithError(error)",
+          "packages/cli/src/__tests__/command-context.test.ts includes: passes validated input to context factory; passes context object to handler alongside input; catches context factory errors and produces exit codes; maps OutfitterError categories to exit codes"
+        ],
+        "testOutput": "CLI package test suite passed (561/561). Context-specific tests passed for typed input flow, ctx injection, and error/exit-code handling.",
+        "typecheck": "Repository typecheck passed (turbo typecheck: 34 successful, 0 failed)."
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-BUILD-005",
+      "title": ".hints() and .onError() declare transport-local hints",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect CommandBuilder source for .hints() and .onError() APIs",
+          "expected": "Both methods exist and are attached to builder",
+          "observed": "Confirmed in packages/cli/src/command.ts: hints(fn) and onError(fn) methods exist and store functions"
+        },
+        {
+          "action": "Verify type signatures",
+          "expected": ".hints(fn) accepts (result, input) => CLIHint[] and .onError(fn) accepts (error, input) => CLIHint[]",
+          "observed": "Confirmed in packages/cli/src/types.ts: SuccessHintFn<TInput> and ErrorHintFn<TInput> definitions and CommandBuilder signatures for hints/onError"
+        },
+        {
+          "action": "Inspect transport-boundary behavior",
+          "expected": "Hint functions are transport-local and do not leak into handler logic",
+          "observed": "Confirmed in packages/cli/src/command.ts: hint functions are stored as command metadata in build(); handler receives standard action context only"
+        },
+        {
+          "action": "Run CLI package tests",
+          "expected": "Hint function tests pass",
+          "observed": "cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test => 561 pass, 0 fail; includes command-hints tests validating signatures/chaining and transport-agnostic handler scope"
+        },
+        {
+          "action": "Run repository typecheck",
+          "expected": "Hint function generic typing compiles",
+          "observed": "cd /Users/mg/Developer/outfitter/stack && bun run typecheck => exit code 0"
+        }
+      ],
+      "evidence": {
+        "codeInspection": [
+          "packages/cli/src/types.ts:93 defines SuccessHintFn<TInput> as (result, input) => CLIHint[]",
+          "packages/cli/src/types.ts:106 defines ErrorHintFn<TInput> as (error, input) => CLIHint[]",
+          "packages/cli/src/types.ts:215 and 259 define CommandBuilder.hints(fn) and .onError(fn) signatures",
+          "packages/cli/src/command.ts:159 and 165 store hint/error hint functions on builder state",
+          "packages/cli/src/command.ts:239 and 242 attach hint functions as command metadata (__successHintFn/__errorHintFn), preserving transport-local behavior",
+          "packages/cli/src/__tests__/command-hints.test.ts includes: does not invoke hint functions during build; handlers remain transport-agnostic (no hints/onError keys in handler context)"
+        ],
+        "testOutput": "CLI package test suite passed (561/561). Hint-specific tests passed for .hints(), .onError(), and transport-local behavior.",
+        "typecheck": "Repository typecheck passed (turbo typecheck: 34 successful, 0 failed)."
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions (VAL-BUILD-004, VAL-BUILD-005): both passed via source inspection, CLI test execution, and full repository typecheck."
+}
