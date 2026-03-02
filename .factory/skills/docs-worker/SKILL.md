@@ -61,12 +61,14 @@ After writing, verify every claim in the doc:
 ### 5. Verify
 
 ```bash
-# Lint the docs (markdown lint)
-bun run check
+# Lint (do NOT use 'bun run check' — format:check has a pre-existing crash)
+bun run lint
 
-# Ensure no build/test breakage from any code touched
-bun run test
+# Type safety
 bun run typecheck
+
+# Ensure no test breakage
+bun run test
 ```
 
 ### 6. Commit

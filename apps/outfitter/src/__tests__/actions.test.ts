@@ -6,6 +6,8 @@
 
 import { describe, expect, test } from "bun:test";
 
+import { validateInput } from "@outfitter/contracts";
+
 import { outfitterActions } from "../actions.js";
 
 describe("outfitter action mapping", () => {
@@ -197,5 +199,19 @@ describe("outfitter action mapping", () => {
 
     expect(mapped.force).toBe(true);
     expect(mapped.dryRun).toBe(true);
+  });
+
+  test("upgrade codemod input schema defaults dryRun when omitted", () => {
+    const action = outfitterActions.get("upgrade.codemod");
+    expect(action).toBeDefined();
+
+    const validation = validateInput(action!.input, {
+      cwd: "/tmp/project",
+    });
+    expect(validation.isOk()).toBe(true);
+
+    if (validation.isOk()) {
+      expect((validation.value as { dryRun: boolean }).dryRun).toBe(false);
+    }
   });
 });

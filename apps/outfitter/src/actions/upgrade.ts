@@ -162,7 +162,7 @@ type UpgradeCodemodAction = ReturnType<
 
 const upgradeCodemodInputSchema = z.object({
   cwd: z.string(),
-  dryRun: z.boolean(),
+  dryRun: z.boolean().default(false),
   outputMode: outputModeSchema,
 });
 
