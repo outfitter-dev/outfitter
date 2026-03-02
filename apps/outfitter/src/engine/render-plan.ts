@@ -12,7 +12,7 @@ export async function renderOperationPlan(
 ): Promise<void> {
   const structuredMode = resolveStructuredOutputMode(options?.mode);
   if (structuredMode) {
-    await output(collector.toJSON(), { mode: structuredMode });
+    await output(collector.toJSON(), structuredMode);
     return;
   }
 
@@ -133,5 +133,5 @@ export async function renderOperationPlan(
   lines.push(
     `Total operations: ${Object.values(summary).reduce((a, b) => a + b, 0)}`
   );
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

@@ -32,7 +32,7 @@ export async function printScaffoldResults(
           movedExisting: result.movedExisting ?? null,
           ...result.dryRunPlan,
         },
-        { mode: structuredMode }
+        structuredMode
       );
       return;
     }
@@ -58,7 +58,7 @@ export async function printScaffoldResults(
         postScaffold: result.postScaffold,
         nextSteps: result.postScaffold.nextSteps,
       },
-      { mode: structuredMode }
+      structuredMode
     );
     return;
   }
@@ -86,5 +86,5 @@ export async function printScaffoldResults(
     lines.push(`  ${step}`);
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

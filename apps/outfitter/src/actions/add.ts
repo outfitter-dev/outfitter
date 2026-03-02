@@ -115,13 +115,13 @@ export const listBlocksAction: ListBlocksAction = defineAction({
 
     const structuredMode = resolveStructuredOutputMode(input.outputMode);
     if (structuredMode) {
-      await output({ blocks: result.value }, { mode: structuredMode });
+      await output({ blocks: result.value }, structuredMode);
     } else {
       const lines = [
         "Available blocks:",
         ...result.value.map((block) => `  - ${block}`),
       ];
-      await output(lines, { mode: "human" });
+      await output(lines, "human");
     }
 
     return Result.ok({ blocks: result.value });

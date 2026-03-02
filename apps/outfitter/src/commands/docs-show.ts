@@ -142,7 +142,7 @@ export async function printDocsShowResults(
       });
       process.stdout.write(filtered);
     } else {
-      await output(result, { mode: structuredMode });
+      await output(result, structuredMode);
     }
     return;
   }
@@ -168,5 +168,5 @@ export async function printDocsShowResults(
   lines.push("");
   lines.push(result.content);
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

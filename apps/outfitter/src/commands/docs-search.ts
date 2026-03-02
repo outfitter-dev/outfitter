@@ -171,7 +171,7 @@ export async function printDocsSearchResults(
       });
       process.stdout.write(filtered);
     } else {
-      await output(result, { mode: structuredMode });
+      await output(result, structuredMode);
     }
     return;
   }
@@ -183,7 +183,7 @@ export async function printDocsSearchResults(
     lines.push(
       theme.muted(`No documentation entries matched "${result.query}".`)
     );
-    await output(lines, { mode: "human" });
+    await output(lines, "human");
     return;
   }
 
@@ -211,5 +211,5 @@ export async function printDocsSearchResults(
     lines.push("");
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

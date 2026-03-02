@@ -123,7 +123,7 @@ export async function printDocsExportResults(
   const structuredMode = resolveStructuredOutputMode(options?.mode);
 
   if (structuredMode) {
-    await output(result, { mode: structuredMode });
+    await output(result, structuredMode);
     return;
   }
 
@@ -145,5 +145,5 @@ export async function printDocsExportResults(
     }
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }
