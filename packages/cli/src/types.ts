@@ -796,17 +796,18 @@ export interface OutputOptions {
   readonly stream?: NodeJS.WritableStream;
 
   /**
-   * Optional truncation configuration for automatic output truncation.
+   * Optional truncation configuration metadata.
    *
-   * When provided, `output()` will apply truncation to array data before
-   * serialization. This is a convenience shorthand — callers can also use
-   * `truncateOutput()` directly for more control.
+   * `output()` does not apply truncation automatically in this branch.
+   * Pass this configuration to `truncateOutput()` before calling `output()`.
    *
    * @example
    * ```typescript
-   * await output(items, "json", {
-   *   truncation: { limit: 50, commandName: "list" },
+   * const truncated = await truncateOutput(items, {
+   *   limit: 50,
+   *   commandName: "list",
    * });
+   * await output(truncated.data, "json");
    * ```
    */
   readonly truncation?: {
