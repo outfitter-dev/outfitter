@@ -209,26 +209,30 @@ describe("testCommand()", () => {
   });
 
   it("serializes concurrent invocations to avoid global-state races", async () => {
+    let running = 0;
+    let overlap = false;
     const cli = makeCli();
     cli.register(
       command("wait")
         .description("Wait briefly")
         .action(async () => {
+          if (running > 0) {
+            overlap = true;
+          }
+          running += 1;
           await new Promise((resolve) => setTimeout(resolve, 40));
+          running -= 1;
           console.log("waited");
         })
     );
 
-    const start = Date.now();
     const [a, b] = await Promise.all([
       testCommand(cli, ["wait"]),
       testCommand(cli, ["wait"]),
     ]);
-    const elapsedMs = Date.now() - start;
 
     expect(a.stdout).toContain("waited");
     expect(b.stdout).toContain("waited");
-    // If calls are serialized, elapsed time should be roughly cumulative.
-    expect(elapsedMs).toBeGreaterThanOrEqual(70);
+    expect(overlap).toBe(false);
   });
 });

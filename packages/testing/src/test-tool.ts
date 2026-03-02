@@ -34,7 +34,7 @@ export interface TestToolOptions {
   /**
    * Custom environment variables for the handler context.
    */
-  readonly env?: Record<string, string | undefined>;
+  readonly env?: Readonly<Record<string, string | undefined>>;
 
   /**
    * Custom request ID for the handler context.
