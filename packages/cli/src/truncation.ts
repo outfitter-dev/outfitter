@@ -269,13 +269,6 @@ export function truncateOutput<T>(
   if (total > filePointerThreshold) {
     const tempDir = options.tempDir ?? tmpdir();
 
-    if (rawTempDir && !validateTempDir(rawTempDir)) {
-      hints.push({
-        description: `Warning: Unsafe tempDir "${rawTempDir}" was rejected; using OS tmpdir instead`,
-        command: `${commandName ? `${commandName} ` : ""}--limit ${total}`,
-      });
-    }
-
     const writeResult = writeFullOutput(items, tempDir);
 
     if ("path" in writeResult) {
