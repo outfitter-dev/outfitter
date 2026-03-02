@@ -1,0 +1,23 @@
+{
+  "milestone": "safety",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-SAFE-001",
+    "VAL-SAFE-002",
+    "VAL-SAFE-003",
+    "VAL-SAFE-004",
+    "VAL-SAFE-005",
+    "VAL-SAFE-006"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}

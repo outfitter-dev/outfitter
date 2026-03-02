@@ -1,0 +1,54 @@
+{
+  "milestone": "safety",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "nonBlockingIssues": [
+    {
+      "featureId": "os-356-destructive-dryrun",
+      "severity": "non_blocking",
+      "description": ".destructive() is order-sensitive with .action() — calling .destructive(false) after .action() does not remove the --dry-run flag because applyDestructiveFlag() runs eagerly inside action()."
+    },
+    {
+      "featureId": "os-356-destructive-dryrun",
+      "severity": "non_blocking",
+      "description": "buildDryRunHint() removes only the exact token '--dry-run' from process.argv. Alternate spellings like '--dry-run=true' or aliases would not be stripped from the real-command hint."
+    },
+    {
+      "featureId": "os-356-retry-envelope",
+      "severity": "non_blocking",
+      "description": "createErrorEnvelope() includes retry_after whenever retryAfterSeconds param is provided, regardless of error category. In theory, a non-rate-limit error constructed with retryAfterSeconds would incorrectly get retry_after. In practice, only RateLimitError defines retryAfterSeconds in the type system, and all tests verify non-rate-limit errors omit retry_after. Defense-in-depth category guard would be a good hardening step."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Clarify in library-worker skill step 6 that export verification should check package entrypoints (./src/index.ts or dist/) rather than internal module files. Workers are importing internal files like './src/command.ts' instead of verifying the public API surface.",
+      "evidence": "os-356-destructive-dryrun worker used 'import(\"./src/command.ts\")' for verification instead of checking the package entrypoint as described in the skill procedure.",
+      "isSystemic": false
+    },
+    {
+      "target": "skills",
+      "suggestion": "Add explicit warning in library-worker skill that piping test/validator output through 'tail', 'head', or other commands masks exit codes. Workers should run commands without pipes and capture full output, or use '&&' chaining to preserve exit codes.",
+      "evidence": "os-356-metadata-annotations transcript shows commands like 'bun test --filter=@outfitter/cli 2>&1 | tail -10' where the pipe masks the actual exit code, making handoff exitCode values unreliable."
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": null
+}
