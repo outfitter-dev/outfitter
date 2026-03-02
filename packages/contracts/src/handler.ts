@@ -2,6 +2,7 @@ import type { Result } from "better-result";
 
 import type { OutfitterError } from "./errors.js";
 import type { Logger } from "./logging.js";
+import type { ProgressCallback } from "./stream.js";
 
 /**
  * Re-export logger contract so existing imports from handler remain valid.
@@ -40,6 +41,21 @@ export interface HandlerContext {
 
   /** Structured logger with automatic redaction */
   logger: Logger;
+
+  /**
+   * Optional streaming progress callback.
+   *
+   * When provided by a transport adapter, the handler can emit progress
+   * events without knowing which transport consumes them. When `undefined`,
+   * the handler does not stream — it simply returns its final result.
+   *
+   * @example
+   * ```typescript
+   * ctx.progress?.({ type: "start", command: "check", ts: new Date().toISOString() });
+   * ctx.progress?.({ type: "progress", current: 5, total: 10 });
+   * ```
+   */
+  progress?: ProgressCallback;
 
   /** Unique request identifier for tracing (UUIDv7) */
   requestId: string;

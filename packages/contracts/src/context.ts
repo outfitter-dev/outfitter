@@ -1,4 +1,5 @@
 import type { HandlerContext, Logger, ResolvedConfig } from "./handler.js";
+import type { ProgressCallback } from "./stream.js";
 
 /**
  * Options for creating a handler context.
@@ -14,6 +15,9 @@ export interface CreateContextOptions {
   env?: Record<string, string | undefined>;
   /** Logger instance (uses no-op logger if not provided) */
   logger?: Logger;
+
+  /** Streaming progress callback (undefined means no streaming) */
+  progress?: ProgressCallback;
 
   /** Explicit request ID (generates UUIDv7 if not provided) */
   requestId?: string;
@@ -84,6 +88,9 @@ export function createContext(options: CreateContextOptions): HandlerContext {
   }
   if (options.signal !== undefined) {
     ctx.signal = options.signal;
+  }
+  if (options.progress !== undefined) {
+    ctx.progress = options.progress;
   }
   if (options.workspaceRoot !== undefined) {
     ctx.workspaceRoot = options.workspaceRoot;

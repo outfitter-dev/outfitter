@@ -62,6 +62,12 @@ export {
   mapLogLevelToMcp,
   shouldEmitLog,
 } from "./logging.js";
+// Progress adapter
+export {
+  createMcpProgressCallback,
+  type McpNotificationSender,
+  type McpProgressNotification,
+} from "./progress.js";
 // Schema utilities
 export { type JsonSchema, zodToJsonSchema } from "./schema.js";
 // Server

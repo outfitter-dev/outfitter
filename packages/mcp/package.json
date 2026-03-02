@@ -1,25 +1,11 @@
 {
   "name": "@outfitter/mcp",
-  "version": "0.4.3",
   "description": "MCP server framework with typed tools for Outfitter",
-  "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "outfitter",
-    "tools",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/mcp"
-  },
+  "version": "0.4.3",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -48,6 +34,12 @@
       }
     },
     "./package.json": "./package.json",
+    "./progress": {
+      "import": {
+        "types": "./dist/progress.d.ts",
+        "default": "./dist/progress.js"
+      }
+    },
     "./schema": {
       "import": {
         "types": "./dist/schema.d.ts",
@@ -73,6 +65,20 @@
       }
     }
   },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "outfitter",
+    "tools",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/mcp"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
