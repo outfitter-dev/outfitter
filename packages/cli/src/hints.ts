@@ -18,6 +18,7 @@
 import type { CLIHint, ErrorCategory } from "@outfitter/contracts";
 import type { Command } from "commander";
 
+import type { CommandMetadata } from "./command.js";
 import { unwrapZodField } from "./schema-input.js";
 
 // =============================================================================
@@ -46,6 +47,8 @@ export interface CommandTreeNode {
   readonly name: string;
   /** Command description */
   readonly description?: string;
+  /** Safety metadata signals (readOnly, idempotent) */
+  readonly metadata?: CommandMetadata;
   /** Available options/flags */
   readonly options?: readonly CommandTreeOption[];
   /** Nested subcommands */
@@ -99,6 +102,10 @@ function buildCommandNode(cmd: Command): CommandTreeNode {
     .filter((sub: Command) => !(sub as Command & { _hidden?: boolean })._hidden)
     .map((sub: Command) => buildCommandNode(sub));
 
+  // Read safety metadata from the Commander command (set by CommandBuilder.build())
+  const metadata = (cmd as Command & { __metadata?: CommandMetadata })
+    .__metadata;
+
   const node: CommandTreeNode = {
     name: cmd.name(),
   };
@@ -108,6 +115,7 @@ function buildCommandNode(cmd: Command): CommandTreeNode {
     return {
       ...node,
       description,
+      ...(metadata ? { metadata } : {}),
       ...(options.length > 0 ? { options } : {}),
       ...(subcommands.length > 0 ? { subcommands } : {}),
     };
@@ -115,6 +123,7 @@ function buildCommandNode(cmd: Command): CommandTreeNode {
 
   return {
     ...node,
+    ...(metadata ? { metadata } : {}),
     ...(options.length > 0 ? { options } : {}),
     ...(subcommands.length > 0 ? { subcommands } : {}),
   };

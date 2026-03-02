@@ -34,7 +34,11 @@ export interface ActionCliSpec<TInput = unknown> {
 export interface ActionMcpSpec<TInput = unknown> {
   readonly deferLoading?: boolean;
   readonly description?: string;
+  /** When true, calling the action multiple times with the same input has the same effect */
+  readonly idempotent?: boolean;
   readonly mapInput?: (input: unknown) => TInput;
+  /** When true, the action does not modify any state */
+  readonly readOnly?: boolean;
   readonly tool?: string;
 }
 
