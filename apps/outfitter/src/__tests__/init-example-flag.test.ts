@@ -39,7 +39,7 @@ describe("init --example flag", () => {
       }
     });
 
-    test("todo example uses builder patterns (.input, .context, .hints)", async () => {
+    test("todo example uses builder/runHandler patterns (.input, contextFactory, hints)", async () => {
       const { runInit } = await import("../commands/init.js");
 
       await runInit({
@@ -60,12 +60,11 @@ describe("init --example flag", () => {
       const content = readFileSync(programPath, "utf-8");
       // Should demonstrate .input() with a Zod schema
       expect(content).toContain(".input(");
-      // Should demonstrate .context() for async context construction
-      expect(content).toContain(".context(");
-      // Should demonstrate .hints() for post-command suggestions
-      expect(content).toContain(".hints(");
       // Should demonstrate runHandler() lifecycle bridge
       expect(content).toContain("runHandler");
+      // Context + hints should be wired through runHandler in one canonical place
+      expect(content).toContain("contextFactory:");
+      expect(content).toContain("hints:");
       // Should NOT be the default hello-world stub
       expect(content).not.toContain("hello [name]");
       expect(content).not.toContain("Say hello");
