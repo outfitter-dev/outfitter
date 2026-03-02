@@ -15,8 +15,11 @@ Foundation (stable) -> Runtime (active) -> Tooling (early). Dependencies flow do
 All domain logic returns `Result<T, E>` via `better-result`. CLI and MCP are thin adapters.
 
 ```typescript
-type Handler<TInput, TOutput, TError extends OutfitterError = OutfitterError> =
-  (input: TInput, ctx: HandlerContext) => Promise<Result<TOutput, TError>>;
+type Handler<
+  TInput,
+  TOutput,
+  TError extends OutfitterError = OutfitterError,
+> = (input: TInput, ctx: HandlerContext) => Promise<Result<TOutput, TError>>;
 ```
 
 ## Error Taxonomy

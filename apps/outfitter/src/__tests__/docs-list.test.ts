@@ -106,7 +106,10 @@ describe("docs.list action", () => {
 
   test("mapInput explicit --output overrides OUTFITTER_JSONL fallback", () => {
     const originalJsonl = process.env["OUTFITTER_JSONL"];
+    const originalArgv = process.argv;
     process.env["OUTFITTER_JSONL"] = "1";
+    // Simulate the user explicitly passing --output human on the command line
+    process.argv = ["bun", "outfitter", "docs", "list", "--output", "human"];
 
     try {
       const action = outfitterActions.get("docs.list");
@@ -122,6 +125,8 @@ describe("docs.list action", () => {
       } else {
         process.env["OUTFITTER_JSONL"] = originalJsonl;
       }
+
+      process.argv = originalArgv;
     }
   });
 });

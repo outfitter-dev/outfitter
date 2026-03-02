@@ -15,13 +15,13 @@ Environment variables, external dependencies, and setup notes.
 
 ## Environment Variables
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `OUTFITTER_ENV` | Environment profile | `production` |
-| `OUTFITTER_LOG_LEVEL` | Override log level | (profile default) |
-| `OUTFITTER_VERBOSE` | Override CLI verbosity | `0` |
-| `OUTFITTER_JSON` | Force JSON output | `0` |
-| `OUTFITTER_JSONL` | Force JSONL output | `0` |
+| Variable              | Purpose                | Default           |
+| --------------------- | ---------------------- | ----------------- |
+| `OUTFITTER_ENV`       | Environment profile    | `production`      |
+| `OUTFITTER_LOG_LEVEL` | Override log level     | (profile default) |
+| `OUTFITTER_VERBOSE`   | Override CLI verbosity | `0`               |
+| `OUTFITTER_JSON`      | Force JSON output      | `0`               |
+| `OUTFITTER_JSONL`     | Force JSONL output     | `0`               |
 
 ## No External Services
 

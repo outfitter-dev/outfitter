@@ -10,6 +10,7 @@ NOTE: Startup and cleanup are handled by `worker-base`. This skill defines the W
 ## When to Use This Skill
 
 Use for features that involve writing or updating documentation:
+
 - Package-level docs in `packages/<pkg>/docs/`
 - README updates for packages
 - Migration guides
@@ -51,6 +52,7 @@ rg "export.*functionName" packages/<pkg>/src/
 ### 4. Cross-Reference
 
 After writing, verify every claim in the doc:
+
 - Every function name exists in the source (`rg "export.*<name>" packages/<pkg>/src/`)
 - Every import path exists in `package.json` exports
 - Every code example uses correct types and signatures
@@ -86,12 +88,32 @@ Documentation-only changes to `docs/` directories do not need changesets unless 
   "whatWasLeftUndone": "",
   "verification": {
     "commandsRun": [
-      { "command": "test -f packages/contracts/docs/error-handling-patterns.md", "exitCode": 0, "observation": "File exists" },
-      { "command": "rg 'export.*adaptHandler' packages/mcp/src/", "exitCode": 0, "observation": "Confirmed adaptHandler export in types.ts" },
-      { "command": "rg 'export.*OutfitterError' packages/contracts/src/", "exitCode": 0, "observation": "Confirmed OutfitterError export" },
+      {
+        "command": "test -f packages/contracts/docs/error-handling-patterns.md",
+        "exitCode": 0,
+        "observation": "File exists"
+      },
+      {
+        "command": "rg 'export.*adaptHandler' packages/mcp/src/",
+        "exitCode": 0,
+        "observation": "Confirmed adaptHandler export in types.ts"
+      },
+      {
+        "command": "rg 'export.*OutfitterError' packages/contracts/src/",
+        "exitCode": 0,
+        "observation": "Confirmed OutfitterError export"
+      },
       { "command": "bun run check", "exitCode": 0, "observation": "Clean" },
-      { "command": "bun run test", "exitCode": 0, "observation": "3280 tests passed" },
-      { "command": "bun run typecheck", "exitCode": 0, "observation": "No errors" }
+      {
+        "command": "bun run test",
+        "exitCode": 0,
+        "observation": "3280 tests passed"
+      },
+      {
+        "command": "bun run typecheck",
+        "exitCode": 0,
+        "observation": "No errors"
+      }
     ],
     "interactiveChecks": []
   },

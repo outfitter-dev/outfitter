@@ -96,6 +96,40 @@ describe("command()", () => {
   });
 });
 
+describe("--json flag parse states", () => {
+  it("options.json is undefined when --json is not passed", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let jsonValue: unknown;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async ({ flags }) => {
+          jsonValue = flags["json"];
+        })
+    );
+
+    await cli.parse(["node", "test", "hello"]);
+    expect(jsonValue).toBeUndefined();
+  });
+
+  it("options.json is true when --json is passed", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let jsonValue: unknown;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async ({ flags }) => {
+          jsonValue = flags["json"];
+        })
+    );
+
+    await cli.parse(["node", "test", "--json", "hello"]);
+    expect(jsonValue).toBe(true);
+  });
+});
+
 describe("--json env var bridge", () => {
   let originalJson: string | undefined;
 

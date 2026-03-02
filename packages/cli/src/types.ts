@@ -460,8 +460,6 @@ export type OutputMode = "human" | "json" | "jsonl" | "tree" | "table";
 export interface OutputOptions {
   /** Exit code to use after output (undefined = don't exit) */
   readonly exitCode?: number;
-  /** Force a specific output mode (overrides flag detection) */
-  readonly mode?: OutputMode;
 
   /** Whether to pretty-print JSON output */
   readonly pretty?: boolean;

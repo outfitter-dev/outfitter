@@ -30,7 +30,7 @@ export async function printUpgradeResults(
 ): Promise<void> {
   const structuredMode = resolveStructuredOutputMode(options?.mode);
   if (structuredMode) {
-    await output(result, { mode: structuredMode });
+    await output(result, structuredMode);
     return;
   }
 
@@ -40,7 +40,7 @@ export async function printUpgradeResults(
   if (result.packages.length === 0) {
     lines.push("No @outfitter/* packages found in package.json.");
     if (!result.unknownPackages || result.unknownPackages.length === 0) {
-      await output(lines, { mode: "human" });
+      await output(lines, "human");
       return;
     }
     lines.push("");
@@ -266,5 +266,5 @@ export async function printUpgradeResults(
     }
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

@@ -50,18 +50,18 @@ function writeWithBackpressure(
 // =============================================================================
 
 /**
- * Detects output mode based on environment and options.
+ * Detects output mode based on explicit format, environment, and options.
  *
- * Priority: explicit option > env var > default (human)
+ * Priority: explicit format > env var > default (human)
  *
  * Per CLI conventions (clig.dev), human output is the default.
  * Machine-readable output requires explicit opt-in via --json flag
  * or OUTFITTER_JSON=1 environment variable.
  */
-function detectMode(options?: OutputOptions): OutputMode {
-  // Explicit mode takes highest priority
-  if (options?.mode) {
-    return options.mode;
+export function detectMode(format?: OutputMode): OutputMode {
+  // Explicit format takes highest priority
+  if (format) {
+    return format;
   }
 
   // Check environment variables (JSONL takes priority over JSON)
@@ -86,7 +86,7 @@ function isValidCategory(category: string): category is ErrorCategory {
  * Safe JSON stringify that handles circular references and undefined values.
  * Wraps contracts' safeStringify with undefined → null conversion for CLI JSON output.
  */
-function safeStringify(value: unknown, pretty?: boolean): string {
+export function cliStringify(value: unknown, pretty?: boolean): string {
   // Use contracts' safeStringify which handles BigInt and circular references
   // We wrap the value to convert undefined to null for CLI JSON compatibility
   const wrappedValue = value === undefined ? null : value;
@@ -96,7 +96,7 @@ function safeStringify(value: unknown, pretty?: boolean): string {
 /**
  * Formats data for human-readable output.
  */
-function formatHuman(data: unknown): string {
+export function formatHuman(data: unknown): string {
   if (data === null || data === undefined) {
     return "";
   }
@@ -221,34 +221,41 @@ function formatErrorHuman(error: Error): string {
  * Respects --json, --jsonl, --tree, --table flags automatically.
  * Defaults to human-friendly output when no flags are present.
  *
+ * Detection hierarchy (highest wins):
+ * 1. Explicit `format` parameter
+ * 2. Environment variables (`OUTFITTER_JSON`, `OUTFITTER_JSONL`)
+ * 3. Default: `"human"`
+ *
  * @param data - The data to output
+ * @param format - Explicit output format (e.g. from a resolved CLI flag)
  * @param options - Output configuration options
  *
  * @example
  * ```typescript
  * import { output } from "@outfitter/cli";
  *
- * // Basic usage - mode auto-detected from flags
+ * // Basic usage - mode auto-detected from env
  * output(results);
  *
- * // Force JSON mode
- * output(results, { mode: "json" });
+ * // Explicit format from resolved flag
+ * output(results, "json");
  *
  * // Pretty-print JSON
- * output(results, { mode: "json", pretty: true });
+ * output(results, "json", { pretty: true });
  *
  * // Output to stderr
- * output(errors, { stream: process.stderr });
+ * output(errors, undefined, { stream: process.stderr });
  *
  * // Await for large outputs (recommended)
- * await output(largeDataset, { mode: "jsonl" });
+ * await output(largeDataset, "jsonl");
  * ```
  */
 export async function output(
   data: unknown,
+  format?: OutputMode,
   options?: OutputOptions
 ): Promise<void> {
-  const mode = detectMode(options);
+  const mode = detectMode(format);
   const stream = options?.stream ?? process.stdout;
 
   let outputText: string;
@@ -257,7 +264,7 @@ export async function output(
     case "json": {
       // Handle undefined/null explicitly
       const jsonData = data === undefined ? null : data;
-      outputText = safeStringify(jsonData, options?.pretty);
+      outputText = cliStringify(jsonData, options?.pretty);
       break;
     }
 
@@ -267,11 +274,11 @@ export async function output(
         if (data.length === 0) {
           outputText = "";
         } else {
-          outputText = data.map((item) => safeStringify(item)).join("\n");
+          outputText = data.map((item) => cliStringify(item)).join("\n");
         }
       } else {
         // Single objects get single JSON line
-        outputText = safeStringify(data);
+        outputText = cliStringify(data);
       }
       break;
     }
@@ -295,6 +302,7 @@ export async function output(
  * and exits with an appropriate exit code.
  *
  * @param error - The error to display
+ * @param format - Explicit output format (e.g. from a resolved CLI flag)
  * @returns Never returns (exits the process)
  *
  * @example
@@ -308,12 +316,9 @@ export async function output(
  * }
  * ```
  */
-export function exitWithError(error: Error, options?: OutputOptions): never {
+export function exitWithError(error: Error, format?: OutputMode): never {
   const exitCode = getExitCode(error);
-  const mode = detectMode({
-    ...options,
-    stream: options?.stream ?? process.stderr,
-  });
+  const mode = detectMode(format);
   const isJsonMode = mode === "json" || mode === "jsonl";
 
   if (isJsonMode) {

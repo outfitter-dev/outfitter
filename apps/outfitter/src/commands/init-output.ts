@@ -44,7 +44,7 @@ export async function printInitResults(
           packageName: result.packageName,
           ...result.dryRunPlan,
         },
-        { mode: structuredMode }
+        structuredMode
       );
       return;
     }
@@ -69,7 +69,7 @@ export async function printInitResults(
         postScaffold: result.postScaffold,
         nextSteps: result.postScaffold.nextSteps,
       },
-      { mode: structuredMode }
+      structuredMode
     );
     return;
   }
@@ -133,5 +133,5 @@ export async function printInitResults(
     lines.push(`  ${step}`);
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }

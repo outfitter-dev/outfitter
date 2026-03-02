@@ -533,7 +533,7 @@ export async function printDoctorResults(
 ): Promise<void> {
   const structuredMode = resolveStructuredOutputMode(options?.mode);
   if (structuredMode) {
-    await output(result, { mode: structuredMode });
+    await output(result, structuredMode);
     return;
   }
 
@@ -628,7 +628,7 @@ export async function printDoctorResults(
     );
   }
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }
 
 /**

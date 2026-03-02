@@ -117,7 +117,7 @@ export async function printDocsApiResults(
       });
       process.stdout.write(filtered);
     } else {
-      await output(result, { mode: structuredMode });
+      await output(result, structuredMode);
     }
     return;
   }
@@ -128,7 +128,7 @@ export async function printDocsApiResults(
 
   if (totalDeclarations === 0) {
     lines.push(theme.muted("No API declarations found."));
-    await output(lines, { mode: "human" });
+    await output(lines, "human");
     return;
   }
 
@@ -167,5 +167,5 @@ export async function printDocsApiResults(
 
   lines.push("");
 
-  await output(lines, { mode: "human" });
+  await output(lines, "human");
 }
