@@ -7,7 +7,14 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
 import type { CLIHint, ErrorCategory } from "@outfitter/contracts";
-import { exitCodeMap, ValidationError } from "@outfitter/contracts";
+import {
+  exitCodeMap,
+  NetworkError,
+  NotFoundError,
+  RateLimitError,
+  TimeoutError,
+  ValidationError,
+} from "@outfitter/contracts";
 import { Result } from "better-result";
 
 import {
@@ -164,6 +171,7 @@ describe("createErrorEnvelope()", () => {
     expect(envelope.error).toEqual({
       category: "validation",
       message: "Invalid env",
+      retryable: false,
     });
   });
 
@@ -653,7 +661,11 @@ describe("runHandler() JSON mode output", () => {
       expect(envelope).toEqual({
         ok: false,
         command: "deploy",
-        error: { category: "validation", message: "Bad input" },
+        error: {
+          category: "validation",
+          message: "Bad input",
+          retryable: false,
+        },
       });
     } finally {
       exitMock.restore();
@@ -778,6 +790,278 @@ describe("runHandler() env-var mode detection", () => {
       const envelope = JSON.parse(captured.stderr.trim());
       expect(envelope.ok).toBe(false);
       expect(envelope.error.message).toBe("bad input");
+    } finally {
+      exitMock.restore();
+    }
+  });
+});
+
+// =============================================================================
+// createErrorEnvelope() — retryable and retry_after
+// =============================================================================
+
+describe("createErrorEnvelope() retryable field", () => {
+  test("includes retryable: false for validation errors", () => {
+    const envelope = createErrorEnvelope("test", "validation", "Bad input");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: false for not_found errors", () => {
+    const envelope = createErrorEnvelope("test", "not_found", "Missing");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: false for conflict errors", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "conflict",
+      "Version mismatch"
+    );
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: false for permission errors", () => {
+    const envelope = createErrorEnvelope("test", "permission", "Denied");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: true for timeout errors", () => {
+    const envelope = createErrorEnvelope("test", "timeout", "Timed out");
+
+    expect(envelope.error.retryable).toBe(true);
+  });
+
+  test("includes retryable: true for rate_limit errors", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "rate_limit",
+      "Too many requests"
+    );
+
+    expect(envelope.error.retryable).toBe(true);
+  });
+
+  test("includes retryable: true for network errors", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "network",
+      "Connection refused"
+    );
+
+    expect(envelope.error.retryable).toBe(true);
+  });
+
+  test("includes retryable: false for internal errors", () => {
+    const envelope = createErrorEnvelope("test", "internal", "Unexpected");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: false for auth errors", () => {
+    const envelope = createErrorEnvelope("test", "auth", "Unauthorized");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+
+  test("includes retryable: false for cancelled errors", () => {
+    const envelope = createErrorEnvelope("test", "cancelled", "User cancelled");
+
+    expect(envelope.error.retryable).toBe(false);
+  });
+});
+
+describe("createErrorEnvelope() retry_after field", () => {
+  test("includes retry_after when retryAfterSeconds is provided", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "rate_limit",
+      "Rate limit exceeded",
+      undefined,
+      60
+    );
+
+    expect(envelope.error.retry_after).toBe(60);
+  });
+
+  test("omits retry_after when retryAfterSeconds is not provided", () => {
+    const envelope = createErrorEnvelope(
+      "test",
+      "rate_limit",
+      "Rate limit exceeded"
+    );
+
+    expect("retry_after" in envelope.error).toBe(false);
+  });
+
+  test("omits retry_after for non-rate-limit retryable errors", () => {
+    const envelope = createErrorEnvelope("test", "timeout", "Timed out");
+
+    expect("retry_after" in envelope.error).toBe(false);
+    expect(envelope.error.retryable).toBe(true);
+  });
+
+  test("omits retry_after for non-retryable errors", () => {
+    const envelope = createErrorEnvelope("test", "validation", "Bad input");
+
+    expect("retry_after" in envelope.error).toBe(false);
+    expect(envelope.error.retryable).toBe(false);
+  });
+});
+
+// =============================================================================
+// runHandler() — retryable and retry_after in error envelopes
+// =============================================================================
+
+describe("runHandler() retry envelope fields", () => {
+  test("includes retryable: false for validation error in envelope", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(new ValidationError({ message: "Bad input" })),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(false);
+      expect("retry_after" in envelope.error).toBe(false);
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("includes retryable: true for timeout error in envelope", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(TimeoutError.create("Database query", 5000)),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(true);
+      expect("retry_after" in envelope.error).toBe(false);
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("includes retryable: true for network error in envelope", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(NetworkError.create("Connection refused")),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(true);
+      expect("retry_after" in envelope.error).toBe(false);
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("includes retryable: true and retry_after for rate_limit error with retryAfterSeconds", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(RateLimitError.create("Too many requests", 30)),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(true);
+      expect(envelope.error.retry_after).toBe(30);
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("includes retryable: true without retry_after for rate_limit error without retryAfterSeconds", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(RateLimitError.create("Too many requests")),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(true);
+      expect("retry_after" in envelope.error).toBe(false);
+    } finally {
+      exitMock.restore();
+    }
+  });
+
+  test("includes retryable: false for not_found error in envelope", async () => {
+    const exitMock = mockProcessExit();
+
+    try {
+      const captured = await captureOutput(async () => {
+        try {
+          await runHandler({
+            command: "test",
+            handler: async () =>
+              Result.err(NotFoundError.create("resource", "abc123")),
+            format: "json",
+          });
+        } catch {
+          // process.exit mock throws
+        }
+      });
+
+      const envelope = JSON.parse(captured.stderr.trim());
+      expect(envelope.error.retryable).toBe(false);
+      expect("retry_after" in envelope.error).toBe(false);
     } finally {
       exitMock.restore();
     }

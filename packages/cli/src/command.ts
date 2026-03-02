@@ -48,6 +48,17 @@ export type {
 } from "./types.js";
 
 /**
+ * Command metadata for safety signals (readOnly, idempotent).
+ * Stored on Commander commands and surfaced in the command tree.
+ */
+export interface CommandMetadata {
+  /** When true, the command does not modify any state */
+  readonly readOnly?: boolean;
+  /** When true, calling the command multiple times with the same input has the same effect */
+  readonly idempotent?: boolean;
+}
+
+/**
  * Internal type extending Commander's Command with hint function metadata.
  * Used to pass stored hint functions through build() for downstream use by runHandler().
  */
@@ -56,6 +67,8 @@ interface CommandWithHints extends Command {
   __successHintFn?: SuccessHintFn<any>;
   // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
   __errorHintFn?: ErrorHintFn<any>;
+  /** Safety metadata signals stored by .readOnly() and .idempotent() */
+  __metadata?: CommandMetadata;
 }
 
 /**
@@ -186,6 +199,9 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private readonly explicitLongFlags = new Set<string>();
   private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
   private schemaFlagsApplied = false;
+  private _destructive = false;
+  private _readOnly = false;
+  private _idempotent = false;
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -264,6 +280,21 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this;
   }
 
+  destructive(isDest: boolean): this {
+    this._destructive = isDest;
+    return this;
+  }
+
+  readOnly(isReadOnly: boolean): this {
+    this._readOnly = isReadOnly;
+    return this;
+  }
+
+  idempotent(isIdempotent: boolean): this {
+    this._idempotent = isIdempotent;
+    return this;
+  }
+
   preset(preset: AnyPreset<Record<string, unknown>>): this {
     if (isSchemaPreset(preset)) {
       // Schema-driven preset: store for lazy flag derivation in applySchemaFlags()
@@ -304,6 +335,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     const contextFactory = this.ctxFactory;
     const presets = [...this.schemaPresets];
     this.applySchemaFlags();
+    this.applyDestructiveFlag();
 
     // Build a merged validation schema that includes both .input() fields
     // and schema preset fields. This ensures preset Zod fragments are
@@ -361,6 +393,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
 
   build(): Command {
     this.applySchemaFlags();
+    this.applyDestructiveFlag();
 
     // Store hint functions as metadata on the Command for downstream use by runHandler()
     if (this.successHintFn) {
@@ -368,6 +401,18 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     }
     if (this.errorHintsFn) {
       (this.cmd as CommandWithHints).__errorHintFn = this.errorHintsFn;
+    }
+
+    // Store safety metadata signals on the Command for buildCommandTree() to surface
+    const metadata: CommandMetadata = {};
+    if (this._readOnly) {
+      (metadata as { readOnly: boolean }).readOnly = true;
+    }
+    if (this._idempotent) {
+      (metadata as { idempotent: boolean }).idempotent = true;
+    }
+    if (metadata.readOnly !== undefined || metadata.idempotent !== undefined) {
+      (this.cmd as CommandWithHints).__metadata = metadata;
     }
 
     return this.cmd;
@@ -419,6 +464,25 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
         existingLongs.add(flag.longFlag);
       }
     }
+  }
+
+  /**
+   * Auto-add --dry-run flag when the command is marked destructive.
+   * Deduplicates if --dry-run is already present from .option(), .preset(),
+   * or .input() schema.
+   */
+  private applyDestructiveFlag(): void {
+    if (!this._destructive) return;
+
+    // Check if --dry-run already exists on the Commander command
+    const hasDryRun = this.cmd.options.some((o) => o.long === "--dry-run");
+    if (hasDryRun) return;
+
+    this.cmd.option(
+      "--dry-run",
+      "Preview changes without applying (destructive command safety)",
+      false
+    );
   }
 }
 
