@@ -1,0 +1,39 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "jsPlugins": [
+    {
+      "name": "outfitter",
+      "specifier": "@outfitter/oxlint-plugin"
+    }
+  ],
+  "globals": { "Bun": "readonly" },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "off",
+    "perf": "off",
+    "style": "off",
+    "restriction": "off"
+  },
+  "ignorePatterns": ["**/node_modules/**", "**/dist/**"],
+  "rules": {
+    "no-console": "off",
+    "no-control-regex": "off",
+    "no-shadow": "off",
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off",
+    "no-unsafe-optional-chaining": "off",
+    "no-void": "off",
+    "outfitter/handler-must-return-result": "error",
+    "outfitter/max-file-lines": ["warn", { "warn": 200, "error": 400 }],
+    "outfitter/no-cross-tier-import": "error",
+    "outfitter/no-throw-in-handler": "warn",
+    "outfitter/prefer-bun-api": "warn",
+    "outfitter/snapshot-location": "warn",
+    "outfitter/test-file-naming": "warn",
+    "outfitter/use-error-taxonomy": "warn",
+    "preserve-caught-error": "off",
+    "require-await": "off",
+    "typescript/require-await": "off"
+  }
+}
