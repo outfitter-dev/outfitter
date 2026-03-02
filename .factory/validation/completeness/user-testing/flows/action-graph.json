@@ -1,0 +1,161 @@
+{
+  "groupId": "action-graph",
+  "testedAt": "2026-02-28T16:37:58Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "bun run typecheck",
+    "rg",
+    "code inspection"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-GRAPH-001",
+      "title": ".relatedTo() is available and chainable",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect CommandBuilder API and implementation",
+          "expected": "`relatedTo(target, options?)` exists, accepts optional description, and returns builder for chaining",
+          "observed": "`relatedTo(target: string, options?: RelatedToOptions): this` is declared in `packages/cli/src/types.ts`; implementation in `packages/cli/src/command.ts` appends declaration and `return this`."
+        },
+        {
+          "action": "Run targeted graph test file",
+          "expected": "Builder API tests for chainability/description pass",
+          "observed": "`bun test src/__tests__/action-graph.test.ts` passed 22/22, including all VAL-GRAPH-001 tests."
+        },
+        {
+          "action": "Run package typecheck",
+          "expected": "Type signatures compile cleanly",
+          "observed": "`bun run typecheck` (tsc --noEmit) exited 0."
+        }
+      ],
+      "evidence": {
+        "tests": "src/__tests__/action-graph.test.ts -> .relatedTo() builder method (VAL-GRAPH-001): 4 passing tests",
+        "typecheck": "cd packages/cli && bun run typecheck -> exit 0",
+        "source": [
+          "packages/cli/src/types.ts:339",
+          "packages/cli/src/command.ts:278"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-GRAPH-002",
+      "title": "Action graph builds from .relatedTo() declarations",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect action graph builder source",
+          "expected": "Graph includes all registered commands as nodes and `.relatedTo()` declarations as edges",
+          "observed": "`buildActionGraph(program)` iterates all commands, collects nodes, expands `__relatedTo` declarations into edges, and returns queryable nodes/edges structure."
+        },
+        {
+          "action": "Run graph construction tests",
+          "expected": "Fixture registry verifies nodes/edges/queryability",
+          "observed": "`action-graph.test.ts` includes and passes tests for nodes, single/multiple edges, isolated nodes, and neighbor queries."
+        }
+      ],
+      "evidence": {
+        "tests": "src/__tests__/action-graph.test.ts -> Action graph construction (VAL-GRAPH-002): 5 passing tests",
+        "source": [
+          "packages/cli/src/hints.ts:417",
+          "packages/cli/src/command.ts:401"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-GRAPH-003",
+      "title": "Invalid targets and edge cases handled safely",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect edge-case handling in graph builder",
+          "expected": "Unknown targets generate deterministic warning without crashing; self-links/cycles do not loop infinitely",
+          "observed": "`buildActionGraph` always returns finite nodes/edges and appends warnings for unknown targets."
+        },
+        {
+          "action": "Run edge-case tests",
+          "expected": "Unknown target, self-link, and cycle cases pass safely",
+          "observed": "`action-graph.test.ts` edge-case suite passed for unknown target warning, self-link, cycle, and empty graph."
+        }
+      ],
+      "evidence": {
+        "tests": "src/__tests__/action-graph.test.ts -> Edge cases (VAL-GRAPH-003): 4 passing tests",
+        "source": [
+          "packages/cli/src/hints.ts:447",
+          "packages/cli/src/hints.ts:455"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-GRAPH-004",
+      "title": "Tier-4 success hints use graph neighbors",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect success hint generation",
+          "expected": "Success hints derive from outgoing graph neighbors with relationship metadata",
+          "observed": "`graphSuccessHints` iterates outgoing edges, excludes self-links, and emits CLI commands with edge descriptions or fallback text."
+        },
+        {
+          "action": "Run success-path hint tests",
+          "expected": "Success hints include related next-actions and relationship descriptions",
+          "observed": "`action-graph.test.ts` Tier-4 success tests all pass (related commands, descriptions, fallback behavior, self-link exclusion)."
+        },
+        {
+          "action": "Run cross-feature graph-envelope composition tests",
+          "expected": "Success envelopes can carry tier-4 hints alongside other hint metadata",
+          "observed": "`cross-feature-integration.test.ts` VAL-CROSS-004 success-path graph hint composition tests passed."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "src/__tests__/action-graph.test.ts -> Tier-4 success hints (VAL-GRAPH-004): 5 passing tests",
+          "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 success envelope graph hint composition: passing"
+        ],
+        "source": ["packages/cli/src/hints.ts:481"]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-GRAPH-005",
+      "title": "Tier-4 error hints include remediation paths",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect error hint generation",
+          "expected": "Error hints derive remediation commands from graph neighbors and are distinct from generic category hints",
+          "observed": "`graphErrorHints` emits `Try: ...` remediation descriptions from related edges, excluding self-links."
+        },
+        {
+          "action": "Run error-path hint tests",
+          "expected": "Error hints include remediation paths and distinction behavior",
+          "observed": "`action-graph.test.ts` Tier-4 error tests passed, including remediation-path and distinction checks."
+        },
+        {
+          "action": "Run cross-feature envelope composition tests",
+          "expected": "Graph-aware hints coexist with generic error metadata (retryable/retry_after) without conflicts",
+          "observed": "`cross-feature-integration.test.ts` VAL-CROSS-004 error-path tests passed (graph hints + retry metadata in normal and streamed envelopes)."
+        }
+      ],
+      "evidence": {
+        "tests": [
+          "src/__tests__/action-graph.test.ts -> Tier-4 error hints (VAL-GRAPH-005): 4 passing tests",
+          "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 error envelope graph hint + retry metadata: passing"
+        ],
+        "source": ["packages/cli/src/hints.ts:522"]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 5 assertions (VAL-GRAPH-001..005): all 5 passed. Evidence collected from source inspection, full @outfitter/cli test run, targeted action-graph/cross-feature test runs, and package typecheck."
+}
