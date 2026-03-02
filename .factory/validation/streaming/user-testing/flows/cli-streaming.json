@@ -2,7 +2,7 @@
   "groupId": "cli-streaming",
   "testedAt": "2026-02-28T15:23:45Z",
   "credentials": {
-    "account": "not-applicable",
+    "account": "N/A",
     "namespace": "streaming.cli-streaming"
   },
   "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
@@ -34,14 +34,14 @@
         }
       ],
       "evidence": {
-        "terminalSnapshots": [
+        "terminal": [
           "bun -e helpInformation(): Usage: demo [options] ... --stream    Stream progress events as NDJSON to stdout (default: false)",
           "bun -e runHandler(stream:true) output: {\"type\":\"start\"...} / {\"type\":\"progress\"...} / {\"ok\":true,...}",
           "bun -e runHandler(non-stream) output: {\"ok\":true,\"command\":\"demo-stream\",\"result\":{\"ok\":true}}",
           "cd packages/cli && bun test --filter streaming: 34 pass, 0 fail"
         ],
-        "consoleErrors": "not-applicable (shell-only flow)",
-        "network": "not-applicable (shell-only flow)"
+        "consoleErrors": "N/A (shell-only flow)",
+        "network": "N/A (shell-only flow)"
       },
       "issues": null
     },
@@ -67,12 +67,12 @@
         }
       ],
       "evidence": {
-        "terminalSnapshots": [
+        "terminal": [
           "bun test --filter streaming includes NDJSON parsing assertions and all pass",
           "runtime sample output lines: type=start, type=progress, final envelope with ok/command/result"
         ],
-        "consoleErrors": "not-applicable (shell-only flow)",
-        "network": "not-applicable (shell-only flow)"
+        "consoleErrors": "N/A (shell-only flow)",
+        "network": "N/A (shell-only flow)"
       },
       "issues": null
     },
@@ -93,12 +93,12 @@
         }
       ],
       "evidence": {
-        "terminalSnapshots": [
+        "terminal": [
           "bun test --filter streaming ordering tests all pass",
           "runtime sample confirmed start line precedes progress and envelope is last"
         ],
-        "consoleErrors": "not-applicable (shell-only flow)",
-        "network": "not-applicable (shell-only flow)"
+        "consoleErrors": "N/A (shell-only flow)",
+        "network": "N/A (shell-only flow)"
       },
       "issues": null
     },
@@ -119,12 +119,12 @@
         }
       ],
       "evidence": {
-        "terminalSnapshots": [
+        "terminal": [
           "bun test --filter streaming parity tests pass",
           "manual non-stream envelope and streamed terminal envelope both observed in {ok,command,result} shape for success"
         ],
-        "consoleErrors": "not-applicable (shell-only flow)",
-        "network": "not-applicable (shell-only flow)"
+        "consoleErrors": "N/A (shell-only flow)",
+        "network": "N/A (shell-only flow)"
       },
       "issues": null
     },
@@ -145,11 +145,11 @@
         }
       ],
       "evidence": {
-        "terminalSnapshots": [
+        "terminal": [
           "bun test --filter streaming orthogonality matrix tests all pass"
         ],
-        "consoleErrors": "not-applicable (shell-only flow)",
-        "network": "not-applicable (shell-only flow)"
+        "consoleErrors": "N/A (shell-only flow)",
+        "network": "N/A (shell-only flow)"
       },
       "issues": null
     }

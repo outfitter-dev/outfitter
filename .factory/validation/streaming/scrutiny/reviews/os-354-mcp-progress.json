@@ -18,7 +18,7 @@
     {
       "area": "services",
       "observation": "`.factory/services.yaml` lists `check: bun run check`, but mission AGENTS guidance says this command is currently broken and should be avoided.",
-      "evidence": "`/Users/mg/Developer/outfitter/stack/.factory/services.yaml` line 7 defines `check: bun run check`, while mission `/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md` line 25 says `bun run check` crashes with a tokio panic and recommends `bun run lint` + `bun run typecheck` instead."
+      "evidence": "Repo `.factory/services.yaml` line 7 defines `check: bun run check`, while mission-level AGENTS guidance (same mission context, line 25) states `bun run check` crashes with a tokio panic and recommends `bun run lint` + `bun run typecheck` instead."
     }
   ],
   "addressesFailureFrom": null,

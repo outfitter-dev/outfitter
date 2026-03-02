@@ -2,7 +2,7 @@
   "groupId": "transport-modularity",
   "testedAt": "2026-02-28T15:24:37Z",
   "credentials": {
-    "account": "not-applicable",
+    "account": "N/A",
     "namespace": "streaming.transport-modularity"
   },
   "toolsUsed": ["shell", "bun test", "bun run typecheck", "Read"],
