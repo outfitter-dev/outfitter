@@ -1,28 +1,11 @@
 {
   "name": "@outfitter/cli",
-  "version": "0.5.3",
   "description": "Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing",
-  "keywords": [
-    "bun",
-    "cli",
-    "colors",
-    "commander",
-    "outfitter",
-    "renderers",
-    "terminal",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/cli"
-  },
+  "version": "0.5.3",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -93,6 +76,12 @@
         "default": "./dist/schema.js"
       }
     },
+    "./schema-input": {
+      "import": {
+        "types": "./dist/schema-input.d.ts",
+        "default": "./dist/schema-input.js"
+      }
+    },
     "./terminal": {
       "import": {
         "types": "./dist/terminal/index.d.ts",
@@ -124,6 +113,23 @@
       }
     }
   },
+  "keywords": [
+    "bun",
+    "cli",
+    "colors",
+    "commander",
+    "outfitter",
+    "renderers",
+    "terminal",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/cli"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

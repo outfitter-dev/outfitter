@@ -69,6 +69,12 @@
         "default": "./dist/handler.js"
       }
     },
+    "./hints": {
+      "import": {
+        "types": "./dist/hints.d.ts",
+        "default": "./dist/hints.js"
+      }
+    },
     "./logging": {
       "import": {
         "types": "./dist/logging.d.ts",

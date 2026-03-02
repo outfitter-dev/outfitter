@@ -7,13 +7,24 @@
 import { Command } from "commander";
 
 import { createCLI as createCLIImpl } from "./cli.js";
+import { exitWithError } from "./output.js";
+import { resolveOutputMode } from "./query.js";
+import {
+  createCommanderOption,
+  deriveFlags,
+  validateInput,
+} from "./schema-input.js";
 import type {
   CLI,
   CLIConfig,
   CommandAction,
   CommandBuilder,
   CommandFlags,
+  ContextFactory,
+  ErrorHintFn,
   FlagPreset,
+  SuccessHintFn,
+  ZodObjectLike,
 } from "./types.js";
 
 export type {
@@ -23,8 +34,23 @@ export type {
   CommandBuilder,
   CommandConfig,
   CommandFlags,
+  ContextFactory,
+  ErrorHintFn,
   FlagPreset,
+  SuccessHintFn,
+  ZodObjectLike,
 } from "./types.js";
+
+/**
+ * Internal type extending Commander's Command with hint function metadata.
+ * Used to pass stored hint functions through build() for downstream use by runHandler().
+ */
+interface CommandWithHints extends Command {
+  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  __successHintFn?: SuccessHintFn<any>;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  __errorHintFn?: ErrorHintFn<any>;
+}
 
 function parseCommandSignature(signature: string): {
   name: string;
@@ -52,24 +78,40 @@ export function createCLI(config: CLIConfig): CLI {
   return createCLIImpl(config);
 }
 
-class CommandBuilderImpl implements CommandBuilder {
-  private readonly command: Command;
+// eslint-disable-next-line typescript/no-explicit-any -- internal impl; public API is typed via CommandBuilder<TInput, TContext>
+class CommandBuilderImpl implements CommandBuilder<any, any> {
+  private readonly cmd: Command;
+  private inputSchema: ZodObjectLike | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private ctxFactory: ((input: any) => Promise<unknown> | unknown) | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private successHintFn: SuccessHintFn<any> | undefined;
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  private errorHintsFn: ErrorHintFn<any> | undefined;
+  private readonly explicitLongFlags = new Set<string>();
+  private schemaFlagsApplied = false;
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
-    this.command = new Command(name);
+    this.cmd = new Command(name);
     if (argumentsSpec) {
-      this.command.arguments(argumentsSpec);
+      this.cmd.arguments(argumentsSpec);
     }
   }
 
   description(text: string): this {
-    this.command.description(text);
+    this.cmd.description(text);
     return this;
   }
 
   option(flags: string, description: string, defaultValue?: unknown): this {
-    this.command.option(
+    // Track explicitly declared long flags for override detection
+    const longMatch = flags.match(/--([a-z][a-z0-9-]*)/i);
+    if (longMatch) {
+      this.explicitLongFlags.add(`--${longMatch[1]}`);
+    }
+
+    this.cmd.option(
       flags,
       description,
       defaultValue as string | boolean | string[] | undefined
@@ -82,7 +124,12 @@ class CommandBuilderImpl implements CommandBuilder {
     description: string,
     defaultValue?: unknown
   ): this {
-    this.command.requiredOption(
+    const longMatch = flags.match(/--([a-z][a-z0-9-]*)/i);
+    if (longMatch) {
+      this.explicitLongFlags.add(`--${longMatch[1]}`);
+    }
+
+    this.cmd.requiredOption(
       flags,
       description,
       defaultValue as string | boolean | string[] | undefined
@@ -91,20 +138,52 @@ class CommandBuilderImpl implements CommandBuilder {
   }
 
   alias(alias: string): this {
-    this.command.alias(alias);
+    this.cmd.alias(alias);
+    return this;
+  }
+
+  input<T extends Record<string, unknown>>(
+    schema: ZodObjectLike<T>
+  ): CommandBuilder<T> {
+    this.inputSchema = schema as ZodObjectLike;
+    // Schema flags are applied lazily in applySchemaFlags() — called by action() and build()
+    return this as unknown as CommandBuilder<T>;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  context<T>(factory: ContextFactory<any, T>): CommandBuilder<any, T> {
+    this.ctxFactory = factory;
+    return this as unknown as CommandBuilder<any, T>;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  hints(fn: SuccessHintFn<any>): this {
+    this.successHintFn = fn;
+    return this;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  onError(fn: ErrorHintFn<any>): this {
+    this.errorHintsFn = fn;
     return this;
   }
 
   preset(preset: FlagPreset<Record<string, unknown>>): this {
     for (const opt of preset.options) {
+      // Track preset flags as explicit too — they override schema-derived flags
+      const longMatch = opt.flags.match(/--([a-z][a-z0-9-]*)/i);
+      if (longMatch) {
+        this.explicitLongFlags.add(`--${longMatch[1]}`);
+      }
+
       if (opt.required) {
-        this.command.requiredOption(
+        this.cmd.requiredOption(
           opt.flags,
           opt.description,
           opt.defaultValue as string | boolean | string[] | undefined
         );
       } else {
-        this.command.option(
+        this.cmd.option(
           opt.flags,
           opt.description,
           opt.defaultValue as string | boolean | string[] | undefined
@@ -114,20 +193,86 @@ class CommandBuilderImpl implements CommandBuilder {
     return this;
   }
 
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   action<TFlags extends CommandFlags = CommandFlags>(
-    handler: CommandAction<TFlags>
+    handler: CommandAction<TFlags, any, any>
   ): this {
-    this.command.action(async (...args: unknown[]) => {
+    const schema = this.inputSchema;
+    const contextFactory = this.ctxFactory;
+    this.applySchemaFlags();
+
+    this.cmd.action(async (...args: unknown[]) => {
       const command = args.at(-1) as Command;
       const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
       const positional = command.args as string[];
-      await handler({ args: positional, flags, command });
+
+      let input: Record<string, unknown> | undefined;
+      let ctx: unknown;
+      try {
+        input = schema ? validateInput(flags, schema) : undefined;
+        // Construct context if factory is provided
+        if (contextFactory) {
+          // When .input() is used, pass validated input; otherwise pass raw flags
+          const factoryArg = input !== undefined ? input : flags;
+          ctx = await contextFactory(factoryArg);
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        const { mode } = resolveOutputMode(
+          flags as unknown as Record<string, unknown>
+        );
+        exitWithError(error, mode);
+      }
+
+      await (handler as CommandAction<TFlags, unknown, unknown>)({
+        args: positional,
+        flags,
+        command,
+        input,
+        ctx,
+      });
     });
     return this;
   }
 
   build(): Command {
-    return this.command;
+    this.applySchemaFlags();
+
+    // Store hint functions as metadata on the Command for downstream use by runHandler()
+    if (this.successHintFn) {
+      (this.cmd as CommandWithHints).__successHintFn = this.successHintFn;
+    }
+    if (this.errorHintsFn) {
+      (this.cmd as CommandWithHints).__errorHintFn = this.errorHintsFn;
+    }
+
+    return this.cmd;
+  }
+
+  /**
+   * Apply schema-derived flags to the Commander command.
+   * Called lazily so that explicit .option()/.requiredOption()/.preset() calls
+   * made after .input() are properly tracked as overrides.
+   */
+  private applySchemaFlags(): void {
+    if (this.schemaFlagsApplied || !this.inputSchema) return;
+    this.schemaFlagsApplied = true;
+
+    // Also collect long flags already registered on the Commander command
+    // (from .option()/.requiredOption()/.preset() calls made before .input())
+    const existingLongs = new Set(this.explicitLongFlags);
+    for (const opt of this.cmd.options) {
+      if (opt.long) {
+        existingLongs.add(opt.long);
+      }
+    }
+
+    const derived = deriveFlags(this.inputSchema, existingLongs);
+
+    for (const flag of derived) {
+      const option = createCommanderOption(flag, this.inputSchema);
+      this.cmd.addOption(option);
+    }
   }
 }
 

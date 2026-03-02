@@ -5,6 +5,8 @@ import type {
   CommandBuilder,
   CommandConfig,
   CommandFlags,
+  ErrorHintFn,
+  SuccessHintFn,
 } from "../../command.js";
 
 export const verifyCommandExports = (
@@ -13,7 +15,9 @@ export const verifyCommandExports = (
   builder: CommandBuilder,
   action: CommandAction,
   flags: CommandFlags,
-  commandConfig: CommandConfig
+  commandConfig: CommandConfig,
+  successHintFn: SuccessHintFn,
+  errorHintFn: ErrorHintFn
 ): void => {
   void cli;
   void config;
@@ -21,4 +25,6 @@ export const verifyCommandExports = (
   void action;
   void flags;
   void commandConfig;
+  void successHintFn;
+  void errorHintFn;
 };
