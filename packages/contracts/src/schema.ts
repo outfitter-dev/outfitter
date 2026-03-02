@@ -282,7 +282,9 @@ function convertZodType(schema: z.ZodType<unknown>): JsonSchema {
 
     case "ZodLazy":
     case "lazy":
-      // Lazy schemas are tricky - just return empty for now
+      // TODO(OS-xxx): Lazy schemas silently fall back to empty `{}` which
+      // produces an unconstrained property in the JSON Schema. Resolve the
+      // inner schema at least one level deep, or emit a `$ref`.
       jsonSchema = {};
       break;
 

@@ -213,6 +213,28 @@ describe("retry<T>()", () => {
       expect(result.unwrap()).toEqual({ value: 42 });
     }
   });
+
+  it("returns InternalError when maxAttempts is 0", async () => {
+    const fn = async () => Result.ok("never called");
+    const result = await retry(fn, { maxAttempts: 0 });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("InternalError");
+      expect(result.error.message).toContain("maxAttempts must be >= 1");
+    }
+  });
+
+  it("returns InternalError when maxAttempts is negative", async () => {
+    const fn = async () => Result.ok("never called");
+    const result = await retry(fn, { maxAttempts: -1 });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error._tag).toBe("InternalError");
+      expect(result.error.message).toContain("maxAttempts must be >= 1");
+    }
+  });
 });
 
 // ============================================================================
