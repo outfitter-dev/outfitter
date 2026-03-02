@@ -49,10 +49,10 @@ Three tiers, one goal: shared infrastructure that works for humans and machines.
 
 APIs everything else depends on.
 
-| Package                | What it does                                   |
-| ---------------------- | ---------------------------------------------- |
-| `@outfitter/contracts` | Result/Error patterns and the handler contract |
-| `@outfitter/types`     | Type utilities and branded types               |
+| Package                | What it does                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `@outfitter/contracts` | Result/Error patterns, handler contract, and utilities like `parseInput()`, `wrapError()`, `fromFetch()`, `expectOk()`, `expectErr()` |
+| `@outfitter/types`     | Type utilities and branded types                                                                                                      |
 
 ### Runtime (Active)
 
@@ -75,19 +75,26 @@ The building blocks for applications.
 
 Developer-facing tools built on the runtime.
 
-| Package              | What it does                          |
-| -------------------- | ------------------------------------- |
-| `outfitter`          | Umbrella CLI for scaffolding projects |
-| `@outfitter/testing` | Test harnesses for CLI and MCP        |
+| Package              | What it does                                                               |
+| -------------------- | -------------------------------------------------------------------------- |
+| `outfitter`          | Umbrella CLI for scaffolding projects                                      |
+| `@outfitter/testing` | Test harnesses for CLI and MCP, including `testCommand()` and `testTool()` |
 
 ## Documentation
 
-| Guide                                      | When to read it                                   |
-| ------------------------------------------ | ------------------------------------------------- |
-| [Getting Started](docs/getting-started.md) | Build your first CLI, MCP server, or daemon       |
-| [Patterns](docs/reference/patterns.md)     | Understand handlers, Result types, error taxonomy |
-| [Architecture](docs/ARCHITECTURE.md)       | How packages fit together                         |
-| [Migration](docs/migration.md)             | Adopting Outfitter or upgrading versions          |
+| Guide                                                                           | When to read it                                                                                                        |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| [Getting Started](docs/getting-started.md)                                      | Build your first CLI, MCP server, or daemon                                                                            |
+| [Patterns](docs/reference/patterns.md)                                          | Understand handlers, Result types, error taxonomy                                                                      |
+| [Architecture](docs/ARCHITECTURE.md)                                            | How packages fit together                                                                                              |
+| [Migration](docs/migration.md)                                                  | Adopting Outfitter or upgrading versions                                                                               |
+| [v0.4 Migration](docs/migration-v0.4.md)                                        | Upgrade for Foundation v0.4 changes (`--json` default, output format param, `resolveOutputMode()`, commander peer dep) |
+| [Discoverability](docs/reference/discoverability.md)                            | Understand subpath exports, tooling, and package discoverability                                                       |
+| [Error Handling Patterns](packages/contracts/docs/error-handling-patterns.md)   | Apply `parseInput()`, `wrapError()`, and `fromFetch()` in Result-first flows                                           |
+| [CLI Patterns](packages/cli/docs/cli-patterns.md)                               | Follow CLI output/queryability patterns and conventions                                                                |
+| [Peer Dependencies](packages/cli/docs/peer-dependencies.md)                     | Use and validate peer dependency strategy for CLI packages                                                             |
+| [MCP `adaptHandler()`](packages/mcp/docs/adapt-handler.md)                      | Bridge shared handlers to MCP tools safely                                                                             |
+| [MCP Dynamic Tool Registration](packages/mcp/docs/dynamic-tool-registration.md) | Implement `registerTool()` patterns for MCP surfaces                                                                   |
 
 ## Development
 
