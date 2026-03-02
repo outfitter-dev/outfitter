@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 import { outfitterActions } from "../actions.js";
@@ -151,6 +153,68 @@ describe("runCheckActionRegistry", () => {
 
     // ok is false because the test fixtures intentionally include unregistered commands
     expect(result.value.ok).toBe(false);
+  });
+
+  test("handles inline comments inside named import lists", async () => {
+    const tempWorkspace = mkdtempSync(
+      resolve(tmpdir(), "outfitter-check-action-registry-")
+    );
+    const commandsDir = resolve(tempWorkspace, "apps/outfitter/src/commands");
+    const actionsDir = resolve(tempWorkspace, "apps/outfitter/src/actions");
+    const registryPath = resolve(
+      tempWorkspace,
+      "apps/outfitter/src/actions.ts"
+    );
+
+    try {
+      mkdirSync(commandsDir, { recursive: true });
+      mkdirSync(actionsDir, { recursive: true });
+
+      writeFileSync(
+        registryPath,
+        `import {
+  /* legacy alias retained for compat */
+  testAction,
+} from "./actions/test.js";
+
+const registry = {
+  add: (value: unknown) => registry,
+};
+
+export const actions = registry.add(testAction);
+`,
+        "utf-8"
+      );
+
+      writeFileSync(
+        resolve(actionsDir, "test.ts"),
+        `import { testCommand } from "../commands/test.js";
+
+export const testAction = testCommand;
+`,
+        "utf-8"
+      );
+
+      writeFileSync(
+        resolve(commandsDir, "test.ts"),
+        `export const testCommand = () => "ok";
+`,
+        "utf-8"
+      );
+
+      const result = await runCheckActionRegistry({ cwd: tempWorkspace });
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) return;
+
+      expect(result.value.registered).toContain(
+        "apps/outfitter/src/commands/test.ts"
+      );
+      expect(result.value.unregistered).not.toContain(
+        "apps/outfitter/src/commands/test.ts"
+      );
+    } finally {
+      rmSync(tempWorkspace, { recursive: true, force: true });
+    }
   });
 });
 

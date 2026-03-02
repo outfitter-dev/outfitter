@@ -86,6 +86,30 @@ function extractCommandImports(content: string): Set<string> {
  * Returns the set of action definition file basenames (with `.ts` extension)
  * that contain at least one action added to the registry.
  */
+function parseNamedImportSymbols(namedImports: string): readonly string[] {
+  const withoutComments = namedImports
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+
+  return withoutComments
+    .split(",")
+    .map((raw) => raw.trim())
+    .filter((raw) => raw.length > 0)
+    .map((raw) => {
+      const withoutType = raw.replace(/^type\s+/, "").trim();
+      if (!withoutType) {
+        return "";
+      }
+
+      // For `import { foo as bar }`, the local symbol is `bar`.
+      const aliased = withoutType.match(
+        /^([A-Za-z_$][A-Za-z0-9_$]*)\s+as\s+([A-Za-z_$][A-Za-z0-9_$]*)$/
+      );
+      return aliased?.[2] ?? withoutType;
+    })
+    .filter((symbol): symbol is string => symbol.length > 0);
+}
+
 function extractRegisteredActionFiles(registryContent: string): Set<string> {
   // 1. Parse import statements: import { sym1, sym2 } from "./actions/foo.js"
   const importMap = new Map<string, string>();
@@ -93,14 +117,10 @@ function extractRegisteredActionFiles(registryContent: string): Set<string> {
     /import\s+\{([^}]+)\}\s+from\s+["']\.\/actions\/([^"']+)\.(js|ts)["']/g;
   let match: RegExpExecArray | null;
   while ((match = importPattern.exec(registryContent)) !== null) {
-    const symbols = match[1]!.split(",").map((s) => s.trim());
+    const symbols = parseNamedImportSymbols(match[1]!);
     const file = `${match[2]}.ts`;
     for (const sym of symbols) {
-      // Handle `type Foo` imports — skip them
-      const cleaned = sym.replace(/^type\s+/, "");
-      if (cleaned) {
-        importMap.set(cleaned, file);
-      }
+      importMap.set(sym, file);
     }
   }
 

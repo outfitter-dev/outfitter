@@ -490,6 +490,45 @@ export function createGetCommand(): Command {
     // Should NOT add TODO comments — arguments are now schema fields
     expect(updated).not.toContain("// TODO: positional argument");
   });
+
+  test("inserts .input(schema) before real .action() call, not comment mentions", async () => {
+    writeTarget(
+      "commands/commented-action.ts",
+      `import { Command } from "commander";
+
+export function createCommentedActionCommand(): Command {
+  return new Command("commented-action")
+    .description("Demo command")
+    .option("--name <name>", "Name")
+    // TODO: add .action() metrics here
+    .action((flags) => {
+      console.log(flags.name);
+    });
+}
+`
+    );
+
+    const result = await runCodemod(CODEMOD_PATH, tempDir, false);
+    expect(result.isOk()).toBe(true);
+
+    const updated = readTarget("commands/commented-action.ts");
+    const lines = updated.split("\n");
+    const commentIndex = lines.findIndex((line) =>
+      line.includes("// TODO: add .action() metrics here")
+    );
+    const inputIndex = lines.findIndex((line) =>
+      line.includes(".input(inputSchema)")
+    );
+    const actionIndex = lines.findIndex((line) =>
+      line.includes(".action((flags)")
+    );
+
+    expect(commentIndex).toBeGreaterThanOrEqual(0);
+    expect(inputIndex).toBeGreaterThanOrEqual(0);
+    expect(actionIndex).toBeGreaterThanOrEqual(0);
+    expect(commentIndex).toBeLessThan(inputIndex);
+    expect(inputIndex).toBeLessThan(actionIndex);
+  });
 });
 
 // =============================================================================

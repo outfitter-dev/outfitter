@@ -418,6 +418,10 @@ interface TransformResult {
   readonly content: string;
 }
 
+function isActionCallLine(trimmed: string): boolean {
+  return /^\.\s*action\s*\(/.test(trimmed);
+}
+
 /**
  * Transform a single file's content from Commander patterns to builder patterns.
  *
@@ -495,8 +499,9 @@ function transformFile(content: string): TransformResult {
       continue;
     }
 
-    // Insert .input(schema) before .action()
-    if (trimmed.includes(".action(") && !insertedInput) {
+    // Insert .input(schema) before a real method-chain .action() call.
+    // This avoids false positives from comments/strings mentioning ".action()".
+    if (isActionCallLine(trimmed) && !insertedInput) {
       // Find the indentation of the .action() line
       const indent = line.match(/^(\s*)/)?.[1] ?? "    ";
       newLines.push(`${indent}.input(${schemaName})`);
