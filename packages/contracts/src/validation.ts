@@ -9,7 +9,7 @@ import { ValidationError } from "./errors.js";
  * @param issues - Array of Zod validation issues
  * @returns Formatted error message string
  */
-function formatZodIssues(issues: z.ZodIssue[]): string {
+export function formatZodIssues(issues: z.ZodIssue[]): string {
   return issues
     .map((issue) => {
       const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
@@ -58,6 +58,27 @@ export function createValidator<T>(
   };
 }
 
+function parseWithSchema<TSchema extends z.ZodType>(
+  schema: TSchema,
+  data: unknown
+): Result<z.infer<TSchema>, ValidationError> {
+  const parseResult = schema.safeParse(data);
+
+  if (parseResult.success) {
+    return Result.ok(parseResult.data);
+  }
+
+  const message = formatZodIssues(parseResult.error.issues);
+  const field = extractField(parseResult.error.issues);
+
+  const errorProps: { message: string; field?: string } = { message };
+  if (field !== undefined) {
+    errorProps.field = field;
+  }
+
+  return Result.err(new ValidationError(errorProps));
+}
+
 /**
  * Validate input against a Zod schema.
  *
@@ -80,20 +101,38 @@ export function validateInput<T>(
   schema: z.ZodType<T>,
   input: unknown
 ): Result<T, ValidationError> {
-  const parseResult = schema.safeParse(input);
+  return parseWithSchema(schema, input);
+}
 
-  if (parseResult.success) {
-    return Result.ok(parseResult.data);
-  }
-
-  const message = formatZodIssues(parseResult.error.issues);
-  const field = extractField(parseResult.error.issues);
-
-  // Build error with optional field only if defined
-  const errorProps: { message: string; field?: string } = { message };
-  if (field !== undefined) {
-    errorProps.field = field;
-  }
-
-  return Result.err(new ValidationError(errorProps));
+/**
+ * Parse and validate data against a Zod schema, returning a Result.
+ *
+ * Wraps Zod's `safeParse` into `Result<T, ValidationError>` where `T` is
+ * automatically inferred from the schema — no manual type argument needed.
+ *
+ * @typeParam TSchema - The Zod schema type (inferred from `schema` argument)
+ * @param schema - Zod schema to parse/validate against
+ * @param data - Unknown data to parse
+ * @returns `Ok<z.infer<TSchema>>` for valid data, `Err<ValidationError>` for invalid data
+ *
+ * @example
+ * ```typescript
+ * const UserSchema = z.object({
+ *   name: z.string().min(1),
+ *   email: z.string().email(),
+ * });
+ *
+ * const result = parseInput(UserSchema, input);
+ * // Result<{ name: string; email: string }, ValidationError>
+ *
+ * if (result.isOk()) {
+ *   result.value.name; // string — fully typed, no manual annotation
+ * }
+ * ```
+ */
+export function parseInput<TSchema extends z.ZodType>(
+  schema: TSchema,
+  data: unknown
+): Result<z.infer<TSchema>, ValidationError> {
+  return parseWithSchema(schema, data);
 }

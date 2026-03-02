@@ -52,6 +52,8 @@ export {
   assertDefined,
   assertMatches,
   assertNonEmpty,
+  expectErr,
+  expectOk,
   isNonEmptyArray,
   type NonEmptyArray,
 } from "./assert/index.js";
@@ -83,6 +85,8 @@ export {
   toEnvelope,
   toHttpResponse,
 } from "./envelope.js";
+// Fetch-to-Result helper
+export { fromFetch } from "./from-fetch.js";
 // Errors
 export {
   AlreadyExistsError,
@@ -177,4 +181,16 @@ export {
   serializeError,
 } from "./serialization.js";
 // Validation utilities
-export { createValidator, validateInput } from "./validation.js";
+export {
+  createValidator,
+  formatZodIssues,
+  parseInput,
+  validateInput,
+} from "./validation.js";
+// Wrap-error utilities
+export {
+  composeMappers,
+  type ErrorMapper,
+  isOutfitterError,
+  wrapError,
+} from "./wrap-error.js";

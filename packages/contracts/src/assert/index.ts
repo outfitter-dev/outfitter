@@ -4,6 +4,9 @@
  * Provides type-safe assertions that return Result types instead of throwing.
  * Enables explicit error handling for invariant checks and validations.
  *
+ * Also provides test assertion helpers (`expectOk`, `expectErr`) that assert
+ * and narrow Result types, throwing descriptive failures for use with test runners.
+ *
  * @module assert
  */
 
@@ -85,3 +88,79 @@ export function assertMatches<T>(
   }
   return Result.ok(value);
 }
+
+/**
+ * Format a value for display in error messages.
+ * Handles Error objects, strings, and general values with JSON serialization fallback.
+ */
+const formatValue = (value: unknown): string => {
+  if (value instanceof Error) {
+    return value.message;
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+/**
+ * Assert a Result is Ok and return the narrowed value.
+ *
+ * Throws a descriptive error if the Result is Err, making it ideal for
+ * test assertions with Bun's test runner.
+ *
+ * @param result - The Result to assert
+ * @param message - Optional context message prepended to the error
+ * @returns The unwrapped Ok value with type narrowing to `T`
+ * @throws Error with descriptive message if Result is Err
+ *
+ * @example
+ * ```typescript
+ * import { expectOk } from "@outfitter/contracts";
+ *
+ * const result = await fetchUser(id);
+ * const user = expectOk(result); // throws if Err, returns User if Ok
+ * expect(user.name).toBe("Alice");
+ * ```
+ */
+export const expectOk = <T, E>(result: Result<T, E>, message?: string): T => {
+  if (result.isOk()) {
+    return result.value;
+  }
+  const errorDetail = formatValue(result.error);
+  const prefix = message ? `${message}: ` : "";
+  throw new Error(`${prefix}Expected Ok, got Err: ${errorDetail}`);
+};
+
+/**
+ * Assert a Result is Err and return the narrowed error.
+ *
+ * Throws a descriptive error if the Result is Ok, making it ideal for
+ * test assertions with Bun's test runner.
+ *
+ * @param result - The Result to assert
+ * @param message - Optional context message prepended to the error
+ * @returns The unwrapped Err value with type narrowing to `E`
+ * @throws Error with descriptive message if Result is Ok
+ *
+ * @example
+ * ```typescript
+ * import { expectErr } from "@outfitter/contracts";
+ *
+ * const result = validateInput(invalidData);
+ * const error = expectErr(result); // throws if Ok, returns error if Err
+ * expect(error.category).toBe("validation");
+ * ```
+ */
+export const expectErr = <T, E>(result: Result<T, E>, message?: string): E => {
+  if (result.isErr()) {
+    return result.error;
+  }
+  const valueDetail = formatValue(result.value);
+  const prefix = message ? `${message}: ` : "";
+  throw new Error(`${prefix}Expected Err, got Ok: ${valueDetail}`);
+};
