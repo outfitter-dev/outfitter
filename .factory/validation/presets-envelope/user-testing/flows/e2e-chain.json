@@ -1,0 +1,49 @@
+{
+  "groupId": "e2e-chain",
+  "testedAt": "2026-02-28T00:51:16Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": ["shell", "bun test", "rg", "file inspection"],
+  "assertions": [
+    {
+      "id": "VAL-CROSS-001",
+      "title": "Full builder chain works end-to-end",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Locate builder-chain integration tests with `rg 'VAL-CROSS-001|builder chain|full chain|integration' packages/cli/src`",
+          "expected": "Find dedicated E2E tests for `.input(schema).context(factory).hints(fn).preset(verbosity).handler(fn)`",
+          "observed": "Found `packages/cli/src/__tests__/builder-e2e.test.ts` with header `@see VAL-CROSS-001` and `Full builder chain E2E` test suite."
+        },
+        {
+          "action": "Inspect `packages/cli/src/__tests__/builder-e2e.test.ts`",
+          "expected": "Coverage for arg parsing, schema validation, context construction, handler invocation, hint generation, envelope wrapping, and output behavior in JSON and human modes.",
+          "observed": "Test file explicitly documents and asserts full chain coverage, including JSON success path, human success path, validation failure path, context factory failure path, preset composition, and CLI parse → runHandler integration."
+        },
+        {
+          "action": "Run targeted integration test: `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/builder-e2e.test.ts`",
+          "expected": "Full chain integration tests pass and show JSON/human output coverage",
+          "observed": "13 pass / 0 fail. Includes: `success path — JSON mode`, `success path — human mode`, `runHandler() bridges full lifecycle`, and `CLI parse → runHandler full integration`."
+        },
+        {
+          "action": "Run required package suites: `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test` and `cd /Users/mg/Developer/outfitter/stack/apps/outfitter && bun test`",
+          "expected": "No regressions; integration coverage remains green",
+          "observed": "`packages/cli`: 659 pass / 0 fail. `apps/outfitter`: 749 pass / 0 fail. No VAL-CROSS-001 builder-chain tests found in apps/outfitter test files via grep."
+        }
+      ],
+      "evidence": {
+        "screenshots": [],
+        "consoleErrors": "n/a (shell flow)",
+        "network": "n/a (shell flow)",
+        "testOutput": "builder-e2e.test.ts: 13 pass / 0 fail. Key passing cases: JSON full-chain success, human-mode success, schema validation failure handling, context failure handling, runHandler lifecycle bridging, and CLI parse → runHandler end-to-end integration.",
+        "codeInspection": "`packages/cli/src/__tests__/builder-e2e.test.ts` header and tests explicitly assert full chain behavior and envelope output in both JSON and human modes."
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-CROSS-001): 1 passed, 0 failed, 0 blocked."
+}

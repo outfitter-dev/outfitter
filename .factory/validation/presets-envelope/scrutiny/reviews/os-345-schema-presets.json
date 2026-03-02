@@ -1,0 +1,28 @@
+{
+  "featureId": "os-345-schema-presets",
+  "reviewedAt": "2026-02-28T00:25:42Z",
+  "commitId": "4861df34ef9863cc727c2a7bfc289374125d702f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The commit adds schema-preset types/factories and derives Commander flags from schema fragments, but it does not merge preset schemas into `.input()` validation or apply preset resolvers in the command execution flow, which leaves key OS-345 expected behavior unmet.",
+    "issues": [
+      {
+        "file": "packages/cli/src/command.ts",
+        "line": 221,
+        "severity": "blocking",
+        "description": "Schema preset fields are not merged into the validated input schema and schema preset resolvers are never executed by the builder lifecycle. `action()` validates with only `this.inputSchema` (`validateInput(flags, schema)`), while `.preset()` stores schema presets only for flag derivation (`schemaPresets.push(...)` at lines 176-179). This contradicts the feature contract that schema fragments compose with `.input()` (merged schema) and remove the need for separate resolve/preAction plumbing. Repro from review: parsing `--query hi --limit 7` yields input `{\"query\":\"hi\"}` (preset field omitted), and `--limit abc` is accepted as `NaN` when provided via schema preset."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`library-worker` procedure and practical execution are misaligned for validation expectations: the procedure requires full-suite `bun run test`, but this worker session did not run it and still reported `followedProcedure: true`.",
+      "evidence": "Skill requirement: .factory/skills/library-worker/SKILL.md:59-60 (`bun run test`). Handoff commands for this feature omit full-suite test: .../handoffs/2026-02-27T23-51-12-435Z__os-345-schema-presets__12899321-3368-4932-a121-9a256d9989d1.json:16-31. Mission testing notes also warn about full-suite quirks: .factory/library/user-testing.md:80-81,88."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review failed: schema-driven preset flag derivation/backward compatibility are present, but merged-schema/resolver execution behavior expected by OS-345 is not implemented in command runtime flow."
+}
