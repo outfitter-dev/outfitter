@@ -889,7 +889,6 @@ export type AnyKitError =
   | InstanceType<typeof CancelledError>;
 
 /**
- * Type alias for backwards compatibility with handler signatures.
- * Use AnyKitError for the union type.
+ * Canonical union type of all concrete error class instances.
  */
 export type OutfitterError = AnyKitError;
