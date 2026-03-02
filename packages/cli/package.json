@@ -39,10 +39,22 @@
         "default": "./dist/completion.js"
       }
     },
+    "./envelope": {
+      "import": {
+        "types": "./dist/envelope.d.ts",
+        "default": "./dist/envelope.js"
+      }
+    },
     "./flags": {
       "import": {
         "types": "./dist/flags.d.ts",
         "default": "./dist/flags.js"
+      }
+    },
+    "./hints": {
+      "import": {
+        "types": "./dist/hints.d.ts",
+        "default": "./dist/hints.js"
       }
     },
     "./input": {

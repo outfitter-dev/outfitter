@@ -7,6 +7,7 @@
 import { Command } from "commander";
 
 import { createCLI as createCLIImpl } from "./cli.js";
+import { isSchemaPreset } from "./flags.js";
 import { exitWithError } from "./output.js";
 import { resolveOutputMode } from "./query.js";
 import {
@@ -15,6 +16,7 @@ import {
   validateInput,
 } from "./schema-input.js";
 import type {
+  AnyPreset,
   CLI,
   CLIConfig,
   CommandAction,
@@ -23,11 +25,13 @@ import type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
 
 export type {
+  AnyPreset,
   CLI,
   CLIConfig,
   CommandAction,
@@ -37,6 +41,7 @@ export type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
 } from "./types.js";
@@ -50,6 +55,70 @@ interface CommandWithHints extends Command {
   __successHintFn?: SuccessHintFn<any>;
   // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
   __errorHintFn?: ErrorHintFn<any>;
+}
+
+/**
+ * Build a merged validation schema from the command's .input() schema and any
+ * schema presets. When both exist, the merged schema validates all fields from
+ * both. When only one exists, it is returned directly. When neither exists,
+ * returns undefined.
+ *
+ * The merged schema implements ZodObjectLike by combining shapes and delegating
+ * safeParse to the underlying schemas.
+ */
+function buildMergedSchema(
+  inputSchema: ZodObjectLike | undefined,
+  schemaPresets: readonly SchemaPreset<Record<string, unknown>>[]
+): ZodObjectLike | undefined {
+  if (!inputSchema && schemaPresets.length === 0) return undefined;
+  if (schemaPresets.length === 0) return inputSchema;
+  if (!inputSchema && schemaPresets.length === 1) {
+    return schemaPresets[0]!.schema;
+  }
+
+  // Merge shapes from all schemas
+  const mergedShape: Record<string, unknown> = {};
+  if (inputSchema) {
+    Object.assign(mergedShape, inputSchema.shape);
+  }
+  for (const preset of schemaPresets) {
+    Object.assign(mergedShape, preset.schema.shape);
+  }
+
+  // Build a merged safeParse that validates against all schemas
+  const allSchemas: ZodObjectLike[] = [];
+  if (inputSchema) allSchemas.push(inputSchema);
+  for (const preset of schemaPresets) allSchemas.push(preset.schema);
+
+  return {
+    shape: mergedShape,
+    safeParse(data: unknown): {
+      success: boolean;
+      data?: Record<string, unknown>;
+      error?: unknown;
+    } {
+      // Validate against each schema separately and merge results.
+      // Each schema only knows its own fields, so we pick fields per schema.
+      let merged: Record<string, unknown> = {};
+      for (const schema of allSchemas) {
+        // Pick only the fields this schema defines
+        const schemaData: Record<string, unknown> = {};
+        if (data && typeof data === "object") {
+          for (const key of Object.keys(schema.shape)) {
+            if (key in data) {
+              schemaData[key] = (data as Record<string, unknown>)[key];
+            }
+          }
+        }
+        const result = schema.safeParse(schemaData);
+        if (!result.success) {
+          return result;
+        }
+        merged = { ...merged, ...(result.data as Record<string, unknown>) };
+      }
+      return { success: true, data: merged };
+    },
+  };
 }
 
 function parseCommandSignature(signature: string): {
@@ -89,6 +158,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private errorHintsFn: ErrorHintFn<any> | undefined;
   private readonly explicitLongFlags = new Set<string>();
+  private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
   private schemaFlagsApplied = false;
 
   constructor(signature: string) {
@@ -168,8 +238,15 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this;
   }
 
-  preset(preset: FlagPreset<Record<string, unknown>>): this {
-    for (const opt of preset.options) {
+  preset(preset: AnyPreset<Record<string, unknown>>): this {
+    if (isSchemaPreset(preset)) {
+      // Schema-driven preset: store for lazy flag derivation in applySchemaFlags()
+      this.schemaPresets.push(preset);
+      return this;
+    }
+
+    // FlagPreset: add options directly to Commander (existing behavior)
+    for (const opt of (preset as FlagPreset<Record<string, unknown>>).options) {
       // Track preset flags as explicit too — they override schema-derived flags
       const longMatch = opt.flags.match(/--([a-z][a-z0-9-]*)/i);
       if (longMatch) {
@@ -199,17 +276,37 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   ): this {
     const schema = this.inputSchema;
     const contextFactory = this.ctxFactory;
+    const presets = [...this.schemaPresets];
     this.applySchemaFlags();
+
+    // Build a merged validation schema that includes both .input() fields
+    // and schema preset fields. This ensures preset Zod fragments are
+    // validated alongside the command's own input schema.
+    const mergedSchema = buildMergedSchema(schema, presets);
 
     this.cmd.action(async (...args: unknown[]) => {
       const command = args.at(-1) as Command;
       const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
       const positional = command.args as string[];
 
+      // Wrap validation and context factory — these should go through
+      // exitWithError on failure. The handler call stays outside the
+      // try/catch so runHandler's own error lifecycle isn't intercepted.
       let input: Record<string, unknown> | undefined;
       let ctx: unknown;
       try {
-        input = schema ? validateInput(flags, schema) : undefined;
+        input = mergedSchema ? validateInput(flags, mergedSchema) : undefined;
+
+        // Execute schema preset resolvers, composing resolved values into input.
+        // Resolvers transform raw Commander flags into typed preset values.
+        if (input !== undefined && presets.length > 0) {
+          for (const preset of presets) {
+            const resolved = preset.resolve(
+              flags as unknown as Record<string, unknown>
+            );
+            Object.assign(input, resolved);
+          }
+        }
         // Construct context if factory is provided
         if (contextFactory) {
           // When .input() is used, pass validated input; otherwise pass raw flags
@@ -253,9 +350,15 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
    * Apply schema-derived flags to the Commander command.
    * Called lazily so that explicit .option()/.requiredOption()/.preset() calls
    * made after .input() are properly tracked as overrides.
+   *
+   * Derives flags from both .input() schema AND schema presets.
    */
   private applySchemaFlags(): void {
-    if (this.schemaFlagsApplied || !this.inputSchema) return;
+    if (this.schemaFlagsApplied) return;
+
+    // Nothing to derive if neither .input() nor schema presets are used
+    if (!this.inputSchema && this.schemaPresets.length === 0) return;
+
     this.schemaFlagsApplied = true;
 
     // Also collect long flags already registered on the Commander command
@@ -267,11 +370,27 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       }
     }
 
-    const derived = deriveFlags(this.inputSchema, existingLongs);
+    // Derive flags from .input() schema
+    if (this.inputSchema) {
+      const derived = deriveFlags(this.inputSchema, existingLongs);
+      for (const flag of derived) {
+        const option = createCommanderOption(flag, this.inputSchema);
+        this.cmd.addOption(option);
+        // Track the derived long flag so schema preset fields
+        // with the same name don't duplicate it
+        existingLongs.add(flag.longFlag);
+      }
+    }
 
-    for (const flag of derived) {
-      const option = createCommanderOption(flag, this.inputSchema);
-      this.cmd.addOption(option);
+    // Derive flags from schema presets
+    for (const schemaPreset of this.schemaPresets) {
+      const derived = deriveFlags(schemaPreset.schema, existingLongs);
+      for (const flag of derived) {
+        const option = createCommanderOption(flag, schemaPreset.schema);
+        this.cmd.addOption(option);
+        // Track to prevent duplicates across multiple schema presets
+        existingLongs.add(flag.longFlag);
+      }
     }
   }
 }
