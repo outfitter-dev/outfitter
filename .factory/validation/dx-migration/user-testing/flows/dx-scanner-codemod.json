@@ -1,0 +1,76 @@
+{
+  "groupId": "dx-scanner-codemod",
+  "testedAt": "2026-02-28T03:10:32Z",
+  "credentials": {
+    "account": "not-applicable (shell)",
+    "namespace": "dx-migration"
+  },
+  "toolsUsed": ["shell:bun test", "shell:bun run"],
+  "assertions": [
+    {
+      "id": "VAL-DX-001",
+      "title": "Action registry completeness scanner",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run targeted tests: bun test apps/outfitter/src/__tests__/check-action-registry.test.ts",
+          "expected": "Scanner tests exist and pass",
+          "observed": "10/10 tests passed, including CLI output checks for check action-registry"
+        },
+        {
+          "action": "Run scanner CLI (human): bun run apps/outfitter/src/cli.ts check action-registry --cwd /Users/mg/Developer/outfitter/stack",
+          "expected": "Cross-reference command files vs action registry and report unregistered commands",
+          "observed": "Output reported scan of 42 command files, 22 registered, 20 unregistered; listed unregistered files. Exit code was 1 due to unregistered files being reported."
+        },
+        {
+          "action": "Run scanner CLI (JSON): bun run apps/outfitter/src/cli.ts check action-registry --cwd /Users/mg/Developer/outfitter/stack --output json",
+          "expected": "Structured cross-reference output with registered/unregistered arrays",
+          "observed": "JSON payload included commandsDir/actionsDir, totalCommands, registered/unregistered arrays and counts, confirming cross-reference behavior."
+        }
+      ],
+      "evidence": {
+        "testOutput": "check-action-registry.test.ts: 10 pass, 0 fail",
+        "cliInvocation": "[action-registry] scanned 42 command files ... 22 registered, 20 unregistered; unregistered list emitted",
+        "structuredOutput": "JSON output contained registered and unregistered command file arrays with counts"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-DX-004",
+      "title": "outfitter upgrade codemod transforms Commander to builder",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run targeted codemod tests: bun test apps/outfitter/src/__tests__/upgrade-codemod-builder.test.ts",
+          "expected": "Commander→builder codemod tests exist and pass, including option/argument semantics",
+          "observed": "26/26 tests passed, including .argument() conversion, square-bracket optional semantics, angle-bracket required semantics, and .input(schema) placement before .action()."
+        },
+        {
+          "action": "Inspect CLI surface: bun run apps/outfitter/src/cli.ts upgrade codemod --help",
+          "expected": "Codemod subcommand is available with dry-run and cwd controls",
+          "observed": "Help output showed 'upgrade codemod' with --cwd and --dry-run options."
+        },
+        {
+          "action": "Run codemod on temp fixture (non-dry-run) containing .argument('<id>'), .option('--tag [value]'), .requiredOption('--name <name>')",
+          "expected": "Generate Zod schema skeleton, preserve optional/required semantics, and insert .input(schema) before .action()",
+          "observed": "CLI reported transformed 1 file. Transformed file contained inputSchema with id: z.string(), tag: z.string().optional(), name: z.string(), and inserted .input(inputSchema) directly before .action()."
+        },
+        {
+          "action": "Run codemod on complex temp fixture with multiple .command() calls using --dry-run",
+          "expected": "Complex command file should be skipped with cli.register() fallback guidance",
+          "observed": "CLI reported skipped 1 file and printed 'use cli.register() fallback'."
+        }
+      ],
+      "evidence": {
+        "testOutput": "upgrade-codemod-builder.test.ts: 26 pass, 0 fail",
+        "cliInvocation": "outfitter upgrade codemod --help shows --cwd and --dry-run",
+        "fixtureTransform": "Transformed temp fixture included z.object schema and .input(inputSchema) insertion before .action()",
+        "complexSkip": "[codemod] skipped 1 file(s) ... use cli.register() fallback"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions (VAL-DX-001, VAL-DX-004): both passed with direct test evidence plus CLI verification on real scanner/codemod commands and temporary fixtures."
+}

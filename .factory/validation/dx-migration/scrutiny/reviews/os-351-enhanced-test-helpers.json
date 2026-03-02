@@ -1,0 +1,38 @@
+{
+  "featureId": "os-351-enhanced-test-helpers",
+  "reviewedAt": "2026-02-28T02:36:31Z",
+  "commitId": "e44cf2cb2e29f038fa3bda4647b16b13cf307a1f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature adds the requested helpers (input/context/envelope support in testCommand, context/hints support in testTool), adds focused tests, and includes a minor changeset. However, there is a state-restoration bug in testCommand when json and env options are used together, so the implementation is not fully safe.",
+    "issues": [
+      {
+        "file": "packages/testing/src/test-command.ts",
+        "line": 275,
+        "severity": "blocking",
+        "description": "Environment restoration is incorrect when `options.env` includes `OUTFITTER_JSON` and `options.json` is also true. `envBackup.set(\"OUTFITTER_JSON\", process.env[\"OUTFITTER_JSON\"])` runs after env overrides are applied, overwriting the original backup value and causing `OUTFITTER_JSON` to restore to the temporary test value instead of the pre-test process value. This violates the helper's no-side-effects contract and can leak env state across tests."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "knowledge",
+      "observation": "The shared testing guidance appears stale: it says the full suite has 3 pre-existing failures, but this feature handoff reports full-suite success.",
+      "evidence": ".factory/library/user-testing.md:88 says there are \"3 pre-existing unrelated test failures\"; handoff verification for this feature reports `bun run test` exitCode 0 with \"40 tasks successful, 40 total\"."
+    },
+    {
+      "area": "skills",
+      "observation": "library-worker skill guidance is internally inconsistent about `bun run check`.",
+      "evidence": ".factory/skills/library-worker/SKILL.md:65 says \"do NOT use 'bun run check'\", but the same file's example handoff at line 129 includes a `bun run check` command with exitCode 0."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Mission AGENTS pre-existing-issues section is now stale for OS-351 env cleanup behavior.",
+      "evidence": "/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:28 says testCommand uses `process.env[key] = undefined`; this feature commit changes cleanup to `delete process.env[key]` in packages/testing/src/test-command.ts."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed os-351-enhanced-test-helpers at commit e44cf2cb2e29f038fa3bda4647b16b13cf307a1f. Core feature scope is largely implemented with tests and a changeset, but the review fails due to a blocking env-restore bug in testCommand when combining env + json options."
+}

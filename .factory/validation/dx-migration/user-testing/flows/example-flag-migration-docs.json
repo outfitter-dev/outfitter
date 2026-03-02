@@ -1,0 +1,90 @@
+{
+  "groupId": "example-flag-migration-docs",
+  "testedAt": "2026-02-28T03:09:44Z",
+  "credentials": {
+    "account": "not-applicable",
+    "namespace": "not-applicable"
+  },
+  "toolsUsed": ["shell", "bun test", "ripgrep", "file inspection"],
+  "assertions": [
+    {
+      "id": "VAL-DX-005",
+      "title": "--example flag for outfitter init",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run `bun test --filter \"example\"` in apps/outfitter",
+          "expected": "Init/example coverage passes including todo and files example checks",
+          "observed": "12/12 tests passed in src/__tests__/init-example-flag.test.ts, including todo builder-pattern assertions and mcp files-pattern assertions."
+        },
+        {
+          "action": "Run `bun run src/cli.ts init --help`",
+          "expected": "`--example` flag appears in init help text",
+          "observed": "Help output includes `-e, --example <name>` with `Scaffold with a pattern-rich example (cli: todo; mcp: files)`."
+        },
+        {
+          "action": "Run dry-run scaffolds for both examples",
+          "expected": "CLI accepts `--example` and produces scaffold plans",
+          "observed": "`init cli my-tool --example todo --dry-run --yes` and `init mcp my-server --example files --dry-run --yes` both returned operation plans with exit code 0."
+        },
+        {
+          "action": "Inspect preset example template files",
+          "expected": "Pattern-rich example templates exist for todo and files",
+          "observed": "Found `packages/presets/presets/_examples/cli-todo/src/program.ts.template` and `packages/presets/presets/_examples/mcp-files/src/mcp.ts.template` containing builder/resource/tool patterns (e.g., `.input`, `.context`, `.hints`, `.onError`, `runHandler`, `defineResource`, `defineResourceTemplate`, `defineTool`)."
+        }
+      ],
+      "evidence": {
+        "testOutput": "bun test --filter \"example\" -> 12 pass, 0 fail",
+        "helpOutput": "init help lists -e, --example <name> with cli: todo and mcp: files",
+        "scaffoldOutput": "Both dry-run init commands succeeded and emitted operation plans",
+        "presetFiles": [
+          "packages/presets/presets/_examples/cli-todo/src/program.ts.template",
+          "packages/presets/presets/_examples/mcp-files/src/mcp.ts.template"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-CROSS-002",
+      "title": "Migration docs cover v0.5 breaking changes",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Check migration doc file presence",
+          "expected": "`docs/migration-v0.5.md` exists",
+          "observed": "`test -f docs/migration-v0.5.md` returned `exists`."
+        },
+        {
+          "action": "Review migration doc content",
+          "expected": "Doc covers v0.5 breaking changes and includes before/after code plus migration steps",
+          "observed": "Document includes sections covering builder additions (`.input`, `.context`, `.hints`, `.onError`), schema-driven preset changes (`createSchemaPreset`), `loadConfig()` signature overload change, and ErrorCategory enrichment (`errorCategoryMeta`, JSON-RPC, retryable), with explicit Before/After examples and Migration steps sections."
+        },
+        {
+          "action": "Keyword/section verification via ripgrep",
+          "expected": "Required topics are present in the migration doc",
+          "observed": "ripgrep found required markers: `.input(`, `.context(`, `.hints(`, `.onError(`, `createSchemaPreset`, `loadConfig(`, `errorCategoryMeta`, and multiple `Before:`, `After:`, `Migration steps:` blocks."
+        }
+      ],
+      "evidence": {
+        "filePresence": "docs/migration-v0.5.md exists",
+        "contentReview": "Required v0.5 migration topics present with before/after code and migration steps",
+        "keywordChecks": [
+          ".input(",
+          ".context(",
+          ".hints(",
+          ".onError(",
+          "createSchemaPreset",
+          "loadConfig(",
+          "errorCategoryMeta",
+          "Before:",
+          "After:",
+          "Migration steps:"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 2 assertions: 2 passed, 0 failed, 0 blocked."
+}
