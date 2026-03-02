@@ -25,28 +25,31 @@ This is a **library monorepo** with no web UI or running services. All user test
 
 ## Package Test Commands
 
-| Package | Command |
-|---------|---------|
-| `@outfitter/cli` | `bun run test --filter=@outfitter/cli` |
+| Package                | Command                                      |
+| ---------------------- | -------------------------------------------- |
+| `@outfitter/cli`       | `bun run test --filter=@outfitter/cli`       |
 | `@outfitter/contracts` | `bun run test --filter=@outfitter/contracts` |
-| `@outfitter/testing` | `bun run test --filter=@outfitter/testing` |
-| `@outfitter/mcp` | `bun run test --filter=@outfitter/mcp` |
-| `outfitter` (app) | `bun run test --filter=outfitter` |
-| All | `bun run test` |
+| `@outfitter/testing`   | `bun run test --filter=@outfitter/testing`   |
+| `@outfitter/mcp`       | `bun run test --filter=@outfitter/mcp`       |
+| `outfitter` (app)      | `bun run test --filter=outfitter`            |
+| All                    | `bun run test`                               |
 
 ## Verification Patterns
 
 ### API existence check
+
 ```bash
 bun -e "const m = await import('@outfitter/contracts'); console.log(typeof m.parseInput)"
 ```
 
 ### Doc file check
+
 ```bash
 test -f packages/contracts/docs/error-handling-patterns.md && echo "exists" || echo "missing"
 ```
 
 ### CLI behavior check
+
 ```bash
 cd apps/outfitter && bun run src/index.ts schema --help
 ```

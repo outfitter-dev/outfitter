@@ -10,6 +10,7 @@ NOTE: Startup and cleanup are handled by `worker-base`. This skill defines the W
 ## When to Use This Skill
 
 Use for features that involve writing or modifying TypeScript code in the monorepo:
+
 - Bug fixes in existing packages
 - New utility functions and helpers
 - Testing primitives and harnesses
@@ -103,11 +104,27 @@ feat(contracts): add parseInput() Zod-to-Result helper [OS-332]
   "whatWasLeftUndone": "",
   "verification": {
     "commandsRun": [
-      { "command": "cd packages/contracts && bun test", "exitCode": 0, "observation": "47 tests passed including 6 new parseInput tests" },
-      { "command": "bun run test", "exitCode": 0, "observation": "3280 tests passed, 0 failed" },
-      { "command": "bun run typecheck", "exitCode": 0, "observation": "No errors" },
+      {
+        "command": "cd packages/contracts && bun test",
+        "exitCode": 0,
+        "observation": "47 tests passed including 6 new parseInput tests"
+      },
+      {
+        "command": "bun run test",
+        "exitCode": 0,
+        "observation": "3280 tests passed, 0 failed"
+      },
+      {
+        "command": "bun run typecheck",
+        "exitCode": 0,
+        "observation": "No errors"
+      },
       { "command": "bun run check", "exitCode": 0, "observation": "Clean" },
-      { "command": "bun -e \"const m = await import('@outfitter/contracts'); console.log(typeof m.parseInput)\"", "exitCode": 0, "observation": "function" }
+      {
+        "command": "bun -e \"const m = await import('@outfitter/contracts'); console.log(typeof m.parseInput)\"",
+        "exitCode": 0,
+        "observation": "function"
+      }
     ],
     "interactiveChecks": []
   },
@@ -116,12 +133,30 @@ feat(contracts): add parseInput() Zod-to-Result helper [OS-332]
       {
         "file": "packages/contracts/src/__tests__/parse-input.test.ts",
         "cases": [
-          { "name": "returns Ok with parsed value for valid input", "verifies": "happy path" },
-          { "name": "returns Err with ValidationError for invalid input", "verifies": "error case" },
-          { "name": "preserves Zod error details in ValidationError message", "verifies": "error format" },
-          { "name": "infers generic T from schema", "verifies": "type narrowing" },
-          { "name": "handles nested object schemas", "verifies": "complex input" },
-          { "name": "handles optional fields correctly", "verifies": "edge case" }
+          {
+            "name": "returns Ok with parsed value for valid input",
+            "verifies": "happy path"
+          },
+          {
+            "name": "returns Err with ValidationError for invalid input",
+            "verifies": "error case"
+          },
+          {
+            "name": "preserves Zod error details in ValidationError message",
+            "verifies": "error format"
+          },
+          {
+            "name": "infers generic T from schema",
+            "verifies": "type narrowing"
+          },
+          {
+            "name": "handles nested object schemas",
+            "verifies": "complex input"
+          },
+          {
+            "name": "handles optional fields correctly",
+            "verifies": "edge case"
+          }
         ]
       }
     ]
