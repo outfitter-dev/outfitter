@@ -26,6 +26,8 @@ import type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  RelatedToDeclaration,
+  RelatedToOptions,
   SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
@@ -42,6 +44,8 @@ export type {
   ContextFactory,
   ErrorHintFn,
   FlagPreset,
+  RelatedToDeclaration,
+  RelatedToOptions,
   SchemaPreset,
   SuccessHintFn,
   ZodObjectLike,
@@ -69,6 +73,8 @@ interface CommandWithHints extends Command {
   __errorHintFn?: ErrorHintFn<any>;
   /** Safety metadata signals stored by .readOnly() and .idempotent() */
   __metadata?: CommandMetadata;
+  /** Relationship declarations stored by .relatedTo() */
+  __relatedTo?: RelatedToDeclaration[];
 }
 
 /**
@@ -202,6 +208,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private _destructive = false;
   private _readOnly = false;
   private _idempotent = false;
+  private readonly _relatedTo: RelatedToDeclaration[] = [];
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -292,6 +299,14 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
 
   idempotent(isIdempotent: boolean): this {
     this._idempotent = isIdempotent;
+    return this;
+  }
+
+  relatedTo(target: string, options?: RelatedToOptions): this {
+    this._relatedTo.push({
+      target,
+      ...(options?.description ? { description: options.description } : {}),
+    });
     return this;
   }
 
@@ -413,6 +428,11 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     }
     if (metadata.readOnly !== undefined || metadata.idempotent !== undefined) {
       (this.cmd as CommandWithHints).__metadata = metadata;
+    }
+
+    // Store relationship declarations on the Command for action graph construction
+    if (this._relatedTo.length > 0) {
+      (this.cmd as CommandWithHints).__relatedTo = [...this._relatedTo];
     }
 
     return this.cmd;
