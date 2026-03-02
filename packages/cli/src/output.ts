@@ -211,9 +211,14 @@ function formatErrorHuman(error: Error): string {
   return error.message;
 }
 
+type OutputSliceTruncation = Pick<
+  NonNullable<OutputOptions["truncation"]>,
+  "limit" | "offset"
+>;
+
 function applyOutputTruncation(
   data: unknown,
-  truncation: OutputOptions["truncation"]
+  truncation: OutputSliceTruncation | undefined
 ): unknown {
   if (!truncation || !Array.isArray(data)) {
     return data;
