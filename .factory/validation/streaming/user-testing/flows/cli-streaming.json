@@ -2,8 +2,8 @@
   "groupId": "cli-streaming",
   "testedAt": "2026-02-28T15:23:45Z",
   "credentials": {
-    "account": "not-applicable-shell",
-    "namespace": "not-applicable-shell"
+    "account": "not-applicable",
+    "namespace": "streaming.cli-streaming"
   },
   "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
   "assertions": [
