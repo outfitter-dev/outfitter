@@ -1,6 +1,9 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Claude-Specific Instruction
 
-@.claude/CLAUDE.md
+- Unless otherwise specified, updates to this file should be made directly in `./AGENTS.md`.
+
+## Agent Instructions
+<!-- Do not edit below this line -->
 @AGENTS.md

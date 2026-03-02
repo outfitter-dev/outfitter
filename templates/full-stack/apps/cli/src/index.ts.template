@@ -1,5 +1,0 @@
-/**
- * {{projectName}} CLI - Public API.
- */
-
-export { runCli } from "./cli.js";

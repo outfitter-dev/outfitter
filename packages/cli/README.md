@@ -361,6 +361,101 @@ if (flags.reset) {
 }
 ```
 
+## NDJSON Streaming (`@outfitter/cli/streaming`)
+
+Real-time progress reporting via newline-delimited JSON. Handlers emit progress events through an optional `ctx.progress` callback; the CLI adapter writes them as NDJSON lines to stdout.
+
+```typescript
+import { streamPreset } from "@outfitter/cli/query";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("deploy")
+  .preset(streamPreset())
+  .action(async ({ flags }) => {
+    await runHandler({
+      command: "deploy",
+      handler: async (input, ctx) => {
+        ctx.progress?.({ type: "progress", current: 1, total: 3 });
+        // ... work ...
+        return Result.ok({ status: "deployed" });
+      },
+      input,
+      stream: Boolean(flags.stream),
+    });
+  });
+```
+
+```
+$ mycli deploy --stream
+{"type":"start","command":"deploy","ts":"2025-01-01T00:00:00.000Z"}
+{"type":"progress","current":1,"total":3}
+{"ok":true,"command":"deploy","result":{"status":"deployed"}}
+```
+
+`--stream` is orthogonal to output mode — it controls delivery (streaming vs batch), not serialization. Types live in `@outfitter/contracts/stream`.
+
+Low-level utilities (`writeNdjsonLine`, `writeStreamEnvelope`, `createNdjsonProgress`) are exported from `@outfitter/cli/streaming` for custom setups.
+
+## Output Truncation (`@outfitter/cli/truncation`)
+
+Truncate array output with pagination hints and optional file pointers for very large results.
+
+```typescript
+import { truncateOutput } from "@outfitter/cli/truncation";
+
+const result = truncateOutput(items, {
+  limit: 20,
+  offset: 0,
+  commandName: "list",
+});
+// result.data      — sliced items (length <= 20)
+// result.metadata  — { showing: 20, total: 500, truncated: true }
+// result.hints     — [{ description: "Show next 20 of 480...", command: "list --offset 20 --limit 20" }]
+```
+
+When output exceeds `filePointerThreshold` (default: 1000 items), the full result is written to a temp file and `metadata.full_output` contains the file path. File write failures degrade gracefully with a warning hint instead of crashing.
+
+**Exports:** `truncateOutput`, `TruncationOptions`, `TruncationResult`, `TruncationMetadata`, `DEFAULT_FILE_POINTER_THRESHOLD`
+
+## CommandBuilder
+
+The `command()` builder provides a fluent API for defining CLI commands with typed input schemas, safety metadata, and hint generation:
+
+```typescript
+import { command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("delete <id>")
+  .description("Delete a resource")
+  .input(z.object({ id: z.string(), force: z.boolean().default(false) }))
+  .destructive(true)        // auto-adds --dry-run flag
+  .relatedTo("list", { description: "List remaining resources" })
+  .hints((result, input) => [{ description: "Verify", command: `show ${input.id}` }])
+  .onError((error, input) => [{ description: "Check exists", command: `show ${input.id}` }])
+  .action(async ({ input, flags }) => {
+    await runHandler({
+      command: "delete",
+      handler: deleteHandler,
+      input,
+      dryRun: Boolean(flags.dryRun),
+    });
+  })
+  .build();
+```
+
+**Safety metadata methods:**
+
+| Method             | Effect                                                          |
+| ------------------ | --------------------------------------------------------------- |
+| `.destructive()`   | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execution hint |
+| `.readOnly()`      | Surfaces in command tree JSON and maps to MCP `readOnlyHint`    |
+| `.idempotent()`    | Surfaces in command tree JSON and maps to MCP `idempotentHint`  |
+| `.relatedTo()`     | Declares action graph edges for tier-4 hint generation          |
+| `.input(schema)`   | Zod schema for auto-derived flags and validation                |
+| `.context(factory)` | Async factory for handler context construction                 |
+| `.hints(fn)`       | Success hint function called with `(result, input)`             |
+| `.onError(fn)`     | Error hint function called with `(error, input)`                |
+
 ## Conventions
 
 Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../docs/cli/conventions.md) for the complete catalog.
@@ -384,13 +479,17 @@ command("deploy")
   });
 ```
 
-**Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`
+**Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`, `streamPreset`
 
 **Additional modules:**
 
 - `@outfitter/cli/verbs` — Standard verb families (`create`, `modify`, `remove`, `list`, `show`)
-- `@outfitter/cli/query` — Output mode and jq expression presets
+- `@outfitter/cli/query` — Output mode, jq expression, and streaming presets
 - `@outfitter/cli/completion` — Shell completion script generation
+- `@outfitter/cli/streaming` — NDJSON streaming primitives
+- `@outfitter/cli/truncation` — Output truncation with pagination hints
+- `@outfitter/cli/envelope` — Response envelope construction and `runHandler()` lifecycle
+- `@outfitter/cli/hints` — Hint generation tiers (command tree, error recovery, schema params, action graph)
 
 ## Configuration
 

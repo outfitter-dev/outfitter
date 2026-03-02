@@ -237,6 +237,45 @@ server.registerResource(configResource);
 const contentResult = await server.readResource("file:///etc/app/config.json");
 ```
 
+### defineResourceTemplate(definition)
+
+Helper for defining MCP resource templates with URI pattern matching and optional Zod validation.
+
+```typescript
+import { defineResourceTemplate } from "@outfitter/mcp";
+import { z } from "zod";
+
+// Basic template with string variables
+const userTemplate = defineResourceTemplate({
+  uriTemplate: "db:///users/{userId}/profile",
+  name: "User Profile",
+  handler: async (uri, variables, ctx) => {
+    const profile = await getProfile(variables.userId);
+    return Result.ok([{ uri, text: JSON.stringify(profile), mimeType: "application/json" }]);
+  },
+});
+
+// Typed template with Zod validation and coercion
+const postTemplate = defineResourceTemplate({
+  uriTemplate: "db:///users/{userId}/posts/{postId}",
+  name: "User Post",
+  paramSchema: z.object({
+    userId: z.string().min(1),
+    postId: z.coerce.number().int().positive(),
+  }),
+  handler: async (uri, params, ctx) => {
+    // params is { userId: string; postId: number } — validated and coerced
+    const post = await getPost(params.userId, params.postId);
+    return Result.ok([{ uri, text: JSON.stringify(post) }]);
+  },
+});
+
+server.registerResourceTemplate(userTemplate);
+server.registerResourceTemplate(postTemplate);
+```
+
+Templates use RFC 6570 Level 1 URI templates (`{param}` placeholders). Typed templates validate extracted variables against a Zod schema before handler invocation.
+
 ### Server Methods
 
 ```typescript
@@ -276,6 +315,53 @@ Extended handler context for MCP tools with additional metadata:
 interface McpHandlerContext extends HandlerContext {
   toolName?: string; // Name of the tool being invoked
 }
+```
+
+## Streaming and Progress (`@outfitter/mcp/progress`)
+
+When an MCP client provides a `progressToken` in the tool call params, the server automatically creates a progress callback and injects it into the handler context as `ctx.progress`. Each call emits a `notifications/progress` notification.
+
+```typescript
+const tool = defineTool({
+  name: "index-files",
+  description: "Index workspace files",
+  inputSchema: z.object({ path: z.string() }),
+  handler: async (input, ctx) => {
+    const files = await listFiles(input.path);
+
+    for (let i = 0; i < files.length; i++) {
+      await indexFile(files[i]);
+      ctx.progress?.({ type: "progress", current: i + 1, total: files.length });
+    }
+
+    ctx.progress?.({ type: "step", name: "complete", status: "done", duration_ms: 150 });
+
+    return Result.ok({ indexed: files.length });
+  },
+});
+```
+
+Use optional chaining (`ctx.progress?.()`) so the handler works whether or not the client requested progress tracking. Without a `progressToken`, `ctx.progress` is `undefined` and no notifications are sent.
+
+**Event mapping to MCP notifications:**
+
+| StreamEvent type | MCP `progress` | MCP `total` | MCP `message`             |
+| ---------------- | -------------- | ----------- | ------------------------- |
+| `start`          | `0`            | --          | `[start] {command}`       |
+| `step`           | `0`            | --          | `[step] {name}: {status}` |
+| `progress`       | `current`      | `total`     | `message` (if provided)   |
+
+The progress callback uses the same `StreamEvent` types from `@outfitter/contracts/stream` as the CLI NDJSON adapter, keeping handlers transport-agnostic.
+
+**Programmatic usage** (for custom transport layers):
+
+```typescript
+import { createMcpProgressCallback } from "@outfitter/mcp/progress";
+
+const progress = createMcpProgressCallback(
+  "tok-123",
+  (notification) => sdkServer.notification(notification)
+);
 ```
 
 ## Core Tools

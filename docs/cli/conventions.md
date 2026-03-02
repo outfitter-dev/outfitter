@@ -42,6 +42,7 @@ command("check")
 | --------------------------- | --------------------- | ------------------------------------------------------------------- | ----------- |
 | `outputModePreset(config?)` | `-o, --output <mode>` | `{ outputMode: "human" \| "json" \| "jsonl" \| "tree" \| "table" }` | `"human"`   |
 | `jqPreset()`                | `--jq <expr>`         | `{ jq: string \| undefined }`                                       | `undefined` |
+| `streamPreset()`            | `--stream`            | `{ stream: boolean }`                                               | `false`     |
 
 ## Composition
 
@@ -106,6 +107,94 @@ outputModePreset({
   includeJsonl: true,
 });
 ```
+
+## NDJSON Streaming (`@outfitter/cli/streaming`)
+
+The `streamPreset()` enables real-time progress reporting over NDJSON (newline-delimited JSON). When `--stream` is active, progress events and the terminal envelope are written as individual JSON lines to stdout.
+
+### Enabling Streaming
+
+Add `streamPreset()` to your command's presets and pass `stream` to `runHandler()`:
+
+```typescript
+import { streamPreset } from "@outfitter/cli/query";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("deploy")
+  .preset(streamPreset())
+  .action(async ({ flags }) => {
+    await runHandler({
+      command: "deploy",
+      handler: deployHandler,
+      input,
+      stream: Boolean(flags.stream),
+    });
+  });
+```
+
+### Protocol Format
+
+Each line is a self-contained JSON object with a `type` discriminator:
+
+```
+{"type":"start","command":"deploy","ts":"2025-01-01T00:00:00.000Z"}
+{"type":"progress","current":5,"total":10,"message":"Processing..."}
+{"type":"step","name":"validate","status":"complete","duration_ms":42}
+{"ok":true,"command":"deploy","result":{...},"hints":[...]}
+```
+
+**Event ordering is deterministic:**
+
+1. `start` event is always first (emitted by the adapter)
+2. `step` / `progress` events appear in handler emission order
+3. Terminal envelope (success or error) is always last
+
+### Stream Event Types
+
+| Event Type       | Discriminator | Fields                           |
+| ---------------- | ------------- | -------------------------------- |
+| `StreamStart`    | `"start"`     | `command`, `ts` (ISO-8601)       |
+| `StreamStep`     | `"step"`      | `name`, `status`, `duration_ms?` |
+| `StreamProgress` | `"progress"`  | `current`, `total`, `message?`   |
+
+Types are defined in `@outfitter/contracts/stream`.
+
+### Progress Callback Pattern
+
+Handlers emit progress via an optional `ctx.progress` callback. Use optional chaining so the handler works whether or not streaming is active:
+
+```typescript
+const handler: Handler<Input, Output> = async (input, ctx) => {
+  for (let i = 0; i < items.length; i++) {
+    await processItem(items[i]);
+    ctx.progress?.({ type: "progress", current: i + 1, total: items.length });
+  }
+
+  ctx.progress?.({ type: "step", name: "cleanup", status: "complete", duration_ms: 12 });
+
+  return Result.ok({ processed: items.length });
+};
+```
+
+When streaming is not active, `ctx.progress` is `undefined` and no events are emitted. The handler remains transport-agnostic.
+
+### Stream vs Output Mode
+
+`--stream` is orthogonal to output mode (`--output`). It controls delivery (streaming vs batch), not serialization (JSON vs human). You can combine `--stream` with any output mode.
+
+### Low-Level Utilities
+
+For custom streaming setups or testing, the NDJSON primitives are available directly:
+
+```typescript
+import {
+  writeNdjsonLine,
+  writeStreamEnvelope,
+  createNdjsonProgress,
+} from "@outfitter/cli/streaming";
+```
+
+In most cases `runHandler()` handles the wiring automatically.
 
 ## Verb Conventions (`@outfitter/cli/verbs`)
 
