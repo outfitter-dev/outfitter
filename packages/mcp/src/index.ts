@@ -99,6 +99,7 @@ export {
   type PromptMessage,
   type PromptMessageContent,
   type PromptResult,
+  type ProgressReporter,
   type ResourceContent,
   type ResourceDefinition,
   type ResourceReadHandler,

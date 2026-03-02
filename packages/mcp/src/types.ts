@@ -907,6 +907,12 @@ export interface McpHandlerContext extends HandlerContext {
   toolName?: string;
 }
 
+/**
+ * Backward-compatible alias for progress reporter shape.
+ * Prefer `McpHandlerContext['progress']` for new code.
+ */
+export type ProgressReporter = NonNullable<McpHandlerContext["progress"]>;
+
 // ============================================================================
 // Handler Adapter
 // ============================================================================
