@@ -1,19 +1,26 @@
+/**
+ * Tests for output mode resolution parity across legacy and new flag styles.
+ *
+ * Validates that `resolveOutputMode()` correctly handles both legacy
+ * `--json`/`--jsonl` boolean flags and new `--output` flag style,
+ * plus env var fallback.
+ *
+ * @packageDocumentation
+ */
+
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { resolveOutputModeFromContext } from "../output-mode.js";
+import { resolveOutputMode } from "@outfitter/cli/query";
 
-// Capture original env state to restore after each test
 const originalJson = process.env["OUTFITTER_JSON"];
 const originalJsonl = process.env["OUTFITTER_JSONL"];
 
 beforeEach(() => {
-  // Clear env vars before each test for isolation
   delete process.env["OUTFITTER_JSON"];
   delete process.env["OUTFITTER_JSONL"];
 });
 
 afterEach(() => {
-  // Restore original env state
   if (originalJson === undefined) {
     delete process.env["OUTFITTER_JSON"];
   } else {
@@ -27,51 +34,58 @@ afterEach(() => {
   }
 });
 
-describe("resolveOutputModeFromContext", () => {
+describe("resolveOutputMode", () => {
   test("returns json when --json flag is set", () => {
-    expect(resolveOutputModeFromContext({ json: true })).toBe("json");
+    expect(resolveOutputMode({ json: true }).mode).toBe("json");
   });
 
   test("returns jsonl when --jsonl flag is set", () => {
-    expect(resolveOutputModeFromContext({ jsonl: true })).toBe("jsonl");
+    expect(resolveOutputMode({ jsonl: true }).mode).toBe("jsonl");
   });
 
   test("returns json when OUTFITTER_JSON=1 env var is set", () => {
     process.env["OUTFITTER_JSON"] = "1";
-    expect(resolveOutputModeFromContext({})).toBe("json");
+    expect(resolveOutputMode({}).mode).toBe("json");
   });
 
   test("returns jsonl when OUTFITTER_JSONL=1 env var is set", () => {
     process.env["OUTFITTER_JSONL"] = "1";
-    expect(resolveOutputModeFromContext({})).toBe("jsonl");
+    expect(resolveOutputMode({}).mode).toBe("jsonl");
   });
 
   test("returns human when no flag or env var is set", () => {
-    expect(resolveOutputModeFromContext({})).toBe("human");
+    expect(resolveOutputMode({}).mode).toBe("human");
   });
 
   test("flag takes priority over env var", () => {
     process.env["OUTFITTER_JSON"] = "1";
-    // Even with JSON env set, explicit jsonl flag wins
-    expect(resolveOutputModeFromContext({ jsonl: true })).toBe("jsonl");
+    expect(resolveOutputMode({ jsonl: true }).mode).toBe("jsonl");
   });
 
   test("json flag takes priority over OUTFITTER_JSONL env var", () => {
     process.env["OUTFITTER_JSONL"] = "1";
-    expect(resolveOutputModeFromContext({ json: true })).toBe("json");
+    expect(resolveOutputMode({ json: true }).mode).toBe("json");
   });
 
   test("OUTFITTER_JSONL env takes priority over OUTFITTER_JSON env", () => {
     process.env["OUTFITTER_JSON"] = "1";
     process.env["OUTFITTER_JSONL"] = "1";
-    expect(resolveOutputModeFromContext({})).toBe("jsonl");
+    expect(resolveOutputMode({}).mode).toBe("jsonl");
   });
 
   test("does NOT set any env vars as side effect", () => {
-    resolveOutputModeFromContext({ json: true });
+    resolveOutputMode({ json: true });
     expect(process.env["OUTFITTER_JSON"]).toBeUndefined();
 
-    resolveOutputModeFromContext({ jsonl: true });
+    resolveOutputMode({ jsonl: true });
     expect(process.env["OUTFITTER_JSONL"]).toBeUndefined();
+  });
+
+  test("returns source metadata", () => {
+    expect(resolveOutputMode({ json: true }).source).toBe("flag");
+    expect(resolveOutputMode({}).source).toBe("default");
+
+    process.env["OUTFITTER_JSON"] = "1";
+    expect(resolveOutputMode({}).source).toBe("env");
   });
 });

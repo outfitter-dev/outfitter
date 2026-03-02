@@ -5,14 +5,12 @@
  */
 
 import { cwdPreset } from "@outfitter/cli/flags";
+import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printDoctorResults, runDoctor } from "../commands/doctor.js";
-import {
-  type CliOutputMode,
-  resolveOutputModeFromContext,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import { outputModeSchema, resolveCwdFromPreset } from "./shared.js";
 
 interface DoctorActionInput {
@@ -40,7 +38,7 @@ export const doctorAction: DoctorAction = defineAction({
     description: "Validate environment and dependencies",
     options: [...doctorCwd.options],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       return {
         cwd: resolveCwdFromPreset(context.flags, doctorCwd),
         outputMode,

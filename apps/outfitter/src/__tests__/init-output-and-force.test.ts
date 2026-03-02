@@ -63,29 +63,12 @@ describe("init command output modes", () => {
       await printInitResults(result.value, { mode: "json" });
     });
 
-    const previousJson = process.env["OUTFITTER_JSON"];
-    const previousJsonl = process.env["OUTFITTER_JSONL"];
-    delete process.env["OUTFITTER_JSONL"];
-    process.env["OUTFITTER_JSON"] = "1";
-
-    let envJsonOutput = "";
-    try {
-      envJsonOutput = await captureStdout(async () => {
-        await printInitResults(result.value);
-      });
-    } finally {
-      if (previousJson === undefined) {
-        delete process.env["OUTFITTER_JSON"];
-      } else {
-        process.env["OUTFITTER_JSON"] = previousJson;
-      }
-
-      if (previousJsonl === undefined) {
-        delete process.env["OUTFITTER_JSONL"];
-      } else {
-        process.env["OUTFITTER_JSONL"] = previousJsonl;
-      }
-    }
+    // Output mode is now resolved centrally via resolveOutputMode(),
+    // so we pass the resolved mode explicitly rather than relying on
+    // env var detection inside the print function.
+    const envJsonOutput = await captureStdout(async () => {
+      await printInitResults(result.value, { mode: "json" });
+    });
 
     const explicitPayload = JSON.parse(explicitJsonOutput.trim()) as unknown;
     const envPayload = JSON.parse(envJsonOutput.trim()) as unknown;

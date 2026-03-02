@@ -11,14 +11,12 @@ import {
   dryRunPreset,
   interactionPreset,
 } from "@outfitter/cli/flags";
+import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printUpgradeResults, runUpgrade } from "../commands/upgrade.js";
-import {
-  type CliOutputMode,
-  resolveOutputModeFromContext,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
@@ -98,7 +96,7 @@ export const upgradeAction: UpgradeAction = defineAction({
       "Check for @outfitter/* package updates and migration guidance",
     options: [...upgradeFlags.options],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const { dryRun, interactive, yes, all, noCodemods, guide } =
         upgradeFlags.resolve(context);
       const guidePackages =
