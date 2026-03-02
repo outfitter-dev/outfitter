@@ -370,9 +370,7 @@ function generateSchemaField(option: ParsedOption): string {
   switch (type) {
     case "boolean": {
       const defaultBool = negated ? "true" : "false";
-      // TODO: Commander's --no-* flags have special semantics (presence sets value to false).
-      // The generated schema captures the default correctly but doesn't preserve the
-      // negated flag relationship. Manual review may be needed for --no-* flags.
+      // Preserve Commander negated-flag defaults: --no-foo maps to foo:boolean default true.
       field = `${key}: z.boolean().default(${defaultBool}).describe("${escapeString(description)}")`;
       break;
     }

@@ -26,8 +26,6 @@ import type { InitPresetId } from "./init-option-resolution.js";
 // Example Overlays
 // =============================================================================
 
-let cachedPresetExamples: ReadonlyMap<string, readonly string[]> | undefined;
-
 function discoverPresetExamples(): ReadonlyMap<string, readonly string[]> {
   const examplesRoot = join(getPresetsBaseDir(), "_examples");
   if (!existsSync(examplesRoot)) {
@@ -62,10 +60,7 @@ function discoverPresetExamples(): ReadonlyMap<string, readonly string[]> {
 }
 
 function getPresetExamples(): ReadonlyMap<string, readonly string[]> {
-  if (!cachedPresetExamples) {
-    cachedPresetExamples = discoverPresetExamples();
-  }
-  return cachedPresetExamples;
+  return discoverPresetExamples();
 }
 
 /**
