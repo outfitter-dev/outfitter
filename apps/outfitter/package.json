@@ -1,29 +1,11 @@
 {
   "name": "outfitter",
-  "version": "0.3.4",
   "description": "Outfitter umbrella CLI for scaffolding and project management",
-  "keywords": [
-    "bun",
-    "cli",
-    "outfitter",
-    "scaffolding",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "apps/outfitter"
-  },
-  "bin": {
-    "out": "./dist/cli.js",
-    "outfitter": "./dist/cli.js"
-  },
+  "version": "0.3.4",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -51,16 +33,16 @@
         "default": "./dist/commands/check.js"
       }
     },
-    "./commands/check-action-registry": {
-      "import": {
-        "types": "./dist/commands/check-action-registry.d.ts",
-        "default": "./dist/commands/check-action-registry.js"
-      }
-    },
     "./commands/check-action-ceremony": {
       "import": {
         "types": "./dist/commands/check-action-ceremony.d.ts",
         "default": "./dist/commands/check-action-ceremony.js"
+      }
+    },
+    "./commands/check-action-registry": {
+      "import": {
+        "types": "./dist/commands/check-action-registry.d.ts",
+        "default": "./dist/commands/check-action-registry.js"
       }
     },
     "./commands/check-docs-sentinel": {
@@ -419,6 +401,24 @@
       }
     }
   },
+  "keywords": [
+    "bun",
+    "cli",
+    "outfitter",
+    "scaffolding",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "apps/outfitter"
+  },
+  "bin": {
+    "out": "./dist/cli.js",
+    "outfitter": "./dist/cli.js"
+  },
+  "sideEffects": false,
   "scripts": {
     "build": "cd ../.. && bunup --filter outfitter",
     "postbuild": "bun link",

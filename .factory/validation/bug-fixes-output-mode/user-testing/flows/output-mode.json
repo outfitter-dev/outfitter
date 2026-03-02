@@ -5,12 +5,7 @@
     "account": "n/a",
     "namespace": "n/a"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "file inspection"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "file inspection"],
   "assertions": [
     {
       "id": "VAL-OUTPUT-001",
@@ -140,9 +135,7 @@
       "description": "The suggested command `bun run src/index.ts ...` produced no CLI output because `src/index.ts` is programmatic exports; the runnable CLI entry is `src/cli.ts`.",
       "resolved": true,
       "resolution": "Switched to `bun run src/cli.ts ...` for end-to-end CLI verification.",
-      "affectedAssertions": [
-        "VAL-CROSS-002"
-      ]
+      "affectedAssertions": ["VAL-CROSS-002"]
     }
   ],
   "blockers": [],

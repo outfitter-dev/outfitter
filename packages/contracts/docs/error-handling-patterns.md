@@ -15,7 +15,7 @@ import { type Handler, Result, NotFoundError } from "@outfitter/contracts";
 
 const getNote: Handler<{ id: string }, Note, NotFoundError> = async (
   input,
-  ctx,
+  ctx
 ) => {
   const note = await db.notes.find(input.id);
   if (!note) return Result.err(NotFoundError.create("note", input.id));
@@ -67,9 +67,7 @@ const getUserTool = defineTool({
   handler: async (input, ctx) => {
     const user = await db.users.find(input.userId);
     if (!user) {
-      return Result.err(
-        NotFoundError.create("user", input.userId),
-      );
+      return Result.err(NotFoundError.create("user", input.userId));
     }
     return Result.ok({ name: user.name, email: user.email });
   },
@@ -82,18 +80,18 @@ Never throw from a tool handler. An unhandled throw bypasses the server's error 
 
 All domain errors use one of 10 categories. Each category maps to a CLI exit code and HTTP status code, ensuring consistent behavior across CLI, MCP, and API transports.
 
-| Category     | Exit Code | HTTP Status | When to Use                               |
-| ------------ | --------- | ----------- | ----------------------------------------- |
-| `validation` | 1         | 400         | Invalid input, schema violation            |
-| `not_found`  | 2         | 404         | Resource does not exist                    |
-| `conflict`   | 3         | 409         | Duplicate creation, version mismatch       |
-| `permission` | 4         | 403         | Insufficient permissions                   |
-| `timeout`    | 5         | 504         | Operation exceeded time limit              |
-| `rate_limit` | 6         | 429         | Request rate exceeded                      |
-| `network`    | 7         | 502         | Network or upstream failure                |
-| `internal`   | 8         | 500         | Unexpected internal error                  |
-| `auth`       | 9         | 401         | Missing or invalid credentials             |
-| `cancelled`  | 130       | 499         | User cancellation (POSIX: 128 + SIGINT)    |
+| Category     | Exit Code | HTTP Status | When to Use                             |
+| ------------ | --------- | ----------- | --------------------------------------- |
+| `validation` | 1         | 400         | Invalid input, schema violation         |
+| `not_found`  | 2         | 404         | Resource does not exist                 |
+| `conflict`   | 3         | 409         | Duplicate creation, version mismatch    |
+| `permission` | 4         | 403         | Insufficient permissions                |
+| `timeout`    | 5         | 504         | Operation exceeded time limit           |
+| `rate_limit` | 6         | 429         | Request rate exceeded                   |
+| `network`    | 7         | 502         | Network or upstream failure             |
+| `internal`   | 8         | 500         | Unexpected internal error               |
+| `auth`       | 9         | 401         | Missing or invalid credentials          |
+| `cancelled`  | 130       | 499         | User cancellation (POSIX: 128 + SIGINT) |
 
 Use `getExitCode()` and `getStatusCode()` from `@outfitter/contracts` for programmatic lookups. See the full taxonomy reference in [error-taxonomy.md](./error-taxonomy.md).
 
@@ -128,7 +126,7 @@ class GitError extends Error {
 
 async function getCommit(
   input: { sha: string },
-  ctx: import("@outfitter/contracts").HandlerContext,
+  ctx: import("@outfitter/contracts").HandlerContext
 ): Promise<Result<{ sha: string; message: string }, GitError>> {
   // ... domain logic returning Result<T, GitError>
 }

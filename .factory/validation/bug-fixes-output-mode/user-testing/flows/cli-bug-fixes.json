@@ -5,13 +5,7 @@
     "account": "n/a",
     "namespace": "n/a"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "bun -e",
-    "file inspection"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "bun -e", "file inspection"],
   "assertions": [
     {
       "id": "VAL-BUG-001",
@@ -123,9 +117,7 @@
       "description": "Running `bun -e \"const m = await import('@outfitter/cli/output')\"` from monorepo root failed module resolution because root is not a direct package consumer context.",
       "resolved": true,
       "resolution": "Ran the import check from `packages/cli` cwd to validate the package's public subpath export directly.",
-      "affectedAssertions": [
-        "VAL-BUG-003"
-      ]
+      "affectedAssertions": ["VAL-BUG-003"]
     }
   ],
   "blockers": [],

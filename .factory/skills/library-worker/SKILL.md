@@ -32,6 +32,7 @@ Use for features that involve writing or modifying TypeScript code in the monore
 - Cover: happy path, error cases, edge cases, type narrowing (if applicable).
 - Run `bun test` in the package directory to confirm tests FAIL (red).
 - If tests pass before implementation, your tests aren't testing the new behavior.
+- **Type-only features:** For features that only export types (no runtime code), `import type` in tests won't fail at runtime and package tsconfig excludes test files. Demonstrate the "red" phase by showing that importing the type from a non-test source file would fail typecheck, or write runtime assertion tests (e.g., verify type shape of objects conforming to the type).
 
 ### 3. Implement (Green Phase)
 
@@ -61,21 +62,27 @@ bun run test
 # Type safety
 bun run typecheck
 
-# Lint + format
-bun run check
+# Lint (do NOT use 'bun run check' — format:check has a pre-existing crash)
+bun run lint
 ```
 
-Fix any failures before completing. If `bun run check` reports formatting issues, run `bun run format:fix` and verify again.
+Fix any failures before completing. If `bun run test` surfaces known unrelated failures (e.g., logging test failures from other packages), fall back to package-scoped `cd packages/<pkg> && bun test` and note the fallback in your handoff.
 
 ### 6. Export Verification
 
-Verify the new API is importable:
+Verify the new API is importable. Run from the **package directory** (not repo root) since workspace resolution doesn't work from root with `bun -e`:
 
 ```bash
-bun -e "const m = await import('@outfitter/<pkg>'); console.log(typeof m.<newExport>)"
+cd packages/<pkg> && bun -e "const m = await import('./src/index.ts'); console.log(typeof m.<newExport>)"
 ```
 
-This must print `function` (or `object` for types). If it prints `undefined`, the export is missing.
+Or verify the built output:
+
+```bash
+cd packages/<pkg> && bun -e "const m = await import('./dist/index.js'); console.log(typeof m.<newExport>)"
+```
+
+This must print `function` (or `object` for types). If it prints `undefined`, check whether the export is a **type-only export** (type alias or interface). Type-only exports are erased at runtime and will always show `undefined` in runtime checks — this is expected. For type-only exports, verify via `.d.ts` output or typecheck instead of runtime import checks. See `.factory/library/user-testing.md` for more verification patterns.
 
 ### 7. Changeset
 
