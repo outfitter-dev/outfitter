@@ -1,0 +1,49 @@
+{
+  "milestone": "reference",
+  "round": 2,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "The library-worker skill procedure is package-centric and assumes changes under packages/<pkg>. For reference/example-project work under examples/, the strict red-phase and package-specific verification guidance is not always a natural fit. Consider adding a note or alternate workflow for examples/ work.",
+      "evidence": "Features os-358-reference-project and fix-reference-scrutiny both flagged this mismatch in their handoff skillFeedback. The fix-reference-scrutiny worker also reported skipping the red phase for a docs+examples fix while marking followedProcedure=true.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "The docs-worker skill procedure requires lint + typecheck + test in verification, but the migration-v06-docs worker only ran lint while reporting followedProcedure=true. Consider enforcing all three validators or clarifying which are required for docs-only changes.",
+      "evidence": "docs-worker skill (.factory/skills/docs-worker/SKILL.md lines 64-71) requires bun run lint, bun run typecheck, and bun run test. Handoff for worker session 2f362eb7 records only bun run lint under verification.commandsRun.",
+      "isSystemic": false
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Update the NDJSON progress event example in mission AGENTS.md Streaming Design Context section to remove the 'name' field from the progress event, since StreamProgressEvent in packages/contracts/src/stream.ts only has type/current/total/message fields.",
+      "evidence": "AGENTS.md line 75 shows progress event with 'name' field; packages/contracts/src/stream.ts:78-89 defines StreamProgressEvent with only type, current, total, message (no name).",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "fix-reference-scrutiny reviewer flagged library-worker skill procedure mismatch for mixed docs+examples fix work",
+      "reason": "duplicate — same observation already captured from os-358-reference-project review and carried forward in suggestedGuidanceUpdates"
+    }
+  ],
+  "previousRound": null
+}

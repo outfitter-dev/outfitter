@@ -1,0 +1,73 @@
+{
+  "groupId": "ref-001-build",
+  "testedAt": "2026-02-28T17:40:16Z",
+  "credentials": {
+    "account": "not-required",
+    "namespace": "not-required"
+  },
+  "toolsUsed": ["shell", "Read", "LS", "Glob", "bun"],
+  "assertions": [
+    {
+      "id": "VAL-REF-001",
+      "title": "Standalone reference project exists in examples/",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Verify examples/reference exists with its own package.json",
+          "expected": "examples/reference/ directory and package.json are present",
+          "observed": "examples/reference/ exists and includes package.json"
+        },
+        {
+          "action": "Inspect scripts in examples/reference/package.json",
+          "expected": "scripts include build, test, lint, typecheck",
+          "observed": "scripts include build (bun run typecheck), test (bun test), lint (oxlint ./src), typecheck (tsc --noEmit)"
+        },
+        {
+          "action": "Verify source files under examples/reference/src/",
+          "expected": "src/ contains implementation files and tests",
+          "observed": "src/ contains cli.ts, handlers.ts, index.ts, mcp.ts, schemas.ts, and __tests__/*.test.ts"
+        },
+        {
+          "action": "Run build in examples/reference",
+          "expected": "bun run build succeeds",
+          "observed": "Succeeded: bun run typecheck -> tsc --noEmit (exit 0)"
+        },
+        {
+          "action": "Run tests in examples/reference",
+          "expected": "bun test succeeds",
+          "observed": "Succeeded: 52 pass, 0 fail (exit 0)"
+        },
+        {
+          "action": "Run Turbo build from monorepo root scoped to reference project",
+          "expected": "Turbo can build @outfitter/reference from repo root",
+          "observed": "Succeeded: ./node_modules/.bin/turbo run build --filter=@outfitter/reference --no-daemon completed with @outfitter/reference:build and exit 0"
+        }
+      ],
+      "evidence": {
+        "fileTree": [
+          "examples/reference/package.json",
+          "examples/reference/tsconfig.json",
+          "examples/reference/.oxlintrc.json",
+          "examples/reference/src/index.ts",
+          "examples/reference/src/handlers.ts",
+          "examples/reference/src/cli.ts",
+          "examples/reference/src/mcp.ts",
+          "examples/reference/src/schemas.ts",
+          "examples/reference/src/__tests__/cli.test.ts",
+          "examples/reference/src/__tests__/handlers.test.ts",
+          "examples/reference/src/__tests__/integration.test.ts",
+          "examples/reference/src/__tests__/mcp.test.ts"
+        ],
+        "buildOutput": {
+          "examplesReference": "$ bun run typecheck\\n$ tsc --noEmit\\n[exit 0]",
+          "monorepoTurbo": "turbo run build --filter=@outfitter/reference --no-daemon -> Tasks: 8 successful, 8 total; @outfitter/reference:build ran bun run typecheck; [exit 0]"
+        },
+        "testOutput": "bun test in examples/reference -> 52 pass, 0 fail across 4 files [exit 0]"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "summary": "Tested 1 assertion (VAL-REF-001): passed. The reference project exists with required scripts and source files, builds/tests independently, and also builds from monorepo root via Turbo."
+}
