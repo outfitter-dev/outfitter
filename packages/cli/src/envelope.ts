@@ -172,15 +172,19 @@ export function createErrorEnvelope(
 ): ErrorEnvelope {
   const meta = errorCategoryMeta(category);
 
-  const errorField: ErrorEnvelope["error"] =
-    retryAfterSeconds != null
-      ? {
-          category,
-          message,
-          retryable: meta.retryable,
-          retry_after: retryAfterSeconds,
-        }
-      : { category, message, retryable: meta.retryable };
+  // Defense-in-depth: only include retry_after for rate_limit errors,
+  // even if retryAfterSeconds is somehow provided for other categories
+  const includeRetryAfter =
+    retryAfterSeconds != null && category === "rate_limit";
+
+  const errorField: ErrorEnvelope["error"] = includeRetryAfter
+    ? {
+        category,
+        message,
+        retryable: meta.retryable,
+        retry_after: retryAfterSeconds,
+      }
+    : { category, message, retryable: meta.retryable };
 
   const envelope: ErrorEnvelope = {
     ok: false,

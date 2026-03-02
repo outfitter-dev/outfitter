@@ -458,6 +458,88 @@ describe("file pointer write failure degrades gracefully (VAL-CTX-005)", () => {
 });
 
 // =============================================================================
+// tempDir validation (safe directory constraints)
+// =============================================================================
+
+describe("tempDir validation rejects unsafe paths", () => {
+  test("rejects relative path traversal and falls back to OS tmpdir", () => {
+    const items = generateItems(DEFAULT_FILE_POINTER_THRESHOLD + 100);
+
+    const result = truncateOutput(items, {
+      limit: 20,
+      tempDir: "../../../etc",
+    });
+
+    // Should reject unsafe tempDir and fall back to OS tmpdir
+    expect(result.data).toHaveLength(20);
+    expect(result.metadata).toBeDefined();
+    expect(result.metadata!.truncated).toBe(true);
+
+    // Should fall back to OS tmpdir, writing the file successfully there
+    expect(result.metadata!.full_output).toBeDefined();
+    expect(result.metadata!.full_output!.startsWith(tmpdir())).toBe(true);
+
+    if (result.metadata!.full_output) {
+      createdFiles.push(result.metadata!.full_output);
+    }
+  });
+
+  test("rejects tempDir containing .. traversal and falls back to OS tmpdir", () => {
+    const items = generateItems(DEFAULT_FILE_POINTER_THRESHOLD + 100);
+
+    const result = truncateOutput(items, {
+      limit: 20,
+      tempDir: "/tmp/safe/../../../etc",
+    });
+
+    // Should reject unsafe tempDir and fall back to OS tmpdir
+    expect(result.data).toHaveLength(20);
+    expect(result.metadata!.full_output).toBeDefined();
+    expect(result.metadata!.full_output!.startsWith(tmpdir())).toBe(true);
+
+    if (result.metadata!.full_output) {
+      createdFiles.push(result.metadata!.full_output);
+    }
+  });
+
+  test("accepts valid absolute path as tempDir", () => {
+    const items = generateItems(DEFAULT_FILE_POINTER_THRESHOLD + 100);
+    const validDir = tmpdir();
+
+    const result = truncateOutput(items, {
+      limit: 20,
+      tempDir: validDir,
+    });
+
+    // Valid absolute path should work normally
+    expect(result.metadata!.full_output).toBeDefined();
+    expect(result.metadata!.full_output!.startsWith(validDir)).toBe(true);
+
+    if (result.metadata!.full_output) {
+      createdFiles.push(result.metadata!.full_output);
+    }
+  });
+
+  test("rejects non-absolute tempDir and falls back to OS tmpdir", () => {
+    const items = generateItems(DEFAULT_FILE_POINTER_THRESHOLD + 100);
+
+    const result = truncateOutput(items, {
+      limit: 20,
+      tempDir: "relative/path",
+    });
+
+    // Should reject relative path and fall back to OS tmpdir
+    expect(result.data).toHaveLength(20);
+    expect(result.metadata!.full_output).toBeDefined();
+    expect(result.metadata!.full_output!.startsWith(tmpdir())).toBe(true);
+
+    if (result.metadata!.full_output) {
+      createdFiles.push(result.metadata!.full_output);
+    }
+  });
+});
+
+// =============================================================================
 // Edge Cases
 // =============================================================================
 

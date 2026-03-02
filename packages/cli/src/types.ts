@@ -794,6 +794,31 @@ export interface OutputOptions {
 
   /** Stream to write to (defaults to stdout) */
   readonly stream?: NodeJS.WritableStream;
+
+  /**
+   * Optional truncation configuration for automatic output truncation.
+   *
+   * When provided, `output()` will apply truncation to array data before
+   * serialization. This is a convenience shorthand — callers can also use
+   * `truncateOutput()` directly for more control.
+   *
+   * @example
+   * ```typescript
+   * await output(items, "json", {
+   *   truncation: { limit: 50, commandName: "list" },
+   * });
+   * ```
+   */
+  readonly truncation?: {
+    /** Command name for pagination hints. */
+    readonly commandName?: string;
+    /** Threshold above which a file pointer is generated. */
+    readonly filePointerThreshold?: number;
+    /** Maximum items to show. */
+    readonly limit: number;
+    /** Starting offset (0-based). */
+    readonly offset?: number;
+  };
 }
 
 // =============================================================================
