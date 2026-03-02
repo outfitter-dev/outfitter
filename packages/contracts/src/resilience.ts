@@ -114,7 +114,7 @@ export async function retry<T>(
 ): Promise<Result<T, OutfitterError>> {
   const maxAttempts = options?.maxAttempts ?? 3;
 
-  if (maxAttempts <= 0) {
+  if (!(maxAttempts >= 1)) {
     return Result.err(
       InternalError.create("maxAttempts must be >= 1", { maxAttempts })
     );
