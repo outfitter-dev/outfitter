@@ -1,0 +1,34 @@
+{
+  "featureId": "os-336-test-command-tool",
+  "reviewedAt": "2026-02-27T19:58:50Z",
+  "commitId": "a43cac8e12dc55c0b3cf8ae49586692a70814a8b",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature is mostly implemented as described: new helpers exist, are exported, include broad tests, and a minor changeset was added. testTool() satisfies its contract, but testCommand() does not fully restore process state when env overrides are used.",
+    "issues": [
+      {
+        "file": "packages/testing/src/test-command.ts",
+        "line": 89,
+        "severity": "blocking",
+        "description": "When restoring env vars, previously-unset keys are assigned `undefined` instead of deleted (`process.env[key] = undefined`). This leaves the key present on `process.env` (state changed), violating the requirement that global process state is fully restored after each call (VAL-TEST-001). Repro evidence from local runtime check: before `hasOwnProperty` was false, after calling testCommand with env override it became true."
+      },
+      {
+        "file": "packages/testing/src/__tests__/test-command.test.ts",
+        "line": 172,
+        "severity": "non_blocking",
+        "description": "Env restoration tests assert only value-level `toBeUndefined()` and do not assert key deletion/presence, so they miss the process-state leakage caused by restoring via assignment to undefined."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "Environment restoration semantics are not explicitly documented in mission shared state, and this led to inconsistent restoration behavior in new code.",
+      "evidence": "packages/testing/src/fixtures.ts:275-277 restores missing vars with `delete process.env[key]`, while packages/testing/src/test-command.ts:89 uses `process.env[key] = undefined` for missing vars."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review failed on one blocking issue: testCommand() leaks process.env key presence when restoring env overrides, so VAL-TEST-001 is not fully satisfied. testTool() behavior, exports, test coverage breadth, changeset presence, and transcript evidence of TDD flow are otherwise solid."
+}
