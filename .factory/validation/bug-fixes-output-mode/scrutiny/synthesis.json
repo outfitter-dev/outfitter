@@ -1,0 +1,82 @@
+{
+  "milestone": "bug-fixes-output-mode",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "bun run test",
+      "exitCode": 0,
+      "details": "All tests passed across all packages (739 in outfitter app, 336 in contracts, plus others). 0 failures."
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "details": "All 34 tasks succeeded. Clean typecheck across all packages."
+    },
+    "lint": {
+      "passed": true,
+      "command": "bun run lint",
+      "exitCode": 0,
+      "details": "9 warnings (pre-existing action-must-register lint warnings), 0 errors. All 31 lint tasks succeeded."
+    }
+  },
+  "reviewsSummary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "nonBlockingIssues": [
+    {
+      "featureId": "os-421-centralize-output-mode",
+      "severity": "non_blocking",
+      "description": "Documentation for forceHumanWhenImplicit in packages/cli/src/query.ts is internally inconsistent: config docs say it returns the default mode for implicit resolution, while implementation forces 'human'. Clarify comment or align behavior with documented contract."
+    },
+    {
+      "featureId": "os-422-output-mode-parity",
+      "severity": "non_blocking",
+      "description": "The 'end-to-end output chain' section in the parity test validates resolver/mapped mode consistency but does not invoke @outfitter/cli output() rendering directly, so the final formatting stage is not asserted in this specific suite."
+    }
+  ],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Updated .factory/library/architecture.md: Output Mode Resolution section now reflects centralized state (resolveOutputMode in packages/cli/src/query.ts) rather than prior '5+ files split' description.",
+      "sourceFeature": "os-421-centralize-output-mode"
+    }
+  ],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Update library-worker skill verification steps to use 'bun run lint' and 'bun run typecheck' instead of 'bun run check' when 'bun run check' is known to crash, or make the check command conditional on environment stability.",
+      "evidence": "5 of 6 reviewed features (os-323, os-322, os-331, os-420, os-422) encountered or noted the mismatch between the library-worker skill mandating 'bun run check' and the mission AGENTS documenting it as broken due to oxfmt tokio panic. Workers consistently deviated by running lint+typecheck separately.",
+      "isSystemic": true
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Update 'Key Source Files' and 'Output Mode Resolution Context' sections to remove references to deleted/refactored files: apps/outfitter/src/actions/docs-output-mode.ts (deleted) and resolveOutputModeWithEnvFallback in apps/outfitter/src/actions/shared.ts (removed). Update the '5+ files split' description to reflect centralized resolution in packages/cli/src/query.ts.",
+      "evidence": "Feature os-421 deleted docs-output-mode.ts and removed output-mode helpers from shared.ts. Current AGENTS.md still references these as active key source files (lines 56-57) and describes the 5-file split architecture (lines 62-67).",
+      "isSystemic": false
+    },
+    {
+      "target": "skills",
+      "suggestion": "Consider adding flexibility to the library-worker skill for manifest-only changes (e.g., peer dep moves) where Red-phase test creation is not applicable. Allow workers to skip TDD steps when the change is purely declarative.",
+      "evidence": "Feature os-322 (Commander peer dep) was a package.json-only change where the library-worker TDD mandate had no meaningful Red phase. Worker deviated appropriately.",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "services.yaml advertises 'check: bun run check' despite the command crashing.",
+      "reason": "The command is legitimate and will work once the upstream oxfmt bug is fixed. services.yaml should reflect the canonical commands, not temporary environmental issues. The workaround is documented in mission AGENTS.md."
+    },
+    {
+      "observation": "Worker reported startup deviation about not finding mission context files locally in subagent runs.",
+      "reason": "This is a runtime/process concern about subagent file access, not a shared-state documentation issue. The skill procedure correctly references mission files; the issue is about subagent environment setup."
+    }
+  ],
+  "previousRound": null
+}

@@ -29,4 +29,4 @@ type Handler<
 
 ## Output Mode Resolution
 
-Currently split across 5+ files. v0.4 goal: centralize in `outputModePreset` with source tracking.
+Centralized in `packages/cli/src/query.ts` via `resolveOutputMode()` (completed in OS-421). Returns `{ mode, source }` where source tracks whether resolution came from an explicit flag, env var, or default. All action groups delegate to this single resolver — no per-action env-var detection or explicitness-checking branches remain. The legacy files `apps/outfitter/src/actions/docs-output-mode.ts` and per-action resolution in `apps/outfitter/src/actions/shared.ts` were removed.

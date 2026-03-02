@@ -53,3 +53,24 @@ test -f packages/contracts/docs/error-handling-patterns.md && echo "exists" || e
 ```bash
 cd apps/outfitter && bun run src/index.ts schema --help
 ```
+
+## Flow Validator Guidance: Shell
+
+**Surface type:** Shell commands (test runner, typecheck, import verification, code inspection)
+
+**Isolation rules:**
+- All verification is read-only — no shared state concerns between parallel subagents
+- Do not modify any source files
+- Do not run `bun install` or any command that modifies node_modules
+- Each subagent should run its own test/typecheck/grep commands independently
+
+**Boundaries:**
+- Work from repo root (the directory containing `AGENTS.md`)
+- Use `bun test` for running tests, not `bun run test` (the latter uses Turbo which may conflict)
+- For package-scoped tests: `cd <package-dir> && bun test` or `bun test --filter=<pattern>`
+- For import verification: `bun -e "..."` from repo root
+- For code inspection: use `rg` (ripgrep) or Read tool
+
+**Known quirks:**
+- `bun run check` crashes with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately
+- 3 pre-existing unrelated test failures in full suite (Registry Build Output, createOutfitterLoggerFactory) — ignore these

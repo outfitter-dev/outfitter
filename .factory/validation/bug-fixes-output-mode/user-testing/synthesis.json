@@ -1,0 +1,30 @@
+{
+  "milestone": "bug-fixes-output-mode",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-BUG-001",
+    "VAL-BUG-002",
+    "VAL-BUG-003",
+    "VAL-OUTPUT-001",
+    "VAL-OUTPUT-002",
+    "VAL-OUTPUT-003",
+    "VAL-CROSS-002"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [
+    {
+      "target": "user-testing.md",
+      "description": "Added 'Flow Validator Guidance: Shell' section with isolation rules, boundary constraints, and known quirks for parallel shell-based validation subagents",
+      "source": "setup"
+    }
+  ],
+  "previousRound": null
+}

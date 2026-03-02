@@ -1,0 +1,133 @@
+{
+  "groupId": "cli-bug-fixes",
+  "testedAt": "2026-02-27T18:48:48Z",
+  "credentials": {
+    "account": "n/a",
+    "namespace": "n/a"
+  },
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "rg",
+    "bun -e",
+    "file inspection"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-BUG-001",
+      "title": "--json flag default is undefined with correct parse states",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect createCLI() JSON flag registration in packages/cli/src/cli.ts",
+          "expected": "--json registered without a false default; omitted flag remains undefined",
+          "observed": "Found `program.option(\"--json\", \"Output as JSON\")` with no default argument in cli.ts:78"
+        },
+        {
+          "action": "Inspect env bridge logic for OUTFITTER_JSON in packages/cli/src/cli.ts",
+          "expected": "Set OUTFITTER_JSON only when --json is passed; restore previous value after action",
+          "observed": "preAction sets env only when `allOpts[\"json\"] === true` (cli.ts:81-84); postAction/finally restore previous env (cli.ts:52-67,87-114)"
+        },
+        {
+          "action": "Run focused CLI tests for parse states and env bridge",
+          "expected": "Tests confirm undefined/true parse states and bridge set/restore behavior",
+          "observed": "`bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/core.test.ts` passed (12 pass, 0 fail), including parse-state and env-bridge tests"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "core.test.ts: (pass) options.json is undefined when --json is not passed",
+          "core.test.ts: (pass) options.json is true when --json is passed",
+          "core.test.ts: (pass) global --json sets OUTFITTER_JSON env var",
+          "core.test.ts: (pass) does not set OUTFITTER_JSON when --json is not passed"
+        ],
+        "sourceRefs": [
+          "packages/cli/src/cli.ts:78",
+          "packages/cli/src/cli.ts:81-84",
+          "packages/cli/src/cli.ts:52-67",
+          "packages/cli/src/cli.ts:87-114"
+        ],
+        "network": "n/a"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-BUG-002",
+      "title": "Commander declared as peer dependency",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect packages/cli/package.json dependencies and peerDependencies",
+          "expected": "`commander` appears in peerDependencies with version >=14.0.0 and not in dependencies",
+          "observed": "`peerDependencies.commander` is `>=14.0.0` (package.json:157); dependencies only contain `@clack/prompts` and `better-result` (package.json:140-143)"
+        },
+        {
+          "action": "Confirm installation-status check policy for this assignment",
+          "expected": "Do not run bun install if task says already installed",
+          "observed": "Followed assignment instruction: 'Already installed (do NOT run bun install)'"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "package.json grep confirms commander in peerDependencies and absent from dependencies"
+        ],
+        "sourceRefs": [
+          "packages/cli/package.json:140-143",
+          "packages/cli/package.json:152-158"
+        ],
+        "bunInstallExitCode": "not executed per assignment instruction (already installed; do NOT run bun install)"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-BUG-003",
+      "title": "output() accepts explicit format parameter with clear hierarchy",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect packages/cli/src/output.ts for output() signature and mode detection hierarchy",
+          "expected": "output() accepts explicit format parameter and uses hierarchy: format > env > default human",
+          "observed": "`export async function output(data, format?, options?)` found (output.ts:253-256); `detectMode(format?)` enforces explicit format first, then env vars, then human default (output.ts:61-75)"
+        },
+        {
+          "action": "Run focused output tests for hierarchy behavior",
+          "expected": "Tests pass for explicit format precedence, env fallback, and human default",
+          "observed": "`bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli test src/__tests__/output.test.ts -t \"format parameter|mode detection|hierarchy\"` passed (19 pass, 0 fail)"
+        },
+        {
+          "action": "Verify public subpath import for output()",
+          "expected": "`@outfitter/cli/output` import resolves and exports `output`",
+          "observed": "`bun --cwd /Users/mg/Developer/outfitter/stack/packages/cli -e \"const m = await import('@outfitter/cli/output'); console.log(typeof m.output)\"` returned `function`"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "output.test.ts: (pass) format parameter takes precedence over env vars",
+          "output.test.ts: (pass) when format is undefined, falls back to env var detection",
+          "output.test.ts: (pass) when format is undefined and no env, defaults to human",
+          "output.test.ts: (pass) hierarchy: format > env > default",
+          "import check output: function"
+        ],
+        "sourceRefs": [
+          "packages/cli/src/output.ts:61-75",
+          "packages/cli/src/output.ts:253-256",
+          "packages/cli/package.json:71-74"
+        ],
+        "network": "n/a"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "Running `bun -e \"const m = await import('@outfitter/cli/output')\"` from monorepo root failed module resolution because root is not a direct package consumer context.",
+      "resolved": true,
+      "resolution": "Ran the import check from `packages/cli` cwd to validate the package's public subpath export directly.",
+      "affectedAssertions": [
+        "VAL-BUG-003"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 3 assertions (VAL-BUG-001..003): all 3 passed. CLI package test suite and focused assertion tests passed with zero failures."
+}
