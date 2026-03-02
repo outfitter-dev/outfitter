@@ -1,0 +1,26 @@
+{
+  "featureId": "os-333-wrap-error",
+  "reviewedAt": "2026-02-27T19:29:20Z",
+  "commitId": "898aeb3dbd8067795d04a1040c2142aa9c01ff00",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Implementation matches the feature contract: wrapError performs typed passthrough before mapper invocation, untyped mapper path with InternalError fallback, composeMappers preserves declared order and short-circuits, root exports were added, and a minor changeset was included.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "knowledge",
+      "observation": "Build tooling auto-runs normalize-exports and mutates package.json (including export map ordering/additions), but this behavior is not documented in mission/shared-state docs; the worker had to investigate whether package.json changes were expected.",
+      "evidence": "Transcript skeleton for d72d8e60-2d42-4f66-afbe-24358934b63e includes an explicit investigation step ('package.json change is from build output (normalize-exports)'). Commit 898aeb3d shows a broad package.json reorder plus new ./wrap-error export."
+    },
+    {
+      "area": "skills",
+      "observation": "The library-worker skill has contradictory guidance: its Verify procedure warns not to run bun run check, but the Example Handoff still includes bun run check.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/library-worker/SKILL.md — Verify section says 'Do NOT use 'bun run check'', while Example Handoff commandsRun includes `{ \"command\": \"bun run check\" ... }`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed handoff, transcript skeleton, and commit 898aeb3d for os-333-wrap-error. The implementation satisfies the specified behavior and export requirements in scope; review status is pass."
+}

@@ -38,8 +38,16 @@ This is a **library monorepo** with no web UI or running services. All user test
 
 ### API existence check
 
+Run import verification from the **package directory** (not repo root), since workspace package resolution doesn't work from root with `bun -e`:
+
 ```bash
-bun -e "const m = await import('@outfitter/contracts'); console.log(typeof m.parseInput)"
+cd packages/contracts && bun -e "const m = await import('./src/index.ts'); console.log(typeof m.parseInput)"
+```
+
+Alternatively, verify the built output:
+
+```bash
+cd packages/contracts && bun -e "const m = await import('./dist/index.js'); console.log(typeof m.parseInput)"
 ```
 
 ### Doc file check
@@ -59,12 +67,14 @@ cd apps/outfitter && bun run src/index.ts schema --help
 **Surface type:** Shell commands (test runner, typecheck, import verification, code inspection)
 
 **Isolation rules:**
+
 - All verification is read-only — no shared state concerns between parallel subagents
 - Do not modify any source files
 - Do not run `bun install` or any command that modifies node_modules
 - Each subagent should run its own test/typecheck/grep commands independently
 
 **Boundaries:**
+
 - Work from repo root (the directory containing `AGENTS.md`)
 - Use `bun test` for running tests, not `bun run test` (the latter uses Turbo which may conflict)
 - For package-scoped tests: `cd <package-dir> && bun test` or `bun test --filter=<pattern>`
@@ -72,5 +82,6 @@ cd apps/outfitter && bun run src/index.ts schema --help
 - For code inspection: use `rg` (ripgrep) or Read tool
 
 **Known quirks:**
-- `bun run check` crashes with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately
+
+- `bun run check` and `bun run format:fix` crash with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately for validation
 - 3 pre-existing unrelated test failures in full suite (Registry Build Output, createOutfitterLoggerFactory) — ignore these
