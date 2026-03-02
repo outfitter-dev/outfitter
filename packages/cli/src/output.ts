@@ -288,11 +288,13 @@ export async function output(
         if (renderedData.length === 0) {
           outputText = "";
         } else {
-          outputText = data.map((item) => cliStringify(item)).join("\n");
+          outputText = renderedData
+            .map((item) => cliStringify(item))
+            .join("\n");
         }
       } else {
         // Single objects get single JSON line
-        outputText = cliStringify(data);
+        outputText = cliStringify(renderedData);
       }
       break;
     }
