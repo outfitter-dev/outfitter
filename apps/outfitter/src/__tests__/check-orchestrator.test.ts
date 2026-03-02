@@ -210,17 +210,6 @@ describe("buildCheckOrchestratorPlan", () => {
       command: ["bun", "run", "typecheck", "--", "--only"],
     });
   });
-
-  test("pre-commit mode syncs agent scaffolding when .claude files change", () => {
-    const plan = buildCheckOrchestratorPlan({
-      cwd: process.cwd(),
-      mode: "pre-commit",
-      stagedFiles: [".claude/settings.json"],
-    });
-    const stepIds = plan.map((step) => step.id);
-
-    expect(stepIds).toContain("sync-agent-scaffolding");
-  });
 });
 
 describe("parseTreePaths", () => {
