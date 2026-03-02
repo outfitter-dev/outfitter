@@ -1,25 +1,11 @@
 {
   "name": "@outfitter/testing",
-  "version": "0.2.5",
   "description": "Test harnesses, fixtures, and utilities for Outfitter packages",
-  "keywords": [
-    "fixtures",
-    "harness",
-    "outfitter",
-    "testing",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/testing"
-  },
+  "version": "0.2.5",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -59,8 +45,34 @@
         "default": "./dist/mock-factories.js"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./test-command": {
+      "import": {
+        "types": "./dist/test-command.d.ts",
+        "default": "./dist/test-command.js"
+      }
+    },
+    "./test-tool": {
+      "import": {
+        "types": "./dist/test-tool.d.ts",
+        "default": "./dist/test-tool.js"
+      }
+    }
   },
+  "keywords": [
+    "fixtures",
+    "harness",
+    "outfitter",
+    "testing",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/testing"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
@@ -74,6 +86,7 @@
     "prepublishOnly": "bun ../../scripts/check-publish-manifest.ts"
   },
   "dependencies": {
+    "@outfitter/cli": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@outfitter/mcp": "workspace:*",
     "zod": "catalog:"
