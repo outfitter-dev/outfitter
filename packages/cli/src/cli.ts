@@ -60,7 +60,7 @@ export function createCLI(config: CLIConfig): CLI {
     }
 
     if (bridgedJsonEnvPrevious === undefined) {
-      process.env["OUTFITTER_JSON"] = undefined;
+      delete process.env["OUTFITTER_JSON"];
     } else {
       process.env["OUTFITTER_JSON"] = bridgedJsonEnvPrevious;
     }
