@@ -8,6 +8,7 @@ import { Command } from "commander";
 
 import { createCLI as createCLIImpl } from "./cli.js";
 import { exitWithError } from "./output.js";
+import { resolveOutputMode } from "./query.js";
 import {
   createCommanderOption,
   deriveFlags,
@@ -205,8 +206,10 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       const flags = (command.optsWithGlobals?.() ?? command.opts()) as TFlags;
       const positional = command.args as string[];
 
-      const input = schema ? validateInput(flags, schema) : undefined;
-
+      let input: Record<string, unknown> | undefined;
+      let ctx: unknown;
+      try {
+        input = schema ? validateInput(flags, schema) : undefined;
         // Construct context if factory is provided
         if (contextFactory) {
           // When .input() is used, pass validated input; otherwise pass raw flags
