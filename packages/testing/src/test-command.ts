@@ -92,11 +92,11 @@ export async function testCommand(
       }
     }
 
-  // Save process.argv so code that reads it (e.g., hasExplicitOutputFlag)
-  // sees the test invocation args instead of the test runner's args.
-  const savedArgv = process.argv;
-  const testArgv = ["node", "test", ...fullArgs];
-  process.argv = testArgv;
+    // Save process.argv so code that reads it (e.g., hasExplicitOutputFlag)
+    // sees the test invocation args instead of the test runner's args.
+    const savedArgv = process.argv;
+    const testArgv = ["node", "test", ...args];
+    process.argv = testArgv;
 
     try {
       // Commander expects argv in the format: ['node', 'program-name', ...args]
@@ -123,5 +123,6 @@ export async function testCommand(
           process.env[key] = value;
         }
       }
+    }
   });
 }
