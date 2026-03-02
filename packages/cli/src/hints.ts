@@ -236,10 +236,12 @@ const CATEGORY_RECOVERY_MAP: Record<
       params: { retryable: retryableMap.not_found },
     },
   ],
-  conflict: () => [
+  conflict: (cliName) => [
     {
       description: "Resolve the conflict and retry",
-      command: "--force",
+      command: cliName
+        ? `${cliName} <previous-command> --force`
+        : "<previous-command> --force",
       params: { retryable: retryableMap.conflict },
     },
   ],

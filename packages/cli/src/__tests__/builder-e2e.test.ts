@@ -403,6 +403,8 @@ describe("Full builder chain E2E", () => {
                 handler: async (inp) =>
                   Result.err(
                     new NotFoundError({
+                      resourceType: "environment",
+                      resourceId: inp.env,
                       message: `Environment "${inp.env}" not found`,
                     })
                   ),
