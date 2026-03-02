@@ -1,0 +1,43 @@
+{
+  "milestone": "mcp-config",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "In library-worker step 5 (full-suite verification), add explicit fallback guidance: when `bun run test` surfaces known unrelated failures, the worker may fall back to package-scoped `cd packages/<pkg> && bun test` and note the fallback in the handoff. This prevents false procedural non-compliance.",
+      "evidence": "Feature os-349-define-resource worker (session 5621425f) had to fall back from `bun test --filter=@outfitter/mcp` to package-local test due to unrelated logging test failures surfacing through root-level filtered runs.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "For features implementing TypeScript overloads or type narrowing, the library-worker procedure should recommend compile-time type assertions outside src/__tests__/ when the package tsconfig excludes test directories. This prevents runtime-only 'type' checks from being treated as compile-time narrowing verification.",
+      "evidence": "Feature os-350-config-optional-schema added a 'type narrowing' test at packages/config/src/__tests__/config.test.ts:1153 that only performs runtime assertions, but packages/config/tsconfig.json excludes src/__tests__/ from type checking.",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "user-testing guidance is slightly inconsistent about package-scoped test commands (`bun run test --filter=...` vs package-local `bun test`)",
+      "reason": "already-documented — .factory/library/user-testing.md documents both styles; they serve different purposes (filtered root runs for cross-package verification vs package-local for isolation)"
+    }
+  ],
+  "previousRound": null
+}

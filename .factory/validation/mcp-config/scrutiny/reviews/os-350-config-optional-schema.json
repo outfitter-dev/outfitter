@@ -1,0 +1,37 @@
+{
+  "featureId": "os-350-config-optional-schema",
+  "milestone": "mcp-config",
+  "reviewer": "scrutiny-feature-reviewer",
+  "verdict": "pass",
+  "codeQuality": {
+    "score": 5,
+    "notes": "Implementation is clean and focused: overloads are explicit, runtime schema-vs-options discrimination is centralized (`isZodSchema`), and existing validation/error behavior is preserved when a schema is provided. Changeset added with correct minor bump for @outfitter/config."
+  },
+  "testCoverage": {
+    "score": 4,
+    "notes": "Coverage is strong for runtime behavior (8 new tests for schema-less loading, YAML parsing, extends, not-found behavior, and backward compatibility). One gap: the new 'type narrowing' test is runtime-only and does not provide compile-time overload assertions."
+  },
+  "contractFulfillment": {
+    "fulfilled": [
+      "VAL-CFG-001: `loadConfig()` now supports schema-optional usage and returns raw parsed config when called without schema (`packages/config/src/index.ts`: overloads at lines 664, 686 and raw-return branch at line 821).",
+      "Schema-based behavior remains backward compatible with validated typed results (`packages/config/src/index.ts`: schema overloads at lines 720 and 747; validation path retained after line 825).",
+      "Release metadata requirement satisfied via minor changeset (`.changeset/config-optional-schema.md`)."
+    ],
+    "unfulfilled": []
+  },
+  "issues": [
+    {
+      "severity": "suggestion",
+      "description": "The new 'returns Result<unknown, ...> type when no schema provided' test validates runtime behavior but does not actually verify TypeScript overload narrowing at compile time. Consider adding a compile-time type assertion in non-test sources (or a dedicated type test setup) since package typecheck excludes `src/__tests__`.",
+      "file": "packages/config/src/__tests__/config.test.ts",
+      "line": 1153
+    }
+  ],
+  "sharedStateObservations": [
+    {
+      "target": "skills",
+      "observation": "For overload/narrowing features, the worker procedure could more explicitly require compile-time type assertions outside `src/__tests__` when package tsconfig excludes tests, to prevent runtime-only 'type' checks from being treated as narrowing verification.",
+      "evidence": "`packages/config/tsconfig.json:9` excludes `src/__tests__`; new test at `packages/config/src/__tests__/config.test.ts:1153` is labeled as type narrowing but only performs runtime assertions."
+    }
+  ]
+}
