@@ -49,10 +49,10 @@ Three tiers, one goal: shared infrastructure that works for humans and machines.
 
 APIs everything else depends on.
 
-| Package                | What it does                                   |
-| ---------------------- | ---------------------------------------------- |
+| Package                | What it does                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `@outfitter/contracts` | Result/Error patterns, handler contract, and utilities like `parseInput()`, `wrapError()`, `fromFetch()`, `expectOk()`, `expectErr()` |
-| `@outfitter/types`     | Type utilities and branded types               |
+| `@outfitter/types`     | Type utilities and branded types                                                                                                      |
 
 ### Runtime (Active)
 
@@ -75,9 +75,9 @@ The building blocks for applications.
 
 Developer-facing tools built on the runtime.
 
-| Package              | What it does                          |
-| -------------------- | ------------------------------------- |
-| `outfitter`          | Umbrella CLI for scaffolding projects |
+| Package              | What it does                                                               |
+| -------------------- | -------------------------------------------------------------------------- |
+| `outfitter`          | Umbrella CLI for scaffolding projects                                      |
 | `@outfitter/testing` | Test harnesses for CLI and MCP, including `testCommand()` and `testTool()` |
 
 ## Documentation
