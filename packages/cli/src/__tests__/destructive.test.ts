@@ -258,7 +258,8 @@ describe("runHandler() dry-run hint", () => {
 
     const envelope = JSON.parse(captured.stdout.trim());
     const dryRunHint = envelope.hints.find(
-      (h: { command: string }) => !h.command.includes("--dry-run")
+      (h: { description: string }) =>
+        h.description === "Execute without dry-run"
     );
     expect(dryRunHint).toBeDefined();
     expect(dryRunHint.command).toContain("--id");
@@ -401,7 +402,8 @@ describe("Destructive command E2E flow", () => {
 
     // Should have a hint for running without --dry-run
     const realCommandHint = envelope.hints.find(
-      (h: { command: string }) => !h.command.includes("--dry-run")
+      (h: { description: string }) =>
+        h.description === "Execute without dry-run"
     );
     expect(realCommandHint).toBeDefined();
   });
