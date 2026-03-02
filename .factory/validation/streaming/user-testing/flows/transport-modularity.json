@@ -5,7 +5,7 @@
     "account": "not-applicable",
     "namespace": "streaming.transport-modularity"
   },
-  "toolsUsed": ["shell"],
+  "toolsUsed": ["shell", "bun test", "bun run typecheck", "Read"],
   "assertions": [
     {
       "id": "VAL-STREAM-006",
@@ -18,12 +18,12 @@
           "observed": "HandlerContext declares progress?: ProgressCallback"
         },
         {
-          "action": "Run cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test --filter stream",
+          "action": "Run cd packages/contracts && bun test --filter stream",
           "expected": "Handler tests verify ctx.progress works when defined and is absent in non-stream mode",
           "observed": "stream.test.ts passed (10/10), including 'handler can call ctx.progress when defined (transport-agnostic)' and 'handler works without progress (non-streaming)'"
         },
         {
-          "action": "Run cd /Users/mg/Developer/outfitter/stack && bun run typecheck",
+          "action": "Run bun run typecheck",
           "expected": "Type safety for optional HandlerContext.progress remains valid",
           "observed": "Typecheck passed (34 successful tasks, 0 failures)"
         }
@@ -56,7 +56,7 @@
           "observed": "ctx.progress assigned only when progressToken !== undefined && sdkServer; otherwise left undefined"
         },
         {
-          "action": "Run cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test --filter progress",
+          "action": "Run cd packages/mcp && bun test --filter progress",
           "expected": "Tests capture notifications/progress payloads and no-token behavior",
           "observed": "progress.test.ts passed (14/14), including token payload assertions and tests confirming ctx.progress undefined/no notifications without token"
         }
@@ -84,7 +84,7 @@
         {
           "action": "Run adapter-focused tests",
           "expected": "Each adapter has independent unit/integration coverage",
-          "observed": "cd .../packages/cli && bun test --filter streaming passed (34/34); cd .../packages/mcp && bun test --filter progress passed (14/14)"
+          "observed": "cd packages/cli && bun test --filter streaming passed (34/34); cd packages/mcp && bun test --filter progress passed (14/14)"
         },
         {
           "action": "Verify shared stream types are centralized and reused",
@@ -92,7 +92,7 @@
           "observed": "StreamEvent/ProgressCallback defined in packages/contracts/src/stream.ts, exported from packages/contracts/src/index.ts, and imported in both packages/cli/src/streaming.ts and packages/mcp/src/progress.ts"
         },
         {
-          "action": "Run cd /Users/mg/Developer/outfitter/stack && bun run typecheck",
+          "action": "Run bun run typecheck",
           "expected": "Cross-package type imports compile cleanly",
           "observed": "Typecheck passed (34 successful tasks, 0 failures)"
         }
