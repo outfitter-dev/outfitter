@@ -1,0 +1,173 @@
+{
+  "groupId": "cli-streaming",
+  "testedAt": "2026-02-28T15:23:45Z",
+  "credentials": {
+    "account": "not-applicable-shell",
+    "namespace": "not-applicable-shell"
+  },
+  "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
+  "assertions": [
+    {
+      "id": "VAL-STREAM-001",
+      "title": "--stream flag is discoverable and accepted",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect stream flag preset in packages/cli/src/query.ts",
+          "expected": "A discoverable --stream CLI option is defined",
+          "observed": "streamPreset() defines flags: --stream with description and default false"
+        },
+        {
+          "action": "Generate help text from a command using streamPreset()",
+          "expected": "Help output includes --stream option",
+          "observed": "Help output contained: '--stream    Stream progress events as NDJSON to stdout (default: false)'"
+        },
+        {
+          "action": "Run runHandler() with stream enabled and disabled",
+          "expected": "With --stream accepted at runtime; without stream behavior remains standard envelope",
+          "observed": "stream:true emitted start/progress/envelope lines and exited 0; non-stream emitted a single standard envelope line"
+        },
+        {
+          "action": "Run streaming test suite",
+          "expected": "Flag discoverability/acceptance and non-stream parity tests pass",
+          "observed": "Passed tests include 'defines --stream option', 'resolves stream as true when passed', and 'without --stream, output is unchanged'"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "bun -e helpInformation(): Usage: demo [options] ... --stream    Stream progress events as NDJSON to stdout (default: false)",
+          "bun -e runHandler(stream:true) output: {\"type\":\"start\"...} / {\"type\":\"progress\"...} / {\"ok\":true,...}",
+          "bun -e runHandler(non-stream) output: {\"ok\":true,\"command\":\"demo-stream\",\"result\":{\"ok\":true}}",
+          "cd packages/cli && bun test --filter streaming: 34 pass, 0 fail"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-002",
+      "title": "Stream output is valid NDJSON with type discriminators",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run streaming tests in packages/cli",
+          "expected": "All NDJSON lines parse as JSON and event lines include allowed type discriminators",
+          "observed": "Tests passed: 'each line is valid JSON with type discriminator' and 'all output lines are valid NDJSON'"
+        },
+        {
+          "action": "Inspect NDJSON writer implementation in packages/cli/src/streaming.ts",
+          "expected": "Each event/envelope is written as one JSON object per newline",
+          "observed": "writeNdjsonLine() writes safeStringify(data) + newline; createNdjsonProgress() forwards StreamEvent lines"
+        },
+        {
+          "action": "Execute runHandler(stream:true) sample",
+          "expected": "Non-envelope lines are typed stream events and final line is standard envelope",
+          "observed": "Observed start/progress lines followed by final envelope {ok,command,result}"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "bun test --filter streaming includes NDJSON parsing assertions and all pass",
+          "runtime sample output lines: type=start, type=progress, final envelope with ok/command/result"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-003",
+      "title": "Event ordering is deterministic",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run ordered-event tests in packages/cli/src/__tests__/streaming.test.ts",
+          "expected": "start is first, envelope is last, progress events are in-between, no events after envelope",
+          "observed": "Passed tests: 'emits start event first, envelope last', 'progress events appear between start and envelope', and 'no events after envelope on success'"
+        },
+        {
+          "action": "Inspect runHandler() stream path in packages/cli/src/envelope.ts",
+          "expected": "Implementation enforces deterministic write order",
+          "observed": "runHandler() writes start before handler invocation and writes terminal envelope as the final stream write before return/exit"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "bun test --filter streaming ordering tests all pass",
+          "runtime sample confirmed start line precedes progress and envelope is last"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-004",
+      "title": "Terminal envelope matches non-stream envelope shape",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run stream-vs-non-stream parity tests",
+          "expected": "Final stream line equals standard success/error envelope shapes and exit behavior remains mapped",
+          "observed": "Passed tests: 'terminal envelope matches non-stream envelope shape exactly' and 'error envelope shape matches non-stream error envelope'"
+        },
+        {
+          "action": "Inspect streaming terminal write implementation",
+          "expected": "Stream terminal line reuses standard envelope object shape",
+          "observed": "writeStreamEnvelope() writes CommandEnvelope directly as final NDJSON line"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "bun test --filter streaming parity tests pass",
+          "manual non-stream envelope and streamed terminal envelope both observed in {ok,command,result} shape for success"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)"
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-005",
+      "title": "--stream is orthogonal to output mode",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Run output-mode matrix tests in streaming suite",
+          "expected": "stream mode works with human/json/jsonl and env-driven mode resolution",
+          "observed": "Passed tests: format json/human/jsonl and env cases OUTFITTER_JSON=1 and OUTFITTER_JSONL=1"
+        },
+        {
+          "action": "Inspect output mode resolution and stream handling source",
+          "expected": "stream toggles delivery only, does not override output mode selection",
+          "observed": "query.ts resolves output mode independently; envelope.ts resolves format/env then applies stream path without forcing a mode"
+        }
+      ],
+      "evidence": {
+        "terminalSnapshots": [
+          "bun test --filter streaming orthogonality matrix tests all pass"
+        ],
+        "consoleErrors": "not-applicable (shell-only flow)",
+        "network": "not-applicable (shell-only flow)"
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "Running `bun test --filter=@outfitter/cli` from repo root executed a broad workspace test set and reported 2 unrelated failures in createOutfitterLoggerFactory() tests, which is outside streaming scope.",
+      "resolved": true,
+      "resolution": "Used focused command `cd packages/cli && bun test --filter streaming` and direct source inspection to validate all assigned streaming assertions.",
+      "affectedAssertions": [
+        "VAL-STREAM-001",
+        "VAL-STREAM-002",
+        "VAL-STREAM-003",
+        "VAL-STREAM-004",
+        "VAL-STREAM-005"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 5 assertions (VAL-STREAM-001..005): 5 passed, 0 failed, 0 blocked, 0 skipped."
+}

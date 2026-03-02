@@ -1,0 +1,26 @@
+{
+  "featureId": "os-354-mcp-progress",
+  "reviewedAt": "2026-02-28T14:51:09Z",
+  "commitId": "3b7d1d61a080e368520ef631024d37672804906f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The feature cleanly introduces a modular MCP progress adapter (`progress.ts`) and wires it into `createHandlerContext()` in `server.ts`. Behavior aligns with requirements: progress notifications are emitted only when a progressToken is present, and no progress callback is exposed without a token. Test coverage is strong at both adapter-unit and server-integration levels, and the changeset is present.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "knowledge",
+      "observation": "Testing guidance in `.factory/library/user-testing.md` is internally inconsistent for package-scoped tests, which can lead to incorrect command choice and noisy failures.",
+      "evidence": "`user-testing.md` mixes `bun test --filter=<package>` (line 13), `bun run test --filter=...` (lines 30-35), and `Use bun test ... not bun run test` (line 80). The reviewed transcript skeleton shows the worker running `bun test --filter=@outfitter/mcp` from repo root and then reporting unrelated logger failures before switching strategy."
+    },
+    {
+      "area": "services",
+      "observation": "`.factory/services.yaml` lists `check: bun run check`, but mission AGENTS guidance says this command is currently broken and should be avoided.",
+      "evidence": "`/Users/mg/Developer/outfitter/stack/.factory/services.yaml` line 7 defines `check: bun run check`, while mission `/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md` line 25 says `bun run check` crashes with a tokio panic and recommends `bun run lint` + `bun run typecheck` instead."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass. The implementation satisfies VAL-STREAM-007 and the feature description: MCP progressToken requests receive `notifications/progress` emissions via ctx.progress, and no-token requests leave ctx.progress undefined with no emitted notifications."
+}

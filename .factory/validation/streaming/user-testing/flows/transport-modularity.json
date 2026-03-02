@@ -1,0 +1,126 @@
+{
+  "groupId": "transport-modularity",
+  "testedAt": "2026-02-28T15:24:37Z",
+  "credentials": {
+    "account": "not-applicable",
+    "namespace": "streaming.transport-modularity"
+  },
+  "toolsUsed": ["shell"],
+  "assertions": [
+    {
+      "id": "VAL-STREAM-006",
+      "title": "ctx.progress is transport-agnostic",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect packages/contracts/src/handler.ts",
+          "expected": "HandlerContext exposes optional progress callback",
+          "observed": "HandlerContext declares progress?: ProgressCallback"
+        },
+        {
+          "action": "Run cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test --filter stream",
+          "expected": "Handler tests verify ctx.progress works when defined and is absent in non-stream mode",
+          "observed": "stream.test.ts passed (10/10), including 'handler can call ctx.progress when defined (transport-agnostic)' and 'handler works without progress (non-streaming)'"
+        },
+        {
+          "action": "Run cd /Users/mg/Developer/outfitter/stack && bun run typecheck",
+          "expected": "Type safety for optional HandlerContext.progress remains valid",
+          "observed": "Typecheck passed (34 successful tasks, 0 failures)"
+        }
+      ],
+      "evidence": {
+        "terminal": [
+          "bun test --filter stream -> 10 pass, 0 fail",
+          "bun run typecheck -> 34 successful, 0 failed"
+        ],
+        "source": [
+          "packages/contracts/src/handler.ts",
+          "packages/contracts/src/__tests__/stream.test.ts"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-007",
+      "title": "MCP adapter emits notifications/progress",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect packages/mcp/src/progress.ts",
+          "expected": "ctx.progress events map to MCP notifications/progress with progressToken and payload fields",
+          "observed": "createMcpProgressCallback maps StreamEvent to { method: 'notifications/progress', params: { progressToken, progress, total?, message? } }"
+        },
+        {
+          "action": "Inspect packages/mcp/src/server.ts createHandlerContext()",
+          "expected": "ctx.progress set only when progressToken is present and SDK server is bound",
+          "observed": "ctx.progress assigned only when progressToken !== undefined && sdkServer; otherwise left undefined"
+        },
+        {
+          "action": "Run cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test --filter progress",
+          "expected": "Tests capture notifications/progress payloads and no-token behavior",
+          "observed": "progress.test.ts passed (14/14), including token payload assertions and tests confirming ctx.progress undefined/no notifications without token"
+        }
+      ],
+      "evidence": {
+        "terminal": ["bun test --filter progress -> 14 pass, 0 fail"],
+        "source": [
+          "packages/mcp/src/progress.ts",
+          "packages/mcp/src/server.ts",
+          "packages/mcp/src/__tests__/progress.test.ts"
+        ]
+      },
+      "issues": null
+    },
+    {
+      "id": "VAL-STREAM-008",
+      "title": "Streaming adapters are modular",
+      "status": "pass",
+      "steps": [
+        {
+          "action": "Inspect adapter modules",
+          "expected": "CLI and MCP streaming adapters are implemented as separate modules",
+          "observed": "CLI adapter is packages/cli/src/streaming.ts; MCP adapter is packages/mcp/src/progress.ts"
+        },
+        {
+          "action": "Run adapter-focused tests",
+          "expected": "Each adapter has independent unit/integration coverage",
+          "observed": "cd .../packages/cli && bun test --filter streaming passed (34/34); cd .../packages/mcp && bun test --filter progress passed (14/14)"
+        },
+        {
+          "action": "Verify shared stream types are centralized and reused",
+          "expected": "Event types/order contract lives in @outfitter/contracts and is imported by both adapters",
+          "observed": "StreamEvent/ProgressCallback defined in packages/contracts/src/stream.ts, exported from packages/contracts/src/index.ts, and imported in both packages/cli/src/streaming.ts and packages/mcp/src/progress.ts"
+        },
+        {
+          "action": "Run cd /Users/mg/Developer/outfitter/stack && bun run typecheck",
+          "expected": "Cross-package type imports compile cleanly",
+          "observed": "Typecheck passed (34 successful tasks, 0 failures)"
+        }
+      ],
+      "evidence": {
+        "terminal": [
+          "bun test --filter streaming -> 34 pass, 0 fail",
+          "bun test --filter progress -> 14 pass, 0 fail",
+          "bun run typecheck -> 34 successful, 0 failed"
+        ],
+        "source": [
+          "packages/cli/src/streaming.ts",
+          "packages/mcp/src/progress.ts",
+          "packages/contracts/src/stream.ts",
+          "packages/contracts/src/index.ts"
+        ]
+      },
+      "issues": null
+    }
+  ],
+  "frictions": [
+    {
+      "description": "Ad-hoc standalone TypeScript import check for @outfitter/contracts from a /tmp file failed due local Bun type definition resolution; this was not needed once root typecheck and source export inspection were completed.",
+      "resolved": true,
+      "resolution": "Used repository-level typecheck (bun run typecheck) plus direct inspection of contracts index/stream exports and consumer imports in CLI/MCP adapters.",
+      "affectedAssertions": ["VAL-STREAM-008"]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 3 assertions (VAL-STREAM-006/007/008): all 3 passed. Transport-agnostic ctx.progress, MCP notifications/progress mapping, and modular CLI/MCP adapters with shared contracts stream types are all implemented and covered by passing tests."
+}

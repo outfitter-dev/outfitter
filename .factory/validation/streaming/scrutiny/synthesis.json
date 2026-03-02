@@ -1,0 +1,56 @@
+{
+  "milestone": "streaming",
+  "round": 2,
+  "status": "pass",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "bun run test",
+      "exitCode": 0,
+      "observation": "40/40 turbo tasks passed, 0 test failures across all packages"
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "observation": "34/34 turbo tasks passed, no type errors"
+    },
+    "lint": {
+      "passed": true,
+      "command": "bun run lint",
+      "exitCode": 0,
+      "observation": "31/31 turbo tasks passed, 9 pre-existing warnings (max-file-lines, action-must-register), 0 errors"
+    }
+  },
+  "reviewsSummary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "nonBlockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Add convention: 'All new JSON/NDJSON serialization paths must use safeStringify (from @outfitter/contracts) rather than raw JSON.stringify, to ensure consistent BigInt handling, circular reference detection, and sensitive data redaction across all output modes including streaming.'",
+      "evidence": "os-354-cli-ndjson introduced writeNdjsonLine() with raw JSON.stringify while the non-stream output path uses safeStringify. This was caught in round 1 review and fixed in fix-streaming-safe-stringify. Pattern-level guidance prevents recurrence.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Update library-worker skill's export verification guidance (step 6) to clarify that type-only exports (type aliases, interfaces) are erased at runtime and will show 'undefined' in runtime checks — this is expected and not an indication of missing exports. The skill should recommend checking .d.ts output or TypeScript AST instead.",
+      "evidence": "os-354-progress-types worker handoff records ProgressCallback: undefined as 'expected' because type aliases are erased at runtime, but the skill guidance implies undefined means missing export.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Consider adding TDD enforcement verification in scrutiny reviews: the fix-streaming-safe-stringify worker marked followedProcedure: true in handoff but transcript shows implementation edits before test additions, violating the library-worker Red-Green-Refactor sequence.",
+      "evidence": "Transcript skeleton for worker session e3690af0-2520-4edc-9a64-39535e4d9462 shows Edit calls in packages/cli/src/streaming.ts and packages/cli/src/envelope.ts before test additions in packages/cli/src/__tests__/streaming.test.ts.",
+      "isSystemic": false
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": ".factory/validation/streaming/scrutiny/synthesis.json (round 1)"
+}

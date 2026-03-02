@@ -1,0 +1,34 @@
+{
+  "featureId": "os-354-cli-ndjson",
+  "reviewedAt": "2026-02-28T14:52:44Z",
+  "commitId": "044b3989",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature delivers the requested NDJSON streaming structure, flag preset, runHandler integration, and broad assertion-focused tests, but it introduces a blocking serialization/safety regression in stream mode.",
+    "issues": [
+      {
+        "file": "packages/cli/src/streaming.ts",
+        "line": 46,
+        "severity": "blocking",
+        "description": "`writeNdjsonLine()` uses raw `JSON.stringify`, bypassing the CLI's `safeStringify` path used for non-stream JSON output. This can throw on BigInt/circular payloads and can emit unredacted sensitive values in stream mode, violating parity/safety expectations relative to non-stream JSON output (`packages/cli/src/output.ts:89-93,267-282`)."
+      },
+      {
+        "file": "packages/cli/src/envelope.ts",
+        "line": 451,
+        "severity": "non_blocking",
+        "description": "Streaming context injection clones `rawContext` via object spread (`{ ...rawContext, progress }`), which drops prototype chain and non-enumerable properties. Class/prototype-based contexts can lose behavior when `stream` is enabled."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "A convention gap exists around JSON serialization safety: new JSON/NDJSON writers are not explicitly required (in mission shared guidance) to reuse `safeStringify` semantics (redaction + BigInt/circular handling).",
+      "evidence": "`packages/cli/src/streaming.ts:46` uses `JSON.stringify`, while established JSON output path uses `safeStringify` (`packages/cli/src/output.ts:89-93,267-282`). The mission AGENTS and `.factory/library/architecture.md` mention streaming protocol/orthogonality but do not explicitly codify this serializer requirement."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Implementation scope and tests are substantial and cover the listed streaming assertions, but a blocking stream-mode serializer regression remains (raw `JSON.stringify` instead of safe serializer behavior). Review status: fail."
+}
