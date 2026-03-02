@@ -1,0 +1,24 @@
+{
+  "milestone": "documentation",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-DOCS-001",
+    "VAL-DOCS-002",
+    "VAL-DOCS-003",
+    "VAL-DOCS-004",
+    "VAL-DOCS-005",
+    "VAL-DOCS-006",
+    "VAL-CROSS-001"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}

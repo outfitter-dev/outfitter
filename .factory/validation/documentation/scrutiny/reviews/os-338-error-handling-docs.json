@@ -1,0 +1,21 @@
+{
+  "featureId": "os-338-error-handling-docs",
+  "reviewedAt": "2026-02-27T20:48:36Z",
+  "commitId": "585eb704f3d729f503ee639a5fd99a003ad42d43",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The new contracts doc exists at packages/contracts/docs/error-handling-patterns.md and fully covers the requested scope: error boundaries (Result for domain errors; throws for protocol/startup failures), MCP Result boundary guidance, visible 10-category taxonomy with exit/HTTP mapping, and an adaptHandler() bridge example for domain errors extending Error but not OutfitterError. Referenced APIs/imports in examples match exported source symbols and package exports.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker procedure requires running `bun run check`, but this mission explicitly marks `bun run check` as a known crashing command and directs workers to run `bun run lint` + `bun run typecheck` instead. The worker followed mission guidance, indicating the skill procedure is stale for this environment.",
+      "evidence": "Skill procedure: /Users/mg/Developer/outfitter/stack/.factory/skills/docs-worker/SKILL.md:65. Mission exception: /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72. Worker command evidence: /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-09-45-364Z__os-338-error-handling-docs__61797313-e4f0-41c1-8f6e-158eac5de595.json:41,46."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review passed. The OS-338 documentation implementation matches the feature requirements and the committed content is accurate to source exports/signatures; one non-blocking shared-state note was recorded about docs-worker verification guidance being out of sync with mission-specific known tooling issues."
+}

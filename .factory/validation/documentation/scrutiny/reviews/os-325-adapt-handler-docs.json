@@ -1,0 +1,21 @@
+{
+  "featureId": "os-325-adapt-handler-docs",
+  "reviewedAt": "2026-02-27T20:48:24Z",
+  "commitId": "3bb8e3b9",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The commit adds a dedicated MCP package doc at packages/mcp/docs/adapt-handler.md that fully covers the requested adaptHandler() use case: it explains the domain-error type mismatch problem, shows adaptHandler() as the bridge solution, includes a realistic end-to-end example, and documents when to use adaptHandler() vs passing handlers directly. The documented signature matches packages/mcp/src/types.ts.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "There is guidance drift between the docs-worker skill and mission guidance for verification commands. The skill says to run `bun run check`, while this mission's AGENTS.md says `bun run check` is known to crash and workers should run `bun run lint` plus `bun run typecheck` instead.",
+      "evidence": ".factory/skills/docs-worker/SKILL.md (Step 5 Verify) vs /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md (Known Pre-Existing Issues section); transcript skeleton/handoff for session c56d6c05-38b2-4b2e-acb2-b1a00cbedc3f shows lint+typecheck commands and no bun run check."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review completed for os-325-adapt-handler-docs: implementation passes. The documentation file added in commit 3bb8e3b9 satisfies the feature requirements and aligns with source signatures/types. One shared-state observation was noted about verification-command guidance drift between skill instructions and mission AGENTS guidance."
+}

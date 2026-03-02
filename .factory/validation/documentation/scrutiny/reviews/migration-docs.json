@@ -1,0 +1,21 @@
+{
+  "featureId": "migration-docs",
+  "reviewedAt": "2026-02-27T20:49:22Z",
+  "commitId": "bbf3c75328ba2f96c8521658b79edb28e706d561",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The migration guide at docs/migration-v0.4.md is present and covers all required v0.4 breaking changes (--json default, Commander peer dependency, output()/exitWithError format parameter change, centralized resolveOutputMode(), and dependency-versions Result return) with before/after examples and migration steps.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker procedure still mandates `bun run check`, which conflicts with this mission's known pre-existing formatter/check crash and can create avoidable noise during docs-only work.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/docs-worker/SKILL.md:65-69 requires `bun run check`; /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72 documents `bun run check` crashing and recommends `bun run lint` + `bun run typecheck`; /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl:3 shows this worker ran `bun run check` and then `bun run format:fix`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass. The feature fully delivers the requested migration documentation with accurate, actionable upgrade guidance and no blocking defects found; one shared-state skill/procedure mismatch was noted."
+}

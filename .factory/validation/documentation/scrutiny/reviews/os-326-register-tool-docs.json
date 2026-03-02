@@ -1,0 +1,28 @@
+{
+  "featureId": "os-326-register-tool-docs",
+  "reviewedAt": "2026-02-27T20:49:00Z",
+  "commitId": "8d302ce3e3695793e700d854a2ab30bbf4f5954c",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The feature intent is satisfied: the new MCP docs page documents post-connect registerTool() auto-notification, explains the auth-gated dynamic registration flow, and aligns with source behavior in server/transport and notification tests. I found one minor wording inconsistency in the manual-notification section.",
+    "issues": [
+      {
+        "file": "packages/mcp/docs/dynamic-tool-registration.md",
+        "line": 100,
+        "severity": "non_blocking",
+        "description": "The section claims explicit control over when notifications fire for bulk registration, and line 103 implies registration without per-tool notifications, but post-connect registerTool() still auto-notifies each call. The wording is internally contradictory and may mislead readers about suppression behavior."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The docs-worker skill procedure mandates `bun run check`, but mission-level AGENTS guidance marks `bun run check` as a known crashing command and instructs `bun run lint` + `bun run typecheck` instead. This creates a procedure mismatch in this mission context.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/docs-worker/SKILL.md:64-69, /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72, /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-19-52-071Z__os-326-register-tool-docs__92352a1d-6f19-42e3-96e4-451e0d918f0a.json:21,26"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass with one non-blocking docs clarity note. The implementation delivers the requested documentation for registerTool() post-connect auto-notification and auth-gated dynamic tool registration, and the described behavior is supported by source and tests."
+}
