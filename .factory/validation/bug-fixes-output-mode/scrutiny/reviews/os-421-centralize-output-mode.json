@@ -1,0 +1,38 @@
+{
+  "featureId": "os-421-centralize-output-mode",
+  "reviewedAt": "2026-02-27T18:39:12Z",
+  "commitId": "fe3f69af",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Feature requirements for VAL-OUTPUT-002 are satisfied: output-mode resolution is centralized in packages/cli/src/query.ts via resolveOutputMode(), action-level duplicate env/explicitness branches were removed, apps/outfitter/src/actions/docs-output-mode.ts was deleted, and comprehensive resolver tests were added.",
+    "issues": [
+      {
+        "file": "packages/cli/src/query.ts",
+        "line": 44,
+        "severity": "non_blocking",
+        "description": "Documentation for forceHumanWhenImplicit is internally inconsistent: config docs say it returns the default mode for implicit resolution, while implementation forces \"human\" (line ~131). Clarify comment or align behavior with documented contract."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "Mission AGENTS.md still references pre-centralization output-mode helpers/files as active key sources and current architecture state, which can mislead subsequent workers.",
+      "evidence": "/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md lines 56-57 list resolveOutputModeWithEnvFallback and docs-output-mode.ts; lines 62-67 still describe output mode as split across 5+ files."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Shared architecture notes remain stale on output-mode architecture after OS-421 completion.",
+      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/library/architecture.md lines 30-32 still say output mode is currently split across 5+ files and centralization is only a goal."
+    },
+    {
+      "area": "skills",
+      "observation": "Worker reported a startup deviation due not finding mission context files locally, suggesting skill/runtime guidance is ambiguous about mission file location in subagent runs.",
+      "evidence": "handoff.skillFeedback.deviations[0] in /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T18-25-24-396Z__os-421-centralize-output-mode__113a8521-c1f1-4099-b291-e73023a91b40.json"
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Pass: centralized resolver implementation and action refactors meet the feature contract, with no blocking code defects found. Noted non-blocking resolver documentation inconsistency and shared-state documentation drift."
+}
