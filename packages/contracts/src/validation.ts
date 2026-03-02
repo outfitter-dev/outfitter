@@ -58,6 +58,27 @@ export function createValidator<T>(
   };
 }
 
+function parseWithSchema<TSchema extends z.ZodType>(
+  schema: TSchema,
+  data: unknown
+): Result<z.infer<TSchema>, ValidationError> {
+  const parseResult = schema.safeParse(data);
+
+  if (parseResult.success) {
+    return Result.ok(parseResult.data);
+  }
+
+  const message = formatZodIssues(parseResult.error.issues);
+  const field = extractField(parseResult.error.issues);
+
+  const errorProps: { message: string; field?: string } = { message };
+  if (field !== undefined) {
+    errorProps.field = field;
+  }
+
+  return Result.err(new ValidationError(errorProps));
+}
+
 /**
  * Validate input against a Zod schema.
  *
@@ -80,22 +101,7 @@ export function validateInput<T>(
   schema: z.ZodType<T>,
   input: unknown
 ): Result<T, ValidationError> {
-  const parseResult = schema.safeParse(input);
-
-  if (parseResult.success) {
-    return Result.ok(parseResult.data);
-  }
-
-  const message = formatZodIssues(parseResult.error.issues);
-  const field = extractField(parseResult.error.issues);
-
-  // Build error with optional field only if defined
-  const errorProps: { message: string; field?: string } = { message };
-  if (field !== undefined) {
-    errorProps.field = field;
-  }
-
-  return Result.err(new ValidationError(errorProps));
+  return parseWithSchema(schema, input);
 }
 
 /**
