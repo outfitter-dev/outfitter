@@ -7,13 +7,13 @@
 import { output } from "@outfitter/cli";
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { cwdPreset, dryRunPreset, forcePreset } from "@outfitter/cli/flags";
+import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { listBlocks, printAddResults, runAdd } from "../commands/add.js";
 import {
   type CliOutputMode,
-  resolveOutputModeFromContext,
   resolveStructuredOutputMode,
 } from "../output-mode.js";
 import {
@@ -56,7 +56,7 @@ export const addAction: AddAction = defineAction({
       "Add a block from the registry (claude, linter, lefthook, bootstrap, scaffolding)",
     options: [...addSharedFlags.options, ...addCwd.options],
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       const { force, dryRun } = addSharedFlags.resolve(context);
       return {
         block: context.args[0] as string,
@@ -100,7 +100,7 @@ export const listBlocksAction: ListBlocksAction = defineAction({
     command: "list",
     description: "List available blocks",
     mapInput: (context) => {
-      const outputMode = resolveOutputModeFromContext(context.flags);
+      const { mode: outputMode } = resolveOutputMode(context.flags);
       return {
         outputMode,
       };

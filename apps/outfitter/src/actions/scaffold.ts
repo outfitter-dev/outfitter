@@ -6,14 +6,12 @@
 
 import { actionCliPresets } from "@outfitter/cli/actions";
 import { dryRunPreset, forcePreset } from "@outfitter/cli/flags";
+import { resolveOutputMode } from "@outfitter/cli/query";
 import { defineAction, Result } from "@outfitter/contracts";
 import { z } from "zod";
 
 import { printScaffoldResults, runScaffold } from "../commands/scaffold.js";
-import {
-  type CliOutputMode,
-  resolveOutputModeFromContext,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
@@ -76,7 +74,7 @@ function resolveScaffoldOptions(context: {
 }): ScaffoldActionInput {
   const flags = context.flags as ScaffoldFlags;
   const { force, dryRun } = scaffoldSharedFlags.resolve(context);
-  const outputMode = resolveOutputModeFromContext(context.flags);
+  const { mode: outputMode } = resolveOutputMode(context.flags);
   const noTooling = resolveNoToolingFlag(flags);
   const local = resolveLocalFlag(flags);
   const installTimeout = resolveInstallTimeoutFlag(flags.installTimeout);

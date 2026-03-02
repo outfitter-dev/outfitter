@@ -10,6 +10,7 @@ import {
   dryRunPreset,
   forcePreset,
 } from "@outfitter/cli/flags";
+import { resolveOutputMode } from "@outfitter/cli/query";
 import {
   type ActionCliInputContext,
   type ActionCliOption,
@@ -22,10 +23,7 @@ import { z } from "zod";
 
 import type { InitOptions } from "../commands/init.js";
 import { printInitResults, runInit } from "../commands/init.js";
-import {
-  type CliOutputMode,
-  resolveOutputModeFromContext,
-} from "../output-mode.js";
+import type { CliOutputMode } from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
@@ -176,7 +174,7 @@ function resolveInitOptions(
     "skip-commit"
   );
   const installTimeout = resolveInstallTimeoutFlag(flags.installTimeout);
-  const outputMode = resolveOutputModeFromContext(context.flags);
+  const { mode: outputMode } = resolveOutputMode(context.flags);
 
   return {
     targetDir,
