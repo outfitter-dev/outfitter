@@ -73,11 +73,12 @@ export async function testCommand(
       envBackup.set(key, process.env[key]);
       process.env[key] = value;
     }
+  }
 
   // Save process.argv so code that reads it (e.g., hasExplicitOutputFlag)
   // sees the test invocation args instead of the test runner's args.
   const savedArgv = process.argv;
-  const testArgv = ["node", "test", ...fullArgs];
+  const testArgv = ["node", "test", ...args];
   process.argv = testArgv;
 
   try {
@@ -98,5 +99,6 @@ export async function testCommand(
       } else {
         process.env[key] = original;
       }
+    }
   }
 }
