@@ -256,8 +256,8 @@ export interface RunHandlerOptions<
    * The CLI owns the initial `start` event, so handlers should emit only
    * `step` and `progress` events through `ctx.progress`.
    *
-  * `--stream` is orthogonal to output mode — it controls delivery, not serialization.
-  */
+   * `--stream` is orthogonal to output mode — it controls delivery, not serialization.
+   */
   readonly stream?: boolean;
 
   /**
