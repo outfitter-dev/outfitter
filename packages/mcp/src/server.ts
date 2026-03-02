@@ -29,6 +29,7 @@ import {
   type CompletionResult,
   type InvokeToolOptions,
   McpError,
+  type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
   type PromptArgument,
@@ -214,8 +215,8 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     signal?: AbortSignal,
     progressToken?: string | number,
     loggerMeta?: Record<string, string>
-  ): HandlerContext {
-    const ctx: HandlerContext = {
+  ): McpHandlerContext {
+    const ctx: McpHandlerContext = {
       requestId,
       logger: logger.child(loggerMeta ?? { tool: label, requestId }),
       cwd: process.cwd(),
@@ -229,7 +230,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
 
     // Add progress reporter when token is present and SDK server is bound
     if (progressToken !== undefined && sdkServer) {
-      (ctx as { progress?: unknown }).progress = {
+      ctx.progress = {
         report(progress: number, total?: number, message?: string) {
           sdkServer?.notification?.({
             method: "notifications/progress",

@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
@@ -9,6 +9,7 @@ import {
   deriveBinName,
   deriveProjectName,
   executePlan,
+  getPresetsBaseDir,
   isPathWithin,
   resolveAuthor,
   resolveYear,
@@ -21,6 +22,74 @@ import { runPostScaffold } from "../engine/post-scaffold.js";
 import type { TargetDefinition } from "../targets/index.js";
 import type { InitPresetId } from "./init-option-resolution.js";
 
+// =============================================================================
+// Example Overlays
+// =============================================================================
+
+function discoverPresetExamples(): ReadonlyMap<string, readonly string[]> {
+  const examplesRoot = join(getPresetsBaseDir(), "_examples");
+  if (!existsSync(examplesRoot)) {
+    return new Map();
+  }
+
+  const examplesByPreset = new Map<string, string[]>();
+
+  for (const entry of readdirSync(examplesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const separatorIndex = entry.name.indexOf("-");
+    if (separatorIndex <= 0 || separatorIndex >= entry.name.length - 1) {
+      continue;
+    }
+
+    const preset = entry.name.slice(0, separatorIndex);
+    const example = entry.name.slice(separatorIndex + 1);
+    const existing = examplesByPreset.get(preset) ?? [];
+    existing.push(example);
+    examplesByPreset.set(preset, existing);
+  }
+
+  return new Map(
+    [...examplesByPreset.entries()].map(([preset, examples]) => [
+      preset,
+      [...new Set(examples)].toSorted(),
+    ])
+  );
+}
+
+function getPresetExamples(): ReadonlyMap<string, readonly string[]> {
+  return discoverPresetExamples();
+}
+
+/**
+ * Validates an `--example` flag value against the preset's available examples.
+ * @returns The validated example overlay directory name, or an error message.
+ */
+export function validateExample(
+  preset: string,
+  example: string
+): Result<string, string> {
+  const presetExamples = getPresetExamples();
+  const available = presetExamples.get(preset);
+  if (!available || available.length === 0) {
+    return Result.err(
+      `Preset '${preset}' has no available examples. ` +
+        `Only these presets support --example: ${[...presetExamples.keys()].join(", ")}`
+    );
+  }
+
+  if (!available.includes(example)) {
+    return Result.err(
+      `Unknown example '${example}' for preset '${preset}'. ` +
+        `Available examples: ${available.join(", ")}`
+    );
+  }
+
+  return Result.ok(`_examples/${preset}-${example}`);
+}
+
 /** Whether the project is a standalone package or a workspace with nested packages. */
 export type InitStructure = "single" | "workspace";
 
@@ -28,6 +97,10 @@ export type InitStructure = "single" | "workspace";
 export interface ResolvedInitExecutionInput {
   readonly binName?: string | undefined;
   readonly blocksOverride?: readonly string[];
+  /** Example overlay name (e.g., "todo" for cli, "files" for mcp). */
+  readonly example?: string | undefined;
+  /** Resolved example overlay directory name (e.g., "_examples/cli-todo"). Set by pipeline after validation. */
+  readonly exampleOverlayDir?: string | undefined;
   readonly includeTooling: boolean;
   readonly local: boolean;
   readonly packageName: string;
@@ -100,6 +173,15 @@ function buildInitPlan(
         includeTooling: input.includeTooling,
         overlayBaseTemplate: true,
       },
+      ...(input.exampleOverlayDir
+        ? ([
+            {
+              type: "copy-example-overlay",
+              preset: input.exampleOverlayDir,
+              targetDir: projectDir,
+            },
+          ] as const)
+        : []),
       { type: "inject-shared-config" },
       ...(input.local
         ? ([{ type: "rewrite-local-dependencies", mode: "workspace" }] as const)
@@ -122,8 +204,18 @@ export async function executeInitPipeline(
   target: TargetDefinition,
   options: InitExecutionOptions
 ): Promise<Result<InitExecutionResult, string>> {
-  const projectName = deriveProjectName(input.packageName);
-  if (input.structure === "workspace") {
+  // Validate --example flag if provided
+  let resolvedInput = input;
+  if (input.example) {
+    const exampleResult = validateExample(input.preset, input.example);
+    if (exampleResult.isErr()) {
+      return Result.err(exampleResult.error);
+    }
+    resolvedInput = { ...input, exampleOverlayDir: exampleResult.value };
+  }
+
+  const projectName = deriveProjectName(resolvedInput.packageName);
+  if (resolvedInput.structure === "workspace") {
     const invalidProjectName = validateProjectDirectoryName(projectName);
     if (invalidProjectName) {
       return Result.err(
@@ -134,10 +226,10 @@ export async function executeInitPipeline(
 
   const collector = options.dryRun ? new OperationCollector() : undefined;
 
-  const projectBaseDir = resolve(input.rootDir, target.placement);
+  const projectBaseDir = resolve(resolvedInput.rootDir, target.placement);
   const resolvedProjectDir = resolve(projectBaseDir, projectName);
   if (
-    input.structure === "workspace" &&
+    resolvedInput.structure === "workspace" &&
     !isPathWithin(projectBaseDir, resolvedProjectDir)
   ) {
     return Result.err(
@@ -146,31 +238,40 @@ export async function executeInitPipeline(
   }
 
   const projectDir =
-    input.structure === "workspace" ? resolvedProjectDir : input.rootDir;
+    resolvedInput.structure === "workspace"
+      ? resolvedProjectDir
+      : resolvedInput.rootDir;
 
-  if (input.structure === "single") {
-    if (existsSync(join(input.rootDir, "package.json")) && !options.force) {
+  if (resolvedInput.structure === "single") {
+    if (
+      existsSync(join(resolvedInput.rootDir, "package.json")) &&
+      !options.force
+    ) {
       return Result.err(
-        `Directory '${input.rootDir}' already has a package.json. Use --force to overwrite, or use 'outfitter add' for existing projects.`
+        `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite, or use 'outfitter add' for existing projects.`
       );
     }
   } else {
-    const workspaceName = input.workspaceName ?? basename(input.rootDir);
-    const workspacePackageJsonPath = join(input.rootDir, "package.json");
+    const workspaceName =
+      resolvedInput.workspaceName ?? basename(resolvedInput.rootDir);
+    const workspacePackageJsonPath = join(
+      resolvedInput.rootDir,
+      "package.json"
+    );
     if (options.dryRun) {
       if (existsSync(workspacePackageJsonPath) && !options.force) {
         return Result.err(
-          `Directory '${input.rootDir}' already has a package.json. Use --force to overwrite.`
+          `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite.`
         );
       }
 
       collector?.add({
         type: "dir-create",
-        path: join(input.rootDir, "apps"),
+        path: join(resolvedInput.rootDir, "apps"),
       });
       collector?.add({
         type: "dir-create",
-        path: join(input.rootDir, "packages"),
+        path: join(resolvedInput.rootDir, "packages"),
       });
       collector?.add(
         existsSync(workspacePackageJsonPath)
@@ -186,7 +287,7 @@ export async function executeInitPipeline(
             }
       );
 
-      const readmePath = join(input.rootDir, "README.md");
+      const readmePath = join(resolvedInput.rootDir, "README.md");
       if (options.force || !existsSync(readmePath)) {
         collector?.add(
           existsSync(readmePath)
@@ -203,7 +304,7 @@ export async function executeInitPipeline(
         );
       }
 
-      const gitignorePath = join(input.rootDir, ".gitignore");
+      const gitignorePath = join(resolvedInput.rootDir, ".gitignore");
       if (options.force || !existsSync(gitignorePath)) {
         collector?.add(
           existsSync(gitignorePath)
@@ -221,7 +322,7 @@ export async function executeInitPipeline(
       }
     } else {
       const workspaceResult = scaffoldWorkspaceRoot(
-        input.rootDir,
+        resolvedInput.rootDir,
         workspaceName,
         options.force
       );
@@ -232,9 +333,15 @@ export async function executeInitPipeline(
   }
 
   const resolvedBinName =
-    input.binName ?? deriveBinName(deriveProjectName(input.packageName));
+    resolvedInput.binName ??
+    deriveBinName(deriveProjectName(resolvedInput.packageName));
 
-  const plan = buildInitPlan(target, input, projectDir, resolvedBinName);
+  const plan = buildInitPlan(
+    target,
+    resolvedInput,
+    projectDir,
+    resolvedBinName
+  );
 
   const executeResult = await executePlan(plan, {
     force: options.force,
@@ -247,11 +354,11 @@ export async function executeInitPipeline(
 
   const postScaffoldResult = await runPostScaffold(
     {
-      rootDir: input.rootDir,
+      rootDir: resolvedInput.rootDir,
       projectDir,
       origin: "init",
-      target: input.preset,
-      structure: input.structure,
+      target: resolvedInput.preset,
+      structure: resolvedInput.structure,
       skipInstall: options.skipInstall,
       skipGit: options.skipGit,
       skipCommit: options.skipCommit,
@@ -265,11 +372,11 @@ export async function executeInitPipeline(
   }
 
   return Result.ok({
-    structure: input.structure,
-    rootDir: input.rootDir,
+    structure: resolvedInput.structure,
+    rootDir: resolvedInput.rootDir,
     projectDir,
-    preset: input.preset,
-    packageName: input.packageName,
+    preset: resolvedInput.preset,
+    packageName: resolvedInput.packageName,
     blocksAdded: executeResult.value.blocksAdded,
     postScaffold: postScaffoldResult.value,
     ...(collector ? { dryRunPlan: collector.toJSON() } : {}),

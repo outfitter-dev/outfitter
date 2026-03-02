@@ -26,6 +26,11 @@ export type ScaffoldChange =
       readonly overlayBaseTemplate: boolean;
     }
   | {
+      readonly type: "copy-example-overlay";
+      readonly preset: string;
+      readonly targetDir: string;
+    }
+  | {
       readonly type: "inject-shared-config";
     }
   | {
