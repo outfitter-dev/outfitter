@@ -1,0 +1,34 @@
+{
+  "featureId": "os-349-define-resource",
+  "milestone": "mcp-config",
+  "reviewer": "scrutiny-feature-reviewer",
+  "verdict": "pass",
+  "codeQuality": {
+    "score": 5,
+    "notes": "Implementation cleanly extends the existing MCP pattern: defineResourceTemplate() now supports typed overloads and wraps handlers with Zod safeParse validation before invocation, returning framework-compatible ValidationError for centralized translation (packages/mcp/src/server.ts). New typed interfaces are added in types.ts and exported from the root index. Changeset is present with minor bump."
+  },
+  "testCoverage": {
+    "score": 5,
+    "notes": "Strong targeted coverage via 13 new tests in packages/mcp/src/__tests__/define-resource.test.ts: happy paths, validation failure short-circuit (handler not called), coercion, context propagation, error translation, backward compatibility, and registration/list/read integration. Handoff reports package MCP suite passing (165 tests total)."
+  },
+  "contractFulfillment": {
+    "fulfilled": [
+      "VAL-MCP-001: First-class resource helpers are available with typed definitions and schema-backed template validation; defineResource()/defineResourceTemplate are exported from @outfitter/mcp and server/types subpaths (packages/mcp/src/server.ts, packages/mcp/src/types.ts, packages/mcp/src/index.ts, packages/mcp/package.json exports).",
+      "VAL-MCP-002: createMcpServer integration is covered; resources/templates can be registered and read, with schema validation happening before handler execution for template variables (packages/mcp/src/__tests__/define-resource.test.ts)."
+    ],
+    "unfulfilled": []
+  },
+  "issues": [],
+  "sharedStateObservations": [
+    {
+      "target": "skills",
+      "observation": "library-worker step 5 requires full-suite `bun run test`, but this mission has known unrelated full-suite failures; the worker had to rely on package-scoped verification instead. Skill guidance should explicitly document this fallback to avoid false procedural non-compliance.",
+      "evidence": "Transcript skeleton for session 5621425f-4aa2-46d5-88ba-02dbba114bcf shows `bun test --filter=@outfitter/mcp` reporting unrelated logging failures, then fallback to `cd packages/mcp && bun test`. Mission AGENTS.md and .factory/library/user-testing.md already note pre-existing unrelated test failures."
+    },
+    {
+      "target": "library",
+      "observation": "user-testing guidance is slightly inconsistent about package-scoped test commands (`bun run test --filter=...` vs package-local `bun test`), which can lead to non-isolated runs and noise during feature validation.",
+      "evidence": ".factory/library/user-testing.md includes both command styles; this worker’s transcript indicates root-level filtered execution still surfaced unrelated package failures before switching to package-local tests."
+    }
+  ]
+}

@@ -93,7 +93,6 @@ export {
   type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
-  type ProgressReporter,
   type PromptArgument,
   type PromptDefinition,
   type PromptHandler,
@@ -110,4 +109,6 @@ export {
   TOOL_ANNOTATIONS,
   type ToolAnnotations,
   type ToolDefinition,
+  type TypedResourceTemplateDefinition,
+  type TypedResourceTemplateReadHandler,
 } from "./types.js";
