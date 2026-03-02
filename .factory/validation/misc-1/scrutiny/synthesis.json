@@ -1,0 +1,48 @@
+{
+  "milestone": "misc-1",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "bun run test",
+      "exitCode": 0
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": {
+      "passed": true,
+      "command": "bun run lint",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Added note to architecture.md that CLI register() auto-invokes builder.build(), so builder method ordering (e.g., .destructive() before/after .action()) is resolved at build time.",
+      "sourceFeature": "misc-safety-edge-cases"
+    }
+  ],
+  "suggestedGuidanceUpdates": [],
+  "rejectedObservations": [
+    {
+      "observation": "services.yaml advertises `check: bun run check` which is a known crashing command per AGENTS.md",
+      "reason": "services.yaml documents available project commands as-is. The crash is a pre-existing oxfmt bug documented in AGENTS.md Known Pre-Existing Issues. Removing the command from services.yaml would hide its existence; the workaround guidance already lives in AGENTS.md where it belongs."
+    },
+    {
+      "observation": "Architecture notes do not document dry-run transport in runHandler (whether dry-run state travels via runHandler options vs HandlerContext)",
+      "reason": "The dry-run mechanism is an internal implementation detail of envelope.ts. The architecture.md already documents the user-facing contract (.destructive(true) auto-adds --dry-run, dry-run path produces preview + CLIHint). Transport-level plumbing details are better discovered from source than documented in shared architecture notes."
+    }
+  ],
+  "previousRound": null
+}

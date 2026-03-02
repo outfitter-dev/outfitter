@@ -794,6 +794,32 @@ export interface OutputOptions {
 
   /** Stream to write to (defaults to stdout) */
   readonly stream?: NodeJS.WritableStream;
+
+  /**
+   * Optional truncation configuration metadata.
+   *
+   * `output()` does not apply truncation automatically.
+   * Pass this configuration to `truncateOutput()` before calling `output()`.
+   *
+   * @example
+   * ```typescript
+   * const truncated = await truncateOutput(items, {
+   *   limit: 50,
+   *   commandName: "list",
+   * });
+   * await output(truncated.data, "json");
+   * ```
+   */
+  readonly truncation?: {
+    /** Command name for pagination hints. */
+    readonly commandName?: string;
+    /** Threshold above which a file pointer is generated. */
+    readonly filePointerThreshold?: number;
+    /** Maximum items to show. */
+    readonly limit: number;
+    /** Starting offset (0-based). */
+    readonly offset?: number;
+  };
 }
 
 // =============================================================================
