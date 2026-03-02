@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { InternalError, Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
 
 const DEPENDENCY_SECTIONS = [
@@ -41,7 +42,7 @@ function normalizeRange(value: string): string | undefined {
   return trimmed;
 }
 
-function findOutfitterPackageRoot(): string {
+function findOutfitterPackageRoot(): Result<string, InternalError> {
   let currentDir = dirname(fileURLToPath(import.meta.url));
 
   for (let i = 0; i < 10; i += 1) {
@@ -54,7 +55,7 @@ function findOutfitterPackageRoot(): string {
           typeof parsed["name"] === "string" &&
           parsed["name"] === "outfitter"
         ) {
-          return currentDir;
+          return Result.ok(currentDir);
         }
       } catch {
         // Continue walking up.
@@ -63,9 +64,11 @@ function findOutfitterPackageRoot(): string {
     currentDir = dirname(currentDir);
   }
 
-  throw new Error(
-    `Unable to find outfitter package root (walked 10 levels up from ${dirname(fileURLToPath(import.meta.url))}). ` +
-      "Ensure this module is running from within the outfitter package tree."
+  return Result.err(
+    InternalError.create(
+      `Unable to find outfitter package root (walked 10 levels up from ${dirname(fileURLToPath(import.meta.url))}). ` +
+        "Ensure this module is running from within the outfitter package tree."
+    )
   );
 }
 
@@ -149,39 +152,59 @@ function collectWorkspacePackageRanges(
  *
  * Internal deps (`@outfitter/*`) come from workspace package scanning (monorepo)
  * or from the outfitter CLI's own package.json deps (when published).
+ *
+ * Returns `Result<ResolvedPresetDependencyVersions, InternalError>` — never throws.
+ * Successful results are cached; failures are not cached (allowing retry).
  */
-export function resolvePresetDependencyVersions(): ResolvedPresetDependencyVersions {
+export function resolvePresetDependencyVersions(): Result<
+  ResolvedPresetDependencyVersions,
+  InternalError
+> {
   if (cachedResolvedVersions) {
-    return cachedResolvedVersions;
+    return Result.ok(cachedResolvedVersions);
   }
 
-  // External deps from @outfitter/presets (catalog-resolved at publish time).
-  const { all: presetsVersions } = getResolvedVersions();
+  try {
+    // External deps from @outfitter/presets (catalog-resolved at publish time).
+    const { all: presetsVersions } = getResolvedVersions();
 
-  // Internal deps: workspace packages (monorepo) take precedence over
-  // outfitter's own package.json deps (published, frozen at release time).
-  const packageRoot = findOutfitterPackageRoot();
-  const packageJsonPath = join(packageRoot, "package.json");
-  const raw = existsSync(packageJsonPath)
-    ? readJsonFile(packageJsonPath)
-    : undefined;
-  const fromOutfitterPackage =
-    raw !== undefined && isRecord(raw)
-      ? collectOutfitterDepsFromPackageJson(raw)
-      : {};
-  const fromWorkspacePackages = collectWorkspacePackageRanges(packageRoot);
+    // Internal deps: workspace packages (monorepo) take precedence over
+    // outfitter's own package.json deps (published, frozen at release time).
+    const packageRootResult = findOutfitterPackageRoot();
+    if (packageRootResult.isErr()) {
+      return packageRootResult;
+    }
+    const packageRoot = packageRootResult.value;
 
-  // Workspace overrides outfitter's own deps (live vs frozen).
-  const internal: Record<string, string> = {
-    ...fromOutfitterPackage,
-    ...fromWorkspacePackages,
-  };
+    const packageJsonPath = join(packageRoot, "package.json");
+    const raw = existsSync(packageJsonPath)
+      ? readJsonFile(packageJsonPath)
+      : undefined;
+    const fromOutfitterPackage =
+      raw !== undefined && isRecord(raw)
+        ? collectOutfitterDepsFromPackageJson(raw)
+        : {};
+    const fromWorkspacePackages = collectWorkspacePackageRanges(packageRoot);
 
-  cachedResolvedVersions = {
-    internal,
-    external: { ...presetsVersions },
-  };
-  return cachedResolvedVersions;
+    // Workspace overrides outfitter's own deps (live vs frozen).
+    const internal: Record<string, string> = {
+      ...fromOutfitterPackage,
+      ...fromWorkspacePackages,
+    };
+
+    cachedResolvedVersions = {
+      internal,
+      external: { ...presetsVersions },
+    };
+    return Result.ok(cachedResolvedVersions);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return Result.err(
+      InternalError.create(
+        `Failed to resolve preset dependency versions: ${message}`
+      )
+    );
+  }
 }
 
 export function applyResolvedDependencyVersions(
