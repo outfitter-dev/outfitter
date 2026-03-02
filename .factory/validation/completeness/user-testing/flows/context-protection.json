@@ -2,8 +2,8 @@
   "groupId": "context-protection",
   "testedAt": "2026-02-28T16:39:44Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "N/A",
+    "namespace": "N/A"
   },
   "toolsUsed": [
     "shell",
@@ -170,7 +170,7 @@
     {
       "description": "`truncateOutput` is exported via the `@outfitter/cli/truncation` subpath, not from the root `@outfitter/cli` index export; root-index import check returned undefined symbols.",
       "resolved": true,
-      "resolution": "Verified subpath import directly: `cd packages/cli && bun -e \"const m = await import('./src/truncation.ts'); ...\"` returned function/number types as expected.",
+      "resolution": "Verified public subpath import directly: `cd packages/cli && bun -e \"const m = await import('@outfitter/cli/truncation'); ...\"` returned function/number types as expected.",
       "affectedAssertions": [
         "VAL-CTX-001",
         "VAL-CTX-002",
