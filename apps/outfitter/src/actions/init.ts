@@ -37,6 +37,7 @@ import {
 interface InitFlags {
   readonly bin?: unknown;
   readonly dryRun?: unknown;
+  readonly example?: unknown;
   readonly force?: unknown;
   readonly installTimeout?: unknown;
   readonly json?: unknown;
@@ -86,6 +87,7 @@ const initInputSchema = z.object({
   targetDir: z.string(),
   name: z.string().optional(),
   bin: z.string().optional(),
+  example: z.string().optional(),
   preset: z.enum(initPresetValues).optional(),
   structure: z.enum(["single", "workspace"]).optional(),
   workspaceName: z.string().optional(),
@@ -110,6 +112,10 @@ const commonInitOptions: ActionCliOption[] = [
   {
     flags: "-b, --bin <name>",
     description: "Binary name (defaults to project name)",
+  },
+  {
+    flags: "-e, --example <name>",
+    description: "Scaffold with a pattern-rich example (cli: todo; mcp: files)",
   },
   {
     flags: "--local",
@@ -150,6 +156,7 @@ function resolveInitOptions(
   const targetDir = context.args[0] ?? process.cwd();
   const name = resolveStringFlag(flags.name);
   const bin = resolveStringFlag(flags.bin);
+  const example = resolveStringFlag(flags.example);
   const preset = normalizeInitPreset(
     presetOverride ??
       (resolveStringFlag(flags.preset) as InitPresetFlag | undefined)
@@ -187,6 +194,7 @@ function resolveInitOptions(
     ...(withBlocks ? { with: withBlocks } : {}),
     ...(noTooling !== undefined ? { noTooling } : {}),
     ...(bin ? { bin } : {}),
+    ...(example ? { example } : {}),
     ...(yes ? { yes } : {}),
     ...(dryRun ? { dryRun } : {}),
     ...(skipInstall ? { skipInstall } : {}),

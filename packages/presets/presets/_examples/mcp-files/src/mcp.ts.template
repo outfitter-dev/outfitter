@@ -1,0 +1,178 @@
+/**
+ * {{projectName}} - MCP server definition
+ *
+ * Demonstrates v0.5 MCP patterns:
+ * - `defineResource()` for static resources
+ * - `defineResourceTemplate()` with Zod schema validation for parameterized resources
+ * - `defineTool()` for file operations with Result patterns
+ */
+
+import { Result } from "@outfitter/contracts";
+import {
+	createMcpServer,
+	connectStdio,
+	defineResource,
+	defineResourceTemplate,
+	defineTool,
+} from "@outfitter/mcp";
+import { z } from "zod";
+
+// =============================================================================
+// In-memory file store (replace with real filesystem in production)
+// =============================================================================
+
+const files = new Map<string, string>([
+	["README.md", "# {{projectName}}\n\nWelcome to the project."],
+	["config.json", JSON.stringify({ name: "{{binName}}", version: "{{version}}" }, null, 2)],
+]);
+
+// =============================================================================
+// Resources — Static
+// =============================================================================
+
+/**
+ * List all known files as a static resource.
+ * Clients can read this resource to discover available files.
+ */
+const fileListResource = defineResource({
+	uri: "files:///index",
+	name: "File Index",
+	description: "List of all available files in the workspace",
+	mimeType: "application/json",
+	handler: async (_uri, ctx) => {
+		ctx.logger.info("Listing files", { count: files.size });
+		const listing = [...files.keys()].map((name) => ({
+			name,
+			size: files.get(name)?.length ?? 0,
+		}));
+		return Result.ok([{ uri: _uri, text: JSON.stringify(listing, null, 2) }]);
+	},
+});
+
+// =============================================================================
+// Resources — Parameterized (Templates)
+// =============================================================================
+
+/**
+ * Read a file by name using a URI template.
+ * Uses `defineResourceTemplate()` with Zod schema validation
+ * for the `filename` parameter.
+ */
+const fileContentTemplate = defineResourceTemplate({
+	uriTemplate: "files:///{filename}",
+	name: "File Content",
+	description: "Read the content of a specific file",
+	mimeType: "text/plain",
+	paramSchema: z.object({
+		filename: z.string().describe("Name of the file to read"),
+	}),
+	handler: async (uri, params, ctx) => {
+		const { filename } = params as { filename: string };
+		ctx.logger.info("Reading file", { filename });
+
+		const content = files.get(filename);
+		if (content === undefined) {
+			return Result.err(
+				new Error(`File not found: ${filename}`),
+			);
+		}
+
+		return Result.ok([{ uri, text: content }]);
+	},
+});
+
+// =============================================================================
+// Tools — File Operations
+// =============================================================================
+
+/**
+ * Write content to a file.
+ * Demonstrates `defineTool()` with a Zod input schema and Result return.
+ */
+const writeFileTool = defineTool({
+	name: "write_file",
+	description: "Write content to a file (creates or overwrites)",
+	inputSchema: z.object({
+		filename: z.string().describe("Name of the file to write"),
+		content: z.string().describe("Content to write to the file"),
+	}),
+	handler: async (input, ctx) => {
+		ctx.logger.info("Writing file", { filename: input.filename });
+		const existed = files.has(input.filename);
+		files.set(input.filename, input.content);
+		return Result.ok({
+			filename: input.filename,
+			action: existed ? "updated" : "created",
+			size: input.content.length,
+		});
+	},
+});
+
+/**
+ * Delete a file.
+ * Shows error handling with Result.err for missing files.
+ */
+const deleteFileTool = defineTool({
+	name: "delete_file",
+	description: "Delete a file from the workspace",
+	inputSchema: z.object({
+		filename: z.string().describe("Name of the file to delete"),
+	}),
+	handler: async (input, ctx) => {
+		ctx.logger.info("Deleting file", { filename: input.filename });
+		if (!files.has(input.filename)) {
+			return Result.err(
+				new Error(`File not found: ${input.filename}`),
+			);
+		}
+		files.delete(input.filename);
+		return Result.ok({ filename: input.filename, deleted: true });
+	},
+});
+
+/**
+ * Search files by content pattern.
+ * Demonstrates a read-only tool that queries the file store.
+ */
+const searchFilesTool = defineTool({
+	name: "search_files",
+	description: "Search for files containing a text pattern",
+	inputSchema: z.object({
+		pattern: z.string().describe("Text pattern to search for"),
+	}),
+	handler: async (input, ctx) => {
+		ctx.logger.info("Searching files", { pattern: input.pattern });
+		const matches: Array<{ filename: string; lineCount: number }> = [];
+		for (const [name, content] of files) {
+			if (content.includes(input.pattern)) {
+				matches.push({ filename: name, lineCount: content.split("\n").length });
+			}
+		}
+		return Result.ok({ pattern: input.pattern, matches, total: matches.length });
+	},
+});
+
+// =============================================================================
+// Server Setup
+// =============================================================================
+
+const server = createMcpServer({
+	name: "{{binName}}",
+	version: "{{version}}",
+});
+
+// Register resources
+server.registerResource(fileListResource);
+server.registerResourceTemplate(fileContentTemplate);
+
+// Register tools
+server.registerTool(writeFileTool);
+server.registerTool(deleteFileTool);
+server.registerTool(searchFilesTool);
+
+export { server };
+
+/** Start the MCP server over stdio transport. */
+export async function startServer(): Promise<void> {
+	await connectStdio(server);
+}

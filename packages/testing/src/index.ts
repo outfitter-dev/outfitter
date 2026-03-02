@@ -52,8 +52,17 @@ export {
 // Test Helpers
 // ============================================================================
 
-export { testCommand, type TestCommandOptions } from "./test-command.js";
-export { testTool, type TestToolOptions } from "./test-tool.js";
+export {
+  getTestContext,
+  testCommand,
+  type TestCommandOptions,
+  type TestCommandResult,
+} from "./test-command.js";
+export {
+  testTool,
+  type TestToolOptions,
+  type TestToolResult,
+} from "./test-tool.js";
 
 // ============================================================================
 // Mock Factories
