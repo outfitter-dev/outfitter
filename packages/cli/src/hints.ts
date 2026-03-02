@@ -20,6 +20,7 @@ import type { Command } from "commander";
 
 import type { CommandMetadata } from "./command.js";
 import { unwrapZodField } from "./schema-input.js";
+import type { RelatedToDeclaration } from "./types.js";
 
 // =============================================================================
 // Command Tree Types
@@ -362,4 +363,183 @@ export function schemaHintParams(schema: {
   }
 
   return params;
+}
+
+// =============================================================================
+// Tier 4: Action Graph (.relatedTo() declarations)
+// =============================================================================
+
+/**
+ * An edge in the action graph representing a relationship between commands.
+ */
+export interface ActionGraphEdge {
+  /** Source command name */
+  readonly from: string;
+  /** Target command name */
+  readonly to: string;
+  /** Relationship description (if provided) */
+  readonly description?: string;
+}
+
+/**
+ * An action graph built from `.relatedTo()` declarations on registered commands.
+ *
+ * Nodes are command names, edges are relationship declarations.
+ * Used for tier-4 hint generation — success hints include next-actions
+ * from graph neighbors, error hints include remediation paths.
+ */
+export interface ActionGraph {
+  /** All registered command names */
+  readonly nodes: readonly string[];
+  /** Relationship edges between commands */
+  readonly edges: readonly ActionGraphEdge[];
+  /** Warnings for invalid references (e.g., unknown targets) */
+  readonly warnings?: readonly string[];
+}
+
+/**
+ * Build an action graph from a Commander program's registered commands.
+ *
+ * Walks all commands, collecting `.relatedTo()` declarations as edges.
+ * Unknown targets produce warnings (not crashes). Self-links and cycles
+ * are preserved in the graph — callers handle them during traversal.
+ *
+ * @param program - The Commander program (root command)
+ * @returns An action graph with nodes, edges, and optional warnings
+ *
+ * @example
+ * ```typescript
+ * const graph = buildActionGraph(program);
+ * // graph.nodes: ["deploy", "status", "rollback"]
+ * // graph.edges: [{ from: "deploy", to: "status", description: "Check status" }]
+ * ```
+ */
+export function buildActionGraph(program: Command): ActionGraph {
+  const nodes: string[] = [];
+  const edges: ActionGraphEdge[] = [];
+  const warnings: string[] = [];
+
+  // Collect all command names as a set for target validation
+  const commandNames = new Set<string>();
+  for (const cmd of program.commands) {
+    const name = (cmd as Command).name();
+    commandNames.add(name);
+  }
+
+  // Walk commands and extract relationship declarations
+  for (const cmd of program.commands) {
+    const name = (cmd as Command).name();
+    nodes.push(name);
+
+    const relatedTo = (
+      cmd as Command & { __relatedTo?: RelatedToDeclaration[] }
+    ).__relatedTo;
+    if (relatedTo) {
+      for (const decl of relatedTo) {
+        const edge: ActionGraphEdge = {
+          from: name,
+          to: decl.target,
+          ...(decl.description ? { description: decl.description } : {}),
+        };
+        edges.push(edge);
+
+        // Warn about unknown targets (but still add the edge)
+        if (!commandNames.has(decl.target)) {
+          warnings.push(
+            `Unknown relationship target "${decl.target}" from command "${name}"`
+          );
+        }
+      }
+    }
+  }
+
+  return {
+    nodes,
+    edges,
+    ...(warnings.length > 0 ? { warnings } : {}),
+  };
+}
+
+/**
+ * Generate tier-4 success hints from action graph neighbors (Tier 4).
+ *
+ * For a given command, returns CLIHint[] for all outgoing edges in the
+ * action graph. Self-links are excluded (they would be confusing as
+ * "next action" suggestions).
+ *
+ * @param graph - The action graph
+ * @param commandName - The command that just succeeded
+ * @param cliName - CLI name for hint command prefix
+ * @returns Array of CLI hints for related next-actions
+ *
+ * @example
+ * ```typescript
+ * const hints = graphSuccessHints(graph, "deploy", "my-cli");
+ * // [{ description: "Check deployment status", command: "my-cli status" }]
+ * ```
+ */
+export function graphSuccessHints(
+  graph: ActionGraph,
+  commandName: string,
+  cliName?: string
+): CLIHint[] {
+  const hints: CLIHint[] = [];
+
+  for (const edge of graph.edges) {
+    // Only outgoing edges from this command, excluding self-links
+    if (edge.from === commandName && edge.to !== commandName) {
+      const prefix = cliName ? `${cliName} ` : "";
+      const description = edge.description ?? `Run ${edge.to}`;
+
+      hints.push({
+        description,
+        command: `${prefix}${edge.to}`,
+      });
+    }
+  }
+
+  return hints;
+}
+
+/**
+ * Generate tier-4 error hints from action graph neighbors (Tier 4).
+ *
+ * For a given command that failed, returns CLIHint[] for related
+ * remediation paths. Self-links are excluded. Error hints use the
+ * relationship description as remediation context.
+ *
+ * @param graph - The action graph
+ * @param commandName - The command that failed
+ * @param cliName - CLI name for hint command prefix
+ * @returns Array of CLI hints for remediation paths
+ *
+ * @example
+ * ```typescript
+ * const hints = graphErrorHints(graph, "deploy", "my-cli");
+ * // [{ description: "Try: Rollback deployment", command: "my-cli rollback" }]
+ * ```
+ */
+export function graphErrorHints(
+  graph: ActionGraph,
+  commandName: string,
+  cliName?: string
+): CLIHint[] {
+  const hints: CLIHint[] = [];
+
+  for (const edge of graph.edges) {
+    // Only outgoing edges from this command, excluding self-links
+    if (edge.from === commandName && edge.to !== commandName) {
+      const prefix = cliName ? `${cliName} ` : "";
+      const description = edge.description
+        ? `Try: ${edge.description}`
+        : `Try: ${edge.to}`;
+
+      hints.push({
+        description,
+        command: `${prefix}${edge.to}`,
+      });
+    }
+  }
+
+  return hints;
 }
