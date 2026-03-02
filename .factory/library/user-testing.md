@@ -38,8 +38,16 @@ This is a **library monorepo** with no web UI or running services. All user test
 
 ### API existence check
 
+Run import verification from the **package directory** (not repo root), since workspace package resolution doesn't work from root with `bun -e`:
+
 ```bash
-bun -e "const m = await import('@outfitter/contracts'); console.log(typeof m.parseInput)"
+cd packages/contracts && bun -e "const m = await import('./src/index.ts'); console.log(typeof m.parseInput)"
+```
+
+Alternatively, verify the built output:
+
+```bash
+cd packages/contracts && bun -e "const m = await import('./dist/index.js'); console.log(typeof m.parseInput)"
 ```
 
 ### Doc file check
@@ -75,5 +83,5 @@ cd apps/outfitter && bun run src/index.ts schema --help
 
 **Known quirks:**
 
-- `bun run check` crashes with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately
+- `bun run check` and `bun run format:fix` crash with tokio panic (pre-existing oxlint/oxfmt bug) — use `bun run lint` and `bun run typecheck` separately for validation
 - 3 pre-existing unrelated test failures in full suite (Registry Build Output, createOutfitterLoggerFactory) — ignore these
