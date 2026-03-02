@@ -798,22 +798,24 @@ export interface OutputOptions {
   /**
    * Optional truncation configuration metadata.
    *
-   * `output()` does not apply truncation automatically.
-   * Pass this configuration to `truncateOutput()` before calling `output()`.
+   * `output()` applies array slicing when this option is provided.
+   * For array data, it uses `offset` + `limit` before rendering.
+   *
+   * If you need pagination hints or file-pointer metadata, call
+   * `truncateOutput()` first and pass `truncated.hints` / `truncated.metadata`
+   * through your envelope separately.
    *
    * @example
    * ```typescript
-   * const truncated = await truncateOutput(items, {
-   *   limit: 50,
-   *   commandName: "list",
+   * await output(items, "json", {
+   *   truncation: { limit: 50, offset: 0 },
    * });
-   * await output(truncated.data, "json");
    * ```
    */
   readonly truncation?: {
-    /** Command name for pagination hints. */
+    /** Command name for pagination hints (used by `truncateOutput()`, not `output()`). */
     readonly commandName?: string;
-    /** Threshold above which a file pointer is generated. */
+    /** File-pointer threshold (used by `truncateOutput()`, not `output()`). */
     readonly filePointerThreshold?: number;
     /** Maximum items to show. */
     readonly limit: number;

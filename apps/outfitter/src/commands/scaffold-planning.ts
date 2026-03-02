@@ -26,8 +26,13 @@ import {
   validatePackageName,
   validateProjectDirectoryName,
 } from "../engine/index.js";
-import { detectWorkspaceRoot } from "../engine/workspace.js";
+import {
+  detectWorkspaceRoot,
+  getWorkspacePatterns,
+  hasWorkspacesField,
+} from "../engine/workspace.js";
 import type { TargetDefinition } from "../targets/index.js";
+import { parseBlocks } from "./init-option-resolution.js";
 
 interface PackageJsonData {
   readonly bin?: string | Record<string, string>;
@@ -83,44 +88,6 @@ function readPackageJson(path: string): PackageJsonData | null {
   }
 }
 
-function hasWorkspacesField(pkg: PackageJsonData): boolean {
-  const workspaces = pkg.workspaces;
-  if (Array.isArray(workspaces) && workspaces.length > 0) {
-    return true;
-  }
-  if (
-    workspaces &&
-    typeof workspaces === "object" &&
-    !Array.isArray(workspaces)
-  ) {
-    const packages = (workspaces as { packages?: unknown }).packages;
-    return Array.isArray(packages) && packages.length > 0;
-  }
-  return false;
-}
-
-function extractWorkspacePatterns(pkg: PackageJsonData): readonly string[] {
-  const workspaces = pkg.workspaces;
-  if (Array.isArray(workspaces)) {
-    return workspaces.filter(
-      (entry): entry is string => typeof entry === "string"
-    );
-  }
-  if (
-    workspaces &&
-    typeof workspaces === "object" &&
-    !Array.isArray(workspaces)
-  ) {
-    const packages = (workspaces as { packages?: unknown }).packages;
-    if (Array.isArray(packages)) {
-      return packages.filter(
-        (entry): entry is string => typeof entry === "string"
-      );
-    }
-  }
-  return [];
-}
-
 /**
  * Detects whether the given directory is a workspace root, a single package,
  * or has no package.json at all. Walks up to find workspace roots when needed.
@@ -137,7 +104,7 @@ export function detectProjectStructure(
       return Result.ok({
         kind: "workspace",
         rootDir: resolvedCwd,
-        workspacePatterns: extractWorkspacePatterns(cwdPkg),
+        workspacePatterns: getWorkspacePatterns(cwdPkg.workspaces),
       });
     }
 
@@ -151,7 +118,7 @@ export function detectProjectStructure(
         return Result.ok({
           kind: "workspace",
           rootDir: wsResult.value,
-          workspacePatterns: extractWorkspacePatterns(rootPkg),
+          workspacePatterns: getWorkspacePatterns(rootPkg.workspaces),
         });
       }
     }
@@ -173,7 +140,7 @@ export function detectProjectStructure(
       return Result.ok({
         kind: "workspace",
         rootDir: wsResult.value,
-        workspacePatterns: extractWorkspacePatterns(rootPkg),
+        workspacePatterns: getWorkspacePatterns(rootPkg.workspaces),
       });
     }
   }
@@ -295,7 +262,7 @@ export function ensureWorkspacePattern(
   }
 
   const pattern = `${placement}/*`;
-  const patterns = [...extractWorkspacePatterns(pkg)];
+  const patterns = [...getWorkspacePatterns(pkg.workspaces)];
   if (patterns.includes(pattern)) {
     return Result.ok(false);
   }
@@ -495,21 +462,6 @@ export function convertToWorkspace(
       name: existingName,
     },
   });
-}
-
-function parseBlocks(
-  withFlag: string | undefined
-): readonly string[] | undefined {
-  if (!withFlag) {
-    return undefined;
-  }
-
-  const blocks = withFlag
-    .split(",")
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  return blocks.length > 0 ? blocks : undefined;
 }
 
 /**

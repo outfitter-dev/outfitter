@@ -225,6 +225,8 @@ export interface SerializedError {
 /**
  * Base interface for OutfitterError properties.
  * All concrete error classes must include these fields.
+ *
+ * @deprecated Use `OutfitterError` (or concrete error class constructor props) instead. This alias will be removed in v1.0.
  */
 export interface KitErrorProps {
   category: ErrorCategory;
@@ -867,9 +869,9 @@ export class CancelledError extends CancelledErrorBase {
 }
 
 /**
- * Union type of all concrete error class instances.
+ * Canonical union type of all concrete error class instances.
  */
-export type AnyKitError =
+export type OutfitterError =
   | InstanceType<typeof ValidationError>
   | InstanceType<typeof AmbiguousError>
   | InstanceType<typeof AssertionError>
@@ -885,7 +887,6 @@ export type AnyKitError =
   | InstanceType<typeof CancelledError>;
 
 /**
- * Type alias for backwards compatibility with handler signatures.
- * Use AnyKitError for the union type.
+ * @deprecated Use `OutfitterError` instead. This alias will be removed in v1.0.
  */
-export type OutfitterError = AnyKitError;
+export type AnyKitError = OutfitterError;
