@@ -1,0 +1,26 @@
+{
+  "featureId": "fix-codemod-issues",
+  "reviewedAt": "2026-02-28T03:03:07Z",
+  "commitId": "83ecd330d1392072b88a9146d77e3ea4d1149178",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Pass. The fix commit directly resolves all round-1 blocking issues: positional `.argument()` declarations are now converted into schema fields, optional-vs-required option semantics are preserved (`[value]` -> `.optional()`, `<value>` -> required), file targeting is restricted to command directories, and `.input(schema)` is inserted before `.action()` including argument-only cases.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "Mission feature metadata remains internally inconsistent on codemod target shape (`.handler().context()` vs `.action()`), which can mislead workers/reviewers.",
+      "evidence": "Mission features.json still states for os-352: `transforms to .input(schema).handler().context()` (lines 705, 714), while validation-contract.md VAL-DX-004 requires `.input(schema)` before `.action()` (line 80) and fix feature text also clarifies `.action()` (features.json line 835)."
+    },
+    {
+      "area": "services",
+      "observation": "Shared service command registry still lists `bun run check` even though mission guidance marks it as a known crashing path.",
+      "evidence": "Mission AGENTS.md line 26: `bun run check` crashes; use lint+typecheck. Repo .factory/services.yaml line 7 still defines `check: bun run check`."
+    }
+  ],
+  "addressesFailureFrom": ".factory/validation/dx-migration/scrutiny/reviews/os-352-upgrade-codemod.json",
+  "summary": "The fix adequately addresses the original failure: both diffs and the fix transcript skeleton were reviewed, and all four blocking codemod issues from round 1 are resolved in commit 83ecd330d1392072b88a9146d77e3ea4d1149178."
+}

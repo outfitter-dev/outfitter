@@ -1,0 +1,21 @@
+{
+  "featureId": "fix-migration-docs-accuracy",
+  "reviewedAt": "2026-02-28T03:03:15Z",
+  "commitId": "8d776b824b3d25c9fb261c78b52d9d851da29165",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The fix commit addresses both prior blocking inaccuracies in docs/migration-v0.5.md and now matches source behavior. I reviewed both diffs (original failing commit 905c38dc and fix commit 8d776b82): the testCommand section now correctly states input is converted to CLI args, and the codemod section now correctly states transformation to .input(schema).action(). Source alignment was confirmed against packages/testing/src/test-command.ts and plugins/outfitter/shared/codemods/cli/commander-to-builder.ts.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "docs-worker procedure/compliance tracking is slightly inconsistent for docs-only fixes: the skill procedure requires lint + typecheck + test, but this run recorded only lint while still marked followedProcedure=true with no deviations.",
+      "evidence": ".factory/skills/docs-worker/SKILL.md:65,68,71 lists bun run lint/typecheck/test under Verify; handoff for this run lists only bun run lint and sets followedProcedure true with deviations [] (.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-58-58-512Z__fix-migration-docs-accuracy__2cdf058a-dff0-4571-87d8-acbbf3e9fa19.json:36,48-49)."
+    }
+  ],
+  "addressesFailureFrom": ".factory/validation/dx-migration/scrutiny/reviews/migration-v05-docs.json",
+  "summary": "Pass: commit 8d776b82 resolves the two round-1 blockers by correcting the testCommand input-parsing description and the codemod target chain, with no remaining blocking inaccuracies found in scope."
+}

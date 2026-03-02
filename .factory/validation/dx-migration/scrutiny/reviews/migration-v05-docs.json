@@ -1,0 +1,39 @@
+{
+  "featureId": "migration-v05-docs",
+  "reviewedAt": "2026-02-28T02:38:47Z",
+  "commitId": "905c38dcfaf73bd9ac09b458d88340648f4ce453",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The migration guide is comprehensive and covers the expected topics, but two factual mismatches against source violate the cross-reference requirement.",
+    "issues": [
+      {
+        "file": "docs/migration-v0.5.md",
+        "line": 706,
+        "severity": "blocking",
+        "description": "`testCommand()` `input` is documented as bypassing CLI parsing, but implementation converts `input` to CLI args and still executes `cli.parse(...)` (packages/testing/src/test-command.ts:34-37, 285-293). This can mislead migration expectations."
+      },
+      {
+        "file": "docs/migration-v0.5.md",
+        "line": 794,
+        "severity": "blocking",
+        "description": "Codemod output is documented as `.input(schema).handler().context()`, but source codemod targets `.input(schema).action()` (apps/outfitter/src/commands/upgrade-codemod-builder.ts:4-6 and plugins/outfitter/shared/codemods/cli/commander-to-builder.ts:2,10)."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "`docs-worker` guidance is internally inconsistent on validator commands, and procedure adherence tracking appears loose for this run.",
+      "evidence": "Skill says to avoid `bun run check` and run lint/typecheck/test (.factory/skills/docs-worker/SKILL.md:64-71), but the same skill's example handoff includes `bun run check` (.factory/skills/docs-worker/SKILL.md:108). This feature handoff is marked `followedProcedure: true` while listing only `bun run test` and `bun run lint` (.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-30-26-798Z__migration-v05-docs__e1745d5e-3124-4ee2-8995-b74bce1cac21.json:16,21,43)."
+    },
+    {
+      "area": "knowledge",
+      "observation": "Shared architecture notes still reference `output.envelope()` even though the implemented CLI envelope API is `createSuccessEnvelope`, `createErrorEnvelope`, and `runHandler`.",
+      "evidence": ".factory/library/architecture.md:44 references `output.envelope()`. Current API exports are in packages/cli/src/envelope.ts:101, 138, and 392."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit 905c38dc for migration-v05-docs. The document is broad and mostly accurate, but contains two blocking factual mismatches (testCommand input behavior and upgrade codemod target chain), so this review fails."
+}

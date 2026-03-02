@@ -1,0 +1,51 @@
+{
+  "featureId": "os-352-upgrade-codemod",
+  "reviewedAt": "2026-02-28T02:38:35Z",
+  "commitId": "23661afc",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature adds a new upgrade codemod command and wiring, but the codemod implementation does not satisfy key VAL-DX-004 behaviors and has correctness risks in real-world usage.",
+    "issues": [
+      {
+        "file": "plugins/outfitter/shared/codemods/cli/commander-to-builder.ts",
+        "line": 340,
+        "severity": "blocking",
+        "description": "VAL-DX-004 requires transforming `.command().action()` to `.input(schema).handler().context()`, but the transform only injects `.input(schema)` before existing `.action(...)` and never emits `.handler(...)` or `.context(...)`. This leaves the core migration target incomplete."
+      },
+      {
+        "file": "plugins/outfitter/shared/codemods/cli/commander-to-builder.ts",
+        "line": 306,
+        "severity": "blocking",
+        "description": "Positional arguments are not converted into schema fields. Files with only `.argument(...)` declarations are returned unchanged when no `.option(...)` is found (`options.length === 0` early return), and argument handling is reduced to TODO comments rather than schema generation (see line 381). This does not meet the requirement to generate schema skeletons from `.option()`/`.argument()` declarations."
+      },
+      {
+        "file": "plugins/outfitter/shared/codemods/cli/commander-to-builder.ts",
+        "line": 231,
+        "severity": "blocking",
+        "description": "Optional-vs-required semantics are not preserved for value options. The parser records `required` (line 201), but schema generation ignores it and emits `z.string()` for non-defaulted string options (line 250), effectively making previously optional `.option('--flag <value>')` inputs required after codemod."
+      },
+      {
+        "file": "plugins/outfitter/shared/codemods/cli/commander-to-builder.ts",
+        "line": 77,
+        "severity": "blocking",
+        "description": "Target detection is over-broad and causes false positives. File collection pushes all TS files, and pattern checks rely on broad substring matches (`new Command(` / `.command(` + `.action(`). In dry-run against repo root, this reported transformations for non-command implementation files such as `packages/cli/src/command.ts`, `packages/cli/src/cli.ts`, and `packages/cli/src/schema.ts`, indicating unsafe transformation scope for the codebase real-test-case requirement."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "conventions",
+      "observation": "Mission guidance is internally inconsistent on target API shape for this migration (`.action` vs `.handler`). This likely contributed to implementation drift from VAL-DX-004.",
+      "evidence": "Mission AGENTS.md lines 75-79 describe v0.5 builder additions around `.action()` + `.context()`, while validation-contract.md line 80 requires codemod output `.input(schema).handler().context()`."
+    },
+    {
+      "area": "services",
+      "observation": "Shared command registry still advertises `bun run check` even though mission guidance says it is a known crashing path.",
+      "evidence": ".factory/services.yaml defines `check: bun run check`, but mission AGENTS.md line 26 says `bun run check` crashes and to use `bun run lint` + `bun run typecheck` instead."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Fail: the codemod command is wired and tested on synthetic fixtures, but the transform does not implement required `.handler().context()` migration semantics, does not properly migrate `.argument()` usage, breaks optional option semantics, and over-matches unrelated source files in real dry-run usage."
+}

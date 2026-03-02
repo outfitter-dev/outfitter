@@ -1,0 +1,45 @@
+{
+  "milestone": "dx-migration",
+  "round": 2,
+  "status": "pass",
+  "validatorsRun": {
+    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "typecheck": {
+      "passed": true,
+      "command": "bun run typecheck",
+      "exitCode": 0
+    },
+    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+  },
+  "reviewsSummary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "skills",
+      "suggestion": "Tighten library-worker and docs-worker skill procedures around verification: workers should either run full-suite `bun run test` or explicitly document in their handoff deviations why they skipped it (e.g., docs-only change). Currently workers mark followedProcedure=true while only running package-level tests, which makes compliance tracking unreliable.",
+      "evidence": "fix-dx-scanner-and-env handoff ran only package-level tests (bun test --filter=outfitter, bun test --filter=@outfitter/testing) instead of full-suite. fix-migration-docs-accuracy handoff ran only lint. Both marked followedProcedure=true with no deviations.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "Mission AGENTS.md still documents stale pre-existing testCommand env-cleanup behavior (process.env[key] = undefined vs delete)",
+      "reason": "Mission-specific context managed by the orchestrator, not shared state."
+    },
+    {
+      "observation": "Mission features.json still states codemod transforms to .handler().context() vs actual .action()",
+      "reason": "Mission-specific metadata inconsistency, not shared state. Already resolved at source code level."
+    },
+    {
+      "observation": "services.yaml still lists `bun run check` which crashes",
+      "reason": "Pre-existing repo-level issue documented in mission AGENTS.md. services.yaml reflects the canonical repo command; the crash is a known oxfmt bug."
+    }
+  ],
+  "previousRound": ".factory/validation/dx-migration/scrutiny/synthesis.json (round 1)"
+}
