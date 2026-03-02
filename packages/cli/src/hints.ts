@@ -247,7 +247,7 @@ const CATEGORY_RECOVERY_MAP: Record<
     },
   ],
   conflict: (cliName, commandName) => {
-    const cmd = commandName ?? "<previous-command>";
+    const cmd = commandName || "<previous-command>";
     return [
       {
         description: "Resolve the conflict and retry",
@@ -264,7 +264,7 @@ const CATEGORY_RECOVERY_MAP: Record<
     },
   ],
   timeout: (cliName, commandName) => {
-    const cmd = commandName ?? "<previous-command>";
+    const cmd = commandName || "<previous-command>";
     return [
       {
         description: "Retry the operation — transient timeout may resolve",
@@ -274,7 +274,7 @@ const CATEGORY_RECOVERY_MAP: Record<
     ];
   },
   rate_limit: (cliName, commandName) => {
-    const cmd = commandName ?? "<previous-command>";
+    const cmd = commandName || "<previous-command>";
     return [
       {
         description: "Wait and retry — rate limit will reset",
@@ -284,7 +284,7 @@ const CATEGORY_RECOVERY_MAP: Record<
     ];
   },
   network: (cliName, commandName) => {
-    const cmd = commandName ?? "<previous-command>";
+    const cmd = commandName || "<previous-command>";
     return [
       {
         description: "Retry the operation — network issue may be transient",
@@ -308,7 +308,7 @@ const CATEGORY_RECOVERY_MAP: Record<
     },
   ],
   cancelled: (cliName, commandName) => {
-    const cmd = commandName ?? "<previous-command>";
+    const cmd = commandName || "<previous-command>";
     return [
       {
         description: "Operation was cancelled — re-run to try again",
