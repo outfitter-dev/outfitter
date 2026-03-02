@@ -130,6 +130,8 @@ export function getTestContext<
 }
 
 async function withProcessLock<T>(run: () => Promise<T>): Promise<T> {
+  // testCommand mutates process-global state (argv/env/stdout/stderr), so
+  // calls must run serially to avoid cross-test contamination.
   const prior = executionChain;
   let release: (() => void) | undefined;
   executionChain = new Promise<void>((resolve) => {
@@ -158,7 +160,11 @@ function inputToArgs(input: Readonly<Record<string, unknown>>): string[] {
   const args: string[] = [];
 
   for (const [key, value] of Object.entries(input)) {
-    const flag = `--${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`;
+    const kebabKey = key
+      .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+      .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
+      .toLowerCase();
+    const flag = `--${kebabKey}`;
 
     if (typeof value === "boolean") {
       if (value) {

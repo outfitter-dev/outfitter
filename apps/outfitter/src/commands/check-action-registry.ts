@@ -9,7 +9,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import { Result } from "@outfitter/contracts";
 
@@ -52,8 +52,8 @@ export interface CheckActionRegistryResult {
 export class CheckActionRegistryError extends Error {
   readonly _tag = "CheckActionRegistryError" as const;
 
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
     this.name = "CheckActionRegistryError";
   }
 }
@@ -123,15 +123,30 @@ function extractRegisteredActionFiles(registryContent: string): Set<string> {
  *
  * Skips `__tests__` directories and non-`.ts` files.
  */
-function listTsFiles(dir: string): readonly string[] {
-  return readdirSync(dir)
-    .filter(
-      (entry) =>
-        entry.endsWith(".ts") &&
-        !entry.startsWith("__") &&
-        !entry.endsWith(".test.ts")
-    )
-    .toSorted();
+function listTsFiles(dir: string, rootDir: string = dir): readonly string[] {
+  const files: string[] = [];
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith("__")) {
+      continue;
+    }
+
+    const entryPath = resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...listTsFiles(entryPath, rootDir));
+      continue;
+    }
+
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) {
+      files.push(relative(rootDir, entryPath).replaceAll("\\", "/"));
+    }
+  }
+
+  return files.toSorted();
 }
 
 /**
@@ -237,7 +252,7 @@ export async function runCheckActionRegistry(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to scan action registry";
-    return Result.err(new CheckActionRegistryError(message));
+    return Result.err(new CheckActionRegistryError(message, { cause: error }));
   }
 }
 

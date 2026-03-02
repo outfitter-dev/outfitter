@@ -115,6 +115,9 @@ describe("runCheckActionRegistry", () => {
     });
 
     expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.cause).toBeDefined();
+    }
   });
 
   test("supports cwd set to apps/outfitter instead of workspace root", async () => {

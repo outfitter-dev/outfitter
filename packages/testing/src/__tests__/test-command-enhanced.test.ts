@@ -122,6 +122,27 @@ describe("testCommand() — input option", () => {
     expect(result.stdout).toContain("dry: true");
     expect(result.exitCode).toBe(0);
   });
+
+  it("converts camelCase keys with acronym suffixes to kebab flags", async () => {
+    const cli = makeCli();
+    cli.register(
+      command("endpoint")
+        .description("Print API endpoint")
+        .option("--api-url <url>", "Service endpoint")
+        .action(({ flags }) => {
+          console.log(
+            `apiURL: ${(flags as Record<string, string>)["apiUrl"] ?? "missing"}`
+          );
+        })
+    );
+
+    const result = await testCommand(cli, ["endpoint"], {
+      input: { apiURL: "https://api.example.com" },
+    });
+
+    expect(result.stdout).toContain("apiURL: https://api.example.com");
+    expect(result.exitCode).toBe(0);
+  });
 });
 
 // ============================================================================

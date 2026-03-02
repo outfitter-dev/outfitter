@@ -3,9 +3,8 @@
  *
  * Demonstrates the v0.5 builder pattern:
  * - `.input(schema)` for Zod-to-Commander auto-derived flags
- * - `.context(factory)` for async context construction
- * - `.hints(fn)` for transport-local hint generation
  * - `runHandler()` for the full lifecycle bridge
+ * - `contextFactory` + `hints` passed in one canonical place
  */
 
 import { command, createCLI } from "@outfitter/cli/command";
@@ -71,14 +70,20 @@ const listInputSchema = z.object({
 // Hint Functions
 // =============================================================================
 
-function addHints(_result: unknown, input: z.infer<typeof addInputSchema>): CLIHint[] {
+function addHints(
+	_result: unknown,
+	_input: z.infer<typeof addInputSchema>,
+): CLIHint[] {
 	return [
 		{ description: "List your todos", command: "{{binName}} list" },
 		{ description: "Add another todo", command: `{{binName}} add --title "next task"` },
 	];
 }
 
-function completeHints(_result: unknown, input: z.infer<typeof completeInputSchema>): CLIHint[] {
+function completeHints(
+	_result: unknown,
+	_input: z.infer<typeof completeInputSchema>,
+): CLIHint[] {
 	return [
 		{ description: "List remaining todos", command: "{{binName}} list" },
 		{ description: "Show all including completed", command: "{{binName}} list --all" },
@@ -98,27 +103,21 @@ export const program = createCLI({
 /**
  * `add` — Create a new todo item.
  *
- * Uses `.input()` to auto-derive `--title` from the Zod schema,
- * `.context()` to inject the current store state,
- * and `.hints()` to suggest next commands.
+ * Uses `.input()` to auto-derive `--title` from the Zod schema and
+ * `runHandler()` to provide context + hints in one place.
  */
 program.register(
 	command("add")
 		.description("Add a new todo item")
 		.input(addInputSchema)
-		.context(buildTodoContext)
-		.hints(addHints)
-		.action(async ({ input, ctx }) => {
-			const { title } = input as z.infer<typeof addInputSchema>;
-			const context = ctx as TodoContext;
-
+		.action(async ({ input }) => {
 			await runHandler({
 				command: "add",
-				input: input as z.infer<typeof addInputSchema>,
+				input,
 				format: "json",
-				contextFactory: async () => context,
+				contextFactory: buildTodoContext,
 				hints: addHints,
-				handler: async (inp) => {
+				handler: async (inp, context) => {
 					const todo: Todo = { id: nextId++, title: inp.title, done: false };
 					store.push(todo);
 					logger.info(`Added todo #${todo.id}: ${todo.title}`);
@@ -137,17 +136,13 @@ program.register(
 	command("list")
 		.description("List todo items")
 		.input(listInputSchema)
-		.context(buildTodoContext)
-		.action(async ({ input, ctx }) => {
-			const { all } = input as z.infer<typeof listInputSchema>;
-			const context = ctx as TodoContext;
-
+		.action(async ({ input }) => {
 			await runHandler({
 				command: "list",
-				input: input as z.infer<typeof listInputSchema>,
+				input,
 				format: "json",
-				contextFactory: async () => context,
-				handler: async (inp) => {
+				contextFactory: buildTodoContext,
+				handler: async (inp, context) => {
 					const items = inp.all ? store : store.filter((t) => !t.done);
 					return Result.ok({
 						items: items.map((t) => ({ id: t.id, title: t.title, done: t.done })),
@@ -162,28 +157,19 @@ program.register(
 /**
  * `complete` — Mark a todo as done.
  *
- * Uses `.input()` with a number flag, `.context()`, `.hints()`,
- * and `.onError()` for error recovery suggestions.
+ * Uses `.input()` with a number flag and delegates hints/error handling
+ * through `runHandler()`.
  */
 program.register(
 	command("complete")
 		.description("Mark a todo as completed")
 		.input(completeInputSchema)
-		.context(buildTodoContext)
-		.hints(completeHints)
-		.onError((_error, input) => {
-			const { id } = input as z.infer<typeof completeInputSchema>;
-			return [{ description: "List available todos", command: "{{binName}} list" }];
-		})
-		.action(async ({ input, ctx }) => {
-			const { id } = input as z.infer<typeof completeInputSchema>;
-			const context = ctx as TodoContext;
-
+		.action(async ({ input }) => {
 			await runHandler({
 				command: "complete",
-				input: input as z.infer<typeof completeInputSchema>,
+				input,
 				format: "json",
-				contextFactory: async () => context,
+				contextFactory: buildTodoContext,
 				hints: completeHints,
 				onError: () => [{ description: "List available todos", command: "{{binName}} list" }],
 				handler: async (inp) => {
