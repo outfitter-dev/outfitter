@@ -422,6 +422,71 @@ describe("MCP Progress Integration", () => {
     }
   });
 
+  it("legacy report() stays in sync with StreamEvent progress state", async () => {
+    const server = createMcpServer({
+      name: "test-server",
+      version: "1.0.0",
+    });
+
+    const notifications: unknown[] = [];
+    const mockSdkServer = {
+      sendToolListChanged: () => {},
+      sendResourceListChanged: () => {},
+      sendPromptListChanged: () => {},
+      notification: (params: unknown) => notifications.push(params),
+    };
+
+    server.bindSdkServer?.(mockSdkServer);
+
+    server.registerTool(
+      defineTool({
+        name: "mixed-progress",
+        description: "Mix StreamEvent calls with legacy report()",
+        inputSchema: z.object({}),
+        handler: async (_input, ctx) => {
+          const progress = ctx.progress as
+            | (ProgressCallback & {
+                report(
+                  progress: number,
+                  total?: number,
+                  message?: string
+                ): void;
+              })
+            | undefined;
+          progress?.({ type: "progress", current: 10, total: 100 });
+          progress?.report(5, 100, "legacy update");
+          progress?.({
+            type: "step",
+            name: "done",
+            status: "complete",
+          });
+          return Result.ok({ done: true });
+        },
+      })
+    );
+
+    await server.invokeTool("mixed-progress", {}, { progressToken: "mixed" });
+
+    expect(notifications).toHaveLength(3);
+
+    const first = notifications[0] as {
+      params: { progress: number; total?: number };
+    };
+    const second = notifications[1] as {
+      params: { progress: number; total?: number; message?: string };
+    };
+    const third = notifications[2] as {
+      params: { progress: number; message?: string };
+    };
+
+    expect(first.params.progress).toBe(10);
+    expect(second.params.progress).toBe(5);
+    expect(second.params.total).toBe(100);
+    expect(second.params.message).toBe("legacy update");
+    // Step event should preserve the latest numeric progress value (5).
+    expect(third.params.progress).toBe(5);
+  });
+
   it("ctx.progress is undefined when no SDK server is bound", async () => {
     let receivedProgress: ProgressCallback | undefined;
 

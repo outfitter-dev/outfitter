@@ -247,19 +247,18 @@ export function createMcpServer(options: McpServerOptions): McpServer {
           });
         }
       };
-      const progress = createMcpProgressCallback(
-        progressToken,
-        sender
-      ) as NonNullable<McpHandlerContext["progress"]>;
+      const streamProgress = createMcpProgressCallback(progressToken, sender);
+      const progress = streamProgress as unknown as NonNullable<
+        McpHandlerContext["progress"]
+      >;
       progress.report = (value: number, total?: number, message?: string) => {
-        sender({
-          method: "notifications/progress",
-          params: {
-            progressToken,
-            progress: value,
-            ...(total !== undefined ? { total } : {}),
-            ...(message ? { message } : {}),
-          },
+        // Route legacy report() through the same callback so the adapter's
+        // internal progress state stays in sync with StreamEvent calls.
+        streamProgress({
+          type: "progress",
+          current: value,
+          total: total ?? value,
+          ...(message !== undefined ? { message } : {}),
         });
       };
       ctx.progress = progress;
