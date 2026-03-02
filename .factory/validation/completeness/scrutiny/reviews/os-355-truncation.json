@@ -1,0 +1,40 @@
+{
+  "featureId": "os-355-truncation",
+  "reviewedAt": "2026-02-28T16:29:48Z",
+  "commitId": "166ca0b07d740a97751e20c4ff77839c16339d86",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The commit adds a standalone truncation utility with strong unit coverage, but it does not wire truncation into the actual CLI output path required by the feature contract. There is also a path-safety gap for custom temp directories.",
+    "issues": [
+      {
+        "file": "packages/cli/src/output.ts",
+        "line": 253,
+        "severity": "blocking",
+        "description": "`output()` never applies truncation (no call to `truncateOutput()`), so large arrays are still emitted in full. The required behavior for configured `limit` (truncate + metadata + pagination hints + optional file pointer) is not implemented in the runtime output flow."
+      },
+      {
+        "file": "packages/cli/src/types.ts",
+        "line": 788,
+        "severity": "blocking",
+        "description": "`OutputOptions` does not define `limit`/`offset` (or equivalent truncation config), so callers cannot pass truncation settings to `output()` as required by VAL-CTX-001/feature scope."
+      },
+      {
+        "file": "packages/cli/src/truncation.ts",
+        "line": 269,
+        "severity": "non_blocking",
+        "description": "File-pointer writes use `options.tempDir` directly (`const tempDir = options.tempDir ?? tmpdir()`), without validating the resolved destination stays within a safe temp directory. This weakens the stated path-safety constraint when custom paths are provided."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Export verification guidance is not being followed/enforced consistently: worker validated direct source-file import and still reported procedure adherence, which can miss public export-map regressions.",
+      "evidence": "Transcript skeleton includes `cd packages/cli && bun -e \"const m = await import('./src/truncation.ts'); ...\"`, while .factory/skills/library-worker/SKILL.md step 6 examples specify verifying via `./src/index.ts` or `./dist/index.js` (lines 73-83). Handoff sets `skillFeedback.followedProcedure: true`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Fail: helper-level truncation logic was implemented and tested, but the feature contract requirement to support truncation through the CLI output path (`output()` with configured limit) is not satisfied."
+}
