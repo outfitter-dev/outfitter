@@ -33,12 +33,6 @@
         "default": "./dist/commands/check.js"
       }
     },
-    "./commands/check-action-registry": {
-      "import": {
-        "types": "./dist/commands/check-action-registry.d.ts",
-        "default": "./dist/commands/check-action-registry.js"
-      }
-    },
     "./commands/check-action-ceremony": {
       "import": {
         "types": "./dist/commands/check-action-ceremony.d.ts",
