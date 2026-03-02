@@ -1,7 +1,7 @@
 {
   "featureId": "os-342-input-schema",
   "reviewedAt": "2026-02-27T23:15:50Z",
-  "commitId": "048072c4",
+  "commitId": "048072c4774c86e138198aae35b24de91b39389c",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "fail",
@@ -18,5 +18,5 @@
   },
   "sharedStateObservations": [],
   "addressesFailureFrom": null,
-  "summary": "Reviewed commit 048072c4 for os-342-input-schema. Auto-derivation/composition/type-surface work is present, but the implementation fails the core validation contract because Zod parse failures are not surfaced and invalid input can still reach handlers."
+  "summary": "Reviewed commit 048072c4774c86e138198aae35b24de91b39389c for os-342-input-schema. Auto-derivation/composition/type-surface work is present, but the implementation fails the core validation contract because Zod parse failures are not surfaced and invalid input can still reach handlers."
 }

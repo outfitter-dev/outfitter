@@ -1,7 +1,7 @@
 {
   "featureId": "os-343-context-factory",
   "reviewedAt": "2026-02-27T23:16:37Z",
-  "commitId": "2d7e5a67",
+  "commitId": "2d7e5a673a5b9a2623742d1d02d1d6ece75d95c9",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "pass",

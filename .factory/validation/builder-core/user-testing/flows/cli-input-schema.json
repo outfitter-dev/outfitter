@@ -2,8 +2,8 @@
   "groupId": "cli-input-schema",
   "testedAt": "2026-02-27T23:39:47Z",
   "credentials": {
-    "account": "not-applicable-shell-validation",
-    "namespace": "not-applicable-shell-validation"
+    "account": "N/A",
+    "namespace": "N/A"
   },
   "toolsUsed": ["shell", "bun", "rg", "Read"],
   "assertions": [

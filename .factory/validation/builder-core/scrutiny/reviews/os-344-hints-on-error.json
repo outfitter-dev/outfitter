@@ -1,7 +1,7 @@
 {
   "featureId": "os-344-hints-on-error",
   "reviewedAt": "2026-02-27T23:14:49Z",
-  "commitId": "31ab3f8c",
+  "commitId": "31ab3f8ccc6942d898580d19f4df5e554e78bd91",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "pass",
@@ -11,5 +11,5 @@
   },
   "sharedStateObservations": [],
   "addressesFailureFrom": null,
-  "summary": "Reviewed commit 31ab3f8c and found the feature complete against its description and expected behavior. No blocking or non-blocking code issues were identified, and no shared-state documentation gaps were observed from this implementation transcript."
+  "summary": "Reviewed commit 31ab3f8ccc6942d898580d19f4df5e554e78bd91 and found the feature complete against its description and expected behavior. No blocking or non-blocking code issues were identified, and no shared-state documentation gaps were observed from this implementation transcript."
 }
