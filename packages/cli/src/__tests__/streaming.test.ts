@@ -14,8 +14,8 @@
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import type { StreamEvent } from "@outfitter/contracts";
 import { ValidationError } from "@outfitter/contracts";
+import type { StreamEvent } from "@outfitter/contracts/stream";
 import { Result } from "better-result";
 
 import {
@@ -401,11 +401,6 @@ describe("runHandler() with stream", () => {
       await runHandler({
         command: "deploy",
         handler: async (_input, ctx) => {
-          ctx?.progress?.({
-            type: "start",
-            command: "deploy",
-            ts: new Date().toISOString(),
-          });
           ctx?.progress?.({ type: "progress", current: 1, total: 3 });
           ctx?.progress?.({ type: "step", name: "build", status: "complete" });
           return Result.ok({ deployed: true });

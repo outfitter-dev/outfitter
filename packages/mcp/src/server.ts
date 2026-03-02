@@ -234,7 +234,18 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // which translates StreamEvent → notifications/progress.
     if (progressToken !== undefined && sdkServer) {
       const sender = (notification: unknown): void => {
-        sdkServer?.notification?.(notification);
+        const maybePromise = sdkServer?.notification?.(notification);
+        if (
+          typeof maybePromise === "object" &&
+          maybePromise !== null &&
+          "then" in maybePromise
+        ) {
+          void (maybePromise as Promise<unknown>).catch((error: unknown) => {
+            logger.warn("Failed to send MCP progress notification", {
+              error: error instanceof Error ? error.message : String(error),
+            });
+          });
+        }
       };
       const progress = createMcpProgressCallback(
         progressToken,

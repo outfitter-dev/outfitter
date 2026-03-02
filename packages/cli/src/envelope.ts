@@ -24,9 +24,12 @@ import type {
   CLIHint,
   ErrorCategory,
   OutfitterError,
-  ProgressCallback,
 } from "@outfitter/contracts";
 import { exitCodeMap, safeStringify } from "@outfitter/contracts";
+import type {
+  ProgressCallback,
+  StreamStartEvent,
+} from "@outfitter/contracts/stream";
 import type { Result } from "better-result";
 
 import { detectMode, formatHuman, output } from "./output.js";

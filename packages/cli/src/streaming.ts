@@ -15,7 +15,10 @@
  * @packageDocumentation
  */
 
-import type { ProgressCallback, StreamEvent } from "@outfitter/contracts";
+import type {
+  ProgressCallback,
+  StreamEvent,
+} from "@outfitter/contracts/stream";
 
 import type { CommandEnvelope } from "./envelope.js";
 import { cliStringify } from "./output.js";
