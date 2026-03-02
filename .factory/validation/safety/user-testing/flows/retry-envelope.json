@@ -1,9 +1,10 @@
 {
   "groupId": "retry-envelope",
   "testedAt": "2026-02-28T16:04:43Z",
+  "commitId": "7a819caabd2f48ffb40f824c2c0e765d27fb4636",
   "credentials": {
-    "account": "N/A",
-    "namespace": "N/A"
+    "account": "shell-local",
+    "namespace": "safety-retry-envelope"
   },
   "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
   "assertions": [

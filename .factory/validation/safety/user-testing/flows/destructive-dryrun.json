@@ -1,6 +1,7 @@
 {
   "groupId": "destructive-dryrun",
   "testedAt": "2026-02-28T16:04:58Z",
+  "commitId": "7a819caabd2f48ffb40f824c2c0e765d27fb4636",
   "credentials": {
     "account": "shell-local",
     "namespace": "safety-destructive-dryrun"

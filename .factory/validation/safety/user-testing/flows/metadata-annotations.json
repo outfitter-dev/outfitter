@@ -1,9 +1,10 @@
 {
   "groupId": "metadata-annotations",
   "testedAt": "2026-02-28T16:04:27Z",
+  "commitId": "7a819caabd2f48ffb40f824c2c0e765d27fb4636",
   "credentials": {
-    "account": "N/A",
-    "namespace": "N/A"
+    "account": "shell-local",
+    "namespace": "safety-metadata-annotations"
   },
   "toolsUsed": ["shell", "bun test", "rg", "Read"],
   "assertions": [
