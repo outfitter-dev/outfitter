@@ -2,8 +2,8 @@
   "groupId": "metadata-annotations",
   "testedAt": "2026-02-28T16:04:27Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "N/A",
+    "namespace": "N/A"
   },
   "toolsUsed": ["shell", "bun test", "rg", "Read"],
   "assertions": [
@@ -13,12 +13,12 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test`",
+          "action": "Run `cd packages/cli && bun test`",
           "expected": "CLI package tests pass, including metadata coverage",
           "observed": "Passed (742 pass, 0 fail), including metadata-related tests."
         },
         {
-          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/metadata.test.ts`",
+          "action": "Run `cd packages/cli && bun test src/__tests__/metadata.test.ts`",
           "expected": "Targeted metadata tests pass and verify command-tree JSON metadata fields",
           "observed": "Passed (12 pass, 0 fail), including assertions that readOnly/idempotent appear in command tree output and defaults omit metadata."
         },
@@ -50,12 +50,12 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test`",
+          "action": "Run `cd packages/mcp && bun test`",
           "expected": "MCP package tests pass, including metadata annotation mapping tests",
           "observed": "Passed (181 pass, 0 fail), including `metadata-annotations.test.ts`."
         },
         {
-          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test src/__tests__/metadata-annotations.test.ts`",
+          "action": "Run `cd packages/mcp && bun test src/__tests__/metadata-annotations.test.ts`",
           "expected": "Targeted tests verify readOnly -> readOnlyHint and idempotent -> idempotentHint",
           "observed": "Passed (6 pass, 0 fail), covering readOnly mapping, idempotent mapping, combined mapping, and no-annotation cases."
         },

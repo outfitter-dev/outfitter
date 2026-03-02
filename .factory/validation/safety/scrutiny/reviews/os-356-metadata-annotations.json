@@ -1,7 +1,7 @@
 {
   "featureId": "os-356-metadata-annotations",
   "reviewedAt": "2026-02-28T15:55:29Z",
-  "commitId": "c4aed878",
+  "commitId": "c4aed8786ae58014b11303ede0d39eeed94436e1",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "pass",
@@ -17,5 +17,5 @@
     }
   ],
   "addressesFailureFrom": null,
-  "summary": "Reviewed commit c4aed878 for os-356-metadata-annotations and found the feature behavior complete and correctly wired across CLI command metadata, command-tree JSON, and MCP annotations. No code defects were identified for VAL-SAFE-004/005."
+  "summary": "Reviewed commit c4aed8786ae58014b11303ede0d39eeed94436e1 for os-356-metadata-annotations and found the feature behavior complete and correctly wired across CLI command metadata, command-tree JSON, and MCP annotations. No code defects were identified for VAL-SAFE-004/005."
 }

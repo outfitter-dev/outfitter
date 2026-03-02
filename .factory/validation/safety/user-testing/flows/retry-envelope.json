@@ -2,8 +2,8 @@
   "groupId": "retry-envelope",
   "testedAt": "2026-02-28T16:04:43Z",
   "credentials": {
-    "account": "not-applicable-shell",
-    "namespace": "not-applicable-shell"
+    "account": "N/A",
+    "namespace": "N/A"
   },
   "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
   "assertions": [
@@ -13,12 +13,12 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run package test suite: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test",
+          "action": "Run package test suite: cd packages/cli && bun test",
           "expected": "Envelope tests covering retryable and retry_after behavior pass",
           "observed": "CLI suite passed (742 pass, 0 fail), including createErrorEnvelope/runHandler tests for retryable and retry_after fields"
         },
         {
-          "action": "Run package test suite: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test",
+          "action": "Run package test suite: cd packages/contracts && bun test",
           "expected": "Contracts tests validating retryability metadata pass",
           "observed": "Contracts suite passed (447 pass, 0 fail), including retryableMap and errorCategoryMeta tests across all categories"
         },
