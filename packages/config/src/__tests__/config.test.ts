@@ -10,8 +10,8 @@
  *
  * Total: 40 tests
  *
- * NOTE: These tests are written in TDD RED phase.
- * They will FAIL until implementation is complete.
+ * Tests for loadConfig() — XDG-compliant configuration loading with
+ * optional schema validation.
  */
 import {
   afterAll,

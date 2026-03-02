@@ -579,6 +579,7 @@ export interface LoadConfigOptions {
   /**
    * Custom search paths to check for config files.
    * When provided, overrides the default XDG-based search paths.
+   * Note: `appName` is appended to each path (e.g., `"/etc/myapp"` becomes `"/etc/myapp/{appName}"`).
    * Paths are searched in order; first match wins.
    */
   searchPaths?: string[];

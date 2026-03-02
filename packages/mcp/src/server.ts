@@ -266,14 +266,23 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     };
 
     const code = codeMap[error.category] ?? -32_603;
+    const context: Record<string, unknown> = {
+      originalTag: error._tag,
+      category: error.category,
+    };
+
+    if (
+      error._tag === "ValidationError" &&
+      "field" in error &&
+      typeof error.field === "string"
+    ) {
+      context["field"] = error.field;
+    }
 
     return new McpError({
       message: error.message,
       code,
-      context: {
-        originalTag: error._tag,
-        category: error.category,
-      },
+      context,
     });
   }
 
@@ -566,6 +575,11 @@ export function createMcpServer(options: McpServerOptions): McpServer {
           try {
             const result = await template.handler(uri, variables, templateCtx);
             if (result.isErr()) {
+              logger.warn("Resource template handler returned error", {
+                uri,
+                requestId: templateRequestId,
+                error: result.error._tag,
+              });
               return Result.err(translateError(result.error));
             }
             return Result.ok(result.value);

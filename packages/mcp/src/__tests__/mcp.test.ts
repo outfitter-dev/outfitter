@@ -426,6 +426,7 @@ describe("Error Translation", () => {
     if (result.isErr()) {
       expect(result.error._tag).toBe("McpError");
       expect(result.error.message).toContain("Invalid input");
+      expect(result.error.context?.["field"]).toBe("email");
     }
   });
 
