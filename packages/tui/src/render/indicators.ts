@@ -164,6 +164,7 @@ export const INDICATORS: Record<
  *
  * @returns true if unicode is likely supported
  */
+/* eslint-disable outfitter/no-process-env-in-packages -- boundary: terminal capability detection from env */
 export function isUnicodeSupported(): boolean {
   // CI environments generally support unicode
   if (process.env["CI"]) {
@@ -207,6 +208,7 @@ export function isUnicodeSupported(): boolean {
 
   return false;
 }
+/* eslint-enable outfitter/no-process-env-in-packages */
 
 /**
  * Gets an indicator character with automatic unicode/fallback selection.
