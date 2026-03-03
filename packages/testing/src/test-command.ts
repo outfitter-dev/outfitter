@@ -282,6 +282,7 @@ export async function testCommand(
   args: string[],
   options?: TestCommandOptions
 ): Promise<TestCommandResult> {
+  /* eslint-disable outfitter/no-process-env-in-packages -- test harness: env snapshot/restore for test isolation */
   return withProcessLock(async () => {
     // Snapshot the full env so command-side mutations do not leak across tests.
     const originalEnv = { ...process.env };
@@ -351,4 +352,5 @@ export async function testCommand(
       injectedTestContext = undefined;
     }
   });
+  /* eslint-enable outfitter/no-process-env-in-packages */
 }

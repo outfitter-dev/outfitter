@@ -14,6 +14,7 @@ let cachedRequire: NodeRequire | null | undefined;
 function getNodeRequire(): NodeRequire {
   if (cachedRequire !== undefined) {
     if (cachedRequire === null) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- runtime assertion: cached negative result
       throw new Error("Node.js built-ins are unavailable in this runtime.");
     }
     return cachedRequire;
@@ -33,6 +34,7 @@ function getNodeRequire(): NodeRequire {
   }
 
   cachedRequire = null;
+  // eslint-disable-next-line outfitter/no-throw-in-handler -- runtime assertion: Node.js builtins unavailable
   throw new Error("Node.js built-ins are unavailable in this runtime.");
 }
 
@@ -251,6 +253,7 @@ export async function withTempDir<T>(
  * // Original environment is restored
  * ```
  */
+/* eslint-disable outfitter/no-process-env-in-packages -- test harness: env isolation fixture */
 export async function withEnv<T>(
   vars: Record<string, string>,
   fn: () => Promise<T>
@@ -280,6 +283,7 @@ export async function withEnv<T>(
     }
   }
 }
+/* eslint-enable outfitter/no-process-env-in-packages */
 
 // ============================================================================
 // Fixture Loading
