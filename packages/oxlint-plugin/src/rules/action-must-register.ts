@@ -92,7 +92,7 @@ function extractImportedNamesForModule({
   const moduleSpecifier = `./actions/${moduleName}.js`;
   const escapedModuleSpecifier = escapeForRegExp(moduleSpecifier);
   const importPattern = new RegExp(
-    `import\\s*\\{([\\s\\S]*?)\\}\\s*from\\s*["']${escapedModuleSpecifier}["'];`,
+    `import\\s*\\{([^}]*)\\}\\s*from\\s*["']${escapedModuleSpecifier}["'];`,
     "gu"
   );
 
