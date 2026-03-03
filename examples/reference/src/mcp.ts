@@ -13,7 +13,12 @@
  */
 
 import { Result } from "@outfitter/contracts";
-import { createMcpServer, defineResource, defineTool } from "@outfitter/mcp";
+import {
+  connectStdio,
+  createMcpServer,
+  defineResource,
+  defineTool,
+} from "@outfitter/mcp";
 
 import {
   analyzeTasks,
@@ -198,6 +203,6 @@ export function buildMcpServer() {
  */
 export async function main(): Promise<void> {
   seedStore();
-  buildMcpServer();
-  // In a real project: capture the return value and call connectStdio(server)
+  const server = buildMcpServer();
+  await connectStdio(server);
 }
