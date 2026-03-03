@@ -37,6 +37,21 @@ export function isUnixPlatform(): boolean {
 // Path Resolution
 // ============================================================================
 
+/** Subset of env vars used for runtime directory resolution. */
+interface RuntimeEnv {
+  readonly XDG_RUNTIME_DIR?: string | undefined;
+  readonly TMPDIR?: string | undefined;
+  readonly TEMP?: string | undefined;
+}
+
+/* eslint-disable outfitter/no-process-env-in-packages -- boundary: snapshot env once, pass to pure functions */
+const RUNTIME_ENV: RuntimeEnv = {
+  XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"],
+  TMPDIR: process.env["TMPDIR"],
+  TEMP: process.env["TEMP"],
+};
+/* eslint-enable outfitter/no-process-env-in-packages */
+
 /**
  * Get the runtime directory for daemon files.
  *
@@ -46,22 +61,22 @@ export function isUnixPlatform(): boolean {
  * - macOS: `$TMPDIR`
  * - Windows: `%TEMP%`
  *
+ * @param env - Environment overrides (defaults to process.env snapshot)
  * @returns Absolute path to runtime directory
  *
  * @internal
  */
-function getRuntimeDir(): string {
+function getRuntimeDir(env: RuntimeEnv = RUNTIME_ENV): string {
   // XDG_RUNTIME_DIR takes precedence
-  const xdgRuntime = process.env["XDG_RUNTIME_DIR"];
-  if (xdgRuntime) {
-    return xdgRuntime;
+  if (env.XDG_RUNTIME_DIR) {
+    return env.XDG_RUNTIME_DIR;
   }
 
   const plat = osPlatform();
 
   if (plat === "darwin") {
     // macOS: use TMPDIR
-    return process.env["TMPDIR"] ?? tmpdir();
+    return env.TMPDIR ?? tmpdir();
   }
 
   if (plat === "linux") {
@@ -70,7 +85,7 @@ function getRuntimeDir(): string {
   }
 
   // Windows: use TEMP
-  return process.env["TEMP"] ?? tmpdir();
+  return env.TEMP ?? tmpdir();
 }
 
 /**
