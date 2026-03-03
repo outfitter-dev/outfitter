@@ -151,19 +151,17 @@ command("deploy <env>")
   .context((input) => loadDeployConfig(input.env))
   .destructive(true) // auto-adds --dry-run
   .relatedTo("status", { description: "Check status" })
-  .hints((result) => [
-    { description: "View logs", command: `logs --env ${result.env}` },
-  ])
-  .onError((err) => [
-    { description: "Rollback", command: `rollback --env ${err.env}` },
-  ])
-  .action(async ({ flags, input, ctx }) => {
   .hints((result, input) => [
     { description: "View logs", command: `logs --env ${input.env}` },
   ])
   .onError((err, input) => [
     { description: "Rollback", command: `rollback --env ${input.env}` },
   ])
+  .action(async ({ flags, input, ctx }) => {
+    // handler body
+  });
+```
+
 **Builder methods:**
 
 | Method                     | Purpose                                                                                     |
@@ -171,8 +169,8 @@ command("deploy <env>")
 | `.input(schema)`           | Zod schema for validated input; auto-derives `--flags` from schema fields                   |
 | `.context(factory)`        | Async factory called after validation; result passed as `ctx` to action                     |
 | `.preset(preset)`          | Attach a flag preset (`outputModePreset()`, `cwdPreset()`, `streamPreset()`, etc.)          |
-| `.hints(fn)`               | Success hint function — generates `CLIHint[]` for the success envelope                      |
-| `.onError(fn)`             | Error hint function — generates `CLIHint[]` for the error envelope                          |
+| `.hints(fn)`               | Success hint function `(result, input) => CLIHint[]` for the success envelope               |
+| `.onError(fn)`             | Error hint function `(error, input) => CLIHint[]` for the error envelope                    |
 | `.destructive(true)`       | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execute-without-dry-run hint |
 | `.readOnly(true)`          | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint`              |
 | `.idempotent(true)`        | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint`              |
