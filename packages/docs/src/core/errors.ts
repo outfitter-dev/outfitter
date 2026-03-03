@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+// eslint-disable-next-line outfitter/use-error-taxonomy -- domain error within docs package; not a handler error
 export class DocsCoreError extends Error {
   readonly _tag = "DocsCoreError" as const;
   readonly category: "validation" | "internal";
