@@ -329,6 +329,7 @@ export interface CheckExportsOptions {
 }
 
 export function resolveJsonMode(options: CheckExportsOptions = {}): boolean {
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   return options.json ?? process.env["OUTFITTER_JSON"] === "1";
 }
 

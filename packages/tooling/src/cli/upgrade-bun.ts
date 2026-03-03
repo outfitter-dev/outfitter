@@ -55,6 +55,7 @@ async function fetchLatestVersion(): Promise<string> {
   // tag_name is like "bun-v1.4.0", extract version
   const match = data.tag_name.match(/bun-v(.+)/);
   if (!match?.[1]) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- CLI script: top-level error → exit code
     throw new Error(`Could not parse version from tag: ${data.tag_name}`);
   }
   return match[1];
@@ -69,6 +70,7 @@ async function fetchLatestVersion(): Promise<string> {
 async function resolveTypesBunVersion(targetVersion: string): Promise<string> {
   const response = await fetch("https://registry.npmjs.org/@types%2fbun");
   if (!response.ok) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- CLI script: top-level error → exit code
     throw new Error(`Failed to fetch @types/bun metadata: ${response.status}`);
   }
 
@@ -312,6 +314,7 @@ export async function runUpgradeBun(
 
       log("");
       info("Updating lockfile...");
+      /* eslint-disable outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup */
       const bunInstall = Bun.spawnSync(["bun", "install"], {
         cwd,
         env: {
@@ -320,6 +323,7 @@ export async function runUpgradeBun(
           PATH: `${process.env["HOME"]}/.bun/bin:${process.env["PATH"]}`,
         },
       });
+      /* eslint-enable outfitter/no-process-env-in-packages */
 
       if (bunInstall.exitCode === 0) {
         success("Lockfile updated");

@@ -46,6 +46,7 @@ function findRepoRoot(startDir: string): string {
     }
     dir = dirname(dir);
   }
+  // eslint-disable-next-line outfitter/no-throw-in-handler -- CLI script: top-level error → exit code
   throw new Error("Could not find repository root");
 }
 
@@ -73,6 +74,7 @@ function readFileEntry(
   const fullPath = join(repoRoot, sourcePath);
 
   if (!existsSync(fullPath)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Source file not found: ${fullPath}`);
   }
 
@@ -152,6 +154,7 @@ function resolveVersion(
 ): string {
   const version = versions[name];
   if (!version) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(
       `Missing resolved version for "${name}" in @outfitter/presets`
     );
@@ -169,6 +172,7 @@ function getWorkspacePackageVersion(relativePackageJsonPath: string): string {
   };
 
   if (typeof pkg.version !== "string") {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Expected version in package.json at ${pkgPath}`);
   }
 

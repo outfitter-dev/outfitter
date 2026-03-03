@@ -356,6 +356,7 @@ const COLORS = {
 
 /** Resolve whether JSON output mode is active. */
 export function resolveJsonMode(options: CheckTsDocOptions = {}): boolean {
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   return options.json ?? process.env["OUTFITTER_JSON"] === "1";
 }
 
