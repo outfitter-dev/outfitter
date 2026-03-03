@@ -197,6 +197,7 @@ export function createSdkServer(server: McpServer): Server {
     const result = await server.readResource(uri);
 
     if (result.isErr()) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
@@ -235,6 +236,7 @@ export function createSdkServer(server: McpServer): Server {
     );
 
     if (result.isErr()) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
@@ -256,6 +258,7 @@ export function createSdkServer(server: McpServer): Server {
     );
 
     if (result.isErr()) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
