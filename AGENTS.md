@@ -10,13 +10,12 @@ Outfitter provides shared infrastructure for AI-agent-ready tooling: CLI, MCP se
 
 **Core idea**: Handlers are pure functions returning `Result<T, E>`. CLI and MCP are thin adapters over the same logic. Write the handler once, expose it everywhere.
 
-**Status**: v0.1.0-rc.1 (release candidate) · **Linear Team**: Stack (`OS`)
+**Linear Team**: Stack (`OS`)
 
 ## Project Structure
 
 - `apps/` — Runnable applications; `apps/outfitter/` is the CLI
 - `packages/` — Versioned libraries (`@outfitter/*`) with source in `src/`; `packages/presets/` holds scaffold presets
-- `templates/` — Legacy shared templates (canonical location: `packages/presets/presets/`)
 - `docs/` — Specs and plan documents
 
 Tests live alongside code in `src/__tests__/` with `*.test.ts` files; snapshots use `__snapshots__/` with `.snap` format.
@@ -49,8 +48,8 @@ bun run release                            # Build + publish
 bun run clean                              # Clear Turbo artifacts and node_modules
 
 # Upgrade Bun
-bunx @outfitter/tooling upgrade-bun 1.4.0  # Upgrade to specific version
 bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
+bunx @outfitter/tooling upgrade-bun x.y.z  # Upgrade to specific version
 ```
 
 **Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
@@ -70,8 +69,8 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 
 **Runtime (Active)** — Evolving based on usage:
 
-- `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors, [flag conventions](./docs/cli/conventions.md)
-- `@outfitter/mcp` — MCP server framework with typed tools and action registry
+- `@outfitter/cli` — Typed Commander wrapper with CommandBuilder, output envelopes, streaming, truncation, [flag conventions](./docs/cli/conventions.md)
+- `@outfitter/mcp` — MCP server framework with typed tools, resources, resource templates, and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
 - `@outfitter/logging` — Structured logging via logtape
 - `@outfitter/file-ops` — Workspace detection, path security, locking
@@ -88,10 +87,6 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 - `@outfitter/docs` — Docs CLI, core assembly primitives, freshness checks, and host adapter
 - `@outfitter/tooling` — Dev tooling presets and CLI workflows (oxlint, typescript, lefthook, markdownlint)
 - `@outfitter/testing` — Test harnesses for MCP and CLI
-
-**Deprecated**:
-
-- `@outfitter/agents` — Deprecated. Use `npx outfitter add scaffolding` instead
 
 ### Handler Contract
 
@@ -136,10 +131,134 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 1. Define the handler in `apps/outfitter/src/commands/<name>.ts` — pure function returning `Result<T, E>`
 2. Define and export the action from the appropriate `apps/outfitter/src/actions/<domain>.ts` module using `defineAction()` with input/output Zod schemas
 3. Wire the action into `apps/outfitter/src/actions.ts` so it is included in the shared `ActionRegistry`
-4. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
-5. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
-6. Run `outfitter schema generate` to update `.outfitter/surface.json`
-7. Verify with `outfitter schema diff` (should report no drift after regeneration)
+4. Build the command with the CommandBuilder pattern (see below) — use `.input()` for Zod-driven flags, `.preset()` for flag presets, and `.destructive()` / `.readOnly()` / `.idempotent()` for safety metadata
+5. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`, `streamPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
+6. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
+7. Run `outfitter schema generate` to update `.outfitter/surface.json`
+8. Verify with `outfitter schema diff` (should report no drift after regeneration)
+
+### CommandBuilder (v0.6)
+
+The `command()` builder from `@outfitter/cli/command` is the recommended way to define CLI commands. It provides a fluent API for typed flags, input validation, context factories, hint generation, and safety metadata.
+
+```typescript
+import { command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("deploy <env>")
+  .description("Deploy to environment")
+  .input(z.object({ env: z.string(), force: z.boolean().default(false) }))
+  .context((input) => loadDeployConfig(input.env))
+  .destructive(true) // auto-adds --dry-run
+  .relatedTo("status", { description: "Check status" })
+  .hints((result, input) => [
+    { description: "View logs", command: `logs --env ${input.env}` },
+  ])
+  .onError((err, input) => [
+    { description: "Rollback", command: `rollback --env ${input.env}` },
+  ])
+  .action(async ({ flags, input, ctx }) => {
+    // handler body
+  })
+  .build();
+```
+
+**Builder methods:**
+
+| Method                     | Purpose                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `.input(schema)`           | Zod schema for validated input; auto-derives `--flags` from schema fields                   |
+| `.context(factory)`        | Async factory called after validation; result passed as `ctx` to action                     |
+| `.preset(preset)`          | Attach a flag preset (`outputModePreset()`, `cwdPreset()`, `streamPreset()`, etc.)          |
+| `.hints(fn)`               | Success hint function `(result, input) => CLIHint[]` for the success envelope               |
+| `.onError(fn)`             | Error hint function `(error, input) => CLIHint[]` for the error envelope                    |
+| `.destructive(true)`       | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execute-without-dry-run hint |
+| `.readOnly(true)`          | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint`              |
+| `.idempotent(true)`        | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint`              |
+| `.relatedTo(target, opts)` | Declares relationship to another command for action graph hints                             |
+
+### Streaming
+
+Handlers emit real-time progress via `ctx.progress` (an optional `ProgressCallback`). The CLI adapter writes events as NDJSON lines; the MCP adapter translates them to `notifications/progress`.
+
+```typescript
+const handler: Handler<Input, Output> = async (input, ctx) => {
+  ctx.progress?.({
+    type: "start",
+    command: "process",
+    ts: new Date().toISOString(),
+  });
+  for (let i = 0; i < items.length; i++) {
+    await processItem(items[i]);
+    ctx.progress?.({ type: "progress", current: i + 1, total: items.length });
+  }
+  return Result.ok({ processed: items.length });
+};
+```
+
+- **CLI**: Add `stream: Boolean(flags.stream)` to `runHandler()`. Use `streamPreset()` from `@outfitter/cli/query` for the `--stream` flag.
+- **MCP**: Automatic when client provides a `progressToken` — `ctx.progress` is injected by `createMcpProgressCallback()` from `@outfitter/mcp/progress`.
+- **Types**: Import `StreamEvent`, `ProgressCallback` from `@outfitter/contracts/stream`.
+
+### Output Envelopes and Hint Tiers
+
+All CLI output goes through `runHandler()` from `@outfitter/cli/envelope`, which wraps results in a `CommandEnvelope`:
+
+- **Success**: `{ ok: true, command, result, hints? }`
+- **Error**: `{ ok: false, command, error: { category, message, retryable, retry_after? }, hints? }`
+
+Error envelopes include `retryable` (derived from error category) and `retry_after` (from `RateLimitError`). Agents check these instead of maintaining category-to-retryability mappings.
+
+**Hint tiers** (accumulated in order):
+
+| Tier | Source         | Generator                                   | Description                         |
+| ---- | -------------- | ------------------------------------------- | ----------------------------------- |
+| 1    | Command tree   | `commandTreeHints()`                        | "What can I do?"                    |
+| 2    | Error category | `errorRecoveryHints()`                      | Standard recovery actions           |
+| 3    | Zod schema     | `schemaHintParams()`                        | Parameter shapes for agents         |
+| 4    | Action graph   | `graphSuccessHints()` / `graphErrorHints()` | Related commands via `.relatedTo()` |
+
+### Output Truncation
+
+Array output can be truncated with pagination hints using `truncateOutput()` from `@outfitter/cli/truncation`:
+
+```typescript
+import { truncateOutput } from "@outfitter/cli/truncation";
+
+const truncated = truncateOutput(items, {
+  limit: 20,
+  offset: 0,
+  commandName: "list",
+});
+// truncated.data — sliced items
+// truncated.metadata — { showing, total, truncated: true } when above limit
+// truncated.hints — CLIHint[] for pagination continuation
+```
+
+When total exceeds `filePointerThreshold` (default 1000), the full result is written to a temp file and `metadata.full_output` contains the path.
+
+### MCP Resources and Templates
+
+`@outfitter/mcp` provides `defineResource()` and `defineResourceTemplate()` for declaring MCP resources alongside tools:
+
+```typescript
+import { defineResource, defineResourceTemplate } from "@outfitter/mcp/server";
+
+const configResource = defineResource({
+  uri: "file:///etc/app/config.json",
+  name: "Application Config",
+  handler: async () => ({ text: JSON.stringify(config) }),
+});
+
+const userTemplate = defineResourceTemplate({
+  uriTemplate: "db:///users/{userId}",
+  name: "User",
+  schema: z.object({ userId: z.string() }),
+  handler: async ({ userId }) => ({
+    text: JSON.stringify(await getUser(userId)),
+  }),
+});
+```
 
 ### Error Taxonomy
 
@@ -220,14 +339,16 @@ OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
 
 ### Blessed Dependencies
 
-| Concern           | Package                                 |
-| ----------------- | --------------------------------------- |
-| Result type       | `better-result` (`^2.5.1`)              |
-| Schema validation | `zod` (`^4.3.5`)                        |
-| CLI parsing       | `commander` (`^14.0.2`)                 |
-| Logging           | `@logtape/logtape` (`^2.0.0`)           |
-| MCP protocol      | `@modelcontextprotocol/sdk` (`^1.12.1`) |
-| Prompts           | `@clack/prompts`                        |
+| Concern           | Package                     |
+| ----------------- | --------------------------- |
+| Result type       | `better-result`             |
+| Schema validation | `zod`                       |
+| CLI parsing       | `commander`                 |
+| Logging           | `@logtape/logtape`          |
+| MCP protocol      | `@modelcontextprotocol/sdk` |
+| Prompts           | `@clack/prompts`            |
+
+Versions are managed via Bun workspace catalogs in the root `package.json`. Check there for current pins.
 
 ## Code Style
 
@@ -271,7 +392,7 @@ Short and descriptive: `feature/<area>/<slug>` or `fix/<area>/<slug>`
 
 Conventional Commits with scopes:
 
-```
+```text
 feat(outfitter): add action registry
 fix(cli): handle missing config gracefully
 ```
@@ -313,6 +434,14 @@ See [docs/RELEASES.md](./docs/RELEASES.md) for the full process.
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — How packages fit together
 - [docs/RELEASES.md](./docs/RELEASES.md) — Changesets, canary publishing, stable release workflow
 - [docs/reference/patterns.md](./docs/reference/patterns.md) — Handler contract, Result types, error taxonomy
+- [docs/reference/result-api.md](./docs/reference/result-api.md) — Result type API reference
+- [docs/reference/result-cookbook.md](./docs/reference/result-cookbook.md) — Result pattern recipes
+- [docs/reference/export-contracts.md](./docs/reference/export-contracts.md) — Package export contracts
+- [docs/reference/discoverability.md](./docs/reference/discoverability.md) — CLI discoverability and self-documentation
+- [docs/reference/block-drift.md](./docs/reference/block-drift.md) — Block drift detection
+- [docs/reference/tui-stacks.md](./docs/reference/tui-stacks.md) — TUI rendering stack reference
+- [docs/reference/outfitter-directory.md](./docs/reference/outfitter-directory.md) — `.outfitter/` directory conventions
 - [docs/cli/conventions.md](./docs/cli/conventions.md) — CLI flag presets, verb conventions, queryability
 - [docs/getting-started.md](./docs/getting-started.md) — Tutorials
-- [docs/reference/outfitter-directory.md](./docs/reference/outfitter-directory.md) — `.outfitter/` directory conventions
+- [docs/migration-v0.5.md](./docs/migration-v0.5.md) — v0.5 migration guide
+- [docs/migration-v0.6.md](./docs/migration-v0.6.md) — v0.6 migration guide (streaming, safety, completeness)

@@ -85,13 +85,6 @@ function normalizePaths(paths: readonly string[] | undefined): string[] {
     .toSorted();
 }
 
-function shouldSyncAgentScaffolding(paths: readonly string[]): boolean {
-  return paths.some(
-    (path) =>
-      path === ".claude/settings.json" || path.startsWith(".claude/hooks/")
-  );
-}
-
 /**
  * Build the ordered list of check steps for the given mode.
  *
@@ -394,14 +387,6 @@ export function buildCheckOrchestratorPlan(
       id: "typecheck",
       label: "Typecheck",
       command: ["bun", "run", "typecheck", "--", "--only"],
-    });
-  }
-
-  if (shouldSyncAgentScaffolding(stagedFiles)) {
-    preCommitSteps.push({
-      id: "sync-agent-scaffolding",
-      label: "Sync agent scaffolding",
-      command: ["./scripts/sync-agent-scaffolding.sh"],
     });
   }
 

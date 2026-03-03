@@ -114,10 +114,6 @@ APIs will change, not production-ready. Developer-facing tools built on the runt
 | `@outfitter/docs`    | Docs CLI, core assembly, freshness checks, and host adapter        |
 | `@outfitter/tooling` | Dev tooling presets and CLI workflows                              |
 
-### Deprecated Packages
-
-- `@outfitter/agents` is deprecated. Use `npx outfitter add scaffolding` instead.
-
 ## Dependency Graph
 
 ```
@@ -172,9 +168,7 @@ outfitter/stack/
 ├── apps/
 │   └── outfitter/           # Umbrella CLI
 │       ├── src/
-│       └── templates/       # Project scaffolding templates
 ├── packages/
-│   ├── agents/              # DEPRECATED: use `npx outfitter add scaffolding`
 │   ├── cli/                 # CLI framework
 │   ├── config/              # Configuration loading
 │   ├── contracts/           # Core contracts (foundation)
@@ -191,7 +185,7 @@ outfitter/stack/
 │   └── types/               # Type utilities
 ├── docs/                    # Documentation (you are here)
 ├── AGENTS.md                # AI agent instructions
-├── .claude/CLAUDE.md        # Claude Code entry point
+├── CLAUDE.md                # Claude Code entry point (references AGENTS.md)
 └── README.md                # Project overview
 ```
 

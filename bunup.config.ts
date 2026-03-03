@@ -433,10 +433,6 @@ export default defineWorkspace(
       },
     },
     {
-      name: "@outfitter/agents",
-      root: "packages/agents",
-    },
-    {
       name: "@outfitter/contracts",
       root: "packages/contracts",
       // Prevent future internal utilities from leaking into the public API.

@@ -41,9 +41,8 @@ describe("target registry", () => {
     expect(new Set(TARGET_IDS).size).toBe(TARGET_IDS.length);
   });
 
-  test("every ready target exists in source and presets directories", () => {
+  test("every ready target exists in presets directory", () => {
     const repoRoot = findRepoRoot();
-    const sourceTemplatesDir = join(repoRoot, "templates");
     const presetsDir = join(repoRoot, "packages", "presets", "presets");
 
     for (const id of READY_TARGET_IDS) {
@@ -52,7 +51,6 @@ describe("target registry", () => {
       if (!target) {
         continue;
       }
-      expect(existsSync(join(sourceTemplatesDir, target.presetDir))).toBe(true);
       expect(existsSync(join(presetsDir, target.presetDir))).toBe(true);
     }
   });

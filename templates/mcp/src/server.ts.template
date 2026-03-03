@@ -1,8 +1,0 @@
-#!/usr/bin/env bun
-/**
- * {{projectName}} MCP server entry point
- */
-
-import { startServer } from "./mcp.js";
-
-startServer().catch(console.error);

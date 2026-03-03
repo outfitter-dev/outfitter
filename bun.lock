@@ -91,18 +91,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/agents": {
-      "name": "@outfitter/agents",
-      "version": "0.1.0",
-      "dependencies": {
-        "@outfitter/contracts": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/bun": "catalog:",
-        "bunup": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/cli": {
       "name": "@outfitter/cli",
       "version": "0.5.3",
@@ -505,8 +493,6 @@
     "@outfitter-agents/outfitter": ["@outfitter-agents/outfitter@workspace:plugins/fieldguides"],
 
     "@outfitter-agents/team": ["@outfitter-agents/team@workspace:plugins/team"],
-
-    "@outfitter/agents": ["@outfitter/agents@workspace:packages/agents"],
 
     "@outfitter/cli": ["@outfitter/cli@workspace:packages/cli"],
 

@@ -43,7 +43,6 @@ freshness with `outfitter check docs-sentinel --cwd .`.
 
 | Package                                                  | Description                                                                                                 |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| [`@outfitter/agents`](../packages/agents/)               | DEPRECATED: Use `outfitter add` instead. Agent documentation and scaffolding for AI-ready projects          |
 | [`@outfitter/cli`](../packages/cli/)                     | Typed CLI runtime with terminal detection, rendering, output contracts, and input parsing                   |
 | [`@outfitter/config`](../packages/config/)               | XDG-compliant config loading with schema validation for Outfitter                                           |
 | [`@outfitter/contracts`](../packages/contracts/)         | Result/Error patterns, error taxonomy, and handler contracts for Outfitter                                  |

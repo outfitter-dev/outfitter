@@ -439,6 +439,9 @@ The scaffolded projects include sensible defaults. If you're setting up manually
 
 - **[Patterns](./reference/patterns.md)** — Learn the conventions for handlers, errors, and validation
 - **[Architecture](./ARCHITECTURE.md)** — Understand how packages fit together
+- **Migration Guides** — Upgrading between versions:
+  - [v0.5 Migration](./migration-v0.5.md) — Builder pattern, agent-navigable envelopes, typed resource templates
+  - [v0.6 Migration](./migration-v0.6.md) — Streaming, safety metadata, output truncation, MCP progress
 - **Package READMEs** — Deep dive into specific packages:
   - [@outfitter/cli](./packages/cli/) — Full CLI API reference
   - [@outfitter/contracts](./packages/contracts/) — Result types and errors

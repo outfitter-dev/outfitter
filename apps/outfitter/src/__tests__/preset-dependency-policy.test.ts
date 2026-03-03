@@ -31,7 +31,6 @@ describe("preset dependency policy", () => {
     const { all: resolvedVersions } = getResolvedVersions();
 
     const presetRoots = [
-      join(repoRoot, "templates"),
       join(repoRoot, "packages", "presets", "presets"),
     ] as const;
 
