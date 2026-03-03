@@ -74,12 +74,14 @@ function createStorageError(message: string, cause?: unknown): StorageError {
 
 function assertValidTableName(tableName: string): void {
   if (!TABLE_NAME_PATTERN.test(tableName)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid table name: ${tableName}`);
   }
 }
 
 function assertValidTokenizer(tokenizer: string): TokenizerType {
   if (!Object.hasOwn(VALID_TOKENIZERS, tokenizer)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid tokenizer: ${tokenizer}`);
   }
   return tokenizer as TokenizerType;
@@ -94,6 +96,7 @@ function getUserVersion(db: Database): number {
 
 function setUserVersion(db: Database, version: number): void {
   if (!Number.isInteger(version) || version < 0) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid user_version: ${version}`);
   }
   db.run(`PRAGMA user_version = ${version}`);
@@ -205,6 +208,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
     writeIndexMetadata(db, metadata);
   } else if (currentVersion !== INDEX_VERSION) {
     if (!options.migrations) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
       throw new Error(
         `Index version ${currentVersion} does not match ${INDEX_VERSION}. Provide migrations or rebuild the index.`
       );
@@ -217,6 +221,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       INDEX_VERSION
     );
     if (result.isErr()) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
       throw new Error(`Failed to migrate index: ${result.error.message}`);
     }
 
@@ -330,6 +335,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
           return Result.ok(undefined);
         } catch (error) {
           db.run("ROLLBACK");
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- rethrow after rollback; outer catch converts to Result.err
           throw error;
         }
       } catch (error) {
