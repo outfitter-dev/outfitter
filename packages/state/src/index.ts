@@ -831,6 +831,7 @@ export async function createPersistentStore(
       } catch {
         // Ignore cleanup errors
       }
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
       throw error;
     }
   };

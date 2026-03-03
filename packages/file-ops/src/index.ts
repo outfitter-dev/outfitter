@@ -707,7 +707,7 @@ export async function acquireLock(
           })
         );
       }
-      // Re-throw unexpected errors
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- rethrow unexpected error after handling known conflict case
       throw error;
     }
 
