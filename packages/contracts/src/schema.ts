@@ -1,13 +1,18 @@
 /**
- * @outfitter/contracts - Schema Utilities
+ * Schema utilities for Zod-to-JSON-Schema conversion.
  *
- * Utilities for converting Zod schemas to JSON Schema format.
- * Used by MCP, CLI, and API adapters for schema introspection.
+ * Provides JSON Schema type definitions, Zod introspection helpers,
+ * and a converter that handles common Zod types including strings,
+ * numbers, objects, arrays, unions, and more.
  *
- * @packageDocumentation
+ * @module schema
  */
 
 import type { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// JSON Schema types and Zod introspection helpers
+// ---------------------------------------------------------------------------
 
 /**
  * JSON Schema representation.
@@ -41,6 +46,193 @@ export interface JsonSchema {
 }
 
 /**
+ * Extract the internal _def object from a Zod schema or def.
+ */
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+function getDef(schemaOrDef: any): any {
+  if (!schemaOrDef) {
+    return undefined;
+  }
+
+  if (schemaOrDef._def) {
+    return schemaOrDef._def;
+  }
+
+  if (schemaOrDef.def) {
+    return schemaOrDef.def;
+  }
+
+  return schemaOrDef;
+}
+
+/**
+ * Extract description from a Zod schema or its def.
+ */
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+function getDescription(schema: any, def: any): string | undefined {
+  if (typeof schema?.description === "string") {
+    return schema.description;
+  }
+
+  if (typeof def?.description === "string") {
+    return def.description;
+  }
+
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Primitive type converters
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert Zod string schema with checks.
+ */
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+function convertString(def: any): JsonSchema {
+  const schema: JsonSchema = { type: "string" };
+
+  if (def.checks) {
+    for (const check of def.checks) {
+      const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
+
+      if (normalizedCheck?.kind) {
+        switch (normalizedCheck.kind) {
+          case "min":
+            schema.minLength = normalizedCheck.value;
+            break;
+          case "max":
+            schema.maxLength = normalizedCheck.value;
+            break;
+          case "length":
+            schema.minLength = normalizedCheck.value;
+            schema.maxLength = normalizedCheck.value;
+            break;
+          case "email":
+            schema.pattern = "^[^@]+@[^@]+\\.[^@]+$";
+            break;
+          case "url":
+            schema.pattern = "^https?://";
+            break;
+          case "uuid":
+            schema.pattern =
+              "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+            break;
+          case "regex":
+            schema.pattern =
+              normalizedCheck.regex?.source ??
+              normalizedCheck.pattern?.source ??
+              (typeof normalizedCheck.pattern === "string"
+                ? normalizedCheck.pattern
+                : undefined);
+            break;
+          default:
+            break;
+        }
+        continue;
+      }
+
+      if (!normalizedCheck?.check) {
+        continue;
+      }
+
+      switch (normalizedCheck.check) {
+        case "min_length":
+          schema.minLength = normalizedCheck.minimum;
+          break;
+        case "max_length":
+          schema.maxLength = normalizedCheck.maximum;
+          break;
+        case "string_format":
+          if (normalizedCheck.pattern) {
+            schema.pattern =
+              typeof normalizedCheck.pattern === "string"
+                ? normalizedCheck.pattern
+                : normalizedCheck.pattern.source;
+          }
+
+          if (normalizedCheck.format && normalizedCheck.format !== "regex") {
+            schema.format = normalizedCheck.format;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  return schema;
+}
+
+/**
+ * Convert Zod number schema with checks.
+ */
+// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+function convertNumber(def: any): JsonSchema {
+  const schema: JsonSchema = { type: "number" };
+
+  if (def.checks) {
+    for (const check of def.checks) {
+      const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
+
+      if (normalizedCheck?.kind) {
+        switch (normalizedCheck.kind) {
+          case "min":
+            schema.minimum = normalizedCheck.value;
+            break;
+          case "max":
+            schema.maximum = normalizedCheck.value;
+            break;
+          case "int":
+            schema.type = "integer";
+            break;
+          default:
+            break;
+        }
+        continue;
+      }
+
+      if (!normalizedCheck?.check) {
+        continue;
+      }
+
+      switch (normalizedCheck.check) {
+        case "greater_than":
+          if (normalizedCheck.inclusive) {
+            schema.minimum = normalizedCheck.value;
+          } else {
+            schema.exclusiveMinimum = normalizedCheck.value;
+          }
+          break;
+        case "less_than":
+          if (normalizedCheck.inclusive) {
+            schema.maximum = normalizedCheck.value;
+          } else {
+            schema.exclusiveMaximum = normalizedCheck.value;
+          }
+          break;
+        case "number_format":
+          if (
+            normalizedCheck.format === "int" ||
+            normalizedCheck.format === "safeint"
+          ) {
+            schema.type = "integer";
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
+// Main converter
+// ---------------------------------------------------------------------------
+
+/**
  * Convert a Zod schema to JSON Schema format.
  *
  * This is a simplified converter that handles common Zod types.
@@ -69,36 +261,6 @@ export interface JsonSchema {
  */
 export function zodToJsonSchema(schema: z.ZodType<unknown>): JsonSchema {
   return convertZodType(schema);
-}
-
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
-function getDef(schemaOrDef: any): any {
-  if (!schemaOrDef) {
-    return undefined;
-  }
-
-  if (schemaOrDef._def) {
-    return schemaOrDef._def;
-  }
-
-  if (schemaOrDef.def) {
-    return schemaOrDef.def;
-  }
-
-  return schemaOrDef;
-}
-
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
-function getDescription(schema: any, def: any): string | undefined {
-  if (typeof schema?.description === "string") {
-    return schema.description;
-  }
-
-  if (typeof def?.description === "string") {
-    return def.description;
-  }
-
-  return undefined;
 }
 
 /**
@@ -300,149 +462,6 @@ function convertZodType(schema: z.ZodType<unknown>): JsonSchema {
   }
 
   return jsonSchema;
-}
-
-/**
- * Convert Zod string schema with checks.
- */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
-function convertString(def: any): JsonSchema {
-  const schema: JsonSchema = { type: "string" };
-
-  if (def.checks) {
-    for (const check of def.checks) {
-      const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
-
-      if (normalizedCheck?.kind) {
-        switch (normalizedCheck.kind) {
-          case "min":
-            schema.minLength = normalizedCheck.value;
-            break;
-          case "max":
-            schema.maxLength = normalizedCheck.value;
-            break;
-          case "length":
-            schema.minLength = normalizedCheck.value;
-            schema.maxLength = normalizedCheck.value;
-            break;
-          case "email":
-            schema.pattern = "^[^@]+@[^@]+\\.[^@]+$";
-            break;
-          case "url":
-            schema.pattern = "^https?://";
-            break;
-          case "uuid":
-            schema.pattern =
-              "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-            break;
-          case "regex":
-            schema.pattern =
-              normalizedCheck.regex?.source ??
-              normalizedCheck.pattern?.source ??
-              (typeof normalizedCheck.pattern === "string"
-                ? normalizedCheck.pattern
-                : undefined);
-            break;
-          default:
-            break;
-        }
-        continue;
-      }
-
-      if (!normalizedCheck?.check) {
-        continue;
-      }
-
-      switch (normalizedCheck.check) {
-        case "min_length":
-          schema.minLength = normalizedCheck.minimum;
-          break;
-        case "max_length":
-          schema.maxLength = normalizedCheck.maximum;
-          break;
-        case "string_format":
-          if (normalizedCheck.pattern) {
-            schema.pattern =
-              typeof normalizedCheck.pattern === "string"
-                ? normalizedCheck.pattern
-                : normalizedCheck.pattern.source;
-          }
-
-          if (normalizedCheck.format && normalizedCheck.format !== "regex") {
-            schema.format = normalizedCheck.format;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  return schema;
-}
-
-/**
- * Convert Zod number schema with checks.
- */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
-function convertNumber(def: any): JsonSchema {
-  const schema: JsonSchema = { type: "number" };
-
-  if (def.checks) {
-    for (const check of def.checks) {
-      const normalizedCheck = check?._zod?.def ?? check?.def ?? check;
-
-      if (normalizedCheck?.kind) {
-        switch (normalizedCheck.kind) {
-          case "min":
-            schema.minimum = normalizedCheck.value;
-            break;
-          case "max":
-            schema.maximum = normalizedCheck.value;
-            break;
-          case "int":
-            schema.type = "integer";
-            break;
-          default:
-            break;
-        }
-        continue;
-      }
-
-      if (!normalizedCheck?.check) {
-        continue;
-      }
-
-      switch (normalizedCheck.check) {
-        case "greater_than":
-          if (normalizedCheck.inclusive) {
-            schema.minimum = normalizedCheck.value;
-          } else {
-            schema.exclusiveMinimum = normalizedCheck.value;
-          }
-          break;
-        case "less_than":
-          if (normalizedCheck.inclusive) {
-            schema.maximum = normalizedCheck.value;
-          } else {
-            schema.exclusiveMaximum = normalizedCheck.value;
-          }
-          break;
-        case "number_format":
-          if (
-            normalizedCheck.format === "int" ||
-            normalizedCheck.format === "safeint"
-          ) {
-            schema.type = "integer";
-          }
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  return schema;
 }
 
 /**
