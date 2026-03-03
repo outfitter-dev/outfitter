@@ -145,7 +145,7 @@ Each line is a self-contained JSON object with a `type` discriminator:
 
 **Event ordering is deterministic:**
 
-1. `start` event is always first (emitted by the adapter)
+1. `start` event is always first (emitted by the handler via `ctx.progress`)
 2. `step` / `progress` events appear in handler emission order
 3. Terminal envelope (success or error) is always last
 

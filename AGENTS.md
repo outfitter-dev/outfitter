@@ -158,17 +158,12 @@ command("deploy <env>")
     { description: "Rollback", command: `rollback --env ${err.env}` },
   ])
   .action(async ({ flags, input, ctx }) => {
-    await runHandler({
-      command: "deploy",
-      handler: deployHandler,
-      input,
-      dryRun: Boolean(flags.dryRun),
-      stream: Boolean(flags.stream),
-    });
-  })
-  .build();
-```
-
+  .hints((result, input) => [
+    { description: "View logs", command: `logs --env ${input.env}` },
+  ])
+  .onError((err, input) => [
+    { description: "Rollback", command: `rollback --env ${input.env}` },
+  ])
 **Builder methods:**
 
 | Method                     | Purpose                                                                                     |
