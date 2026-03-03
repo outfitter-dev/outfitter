@@ -339,7 +339,7 @@ const tool = defineTool({
     ctx.progress?.({
       type: "step",
       name: "complete",
-      status: "done",
+      status: "complete",
       duration_ms: 150,
     });
 
