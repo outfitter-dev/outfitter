@@ -60,8 +60,10 @@ export function createCLI(config: CLIConfig): CLI {
     }
 
     if (bridgedJsonEnvPrevious === undefined) {
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       delete process.env["OUTFITTER_JSON"];
     } else {
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSON"] = bridgedJsonEnvPrevious;
     }
 
@@ -81,7 +83,9 @@ export function createCLI(config: CLIConfig): CLI {
   program.hook("preAction", (thisCommand) => {
     const allOpts = thisCommand.optsWithGlobals();
     if (allOpts["json"] === true && !bridgedJsonEnvActive) {
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       bridgedJsonEnvPrevious = process.env["OUTFITTER_JSON"];
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSON"] = "1";
       bridgedJsonEnvActive = true;
     }
@@ -105,7 +109,9 @@ export function createCLI(config: CLIConfig): CLI {
   program.action(async () => {
     const isJsonMode =
       program.opts()["json"] === true ||
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSON"] === "1" ||
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSONL"] === "1" ||
       !process.stdout.isTTY;
 
