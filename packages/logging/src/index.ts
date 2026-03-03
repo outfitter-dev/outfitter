@@ -1484,6 +1484,7 @@ export async function flush(): Promise<void> {
  */
 function safeGetEnv(key: string): string | undefined {
   if (typeof process !== "undefined") {
+    // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-aware log level resolution
     return process.env?.[key];
   }
   return undefined;

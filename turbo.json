@@ -3,7 +3,7 @@
   "remoteCache": {
     "signature": true
   },
-  "globalDependencies": [".bun-version"],
+  "globalDependencies": [".bun-version", ".oxlintrc.json"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
