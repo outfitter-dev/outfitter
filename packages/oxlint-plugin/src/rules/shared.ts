@@ -20,7 +20,7 @@ export interface RuleModule {
   };
 }
 
-const PACKAGES_SRC_PATTERN = /(?:^|\/)packages\/[^/]+\/src\//;
+const PACKAGES_SRC_PATTERN = /(?:^|\/)packages\/[^/]+\/src\//u;
 const TEST_FILE_PATTERN = /(?:^|\/)__tests__\/|\.(test|spec)\.[cm]?[jt]sx?$/;
 
 interface NodeWithType {
@@ -59,6 +59,19 @@ export function isPackageSourceFile(filePath: string | undefined): boolean {
   }
 
   return !TEST_FILE_PATTERN.test(normalized);
+}
+
+const PACKAGE_NAME_PATTERN = /(?:^|\/)packages\/([^/]+)\/src\//u;
+
+export function extractPackageName(
+  filePath: string | undefined
+): string | undefined {
+  if (!filePath) {
+    return undefined;
+  }
+
+  const match = normalizeFilePath(filePath).match(PACKAGE_NAME_PATTERN);
+  return match?.[1];
 }
 
 export function asIdentifierName(value: unknown): string | undefined {
