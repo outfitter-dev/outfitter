@@ -122,7 +122,7 @@ import { runHandler } from "@outfitter/cli/envelope";
 
 command("deploy")
   .preset(streamPreset())
-  .action(async ({ flags }) => {
+  .action(async ({ flags, input }) => {
     await runHandler({
       command: "deploy",
       handler: deployHandler,
