@@ -62,7 +62,8 @@ export const noNestedBarrelRule: RuleModule = {
         type: "object",
         properties: {
           maxDepth: {
-            type: "number",
+            type: "integer",
+            minimum: 1,
             description:
               "Maximum allowed barrel depth relative to src/. " +
               "1 = only src/index.ts, 2 = also src/<dir>/index.ts, etc.",
