@@ -350,8 +350,30 @@ describe("Tier 2: error category mapping", () => {
     });
 
     test("empty string commandName falls back to placeholder", () => {
-      const hints = errorRecoveryHints("conflict", "my-cli", "");
-      expect(hints[0]?.command).toBe("my-cli <previous-command> --force");
+      const categories: ErrorCategory[] = [
+        "conflict",
+        "timeout",
+        "network",
+        "rate_limit",
+        "cancelled",
+      ];
+
+      for (const category of categories) {
+        const hints = errorRecoveryHints(category, "my-cli", "");
+        const expected =
+          category === "conflict"
+            ? "my-cli <previous-command> --force"
+            : "my-cli <previous-command>";
+        expect(hints[0]?.command).toBe(expected);
+      }
+    });
+
+    test("commandName without cliName omits prefix", () => {
+      const hints = errorRecoveryHints("conflict", undefined, "update");
+      expect(hints[0]?.command).toBe("update --force");
+
+      const retryHints = errorRecoveryHints("timeout", undefined, "deploy");
+      expect(retryHints[0]?.command).toBe("deploy");
     });
   });
 });
