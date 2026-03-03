@@ -96,4 +96,44 @@ describe("normalizeWorkspaceExports", () => {
       "./zeta",
     ]);
   });
+
+  test("strips ./internal exports as safety net", async () => {
+    const cwd = trackTempDir(mkdtempSync(join(tmpdir(), "normalize-exports-")));
+    const packageDir = join(cwd, "packages", "lib");
+    mkdirSync(packageDir, { recursive: true });
+
+    writeJson(join(cwd, "package.json"), {
+      name: "workspace-root",
+      private: true,
+      workspaces: ["packages/*"],
+    });
+
+    const packageJsonPath = join(packageDir, "package.json");
+    writeJson(packageJsonPath, {
+      name: "@outfitter/lib",
+      exports: {
+        ".": "./dist/index.js",
+        "./internal/foo": "./dist/internal/foo.js",
+        "./internal/bar": "./dist/internal/bar.js",
+        "./internal": "./dist/internal/index.js",
+        "./utils": "./dist/utils.js",
+      },
+    });
+
+    const result = await normalizeWorkspaceExports({ cwd, write: true });
+
+    expect(result.changedPackages).toEqual(["packages/lib"]);
+
+    const updatedManifest = JSON.parse(
+      readFileSync(packageJsonPath, "utf8")
+    ) as {
+      exports: Record<string, unknown>;
+    };
+
+    expect(Object.keys(updatedManifest.exports)).toEqual([
+      ".",
+      "./package.json",
+      "./utils",
+    ]);
+  });
 });

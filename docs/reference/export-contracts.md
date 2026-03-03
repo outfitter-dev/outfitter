@@ -81,9 +81,13 @@ The key sequence for export integrity:
 
 ### Adding an Internal Module
 
-1. Create the source file (e.g., `src/internal/helpers.ts`)
-2. Add an exclusion pattern to `bunup.config.ts` if one does not already cover it (the `./internal/*` pattern handles most cases)
+1. Create the source file under `src/internal/` (e.g., `src/internal/helpers.ts`)
+2. No manual config needed — `withDefaults()` in `bunup.config.ts` automatically excludes `./internal` and `./internal/*` from every package's exports
 3. Run `bun run build && outfitter repo check exports --cwd .` to confirm it stays out of the public surface
+
+The `scripts/normalize-exports.ts` post-build step provides an additional safety net by stripping any `./internal*` keys that slip through.
+
+See [File Splitting](./file-splitting.md) for the full `src/internal/` convention and split recipe.
 
 ### Fixing Export Drift
 
