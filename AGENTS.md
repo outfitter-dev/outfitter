@@ -159,7 +159,8 @@ command("deploy <env>")
   ])
   .action(async ({ flags, input, ctx }) => {
     // handler body
-  });
+  })
+  .build();
 ```
 
 **Builder methods:**
