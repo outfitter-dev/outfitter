@@ -348,6 +348,15 @@ describe("Tier 2: error category mapping", () => {
         expect(hints[0]?.command).toBe("my-cli <previous-command>");
       }
     });
+        "rate_limit",
+        "cancelled",
+      ];
+
+      for (const category of categories) {
+        const hints = errorRecoveryHints(category, "my-cli");
+        expect(hints[0]?.command).toBe("my-cli <previous-command>");
+      }
+    });
 
     test("empty string commandName falls back to placeholder", () => {
       const categories: ErrorCategory[] = [
