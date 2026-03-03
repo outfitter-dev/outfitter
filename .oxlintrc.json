@@ -39,7 +39,7 @@
     "outfitter/no-console-in-packages": "error",
     "outfitter/no-cross-tier-import": "error",
     "outfitter/no-deep-relative-import": "warn",
-    "outfitter/no-nested-barrel": "warn",
+    "outfitter/no-nested-barrel": ["warn", { "maxDepth": 3 }],
     "outfitter/no-process-env-in-packages": [
       "warn",
       { "allowedPackages": ["config"] }
