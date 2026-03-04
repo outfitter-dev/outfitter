@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Types-only file (14+ interfaces with TSDoc); splitting hurts discoverability */
 import type { Logger as ContractLogger } from "@outfitter/contracts";
 
 // ============================================================================
