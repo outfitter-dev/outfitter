@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Nested colors/ dir breaks bunup shared chunk paths; 411 LOC barely over threshold */
 /**
  * Color tokens and ANSI utilities.
  *
