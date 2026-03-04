@@ -20,16 +20,8 @@
  * @packageDocumentation
  */
 
-import type {
-  CLIHint,
-  ErrorCategory,
-  OutfitterError,
-} from "@outfitter/contracts";
-import {
-  errorCategoryMeta,
-  exitCodeMap,
-  safeStringify,
-} from "@outfitter/contracts";
+import type { OutfitterError } from "@outfitter/contracts";
+import { safeStringify } from "@outfitter/contracts";
 import type {
   ProgressCallback,
   StreamEvent,
@@ -37,392 +29,38 @@ import type {
 } from "@outfitter/contracts/stream";
 import type { Result } from "better-result";
 
-import { detectMode, formatHuman, output } from "./output.js";
+import {
+  buildDryRunHint,
+  createErrorEnvelope,
+  createSuccessEnvelope,
+  extractCategory,
+  extractMessage,
+  extractRetryAfterSeconds,
+  formatEnvelopeHuman,
+  getExitCode,
+  safeCallHintFn,
+} from "./internal/envelope-helpers.js";
+import type { RunHandlerOptions } from "./internal/envelope-types.js";
+import { detectMode, output } from "./output.js";
 import {
   createNdjsonProgress,
   writeNdjsonLine,
   writeStreamEnvelope,
 } from "./streaming.js";
-import type { OutputMode } from "./types.js";
 
-// =============================================================================
-// Envelope Types
-// =============================================================================
+// Re-export types from internal modules
+export type {
+  CommandEnvelope,
+  ErrorEnvelope,
+  RunHandlerOptions,
+  SuccessEnvelope,
+} from "./internal/envelope-types.js";
 
-/**
- * Structured success envelope wrapping a command result.
- *
- * The `hints` field is absent (not an empty array) when there are no hints.
- * This avoids Clippy-style noise in terminal output.
- */
-export interface SuccessEnvelope<T = unknown> {
-  readonly ok: true;
-  readonly command: string;
-  readonly result: T;
-  readonly hints?: CLIHint[];
-}
-
-/**
- * Structured error envelope wrapping a command failure.
- *
- * The `hints` field is absent (not an empty array) when there are no hints.
- * The `retryable` field indicates whether the error is transient and safe to retry.
- * The `retry_after` field is only present for rate_limit errors with a known delay.
- */
-export interface ErrorEnvelope {
-  readonly ok: false;
-  readonly command: string;
-  readonly error: {
-    readonly category: ErrorCategory;
-    readonly message: string;
-    readonly retryable: boolean;
-    readonly retry_after?: number;
-  };
-  readonly hints?: CLIHint[];
-}
-
-/**
- * Discriminated union of success and error envelopes.
- *
- * Use `envelope.ok` to narrow:
- * ```typescript
- * if (envelope.ok) {
- *   // SuccessEnvelope — envelope.result is available
- * } else {
- *   // ErrorEnvelope — envelope.error is available
- * }
- * ```
- */
-export type CommandEnvelope<T = unknown> = SuccessEnvelope<T> | ErrorEnvelope;
-
-// =============================================================================
-// Envelope Construction
-// =============================================================================
-
-/**
- * Create a success envelope wrapping a command result.
- *
- * The `hints` field is omitted when hints is undefined, null, or empty.
- *
- * @param command - Command name
- * @param result - Handler result value
- * @param hints - Optional CLI hints for next actions
- * @returns A success envelope
- *
- * @example
- * ```typescript
- * const envelope = createSuccessEnvelope("deploy", { status: "deployed" }, [
- *   { description: "Check status", command: "deploy status" },
- * ]);
- * ```
- */
-export function createSuccessEnvelope<T>(
-  command: string,
-  result: T,
-  hints?: CLIHint[]
-): SuccessEnvelope<T> {
-  const envelope: SuccessEnvelope<T> = {
-    ok: true,
-    command,
-    result,
-  };
-
-  // Only add hints if non-empty — absent, not empty array
-  if (hints && hints.length > 0) {
-    return { ...envelope, hints };
-  }
-
-  return envelope;
-}
-
-/**
- * Create an error envelope wrapping a command failure.
- *
- * The `hints` field is omitted when hints is undefined, null, or empty.
- * The `retryable` field is derived from the error category metadata.
- * The `retry_after` field is included only when `retryAfterSeconds` is provided
- * (typically from a `RateLimitError`).
- *
- * @param command - Command name
- * @param category - Error category from the taxonomy
- * @param message - Human-readable error message
- * @param hints - Optional CLI hints for error recovery
- * @param retryAfterSeconds - Optional retry delay in seconds (from RateLimitError)
- * @returns An error envelope
- *
- * @example
- * ```typescript
- * const envelope = createErrorEnvelope("deploy", "validation", "Missing env", [
- *   { description: "Specify env", command: "deploy --env prod" },
- * ]);
- * // envelope.error.retryable === false
- *
- * const rateLimitEnvelope = createErrorEnvelope(
- *   "fetch",
- *   "rate_limit",
- *   "Too many requests",
- *   undefined,
- *   60
- * );
- * // rateLimitEnvelope.error.retryable === true, retry_after === 60
- * ```
- */
-export function createErrorEnvelope(
-  command: string,
-  category: ErrorCategory,
-  message: string,
-  hints?: CLIHint[],
-  retryAfterSeconds?: number
-): ErrorEnvelope {
-  const meta = errorCategoryMeta(category);
-
-  // Defense-in-depth: only include retry_after for rate_limit errors,
-  // even if retryAfterSeconds is somehow provided for other categories
-  const includeRetryAfter =
-    retryAfterSeconds != null && category === "rate_limit";
-
-  const errorField: ErrorEnvelope["error"] = includeRetryAfter
-    ? {
-        category,
-        message,
-        retryable: meta.retryable,
-        retry_after: retryAfterSeconds,
-      }
-    : { category, message, retryable: meta.retryable };
-
-  const envelope: ErrorEnvelope = {
-    ok: false,
-    command,
-    error: errorField,
-  };
-
-  // Only add hints if non-empty — absent, not empty array
-  if (hints && hints.length > 0) {
-    return { ...envelope, hints };
-  }
-
-  return envelope;
-}
-
-// =============================================================================
-// RunHandler Types
-// =============================================================================
-
-/**
- * Options for the runHandler lifecycle bridge.
- *
- * @typeParam TInput - Type of validated input
- * @typeParam TOutput - Type of handler result
- * @typeParam TContext - Type of context object
- */
-export interface RunHandlerOptions<
-  TInput = unknown,
-  TOutput = unknown,
-  TContext = unknown,
-> {
-  /** Command name for the envelope */
-  readonly command: string;
-
-  /**
-   * Handler function returning a Result.
-   *
-   * When a context factory is provided, receives (input, context).
-   * When no context factory, receives (input, undefined).
-   */
-  readonly handler: (
-    input: TInput,
-    context: TContext
-  ) => Promise<Result<TOutput, OutfitterError>>;
-
-  /** Validated input to pass to context factory and handler */
-  readonly input?: TInput;
-
-  /** Output format (json, jsonl, human) */
-  readonly format?: OutputMode;
-
-  /**
-   * Async factory for constructing handler context.
-   * Called before the handler with the validated input.
-   */
-  readonly contextFactory?: (input: TInput) => Promise<TContext> | TContext;
-
-  /** Success hint function — called with (result, input) */
-  readonly hints?: (result: unknown, input: TInput) => CLIHint[];
-
-  /** Error hint function — called with (error, input) */
-  readonly onError?: (error: unknown, input: TInput) => CLIHint[];
-  /**
-   * Enable NDJSON streaming mode.
-   *
-   * When `true`, the handler receives a `progress` callback via context
-   * and the CLI writes progress events as NDJSON lines to stdout.
-   * The final line is the standard command envelope (success or error).
-   * The CLI owns the initial `start` event, so handlers should emit only
-   * `step` and `progress` events through `ctx.progress`.
-   *
-   * `--stream` is orthogonal to output mode — it controls delivery, not serialization.
-   */
-  readonly stream?: boolean;
-
-  /**
-   * Indicate that this is a dry-run invocation of a destructive command.
-   *
-   * When `true`, the success envelope includes a CLIHint with the command
-   * to execute without `--dry-run` (preview-then-commit pattern).
-   *
-   * The handler is responsible for checking the dry-run flag and performing
-   * preview-only logic. This option only controls hint generation in the envelope.
-   */
-  readonly dryRun?: boolean;
-
-  /**
-   * Parsed argv to use for dry-run hint generation.
-   *
-   * Defaults to `process.argv.slice(2)`. Pass explicit argv when using
-   * `cli.parse(customArgv)` to ensure the dry-run hint reconstructs the
-   * correct command.
-   */
-  readonly argv?: readonly string[];
-}
-
-// =============================================================================
-// Internal Helpers
-// =============================================================================
-
-/**
- * Build a CLIHint for executing the current command without --dry-run.
- *
- * Strips the --dry-run flag and its variants (--dry-run=true, --dry-run=false, etc.),
- * producing a hint like: `delete --id abc --force` (without --dry-run).
- *
- * @param argv - Parsed argv to strip --dry-run from. Defaults to `process.argv.slice(2)`.
- */
-function buildDryRunHint(
-  argv: readonly string[] = process.argv.slice(2)
-): CLIHint | undefined {
-  const filteredArgs = argv.filter(
-    (arg) => arg !== "--dry-run" && !arg.startsWith("--dry-run=")
-  );
-  const command = filteredArgs.join(" ");
-  if (!command) return undefined;
-  return {
-    description: "Execute without dry-run",
-    command,
-  };
-}
-
-/**
- * Default error category for errors that aren't OutfitterError.
- */
-const DEFAULT_CATEGORY: ErrorCategory = "internal";
-
-/**
- * Default exit code for unknown categories.
- */
-const DEFAULT_EXIT_CODE = 1;
-
-/**
- * Extract error category from an error object.
- * Works with OutfitterError instances and duck-typed errors.
- */
-function extractCategory(error: unknown): ErrorCategory {
-  if (
-    error !== null &&
-    typeof error === "object" &&
-    "category" in error &&
-    typeof (error as Record<string, unknown>)["category"] === "string"
-  ) {
-    const cat = (error as Record<string, unknown>)["category"] as string;
-    if (cat in exitCodeMap) {
-      return cat as ErrorCategory;
-    }
-  }
-  return DEFAULT_CATEGORY;
-}
-
-/**
- * Extract error message from an error object.
- */
-function extractMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-}
-
-/**
- * Extract retryAfterSeconds from an error object (if present).
- * Works with RateLimitError instances and duck-typed errors.
- */
-function extractRetryAfterSeconds(error: unknown): number | undefined {
-  if (
-    error !== null &&
-    typeof error === "object" &&
-    "retryAfterSeconds" in error &&
-    typeof (error as Record<string, unknown>)["retryAfterSeconds"] === "number"
-  ) {
-    return (error as Record<string, unknown>)["retryAfterSeconds"] as number;
-  }
-  return undefined;
-}
-
-/**
- * Get exit code for an error category.
- */
-function getExitCode(category: ErrorCategory): number {
-  return exitCodeMap[category] ?? DEFAULT_EXIT_CODE;
-}
-
-/**
- * Format an envelope for human-readable output.
- * Returns stdout and stderr portions separately.
- */
-function formatEnvelopeHuman(envelope: CommandEnvelope): {
-  stdout: string;
-  stderr: string;
-} {
-  if (envelope.ok) {
-    const parts: string[] = [];
-
-    // Format the result
-    const formatted = formatHuman(envelope.result);
-    if (formatted) {
-      parts.push(formatted);
-    }
-
-    // Format hints as suggestions
-    if (envelope.hints && envelope.hints.length > 0) {
-      parts.push("");
-      parts.push("Hints:");
-      for (const hint of envelope.hints) {
-        parts.push(`  ${hint.description}`);
-        if (hint.command) {
-          parts.push(`    $ ${hint.command}`);
-        }
-      }
-    }
-
-    return { stdout: parts.join("\n"), stderr: "" };
-  }
-
-  // Error path
-  const parts: string[] = [];
-  parts.push(`Error: ${envelope.error.message}`);
-
-  // Format hints as suggestions
-  if (envelope.hints && envelope.hints.length > 0) {
-    parts.push("");
-    parts.push("Hints:");
-    for (const hint of envelope.hints) {
-      parts.push(`  ${hint.description}`);
-      if (hint.command) {
-        parts.push(`    $ ${hint.command}`);
-      }
-    }
-  }
-
-  return { stdout: "", stderr: parts.join("\n") };
-}
+// Re-export envelope construction functions
+export {
+  createErrorEnvelope,
+  createSuccessEnvelope,
+} from "./internal/envelope-helpers.js";
 
 // =============================================================================
 // Public API
@@ -658,11 +296,15 @@ export async function runHandler<
   }
 }
 
+// =============================================================================
+// Internal (file-scoped)
+// =============================================================================
+
 /**
  * Output an error envelope and exit with mapped exit code.
  */
 function outputErrorEnvelope(
-  envelope: ErrorEnvelope,
+  envelope: import("./internal/envelope-types.js").ErrorEnvelope,
   isJsonMode: boolean
 ): never {
   const exitCode = getExitCode(envelope.error.category);
@@ -678,17 +320,4 @@ function outputErrorEnvelope(
 
   // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
   process.exit(exitCode);
-}
-
-/**
- * Safely call a hint function, returning undefined if it throws.
- * Hint functions should never cause the command to fail.
- */
-function safeCallHintFn(fn: () => CLIHint[]): CLIHint[] | undefined {
-  try {
-    const hints = fn();
-    return hints.length > 0 ? hints : undefined;
-  } catch {
-    return undefined;
-  }
 }
