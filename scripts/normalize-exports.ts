@@ -158,7 +158,7 @@ async function main(): Promise<void> {
   if (check) {
     if (result.changedPackages.length > 0) {
       console.error(
-        `[normalize-exports] Export ordering drift in ${result.changedPackages.length} package(s):`
+        `[normalize-exports] Export normalization needed in ${result.changedPackages.length} package(s):`
       );
       for (const pkg of result.changedPackages) {
         console.error(`  - ${pkg}`);
@@ -172,7 +172,7 @@ async function main(): Promise<void> {
 
   if (result.changedPackages.length > 0) {
     console.log(
-      `[normalize-exports] Sorted exports in ${result.changedPackages.length} package(s)`
+      `[normalize-exports] Normalized exports in ${result.changedPackages.length} package(s)`
     );
   }
 }
