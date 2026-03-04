@@ -288,6 +288,48 @@ function buildRuntimeReexports(sourceContent: string): string[] {
 }
 
 /**
+ * Fixes broken relative paths in shared chunks that re-export from `./internal/`.
+ *
+ * When barrel files re-export from `./internal/*.js` and bunup creates shared
+ * chunks at `dist/shared/@outfitter/`, the relative paths break because
+ * `./internal/` resolves to `dist/shared/@outfitter/internal/` instead of
+ * `dist/internal/`. This plugin rewrites the paths to `../../../internal/`.
+ */
+const fixSharedChunkInternalPaths = (): BunupPlugin => ({
+  name: "fix-shared-chunk-internal-paths",
+  hooks: {
+    onBuildDone: async ({ files }) => {
+      for (const file of files) {
+        if (file.dts) continue;
+        if (!file.fullPath.endsWith(".js")) continue;
+        if (!file.fullPath.includes("/dist/shared/")) continue;
+
+        const content = await Bun.file(file.fullPath).text();
+        if (!content.includes('"./internal/')) continue;
+
+        // Count directory levels from the shared chunk to the dist root
+        // e.g., dist/shared/@outfitter/chunk.js -> 3 levels up to reach dist/
+        const distIndex = file.fullPath.indexOf("/dist/");
+        if (distIndex === -1) continue;
+
+        const afterDist = file.fullPath.slice(distIndex + "/dist/".length);
+        const depth = afterDist.split("/").length - 1; // -1 for the filename
+        const prefix = "../".repeat(depth);
+
+        const fixed = content.replace(
+          /(?<=from\s+")\.\/internal\//g,
+          `${prefix}internal/`
+        );
+
+        if (fixed !== content) {
+          await Bun.write(file.fullPath, fixed);
+        }
+      }
+    },
+  },
+});
+
+/**
  * Work around Bun duplicate export bug with re-exported entrypoints.
  * Removes duplicate export statements that appear consecutively.
  */
@@ -609,7 +651,11 @@ export default defineWorkspace(
     format: ["esm"],
     // Work around Bun duplicate export bug with re-exported entrypoints and
     // repair invalid bare barrel stubs for runtime parsing.
-    plugins: [stripDuplicateExports(), repairBareBarrelExports()],
+    plugins: [
+      stripDuplicateExports(),
+      repairBareBarrelExports(),
+      fixSharedChunkInternalPaths(),
+    ],
     // TypeScript declarations with splitting
     dts: { splitting: true },
     // Auto-generate package.json exports field
