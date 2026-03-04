@@ -101,4 +101,88 @@ describe("no-nested-barrel", () => {
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("noNestedBarrel");
   });
+
+  // maxDepth option tests
+
+  test("maxDepth: 2 allows src/<dir>/index.ts (subpath exports)", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/cli/src/colors/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ maxDepth: 2 }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("valid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("maxDepth: 2 still flags src/<dir>/<subdir>/index.ts", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/tui/src/theme/presets/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ maxDepth: 2 }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("invalid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("noNestedBarrel");
+  });
+
+  test("maxDepth: 3 allows src/<dir>/<subdir>/index.ts", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/tui/src/theme/presets/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ maxDepth: 3 }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("valid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("maxDepth: 3 still flags depth-4 barrels", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/cli/src/a/b/c/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ maxDepth: 3 }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("invalid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("noNestedBarrel");
+  });
+
+  test("maxDepth defaults to 1 when no option provided", () => {
+    // depth 2 should be flagged with default maxDepth
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/cli/src/colors/index.ts",
+      nodes: [{ type: "Program" }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("invalid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("noNestedBarrel");
+  });
+
+  test("maxDepth: 1 is equivalent to default behavior", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/cli/src/colors/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ maxDepth: 1 }],
+      rule: noNestedBarrelRule,
+      sourceText: readFixture("invalid/no-nested-barrel.ts"),
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("noNestedBarrel");
+  });
 });
