@@ -43,7 +43,7 @@ import { formatZodIssues } from "./validation.js";
  * Options for error serialization.
  */
 export interface SerializeErrorOptions {
-  /** Include stack trace. When `isProduction` is true, defaults to false; otherwise defaults to true. */
+  /** Include stack trace (default: false in production, true otherwise). */
   includeStack?: boolean;
 }
 
@@ -164,8 +164,8 @@ function extractContext(
  *
  * @param error - The error to serialize
  * @param options - Serialization options
- * @param isProduction - Whether the environment is production. Defaults to `false` when omitted,
- *   meaning stack traces will be included. Pass `true` in production to strip stacks.
+ * @param isProduction - Whether the environment is production. When omitted, falls back to
+ *   `process.env["NODE_ENV"] === "production"` for safe-by-default stack stripping.
  * @returns JSON-safe serialized error
  *
  * @example
@@ -179,7 +179,9 @@ export function serializeError(
   options?: SerializeErrorOptions,
   isProduction?: boolean
 ): SerializedError {
-  const includeStack = options?.includeStack ?? !(isProduction ?? false);
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: safe default when isProduction not injected
+  const production = isProduction ?? process.env["NODE_ENV"] === "production";
+  const includeStack = options?.includeStack ?? !production;
 
   const context = extractContext(error);
 
