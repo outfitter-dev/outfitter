@@ -607,6 +607,8 @@ export default defineWorkspace(
         exports: {
           exclude: [
             "./bun-version-compat",
+            "./cli/internal",
+            "./cli/internal/*",
             "./cli/check-bunup-registry",
             "./cli/check-boundary-invocations",
             "./cli/check-changeset",

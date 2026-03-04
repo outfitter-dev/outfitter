@@ -9,16 +9,43 @@
  * @packageDocumentation
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+// Re-export public API from internal module
+export {
+  isRedPhaseBranch,
+  isScaffoldBranch,
+  isReleaseBranch,
+  isTestOnlyPath,
+  areFilesTestOnly,
+  canBypassRedPhaseByChangedFiles,
+  hasPackageSourceChanges,
+  createVerificationPlan,
+  checkBunVersion,
+} from "./internal/pre-push-checks.js";
 
-import ts from "typescript";
+export type {
+  PushChangedFiles,
+  VerificationPlan,
+  BunVersionCheckResult,
+} from "./internal/pre-push-checks.js";
 
 import {
-  analyzeSourceFile,
-  calculateCoverage,
-  type DeclarationCoverage,
-} from "./check-tsdoc.js";
+  canBypassRedPhaseByChangedFiles,
+  checkBunVersion,
+  createVerificationPlan,
+  getChangedFilesForPush,
+  getCurrentBranch,
+  hasPackageSourceChanges,
+  hasRedPhaseBranchInContext,
+  isRedPhaseBranch,
+  isReleaseBranch,
+  isScaffoldBranch,
+  printTsdocSummary,
+  readPackageScripts,
+} from "./internal/pre-push-checks.js";
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
 
 const COLORS = {
   reset: "\x1b[0m",
@@ -32,211 +59,18 @@ function log(msg: string): void {
   process.stdout.write(`${msg}\n`);
 }
 
-/**
- * Get current git branch name
- */
-function getCurrentBranch(): string {
-  const result = Bun.spawnSync(["git", "rev-parse", "--abbrev-ref", "HEAD"]);
-  return result.stdout.toString().trim();
+function runScript(scriptName: string): boolean {
+  log("");
+  log(`Running: ${COLORS.blue}bun run ${scriptName}${COLORS.reset}`);
+  const result = Bun.spawnSync(["bun", "run", scriptName], {
+    stdio: ["inherit", "inherit", "inherit"],
+  });
+  return result.exitCode === 0;
 }
 
-function runGit(args: readonly string[]): {
-  readonly ok: boolean;
-  readonly lines: readonly string[];
-} {
-  try {
-    const result = Bun.spawnSync(["git", ...args], { stderr: "ignore" });
-    if (result.exitCode !== 0) {
-      return { ok: false, lines: [] };
-    }
-
-    return {
-      ok: true,
-      lines: result.stdout
-        .toString()
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean),
-    };
-  } catch {
-    return { ok: false, lines: [] };
-  }
-}
-
-/**
- * Check if branch is a TDD RED phase branch
- */
-export function isRedPhaseBranch(branch: string): boolean {
-  return (
-    branch.endsWith("-tests") ||
-    branch.endsWith("/tests") ||
-    branch.endsWith("_tests")
-  );
-}
-
-/**
- * Check if branch is a scaffold branch
- */
-export function isScaffoldBranch(branch: string): boolean {
-  return (
-    branch.endsWith("-scaffold") ||
-    branch.endsWith("/scaffold") ||
-    branch.endsWith("_scaffold")
-  );
-}
-
-export function isReleaseBranch(branch: string): boolean {
-  return branch.startsWith("changeset-release/");
-}
-
-const TEST_PATH_PATTERNS = [
-  /(^|\/)__tests__\//,
-  /(^|\/)__snapshots__\//,
-  /\.(test|spec)\.[cm]?[jt]sx?$/,
-  /\.snap$/,
-  /(^|\/)(vitest|jest|bun)\.config\.[cm]?[jt]s$/,
-  /(^|\/)tsconfig\.test\.json$/,
-  /(^|\/)\.env\.test(\.|$)/,
-] as const;
-
-export function isTestOnlyPath(path: string): boolean {
-  const normalized = path.replaceAll("\\", "/");
-  return TEST_PATH_PATTERNS.some((pattern) => pattern.test(normalized));
-}
-
-export function areFilesTestOnly(paths: readonly string[]): boolean {
-  return paths.length > 0 && paths.every((path) => isTestOnlyPath(path));
-}
-
-export interface PushChangedFiles {
-  readonly files: readonly string[];
-  readonly deterministic: boolean;
-  readonly source: "upstream" | "baseRef" | "undetermined";
-}
-
-export function canBypassRedPhaseByChangedFiles(
-  changedFiles: PushChangedFiles
-): boolean {
-  return changedFiles.deterministic && areFilesTestOnly(changedFiles.files);
-}
-
-/**
- * Check whether any changed files are package source files.
- *
- * Matches files under "packages/PKGNAME/src/" (any depth).
- */
-export function hasPackageSourceChanges(
-  changedFiles: PushChangedFiles
-): boolean {
-  const packageSrcPattern = /^packages\/[^/]+\/src\//;
-  return changedFiles.files.some((f) => packageSrcPattern.test(f));
-}
-
-/**
- * Print a one-line TSDoc coverage summary across all workspace packages.
- *
- * Discovers package entry points ("packages/STAR/src/index.ts"), analyzes
- * TSDoc coverage, and outputs a single summary line. This is advisory
- * only -- the result does not affect the exit code.
- */
-async function printTsdocSummary(): Promise<void> {
-  const glob = new Bun.Glob("packages/*/src/index.ts");
-  const cwd = process.cwd();
-  const allDeclarations: DeclarationCoverage[] = [];
-
-  for (const entry of glob.scanSync({ cwd })) {
-    const filePath = resolve(cwd, entry);
-    const content = await Bun.file(filePath).text();
-    const sourceFile = ts.createSourceFile(
-      filePath,
-      content,
-      ts.ScriptTarget.Latest,
-      true
-    );
-    allDeclarations.push(...analyzeSourceFile(sourceFile));
-  }
-
-  if (allDeclarations.length === 0) return;
-
-  const coverage = calculateCoverage(allDeclarations);
-  const parts: string[] = [];
-  if (coverage.documented > 0) parts.push(`${coverage.documented} documented`);
-  if (coverage.partial > 0) parts.push(`${coverage.partial} partial`);
-  if (coverage.undocumented > 0)
-    parts.push(`${coverage.undocumented} undocumented`);
-
-  log(
-    `${COLORS.blue}TSDoc${COLORS.reset}: ${coverage.percentage}% coverage (${parts.join(", ")} of ${coverage.total} total)`
-  );
-}
-
-function resolveBaseRef(): string | undefined {
-  const candidates = [
-    "origin/main",
-    "main",
-    "origin/trunk",
-    "trunk",
-    "origin/master",
-    "master",
-  ] as const;
-
-  for (const candidate of candidates) {
-    const resolved = runGit(["rev-parse", "--verify", "--quiet", candidate]);
-    if (resolved.ok) {
-      return candidate;
-    }
-  }
-
-  return undefined;
-}
-
-function changedFilesFromRange(range: string): {
-  readonly ok: boolean;
-  readonly files: readonly string[];
-} {
-  const result = runGit(["diff", "--name-only", "--diff-filter=d", range]);
-  return {
-    ok: result.ok,
-    files: result.lines,
-  };
-}
-
-function getChangedFilesForPush(): PushChangedFiles {
-  const upstream = runGit([
-    "rev-parse",
-    "--abbrev-ref",
-    "--symbolic-full-name",
-    "@{upstream}",
-  ]);
-  if (upstream.ok && upstream.lines[0]) {
-    const rangeResult = changedFilesFromRange(`${upstream.lines[0]}...HEAD`);
-    if (rangeResult.ok) {
-      return {
-        files: rangeResult.files,
-        deterministic: true,
-        source: "upstream",
-      };
-    }
-  }
-
-  const baseRef = resolveBaseRef();
-  if (baseRef) {
-    const rangeResult = changedFilesFromRange(`${baseRef}...HEAD`);
-    if (rangeResult.ok) {
-      return {
-        files: rangeResult.files,
-        deterministic: true,
-        source: "baseRef",
-      };
-    }
-  }
-
-  return {
-    files: [],
-    deterministic: false,
-    source: "undetermined",
-  };
-}
+// ---------------------------------------------------------------------------
+// RED-phase bypass with logging
+// ---------------------------------------------------------------------------
 
 function maybeSkipForRedPhase(
   reason: "branch" | "context",
@@ -287,174 +121,15 @@ function maybeSkipForRedPhase(
   return true;
 }
 
-/**
- * Check if any branch in context is a RED phase branch
- */
-function hasRedPhaseBranchInContext(currentBranch: string): boolean {
-  // Try gt ls first (Graphite may not be installed)
-  let branches: string[] = [];
-
-  try {
-    const gtResult = Bun.spawnSync(["gt", "ls"], { stderr: "pipe" });
-    if (gtResult.exitCode === 0) {
-      branches = gtResult.stdout
-        .toString()
-        .split("\n")
-        .map((line) => line.replace(/^[│├└─◉◯ ]*/g, "").replace(/ \(.*/, ""))
-        .filter(Boolean);
-    }
-  } catch {
-    // Graphite not installed — fall through to git branch check
-  }
-
-  // Fall back to git branches
-  if (branches.length === 0) {
-    const gitResult = Bun.spawnSync([
-      "git",
-      "branch",
-      "--list",
-      "cli/*",
-      "types/*",
-      "contracts/*",
-    ]);
-    branches = gitResult.stdout
-      .toString()
-      .split("\n")
-      .map((line) => line.replace(/^[* ]+/, ""))
-      .filter(Boolean);
-  }
-
-  for (const branch of branches) {
-    if (branch === currentBranch) continue;
-    if (isRedPhaseBranch(branch)) return true;
-  }
-
-  return false;
-}
-
-type ScriptMap = Readonly<Record<string, string | undefined>>;
-
-export type VerificationPlan =
-  | {
-      readonly ok: true;
-      readonly scripts: readonly string[];
-      readonly source: "verify:ci" | "fallback";
-    }
-  | {
-      readonly ok: false;
-      readonly error: string;
-    };
-
-/**
- * Derive strict pre-push verification from package scripts.
- *
- * Priority:
- * 1) `verify:ci`
- * 2) fallback sequence: `typecheck`, `check|lint`, `build`, `test`
- */
-export function createVerificationPlan(scripts: ScriptMap): VerificationPlan {
-  if (scripts["verify:ci"]) {
-    return { ok: true, scripts: ["verify:ci"], source: "verify:ci" };
-  }
-
-  const requiredScripts = ["typecheck", "build", "test"] as const;
-  const missingRequired: string[] = requiredScripts.filter(
-    (name) => !scripts[name]
-  );
-  const checkOrLint = scripts["check"]
-    ? "check"
-    : scripts["lint"]
-      ? "lint"
-      : undefined;
-
-  if (!checkOrLint || missingRequired.length > 0) {
-    const missing = checkOrLint
-      ? missingRequired
-      : [...missingRequired, "check|lint"];
-    return {
-      ok: false,
-      error: `Missing required scripts for strict pre-push verification: ${missing.join(", ")}`,
-    };
-  }
-
-  return {
-    ok: true,
-    scripts: ["typecheck", checkOrLint, "build", "test"],
-    source: "fallback",
-  };
-}
-
-function readPackageScripts(cwd: string = process.cwd()): ScriptMap {
-  const packageJsonPath = join(cwd, "package.json");
-  if (!existsSync(packageJsonPath)) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(readFileSync(packageJsonPath, "utf-8")) as {
-      scripts?: Record<string, unknown>;
-    };
-    const scripts = parsed.scripts ?? {};
-    const normalized: Record<string, string> = {};
-
-    for (const [name, value] of Object.entries(scripts)) {
-      if (typeof value === "string") {
-        normalized[name] = value;
-      }
-    }
-
-    return normalized;
-  } catch {
-    return {};
-  }
-}
-
-function runScript(scriptName: string): boolean {
-  log("");
-  log(`Running: ${COLORS.blue}bun run ${scriptName}${COLORS.reset}`);
-  const result = Bun.spawnSync(["bun", "run", scriptName], {
-    stdio: ["inherit", "inherit", "inherit"],
-  });
-  return result.exitCode === 0;
-}
-
-export interface BunVersionCheckResult {
-  readonly matches: boolean;
-  readonly expected?: string;
-  readonly actual?: string;
-}
-
-/**
- * Check that the local Bun version matches the pinned version in ".bun-version".
- *
- * @param projectRoot - Directory containing ".bun-version" (defaults to cwd)
- * @returns Result indicating whether versions match
- */
-export function checkBunVersion(
-  projectRoot: string = process.cwd()
-): BunVersionCheckResult {
-  const versionFile = join(projectRoot, ".bun-version");
-  if (!existsSync(versionFile)) {
-    return { matches: true };
-  }
-
-  const expected = readFileSync(versionFile, "utf-8").trim();
-  const actual = Bun.version;
-
-  if (expected === actual) {
-    return { matches: true };
-  }
-
-  return { matches: false, expected, actual };
-}
+// ---------------------------------------------------------------------------
+// Runner
+// ---------------------------------------------------------------------------
 
 export interface PrePushOptions {
   force?: boolean;
 }
 
-/**
- * Main pre-push command
- */
+/** Main pre-push command */
 export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   log(`${COLORS.blue}Pre-push verify${COLORS.reset} (TDD-aware)`);
   log("");
@@ -555,7 +230,7 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   const changedFiles = getChangedFilesForPush();
   if (hasPackageSourceChanges(changedFiles)) {
     try {
-      await printTsdocSummary();
+      await printTsdocSummary(log);
     } catch {
       // Advisory only — never block push on TSDoc summary failure
     }
