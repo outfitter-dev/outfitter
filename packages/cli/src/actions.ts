@@ -178,6 +178,7 @@ async function runAction(
   const validation = validateInput(action.input, input);
 
   if (validation.isErr()) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
     throw validation.error;
   }
 
@@ -185,6 +186,7 @@ async function runAction(
 
   const result = await action.handler(validation.value, ctx);
   if (result.isErr()) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
     throw result.error;
   }
 }
@@ -202,6 +204,7 @@ function createCommand(
   const { name, args } = splitCommandSpec(commandSpec);
 
   if (!name) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Missing CLI command name for action ${action.id}`);
   }
 
@@ -236,6 +239,7 @@ export function buildCliCommands(
     ((_input) =>
       createHandlerContext({
         cwd: process.cwd(),
+        // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: pass env to handler context
         env: process.env as Record<string, string | undefined>,
       }));
 
@@ -274,6 +278,7 @@ export function buildCliCommands(
 
       if (!name || isArgumentToken(name)) {
         if (baseAction) {
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: duplicate base action in group
           throw new Error(
             `Group '${groupName}' defines multiple base actions: '${baseAction.id}' and '${action.id}'.`
           );

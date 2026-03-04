@@ -40,6 +40,7 @@ export interface TerminalOptions {
 export function getEnvValue(
   key: "NO_COLOR" | "FORCE_COLOR"
 ): string | undefined {
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   return process.env[key];
 }
 

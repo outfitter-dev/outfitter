@@ -132,9 +132,11 @@ export function resolveOutputMode(
   }
 
   // 4. Environment variable fallback (JSONL takes priority)
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   if (process.env["OUTFITTER_JSONL"] === "1") {
     return { mode: "jsonl", source: "env" };
   }
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   if (process.env["OUTFITTER_JSON"] === "1") {
     return { mode: "json", source: "env" };
   }

@@ -30,6 +30,7 @@ const UNSAFE_PATH_PATTERN = /(?:^|[\\/])\.\.(?:[\\/]|$)|^[\\/]|^[a-zA-Z]:/;
  */
 function validatePathComponent(component: string, name: string): void {
   if (UNSAFE_PATH_PATTERN.test(component)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: path traversal security check
     throw new Error(`Security: path traversal detected in ${name}`);
   }
 }
@@ -46,6 +47,7 @@ function getDefaultStateHome(): string {
     case "darwin":
       return path.join(home, "Library", "Application Support");
     case "win32":
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: platform-specific path lookup
       return process.env["LOCALAPPDATA"] ?? path.join(home, "AppData", "Local");
     default:
       return path.join(home, ".local", "state");
@@ -67,6 +69,7 @@ function getStatePath(options: CursorOptions): string {
     validatePathComponent(options.context, "context");
   }
 
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const xdgState = process.env["XDG_STATE_HOME"] ?? getDefaultStateHome();
   const parts = [xdgState, options.toolName, "cursors", options.command];
   if (options.context) {

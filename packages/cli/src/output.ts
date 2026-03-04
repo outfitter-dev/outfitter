@@ -65,7 +65,9 @@ export function detectMode(format?: OutputMode): OutputMode {
   }
 
   // Check environment variables (JSONL takes priority over JSON)
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envJsonl = process.env["OUTFITTER_JSONL"];
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envJson = process.env["OUTFITTER_JSON"];
   if (envJsonl === "1") return "jsonl";
   if (envJson === "1") return "json";
@@ -397,6 +399,7 @@ export function exitWithError(error: Error, format?: OutputMode): never {
  */
 export function resolveVerbose(verbose?: boolean): boolean {
   // 1. OUTFITTER_VERBOSE env var (highest precedence)
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envVerbose = process.env["OUTFITTER_VERBOSE"];
   if (envVerbose === "1") return true;
   if (envVerbose === "0") return false;

@@ -203,6 +203,7 @@ export async function collectIds(
       // @- means stdin
       if (filePath === "-") {
         if (!allowStdin) {
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: stdin not allowed per options
           throw new Error("Reading from stdin is not allowed");
         }
         const stdinContent = await readStdin();
@@ -214,11 +215,13 @@ export async function collectIds(
       } else {
         // @file reference
         if (!allowFile) {
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: file references not allowed per options
           throw new Error("File references are not allowed");
         }
 
         // Security: validate path doesn't contain traversal patterns
         if (!isSecurePath(filePath, true)) {
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: path traversal security check
           throw new Error(
             `Security error: path traversal not allowed: ${filePath}`
           );
@@ -227,6 +230,7 @@ export async function collectIds(
         const file = Bun.file(filePath);
         const exists = await file.exists();
         if (!exists) {
+          // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: file must exist
           throw new Error(`File not found: ${filePath}`);
         }
         const content = await file.text();
@@ -294,6 +298,7 @@ export async function expandFileArg(
 
   // Security: validate path doesn't contain traversal patterns
   if (!isSecurePath(filePath, true)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: path traversal security check
     throw new Error(`Security error: path traversal not allowed: ${filePath}`);
   }
 
@@ -301,6 +306,7 @@ export async function expandFileArg(
   const file = Bun.file(filePath);
   const exists = await file.exists();
   if (!exists) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: file must exist
     throw new Error(`File not found: ${filePath}`);
   }
 
@@ -308,6 +314,7 @@ export async function expandFileArg(
   if (maxSize !== undefined) {
     const size = file.size;
     if (size > maxSize) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: file size security check
       throw new Error(`File exceeds maximum size of ${maxSize} bytes`);
     }
   }
@@ -358,6 +365,7 @@ export async function parseGlob(
 
   // Security: validate pattern doesn't escape workspace
   if (!isSecureGlobPattern(pattern)) {
+    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: glob pattern security check
     throw new Error(
       `Security error: glob pattern may escape workspace: ${pattern}`
     );
