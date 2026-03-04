@@ -512,6 +512,8 @@ export default defineWorkspace(
             "./core/drift",
             "./core/errors",
             "./core/expected-output",
+            "./core/internal",
+            "./core/internal/*",
             "./core/llms-render",
             "./core/options",
             "./core/path-utils",
