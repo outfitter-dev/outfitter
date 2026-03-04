@@ -43,7 +43,7 @@ import { formatZodIssues } from "./validation.js";
  * Options for error serialization.
  */
 export interface SerializeErrorOptions {
-  /** Include stack trace (default: false in production, true in development) */
+  /** Include stack trace. When `isProduction` is true, defaults to false; otherwise defaults to true. */
   includeStack?: boolean;
 }
 
