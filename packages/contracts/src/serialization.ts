@@ -164,7 +164,8 @@ function extractContext(
  *
  * @param error - The error to serialize
  * @param options - Serialization options
- * @param isProduction - Whether the environment is production (injected to avoid process.env access)
+ * @param isProduction - Whether the environment is production. Defaults to `false` when omitted,
+ *   meaning stack traces will be included. Pass `true` in production to strip stacks.
  * @returns JSON-safe serialized error
  *
  * @example
