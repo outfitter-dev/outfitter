@@ -1,30 +1,11 @@
 {
   "name": "@outfitter/tui",
-  "version": "0.2.2",
   "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
-  "keywords": [
-    "bun",
-    "outfitter",
-    "prompt",
-    "rendering",
-    "spinner",
-    "table",
-    "terminal",
-    "theme",
-    "tui",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/tui"
-  },
+  "version": "0.2.2",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -228,6 +209,25 @@
       }
     }
   },
+  "keywords": [
+    "bun",
+    "outfitter",
+    "prompt",
+    "rendering",
+    "spinner",
+    "table",
+    "terminal",
+    "theme",
+    "tui",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/tui"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

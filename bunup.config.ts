@@ -542,6 +542,7 @@ export default defineWorkspace(
             "./demo/templates",
             "./demo/types",
             "./render/*",
+            "./render/internal/*",
           ],
         },
       }),
