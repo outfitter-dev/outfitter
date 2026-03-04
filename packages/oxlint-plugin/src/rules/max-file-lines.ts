@@ -74,9 +74,9 @@ export const maxFileLinesRule: RuleModule = {
     ],
     messages: {
       fileTooLongWarn:
-        "File has {{lineCount}} lines (warn threshold: {{warnLimit}}). Consider splitting into smaller modules.",
+        "File has {{lineCount}} lines (warn threshold: {{warnLimit}}). Consider extracting implementation into src/internal/ modules.",
       fileTooLongError:
-        "File has {{lineCount}} lines (error threshold: {{errorLimit}}). Split this file before adding more code.",
+        "File has {{lineCount}} lines (error threshold: {{errorLimit}}). Extract implementation into src/internal/ modules before adding more code. See docs/reference/file-splitting.md.",
     },
   },
   create(context: RuleContext) {

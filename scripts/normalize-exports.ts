@@ -1,9 +1,11 @@
 /**
- * Normalizes the `exports` field in package.json files to alphabetical key order.
+ * Normalizes the `exports` field in package.json files.
  *
- * Bunup auto-generates exports from filesystem discovery, which produces
- * non-deterministic key ordering. This causes spurious merge conflicts in
- * stacked branches where the semantic exports are identical but key order differs.
+ * Two responsibilities:
+ * 1. Alphabetize export keys to prevent non-deterministic ordering from causing
+ *    spurious merge conflicts in stacked branches.
+ * 2. Strip `./internal` and `./internal/*` exports as a safety net — these are
+ *    implementation details that should never appear in the public surface.
  *
  * Runs as a post-build step after bunup writes exports.
  */
@@ -41,11 +43,22 @@ async function discoverWorkspaceRoots(cwd: string): Promise<string[]> {
   return roots.toSorted();
 }
 
+const INTERNAL_EXPORT_PREFIXES = ["./internal"];
+
+function isInternalExport(key: string): boolean {
+  return INTERNAL_EXPORT_PREFIXES.some(
+    (prefix) => key === prefix || key.startsWith(`${prefix}/`)
+  );
+}
+
 function sortExports(
   exports: Record<string, unknown>
 ): Record<string, unknown> {
   const sorted: Record<string, unknown> = {};
   for (const key of Object.keys(exports).toSorted()) {
+    if (isInternalExport(key)) {
+      continue;
+    }
     sorted[key] = exports[key];
   }
   return sorted;
@@ -145,7 +158,7 @@ async function main(): Promise<void> {
   if (check) {
     if (result.changedPackages.length > 0) {
       console.error(
-        `[normalize-exports] Export ordering drift in ${result.changedPackages.length} package(s):`
+        `[normalize-exports] Export normalization needed in ${result.changedPackages.length} package(s):`
       );
       for (const pkg of result.changedPackages) {
         console.error(`  - ${pkg}`);
@@ -159,7 +172,7 @@ async function main(): Promise<void> {
 
   if (result.changedPackages.length > 0) {
     console.log(
-      `[normalize-exports] Sorted exports in ${result.changedPackages.length} package(s)`
+      `[normalize-exports] Normalized exports in ${result.changedPackages.length} package(s)`
     );
   }
 }

@@ -408,6 +408,27 @@ const repairBareBarrelExports = (): BunupPlugin => ({
 });
 
 /**
+ * Unions `src/internal/` exclusion patterns into every package's export config.
+ *
+ * Ensures `src/internal/**` files never leak into `package.json#exports`,
+ * regardless of whether the package declares its own exclusions.
+ */
+const BASE_INTERNAL_EXCLUDE = ["./internal", "./internal/*"];
+
+function withDefaults(config?: {
+  exports?: { exclude?: string[]; customExports?: Record<string, string> };
+}): { exports: { exclude: string[]; customExports?: Record<string, string> } } {
+  const packageExclude = config?.exports?.exclude ?? [];
+  return {
+    ...config,
+    exports: {
+      ...config?.exports,
+      exclude: [...new Set([...BASE_INTERNAL_EXCLUDE, ...packageExclude])],
+    },
+  };
+}
+
+/**
  * Bunup workspace configuration for tree-shakeable library builds.
  *
  * All library packages use shared options:
@@ -424,42 +445,27 @@ export default defineWorkspace(
     {
       name: "@outfitter/types",
       root: "packages/types",
-      // Prevent future internal utilities from leaking into the public API.
-      // All current source files are intentional exports.
-      config: {
-        exports: {
-          exclude: ["./internal", "./internal/*"],
-        },
-      },
+      config: withDefaults(),
     },
     {
       name: "@outfitter/contracts",
       root: "packages/contracts",
-      // Prevent future internal utilities from leaking into the public API.
-      // All current source files (including assert/ and result/) are intentional exports.
-      config: {
-        exports: {
-          exclude: ["./internal", "./internal/*"],
-        },
-      },
+      config: withDefaults(),
     },
     {
       name: "@outfitter/config",
       root: "packages/config",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/docs",
       root: "packages/docs",
-      // Publish a stable top-level API from src/index.ts and ./core subpath.
-      // Internal command modules and the CLI shim are not public imports.
-      config: {
+      config: withDefaults({
         exports: {
           exclude: [
             "./cli",
             "./command/*",
             "./commands/*",
-            // Internal core helpers from modularization passes are intentionally
-            // private; keep only the stable docs-map/public core entrypoints.
             "./core/content-processing",
             "./core/drift",
             "./core/errors",
@@ -472,23 +478,21 @@ export default defineWorkspace(
             "./version",
           ],
         },
-      },
+      }),
     },
     {
       name: "@outfitter/cli",
       root: "packages/cli",
-      // Exclude internal exports
-      config: {
+      config: withDefaults({
         exports: {
           exclude: ["./colors/colors"],
         },
-      },
+      }),
     },
     {
       name: "@outfitter/tui",
       root: "packages/tui",
-      // Exclude internal exports - consumers should use barrel exports (./render, ./demo)
-      config: {
+      config: withDefaults({
         exports: {
           exclude: [
             "./demo/renderers/*",
@@ -498,59 +502,66 @@ export default defineWorkspace(
             "./render/*",
           ],
         },
-      },
+      }),
     },
     {
       name: "@outfitter/daemon",
       root: "packages/daemon",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/file-ops",
       root: "packages/file-ops",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/index",
       root: "packages/index",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/logging",
       root: "packages/logging",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/mcp",
       root: "packages/mcp",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/schema",
       root: "packages/schema",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/state",
       root: "packages/state",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/presets",
       root: "packages/presets",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/oxlint-plugin",
       root: "packages/oxlint-plugin",
-      config: {
+      config: withDefaults({
         exports: {
           exclude: ["./rules", "./rules/*"],
         },
-      },
+      }),
     },
     {
       name: "@outfitter/testing",
       root: "packages/testing",
+      config: withDefaults(),
     },
     {
       name: "@outfitter/tooling",
       root: "packages/tooling",
-      // CLI scripts and internal registry modules are not public API.
-      // Public surface: ".", "./cli/check", "./cli/fix", "./cli/init", "./registry"
-      config: {
+      config: withDefaults({
         exports: {
           exclude: [
             "./bun-version-compat",
@@ -572,27 +583,21 @@ export default defineWorkspace(
             "./lefthook.yml": "./lefthook.yml",
           },
         },
-      },
+      }),
     },
     {
       name: "outfitter",
       root: "apps/outfitter",
-      // Prevent internal utilities from leaking into the public API.
-      // Current exports cover all command, engine, and create subpaths.
-      config: {
+      config: withDefaults({
         exports: {
-          exclude: ["./actions/*", "./internal/*", "./output-mode"],
+          exclude: ["./actions/*", "./output-mode"],
         },
-      },
+      }),
     },
     {
       name: "outfitter-cli-demo",
       root: "apps/cli-demo",
-      config: {
-        exports: {
-          exclude: ["./internal/*"],
-        },
-      },
+      config: withDefaults(),
     },
   ],
   {
