@@ -60,10 +60,10 @@ export function createCLI(config: CLIConfig): CLI {
     }
 
     if (bridgedJsonEnvPrevious === undefined) {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
       delete process.env["OUTFITTER_JSON"];
     } else {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
       process.env["OUTFITTER_JSON"] = bridgedJsonEnvPrevious;
     }
 
@@ -83,9 +83,9 @@ export function createCLI(config: CLIConfig): CLI {
   program.hook("preAction", (thisCommand) => {
     const allOpts = thisCommand.optsWithGlobals();
     if (allOpts["json"] === true && !bridgedJsonEnvActive) {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var state capture before flag bridging
       bridgedJsonEnvPrevious = process.env["OUTFITTER_JSON"];
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var bridging: propagates --json flag
       process.env["OUTFITTER_JSON"] = "1";
       bridgedJsonEnvActive = true;
     }

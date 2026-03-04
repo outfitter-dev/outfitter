@@ -286,6 +286,6 @@ export function validateInput(
 
   const message = detail ? `${summary}\n${detail}` : summary;
 
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: Commander action catches and converts to error envelope
+  // eslint-disable-next-line outfitter/no-throw-in-handler -- throw: validation failure; Commander action handler catches and formats as error envelope
   throw ValidationError.fromMessage(message, { issues });
 }
