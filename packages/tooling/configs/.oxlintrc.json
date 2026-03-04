@@ -20,7 +20,8 @@
     "**/node_modules/**",
     "**/dist/**",
     "**/.turbo/**",
-    "**/*.gen.ts"
+    "**/*.gen.ts",
+    "**/__tests__/fixtures/**"
   ],
   "rules": {
     "no-void": "off",
@@ -31,7 +32,10 @@
     "outfitter/no-cross-tier-import": "error",
     "outfitter/no-deep-relative-import": "warn",
     "outfitter/no-nested-barrel": "warn",
-    "outfitter/no-process-env-in-packages": "warn",
+    "outfitter/no-process-env-in-packages": [
+      "warn",
+      { "allowedPackages": ["config"] }
+    ],
     "outfitter/no-process-exit-in-packages": "error",
     "outfitter/no-throw-in-handler": "error",
     "outfitter/prefer-bun-api": "warn",

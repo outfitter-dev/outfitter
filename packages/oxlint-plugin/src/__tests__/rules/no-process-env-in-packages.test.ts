@@ -112,4 +112,30 @@ describe("no-process-env-in-packages", () => {
 
     expect(reports).toHaveLength(0);
   });
+
+  test("skips packages listed in allowedPackages option", () => {
+    const reports = runRuleForEvent({
+      event: "MemberExpression",
+      filename: "packages/config/src/environment.ts",
+      nodes: [createMemberExpressionNode("process", "env")],
+      options: [{ allowedPackages: ["config"] }],
+      rule: noProcessEnvInPackagesRule,
+      sourceText: 'const val = process.env["NODE_ENV"];',
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("still reports for packages not in allowedPackages", () => {
+    const reports = runRuleForEvent({
+      event: "MemberExpression",
+      filename: "packages/logging/src/logger.ts",
+      nodes: [createMemberExpressionNode("process", "env")],
+      options: [{ allowedPackages: ["config"] }],
+      rule: noProcessEnvInPackagesRule,
+      sourceText: 'const val = process.env["LOG_LEVEL"];',
+    });
+
+    expect(reports).toHaveLength(1);
+  });
 });

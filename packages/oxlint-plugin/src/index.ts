@@ -1,5 +1,5 @@
 import packageMetadata from "../package.json";
-import { rules as ruleRegistry } from "./rules/index.js";
+import { rules as ruleRegistry } from "./rules/registry.js";
 
 export interface OutfitterPlugin {
   readonly configs: Record<
@@ -40,7 +40,10 @@ plugin.configs["recommended"] = {
     "outfitter/no-deep-relative-import": "warn",
     "outfitter/no-nested-barrel": "warn",
     "outfitter/no-process-exit-in-packages": "error",
-    "outfitter/no-process-env-in-packages": "warn",
+    "outfitter/no-process-env-in-packages": [
+      "warn",
+      { allowedPackages: ["config"] },
+    ],
     "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],
     "outfitter/prefer-bun-api": "warn",
     "outfitter/snapshot-location": "warn",
@@ -49,5 +52,5 @@ plugin.configs["recommended"] = {
   },
 };
 
-export { rules } from "./rules/index.js";
+export { rules } from "./rules/registry.js";
 export default plugin;

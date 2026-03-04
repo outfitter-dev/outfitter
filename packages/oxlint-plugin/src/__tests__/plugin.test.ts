@@ -43,7 +43,10 @@ describe("oxlint plugin scaffold", () => {
       "outfitter/no-deep-relative-import": "warn",
       "outfitter/no-nested-barrel": "warn",
       "outfitter/no-process-exit-in-packages": "error",
-      "outfitter/no-process-env-in-packages": "warn",
+      "outfitter/no-process-env-in-packages": [
+        "warn",
+        { allowedPackages: ["config"] },
+      ],
       "outfitter/max-file-lines": ["error", { warn: 200, error: 400 }],
       "outfitter/prefer-bun-api": "warn",
       "outfitter/snapshot-location": "warn",
