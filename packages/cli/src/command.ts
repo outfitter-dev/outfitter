@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Fluent builder pattern; splitting fragments the API */
 /**
  * Command builder for creating typed CLI commands.
  *
