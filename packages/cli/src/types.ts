@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Types-only file; splitting interfaces across files hurts discoverability */
 /**
  * Type definitions for @outfitter/cli
  *
