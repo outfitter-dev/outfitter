@@ -75,10 +75,14 @@ describe("serializeError()", () => {
 
   it("strips stack in production (isProduction=true)", () => {
     const error = new InternalError({ message: "Unexpected error" });
-    const serialized = serializeError(error, undefined, true);
 
-    // In production, stack should be stripped (stored in context.stack when present)
-    expect(serialized.context?.stack).toBeUndefined();
+    // Development mode: stack should appear in context.stack
+    const devSerialized = serializeError(error, undefined, false);
+    expect(devSerialized.context?.stack).toBeDefined();
+
+    // Production mode: stack should be stripped
+    const prodSerialized = serializeError(error, undefined, true);
+    expect(prodSerialized.context?.stack).toBeUndefined();
   });
 
   it("includes stack when includeStack: true", () => {
