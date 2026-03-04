@@ -1,6 +1,18 @@
+/**
+ * Serialization utilities for errors and JSON.
+ *
+ * Provides error serialization/deserialization for transport across process
+ * boundaries (MCP, IPC, HTTP), and safe JSON stringify/parse wrappers that
+ * handle edge cases (circular references, BigInt, sensitive data) and return
+ * Result types instead of throwing.
+ *
+ * @module serialization
+ */
+
 import { Result } from "better-result";
 import type { z } from "zod";
 
+import type { OutfitterError, SerializedError } from "./errors.js";
 import {
   AlreadyExistsError,
   AmbiguousError,
@@ -11,10 +23,8 @@ import {
   InternalError,
   NetworkError,
   NotFoundError,
-  type OutfitterError,
   PermissionError,
   RateLimitError,
-  type SerializedError,
   TimeoutError,
   ValidationError,
 } from "./errors.js";
@@ -25,11 +35,15 @@ import {
 } from "./redactor.js";
 import { formatZodIssues } from "./validation.js";
 
+// ---------------------------------------------------------------------------
+// Error serialization
+// ---------------------------------------------------------------------------
+
 /**
  * Options for error serialization.
  */
 export interface SerializeErrorOptions {
-  /** Include stack trace (default: false in production, true in development) */
+  /** Include stack trace (default: false in production, true otherwise). */
   includeStack?: boolean;
 }
 
@@ -150,6 +164,8 @@ function extractContext(
  *
  * @param error - The error to serialize
  * @param options - Serialization options
+ * @param isProduction - Whether the environment is production. When omitted, falls back to
+ *   `process.env["NODE_ENV"] === "production"` for safe-by-default stack stripping.
  * @returns JSON-safe serialized error
  *
  * @example
@@ -160,10 +176,12 @@ function extractContext(
  */
 export function serializeError(
   error: OutfitterError,
-  options?: SerializeErrorOptions
+  options?: SerializeErrorOptions,
+  isProduction?: boolean
 ): SerializedError {
-  const isProduction = process.env["NODE_ENV"] === "production";
-  const includeStack = options?.includeStack ?? !isProduction;
+  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: safe default when isProduction not injected
+  const production = isProduction ?? process.env["NODE_ENV"] === "production";
+  const includeStack = options?.includeStack ?? !production;
 
   const context = extractContext(error);
 
@@ -384,6 +402,10 @@ export function deserializeError(data: SerializedError): OutfitterError {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Safe JSON utilities
+// ---------------------------------------------------------------------------
 
 /** Module-scope redactor singleton — avoids re-creating on every call. */
 const defaultRedactor = createRedactor({

@@ -73,19 +73,16 @@ describe("serializeError()", () => {
     expect(serialized.context?.resourceId).toBe("abc123");
   });
 
-  it("strips stack in production (NODE_ENV=production)", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+  it("strips stack in production (isProduction=true)", () => {
+    const error = new InternalError({ message: "Unexpected error" });
 
-    try {
-      const error = new InternalError({ message: "Unexpected error" });
-      const serialized = serializeError(error);
+    // Development mode: stack should appear in context.stack
+    const devSerialized = serializeError(error, undefined, false);
+    expect(devSerialized.context?.stack).toBeDefined();
 
-      // In production, stack should be stripped unless explicitly requested
-      expect(serialized).not.toHaveProperty("stack");
-    } finally {
-      process.env.NODE_ENV = originalEnv;
-    }
+    // Production mode: stack should be stripped
+    const prodSerialized = serializeError(error, undefined, true);
+    expect(prodSerialized.context?.stack).toBeUndefined();
   });
 
   it("includes stack when includeStack: true", () => {

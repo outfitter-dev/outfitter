@@ -1,5 +1,22 @@
+/**
+ * Error taxonomy and concrete error classes.
+ *
+ * Defines the error classification system used throughout Outfitter for:
+ * - CLI exit code determination
+ * - HTTP status code mapping
+ * - JSON-RPC error code mapping (MCP protocol)
+ * - Agent retry decisions (transient vs permanent)
+ * - Granular error code identification
+ *
+ * @module errors
+ */
+
 import type { TaggedErrorClass } from "better-result";
 import { TaggedError } from "better-result";
+
+// ---------------------------------------------------------------------------
+// Taxonomy: categories, code maps, and metadata
+// ---------------------------------------------------------------------------
 
 /**
  * Error categories for classification, exit codes, and HTTP status mapping.
@@ -60,18 +77,18 @@ export const statusCodeMap: Record<ErrorCategory, number> = {
  * Maps error category to JSON-RPC 2.0 error code (for MCP protocol compliance).
  *
  * Standard protocol codes (-32600 series) for direct mappings:
- * - validation → -32602 (Invalid params)
- * - internal → -32603 (Internal error)
+ * - validation -> -32602 (Invalid params)
+ * - internal -> -32603 (Internal error)
  *
  * Implementation-defined server error codes (-32000 to -32099) for domain categories:
- * - auth → -32000
- * - timeout → -32001
- * - conflict → -32002
- * - permission → -32003
- * - rate_limit → -32004
- * - network → -32005
- * - cancelled → -32006
- * - not_found → -32007
+ * - auth -> -32000
+ * - timeout -> -32001
+ * - conflict -> -32002
+ * - permission -> -32003
+ * - rate_limit -> -32004
+ * - network -> -32005
+ * - cancelled -> -32006
+ * - not_found -> -32007
  */
 export const jsonRpcCodeMap: Record<ErrorCategory, number> = {
   validation: -32_602,
@@ -248,11 +265,12 @@ export function getStatusCode(category: ErrorCategory): number {
   return statusCodeMap[category];
 }
 
-// ============================================================================
-// Concrete Error Classes
-// ============================================================================
+// ---------------------------------------------------------------------------
+// TaggedError base classes
+// ---------------------------------------------------------------------------
+// Base classes avoid TS9021 warnings from extending expressions directly.
+// Each base class is a TaggedErrorClass that concrete error classes extend.
 
-// Base classes avoid TS9021 warnings from extending expressions.
 const ValidationErrorBase: TaggedErrorClass<
   "ValidationError",
   {
@@ -405,6 +423,10 @@ const CancelledErrorBase: TaggedErrorClass<
 > = TaggedError("CancelledError")<{
   message: string;
 }>();
+
+// ---------------------------------------------------------------------------
+// Concrete error classes — validation and resource errors
+// ---------------------------------------------------------------------------
 
 /**
  * Input validation failed.
@@ -671,6 +693,10 @@ export class ConflictError extends ConflictErrorBase {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Concrete error classes — operational errors
+// ---------------------------------------------------------------------------
+
 /**
  * Authorization denied.
  *
@@ -867,6 +893,10 @@ export class CancelledError extends CancelledErrorBase {
     return getStatusCode(this.category);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Union types
+// ---------------------------------------------------------------------------
 
 /**
  * Canonical union type of all concrete error class instances.
