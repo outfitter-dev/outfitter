@@ -1,51 +1,14 @@
 {
   "name": "@outfitter/tui",
-  "version": "0.2.2",
   "description": "Terminal UI rendering: tables, lists, boxes, trees, spinners, themes, prompts, and streaming",
-  "keywords": [
-    "bun",
-    "outfitter",
-    "prompt",
-    "rendering",
-    "spinner",
-    "table",
-    "terminal",
-    "theme",
-    "tui",
-    "typescript"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/outfitter-dev/outfitter.git",
-    "directory": "packages/tui"
-  },
+  "version": "0.2.2",
+  "type": "module",
   "files": [
     "dist"
   ],
-  "type": "module",
-  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./borders": {
-      "import": {
-        "types": "./dist/borders/index.d.ts",
-        "default": "./dist/borders/index.js"
-      }
-    },
-    "./box": {
-      "import": {
-        "types": "./dist/box/index.d.ts",
-        "default": "./dist/box/index.js"
-      }
-    },
     "./confirm": {
       "import": {
         "types": "./dist/confirm.d.ts",
@@ -58,19 +21,12 @@
         "default": "./dist/demo/index.js"
       }
     },
-    "./demo/section": {
+    "./borders": {
       "import": {
-        "types": "./dist/demo/section.d.ts",
-        "default": "./dist/demo/section.js"
+        "types": "./dist/borders/index.d.ts",
+        "default": "./dist/borders/index.js"
       }
     },
-    "./list": {
-      "import": {
-        "types": "./dist/list/index.d.ts",
-        "default": "./dist/list/index.js"
-      }
-    },
-    "./package.json": "./package.json",
     "./preset/full": {
       "import": {
         "types": "./dist/preset/full.d.ts",
@@ -83,28 +39,106 @@
         "default": "./dist/preset/standard.js"
       }
     },
-    "./prompt": {
+    "./box": {
       "import": {
-        "types": "./dist/prompt/index.d.ts",
-        "default": "./dist/prompt/index.js"
+        "types": "./dist/box/index.d.ts",
+        "default": "./dist/box/index.js"
       }
     },
-    "./prompt/confirm": {
+    "./tree": {
       "import": {
-        "types": "./dist/prompt/confirm.d.ts",
-        "default": "./dist/prompt/confirm.js"
+        "types": "./dist/tree/index.d.ts",
+        "default": "./dist/tree/index.js"
+      }
+    },
+    "./demo/section": {
+      "import": {
+        "types": "./dist/demo/section.d.ts",
+        "default": "./dist/demo/section.js"
+      }
+    },
+    "./render/internal/box-composition": {
+      "import": {
+        "types": "./dist/render/internal/box-composition.d.ts",
+        "default": "./dist/render/internal/box-composition.js"
+      }
+    },
+    "./render/internal/stack-types": {
+      "import": {
+        "types": "./dist/render/internal/stack-types.d.ts",
+        "default": "./dist/render/internal/stack-types.js"
+      }
+    },
+    "./render/internal/box-helpers": {
+      "import": {
+        "types": "./dist/render/internal/box-helpers.d.ts",
+        "default": "./dist/render/internal/box-helpers.js"
+      }
+    },
+    "./render/internal/hstack": {
+      "import": {
+        "types": "./dist/render/internal/hstack.d.ts",
+        "default": "./dist/render/internal/hstack.js"
+      }
+    },
+    "./render/internal/stack-helpers": {
+      "import": {
+        "types": "./dist/render/internal/stack-helpers.d.ts",
+        "default": "./dist/render/internal/stack-helpers.js"
+      }
+    },
+    "./render/internal/shape-types": {
+      "import": {
+        "types": "./dist/render/internal/shape-types.d.ts",
+        "default": "./dist/render/internal/shape-types.js"
+      }
+    },
+    "./render/internal/vstack": {
+      "import": {
+        "types": "./dist/render/internal/vstack.d.ts",
+        "default": "./dist/render/internal/vstack.js"
+      }
+    },
+    "./render/internal/shape-registry": {
+      "import": {
+        "types": "./dist/render/internal/shape-registry.d.ts",
+        "default": "./dist/render/internal/shape-registry.js"
+      }
+    },
+    "./render/internal/box-types": {
+      "import": {
+        "types": "./dist/render/internal/box-types.d.ts",
+        "default": "./dist/render/internal/box-types.js"
+      }
+    },
+    "./render/internal/stack-conversion": {
+      "import": {
+        "types": "./dist/render/internal/stack-conversion.d.ts",
+        "default": "./dist/render/internal/stack-conversion.js"
+      }
+    },
+    "./render/internal/shape-guards": {
+      "import": {
+        "types": "./dist/render/internal/shape-guards.d.ts",
+        "default": "./dist/render/internal/shape-guards.js"
+      }
+    },
+    "./render": {
+      "import": {
+        "types": "./dist/render/index.d.ts",
+        "default": "./dist/render/index.js"
+      }
+    },
+    "./streaming": {
+      "import": {
+        "types": "./dist/streaming/index.d.ts",
+        "default": "./dist/streaming/index.js"
       }
     },
     "./prompt/group": {
       "import": {
         "types": "./dist/prompt/group.d.ts",
         "default": "./dist/prompt/group.js"
-      }
-    },
-    "./prompt/select": {
-      "import": {
-        "types": "./dist/prompt/select.d.ts",
-        "default": "./dist/prompt/select.js"
       }
     },
     "./prompt/text": {
@@ -125,22 +159,10 @@
         "default": "./dist/prompt/validators.js"
       }
     },
-    "./render": {
+    "./prompt": {
       "import": {
-        "types": "./dist/render/index.d.ts",
-        "default": "./dist/render/index.js"
-      }
-    },
-    "./streaming": {
-      "import": {
-        "types": "./dist/streaming/index.d.ts",
-        "default": "./dist/streaming/index.js"
-      }
-    },
-    "./streaming/ansi": {
-      "import": {
-        "types": "./dist/streaming/ansi.d.ts",
-        "default": "./dist/streaming/ansi.js"
+        "types": "./dist/prompt/index.d.ts",
+        "default": "./dist/prompt/index.js"
       }
     },
     "./streaming/spinner": {
@@ -149,64 +171,16 @@
         "default": "./dist/streaming/spinner.js"
       }
     },
+    "./streaming/ansi": {
+      "import": {
+        "types": "./dist/streaming/ansi.d.ts",
+        "default": "./dist/streaming/ansi.js"
+      }
+    },
     "./streaming/writer": {
       "import": {
         "types": "./dist/streaming/writer.d.ts",
         "default": "./dist/streaming/writer.js"
-      }
-    },
-    "./table": {
-      "import": {
-        "types": "./dist/table/index.d.ts",
-        "default": "./dist/table/index.js"
-      }
-    },
-    "./theme": {
-      "import": {
-        "types": "./dist/theme/index.d.ts",
-        "default": "./dist/theme/index.js"
-      }
-    },
-    "./theme/context": {
-      "import": {
-        "types": "./dist/theme/context.d.ts",
-        "default": "./dist/theme/context.js"
-      }
-    },
-    "./theme/create": {
-      "import": {
-        "types": "./dist/theme/create.d.ts",
-        "default": "./dist/theme/create.js"
-      }
-    },
-    "./theme/presets": {
-      "import": {
-        "types": "./dist/theme/presets/index.d.ts",
-        "default": "./dist/theme/presets/index.js"
-      }
-    },
-    "./theme/presets/bold": {
-      "import": {
-        "types": "./dist/theme/presets/bold.d.ts",
-        "default": "./dist/theme/presets/bold.js"
-      }
-    },
-    "./theme/presets/default": {
-      "import": {
-        "types": "./dist/theme/presets/default.d.ts",
-        "default": "./dist/theme/presets/default.js"
-      }
-    },
-    "./theme/presets/minimal": {
-      "import": {
-        "types": "./dist/theme/presets/minimal.d.ts",
-        "default": "./dist/theme/presets/minimal.js"
-      }
-    },
-    "./theme/presets/rounded": {
-      "import": {
-        "types": "./dist/theme/presets/rounded.d.ts",
-        "default": "./dist/theme/presets/rounded.js"
       }
     },
     "./theme/resolve": {
@@ -215,19 +189,111 @@
         "default": "./dist/theme/resolve.js"
       }
     },
+    "./theme/presets/rounded": {
+      "import": {
+        "types": "./dist/theme/presets/rounded.d.ts",
+        "default": "./dist/theme/presets/rounded.js"
+      }
+    },
+    "./theme/presets/bold": {
+      "import": {
+        "types": "./dist/theme/presets/bold.d.ts",
+        "default": "./dist/theme/presets/bold.js"
+      }
+    },
+    "./theme/presets/minimal": {
+      "import": {
+        "types": "./dist/theme/presets/minimal.d.ts",
+        "default": "./dist/theme/presets/minimal.js"
+      }
+    },
+    "./theme/presets/default": {
+      "import": {
+        "types": "./dist/theme/presets/default.d.ts",
+        "default": "./dist/theme/presets/default.js"
+      }
+    },
+    "./theme/presets": {
+      "import": {
+        "types": "./dist/theme/presets/index.d.ts",
+        "default": "./dist/theme/presets/index.js"
+      }
+    },
+    "./prompt/confirm": {
+      "import": {
+        "types": "./dist/prompt/confirm.d.ts",
+        "default": "./dist/prompt/confirm.js"
+      }
+    },
+    "./prompt/select": {
+      "import": {
+        "types": "./dist/prompt/select.d.ts",
+        "default": "./dist/prompt/select.js"
+      }
+    },
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./list": {
+      "import": {
+        "types": "./dist/list/index.d.ts",
+        "default": "./dist/list/index.js"
+      }
+    },
+    "./table": {
+      "import": {
+        "types": "./dist/table/index.d.ts",
+        "default": "./dist/table/index.js"
+      }
+    },
+    "./theme/context": {
+      "import": {
+        "types": "./dist/theme/context.d.ts",
+        "default": "./dist/theme/context.js"
+      }
+    },
     "./theme/types": {
       "import": {
         "types": "./dist/theme/types.d.ts",
         "default": "./dist/theme/types.js"
       }
     },
-    "./tree": {
+    "./theme": {
       "import": {
-        "types": "./dist/tree/index.d.ts",
-        "default": "./dist/tree/index.js"
+        "types": "./dist/theme/index.d.ts",
+        "default": "./dist/theme/index.js"
       }
-    }
+    },
+    "./theme/create": {
+      "import": {
+        "types": "./dist/theme/create.d.ts",
+        "default": "./dist/theme/create.js"
+      }
+    },
+    "./package.json": "./package.json"
   },
+  "keywords": [
+    "bun",
+    "outfitter",
+    "prompt",
+    "rendering",
+    "spinner",
+    "table",
+    "terminal",
+    "theme",
+    "tui",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/outfitter-dev/outfitter.git",
+    "directory": "packages/tui"
+  },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
