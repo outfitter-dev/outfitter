@@ -109,12 +109,14 @@ export function createTestConfig<T>(
       schema as unknown as { partial?: () => z.ZodType<Partial<T>> }
     ).partial;
     if (typeof maybePartial !== "function") {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- test factory: propagate Zod parse error
       throw parsed.error;
     }
 
     const partialSchema = maybePartial.call(schema);
     const partialParsed = partialSchema.safeParse(values);
     if (!partialParsed.success) {
+      // eslint-disable-next-line outfitter/no-throw-in-handler -- test factory: propagate Zod parse error
       throw partialParsed.error;
     }
 
@@ -128,6 +130,7 @@ export function createTestConfig<T>(
     getRequired<TValue>(key: string): TValue {
       const value = getPath<TValue>(data as Record<string, unknown>, key);
       if (value === undefined) {
+        // eslint-disable-next-line outfitter/no-throw-in-handler -- test factory: assertion for missing config
         throw new Error(`Missing required config value: ${key}`);
       }
       return value;
@@ -149,6 +152,7 @@ export function createTestContext(
     requestId,
     logger,
     cwd: overrides.cwd ?? process.cwd(),
+    // eslint-disable-next-line outfitter/no-process-env-in-packages -- test factory: default env for test context
     env: overrides.env ?? { ...process.env },
   };
 
