@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { maxFileLinesRule } from "../../rules/max-file-lines.js";
+import {
+  DEFAULT_EXTENSIONS,
+  maxFileLinesRule,
+} from "../../rules/max-file-lines.js";
 import { readFixture, runRuleForEvent } from "../rule-test-helpers.js";
 
 describe("max-file-lines", () => {
@@ -229,6 +232,91 @@ describe("max-file-lines", () => {
     });
 
     expect(reports).toHaveLength(0);
+  });
+
+  test("skips files whose extension does not match defaults", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/styles.css",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5 }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\ne\nf\ng",
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("skips non-matching extensions with custom list", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5, extensions: [".vue"] }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\ne\nf\ng",
+    });
+
+    expect(reports).toHaveLength(0);
+  });
+
+  test("checks files matching custom extensions", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/component.vue",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5, extensions: [".vue", ".ts"] }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\ne\nf\ng",
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("fileTooLongError");
+  });
+
+  test("falls back to default extensions when extensions array is empty", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5, extensions: [] }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\ne",
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("fileTooLongWarn");
+  });
+
+  // Defense-in-depth: runtime fallback when schema validation is bypassed
+  test("falls back to default extensions when extensions contains invalid values", () => {
+    const reports = runRuleForEvent({
+      event: "Program",
+      filename: "packages/types/src/index.ts",
+      nodes: [{ type: "Program" }],
+      options: [{ warn: 3, error: 5, extensions: ["noperiod", 42] }],
+      rule: maxFileLinesRule,
+      sourceText: "a\nb\nc\nd\ne",
+    });
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("fileTooLongWarn");
+  });
+
+  test("checks all default source extensions", () => {
+    for (const ext of DEFAULT_EXTENSIONS) {
+      const reports = runRuleForEvent({
+        event: "Program",
+        filename: `packages/types/src/file${ext}`,
+        nodes: [{ type: "Program" }],
+        options: [{ warn: 3, error: 5 }],
+        rule: maxFileLinesRule,
+        sourceText: "a\nb\nc\nd\ne",
+      });
+
+      expect(reports).toHaveLength(1);
+      expect(reports[0]?.messageId).toBe("fileTooLongWarn");
+    }
   });
 
   test("keeps valid fixture clean", () => {
