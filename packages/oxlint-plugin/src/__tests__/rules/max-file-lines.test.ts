@@ -33,10 +33,10 @@ describe("max-file-lines", () => {
     expect(errorReports[0]?.messageId).toBe("fileTooLongError");
   });
 
-  test("uses default thresholds of 200 warn and 400 error", () => {
-    // 201 lines should trigger warn with default thresholds
-    const lines201 = Array.from(
-      { length: 201 },
+  test("uses default thresholds of 300 warn and 500 error", () => {
+    // 301 lines should trigger warn with default thresholds
+    const lines301 = Array.from(
+      { length: 301 },
       (_, i) => `// line ${i + 1}`
     ).join("\n");
 
@@ -46,15 +46,15 @@ describe("max-file-lines", () => {
       nodes: [{ type: "Program" }],
       options: [],
       rule: maxFileLinesRule,
-      sourceText: lines201,
+      sourceText: lines301,
     });
 
     expect(warnReports).toHaveLength(1);
     expect(warnReports[0]?.messageId).toBe("fileTooLongWarn");
 
-    // 200 lines should be fine
-    const lines200 = Array.from(
-      { length: 200 },
+    // 300 lines should be fine
+    const lines300 = Array.from(
+      { length: 300 },
       (_, i) => `// line ${i + 1}`
     ).join("\n");
 
@@ -64,7 +64,7 @@ describe("max-file-lines", () => {
       nodes: [{ type: "Program" }],
       options: [],
       rule: maxFileLinesRule,
-      sourceText: lines200,
+      sourceText: lines300,
     });
 
     expect(okReports).toHaveLength(0);
@@ -128,7 +128,7 @@ describe("max-file-lines", () => {
       nodes: [{ type: "Program" }],
       options: [null],
       rule: maxFileLinesRule,
-      sourceText: Array.from({ length: 201 }, () => "x").join("\n"),
+      sourceText: Array.from({ length: 301 }, () => "x").join("\n"),
     });
 
     expect(reportsNull).toHaveLength(1);
@@ -141,7 +141,7 @@ describe("max-file-lines", () => {
       nodes: [{ type: "Program" }],
       options: [{ warn: "abc", error: -5 }],
       rule: maxFileLinesRule,
-      sourceText: Array.from({ length: 201 }, () => "x").join("\n"),
+      sourceText: Array.from({ length: 301 }, () => "x").join("\n"),
     });
 
     expect(reportsBadValues).toHaveLength(1);

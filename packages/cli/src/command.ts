@@ -1,4 +1,4 @@
-/* eslint-disable outfitter/max-file-lines -- Fluent builder pattern; splitting fragments the API */
+/* oxlint-disable outfitter/max-file-lines -- Fluent builder pattern; splitting fragments the API surface */
 /**
  * Command builder for creating typed CLI commands.
  *
@@ -68,9 +68,9 @@ export interface CommandMetadata {
  * Used to pass stored hint functions through build() for downstream use by runHandler().
  */
 interface CommandWithHints extends Command {
-  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
   __successHintFn?: SuccessHintFn<any>;
-  // eslint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal metadata; typed externally via SuccessHintFn/ErrorHintFn
   __errorHintFn?: ErrorHintFn<any>;
   /** Safety metadata signals stored by .readOnly() and .idempotent() */
   __metadata?: CommandMetadata;
@@ -193,15 +193,15 @@ export function createCLI(config: CLIConfig): CLI {
   return createCLIImpl(config);
 }
 
-// eslint-disable-next-line typescript/no-explicit-any -- internal impl; public API is typed via CommandBuilder<TInput, TContext>
+// oxlint-disable-next-line typescript/no-explicit-any -- internal impl; public API is typed via CommandBuilder<TInput, TContext>
 class CommandBuilderImpl implements CommandBuilder<any, any> {
   private readonly cmd: Command;
   private inputSchema: ZodObjectLike | undefined;
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private ctxFactory: ((input: any) => Promise<unknown> | unknown) | undefined;
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private successHintFn: SuccessHintFn<any> | undefined;
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   private errorHintsFn: ErrorHintFn<any> | undefined;
   private readonly explicitLongFlags = new Set<string>();
   private readonly schemaPresets: SchemaPreset<Record<string, unknown>>[] = [];
@@ -270,19 +270,19 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this as unknown as CommandBuilder<T>;
   }
 
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   context<T>(factory: ContextFactory<any, T>): CommandBuilder<any, T> {
     this.ctxFactory = factory;
     return this as unknown as CommandBuilder<any, T>;
   }
 
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   hints(fn: SuccessHintFn<any>): this {
     this.successHintFn = fn;
     return this;
   }
 
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   onError(fn: ErrorHintFn<any>): this {
     this.errorHintsFn = fn;
     return this;
@@ -343,7 +343,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
     return this;
   }
 
-  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  // oxlint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
   action<TFlags extends CommandFlags = CommandFlags>(
     handler: CommandAction<TFlags, any, any>
   ): this {

@@ -17,10 +17,9 @@ import type { NormalizeIdOptions } from "./types.js";
 // =============================================================================
 
 export { collectIds } from "./internal/input-normalization.js";
+export { expandFileArg, parseGlob } from "./internal/input-file.js";
 export {
-  expandFileArg,
   parseFilter,
-  parseGlob,
   parseKeyValue,
   parseRange,
   parseSortSpec,

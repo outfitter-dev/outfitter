@@ -37,7 +37,6 @@ export {
 // ---------------------------------------------------------------------------
 
 export {
-  analyzeCheckTsdoc,
   analyzeSourceFile,
   calculateCoverage,
   classifyDeclaration,
@@ -45,6 +44,13 @@ export {
   getDeclarationName,
   isExportedDeclaration,
 } from "./internal/tsdoc-analysis.js";
+
+export {
+  analyzeCheckTsdoc,
+  collectReExportedSourceFiles,
+  discoverPackages,
+  analyzePackage,
+} from "./internal/tsdoc-package.js";
 
 // ---------------------------------------------------------------------------
 // Re-exports: formatting
@@ -59,11 +65,11 @@ export {
 // Runner (inline -- orchestrates analysis + formatting)
 // ---------------------------------------------------------------------------
 
-import { analyzeCheckTsdoc } from "./internal/tsdoc-analysis.js";
 import {
   printCheckTsdocHuman,
   resolveJsonMode,
 } from "./internal/tsdoc-formatting.js";
+import { analyzeCheckTsdoc } from "./internal/tsdoc-package.js";
 import type { CheckTsDocOptions } from "./internal/tsdoc-types.js";
 
 /**

@@ -1,3 +1,4 @@
+/* oxlint-disable outfitter/max-file-lines -- Uniform preset collection (12 factories); no natural split seam, barely over threshold */
 /**
  * Built-in flag presets for common CLI patterns.
  *

@@ -39,11 +39,9 @@ export {
 // Stores
 // ============================================================================
 
-export {
-  createCursorStore,
-  createPersistentStore,
-  createScopedStore,
-} from "./internal/stores.js";
+export { createCursorStore } from "./internal/cursor-store.js";
+export { createPersistentStore } from "./internal/persistent-store.js";
+export { createScopedStore } from "./internal/scoped-store.js";
 
 // ============================================================================
 // Pagination

@@ -1,3 +1,4 @@
+/* oxlint-disable outfitter/max-file-lines -- Cohesive server factory; remaining code is a single tightly-coupled block with no further extractable seams */
 /**
  * @outfitter/mcp - Server Implementation
  *
@@ -18,19 +19,21 @@ import { createOutfitterLoggerFactory } from "@outfitter/logging";
 import type { z } from "zod";
 
 import {
+  createHandlerContext,
+  translateError,
+} from "./internal/handler-adapters.js";
+import {
   createDefaultMcpSink,
   resolveDefaultLogLevel,
 } from "./internal/log-config.js";
 import { matchUriTemplate } from "./internal/uri-template.js";
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
-import { createMcpProgressCallback } from "./progress.js";
 import { zodToJsonSchema } from "./schema.js";
 import {
   type CompletionRef,
   type CompletionResult,
   type InvokeToolOptions,
   McpError,
-  type McpHandlerContext,
   type McpServer,
   type McpServerOptions,
   type PromptArgument,
@@ -125,108 +128,18 @@ export function createMcpServer(options: McpServerOptions): McpServer {
   const prompts = new Map<string, PromptDefinition>();
 
   // SDK server binding for notifications
-  // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type from @modelcontextprotocol/sdk
+  // oxlint-disable-next-line typescript/no-explicit-any -- SDK Server type from @modelcontextprotocol/sdk
   let sdkServer: any = null;
   const subscriptions = new Set<string>();
   let clientLogLevel: McpLogLevel | null = resolveDefaultLogLevel(options);
 
-  // Create handler context for tool invocations
-  function createHandlerContext(
-    label: string,
-    requestId: string,
-    signal?: AbortSignal,
-    progressToken?: string | number,
-    loggerMeta?: Record<string, string>
-  ): McpHandlerContext {
-    const ctx: McpHandlerContext = {
-      requestId,
-      logger: logger.child(loggerMeta ?? { tool: label, requestId }),
-      cwd: process.cwd(),
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: pass full env to handler context
-      env: process.env as Record<string, string | undefined>,
-    };
-
-    // Only add signal if it's defined (exactOptionalPropertyTypes)
-    if (signal !== undefined) {
-      ctx.signal = signal;
-    }
-
-    // Add progress callback when token is present and SDK server is bound.
-    // Uses the modular MCP progress adapter (packages/mcp/src/progress.ts)
-    // which translates StreamEvent → notifications/progress.
-    if (progressToken !== undefined && sdkServer) {
-      const sender = (notification: unknown): void => {
-        const maybePromise = sdkServer?.notification?.(notification);
-        if (
-          typeof maybePromise === "object" &&
-          maybePromise !== null &&
-          "then" in maybePromise
-        ) {
-          void (maybePromise as Promise<unknown>).catch((error: unknown) => {
-            logger.warn("Failed to send MCP progress notification", {
-              error: error instanceof Error ? error.message : String(error),
-            });
-          });
-        }
-      };
-      const streamProgress = createMcpProgressCallback(progressToken, sender);
-      const progress = streamProgress as unknown as NonNullable<
-        McpHandlerContext["progress"]
-      >;
-      progress.report = (value: number, total?: number, message?: string) => {
-        // Route legacy report() through the same callback so the adapter's
-        // internal progress state stays in sync with StreamEvent calls.
-        streamProgress({
-          type: "progress",
-          current: value,
-          total: total ?? value,
-          ...(message !== undefined ? { message } : {}),
-        });
-      };
-      ctx.progress = progress;
-    }
-
-    return ctx;
-  }
-
-  // Translate OutfitterError to McpError
-  function translateError(
-    error: OutfitterError
-  ): InstanceType<typeof McpError> {
-    // Map error categories to JSON-RPC error codes
-    const codeMap: Record<string, number> = {
-      validation: -32_602, // Invalid params
-      not_found: -32_601, // Method not found (closest fit)
-      permission: -32_600, // Invalid request
-      internal: -32_603, // Internal error
-      timeout: -32_603,
-      network: -32_603,
-      rate_limit: -32_603,
-      auth: -32_600,
-      conflict: -32_603,
-      cancelled: -32_603,
-    };
-
-    const code = codeMap[error.category] ?? -32_603;
-    const context: Record<string, unknown> = {
-      originalTag: error._tag,
-      category: error.category,
-    };
-
-    if (
-      error._tag === "ValidationError" &&
-      "field" in error &&
-      typeof error.field === "string"
-    ) {
-      context["field"] = error.field;
-    }
-
-    return new McpError({
-      message: error.message,
-      code,
-      context,
-    });
-  }
+  /** Deps object passed to the extracted createHandlerContext helper. */
+  const handlerDeps = {
+    logger,
+    get sdkServer() {
+      return sdkServer;
+    },
+  };
 
   const server: McpServer = {
     name,
@@ -479,10 +392,17 @@ export function createMcpServer(options: McpServerOptions): McpServer {
         }
 
         const requestId = generateRequestId();
-        const ctx = createHandlerContext(uri, requestId, undefined, undefined, {
-          resource: uri,
+        const ctx = createHandlerContext(
+          uri,
           requestId,
-        });
+          handlerDeps,
+          undefined,
+          undefined,
+          {
+            resource: uri,
+            requestId,
+          }
+        );
 
         try {
           const result = await resource.handler(uri, ctx);
@@ -509,6 +429,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
           const templateCtx = createHandlerContext(
             uri,
             templateRequestId,
+            handlerDeps,
             undefined,
             undefined,
             { resource: uri, requestId: templateRequestId }
@@ -596,6 +517,7 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       const ctx = createHandlerContext(
         toolName,
         requestId,
+        handlerDeps,
         invokeOptions?.signal,
         invokeOptions?.progressToken
       );
@@ -696,14 +618,14 @@ export function createMcpServer(options: McpServerOptions): McpServer {
       sdkServer.sendLoggingMessage?.(params);
     },
 
-    // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type
+    // oxlint-disable-next-line typescript/no-explicit-any -- SDK Server type
     bindSdkServer(server: any): void {
       sdkServer = server;
       clientLogLevel = resolveDefaultLogLevel(options);
       logger.debug("SDK server bound for notifications");
     },
 
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async start(): Promise<void> {
       logger.info("MCP server starting", { name, version, tools: tools.size });
       // In a full implementation, this would start the transport layer

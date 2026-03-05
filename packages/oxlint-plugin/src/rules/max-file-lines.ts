@@ -21,8 +21,8 @@ const DEFAULT_EXTENSIONS: readonly string[] = [
   ".cjs",
 ];
 
-const DEFAULT_WARN_LIMIT = 200;
-const DEFAULT_ERROR_LIMIT = 400;
+const DEFAULT_WARN_LIMIT = 300;
+const DEFAULT_ERROR_LIMIT = 500;
 
 function toPositiveInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0
