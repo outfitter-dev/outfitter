@@ -57,111 +57,111 @@ export async function acquireSharedLock(
 
     const metaLock = metaLockResult.value;
 
-    const lockFile = Bun.file(lockPath);
-    const exists = await lockFile.exists();
+    // Guarantee meta-lock release on every code path (return, continue, throw)
+    try {
+      const lockFile = Bun.file(lockPath);
+      const exists = await lockFile.exists();
 
-    if (exists) {
-      // Read existing lock file
-      try {
-        const lockContent = await lockFile.text();
-        const lockData = JSON.parse(lockContent) as LockData;
+      if (exists) {
+        // Read existing lock file
+        try {
+          const lockContent = await lockFile.text();
+          const lockData = JSON.parse(lockContent) as LockData;
 
-        if (lockData.type === "exclusive") {
-          // Exclusive lock exists - cannot acquire shared lock
-          await releaseLock(metaLock);
+          if (lockData.type === "exclusive") {
+            // Exclusive lock exists - cannot acquire shared lock
+            if (timeout > 0 && Date.now() - startTime < timeout) {
+              await Bun.sleep(retryInterval);
+              continue;
+            }
+            return Result.err(
+              new ConflictError({
+                message: `File is exclusively locked: ${path}`,
+              })
+            );
+          }
+
+          // Shared lock exists - add ourselves as a reader
+          const readerId = Bun.randomUUIDv7();
+          const newReader: SharedLockReader = {
+            id: readerId,
+            pid: process.pid,
+            timestamp: Date.now(),
+          };
+          lockData.readers.push(newReader);
+
+          // Write updated lock file
+          await fsWriteFile(lockPath, JSON.stringify(lockData));
+
+          return Result.ok({
+            path,
+            lockPath,
+            pid: process.pid,
+            timestamp: newReader.timestamp,
+            lockType: "shared" as const,
+            readerId,
+          });
+        } catch {
+          // Lock file exists but couldn't be parsed - treat as exclusive
           if (timeout > 0 && Date.now() - startTime < timeout) {
             await Bun.sleep(retryInterval);
             continue;
           }
           return Result.err(
             new ConflictError({
-              message: `File is exclusively locked: ${path}`,
+              message: `File is locked: ${path}`,
             })
           );
         }
+      }
 
-        // Shared lock exists - add ourselves as a reader
-        const readerId = Bun.randomUUIDv7();
-        const newReader: SharedLockReader = {
-          id: readerId,
-          pid: process.pid,
-          timestamp: Date.now(),
-        };
-        lockData.readers.push(newReader);
+      // No lock file exists - create new shared lock
+      const readerId = Bun.randomUUIDv7();
+      const timestamp = Date.now();
+      const sharedLockData: SharedLockData = {
+        type: "shared",
+        readers: [
+          {
+            id: readerId,
+            pid: process.pid,
+            timestamp,
+          },
+        ],
+      };
 
-        // Write updated lock file
-        await fsWriteFile(lockPath, JSON.stringify(lockData));
-        await releaseLock(metaLock);
+      try {
+        await fsWriteFile(lockPath, JSON.stringify(sharedLockData), {
+          flag: "wx",
+        });
 
         return Result.ok({
           path,
           lockPath,
           pid: process.pid,
-          timestamp: newReader.timestamp,
+          timestamp,
           lockType: "shared" as const,
           readerId,
         });
-      } catch {
-        // Lock file exists but couldn't be parsed - treat as exclusive
-        await releaseLock(metaLock);
-        if (timeout > 0 && Date.now() - startTime < timeout) {
+      } catch (error) {
+        // File already exists (race condition) - retry
+        if (
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "EEXIST" &&
+          timeout > 0 &&
+          Date.now() - startTime < timeout
+        ) {
           await Bun.sleep(retryInterval);
           continue;
         }
         return Result.err(
           new ConflictError({
-            message: `File is locked: ${path}`,
+            message: `Failed to acquire shared lock: ${path}`,
           })
         );
       }
-    }
-
-    // No lock file exists - create new shared lock
-    const readerId = Bun.randomUUIDv7();
-    const timestamp = Date.now();
-    const sharedLockData: SharedLockData = {
-      type: "shared",
-      readers: [
-        {
-          id: readerId,
-          pid: process.pid,
-          timestamp,
-        },
-      ],
-    };
-
-    try {
-      await fsWriteFile(lockPath, JSON.stringify(sharedLockData), {
-        flag: "wx",
-      });
+    } finally {
       await releaseLock(metaLock);
-
-      return Result.ok({
-        path,
-        lockPath,
-        pid: process.pid,
-        timestamp,
-        lockType: "shared" as const,
-        readerId,
-      });
-    } catch (error) {
-      await releaseLock(metaLock);
-      // File already exists (race condition) - retry
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "EEXIST" &&
-        timeout > 0 &&
-        Date.now() - startTime < timeout
-      ) {
-        await Bun.sleep(retryInterval);
-        continue;
-      }
-      return Result.err(
-        new ConflictError({
-          message: `Failed to acquire shared lock: ${path}`,
-        })
-      );
     }
   }
 }
@@ -196,13 +196,13 @@ export async function releaseSharedLock(
 
   const metaLock = metaLockResult.value;
 
+  // Guarantee meta-lock release on every code path
   try {
     const lockFile = Bun.file(lock.lockPath);
     const exists = await lockFile.exists();
 
     if (!exists) {
       // Lock file already gone - consider it released
-      await releaseLock(metaLock);
       return Result.ok(undefined);
     }
 
@@ -211,7 +211,6 @@ export async function releaseSharedLock(
 
     if (lockData.type !== "shared") {
       // Not a shared lock - this shouldn't happen
-      await releaseLock(metaLock);
       return Result.err(
         new InternalError({
           message: "Lock file is not a shared lock",
@@ -232,10 +231,8 @@ export async function releaseSharedLock(
       await fsWriteFile(lock.lockPath, JSON.stringify(lockData));
     }
 
-    await releaseLock(metaLock);
     return Result.ok(undefined);
   } catch (error) {
-    await releaseLock(metaLock);
     return Result.err(
       new InternalError({
         message:
@@ -244,6 +241,8 @@ export async function releaseSharedLock(
             : "Failed to release shared lock",
       })
     );
+  } finally {
+    await releaseLock(metaLock);
   }
 }
 
