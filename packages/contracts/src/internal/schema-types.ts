@@ -38,7 +38,7 @@ export interface JsonSchema {
 /**
  * Extract the internal _def object from a Zod schema or def.
  */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+// oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
 export function getDef(schemaOrDef: any): any {
   if (!schemaOrDef) {
     return undefined;
@@ -58,7 +58,7 @@ export function getDef(schemaOrDef: any): any {
 /**
  * Extract description from a Zod schema or its def.
  */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+// oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
 export function getDescription(schema: any, def: any): string | undefined {
   if (typeof schema?.description === "string") {
     return schema.description;

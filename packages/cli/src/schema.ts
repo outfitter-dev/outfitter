@@ -36,7 +36,7 @@ export type {
   GenerateManifestOptions,
 } from "@outfitter/schema";
 
-// eslint-disable-next-line oxc/no-barrel-file -- not a barrel — re-exports for backward compat alongside local exports
+// oxlint-disable-next-line oxc/no-barrel-file -- not a barrel — re-exports for backward compat alongside local exports
 export { generateManifest } from "@outfitter/schema";
 
 // =============================================================================

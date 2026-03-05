@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-// eslint-disable-next-line oxc/no-barrel-file -- intentional barrel for public API surface
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional barrel for public API surface
 
 // === Prompt types ===
 export type {

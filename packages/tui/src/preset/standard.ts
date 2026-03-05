@@ -26,7 +26,7 @@
  * @packageDocumentation
  */
 
-// eslint-disable-next-line oxc/no-barrel-file -- intentional preset aggregation
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional preset aggregation
 export {
   ANSI,
   createTheme,

@@ -118,7 +118,7 @@ export async function renderLlmsFullFromMap(
   for (const entry of sortedEntries) {
     const absolutePath = resolve(resolvedWorkspaceRoot, entry.outputPath);
     if (!isPathInsideWorkspace(resolvedWorkspaceRoot, absolutePath)) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- security assertion: reject path traversal
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- security assertion: reject path traversal
       throw new Error(
         `docs-map entry outputPath resolves outside workspace root: ${entry.outputPath}`
       );
@@ -136,7 +136,7 @@ export async function renderLlmsFullFromMap(
         continue; // Skip if file doesn't exist yet
       }
 
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- rethrow unexpected (non-ENOENT) fs error
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- rethrow unexpected (non-ENOENT) fs error
       throw error;
     }
 

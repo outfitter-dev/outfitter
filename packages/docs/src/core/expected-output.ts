@@ -33,7 +33,7 @@ export async function buildExpectedOutput(
   if (collectedDocsResult.isErr()) {
     const error = collectedDocsResult.error;
     if (error.kind === "outputPathOutsideWorkspace") {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- convert typed Result error to thrown DocsCoreError for caller
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- convert typed Result error to thrown DocsCoreError for caller
       throw DocsCoreError.validation(
         "outputPath must resolve inside workspace",
         {
@@ -43,7 +43,7 @@ export async function buildExpectedOutput(
       );
     }
 
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- convert typed Result error to thrown DocsCoreError for caller
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- convert typed Result error to thrown DocsCoreError for caller
     throw DocsCoreError.validation(
       "Multiple source docs files resolve to the same output path",
       {
@@ -89,7 +89,7 @@ export async function buildExpectedOutput(
       mdxMode: options.mdxMode,
     });
     if (processedContentResult.isErr()) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- propagate Result error to throwing caller
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- propagate Result error to throwing caller
       throw processedContentResult.error;
     }
 

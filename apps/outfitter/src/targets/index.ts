@@ -1,4 +1,4 @@
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for targets module API surface.
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-export for targets module API surface.
 export {
   getInitTarget,
   getReadyTarget,

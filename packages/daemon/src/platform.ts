@@ -44,13 +44,13 @@ interface RuntimeEnv {
   readonly TEMP?: string | undefined;
 }
 
-/* eslint-disable outfitter/no-process-env-in-packages -- boundary: snapshot env once, pass to pure functions */
+/* oxlint-disable outfitter/no-process-env-in-packages -- boundary: snapshot env once, pass to pure functions */
 const RUNTIME_ENV: RuntimeEnv = {
   XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"],
   TMPDIR: process.env["TMPDIR"],
   TEMP: process.env["TEMP"],
 };
-/* eslint-enable outfitter/no-process-env-in-packages */
+/* oxlint-enable outfitter/no-process-env-in-packages */
 
 /**
  * Get the runtime directory for daemon files.

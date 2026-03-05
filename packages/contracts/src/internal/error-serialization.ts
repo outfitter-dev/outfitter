@@ -169,7 +169,7 @@ export function serializeError(
   options?: SerializeErrorOptions,
   isProduction?: boolean
 ): SerializedError {
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: safe default when isProduction not injected
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: safe default when isProduction not injected
   const production = isProduction ?? process.env["NODE_ENV"] === "production";
   const includeStack = options?.includeStack ?? !production;
 

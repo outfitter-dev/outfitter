@@ -30,7 +30,7 @@ import type { SerializedTool, ToolDefinition } from "./tool-types.js";
 
 // Re-export types for convenience
 export type { Result } from "@outfitter/contracts";
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
 export { TaggedError } from "@outfitter/contracts";
 
 // Internal alias for use in this file
@@ -178,7 +178,7 @@ export interface McpServer {
    * Called internally by the transport layer.
    * @param sdkServer - The MCP SDK Server instance
    */
-  // eslint-disable-next-line typescript/no-explicit-any -- SDK Server type
+  // oxlint-disable-next-line typescript/no-explicit-any -- SDK Server type
   bindSdkServer?(sdkServer: any): void;
 
   /**

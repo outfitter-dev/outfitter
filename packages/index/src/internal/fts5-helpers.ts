@@ -52,14 +52,14 @@ export const DEFAULT_TOOL_VERSION = "0.0.0";
 
 export function assertValidTableName(tableName: string): void {
   if (!TABLE_NAME_PATTERN.test(tableName)) {
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid table name: ${tableName}`);
   }
 }
 
 export function assertValidTokenizer(tokenizer: string): TokenizerType {
   if (!Object.hasOwn(VALID_TOKENIZERS, tokenizer)) {
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid tokenizer: ${tokenizer}`);
   }
   return tokenizer as TokenizerType;
@@ -96,7 +96,7 @@ export function getUserVersion(db: Database): number {
 
 export function setUserVersion(db: Database, version: number): void {
   if (!Number.isInteger(version) || version < 0) {
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Invalid user_version: ${version}`);
   }
   db.run(`PRAGMA user_version = ${version}`);

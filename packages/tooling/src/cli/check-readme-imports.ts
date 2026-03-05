@@ -183,7 +183,7 @@ export interface CheckReadmeImportsOptions {
 export function resolveJsonMode(
   options: CheckReadmeImportsOptions = {}
 ): boolean {
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   return options.json ?? process.env["OUTFITTER_JSON"] === "1";
 }
 

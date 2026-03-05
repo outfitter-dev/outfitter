@@ -139,7 +139,7 @@ describe("wrapError", () => {
 
     it("wraps as InternalError when mapper returns undefined", () => {
       const plain = new Error("unmatched");
-      // eslint-disable-next-line unicorn/consistent-function-scoping -- test clarity
+      // oxlint-disable-next-line unicorn/consistent-function-scoping -- test clarity
       const mapper: ErrorMapper = () => undefined;
       const wrapped = wrapError(plain, mapper);
       expect(wrapped).toBeInstanceOf(InternalError);
@@ -246,9 +246,9 @@ describe("composeMappers", () => {
   });
 
   it("returns undefined when no mapper matches", () => {
-    // eslint-disable-next-line unicorn/consistent-function-scoping -- test clarity
+    // oxlint-disable-next-line unicorn/consistent-function-scoping -- test clarity
     const m1: ErrorMapper = () => undefined;
-    // eslint-disable-next-line unicorn/consistent-function-scoping -- test clarity
+    // oxlint-disable-next-line unicorn/consistent-function-scoping -- test clarity
     const m2: ErrorMapper = () => undefined;
 
     const composed = composeMappers(m1, m2);

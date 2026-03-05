@@ -133,7 +133,7 @@ export const expectOk = <T, E>(result: Result<T, E>, message?: string): T => {
   }
   const errorDetail = formatValue(result.error);
   const prefix = message ? `${message}: ` : "";
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- intentional: expectOk() is a test assertion that throws by design
+  // oxlint-disable-next-line outfitter/no-throw-in-handler -- intentional: expectOk() is a test assertion that throws by design
   throw new Error(`${prefix}Expected Ok, got Err: ${errorDetail}`);
 };
 
@@ -163,6 +163,6 @@ export const expectErr = <T, E>(result: Result<T, E>, message?: string): E => {
   }
   const valueDetail = formatValue(result.value);
   const prefix = message ? `${message}: ` : "";
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- intentional: expectErr() is a test assertion that throws by design
+  // oxlint-disable-next-line outfitter/no-throw-in-handler -- intentional: expectErr() is a test assertion that throws by design
   throw new Error(`${prefix}Expected Err, got Ok: ${valueDetail}`);
 };
