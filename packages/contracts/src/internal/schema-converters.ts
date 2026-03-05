@@ -24,7 +24,7 @@ export type ZodTypeConverter = (schema: z.ZodType<unknown>) => JsonSchema;
  * Convert Zod array schema.
  */
 export function convertArray(
-  // eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+  // oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
   def: any,
   convertZodType: ZodTypeConverter
 ): JsonSchema {
@@ -44,7 +44,7 @@ export function convertArray(
  * (refinements, transforms) or ZodPipeline, which would otherwise
  * incorrectly appear as required.
  */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+// oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
 export function isFieldOptional(fieldDef: any): boolean {
   if (!(fieldDef?.typeName || fieldDef?.type)) {
     return false;
@@ -94,7 +94,7 @@ export function isFieldOptional(fieldDef: any): boolean {
  * Convert Zod object schema.
  */
 export function convertObject(
-  // eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+  // oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
   def: any,
   convertZodType: ZodTypeConverter
 ): JsonSchema {

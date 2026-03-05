@@ -62,7 +62,7 @@ export function resolveDefaultLogLevel(
   options: McpServerOptions
 ): McpLogLevel | null {
   // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based log level override
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based log level override
   const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
   if (envLogLevel !== undefined && VALID_MCP_LOG_LEVELS.has(envLogLevel)) {
     return envLogLevel as McpLogLevel;

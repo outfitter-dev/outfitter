@@ -22,7 +22,7 @@
  * @packageDocumentation
  */
 
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-exports for subpath API
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-exports for subpath API
 export {
   type ListItem,
   type ListOptions,

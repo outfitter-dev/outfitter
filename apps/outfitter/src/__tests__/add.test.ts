@@ -192,7 +192,7 @@ describe("runAdd", () => {
 
     // Verify executable permission
     const stats = statSync(join(testDir, "scripts/bootstrap.sh"));
-    // eslint-disable-next-line no-bitwise -- checking file mode bits
+    // oxlint-disable-next-line no-bitwise -- checking file mode bits
     const isExecutable = (stats.mode & 0o100) !== 0;
     expect(isExecutable).toBe(true);
   });

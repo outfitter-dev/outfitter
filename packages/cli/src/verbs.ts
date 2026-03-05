@@ -64,7 +64,7 @@ export function resolveVerb(
 ): { name: string; aliases: string[] } {
   const def = VERB_FAMILIES[family as keyof typeof VERB_FAMILIES];
   if (!Object.hasOwn(VERB_FAMILIES, family) || def === undefined) {
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
     throw new Error(`Unknown verb family: "${family}"`);
   }
 

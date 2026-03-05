@@ -15,7 +15,7 @@ import type { LogLevel } from "./types.js";
  */
 function safeGetEnv(key: string): string | undefined {
   if (typeof process !== "undefined") {
-    // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-aware log level resolution
+    // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-aware log level resolution
     return process.env?.[key];
   }
   return undefined;
@@ -77,13 +77,13 @@ export function resolveLogLevel(level?: LogLevel | string): LogLevel {
   // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
   const envLogLevel = safeGetEnv("OUTFITTER_LOG_LEVEL");
   if (envLogLevel !== undefined && Object.hasOwn(ENV_LEVEL_MAP, envLogLevel)) {
-    // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
     return ENV_LEVEL_MAP[envLogLevel]!;
   }
 
   // 2. Explicit level parameter (validate strings via ENV_LEVEL_MAP)
   if (level !== undefined && Object.hasOwn(ENV_LEVEL_MAP, level)) {
-    // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
     return ENV_LEVEL_MAP[level]!;
   }
 
@@ -95,7 +95,7 @@ export function resolveLogLevel(level?: LogLevel | string): LogLevel {
       defaults.logLevel !== null &&
       Object.hasOwn(ENV_LEVEL_MAP, defaults.logLevel)
     ) {
-      // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
       return ENV_LEVEL_MAP[defaults.logLevel]!;
     }
   } catch {
@@ -119,13 +119,13 @@ export function resolveOutfitterLogLevel(level?: LogLevel | string): LogLevel {
   // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
   const envLogLevel = safeGetEnv("OUTFITTER_LOG_LEVEL");
   if (envLogLevel !== undefined && Object.hasOwn(ENV_LEVEL_MAP, envLogLevel)) {
-    // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
     return ENV_LEVEL_MAP[envLogLevel]!;
   }
 
   // 2. Explicit level parameter (validate strings via ENV_LEVEL_MAP)
   if (level !== undefined && Object.hasOwn(ENV_LEVEL_MAP, level)) {
-    // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
     return ENV_LEVEL_MAP[level]!;
   }
 
@@ -137,7 +137,7 @@ export function resolveOutfitterLogLevel(level?: LogLevel | string): LogLevel {
       defaults.logLevel !== null &&
       Object.hasOwn(ENV_LEVEL_MAP, defaults.logLevel)
     ) {
-      // eslint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- hasOwn guarantees key exists
       return ENV_LEVEL_MAP[defaults.logLevel]!;
     }
   } catch {

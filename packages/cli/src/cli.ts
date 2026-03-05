@@ -60,10 +60,10 @@ export function createCLI(config: CLIConfig): CLI {
     }
 
     if (bridgedJsonEnvPrevious === undefined) {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
       delete process.env["OUTFITTER_JSON"];
     } else {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var restoration after flag bridging
       process.env["OUTFITTER_JSON"] = bridgedJsonEnvPrevious;
     }
 
@@ -83,9 +83,9 @@ export function createCLI(config: CLIConfig): CLI {
   program.hook("preAction", (thisCommand) => {
     const allOpts = thisCommand.optsWithGlobals();
     if (allOpts["json"] === true && !bridgedJsonEnvActive) {
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var state capture before flag bridging
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var state capture before flag bridging
       bridgedJsonEnvPrevious = process.env["OUTFITTER_JSON"];
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var bridging: propagates --json flag
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-var bridging: propagates --json flag
       process.env["OUTFITTER_JSON"] = "1";
       bridgedJsonEnvActive = true;
     }
@@ -95,7 +95,7 @@ export function createCLI(config: CLIConfig): CLI {
   });
 
   const exit =
-    // eslint-disable-next-line outfitter/no-process-exit-in-packages -- CLI adapter default exit hook owns process termination
+    // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- CLI adapter default exit hook owns process termination
     config.onExit ?? ((code: number): void => void process.exit(code));
 
   // Force Commander to throw instead of exiting so parse() can route all exits
@@ -109,9 +109,9 @@ export function createCLI(config: CLIConfig): CLI {
   program.action(async () => {
     const isJsonMode =
       program.opts()["json"] === true ||
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSON"] === "1" ||
-      // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+      // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
       process.env["OUTFITTER_JSONL"] === "1" ||
       !process.stdout.isTTY;
 

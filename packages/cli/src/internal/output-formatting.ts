@@ -44,9 +44,9 @@ export function detectMode(format?: OutputMode): OutputMode {
   }
 
   // Check environment variables (JSONL takes priority over JSON)
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envJsonl = process.env["OUTFITTER_JSONL"];
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envJson = process.env["OUTFITTER_JSON"];
   if (envJsonl === "1") return "jsonl";
   if (envJson === "1") return "json";

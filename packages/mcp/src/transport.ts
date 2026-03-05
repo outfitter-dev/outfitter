@@ -197,7 +197,7 @@ export function createSdkServer(server: McpServer): Server {
     const result = await server.readResource(uri);
 
     if (result.isErr()) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
@@ -207,7 +207,7 @@ export function createSdkServer(server: McpServer): Server {
   // Subscription handlers (resource feature)
   sdkServer.setRequestHandler(
     SubscribeRequestSchema,
-    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
+    // oxlint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       server.subscribe(request.params.uri);
       return {};
@@ -216,7 +216,7 @@ export function createSdkServer(server: McpServer): Server {
 
   sdkServer.setRequestHandler(
     UnsubscribeRequestSchema,
-    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
+    // oxlint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       server.unsubscribe(request.params.uri);
       return {};
@@ -236,7 +236,7 @@ export function createSdkServer(server: McpServer): Server {
     );
 
     if (result.isErr()) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
@@ -258,7 +258,7 @@ export function createSdkServer(server: McpServer): Server {
     );
 
     if (result.isErr()) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- MCP SDK protocol requires throwing to signal errors
       throw toSdkError(result.error);
     }
 
@@ -268,7 +268,7 @@ export function createSdkServer(server: McpServer): Server {
   // Logging handler
   sdkServer.setRequestHandler(
     SetLevelRequestSchema,
-    // eslint-disable-next-line require-await, typescript/require-await -- protocol requires async
+    // oxlint-disable-next-line require-await, typescript/require-await -- protocol requires async
     async (request) => {
       const level = request.params.level as McpLogLevel;
       server.setLogLevel?.(level);

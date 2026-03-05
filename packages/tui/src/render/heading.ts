@@ -40,7 +40,7 @@ export interface HeadingOptions {
 }
 
 /** ANSI escape sequence pattern */
-// eslint-disable-next-line no-control-regex -- ANSI escape detection requires matching ESC character
+// oxlint-disable-next-line no-control-regex -- ANSI escape detection requires matching ESC character
 const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
 
 /**

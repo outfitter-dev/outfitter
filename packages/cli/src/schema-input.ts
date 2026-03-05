@@ -77,7 +77,7 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
   let isOptional = false;
 
   // Walk through wrapper types (default, optional, nullable)
-  // eslint-disable-next-line no-constant-condition
+  // oxlint-disable-next-line no-constant-condition
   while (true) {
     if (description === undefined) {
       description = (current as { description?: string }).description;
@@ -286,6 +286,6 @@ export function validateInput(
 
   const message = detail ? `${summary}\n${detail}` : summary;
 
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- throw: validation failure; Commander action handler catches and formats as error envelope
+  // oxlint-disable-next-line outfitter/no-throw-in-handler -- throw: validation failure; Commander action handler catches and formats as error envelope
   throw ValidationError.fromMessage(message, { issues });
 }
