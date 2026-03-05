@@ -107,7 +107,7 @@ export async function acquireLock(
           })
         );
       }
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- rethrow unexpected error after handling known conflict case
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- rethrow unexpected error after handling known conflict case
       throw error;
     }
 

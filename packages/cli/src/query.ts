@@ -132,11 +132,11 @@ export function resolveOutputMode(
   }
 
   // 4. Environment variable fallback (JSONL takes priority)
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   if (process.env["OUTFITTER_JSONL"] === "1") {
     return { mode: "jsonl", source: "env" };
   }
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: env-based feature detection
   if (process.env["OUTFITTER_JSON"] === "1") {
     return { mode: "json", source: "env" };
   }
@@ -165,7 +165,7 @@ export interface OutputModePresetConfig {
 /**
  * Resolved output mode from CLI input.
  */
-// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// oxlint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type OutputModeFlags = {
   /** The resolved output mode */
   readonly outputMode: OutputMode;
@@ -219,7 +219,7 @@ export function outputModePreset(
 /**
  * Resolved jq expression from CLI input.
  */
-// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// oxlint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type JqFlags = {
   /** The jq expression, or undefined if not provided */
   readonly jq: string | undefined;
@@ -232,7 +232,7 @@ export type JqFlags = {
 /**
  * Resolved stream flags from CLI input.
  */
-// eslint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
+// oxlint-disable-next-line typescript/consistent-type-definitions -- must be `type` to satisfy Record<string, unknown> constraint in FlagPreset<T>
 export type StreamFlags = {
   /** Whether NDJSON streaming mode is enabled */
   readonly stream: boolean;

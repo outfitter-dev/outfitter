@@ -54,7 +54,7 @@ export async function confirmDestructive(
 
   // Check if we're in a TTY environment
   const isTTY = process.stdout.isTTY;
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: terminal capability detection
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: terminal capability detection
   const isDumbTerminal = process.env["TERM"] === "dumb";
 
   if (!isTTY || isDumbTerminal) {

@@ -144,7 +144,7 @@ export function resolveWidth(mode: WidthMode, ctx?: LayoutContext): number {
   // Container width (requires context)
   if (mode === "container") {
     if (!ctx) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: caller must provide ctx for container mode
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: caller must provide ctx for container mode
       throw new Error("container width mode requires LayoutContext");
     }
     return ctx.width;

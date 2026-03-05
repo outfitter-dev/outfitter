@@ -1,4 +1,4 @@
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for engine module API surface.
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-export for engine module API surface.
 export { addBlocks } from "./blocks.js";
 export { injectSharedConfig, rewriteLocalDependencies } from "./config.js";
 export { executePlan } from "./executor.js";

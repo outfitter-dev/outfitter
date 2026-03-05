@@ -149,7 +149,7 @@ export function exitWithError(error: Error, format?: OutputMode): never {
     process.stderr.write(`${formatErrorHuman(error)}\n`);
   }
 
-  // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+  // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
   process.exit(exitCode);
 }
 
@@ -186,7 +186,7 @@ export function exitWithError(error: Error, format?: OutputMode): never {
  */
 export function resolveVerbose(verbose?: boolean): boolean {
   // 1. OUTFITTER_VERBOSE env var (highest precedence)
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: runtime env read
   const envVerbose = process.env["OUTFITTER_VERBOSE"];
   if (envVerbose === "1") return true;
   if (envVerbose === "0") return false;

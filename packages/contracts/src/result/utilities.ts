@@ -145,6 +145,6 @@ export const combine3 = <T1, T2, T3, E>(
  */
 export const expect = <T, E>(result: Result<T, E>, message: string): T => {
   if (result.isOk()) return result.value;
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- intentional: expect() is an assertion utility that throws by design
+  // oxlint-disable-next-line outfitter/no-throw-in-handler -- intentional: expect() is an assertion utility that throws by design
   throw new Error(`${message}: ${String(result.error)}`);
 };

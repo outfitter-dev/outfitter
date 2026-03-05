@@ -11,7 +11,7 @@ import type { JsonSchema } from "./schema-types.js";
 /**
  * Convert Zod string schema with checks.
  */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+// oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
 export function convertString(def: any): JsonSchema {
   const schema: JsonSchema = { type: "string" };
 
@@ -90,7 +90,7 @@ export function convertString(def: any): JsonSchema {
 /**
  * Convert Zod number schema with checks.
  */
-// eslint-disable-next-line typescript/no-explicit-any -- Zod internals
+// oxlint-disable-next-line typescript/no-explicit-any -- Zod internals
 export function convertNumber(def: any): JsonSchema {
   const schema: JsonSchema = { type: "number" };
 

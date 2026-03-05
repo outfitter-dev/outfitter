@@ -111,7 +111,7 @@ function parseNamedRange(name: NamedRange): DateRange {
     default: {
       // Exhaustive check: all NamedRange cases are handled above
       const _exhaustive: never = name;
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- exhaustive check: unreachable code guard
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- exhaustive check: unreachable code guard
       throw new Error(`Unhandled named range: ${_exhaustive}`);
     }
   }

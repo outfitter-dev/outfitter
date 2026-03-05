@@ -23,7 +23,7 @@ export interface CliTestResult {
 // Output Capture
 // ============================================================================
 
-// eslint-disable-next-line outfitter/use-error-taxonomy -- test harness error, not a handler error
+// oxlint-disable-next-line outfitter/use-error-taxonomy -- test harness error, not a handler error
 class ExitError extends Error {
   readonly code: number;
 
@@ -83,7 +83,7 @@ export async function captureCLI(
   };
 
   process.exit = ((code?: number): never => {
-    // eslint-disable-next-line outfitter/no-throw-in-handler -- test harness: simulates process.exit via throw
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- test harness: simulates process.exit via throw
     throw new ExitError(code ?? 0);
   }) as typeof process.exit;
 
@@ -127,7 +127,7 @@ export function mockStdin(input: string): { restore: () => void } {
   const encoded = new TextEncoder().encode(input);
 
   const mockStream = {
-    // eslint-disable-next-line require-await, typescript/require-await -- async generator needs async keyword even without await
+    // oxlint-disable-next-line require-await, typescript/require-await -- async generator needs async keyword even without await
     async *[Symbol.asyncIterator](): AsyncGenerator<Uint8Array, void, unknown> {
       yield encoded;
     },

@@ -25,7 +25,7 @@ const SHELL_SAFE_PROGRAM_NAME = /^[A-Za-z0-9._-]+$/;
 function assertSafeProgramName(programName: string): void {
   if (SHELL_SAFE_PROGRAM_NAME.test(programName)) return;
 
-  // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
+  // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion: invalid input to internal function
   throw new Error(
     `Invalid program name for shell completion: "${programName}".` +
       " Must match /^[A-Za-z0-9._-]+$/."

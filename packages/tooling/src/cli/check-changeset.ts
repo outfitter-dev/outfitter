@@ -236,7 +236,7 @@ export async function runCheckChangeset(
   options: CheckChangesetOptions = {}
 ): Promise<void> {
   // Skip via flag or env var
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
   if (options.skip || process.env["NO_CHANGESET"] === "1") {
     process.stdout.write(
       `${COLORS.dim}check-changeset skipped (NO_CHANGESET=1)${COLORS.reset}\n`
@@ -246,7 +246,7 @@ export async function runCheckChangeset(
   }
 
   // Skip on post-merge pushes to main
-  // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
   if (process.env["GITHUB_EVENT_NAME"] === "push") {
     process.stdout.write(
       `${COLORS.dim}check-changeset skipped (push event)${COLORS.reset}\n`

@@ -7,7 +7,7 @@ import { parse as parseYaml } from "yaml";
 // Error Types
 // ============================================================================
 
-// eslint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
+// oxlint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
 type ParseErrorFields = {
   /** Human-readable error message describing the parse failure */
   message: string;
@@ -40,7 +40,7 @@ export class ParseError extends ParseErrorBase {
   readonly category = "validation" as const;
 }
 
-// eslint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
+// oxlint-disable-next-line typescript/consistent-type-definitions -- type required for TaggedError constraint
 type CircularExtendsErrorFields = {
   /** Human-readable error message */
   message: string;

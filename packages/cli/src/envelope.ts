@@ -183,7 +183,7 @@ export async function runHandler<
         // In stream mode, write error envelope to stdout as NDJSON and exit
         writeStreamEnvelope(envelope);
         const exitCode = getExitCode(category);
-        // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+        // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
         process.exit(exitCode);
       }
 
@@ -223,7 +223,7 @@ export async function runHandler<
     if (isStreaming) {
       writeStreamEnvelope(envelope);
       const exitCode = getExitCode(category);
-      // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+      // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
       process.exit(exitCode);
     }
 
@@ -291,7 +291,7 @@ export async function runHandler<
     if (isStreaming) {
       writeStreamEnvelope(envelope);
       const exitCode = getExitCode(category);
-      // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+      // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
       process.exit(exitCode);
     }
 
@@ -321,6 +321,6 @@ function outputErrorEnvelope(
     }
   }
 
-  // eslint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
+  // oxlint-disable-next-line outfitter/no-process-exit-in-packages -- terminal adapter intentionally exits after serializing errors
   process.exit(exitCode);
 }

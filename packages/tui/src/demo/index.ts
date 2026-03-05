@@ -143,7 +143,7 @@ export function renderAllDemos(config: DemoConfig = {}): string {
  * // ["colors", "borders", "spinner", "list", "box", "table", "progress", "tree", "text", "markdown"]
  * ```
  */
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-export for API surface
 export { getPrimitiveIds } from "./registry.js";
 
 /**

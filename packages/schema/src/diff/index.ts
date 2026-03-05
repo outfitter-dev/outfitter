@@ -12,7 +12,7 @@ import { diffActions } from "./actions.js";
 import { diffMetadata } from "./metadata.js";
 import type { DiffSurfaceMapsOptions, SurfaceMapDiff } from "./types.js";
 
-// eslint-disable-next-line oxc/no-barrel-file -- re-export entrypoint preserves public import path
+// oxlint-disable-next-line oxc/no-barrel-file -- re-export entrypoint preserves public import path
 export { stableJson } from "./shared.js";
 export type {
   DiffEntry,

@@ -1,4 +1,4 @@
-// eslint-disable-next-line oxc/no-barrel-file -- intentional re-export for create module API surface.
+// oxlint-disable-next-line oxc/no-barrel-file -- intentional re-export for create module API surface.
 export { planCreateProject } from "./planner.js";
 export {
   CREATE_PRESET_IDS,

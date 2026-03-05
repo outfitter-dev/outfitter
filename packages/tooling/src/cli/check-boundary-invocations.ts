@@ -130,7 +130,7 @@ export async function readScriptEntries(
       if (isRootManifest) {
         const message =
           error instanceof Error ? error.message : "unknown parse error";
-        // eslint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
+        // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
         throw new Error(
           `Failed to read root package manifest (${filePath}): ${message}`
         );

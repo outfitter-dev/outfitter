@@ -116,7 +116,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
     writeIndexMetadata(db, metadata);
   } else if (currentVersion !== INDEX_VERSION) {
     if (!options.migrations) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
       throw new Error(
         `Index version ${currentVersion} does not match ${INDEX_VERSION}. Provide migrations or rebuild the index.`
       );
@@ -129,7 +129,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       INDEX_VERSION
     );
     if (result.isErr()) {
-      // eslint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- assertion in sync factory; propagates to caller
       throw new Error(`Failed to migrate index: ${result.error.message}`);
     }
 
@@ -180,7 +180,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
   }
 
   return {
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async add(doc: IndexDocument): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -208,7 +208,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -243,7 +243,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
           return Result.ok(undefined);
         } catch (error) {
           db.run("ROLLBACK");
-          // eslint-disable-next-line outfitter/no-throw-in-handler -- rethrow after rollback; outer catch converts to Result.err
+          // oxlint-disable-next-line outfitter/no-throw-in-handler -- rethrow after rollback; outer catch converts to Result.err
           throw error;
         }
       } catch (error) {
@@ -256,7 +256,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async search(
       query: SearchQuery
     ): Promise<Result<SearchResult<T>[], StorageError>> {
@@ -325,7 +325,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async remove(id: string): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
@@ -347,7 +347,7 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
       }
     },
 
-    // eslint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
+    // oxlint-disable-next-line require-await, typescript/require-await -- interface requires Promise return type
     async clear(): Promise<Result<void, StorageError>> {
       const closedCheck = checkClosed();
       if (closedCheck.isErr()) {
