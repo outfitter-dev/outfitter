@@ -8,261 +8,43 @@
 
 import { getStringWidth, truncateText, wrapText } from "@outfitter/cli/text";
 
-import { type BorderStyle, getBorderCharacters } from "./borders.js";
+import { getBorderCharacters } from "./borders.js";
+import { contentToLines } from "./internal/box-composition.js";
+import {
+  alignLine,
+  normalizeBorders,
+  normalizeMargin,
+  normalizePadding,
+} from "./internal/box-helpers.js";
 
 // ============================================================================
+// Re-exports
+// ============================================================================
+
 // Types
-// ============================================================================
+export type {
+  Box,
+  BoxAlign,
+  BoxBorders,
+  BoxContent,
+  BoxOptions,
+  BoxSpacing,
+  NormalizedBorders,
+  NormalizedSpacing,
+} from "./internal/box-types.js";
 
-/**
- * Text alignment options for box content.
- */
-export type BoxAlign = "left" | "center" | "right";
-
-/**
- * Options for customizing box rendering.
- *
- * @example
- * ```typescript
- * // Box with title and rounded corners
- * renderBox("Content", {
- *   title: "Status",
- *   border: "rounded",
- *   padding: 1,
- * });
- *
- * // Fixed-width centered box
- * renderBox("Centered", {
- *   width: 40,
- *   align: "center",
- * });
- * ```
- */
-/**
- * Spacing configuration for individual sides.
- */
-export interface BoxSpacing {
-  bottom?: number;
-  left?: number;
-  right?: number;
-  top?: number;
-}
-
-/**
- * Border visibility configuration for individual sides.
- */
-export interface BoxBorders {
-  bottom?: boolean;
-  left?: boolean;
-  right?: boolean;
-  top?: boolean;
-}
-
-export interface BoxOptions {
-  /**
-   * Content alignment within the box.
-   * @default "left"
-   */
-  align?: BoxAlign;
-  /**
-   * Border style to use.
-   * @default "single"
-   */
-  border?: BorderStyle;
-
-  /**
-   * Control which borders to render.
-   * @default { top: true, right: true, bottom: true, left: true }
-   */
-  borders?: BoxBorders;
-
-  /**
-   * External margin (spacing outside the box).
-   * Can be a single number for all sides or an object for individual sides.
-   */
-  margin?: number | BoxSpacing;
-
-  /**
-   * Internal padding (spaces between border and content).
-   * Can be a single number for all sides or an object for individual sides.
-   * @default 1
-   */
-  padding?: number | BoxSpacing;
-
-  /**
-   * Content sections separated by internal dividers.
-   * Each section can be a string or string[].
-   * When provided, takes precedence over the content parameter.
-   *
-   * @example
-   * ```typescript
-   * renderBox("", {
-   *   sections: [
-   *     "Header",
-   *     ["Line 1", "Line 2"],
-   *     "Footer"
-   *   ],
-   *   border: "single"
-   * });
-   * // ┌─────────────────┐
-   * // │ Header          │
-   * // ├─────────────────┤
-   * // │ Line 1          │
-   * // │ Line 2          │
-   * // ├─────────────────┤
-   * // │ Footer          │
-   * // └─────────────────┘
-   * ```
-   */
-  sections?: Array<string | string[]>;
-
-  /**
-   * Optional title to display in the top border.
-   */
-  title?: string;
-
-  /**
-   * Fixed width for the box. If not specified, auto-fits to content.
-   */
-  width?: number;
-}
-
-/**
- * A rendered box with metadata for composition.
- */
-export interface Box {
-  /** Height in lines */
-  readonly height: number;
-  /** Rendered string representation */
-  readonly output: string;
-  /** Width in characters */
-  readonly width: number;
-}
-
-/**
- * Content that can be rendered inside a box.
- * - string: Plain text content
- * - string[]: Multi-line content
- * - Box: Nested box (rendered string with metadata)
- */
-export type BoxContent = string | string[] | Box;
-
-// ============================================================================
 // Helpers
+export {
+  normalizeBorders,
+  normalizeMargin,
+  normalizePadding,
+} from "./internal/box-helpers.js";
+
+// ============================================================================
+// Imports for inline use
 // ============================================================================
 
-/**
- * Pads a line to a specific width with given alignment.
- */
-function alignLine(line: string, width: number, align: BoxAlign): string {
-  const lineWidth = getStringWidth(line);
-  const padding = width - lineWidth;
-
-  if (padding <= 0) {
-    return line;
-  }
-
-  switch (align) {
-    case "center": {
-      const leftPad = Math.floor(padding / 2);
-      const rightPad = padding - leftPad;
-      return " ".repeat(leftPad) + line + " ".repeat(rightPad);
-    }
-    case "right":
-      return " ".repeat(padding) + line;
-    default:
-      // "left" alignment (default): pad on right
-      return line + " ".repeat(padding);
-  }
-}
-
-/**
- * Normalized spacing with all four sides defined.
- */
-export interface NormalizedSpacing {
-  bottom: number;
-  left: number;
-  right: number;
-  top: number;
-}
-
-/**
- * Normalized borders with all four sides defined.
- */
-export interface NormalizedBorders {
-  bottom: boolean;
-  left: boolean;
-  right: boolean;
-  top: boolean;
-}
-
-/**
- * Normalizes padding input to have all four sides.
- * For backward compatibility, when padding is a number it only applies to horizontal (left/right).
- * When padding is an object, all sides can be specified.
- */
-export function normalizePadding(
-  padding: number | BoxSpacing | undefined,
-  defaultValue: number
-): NormalizedSpacing {
-  if (padding === undefined) {
-    return { top: 0, right: defaultValue, bottom: 0, left: defaultValue };
-  }
-  if (typeof padding === "number") {
-    // Backward compatibility: number only applies to horizontal padding
-    return { top: 0, right: padding, bottom: 0, left: padding };
-  }
-  return {
-    top: padding.top ?? 0,
-    right: padding.right ?? defaultValue,
-    bottom: padding.bottom ?? 0,
-    left: padding.left ?? defaultValue,
-  };
-}
-
-/**
- * Normalizes margin input to have all four sides.
- * When margin is a number, it applies to all sides.
- */
-export function normalizeMargin(
-  margin: number | BoxSpacing | undefined,
-  defaultValue: number
-): NormalizedSpacing {
-  if (margin === undefined) {
-    return {
-      top: defaultValue,
-      right: defaultValue,
-      bottom: defaultValue,
-      left: defaultValue,
-    };
-  }
-  if (typeof margin === "number") {
-    return { top: margin, right: margin, bottom: margin, left: margin };
-  }
-  return {
-    top: margin.top ?? defaultValue,
-    right: margin.right ?? defaultValue,
-    bottom: margin.bottom ?? defaultValue,
-    left: margin.left ?? defaultValue,
-  };
-}
-
-/**
- * Normalizes borders input to have all four sides.
- */
-export function normalizeBorders(
-  borders: BoxBorders | undefined
-): NormalizedBorders {
-  if (borders === undefined) {
-    return { top: true, right: true, bottom: true, left: true };
-  }
-  return {
-    top: borders.top ?? true,
-    right: borders.right ?? true,
-    bottom: borders.bottom ?? true,
-    left: borders.left ?? true,
-  };
-}
+import type { Box, BoxContent, BoxOptions } from "./internal/box-types.js";
 
 // ============================================================================
 // Main Function
@@ -544,48 +326,6 @@ export function renderBox(
 // ============================================================================
 // Box Composition
 // ============================================================================
-
-/**
- * Type guard to check if a value is a Box object.
- */
-function isBox(value: unknown): value is Box {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "output" in value &&
-    "width" in value &&
-    "height" in value &&
-    typeof (value as Box).output === "string" &&
-    typeof (value as Box).width === "number" &&
-    typeof (value as Box).height === "number"
-  );
-}
-
-/**
- * Converts BoxContent to an array of string lines.
- */
-function contentToLines(content: BoxContent | BoxContent[]): string[] {
-  if (Array.isArray(content)) {
-    const lines: string[] = [];
-    for (const item of content) {
-      if (isBox(item)) {
-        lines.push(...item.output.split("\n"));
-      } else if (Array.isArray(item)) {
-        lines.push(...item);
-      } else {
-        lines.push(...item.split("\n"));
-      }
-    }
-    return lines;
-  }
-  if (isBox(content)) {
-    return content.output.split("\n");
-  }
-  if (typeof content === "string") {
-    return content.split("\n");
-  }
-  return content;
-}
 
 /**
  * Creates a Box object that can be composed with other boxes.
