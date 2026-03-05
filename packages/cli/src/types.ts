@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Types-only file; splitting interfaces across files hurts discoverability */
 /**
  * Type definitions for @outfitter/cli
  *
@@ -843,14 +844,8 @@ export interface CollectIdsOptions {
   /** Allow @file expansion (reads IDs from file) */
   readonly allowFile?: boolean;
 
-  /** Allow glob patterns */
-  readonly allowGlob?: boolean;
-
   /** Allow reading from stdin with "-" */
   readonly allowStdin?: boolean;
-
-  /** Separator for comma-separated values */
-  readonly separator?: string;
 }
 
 /**
