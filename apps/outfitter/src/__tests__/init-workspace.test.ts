@@ -44,6 +44,7 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
   });
 });
 
