@@ -3,13 +3,21 @@
   "round": 2,
   "status": "pass",
   "validatorsRun": {
-    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "test": {
+      "passed": true,
+      "command": "bun run test",
+      "exitCode": 0
+    },
     "typecheck": {
       "passed": true,
       "command": "bun run typecheck",
       "exitCode": 0
     },
-    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+    "lint": {
+      "passed": true,
+      "command": "bun run lint",
+      "exitCode": 0
+    }
   },
   "reviewsSummary": {
     "total": 1,

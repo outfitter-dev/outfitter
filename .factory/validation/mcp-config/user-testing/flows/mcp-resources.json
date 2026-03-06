@@ -2,10 +2,15 @@
   "groupId": "mcp-resources",
   "testedAt": "2026-02-28T01:18:30Z",
   "credentials": {
-    "account": "n/a (shell validation)",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "mcp-config-mcp-resources"
   },
-  "toolsUsed": ["bun test", "bun -e", "Grep", "Read"],
+  "toolsUsed": [
+    "bun test",
+    "bun -e",
+    "Grep",
+    "Read"
+  ],
   "assertions": [
     {
       "id": "VAL-MCP-001",
@@ -13,7 +18,7 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run `cd /Users/mg/Developer/outfitter/stack/packages/mcp && bun test`",
+          "action": "Run `cd packages/mcp && bun test`",
           "expected": "MCP package tests pass, including resource definition/validation/error-handling coverage",
           "observed": "Pass (165 passed, 0 failed). Includes `src/__tests__/define-resource.test.ts` coverage for defineResource(), defineResourceTemplate(), paramSchema validation, typed params, and error translation."
         },
@@ -77,5 +82,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 2 assertions (VAL-MCP-001, VAL-MCP-002): 2 passed, 0 failed, 0 blocked."
+  "summary": "Tested 2 assertions (VAL-MCP-001, VAL-MCP-002): 2 passed, 0 failed, 0 blocked.",
+  "commitId": "7e7a3eecbc688f99164bd587571c42d3941b16fe"
 }

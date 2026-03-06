@@ -2,10 +2,15 @@
   "groupId": "e2e-chain",
   "testedAt": "2026-02-28T00:51:16Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "presets-envelope-e2e-chain"
   },
-  "toolsUsed": ["shell", "bun test", "rg", "file inspection"],
+  "toolsUsed": [
+    "shell",
+    "bun test",
+    "rg",
+    "file inspection"
+  ],
   "assertions": [
     {
       "id": "VAL-CROSS-001",
@@ -23,12 +28,12 @@
           "observed": "Test file explicitly documents and asserts full chain coverage, including JSON success path, human success path, validation failure path, context factory failure path, preset composition, and CLI parse → runHandler integration."
         },
         {
-          "action": "Run targeted integration test: `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/builder-e2e.test.ts`",
+          "action": "Run targeted integration test: `cd packages/cli && bun test src/__tests__/builder-e2e.test.ts`",
           "expected": "Full chain integration tests pass and show JSON/human output coverage",
           "observed": "13 pass / 0 fail. Includes: `success path — JSON mode`, `success path — human mode`, `runHandler() bridges full lifecycle`, and `CLI parse → runHandler full integration`."
         },
         {
-          "action": "Run required package suites: `cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test` and `cd /Users/mg/Developer/outfitter/stack/apps/outfitter && bun test`",
+          "action": "Run required package suites: `cd packages/cli && bun test` and `cd apps/outfitter && bun test`",
           "expected": "No regressions; integration coverage remains green",
           "observed": "`packages/cli`: 659 pass / 0 fail. `apps/outfitter`: 749 pass / 0 fail. No VAL-CROSS-001 builder-chain tests found in apps/outfitter test files via grep."
         }
@@ -45,5 +50,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 1 assertion (VAL-CROSS-001): 1 passed, 0 failed, 0 blocked."
+  "summary": "Tested 1 assertion (VAL-CROSS-001): 1 passed, 0 failed, 0 blocked.",
+  "commitId": "80af48a6c4fffaa798ae14e0fd7340517a3eb94a"
 }

@@ -14,5 +14,8 @@
   },
   "frictions": [],
   "blockers": [],
-  "toolsUsed": ["shell", "read"]
+  "toolsUsed": [
+    "shell",
+    "read"
+  ]
 }

@@ -8,7 +8,11 @@
     "failed": 0,
     "blocked": 0
   },
-  "passedAssertions": ["VAL-MCP-001", "VAL-MCP-002", "VAL-CFG-001"],
+  "passedAssertions": [
+    "VAL-MCP-001",
+    "VAL-MCP-002",
+    "VAL-CFG-001"
+  ],
   "failedAssertions": [],
   "blockedAssertions": [],
   "appliedUpdates": [],

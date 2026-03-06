@@ -2,10 +2,16 @@
   "groupId": "ref-001-build",
   "testedAt": "2026-02-28T17:40:16Z",
   "credentials": {
-    "account": "not-required",
-    "namespace": "not-required"
+    "account": "shell-local",
+    "namespace": "reference-ref-001-build"
   },
-  "toolsUsed": ["shell", "Read", "LS", "Glob", "bun"],
+  "toolsUsed": [
+    "shell",
+    "Read",
+    "LS",
+    "Glob",
+    "bun"
+  ],
   "assertions": [
     {
       "id": "VAL-REF-001",
@@ -69,5 +75,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 1 assertion (VAL-REF-001): passed. The reference project exists with required scripts and source files, builds/tests independently, and also builds from monorepo root via Turbo."
+  "summary": "Tested 1 assertion (VAL-REF-001): passed. The reference project exists with required scripts and source files, builds/tests independently, and also builds from monorepo root via Turbo.",
+  "commitId": "c777dd3ba5fd54e819f0aaf9bdef08401de0fcfb"
 }
