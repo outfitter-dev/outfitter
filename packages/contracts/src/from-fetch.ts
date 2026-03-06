@@ -151,8 +151,9 @@ export function fromFetch(
   response: Response
 ): Result<Response, OutfitterError> {
   const { status, statusText } = response;
+  const rateLimitStatus = statusCodeMap.rate_limit;
   const retryAfterSeconds =
-    status === 429
+    status === rateLimitStatus
       ? parseRetryAfterSeconds(response.headers.get("Retry-After"))
       : undefined;
 
