@@ -166,4 +166,28 @@ describe("surface map I/O", () => {
     const read = await readSurfaceMap(snapshotPath);
     expect(read.version).toBe("1.0.0");
   });
+
+  it("preserves the existing generatedAt when the surface content is unchanged", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-"));
+    const registry = createTestRegistry();
+    const outputPath = join(tempDir, ".outfitter", "surface.json");
+    const initialSurfaceMap = {
+      ...generateSurfaceMap(registry, { generator: "build" }),
+      generatedAt: "2026-03-01T00:00:00.000Z",
+    };
+
+    await writeSurfaceMap(initialSurfaceMap, outputPath);
+    const initialContent = await readFile(outputPath, "utf-8");
+
+    await writeSurfaceMap(
+      generateSurfaceMap(registry, { generator: "build" }),
+      outputPath
+    );
+
+    const rewrittenContent = await readFile(outputPath, "utf-8");
+    const rewrittenMap = await readSurfaceMap(outputPath);
+
+    expect(rewrittenMap.generatedAt).toBe(initialSurfaceMap.generatedAt);
+    expect(rewrittenContent).toBe(initialContent);
+  });
 });

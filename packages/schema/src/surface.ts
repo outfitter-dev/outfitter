@@ -32,6 +32,17 @@ export interface GenerateSurfaceMapOptions extends GenerateManifestOptions {
 
 const SURFACE_MAP_SCHEMA = "https://outfitter.dev/surface/v1";
 
+function comparableSurfaceMap(
+  surfaceMap: SurfaceMap
+): Omit<SurfaceMap, "generatedAt"> {
+  const { generatedAt: _generatedAt, ...comparable } = surfaceMap;
+  return comparable;
+}
+
+function serializeSurfaceMap(surfaceMap: SurfaceMap): string {
+  return `${JSON.stringify(surfaceMap, null, 2)}\n`;
+}
+
 // =============================================================================
 // Generation
 // =============================================================================
@@ -75,8 +86,32 @@ export async function writeSurfaceMap(
   outputPath: string
 ): Promise<void> {
   await mkdir(dirname(outputPath), { recursive: true });
-  const content = `${JSON.stringify(surfaceMap, null, 2)}\n`;
-  await writeFile(outputPath, content, "utf-8");
+  let nextSurfaceMap = surfaceMap;
+  let existingContent: string | undefined;
+
+  try {
+    existingContent = await readFile(outputPath, "utf-8");
+    const existingSurfaceMap = JSON.parse(existingContent) as SurfaceMap;
+
+    if (
+      JSON.stringify(comparableSurfaceMap(existingSurfaceMap)) ===
+      JSON.stringify(comparableSurfaceMap(surfaceMap))
+    ) {
+      nextSurfaceMap = {
+        ...surfaceMap,
+        generatedAt: existingSurfaceMap.generatedAt,
+      };
+
+      const nextContent = serializeSurfaceMap(nextSurfaceMap);
+      if (nextContent === existingContent) {
+        return;
+      }
+    }
+  } catch {
+    // Missing or unreadable files are rewritten from scratch.
+  }
+
+  await writeFile(outputPath, serializeSurfaceMap(nextSurfaceMap), "utf-8");
 }
 
 /**
