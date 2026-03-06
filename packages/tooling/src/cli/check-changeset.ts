@@ -38,7 +38,7 @@ function toWorkspacePackageName(packageName: string): string {
     : `@outfitter/${packageName}`;
 }
 
-function getReleasableChangedPackages(
+export function getReleasableChangedPackages(
   changedPackages: readonly string[],
   ignoredPackages: readonly string[]
 ): string[] {
