@@ -36,10 +36,26 @@ describe("findHomePathLeaks", () => {
       findHomePathLeaks('Example path: "/Users/john/Documents"', "/Users/mg")
     ).toEqual([]);
   });
+
+  test("detects escaped Windows home paths in serialized content", () => {
+    expect(
+      findHomePathLeaks(
+        "Path: C:\\\\Users\\\\mg\\\\Developer\\\\outfitter\\\\stack",
+        "C:\\Users\\mg"
+      )
+    ).toEqual([
+      {
+        line: 1,
+        column: 7,
+        matchedText: "C:\\\\Users\\\\mg",
+        lineText: "Path: C:\\\\Users\\\\mg\\\\Developer\\\\outfitter\\\\stack",
+      },
+    ]);
+  });
 });
 
 describe("scanFilesForHardcodedHomePaths", () => {
-  test("reports matching files with relative paths", async () => {
+  test("reports matching files with relative paths", () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
     const targetFile = join(workspaceRoot, "notes.md");
 
@@ -49,7 +65,7 @@ describe("scanFilesForHardcodedHomePaths", () => {
         "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling"
       );
 
-      const leaks = await scanFilesForHardcodedHomePaths(["notes.md"], {
+      const leaks = scanFilesForHardcodedHomePaths(["notes.md"], {
         cwd: workspaceRoot,
         homeDir: "/Users/mg",
       });
