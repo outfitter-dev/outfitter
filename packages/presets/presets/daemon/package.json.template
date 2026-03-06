@@ -35,7 +35,7 @@
 		"@outfitter/daemon": "workspace:*",
 		"@outfitter/cli": "workspace:*",
 		"@outfitter/logging": "workspace:*",
-		"commander": "^14.0.2"
+		"commander": "catalog:"
 	},
 	"devDependencies": {},
 	"outfitter": {

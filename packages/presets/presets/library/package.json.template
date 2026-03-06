@@ -32,10 +32,10 @@
 	"dependencies": {
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/logging": "workspace:*",
-		"zod": "^4.3.5"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"bunup": "^0.16.29"
+		"bunup": "catalog:"
 	},
 	"outfitter": {
 		"template": {
