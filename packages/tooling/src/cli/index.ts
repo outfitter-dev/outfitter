@@ -19,6 +19,7 @@ import { runCheckBunupRegistry } from "./check-bunup-registry.js";
 import { runCheckChangeset } from "./check-changeset.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
+import { runCheckHomePaths } from "./check-home-paths.js";
 import { runCheckMarkdownLinks } from "./check-markdown-links.js";
 import { runCheckTsdoc } from "./check-tsdoc.js";
 import { runCheck } from "./check.js";
@@ -155,6 +156,15 @@ register(
     .option("--paths <paths...>", "Limit check to specific paths")
     .action(async (options: { paths?: string[] }) => {
       await runCheckCleanTree(options);
+    })
+);
+
+register(
+  new Command("check-home-paths")
+    .description("Check staged files for hardcoded home directory paths")
+    .argument("[paths...]", "Specific files to scan")
+    .action(async (paths: string[]) => {
+      await runCheckHomePaths(paths);
     })
 );
 

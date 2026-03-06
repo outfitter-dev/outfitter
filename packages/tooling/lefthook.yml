@@ -13,6 +13,10 @@ pre-commit:
       run: bun x ultracite fix {staged_files}
       stage_fixed: true
 
+    home-paths:
+      glob: "*.{json,md,ts,tsx,yaml,yml}"
+      run: bunx @outfitter/tooling check-home-paths {staged_files}
+
     typecheck:
       glob: "*.{ts,tsx}"
       run: bun run typecheck
