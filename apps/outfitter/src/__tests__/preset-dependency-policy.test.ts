@@ -16,6 +16,13 @@ import {
   EXTERNAL_TEMPLATE_VERSION,
   validatePresetDeps,
 } from "../commands/check-preset-versions.js";
+<<<<<<< HEAD
+=======
+
+function stripRangePrefix(version: string): string {
+  return version.replace(/^[\^~>=<]+/, "");
+}
+>>>>>>> 1bf96636 (test(outfitter): harden preset dependency policy guards)
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
