@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "completeness-cross-feature"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "code inspection"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "code inspection"],
   "assertions": [
     {
       "id": "VAL-CROSS-001",

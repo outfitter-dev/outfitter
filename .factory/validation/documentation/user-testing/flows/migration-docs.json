@@ -5,11 +5,7 @@
     "account": "shell-local",
     "namespace": "documentation-migration-docs"
   },
-  "toolsUsed": [
-    "Read",
-    "Grep",
-    "shell"
-  ],
+  "toolsUsed": ["Read", "Grep", "shell"],
   "assertions": [
     {
       "id": "VAL-CROSS-001",
@@ -48,9 +44,7 @@
         }
       ],
       "evidence": {
-        "files": [
-          "docs/migration-v0.4.md"
-        ],
+        "files": ["docs/migration-v0.4.md"],
         "sectionHeadings": [
           "docs/migration-v0.4.md:5",
           "docs/migration-v0.4.md:42",

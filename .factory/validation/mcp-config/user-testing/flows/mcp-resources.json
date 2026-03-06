@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "mcp-config-mcp-resources"
   },
-  "toolsUsed": [
-    "bun test",
-    "bun -e",
-    "Grep",
-    "Read"
-  ],
+  "toolsUsed": ["bun test", "bun -e", "Grep", "Read"],
   "assertions": [
     {
       "id": "VAL-MCP-001",

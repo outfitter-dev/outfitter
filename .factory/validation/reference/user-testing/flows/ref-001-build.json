@@ -5,13 +5,7 @@
     "account": "shell-local",
     "namespace": "reference-ref-001-build"
   },
-  "toolsUsed": [
-    "shell",
-    "Read",
-    "LS",
-    "Glob",
-    "bun"
-  ],
+  "toolsUsed": ["shell", "Read", "LS", "Glob", "bun"],
   "assertions": [
     {
       "id": "VAL-REF-001",

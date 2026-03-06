@@ -5,10 +5,7 @@
     "account": "shell-local",
     "namespace": "dx-migration-dx-scanner-codemod"
   },
-  "toolsUsed": [
-    "shell:bun test",
-    "shell:bun run"
-  ],
+  "toolsUsed": ["shell:bun test", "shell:bun run"],
   "assertions": [
     {
       "id": "VAL-DX-001",

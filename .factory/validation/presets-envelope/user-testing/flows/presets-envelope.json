@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "presets-envelope-presets-envelope"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-PRESET-001",

@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "builder-core-contracts-types"
   },
-  "toolsUsed": [
-    "shell",
-    "bun",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-BUILD-001",

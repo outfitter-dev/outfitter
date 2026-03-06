@@ -6,12 +6,7 @@
     "account": "shell-local",
     "namespace": "safety-metadata-annotations"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-SAFE-004",

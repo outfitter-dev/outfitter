@@ -5,13 +5,7 @@
     "account": "shell-local",
     "namespace": "streaming-cli-streaming"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "bun -e",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-STREAM-001",
