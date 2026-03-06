@@ -64,6 +64,11 @@ export interface ScanHomePathOptions {
   readonly homeDir?: string;
 }
 
+export interface RunCheckHomePathsOptions {
+  readonly setExitCode?: (code: number) => void;
+  readonly stderr?: Pick<typeof process.stderr, "write">;
+}
+
 export function scanFilesForHardcodedHomePaths(
   filePaths: readonly string[],
   options: ScanHomePathOptions = {}
@@ -93,21 +98,30 @@ export function scanFilesForHardcodedHomePaths(
   return leaks;
 }
 
-export function runCheckHomePaths(paths: readonly string[]): void {
+export function runCheckHomePaths(
+  paths: readonly string[],
+  options: RunCheckHomePathsOptions = {}
+): void {
+  const stderr = options.stderr ?? process.stderr;
+  const setExitCode =
+    options.setExitCode ??
+    ((code: number) => {
+      process.exitCode = code;
+    });
   const leaks = scanFilesForHardcodedHomePaths(paths);
   if (leaks.length === 0) {
-    process.exitCode = 0;
+    setExitCode(0);
     return;
   }
 
-  process.stderr.write("Hardcoded home directory paths detected:\n");
+  stderr.write("Hardcoded home directory paths detected:\n");
   for (const leak of leaks) {
-    process.stderr.write(
+    stderr.write(
       `  ${leak.filePath}:${leak.line}:${leak.column} ${leak.lineText.trim()}\n`
     );
   }
-  process.stderr.write(
+  stderr.write(
     `\nReplace ${JSON.stringify(leaks[0]?.matchedText ?? homedir())} with a repo-relative or home-agnostic path before committing.\n`
   );
-  process.exitCode = 1;
+  setExitCode(1);
 }
