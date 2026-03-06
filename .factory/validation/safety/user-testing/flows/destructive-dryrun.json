@@ -6,12 +6,7 @@
     "account": "shell-local",
     "namespace": "safety-destructive-dryrun"
   },
-  "toolsUsed": [
-    "bun test",
-    "bun -e",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["bun test", "bun -e", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-SAFE-001",

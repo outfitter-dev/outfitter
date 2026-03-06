@@ -120,9 +120,7 @@
           "src/__tests__/action-graph.test.ts -> Tier-4 success hints (VAL-GRAPH-004): 5 passing tests",
           "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 success envelope graph hint composition: passing"
         ],
-        "source": [
-          "packages/cli/src/hints.ts:481"
-        ]
+        "source": ["packages/cli/src/hints.ts:481"]
       },
       "issues": null
     },
@@ -152,9 +150,7 @@
           "src/__tests__/action-graph.test.ts -> Tier-4 error hints (VAL-GRAPH-005): 4 passing tests",
           "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 error envelope graph hint + retry metadata: passing"
         ],
-        "source": [
-          "packages/cli/src/hints.ts:522"
-        ]
+        "source": ["packages/cli/src/hints.ts:522"]
       },
       "issues": null
     }

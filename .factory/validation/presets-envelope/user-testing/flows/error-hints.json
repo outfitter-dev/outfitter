@@ -5,9 +5,7 @@
     "account": "shell-local",
     "namespace": "presets-envelope-error-hints"
   },
-  "toolsUsed": [
-    "shell"
-  ],
+  "toolsUsed": ["shell"],
   "assertions": [
     {
       "id": "VAL-ERR-001",

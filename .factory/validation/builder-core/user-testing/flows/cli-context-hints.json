@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "builder-core-cli-context-hints"
   },
-  "toolsUsed": [
-    "Read",
-    "Grep (rg)",
-    "bun test",
-    "bun run typecheck"
-  ],
+  "toolsUsed": ["Read", "Grep (rg)", "bun test", "bun run typecheck"],
   "assertions": [
     {
       "id": "VAL-BUILD-004",

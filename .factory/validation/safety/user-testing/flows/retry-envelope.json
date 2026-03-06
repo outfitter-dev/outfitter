@@ -6,13 +6,7 @@
     "account": "shell-local",
     "namespace": "safety-retry-envelope"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "bun -e",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun test", "bun -e", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-SAFE-006",

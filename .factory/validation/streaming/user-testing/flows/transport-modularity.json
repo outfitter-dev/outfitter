@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "streaming-transport-modularity"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "bun run typecheck",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun test", "bun run typecheck", "Read"],
   "assertions": [
     {
       "id": "VAL-STREAM-006",
@@ -67,9 +62,7 @@
         }
       ],
       "evidence": {
-        "terminal": [
-          "bun test --filter progress -> 14 pass, 0 fail"
-        ],
+        "terminal": ["bun test --filter progress -> 14 pass, 0 fail"],
         "source": [
           "packages/mcp/src/progress.ts",
           "packages/mcp/src/server.ts",
@@ -125,9 +118,7 @@
       "description": "Ad-hoc standalone TypeScript import check for @outfitter/contracts from a /tmp file failed due local Bun type definition resolution; this was not needed once root typecheck and source export inspection were completed.",
       "resolved": true,
       "resolution": "Used repository-level typecheck (bun run typecheck) plus direct inspection of contracts index/stream exports and consumer imports in CLI/MCP adapters.",
-      "affectedAssertions": [
-        "VAL-STREAM-008"
-      ]
+      "affectedAssertions": ["VAL-STREAM-008"]
     }
   ],
   "blockers": [],

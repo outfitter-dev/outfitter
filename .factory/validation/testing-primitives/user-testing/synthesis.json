@@ -8,10 +8,7 @@
     "failed": 0,
     "blocked": 0
   },
-  "passedAssertions": [
-    "VAL-TEST-001",
-    "VAL-TEST-002"
-  ],
+  "passedAssertions": ["VAL-TEST-001", "VAL-TEST-002"],
   "failedAssertions": [],
   "blockedAssertions": [],
   "appliedUpdates": [],

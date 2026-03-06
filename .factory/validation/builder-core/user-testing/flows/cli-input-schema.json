@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "builder-core-cli-input-schema"
   },
-  "toolsUsed": [
-    "shell",
-    "bun",
-    "rg",
-    "Read"
-  ],
+  "toolsUsed": ["shell", "bun", "rg", "Read"],
   "assertions": [
     {
       "id": "VAL-BUILD-002",

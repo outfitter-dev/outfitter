@@ -5,12 +5,7 @@
     "account": "shell-local",
     "namespace": "presets-envelope-e2e-chain"
   },
-  "toolsUsed": [
-    "shell",
-    "bun test",
-    "rg",
-    "file inspection"
-  ],
+  "toolsUsed": ["shell", "bun test", "rg", "file inspection"],
   "assertions": [
     {
       "id": "VAL-CROSS-001",
