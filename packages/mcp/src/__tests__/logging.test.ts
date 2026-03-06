@@ -152,6 +152,57 @@ describe("MCP Logging", () => {
       expect(sentMessages).toHaveLength(1);
     });
 
+    it("ignores invalid client log levels without clobbering the current level", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+        defaultLogLevel: "debug",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("verbose");
+      server.sendLogMessage("debug", "should still forward");
+
+      expect(sentMessages).toHaveLength(1);
+    });
+
+    it("ignores invalid client log levels without broadening the current threshold", () => {
+      const server = createMcpServer({
+        name: "test-server",
+        version: "1.0.0",
+        defaultLogLevel: "error",
+      });
+
+      const sentMessages: unknown[] = [];
+      const mockSdkServer = {
+        sendLoggingMessage: (params: unknown) => {
+          sentMessages.push(params);
+          return Promise.resolve();
+        },
+        sendToolListChanged: () => Promise.resolve(),
+        sendResourceListChanged: () => Promise.resolve(),
+        sendPromptListChanged: () => Promise.resolve(),
+      };
+
+      server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("verbose");
+      server.sendLogMessage("debug", "should still be filtered");
+      server.sendLogMessage("error", "should still forward");
+
+      expect(sentMessages).toHaveLength(1);
+    });
+
     it("resets log level on rebind", () => {
       const server = createMcpServer({
         name: "test-server",
