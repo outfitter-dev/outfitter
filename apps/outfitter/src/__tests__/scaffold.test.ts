@@ -276,6 +276,7 @@ describe("scaffold command", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
     expect(packageJson.devDependencies["@outfitter/oxlint-plugin"]).toBe(
       workspaceVersion("@outfitter/oxlint-plugin")
     );
