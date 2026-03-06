@@ -29,6 +29,15 @@ function runToolingCli(args: readonly string[]): {
 }
 
 describe("tooling CLI json flag wiring", () => {
+  test("shows check-home-paths help", () => {
+    const help = runToolingCli(["check-home-paths", "--help"]);
+
+    expect(help.exitCode).toBe(0);
+    expect(`${help.stdout}\n${help.stderr}`).toContain(
+      "Check staged files for hardcoded home directory paths"
+    );
+  });
+
   test("shows --json in check-exports and check-readme-imports help", () => {
     const exportsHelp = runToolingCli(["check-exports", "--help"]);
     const readmeHelp = runToolingCli(["check-readme-imports", "--help"]);
