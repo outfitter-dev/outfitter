@@ -25,7 +25,7 @@
 	"dependencies": {
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/logging": "workspace:*",
-		"zod": "^4.3.5"
+		"zod": "catalog:"
 	},
 	"devDependencies": {},
 	"license": "MIT"

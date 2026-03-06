@@ -15,6 +15,8 @@ import {
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
+import { getResolvedVersions } from "@outfitter/presets";
+
 /**
  * Read expected versions directly from workspace package.json files,
  * independent of the resolver under test, so resolver bugs don't mask
@@ -52,6 +54,8 @@ function cleanupTempDir(dir: string): void {
     rmSync(dir, { recursive: true, force: true });
   }
 }
+
+const resolvedVersions = getResolvedVersions().all;
 
 let tempDir: string;
 
@@ -271,7 +275,7 @@ describe("scaffold command", () => {
     expect(packageJson.dependencies["@outfitter/logging"]).toBe(
       workspaceVersion("@outfitter/logging")
     );
-    expect(packageJson.dependencies.commander).toBe("^14.0.2");
+    expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
     expect(packageJson.devDependencies["@outfitter/oxlint-plugin"]).toBe(
       workspaceVersion("@outfitter/oxlint-plugin")
     );
