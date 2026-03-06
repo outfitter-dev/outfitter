@@ -21,6 +21,7 @@ import type { z } from "zod";
 import {
   createDefaultMcpSink,
   resolveDefaultLogLevel,
+  VALID_MCP_LOG_LEVELS,
 } from "./internal/log-config.js";
 import { matchUriTemplate } from "./internal/uri-template.js";
 import { type McpLogLevel, shouldEmitLog } from "./logging.js";
@@ -668,6 +669,11 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     },
 
     setLogLevel(level: string): void {
+      if (!VALID_MCP_LOG_LEVELS.has(level)) {
+        logger.warn("Ignoring invalid client log level", { level });
+        return;
+      }
+
       clientLogLevel = level as McpLogLevel;
       logger.debug("Client log level set", { level });
     },
