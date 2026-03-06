@@ -49,72 +49,68 @@ function normalizeVersionRange(version: string): string {
   return trimmed.replace(/^[\^~>=<]+/, "");
 }
 
-function validatePresetDeps(
+export function validatePresetDeps(
   workspaceRoot: string,
   resolvedVersions: Readonly<Record<string, string>>,
   problems: string[]
 ): void {
-  const templateRoots = ["templates", "packages/presets/presets"] as const;
+  const presetRoot = "packages/presets/presets";
   const glob = new Bun.Glob("**/package.json.template");
 
-  for (const rootPath of templateRoots) {
-    const absoluteRoot = join(workspaceRoot, rootPath);
-    if (!existsSync(absoluteRoot)) {
+  const absoluteRoot = join(workspaceRoot, presetRoot);
+  if (!existsSync(absoluteRoot)) {
+    return;
+  }
+
+  for (const relativePath of glob.scanSync({
+    cwd: absoluteRoot,
+    absolute: false,
+  })) {
+    const templatePath = join(presetRoot, relativePath);
+    const absoluteTemplatePath = join(absoluteRoot, relativePath);
+    const parsed: unknown = JSON.parse(
+      readFileSync(absoluteTemplatePath, "utf-8")
+    );
+    if (!isRecord(parsed)) {
       continue;
     }
 
-    for (const relativePath of glob.scanSync({
-      cwd: absoluteRoot,
-      absolute: false,
-    })) {
-      const templatePath = join(rootPath, relativePath);
-      const absoluteTemplatePath = join(absoluteRoot, relativePath);
-      const parsed: unknown = JSON.parse(
-        readFileSync(absoluteTemplatePath, "utf-8")
-      );
-      if (!isRecord(parsed)) {
+    for (const section of DEPENDENCY_SECTIONS) {
+      const deps = parsed[section];
+      if (!isRecord(deps)) {
         continue;
       }
 
-      for (const section of DEPENDENCY_SECTIONS) {
-        const deps = parsed[section];
-        if (!isRecord(deps)) {
+      for (const [name, value] of Object.entries(deps)) {
+        if (typeof value !== "string") {
           continue;
         }
 
-        for (const [name, value] of Object.entries(deps)) {
-          if (typeof value !== "string") {
-            continue;
-          }
-
-          if (name.startsWith("@outfitter/")) {
-            if (value !== "workspace:*") {
-              problems.push(
-                `${templatePath}: ${name} must use workspace:* (found ${value})`
-              );
-            }
-            continue;
-          }
-
-          if (name.includes("{{") || value.startsWith("workspace:")) {
-            continue;
-          }
-
-          const expected = resolvedVersions[name];
-          if (!expected) {
+        if (name.startsWith("@outfitter/")) {
+          if (value !== "workspace:*") {
             problems.push(
-              `${templatePath}: external dependency "${name}" is not declared in @outfitter/presets`
-            );
-            continue;
-          }
-
-          if (
-            normalizeVersionRange(value) !== normalizeVersionRange(expected)
-          ) {
-            problems.push(
-              `${templatePath}: ${name} expected ${expected} (found ${value})`
+              `${templatePath}: ${name} must use workspace:* (found ${value})`
             );
           }
+          continue;
+        }
+
+        if (name.includes("{{") || value.startsWith("workspace:")) {
+          continue;
+        }
+
+        const expected = resolvedVersions[name];
+        if (!expected) {
+          problems.push(
+            `${templatePath}: external dependency "${name}" is not declared in @outfitter/presets`
+          );
+          continue;
+        }
+
+        if (normalizeVersionRange(value) !== normalizeVersionRange(expected)) {
+          problems.push(
+            `${templatePath}: ${name} expected ${expected} (found ${value})`
+          );
         }
       }
     }
