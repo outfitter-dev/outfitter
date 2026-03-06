@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
   findHomePathLeaks,
+  runCheckHomePaths,
   scanFilesForHardcodedHomePaths,
 } from "../cli/check-home-paths.js";
 
@@ -81,6 +82,42 @@ describe("scanFilesForHardcodedHomePaths", () => {
         },
       ]);
     } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("runCheckHomePaths", () => {
+  test("writes the leak summary to stderr and exits non-zero when leaks are found", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const targetFile = join(workspaceRoot, "tsconfig.jsonc");
+    const originalStderrWrite = process.stderr.write;
+    const originalExitCode = process.exitCode;
+    let stderr = "";
+
+    try {
+      writeFileSync(
+        targetFile,
+        `{"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`
+      );
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      Object.assign(process.stderr, { write: captureStderr });
+      process.exitCode = 0;
+
+      runCheckHomePaths([targetFile]);
+
+      expect(process.exitCode).toBe(1);
+      expect(stderr).toContain("Hardcoded home directory paths detected:");
+      expect(stderr).toContain(`${targetFile}:1:10`);
+      expect(stderr).toContain(JSON.stringify(homedir()));
+    } finally {
+      Object.assign(process.stderr, { write: originalStderrWrite });
+      process.exitCode = originalExitCode;
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
   });
