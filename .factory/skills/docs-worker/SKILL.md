@@ -61,7 +61,7 @@ After writing, verify every claim in the doc:
 ### 5. Verify
 
 ```bash
-# Lint (do NOT use 'bun run check' — format:check has a pre-existing crash)
+# Lint (do NOT use 'bun run check', 'bun run format:check', or 'bun run format:fix' — the formatter has a pre-existing crash)
 bun run lint
 
 # Type safety
@@ -105,7 +105,7 @@ Documentation-only changes to `docs/` directories do not need changesets unless 
         "exitCode": 0,
         "observation": "Confirmed OutfitterError export"
       },
-      { "command": "bun run check", "exitCode": 0, "observation": "Clean" },
+      { "command": "bun run lint", "exitCode": 0, "observation": "Clean" },
       {
         "command": "bun run test",
         "exitCode": 0,
