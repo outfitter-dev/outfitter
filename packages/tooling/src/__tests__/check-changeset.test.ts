@@ -98,18 +98,20 @@ describe("getChangedChangesetFiles", () => {
 });
 
 describe("checkChangesetRequired", () => {
-  test("returns ok when changeset files exist", () => {
+  test("returns ok when all changed packages are covered by changesets", () => {
     const result = checkChangesetRequired(
       ["cli", "contracts"],
-      ["happy-turtle.md"]
+      ["happy-turtle.md"],
+      ["@outfitter/cli", "@outfitter/contracts"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
 
-  test("returns ok when multiple changeset files exist", () => {
+  test("returns ok when multiple changeset files cover the changed packages", () => {
     const result = checkChangesetRequired(
       ["cli"],
-      ["happy-turtle.md", "brave-fox.md"]
+      ["happy-turtle.md", "brave-fox.md"],
+      ["@outfitter/cli"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
@@ -129,6 +131,40 @@ describe("checkChangesetRequired", () => {
 
   test("returns ok when no packages changed even with changesets", () => {
     const result = checkChangesetRequired([], ["happy-turtle.md"]);
+    expect(result).toEqual({ ok: true, missingFor: [] });
+  });
+
+  test("fails when only some changed packages are covered", () => {
+    const result = checkChangesetRequired(
+      ["cli", "contracts"],
+      ["happy-turtle.md"],
+      ["@outfitter/cli"]
+    );
+    expect(result).toEqual({
+      ok: false,
+      missingFor: ["contracts"],
+    });
+  });
+
+  test("fails when changeset files do not mention any changed package", () => {
+    const result = checkChangesetRequired(
+      ["tooling"],
+      ["happy-turtle.md"],
+      ["@outfitter/cli"]
+    );
+    expect(result).toEqual({
+      ok: false,
+      missingFor: ["tooling"],
+    });
+  });
+
+  test("ignores packages listed in changeset config ignore", () => {
+    const result = checkChangesetRequired(
+      ["agents", "tooling"],
+      ["happy-turtle.md"],
+      ["@outfitter/tooling"],
+      ["@outfitter/agents"]
+    );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
 });
