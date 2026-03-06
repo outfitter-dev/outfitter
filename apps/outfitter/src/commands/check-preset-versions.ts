@@ -14,6 +14,7 @@ const DEPENDENCY_SECTIONS = [
   "peerDependencies",
   "optionalDependencies",
 ] as const;
+export const EXTERNAL_TEMPLATE_VERSION = "catalog:";
 
 type DependencySection = (typeof DEPENDENCY_SECTIONS)[number];
 
@@ -108,9 +109,9 @@ export function validatePresetDeps(
           continue;
         }
 
-        if (normalizeVersionRange(value) !== normalizeVersionRange(expected)) {
+        if (value !== EXTERNAL_TEMPLATE_VERSION) {
           problems.push(
-            `${templatePath}: ${name} expected ${expected} (found ${value})`
+            `${templatePath}: ${name} must use ${EXTERNAL_TEMPLATE_VERSION} (found ${value})`
           );
         }
       }

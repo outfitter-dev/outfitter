@@ -8,6 +8,8 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { getResolvedVersions } from "@outfitter/presets";
+
 import type { Manifest } from "../manifest.js";
 import {
   setupInitTestHarness,
@@ -16,6 +18,8 @@ import {
 } from "./helpers/init-test-harness.js";
 
 setupInitTestHarness();
+
+const resolvedVersions = getResolvedVersions().all;
 
 describe("init command local dependency rewriting", () => {
   test("rewrites @outfitter dependencies to workspace:* when local is enabled", async () => {
@@ -39,7 +43,7 @@ describe("init command local dependency rewriting", () => {
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("workspace:*");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
-    expect(packageJson.dependencies.commander).toBe("^14.0.2");
+    expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
   });
 });
 

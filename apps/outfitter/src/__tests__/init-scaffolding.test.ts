@@ -8,6 +8,8 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { getResolvedVersions } from "@outfitter/presets";
+
 import {
   setupInitTestHarness,
   tempDir,
@@ -15,6 +17,8 @@ import {
 } from "./helpers/init-test-harness.js";
 
 setupInitTestHarness();
+
+const resolvedVersions = getResolvedVersions().all;
 
 describe("init command file creation", () => {
   test("creates package.json in target directory", async () => {
@@ -32,6 +36,7 @@ describe("init command file creation", () => {
 
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     expect(packageJson.name).toBe("test-project");
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
   });
 
   test("creates standalone tsconfig.json without tooling preset", async () => {
@@ -84,7 +89,7 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies["@outfitter/logging"]).toBe(
       workspaceVersion("@outfitter/logging")
     );
-    expect(packageJson.dependencies.commander).toBe("^14.0.2");
+    expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.outfitter.template.kind).toBe("runnable");
     expect(packageJson.outfitter.template.placement).toBe("apps");
@@ -99,6 +104,30 @@ describe("init command file creation", () => {
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
     expect(programContent).toMatch(/createCLI/);
+  });
+
+  test("creates MCP template with resolved external dependency versions", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-mcp",
+      preset: "mcp",
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const packageJsonPath = join(tempDir, "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    expect(packageJson.dependencies["@modelcontextprotocol/sdk"]).toBe(
+      resolvedVersions["@modelcontextprotocol/sdk"]
+    );
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
   });
 
   test("creates library template with Result handler pattern and no binary entrypoint", async () => {
@@ -127,7 +156,7 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies["@outfitter/logging"]).toBe(
       workspaceVersion("@outfitter/logging")
     );
-    expect(packageJson.dependencies.zod).toBe("^4.3.5");
+    expect(packageJson.dependencies.zod).toBe(resolvedVersions.zod);
     expect(packageJson.outfitter.template.kind).toBe("library");
     expect(packageJson.outfitter.template.placement).toBe("packages");
     expect(packageJson.outfitter.template.surfaces).toEqual([]);
