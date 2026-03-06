@@ -33,6 +33,10 @@ export interface GenerateSurfaceMapOptions extends GenerateManifestOptions {
 
 const SURFACE_MAP_SCHEMA = "https://outfitter.dev/surface/v1";
 
+function compareStableKeys(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function comparableSurfaceMap(
   surfaceMap: SurfaceMap
 ): Omit<SurfaceMap, "generatedAt"> {
@@ -55,7 +59,7 @@ function stableJsonString(value: unknown): string {
 
   return `{${Object.entries(value)
     .filter(([, nestedValue]) => nestedValue !== undefined)
-    .toSorted(([left], [right]) => left.localeCompare(right))
+    .toSorted(([left], [right]) => compareStableKeys(left, right))
     .map(
       ([key, nestedValue]) =>
         `${JSON.stringify(key)}:${stableJsonString(nestedValue)}`
@@ -73,6 +77,7 @@ function canonicalizeSurfaceMapContent(
     {
       encoding: "utf-8",
       input: content,
+      timeout: 10_000,
     }
   );
 
