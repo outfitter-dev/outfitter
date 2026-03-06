@@ -14,8 +14,8 @@ pre-commit:
       stage_fixed: true
 
     home-paths:
-      glob: "*.{js,jsx,json,md,ts,tsx,yaml,yml}"
-      run: bunx @outfitter/tooling check-home-paths {staged_files}
+      glob: "*.{js,jsx,json,jsonc,md,ts,tsx,yaml,yml}"
+      run: bun x @outfitter/tooling check-home-paths {staged_files}
 
     typecheck:
       glob: "*.{ts,tsx}"
@@ -29,4 +29,4 @@ pre-push:
       # (*-tests, */tests, *_tests). Otherwise runs verify:ci (or a strict
       # fallback: typecheck/check-or-lint/build/test).
       # Requires: @outfitter/tooling as a dev dependency.
-      run: bunx @outfitter/tooling pre-push
+      run: bun x @outfitter/tooling pre-push
