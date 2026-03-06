@@ -1,9 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { getResolvedVersions } from "@outfitter/presets";
+
+import { validatePresetDeps } from "../commands/check-preset-versions.js";
 
 function stripRangePrefix(version: string): string {
   return version.replace(/^[\^~>=<]+/, "");
@@ -68,6 +77,49 @@ describe("preset dependency policy", () => {
           }
         }
       }
+    }
+  });
+
+  test("check-preset-versions validates only the canonical presets root", () => {
+    const { all: resolvedVersions } = getResolvedVersions();
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-presets-"));
+    const canonicalRoot = join(
+      workspaceRoot,
+      "packages",
+      "presets",
+      "presets",
+      "library"
+    );
+    const legacyRoot = join(workspaceRoot, "templates", "legacy");
+
+    try {
+      mkdirSync(canonicalRoot, { recursive: true });
+      writeFileSync(
+        join(canonicalRoot, "package.json.template"),
+        JSON.stringify({
+          dependencies: {
+            "@outfitter/contracts": "workspace:*",
+          },
+        })
+      );
+
+      mkdirSync(legacyRoot, { recursive: true });
+      writeFileSync(
+        join(legacyRoot, "package.json.template"),
+        JSON.stringify({
+          dependencies: {
+            "@outfitter/contracts": "^9.9.9",
+            "totally-unknown-package": "1.0.0",
+          },
+        })
+      );
+
+      const problems: string[] = [];
+      validatePresetDeps(workspaceRoot, resolvedVersions, problems);
+
+      expect(problems).toEqual([]);
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
     }
   });
 });
