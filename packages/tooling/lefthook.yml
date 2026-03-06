@@ -14,7 +14,7 @@ pre-commit:
       stage_fixed: true
 
     home-paths:
-      glob: "*.{json,md,ts,tsx,yaml,yml}"
+      glob: "*.{js,jsx,json,md,ts,tsx,yaml,yml}"
       run: bunx @outfitter/tooling check-home-paths {staged_files}
 
     typecheck:

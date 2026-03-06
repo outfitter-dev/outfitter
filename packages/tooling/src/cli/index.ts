@@ -163,8 +163,8 @@ register(
   new Command("check-home-paths")
     .description("Check staged files for hardcoded home directory paths")
     .argument("[paths...]", "Specific files to scan")
-    .action(async (paths: string[]) => {
-      await runCheckHomePaths(paths);
+    .action((paths: string[]) => {
+      runCheckHomePaths(paths);
     })
 );
 

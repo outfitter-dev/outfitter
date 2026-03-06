@@ -17,15 +17,30 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function buildHomePathPattern(homePath: string): RegExp | undefined {
+  if (homePath.trim().length === 0) {
+    return undefined;
+  }
+
+  const patternSource = homePath
+    .split(/(\\+)/)
+    .map((segment) =>
+      segment.includes("\\") ? "\\\\+" : escapeRegExp(segment)
+    )
+    .join("");
+
+  return new RegExp(patternSource, "g");
+}
+
 export function findHomePathLeaks(
   content: string,
   homePath: string
 ): HomePathLeak[] {
-  if (homePath.trim().length === 0) {
+  const pattern = buildHomePathPattern(homePath);
+  if (!pattern) {
     return [];
   }
 
-  const pattern = new RegExp(escapeRegExp(homePath), "g");
   const leaks: HomePathLeak[] = [];
   const lines = content.split("\n");
 
@@ -49,10 +64,10 @@ export interface ScanHomePathOptions {
   readonly homeDir?: string;
 }
 
-export async function scanFilesForHardcodedHomePaths(
+export function scanFilesForHardcodedHomePaths(
   filePaths: readonly string[],
   options: ScanHomePathOptions = {}
-): Promise<FileHomePathLeak[]> {
+): FileHomePathLeak[] {
   const cwd = options.cwd ?? process.cwd();
   const homePath = options.homeDir ?? homedir();
   const leaks: FileHomePathLeak[] = [];
@@ -78,10 +93,8 @@ export async function scanFilesForHardcodedHomePaths(
   return leaks;
 }
 
-export async function runCheckHomePaths(
-  paths: readonly string[]
-): Promise<void> {
-  const leaks = await scanFilesForHardcodedHomePaths(paths);
+export function runCheckHomePaths(paths: readonly string[]): void {
+  const leaks = scanFilesForHardcodedHomePaths(paths);
   if (leaks.length === 0) {
     process.exitCode = 0;
     return;
@@ -94,7 +107,7 @@ export async function runCheckHomePaths(
     );
   }
   process.stderr.write(
-    `\nReplace ${JSON.stringify(homedir())} with a repo-relative or home-agnostic path before committing.\n`
+    `\nReplace ${JSON.stringify(leaks[0]?.matchedText ?? homedir())} with a repo-relative or home-agnostic path before committing.\n`
   );
   process.exitCode = 1;
 }
