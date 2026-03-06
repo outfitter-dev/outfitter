@@ -1,5 +1,19 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
+import {
+  createActionRegistry,
+  defineAction,
+  Result,
+} from "@outfitter/contracts";
+import { z } from "zod";
+
+import {
+  generateSurfaceMap,
+  writeSurfaceMap,
+} from "../../../../packages/schema/src/surface.ts";
 import {
   canonicalizeJson,
   checkSurfaceMapFormat,
@@ -23,5 +37,34 @@ describe("checkSurfaceMapFormat", () => {
     expect(result.expected).toBe(
       canonicalizeJson(nonCanonical, "/tmp/surface.json")
     );
+  });
+
+  test("passes for surface maps written by @outfitter/schema", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "surface-format-"));
+    const filePath = join(tempDir, "surface.json");
+    const registry = createActionRegistry().add(
+      defineAction({
+        id: "doctor",
+        description: "Validate environment",
+        surfaces: ["cli"],
+        input: z.object({}),
+        cli: { command: "doctor" },
+        handler: async () => Result.ok({ ok: true }),
+      })
+    );
+
+    try {
+      await writeSurfaceMap(
+        generateSurfaceMap(registry, { generator: "build" }),
+        filePath
+      );
+
+      const content = await readFile(filePath, "utf-8");
+      const result = checkSurfaceMapFormat(content, filePath);
+
+      expect(result.ok).toBe(true);
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
   });
 });

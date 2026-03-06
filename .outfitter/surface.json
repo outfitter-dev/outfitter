@@ -1,16 +1,12 @@
 {
   "version": "1.0.0",
   "generatedAt": "2026-03-06T12:18:52.289Z",
-  "surfaces": [
-    "cli"
-  ],
+  "surfaces": ["cli"],
   "actions": [
     {
       "id": "create",
       "description": "Removed - use 'outfitter init' instead",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {}
@@ -23,9 +19,7 @@
     {
       "id": "scaffold",
       "description": "Add a capability to an existing project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -61,21 +55,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "target",
-          "force",
-          "skipInstall",
-          "dryRun",
-          "cwd"
-        ]
+        "required": ["target", "force", "skipInstall", "dryRun", "cwd"]
       },
       "cli": {
         "command": "scaffold <target> [name]",
@@ -118,9 +102,7 @@
     {
       "id": "init",
       "description": "Create a new Outfitter project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -150,10 +132,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -190,18 +169,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -288,9 +260,7 @@
     {
       "id": "init.cli",
       "description": "Create a new CLI project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -320,10 +290,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -360,18 +327,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -454,9 +414,7 @@
     {
       "id": "init.mcp",
       "description": "Create a new MCP server",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -486,10 +444,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -526,18 +481,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -620,9 +568,7 @@
     {
       "id": "init.daemon",
       "description": "Create a new daemon project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -652,10 +598,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -692,18 +635,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -786,9 +722,7 @@
     {
       "id": "init.library",
       "description": "Create a new library project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -818,10 +752,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -858,18 +789,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -952,9 +876,7 @@
     {
       "id": "init.full-stack",
       "description": "Create a full-stack workspace",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -984,10 +906,7 @@
           },
           "structure": {
             "type": "string",
-            "enum": [
-              "single",
-              "workspace"
-            ]
+            "enum": ["single", "workspace"]
           },
           "workspaceName": {
             "type": "string"
@@ -1024,18 +943,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "targetDir",
-          "force"
-        ]
+        "required": ["targetDir", "force"]
       },
       "cli": {
         "group": "init",
@@ -1118,9 +1030,7 @@
     {
       "id": "demo",
       "description": "Run the CLI demo app",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1135,11 +1045,7 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         }
@@ -1164,9 +1070,7 @@
     {
       "id": "doctor",
       "description": "Validate environment and dependencies",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1175,17 +1079,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "command": "doctor",
@@ -1201,9 +1099,7 @@
     {
       "id": "add",
       "description": "Add a block from the registry to your project",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1221,19 +1117,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "block",
-          "force",
-          "dryRun"
-        ]
+        "required": ["block", "force", "dryRun"]
       },
       "cli": {
         "group": "add",
@@ -1260,19 +1148,13 @@
     {
       "id": "add.list",
       "description": "List available blocks",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         }
@@ -1286,9 +1168,7 @@
     {
       "id": "check",
       "description": "Compare local config blocks against the registry for drift detection",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1309,12 +1189,7 @@
           },
           "mode": {
             "type": "string",
-            "enum": [
-              "all",
-              "ci",
-              "pre-commit",
-              "pre-push"
-            ]
+            "enum": ["all", "ci", "pre-commit", "pre-push"]
           },
           "stagedFiles": {
             "type": "array",
@@ -1324,20 +1199,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "compact",
-          "cwd",
-          "manifestOnly",
-          "verbose"
-        ]
+        "required": ["compact", "cwd", "manifestOnly", "verbose"]
       },
       "cli": {
         "group": "check",
@@ -1398,9 +1264,7 @@
     {
       "id": "check.tsdoc",
       "description": "Check TSDoc coverage on exported declarations",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1415,11 +1279,7 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           },
           "jq": {
@@ -1430,11 +1290,7 @@
           },
           "level": {
             "type": "string",
-            "enum": [
-              "documented",
-              "partial",
-              "undocumented"
-            ]
+            "enum": ["documented", "partial", "undocumented"]
           },
           "packages": {
             "type": "array",
@@ -1443,13 +1299,7 @@
             }
           }
         },
-        "required": [
-          "strict",
-          "minCoverage",
-          "cwd",
-          "summary",
-          "packages"
-        ]
+        "required": ["strict", "minCoverage", "cwd", "summary", "packages"]
       },
       "output": {
         "type": "object",
@@ -1481,11 +1331,7 @@
                       },
                       "level": {
                         "type": "string",
-                        "enum": [
-                          "documented",
-                          "partial",
-                          "undocumented"
-                        ]
+                        "enum": ["documented", "partial", "undocumented"]
                       },
                       "file": {
                         "type": "string"
@@ -1494,13 +1340,7 @@
                         "type": "number"
                       }
                     },
-                    "required": [
-                      "name",
-                      "kind",
-                      "level",
-                      "file",
-                      "line"
-                    ]
+                    "required": ["name", "kind", "level", "file", "line"]
                   }
                 },
                 "documented": {
@@ -1559,11 +1399,7 @@
             ]
           }
         },
-        "required": [
-          "ok",
-          "packages",
-          "summary"
-        ]
+        "required": ["ok", "packages", "summary"]
       },
       "cli": {
         "group": "check",
@@ -1607,9 +1443,7 @@
     {
       "id": "check.publish-guardrails",
       "description": "Validate publishable package manifests enforce prepublishOnly guardrails",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1618,17 +1452,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1650,9 +1478,7 @@
     {
       "id": "check.preset-versions",
       "description": "Validate preset dependency versions, registry versions, and Bun version consistency",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1661,17 +1487,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1693,9 +1513,7 @@
     {
       "id": "check.surface-map",
       "description": "Validate canonical surface map path usage (.outfitter/surface.json only)",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1704,17 +1522,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1736,9 +1548,7 @@
     {
       "id": "check.surface-map-format",
       "description": "Validate canonical formatting for .outfitter/surface.json",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1747,17 +1557,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1779,9 +1583,7 @@
     {
       "id": "check.docs-sentinel",
       "description": "Validate docs/README.md PACKAGE_LIST sentinel freshness",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1790,17 +1592,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1822,9 +1618,7 @@
     {
       "id": "check.action-ceremony",
       "description": "Validate action ceremony guardrails in apps/outfitter/src/actions",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1833,17 +1627,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1865,9 +1653,7 @@
     {
       "id": "check.action-registry",
       "description": "Cross-reference command files against action registry for completeness",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1876,17 +1662,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "check",
@@ -1908,9 +1688,7 @@
     {
       "id": "upgrade",
       "description": "Check for @outfitter/* package updates and migration guidance",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -1943,11 +1721,7 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
@@ -2009,9 +1783,7 @@
     {
       "id": "upgrade.codemod",
       "description": "Transform Commander .command().action() patterns to builder .input(schema).action()",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2024,17 +1796,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "upgrade",
@@ -2056,9 +1822,7 @@
     {
       "id": "docs.list",
       "description": "List documentation entries from the docs map",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2076,17 +1840,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "docs",
@@ -2120,9 +1878,7 @@
     {
       "id": "docs.show",
       "description": "Show a specific documentation entry and its content",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2137,18 +1893,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "id",
-          "cwd"
-        ]
+        "required": ["id", "cwd"]
       },
       "cli": {
         "group": "docs",
@@ -2174,9 +1923,7 @@
     {
       "id": "docs.search",
       "description": "Search documentation content for a query string",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2197,18 +1944,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "query",
-          "cwd"
-        ]
+        "required": ["query", "cwd"]
       },
       "cli": {
         "group": "docs",
@@ -2242,9 +1982,7 @@
     {
       "id": "docs.api",
       "description": "Extract API reference from TSDoc coverage data",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2253,11 +1991,7 @@
           },
           "level": {
             "type": "string",
-            "enum": [
-              "documented",
-              "partial",
-              "undocumented"
-            ]
+            "enum": ["documented", "partial", "undocumented"]
           },
           "packages": {
             "type": "array",
@@ -2270,18 +2004,11 @@
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd",
-          "packages"
-        ]
+        "required": ["cwd", "packages"]
       },
       "output": {
         "type": "object",
@@ -2313,11 +2040,7 @@
                       },
                       "level": {
                         "type": "string",
-                        "enum": [
-                          "documented",
-                          "partial",
-                          "undocumented"
-                        ]
+                        "enum": ["documented", "partial", "undocumented"]
                       },
                       "file": {
                         "type": "string"
@@ -2326,13 +2049,7 @@
                         "type": "number"
                       }
                     },
-                    "required": [
-                      "name",
-                      "kind",
-                      "level",
-                      "file",
-                      "line"
-                    ]
+                    "required": ["name", "kind", "level", "file", "line"]
                   }
                 },
                 "documented": {
@@ -2391,11 +2108,7 @@
             ]
           }
         },
-        "required": [
-          "ok",
-          "packages",
-          "summary"
-        ]
+        "required": ["ok", "packages", "summary"]
       },
       "cli": {
         "group": "docs",
@@ -2429,9 +2142,7 @@
     {
       "id": "docs.export",
       "description": "Export documentation to packages, llms.txt, or both",
-      "surfaces": [
-        "cli"
-      ],
+      "surfaces": ["cli"],
       "input": {
         "type": "object",
         "properties": {
@@ -2440,27 +2151,16 @@
           },
           "target": {
             "type": "string",
-            "enum": [
-              "packages",
-              "llms",
-              "llms-full",
-              "all"
-            ],
+            "enum": ["packages", "llms", "llms-full", "all"],
             "default": "all"
           },
           "outputMode": {
             "type": "string",
-            "enum": [
-              "human",
-              "json",
-              "jsonl"
-            ],
+            "enum": ["human", "json", "jsonl"],
             "default": "human"
           }
         },
-        "required": [
-          "cwd"
-        ]
+        "required": ["cwd"]
       },
       "cli": {
         "group": "docs",
@@ -2526,13 +2226,7 @@
       "http": 499
     }
   },
-  "outputModes": [
-    "human",
-    "json",
-    "jsonl",
-    "tree",
-    "table"
-  ],
+  "outputModes": ["human", "json", "jsonl", "tree", "table"],
   "$schema": "https://outfitter.dev/surface/v1",
   "generator": "build"
 }

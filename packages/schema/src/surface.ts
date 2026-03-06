@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { spawnSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -39,8 +40,40 @@ function comparableSurfaceMap(
   return comparable;
 }
 
-function serializeSurfaceMap(surfaceMap: SurfaceMap): string {
-  return `${JSON.stringify(surfaceMap, null, 2)}\n`;
+function canonicalizeSurfaceMapContent(
+  content: string,
+  outputPath: string
+): string {
+  const formatResult = spawnSync(
+    "bun",
+    ["x", "oxfmt", "--stdin-filepath", outputPath],
+    {
+      encoding: "utf-8",
+      input: content,
+    }
+  );
+
+  if (
+    formatResult.status !== 0 ||
+    typeof formatResult.stdout !== "string" ||
+    formatResult.stdout.length === 0
+  ) {
+    return content.endsWith("\n") ? content : `${content}\n`;
+  }
+
+  return formatResult.stdout.endsWith("\n")
+    ? formatResult.stdout
+    : `${formatResult.stdout}\n`;
+}
+
+function serializeSurfaceMap(
+  surfaceMap: SurfaceMap,
+  outputPath: string
+): string {
+  return canonicalizeSurfaceMapContent(
+    `${JSON.stringify(surfaceMap, null, 2)}\n`,
+    outputPath
+  );
 }
 
 // =============================================================================
@@ -102,7 +135,7 @@ export async function writeSurfaceMap(
         generatedAt: existingSurfaceMap.generatedAt,
       };
 
-      const nextContent = serializeSurfaceMap(nextSurfaceMap);
+      const nextContent = serializeSurfaceMap(nextSurfaceMap, outputPath);
       if (nextContent === existingContent) {
         return;
       }
@@ -111,7 +144,11 @@ export async function writeSurfaceMap(
     // Missing or unreadable files are rewritten from scratch.
   }
 
-  await writeFile(outputPath, serializeSurfaceMap(nextSurfaceMap), "utf-8");
+  await writeFile(
+    outputPath,
+    serializeSurfaceMap(nextSurfaceMap, outputPath),
+    "utf-8"
+  );
 }
 
 /**
