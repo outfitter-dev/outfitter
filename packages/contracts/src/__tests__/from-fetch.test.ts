@@ -94,7 +94,7 @@ describe("fromFetch", () => {
   describe("rate limit metadata", () => {
     test("maps Retry-After header (delta-seconds) into retryAfterSeconds", () => {
       const response = new Response(null, {
-        status: 429,
+        status: statusCodeMap.rate_limit,
         statusText: "Too Many Requests",
         headers: {
           "Retry-After": "120",
@@ -109,7 +109,7 @@ describe("fromFetch", () => {
 
     test("ignores invalid Retry-After header values", () => {
       const response = new Response(null, {
-        status: 429,
+        status: statusCodeMap.rate_limit,
         statusText: "Too Many Requests",
         headers: {
           "Retry-After": "definitely-not-a-number",
