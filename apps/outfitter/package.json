@@ -9,34 +9,16 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./targets/types": {
+    ".": {
       "import": {
-        "types": "./dist/targets/types.d.ts",
-        "default": "./dist/targets/types.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
-    "./targets/registry": {
+    "./actions": {
       "import": {
-        "types": "./dist/targets/registry.d.ts",
-        "default": "./dist/targets/registry.js"
-      }
-    },
-    "./targets": {
-      "import": {
-        "types": "./dist/targets/index.d.ts",
-        "default": "./dist/targets/index.js"
-      }
-    },
-    "./commands/check-surface-map-format": {
-      "import": {
-        "types": "./dist/commands/check-surface-map-format.d.ts",
-        "default": "./dist/commands/check-surface-map-format.js"
-      }
-    },
-    "./commands/upgrade-migration-guides": {
-      "import": {
-        "types": "./dist/commands/upgrade-migration-guides.d.ts",
-        "default": "./dist/commands/upgrade-migration-guides.js"
+        "types": "./dist/actions.d.ts",
+        "default": "./dist/actions.js"
       }
     },
     "./commands/add": {
@@ -45,148 +27,22 @@
         "default": "./dist/commands/add.js"
       }
     },
-    "./commands/check-action-registry": {
-      "import": {
-        "types": "./dist/commands/check-action-registry.d.ts",
-        "default": "./dist/commands/check-action-registry.js"
-      }
-    },
     "./commands/check": {
       "import": {
         "types": "./dist/commands/check.d.ts",
         "default": "./dist/commands/check.js"
       }
     },
-    "./commands/upgrade-codemod-builder": {
+    "./commands/check-action-ceremony": {
       "import": {
-        "types": "./dist/commands/upgrade-codemod-builder.d.ts",
-        "default": "./dist/commands/upgrade-codemod-builder.js"
+        "types": "./dist/commands/check-action-ceremony.d.ts",
+        "default": "./dist/commands/check-action-ceremony.js"
       }
     },
-    "./commands/check-preset-versions": {
+    "./commands/check-action-registry": {
       "import": {
-        "types": "./dist/commands/check-preset-versions.d.ts",
-        "default": "./dist/commands/check-preset-versions.js"
-      }
-    },
-    "./commands/docs-list": {
-      "import": {
-        "types": "./dist/commands/docs-list.d.ts",
-        "default": "./dist/commands/docs-list.js"
-      }
-    },
-    "./commands/upgrade-apply": {
-      "import": {
-        "types": "./dist/commands/upgrade-apply.d.ts",
-        "default": "./dist/commands/upgrade-apply.js"
-      }
-    },
-    "./commands/upgrade": {
-      "import": {
-        "types": "./dist/commands/upgrade.d.ts",
-        "default": "./dist/commands/upgrade.js"
-      }
-    },
-    "./commands/check-tsdoc": {
-      "import": {
-        "types": "./dist/commands/check-tsdoc.d.ts",
-        "default": "./dist/commands/check-tsdoc.js"
-      }
-    },
-    "./commands/check-publish-guardrails": {
-      "import": {
-        "types": "./dist/commands/check-publish-guardrails.d.ts",
-        "default": "./dist/commands/check-publish-guardrails.js"
-      }
-    },
-    "./commands/docs-search": {
-      "import": {
-        "types": "./dist/commands/docs-search.d.ts",
-        "default": "./dist/commands/docs-search.js"
-      }
-    },
-    "./commands/docs-module-loader": {
-      "import": {
-        "types": "./dist/commands/docs-module-loader.d.ts",
-        "default": "./dist/commands/docs-module-loader.js"
-      }
-    },
-    "./commands/upgrade-codemods": {
-      "import": {
-        "types": "./dist/commands/upgrade-codemods.d.ts",
-        "default": "./dist/commands/upgrade-codemods.js"
-      }
-    },
-    "./commands/init-execution": {
-      "import": {
-        "types": "./dist/commands/init-execution.d.ts",
-        "default": "./dist/commands/init-execution.js"
-      }
-    },
-    "./commands/shared-deps": {
-      "import": {
-        "types": "./dist/commands/shared-deps.d.ts",
-        "default": "./dist/commands/shared-deps.js"
-      }
-    },
-    "./commands/docs-show": {
-      "import": {
-        "types": "./dist/commands/docs-show.d.ts",
-        "default": "./dist/commands/docs-show.js"
-      }
-    },
-    "./commands/docs-export": {
-      "import": {
-        "types": "./dist/commands/docs-export.d.ts",
-        "default": "./dist/commands/docs-export.js"
-      }
-    },
-    "./commands/repo": {
-      "import": {
-        "types": "./dist/commands/repo.d.ts",
-        "default": "./dist/commands/repo.js"
-      }
-    },
-    "./commands/upgrade-planner": {
-      "import": {
-        "types": "./dist/commands/upgrade-planner.d.ts",
-        "default": "./dist/commands/upgrade-planner.js"
-      }
-    },
-    "./commands/upgrade-latest-version": {
-      "import": {
-        "types": "./dist/commands/upgrade-latest-version.d.ts",
-        "default": "./dist/commands/upgrade-latest-version.js"
-      }
-    },
-    "./commands/init-option-resolution": {
-      "import": {
-        "types": "./dist/commands/init-option-resolution.d.ts",
-        "default": "./dist/commands/init-option-resolution.js"
-      }
-    },
-    "./commands/docs-types": {
-      "import": {
-        "types": "./dist/commands/docs-types.d.ts",
-        "default": "./dist/commands/docs-types.js"
-      }
-    },
-    "./commands/init": {
-      "import": {
-        "types": "./dist/commands/init.d.ts",
-        "default": "./dist/commands/init.js"
-      }
-    },
-    "./commands/jq-utils": {
-      "import": {
-        "types": "./dist/commands/jq-utils.d.ts",
-        "default": "./dist/commands/jq-utils.js"
-      }
-    },
-    "./commands/demo": {
-      "import": {
-        "types": "./dist/commands/demo.d.ts",
-        "default": "./dist/commands/demo.js"
+        "types": "./dist/commands/check-action-registry.d.ts",
+        "default": "./dist/commands/check-action-registry.js"
       }
     },
     "./commands/check-docs-sentinel": {
@@ -201,16 +57,106 @@
         "default": "./dist/commands/check-orchestrator.js"
       }
     },
+    "./commands/check-preset-versions": {
+      "import": {
+        "types": "./dist/commands/check-preset-versions.d.ts",
+        "default": "./dist/commands/check-preset-versions.js"
+      }
+    },
+    "./commands/check-publish-guardrails": {
+      "import": {
+        "types": "./dist/commands/check-publish-guardrails.d.ts",
+        "default": "./dist/commands/check-publish-guardrails.js"
+      }
+    },
+    "./commands/check-surface-map": {
+      "import": {
+        "types": "./dist/commands/check-surface-map.d.ts",
+        "default": "./dist/commands/check-surface-map.js"
+      }
+    },
+    "./commands/check-surface-map-format": {
+      "import": {
+        "types": "./dist/commands/check-surface-map-format.d.ts",
+        "default": "./dist/commands/check-surface-map-format.js"
+      }
+    },
+    "./commands/check-tsdoc": {
+      "import": {
+        "types": "./dist/commands/check-tsdoc.d.ts",
+        "default": "./dist/commands/check-tsdoc.js"
+      }
+    },
+    "./commands/demo": {
+      "import": {
+        "types": "./dist/commands/demo.d.ts",
+        "default": "./dist/commands/demo.js"
+      }
+    },
     "./commands/docs-api": {
       "import": {
         "types": "./dist/commands/docs-api.d.ts",
         "default": "./dist/commands/docs-api.js"
       }
     },
-    "./commands/scaffold": {
+    "./commands/docs-export": {
       "import": {
-        "types": "./dist/commands/scaffold.d.ts",
-        "default": "./dist/commands/scaffold.js"
+        "types": "./dist/commands/docs-export.d.ts",
+        "default": "./dist/commands/docs-export.js"
+      }
+    },
+    "./commands/docs-list": {
+      "import": {
+        "types": "./dist/commands/docs-list.d.ts",
+        "default": "./dist/commands/docs-list.js"
+      }
+    },
+    "./commands/docs-module-loader": {
+      "import": {
+        "types": "./dist/commands/docs-module-loader.d.ts",
+        "default": "./dist/commands/docs-module-loader.js"
+      }
+    },
+    "./commands/docs-search": {
+      "import": {
+        "types": "./dist/commands/docs-search.d.ts",
+        "default": "./dist/commands/docs-search.js"
+      }
+    },
+    "./commands/docs-show": {
+      "import": {
+        "types": "./dist/commands/docs-show.d.ts",
+        "default": "./dist/commands/docs-show.js"
+      }
+    },
+    "./commands/docs-types": {
+      "import": {
+        "types": "./dist/commands/docs-types.d.ts",
+        "default": "./dist/commands/docs-types.js"
+      }
+    },
+    "./commands/doctor": {
+      "import": {
+        "types": "./dist/commands/doctor.d.ts",
+        "default": "./dist/commands/doctor.js"
+      }
+    },
+    "./commands/init": {
+      "import": {
+        "types": "./dist/commands/init.d.ts",
+        "default": "./dist/commands/init.js"
+      }
+    },
+    "./commands/init-execution": {
+      "import": {
+        "types": "./dist/commands/init-execution.d.ts",
+        "default": "./dist/commands/init-execution.js"
+      }
+    },
+    "./commands/init-option-resolution": {
+      "import": {
+        "types": "./dist/commands/init-option-resolution.d.ts",
+        "default": "./dist/commands/init-option-resolution.js"
       }
     },
     "./commands/init-output": {
@@ -219,10 +165,22 @@
         "default": "./dist/commands/init-output.js"
       }
     },
-    "./commands/upgrade-workspace": {
+    "./commands/jq-utils": {
       "import": {
-        "types": "./dist/commands/upgrade-workspace.d.ts",
-        "default": "./dist/commands/upgrade-workspace.js"
+        "types": "./dist/commands/jq-utils.d.ts",
+        "default": "./dist/commands/jq-utils.js"
+      }
+    },
+    "./commands/repo": {
+      "import": {
+        "types": "./dist/commands/repo.d.ts",
+        "default": "./dist/commands/repo.js"
+      }
+    },
+    "./commands/scaffold": {
+      "import": {
+        "types": "./dist/commands/scaffold.d.ts",
+        "default": "./dist/commands/scaffold.js"
       }
     },
     "./commands/scaffold-output": {
@@ -237,46 +195,82 @@
         "default": "./dist/commands/scaffold-planning.js"
       }
     },
+    "./commands/shared-deps": {
+      "import": {
+        "types": "./dist/commands/shared-deps.d.ts",
+        "default": "./dist/commands/shared-deps.js"
+      }
+    },
+    "./commands/upgrade": {
+      "import": {
+        "types": "./dist/commands/upgrade.d.ts",
+        "default": "./dist/commands/upgrade.js"
+      }
+    },
+    "./commands/upgrade-apply": {
+      "import": {
+        "types": "./dist/commands/upgrade-apply.d.ts",
+        "default": "./dist/commands/upgrade-apply.js"
+      }
+    },
+    "./commands/upgrade-codemod-builder": {
+      "import": {
+        "types": "./dist/commands/upgrade-codemod-builder.d.ts",
+        "default": "./dist/commands/upgrade-codemod-builder.js"
+      }
+    },
+    "./commands/upgrade-codemods": {
+      "import": {
+        "types": "./dist/commands/upgrade-codemods.d.ts",
+        "default": "./dist/commands/upgrade-codemods.js"
+      }
+    },
+    "./commands/upgrade-latest-version": {
+      "import": {
+        "types": "./dist/commands/upgrade-latest-version.d.ts",
+        "default": "./dist/commands/upgrade-latest-version.js"
+      }
+    },
+    "./commands/upgrade-migration-docs": {
+      "import": {
+        "types": "./dist/commands/upgrade-migration-docs.d.ts",
+        "default": "./dist/commands/upgrade-migration-docs.js"
+      }
+    },
+    "./commands/upgrade-migration-frontmatter": {
+      "import": {
+        "types": "./dist/commands/upgrade-migration-frontmatter.d.ts",
+        "default": "./dist/commands/upgrade-migration-frontmatter.js"
+      }
+    },
+    "./commands/upgrade-migration-guides": {
+      "import": {
+        "types": "./dist/commands/upgrade-migration-guides.d.ts",
+        "default": "./dist/commands/upgrade-migration-guides.js"
+      }
+    },
+    "./commands/upgrade-output": {
+      "import": {
+        "types": "./dist/commands/upgrade-output.d.ts",
+        "default": "./dist/commands/upgrade-output.js"
+      }
+    },
+    "./commands/upgrade-planner": {
+      "import": {
+        "types": "./dist/commands/upgrade-planner.d.ts",
+        "default": "./dist/commands/upgrade-planner.js"
+      }
+    },
     "./commands/upgrade-report": {
       "import": {
         "types": "./dist/commands/upgrade-report.d.ts",
         "default": "./dist/commands/upgrade-report.js"
       }
     },
-    "./commands/check-action-ceremony": {
+    "./commands/upgrade-workspace": {
       "import": {
-        "types": "./dist/commands/check-action-ceremony.d.ts",
-        "default": "./dist/commands/check-action-ceremony.js"
-      }
-    },
-    "./commands/doctor": {
-      "import": {
-        "types": "./dist/commands/doctor.d.ts",
-        "default": "./dist/commands/doctor.js"
-      }
-    },
-    "./commands/check-surface-map": {
-      "import": {
-        "types": "./dist/commands/check-surface-map.d.ts",
-        "default": "./dist/commands/check-surface-map.js"
-      }
-    },
-    "./engine/dependency-versions": {
-      "import": {
-        "types": "./dist/engine/dependency-versions.d.ts",
-        "default": "./dist/engine/dependency-versions.js"
-      }
-    },
-    "./create/types": {
-      "import": {
-        "types": "./dist/create/types.d.ts",
-        "default": "./dist/create/types.js"
-      }
-    },
-    "./create/presets": {
-      "import": {
-        "types": "./dist/create/presets.d.ts",
-        "default": "./dist/create/presets.js"
+        "types": "./dist/commands/upgrade-workspace.d.ts",
+        "default": "./dist/commands/upgrade-workspace.js"
       }
     },
     "./create": {
@@ -291,58 +285,16 @@
         "default": "./dist/create/planner.js"
       }
     },
-    "./commands/upgrade-output": {
+    "./create/presets": {
       "import": {
-        "types": "./dist/commands/upgrade-output.d.ts",
-        "default": "./dist/commands/upgrade-output.js"
+        "types": "./dist/create/presets.d.ts",
+        "default": "./dist/create/presets.js"
       }
     },
-    "./commands/upgrade-migration-frontmatter": {
+    "./create/types": {
       "import": {
-        "types": "./dist/commands/upgrade-migration-frontmatter.d.ts",
-        "default": "./dist/commands/upgrade-migration-frontmatter.js"
-      }
-    },
-    "./commands/upgrade-migration-docs": {
-      "import": {
-        "types": "./dist/commands/upgrade-migration-docs.d.ts",
-        "default": "./dist/commands/upgrade-migration-docs.js"
-      }
-    },
-    "./engine/workspace": {
-      "import": {
-        "types": "./dist/engine/workspace.d.ts",
-        "default": "./dist/engine/workspace.js"
-      }
-    },
-    "./engine/names": {
-      "import": {
-        "types": "./dist/engine/names.d.ts",
-        "default": "./dist/engine/names.js"
-      }
-    },
-    "./engine/types": {
-      "import": {
-        "types": "./dist/engine/types.d.ts",
-        "default": "./dist/engine/types.js"
-      }
-    },
-    "./engine/preset": {
-      "import": {
-        "types": "./dist/engine/preset.d.ts",
-        "default": "./dist/engine/preset.js"
-      }
-    },
-    "./engine/collector": {
-      "import": {
-        "types": "./dist/engine/collector.d.ts",
-        "default": "./dist/engine/collector.js"
-      }
-    },
-    "./engine/post-scaffold": {
-      "import": {
-        "types": "./dist/engine/post-scaffold.d.ts",
-        "default": "./dist/engine/post-scaffold.js"
+        "types": "./dist/create/types.d.ts",
+        "default": "./dist/create/types.js"
       }
     },
     "./engine": {
@@ -351,28 +303,28 @@
         "default": "./dist/engine/index.js"
       }
     },
+    "./engine/blocks": {
+      "import": {
+        "types": "./dist/engine/blocks.d.ts",
+        "default": "./dist/engine/blocks.js"
+      }
+    },
+    "./engine/collector": {
+      "import": {
+        "types": "./dist/engine/collector.d.ts",
+        "default": "./dist/engine/collector.js"
+      }
+    },
     "./engine/config": {
       "import": {
         "types": "./dist/engine/config.d.ts",
         "default": "./dist/engine/config.js"
       }
     },
-    "./actions": {
+    "./engine/dependency-versions": {
       "import": {
-        "types": "./dist/actions.d.ts",
-        "default": "./dist/actions.js"
-      }
-    },
-    "./manifest": {
-      "import": {
-        "types": "./dist/manifest.d.ts",
-        "default": "./dist/manifest.js"
-      }
-    },
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/engine/dependency-versions.d.ts",
+        "default": "./dist/engine/dependency-versions.js"
       }
     },
     "./engine/executor": {
@@ -381,19 +333,67 @@
         "default": "./dist/engine/executor.js"
       }
     },
+    "./engine/names": {
+      "import": {
+        "types": "./dist/engine/names.d.ts",
+        "default": "./dist/engine/names.js"
+      }
+    },
+    "./engine/post-scaffold": {
+      "import": {
+        "types": "./dist/engine/post-scaffold.d.ts",
+        "default": "./dist/engine/post-scaffold.js"
+      }
+    },
+    "./engine/preset": {
+      "import": {
+        "types": "./dist/engine/preset.d.ts",
+        "default": "./dist/engine/preset.js"
+      }
+    },
     "./engine/render-plan": {
       "import": {
         "types": "./dist/engine/render-plan.d.ts",
         "default": "./dist/engine/render-plan.js"
       }
     },
-    "./engine/blocks": {
+    "./engine/types": {
       "import": {
-        "types": "./dist/engine/blocks.d.ts",
-        "default": "./dist/engine/blocks.js"
+        "types": "./dist/engine/types.d.ts",
+        "default": "./dist/engine/types.js"
       }
     },
-    "./package.json": "./package.json"
+    "./engine/workspace": {
+      "import": {
+        "types": "./dist/engine/workspace.d.ts",
+        "default": "./dist/engine/workspace.js"
+      }
+    },
+    "./manifest": {
+      "import": {
+        "types": "./dist/manifest.d.ts",
+        "default": "./dist/manifest.js"
+      }
+    },
+    "./package.json": "./package.json",
+    "./targets": {
+      "import": {
+        "types": "./dist/targets/index.d.ts",
+        "default": "./dist/targets/index.js"
+      }
+    },
+    "./targets/registry": {
+      "import": {
+        "types": "./dist/targets/registry.d.ts",
+        "default": "./dist/targets/registry.js"
+      }
+    },
+    "./targets/types": {
+      "import": {
+        "types": "./dist/targets/types.d.ts",
+        "default": "./dist/targets/types.js"
+      }
+    }
   },
   "keywords": [
     "bun",
