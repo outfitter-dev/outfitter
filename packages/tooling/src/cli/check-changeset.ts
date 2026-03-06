@@ -27,6 +27,22 @@ export interface ChangesetIgnoredReference {
   readonly packages: string[];
 }
 
+function toWorkspacePackageName(packageName: string): string {
+  return packageName.startsWith("@outfitter/")
+    ? packageName
+    : `@outfitter/${packageName}`;
+}
+
+function getReleasableChangedPackages(
+  changedPackages: readonly string[],
+  ignoredPackages: readonly string[]
+): string[] {
+  const ignored = new Set(ignoredPackages);
+  return changedPackages.filter(
+    (packageName) => !ignored.has(toWorkspacePackageName(packageName))
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Pure functions (tested directly)
 // ---------------------------------------------------------------------------
@@ -90,17 +106,35 @@ export function getChangedChangesetFiles(files: string[]): string[] {
  */
 export function checkChangesetRequired(
   changedPackages: string[],
-  changesetFiles: string[]
+  changesetFiles: string[],
+  coveredPackages: string[] = [],
+  ignoredPackages: string[] = []
 ): ChangesetCheckResult {
   if (changedPackages.length === 0) {
     return { ok: true, missingFor: [] };
   }
 
-  if (changesetFiles.length > 0) {
+  const releasablePackages = getReleasableChangedPackages(
+    changedPackages,
+    ignoredPackages
+  );
+
+  if (releasablePackages.length === 0) {
     return { ok: true, missingFor: [] };
   }
 
-  return { ok: false, missingFor: changedPackages };
+  if (changesetFiles.length === 0) {
+    return { ok: false, missingFor: releasablePackages };
+  }
+
+  const covered = new Set(coveredPackages);
+  const missingFor = releasablePackages.filter(
+    (packageName) => !covered.has(toWorkspacePackageName(packageName))
+  );
+
+  return missingFor.length === 0
+    ? { ok: true, missingFor: [] }
+    : { ok: false, missingFor };
 }
 
 export function parseIgnoredPackagesFromChangesetConfig(
@@ -183,9 +217,9 @@ function loadIgnoredPackages(cwd: string): string[] {
 
 function getIgnoredReferencesForChangedChangesets(
   cwd: string,
-  changesetFiles: readonly string[]
+  changesetFiles: readonly string[],
+  ignoredPackages: readonly string[]
 ): ChangesetIgnoredReference[] {
-  const ignoredPackages = loadIgnoredPackages(cwd);
   return findIgnoredPackageReferences({
     changesetFiles,
     ignoredPackages,
@@ -197,6 +231,28 @@ function getIgnoredReferencesForChangedChangesets(
       }
     },
   });
+}
+
+function getCoveredPackagesForChangedChangesets(
+  cwd: string,
+  changesetFiles: readonly string[]
+): string[] {
+  const covered = new Set<string>();
+
+  for (const filename of changesetFiles) {
+    try {
+      const content = readFileSync(join(cwd, ".changeset", filename), "utf-8");
+      for (const packageName of parseChangesetFrontmatterPackageNames(
+        content
+      )) {
+        covered.add(packageName);
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return [...covered].toSorted();
 }
 
 // ---------------------------------------------------------------------------
@@ -291,15 +347,34 @@ export async function runCheckChangeset(
   }
 
   const changesetFiles = getChangedChangesetFiles(changedFiles);
-  const check = checkChangesetRequired(changedPackages, changesetFiles);
+  const ignoredPackages = loadIgnoredPackages(cwd);
+  const releasablePackages = getReleasableChangedPackages(
+    changedPackages,
+    ignoredPackages
+  );
+  const coveredPackages = getCoveredPackagesForChangedChangesets(
+    cwd,
+    changesetFiles
+  );
+  const check = checkChangesetRequired(
+    changedPackages,
+    changesetFiles,
+    coveredPackages,
+    ignoredPackages
+  );
+  const ignoredReferences = getIgnoredReferencesForChangedChangesets(
+    cwd,
+    changesetFiles,
+    ignoredPackages
+  );
+  let hasErrors = false;
 
   if (!check.ok) {
-    // Warn but don't block — manual changesets are recommended
     process.stderr.write(
-      `${COLORS.yellow}No changeset found.${COLORS.reset} ` +
-        "Consider adding one with `bun run changeset` for a custom changelog entry.\n\n"
+      `${COLORS.red}Changeset coverage missing.${COLORS.reset} ` +
+        "Every changed releasable package must be mentioned in at least one current PR changeset.\n\n"
     );
-    process.stderr.write("Packages with source changes:\n\n");
+    process.stderr.write("Packages missing changeset coverage:\n\n");
 
     for (const pkg of check.missingFor) {
       process.stderr.write(
@@ -311,12 +386,9 @@ export async function runCheckChangeset(
       `\nRun ${COLORS.blue}bun run changeset${COLORS.reset} for a custom changelog entry, ` +
         `or add ${COLORS.blue}release:none${COLORS.reset} to skip.\n`
     );
+    hasErrors = true;
   }
 
-  const ignoredReferences = getIgnoredReferencesForChangedChangesets(
-    cwd,
-    changesetFiles
-  );
   if (ignoredReferences.length > 0) {
     process.stderr.write(
       `${COLORS.red}Invalid changeset package reference(s).${COLORS.reset}\n\n`
@@ -337,12 +409,22 @@ export async function runCheckChangeset(
     process.stderr.write(
       `\nUpdate the affected changeset files to remove ignored packages before merging.\n`
     );
+    hasErrors = true;
+  }
+
+  if (hasErrors) {
     process.exitCode = 1;
     return;
   }
 
-  process.stdout.write(
-    `${COLORS.green}Changeset found for ${changedPackages.length} changed package(s).${COLORS.reset}\n`
-  );
+  if (releasablePackages.length === 0) {
+    process.stdout.write(
+      `${COLORS.green}Only ignored package source changes detected.${COLORS.reset}\n`
+    );
+  } else {
+    process.stdout.write(
+      `${COLORS.green}Changesets cover ${releasablePackages.length} changed package(s).${COLORS.reset}\n`
+    );
+  }
   process.exitCode = 0;
 }
