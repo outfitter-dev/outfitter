@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -189,5 +189,39 @@ describe("surface map I/O", () => {
 
     expect(rewrittenMap.generatedAt).toBe(initialSurfaceMap.generatedAt);
     expect(rewrittenContent).toBe(initialContent);
+  });
+
+  it("treats semantically equivalent surface maps as unchanged even when key order differs", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-"));
+    const registry = createTestRegistry();
+    const outputPath = join(tempDir, ".outfitter", "surface.json");
+    const generatedSurfaceMap = generateSurfaceMap(registry, {
+      generator: "build",
+    });
+    const existingGeneratedAt = "2026-03-01T00:00:00.000Z";
+
+    await mkdir(join(tempDir, ".outfitter"), { recursive: true });
+    await writeFile(
+      outputPath,
+      JSON.stringify(
+        {
+          version: generatedSurfaceMap.version,
+          surfaces: generatedSurfaceMap.surfaces,
+          actions: generatedSurfaceMap.actions,
+          errors: generatedSurfaceMap.errors,
+          outputModes: generatedSurfaceMap.outputModes,
+          $schema: generatedSurfaceMap.$schema,
+          generator: generatedSurfaceMap.generator,
+          generatedAt: existingGeneratedAt,
+        },
+        null,
+        2
+      )
+    );
+
+    await writeSurfaceMap(generatedSurfaceMap, outputPath);
+
+    const rewrittenMap = await readSurfaceMap(outputPath);
+    expect(rewrittenMap.generatedAt).toBe(existingGeneratedAt);
   });
 });

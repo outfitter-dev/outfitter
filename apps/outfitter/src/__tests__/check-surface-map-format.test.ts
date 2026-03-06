@@ -8,12 +8,9 @@ import {
   defineAction,
   Result,
 } from "@outfitter/contracts";
+import { generateSurfaceMap, writeSurfaceMap } from "@outfitter/schema";
 import { z } from "zod";
 
-import {
-  generateSurfaceMap,
-  writeSurfaceMap,
-} from "../../../../packages/schema/src/surface.ts";
 import {
   canonicalizeJson,
   checkSurfaceMapFormat,

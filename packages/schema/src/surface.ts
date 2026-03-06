@@ -40,6 +40,29 @@ function comparableSurfaceMap(
   return comparable;
 }
 
+function stableJsonString(value: unknown): string {
+  if (value === undefined) {
+    return "null";
+  }
+
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableJsonString(item)).join(",")}]`;
+  }
+
+  return `{${Object.entries(value)
+    .filter(([, nestedValue]) => nestedValue !== undefined)
+    .toSorted(([left], [right]) => left.localeCompare(right))
+    .map(
+      ([key, nestedValue]) =>
+        `${JSON.stringify(key)}:${stableJsonString(nestedValue)}`
+    )
+    .join(",")}}`;
+}
+
 function canonicalizeSurfaceMapContent(
   content: string,
   outputPath: string
@@ -120,22 +143,22 @@ export async function writeSurfaceMap(
 ): Promise<void> {
   await mkdir(dirname(outputPath), { recursive: true });
   let nextSurfaceMap = surfaceMap;
-  let existingContent: string | undefined;
+  let nextContent: string | undefined;
 
   try {
-    existingContent = await readFile(outputPath, "utf-8");
+    const existingContent = await readFile(outputPath, "utf-8");
     const existingSurfaceMap = JSON.parse(existingContent) as SurfaceMap;
 
     if (
-      JSON.stringify(comparableSurfaceMap(existingSurfaceMap)) ===
-      JSON.stringify(comparableSurfaceMap(surfaceMap))
+      stableJsonString(comparableSurfaceMap(existingSurfaceMap)) ===
+      stableJsonString(comparableSurfaceMap(surfaceMap))
     ) {
       nextSurfaceMap = {
         ...surfaceMap,
         generatedAt: existingSurfaceMap.generatedAt,
       };
 
-      const nextContent = serializeSurfaceMap(nextSurfaceMap, outputPath);
+      nextContent = serializeSurfaceMap(nextSurfaceMap, outputPath);
       if (nextContent === existingContent) {
         return;
       }
@@ -146,7 +169,7 @@ export async function writeSurfaceMap(
 
   await writeFile(
     outputPath,
-    serializeSurfaceMap(nextSurfaceMap, outputPath),
+    nextContent ?? serializeSurfaceMap(nextSurfaceMap, outputPath),
     "utf-8"
   );
 }
