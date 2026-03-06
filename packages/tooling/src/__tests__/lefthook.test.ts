@@ -78,7 +78,7 @@ describe("lefthook.yml preset", () => {
 
     const commands = preCommit?.commands ?? {};
     expect(commands["home-paths"]).toEqual({
-      glob: "*.{js,jsx,json,jsonc,md,ts,tsx,yaml,yml}",
+      glob: "*.{js,jsx,json,jsonc,css,md,ts,tsx,yaml,yml}",
       run: "bun x @outfitter/tooling check-home-paths {staged_files}",
     });
   });
