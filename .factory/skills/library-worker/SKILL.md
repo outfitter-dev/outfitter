@@ -50,6 +50,8 @@ Use for features that involve writing or modifying TypeScript code in the monore
 
 ### 5. Verify
 
+Do not use `bun run check`, `bun run format:check`, or `bun run format:fix` for validation in this repo — the formatter has a pre-existing tokio panic. Use lint + typecheck instead. If you must format touched files after the repo-wide formatter crashes, use a targeted formatter invocation and note the fallback in your handoff.
+
 Run these commands and report EXACT output in your handoff:
 
 ```bash
@@ -62,7 +64,7 @@ bun run test
 # Type safety
 bun run typecheck
 
-# Lint (do NOT use 'bun run check' — format:check has a pre-existing crash)
+# Lint
 bun run lint
 ```
 
@@ -89,10 +91,29 @@ This must print `function` (or `object` for runtime namespace/enum exports). Typ
 If the change modifies a published package's runtime behavior or API:
 
 ```bash
+# Interactive/local shells
 bun changeset
 ```
 
 Select the affected package(s), choose the appropriate bump level (patch for fixes, minor for new features), and write a concise description.
+
+In non-interactive worker/exec mode, create the changeset file directly instead of invoking the prompt:
+
+```md
+---
+"@outfitter/contracts": patch
+---
+
+Add parseInput Result wrapper for schema validation.
+```
+
+Save it as `.changeset/<slug>.md`, then validate the file with:
+
+```bash
+bun changeset status --output .changeset/.status-check.json && rm .changeset/.status-check.json
+```
+
+Keep the interactive `bun changeset` flow for local/manual runs.
 
 ### 8. Commit
 
