@@ -98,7 +98,7 @@ describe("getChangedChangesetFiles", () => {
 });
 
 describe("checkChangesetRequired", () => {
-  test("returns ok when all changed packages are covered by changesets", () => {
+  test("returns ok when all releasable packages are covered by changesets", () => {
     const result = checkChangesetRequired(
       ["cli", "contracts"],
       ["happy-turtle.md"],
@@ -107,7 +107,7 @@ describe("checkChangesetRequired", () => {
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
 
-  test("returns ok when multiple changeset files cover the changed packages", () => {
+  test("returns ok when multiple changeset files cover the releasable packages", () => {
     const result = checkChangesetRequired(
       ["cli"],
       ["happy-turtle.md", "brave-fox.md"],
@@ -158,12 +158,11 @@ describe("checkChangesetRequired", () => {
     });
   });
 
-  test("ignores packages listed in changeset config ignore", () => {
+  test("accepts prefiltered releasable packages from the runner", () => {
     const result = checkChangesetRequired(
-      ["agents", "tooling"],
+      ["tooling"],
       ["happy-turtle.md"],
-      ["@outfitter/tooling"],
-      ["@outfitter/agents"]
+      ["@outfitter/tooling"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
