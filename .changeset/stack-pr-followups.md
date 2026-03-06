@@ -2,6 +2,7 @@
 "@outfitter/tooling": patch
 "@outfitter/mcp": patch
 "@outfitter/contracts": patch
+"@outfitter/schema": patch
 "@outfitter/presets": patch
 "outfitter": patch
 ---
