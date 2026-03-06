@@ -5,6 +5,7 @@ import {
   findIgnoredPackageReferences,
   getChangedChangesetFiles,
   getChangedPackagePaths,
+  getReleasableChangedPackages,
   parseChangesetFrontmatterPackageNames,
   parseIgnoredPackagesFromChangesetConfig,
 } from "../cli/check-changeset.js";
@@ -165,6 +166,17 @@ describe("checkChangesetRequired", () => {
       ["@outfitter/tooling"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
+  });
+});
+
+describe("getReleasableChangedPackages", () => {
+  test("filters ignored packages after normalizing them to workspace names", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["cli", "agents", "schema"],
+        ["@outfitter/agents"]
+      )
+    ).toEqual(["cli", "schema"]);
   });
 });
 
