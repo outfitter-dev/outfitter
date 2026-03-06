@@ -38,6 +38,12 @@ describe("findHomePathLeaks", () => {
     ).toEqual([]);
   });
 
+  test("does not flag a different user whose username starts with the current username", () => {
+    expect(
+      findHomePathLeaks("/Users/johnsmith/project", "/Users/john")
+    ).toEqual([]);
+  });
+
   test("detects escaped Windows home paths in serialized content", () => {
     expect(
       findHomePathLeaks(
