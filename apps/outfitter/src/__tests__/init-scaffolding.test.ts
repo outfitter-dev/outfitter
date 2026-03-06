@@ -90,6 +90,7 @@ describe("init command file creation", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.outfitter.template.kind).toBe("runnable");
     expect(packageJson.outfitter.template.placement).toBe("apps");
@@ -157,6 +158,7 @@ describe("init command file creation", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.zod).toBe(resolvedVersions.zod);
+    expect(JSON.stringify(packageJson)).not.toContain("catalog:");
     expect(packageJson.outfitter.template.kind).toBe("library");
     expect(packageJson.outfitter.template.placement).toBe("packages");
     expect(packageJson.outfitter.template.surfaces).toEqual([]);
