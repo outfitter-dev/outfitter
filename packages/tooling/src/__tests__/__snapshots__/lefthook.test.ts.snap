@@ -5,8 +5,8 @@ exports[`lefthook.yml preset matches snapshot 1`] = `
   "pre-commit": {
     "commands": {
       "home-paths": {
-        "glob": "*.{js,jsx,json,md,ts,tsx,yaml,yml}",
-        "run": "bunx @outfitter/tooling check-home-paths {staged_files}",
+        "glob": "*.{js,jsx,json,jsonc,md,ts,tsx,yaml,yml}",
+        "run": "bun x @outfitter/tooling check-home-paths {staged_files}",
       },
       "typecheck": {
         "glob": "*.{ts,tsx}",
@@ -23,7 +23,7 @@ exports[`lefthook.yml preset matches snapshot 1`] = `
   "pre-push": {
     "commands": {
       "verify": {
-        "run": "bunx @outfitter/tooling pre-push",
+        "run": "bun x @outfitter/tooling pre-push",
       },
     },
     "parallel": false,

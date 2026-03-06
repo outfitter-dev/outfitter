@@ -77,16 +77,10 @@ describe("lefthook.yml preset", () => {
     const preCommit = parsed["pre-commit"];
 
     const commands = preCommit?.commands ?? {};
-    const hasHomePathCheck = Object.values(commands).some(
-      (cmd: unknown) =>
-        typeof cmd === "object" &&
-        cmd !== null &&
-        "run" in cmd &&
-        typeof (cmd as { run: unknown }).run === "string" &&
-        (cmd as { run: string }).run.includes("check-home-paths")
-    );
-
-    expect(hasHomePathCheck).toBe(true);
+    expect(commands["home-paths"]).toEqual({
+      glob: "*.{js,jsx,json,jsonc,md,ts,tsx,yaml,yml}",
+      run: "bun x @outfitter/tooling check-home-paths {staged_files}",
+    });
   });
 
   test("pre-push uses tooling pre-push command", async () => {
