@@ -16,6 +16,7 @@ import {
   NotFoundError,
   PermissionError,
   RateLimitError,
+  statusCodeMap,
   TimeoutError,
   ValidationError,
 } from "./errors.js";
@@ -25,16 +26,29 @@ import {
  *
  * Unmapped 4xx codes fall back to `validation`, unmapped 5xx to `internal`.
  */
-const httpStatusToCategory: Readonly<Record<number, ErrorCategory>> = {
-  401: "auth",
-  403: "permission",
-  404: "not_found",
+const CANONICAL_FETCH_ERROR_CATEGORIES = [
+  "auth",
+  "permission",
+  "not_found",
+  "conflict",
+  "rate_limit",
+  "network",
+  "timeout",
+] as const satisfies readonly ErrorCategory[];
+
+const HTTP_STATUS_ALIASES: Readonly<Record<number, ErrorCategory>> = {
   408: "timeout",
-  409: "conflict",
-  429: "rate_limit",
-  502: "network",
   503: "network",
-  504: "timeout",
+};
+
+const httpStatusToCategory: Readonly<Record<number, ErrorCategory>> = {
+  ...Object.fromEntries(
+    CANONICAL_FETCH_ERROR_CATEGORIES.map((category) => [
+      statusCodeMap[category],
+      category,
+    ])
+  ),
+  ...HTTP_STATUS_ALIASES,
 };
 
 const UNKNOWN_HTTP_TIMEOUT_MS = -1;
