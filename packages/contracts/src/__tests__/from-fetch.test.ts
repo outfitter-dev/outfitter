@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { Result } from "better-result";
 
 import type { ErrorCategory, OutfitterError } from "../errors.js";
-import { RateLimitError } from "../errors.js";
+import { RateLimitError, statusCodeMap } from "../errors.js";
 import { fromFetch } from "../from-fetch.js";
 
 /**
@@ -64,6 +64,29 @@ describe("fromFetch", () => {
         expect(result.isErr()).toBe(true);
         const error = result.error as OutfitterError;
         expect(error.category).toBe(expectedCategory);
+      });
+    }
+  });
+
+  describe("stays aligned with canonical statusCodeMap", () => {
+    const canonicalMappings: Array<[ErrorCategory, number]> = [
+      ["auth", statusCodeMap.auth],
+      ["permission", statusCodeMap.permission],
+      ["not_found", statusCodeMap.not_found],
+      ["conflict", statusCodeMap.conflict],
+      ["rate_limit", statusCodeMap.rate_limit],
+      ["network", statusCodeMap.network],
+      ["timeout", statusCodeMap.timeout],
+    ];
+
+    for (const [expectedCategory, status] of canonicalMappings) {
+      test(`${status} matches canonical ${expectedCategory} mapping`, () => {
+        const response = makeResponse(status);
+        const result = fromFetch(response);
+        expect(result.isErr()).toBe(true);
+        expect((result.error as OutfitterError).category).toBe(
+          expectedCategory
+        );
       });
     }
   });
