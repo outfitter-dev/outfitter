@@ -94,6 +94,37 @@ describe("scanFilesForHardcodedHomePaths", () => {
 });
 
 describe("runCheckHomePaths", () => {
+  test("leaves stderr empty and exits zero when no leaks are found", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const targetFile = join(workspaceRoot, "README.md");
+    let capturedExitCode: number | undefined;
+    let stderr = "";
+
+    try {
+      writeFileSync(
+        targetFile,
+        "Use repo-relative paths like packages/tooling/src/index.ts."
+      );
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      runCheckHomePaths([targetFile], {
+        setExitCode: (value) => {
+          capturedExitCode = value;
+        },
+        stderr: { write: captureStderr },
+      });
+
+      expect(capturedExitCode).toBe(0);
+      expect(stderr).toBe("");
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
   test("writes the leak summary to stderr and exits non-zero when leaks are found", () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
     const targetFile = join(workspaceRoot, "tsconfig.jsonc");
