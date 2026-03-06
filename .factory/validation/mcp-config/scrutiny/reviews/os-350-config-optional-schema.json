@@ -33,5 +33,6 @@
       "observation": "For overload/narrowing features, the worker procedure could more explicitly require compile-time type assertions outside `src/__tests__` when package tsconfig excludes tests, to prevent runtime-only 'type' checks from being treated as narrowing verification.",
       "evidence": "`packages/config/tsconfig.json:9` excludes `src/__tests__`; new test at `packages/config/src/__tests__/config.test.ts:1153` is labeled as type narrowing but only performs runtime assertions."
     }
-  ]
+  ],
+  "commitId": "a8370c2e0065c83ba419ac8d7f4f38fba8282d63"
 }

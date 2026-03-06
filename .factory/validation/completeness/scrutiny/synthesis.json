@@ -28,7 +28,10 @@
     "failed": 2,
     "preTriageStatus": "fail",
     "statusRationale": "Round status is pass after explicit triageOverrides for failed reviews.",
-    "failedFeatures": ["os-355-truncation", "os-357-related-to"],
+    "failedFeatures": [
+      "os-355-truncation",
+      "os-357-related-to"
+    ],
     "triageOverrides": {
       "os-355-truncation": {
         "reviewerSeverity": "blocking",

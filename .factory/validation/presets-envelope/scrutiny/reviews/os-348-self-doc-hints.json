@@ -1,7 +1,7 @@
 {
   "featureId": "os-348-self-doc-hints",
   "reviewedAt": "2026-02-28T00:24:27Z",
-  "commitId": "302e7fa4",
+  "commitId": "302e7fa461a8345940709132721ef1122e1d1a16",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "fail",

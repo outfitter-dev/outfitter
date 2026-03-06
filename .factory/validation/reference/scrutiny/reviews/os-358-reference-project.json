@@ -1,7 +1,7 @@
 {
   "featureId": "os-358-reference-project",
   "reviewedAt": "2026-02-28T17:13:12Z",
-  "commitId": "c777dd3b",
+  "commitId": "c777dd3ba5fd54e819f0aaf9bdef08401de0fcfb",
   "transcriptSkeletonReviewed": true,
   "diffReviewed": true,
   "status": "fail",
@@ -20,7 +20,7 @@
     {
       "area": "skills",
       "observation": "The `library-worker` skill procedure is package-centric and assumes changes under `packages/<pkg>`. For reference/example-project work under `examples/`, the strict red-phase and package-specific verification guidance is not always a natural fit.",
-      "evidence": "Handoff `/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-03-34-192Z__os-358-reference-project__67e8fdb0-69d2-494e-96bb-33962035dab4.json` includes `skillFeedback.suggestedChanges[0]` noting this mismatch for the reference project."
+      "evidence": "Handoff `../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-03-34-192Z__os-358-reference-project__67e8fdb0-69d2-494e-96bb-33962035dab4.json` includes `skillFeedback.suggestedChanges[0]` noting this mismatch for the reference project."
     }
   ],
   "addressesFailureFrom": null,

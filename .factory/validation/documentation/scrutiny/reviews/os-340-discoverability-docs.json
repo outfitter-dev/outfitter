@@ -25,7 +25,7 @@
     {
       "area": "skills",
       "observation": "`docs-worker` still prescribes `bun run check` in its verification step, which conflicts with mission-level known-quirk guidance and can send workers into avoidable troubleshooting.",
-      "evidence": "Skill step 5 requires `bun run check` (`.factory/skills/docs-worker/SKILL.md:63-66`), while mission guidance says `bun run check` crashes and recommends `bun run lint` + `bun run typecheck` (`/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:67-73`; `.factory/library/user-testing.md:84-87`)."
+      "evidence": "Skill step 5 requires `bun run check` (`.factory/skills/docs-worker/SKILL.md:63-66`), while mission guidance says `bun run check` crashes and recommends `bun run lint` + `bun run typecheck` (`../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:67-73`; `.factory/library/user-testing.md:84-87`)."
     },
     {
       "area": "services",

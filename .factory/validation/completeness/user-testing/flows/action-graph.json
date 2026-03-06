@@ -2,8 +2,8 @@
   "groupId": "action-graph",
   "testedAt": "2026-02-28T16:37:58Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "completeness-action-graph"
   },
   "toolsUsed": [
     "shell",
@@ -120,7 +120,9 @@
           "src/__tests__/action-graph.test.ts -> Tier-4 success hints (VAL-GRAPH-004): 5 passing tests",
           "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 success envelope graph hint composition: passing"
         ],
-        "source": ["packages/cli/src/hints.ts:481"]
+        "source": [
+          "packages/cli/src/hints.ts:481"
+        ]
       },
       "issues": null
     },
@@ -150,12 +152,15 @@
           "src/__tests__/action-graph.test.ts -> Tier-4 error hints (VAL-GRAPH-005): 4 passing tests",
           "src/__tests__/cross-feature-integration.test.ts -> VAL-CROSS-004 error envelope graph hint + retry metadata: passing"
         ],
-        "source": ["packages/cli/src/hints.ts:522"]
+        "source": [
+          "packages/cli/src/hints.ts:522"
+        ]
       },
       "issues": null
     }
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 5 assertions (VAL-GRAPH-001..005): all 5 passed. Evidence collected from source inspection, full @outfitter/cli test run, targeted action-graph/cross-feature test runs, and package typecheck."
+  "summary": "Tested 5 assertions (VAL-GRAPH-001..005): all 5 passed. Evidence collected from source inspection, full @outfitter/cli test run, targeted action-graph/cross-feature test runs, and package typecheck.",
+  "commitId": "383d814836537d983d82ad94d81646a20174b7bb"
 }

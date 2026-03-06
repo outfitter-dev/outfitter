@@ -2,8 +2,8 @@
   "groupId": "context-protection",
   "testedAt": "2026-02-28T16:39:44Z",
   "credentials": {
-    "account": "N/A",
-    "namespace": "N/A"
+    "account": "shell-local",
+    "namespace": "completeness-context-protection"
   },
   "toolsUsed": [
     "shell",
@@ -181,5 +181,6 @@
     }
   ],
   "blockers": [],
-  "summary": "Tested 5 assertions (VAL-CTX-001..005): all 5 passed. Evidence collected from targeted truncation and cross-feature test runs, source inspection, grep-based coverage checks, and import verification for the truncation module subpath export."
+  "summary": "Tested 5 assertions (VAL-CTX-001..005): all 5 passed. Evidence collected from targeted truncation and cross-feature test runs, source inspection, grep-based coverage checks, and import verification for the truncation module subpath export.",
+  "commitId": "166ca0b07d740a97751e20c4ff77839c16339d86"
 }

@@ -2,10 +2,15 @@
   "groupId": "cli-input-schema",
   "testedAt": "2026-02-27T23:39:47Z",
   "credentials": {
-    "account": "N/A",
-    "namespace": "N/A"
+    "account": "shell-local",
+    "namespace": "builder-core-cli-input-schema"
   },
-  "toolsUsed": ["shell", "bun", "rg", "Read"],
+  "toolsUsed": [
+    "shell",
+    "bun",
+    "rg",
+    "Read"
+  ],
   "assertions": [
     {
       "id": "VAL-BUILD-002",
@@ -81,5 +86,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 2 assertions for builder-core input schema: VAL-BUILD-002 passed with source + test + typecheck evidence; VAL-BUILD-003 failed due to missing `.requiredOption()` and variadic explicit-composition test coverage evidence."
+  "summary": "Tested 2 assertions for builder-core input schema: VAL-BUILD-002 passed with source + test + typecheck evidence; VAL-BUILD-003 failed due to missing `.requiredOption()` and variadic explicit-composition test coverage evidence.",
+  "commitId": "048072c4774c86e138198aae35b24de91b39389c"
 }

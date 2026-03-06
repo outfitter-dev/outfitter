@@ -24,5 +24,11 @@
   },
   "frictions": [],
   "blockers": [],
-  "toolsUsed": ["bun test", "bun run typecheck", "bun -e", "rg", "Read"]
+  "toolsUsed": [
+    "bun test",
+    "bun run typecheck",
+    "bun -e",
+    "rg",
+    "Read"
+  ]
 }

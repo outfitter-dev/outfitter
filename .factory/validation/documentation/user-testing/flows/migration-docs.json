@@ -2,10 +2,14 @@
   "groupId": "migration-docs",
   "testedAt": "2026-02-27T21:09:35Z",
   "credentials": {
-    "account": "not-applicable",
-    "namespace": "not-applicable"
+    "account": "shell-local",
+    "namespace": "documentation-migration-docs"
   },
-  "toolsUsed": ["Read", "Grep", "shell"],
+  "toolsUsed": [
+    "Read",
+    "Grep",
+    "shell"
+  ],
   "assertions": [
     {
       "id": "VAL-CROSS-001",
@@ -44,7 +48,9 @@
         }
       ],
       "evidence": {
-        "files": ["docs/migration-v0.4.md"],
+        "files": [
+          "docs/migration-v0.4.md"
+        ],
         "sectionHeadings": [
           "docs/migration-v0.4.md:5",
           "docs/migration-v0.4.md:42",
@@ -83,5 +89,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 1 assertion (VAL-CROSS-001): passed. Migration docs exist and cover all required breaking changes with before/after examples and migration steps."
+  "summary": "Tested 1 assertion (VAL-CROSS-001): passed. Migration docs exist and cover all required breaking changes with before/after examples and migration steps.",
+  "commitId": "bbf3c75328ba2f96c8521658b79edb28e706d561"
 }

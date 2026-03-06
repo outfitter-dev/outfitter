@@ -3,19 +3,30 @@
   "round": 1,
   "status": "fail",
   "validatorsRun": {
-    "test": { "passed": true, "command": "bun run test", "exitCode": 0 },
+    "test": {
+      "passed": true,
+      "command": "bun run test",
+      "exitCode": 0
+    },
     "typecheck": {
       "passed": true,
       "command": "bun run typecheck",
       "exitCode": 0
     },
-    "lint": { "passed": true, "command": "bun run lint", "exitCode": 0 }
+    "lint": {
+      "passed": true,
+      "command": "bun run lint",
+      "exitCode": 0
+    }
   },
   "reviewsSummary": {
     "total": 2,
     "passed": 0,
     "failed": 2,
-    "failedFeatures": ["os-358-reference-project", "migration-v06-docs"]
+    "failedFeatures": [
+      "os-358-reference-project",
+      "migration-v06-docs"
+    ]
   },
   "blockingIssues": [
     {

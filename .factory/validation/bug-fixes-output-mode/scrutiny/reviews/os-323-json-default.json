@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "`library-worker` verification guidance is partially out of sync with mission-level known issues: it mandates unconditional `bun run test` and `bun run check`, while mission guidance documents known pre-existing full-suite failures and `bun run check` instability.",
-      "evidence": "Skill procedure: `.factory/skills/library-worker/SKILL.md:59,65`; mission known issues: `/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75-76`."
+      "evidence": "Skill procedure: `.factory/skills/library-worker/SKILL.md:59,65`; mission known issues: `../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75-76`."
     }
   ],
   "addressesFailureFrom": null,
