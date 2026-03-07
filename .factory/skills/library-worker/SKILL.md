@@ -50,7 +50,7 @@ Use for features that involve writing or modifying TypeScript code in the monore
 
 ### 5. Verify
 
-Do not use `bun run check`, `bun run format:check`, or `bun run format:fix` for validation in this repo — the formatter has a pre-existing tokio panic. Use lint + typecheck instead. If you must format touched files after the repo-wide formatter crashes, run `bun x oxfmt --write <path>...` only on the files you changed and note the fallback in your handoff.
+Do not use `bun run check`, `bun run format:check`, or `bun run format:fix` for validation in this repo — the formatter has a pre-existing tokio panic. Use lint + typecheck instead. If you need to format specific touched files, run `bun x oxfmt --write <path>...` only on the files you changed and note the fallback in your handoff.
 
 Run these commands and report EXACT output in your handoff:
 
