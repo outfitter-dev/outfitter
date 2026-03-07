@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "The library-worker skill is too rigid for manifest-only changes and conflicts with mission guidance for this repo: it mandates Red-phase test creation and bun run check, but this feature was package.json-only and mission AGENTS documents bun run check as a known panic.",
-      "evidence": ".factory/skills/library-worker/SKILL.md:28 (Write Failing Tests), 65-68 (requires bun run check); ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:76 (bun run check known panic, use lint+typecheck); ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T17-48-42-815Z__os-322-commander-peer-dep__778d68ad-4690-43d0-b431-579f321795c3.json (skillFeedback.deviations/suggestedChanges)."
+      "evidence": ".factory/skills/library-worker/SKILL.md:28 (Write Failing Tests), 65-68 (requires bun run check); ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:76 (bun run check known panic, use lint+typecheck); ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T17-48-42-815Z__os-322-commander-peer-dep__778d68ad-4690-43d0-b431-579f321795c3.json (skillFeedback.deviations/suggestedChanges)."
     }
   ],
   "addressesFailureFrom": null,

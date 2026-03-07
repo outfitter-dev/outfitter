@@ -26,12 +26,12 @@
     {
       "area": "skills",
       "observation": "The docs-worker skill procedure requires lint + typecheck + test, but this run recorded only lint while still reporting followedProcedure=true.",
-      "evidence": ".factory/skills/docs-worker/SKILL.md:64-71 requires bun run lint, bun run typecheck, and bun run test; handoff file ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-07-55-945Z__migration-v06-docs__2f362eb7-602c-49b0-9730-5e5ef4bbf011.json:16 records only bun run lint under verification.commandsRun."
+      "evidence": ".factory/skills/docs-worker/SKILL.md:64-71 requires bun run lint, bun run typecheck, and bun run test; handoff file ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T17-07-55-945Z__migration-v06-docs__2f362eb7-602c-49b0-9730-5e5ef4bbf011.json:16 records only bun run lint under verification.commandsRun."
     },
     {
       "area": "conventions",
       "observation": "Mission shared guidance has an outdated NDJSON progress example that includes a 'name' field not present in the actual StreamProgressEvent contract.",
-      "evidence": "../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75 shows progress event with \"name\"; packages/contracts/src/stream.ts:78-89 defines StreamProgressEvent with only type/current/total/message."
+      "evidence": "~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:75 shows progress event with \"name\"; packages/contracts/src/stream.ts:78-89 defines StreamProgressEvent with only type/current/total/message."
     }
   ],
   "addressesFailureFrom": null,

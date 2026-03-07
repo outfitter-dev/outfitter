@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "The library-worker procedure requires running full-suite `bun run test`, but this run only executed package tests plus typecheck/lint while handoff.skillFeedback still marked followedProcedure=true. Procedure or guidance may need clarification for missions with known pre-existing full-suite failures.",
-      "evidence": ".factory/skills/library-worker/SKILL.md (Step 5 includes `bun run test`); ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl entry for workerSessionId e005444a-7f80-4e09-a044-34c4de093a28 shows `cd packages/contracts && bun test`, `bun run typecheck`, and `bun run lint`, but no full-suite `bun run test`."
+      "evidence": ".factory/skills/library-worker/SKILL.md (Step 5 includes `bun run test`); ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl entry for workerSessionId e005444a-7f80-4e09-a044-34c4de093a28 shows `cd packages/contracts && bun test`, `bun run typecheck`, and `bun run lint`, but no full-suite `bun run test`."
     },
     {
       "area": "knowledge",
