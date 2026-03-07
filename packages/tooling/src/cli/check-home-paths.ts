@@ -13,6 +13,11 @@ export interface FileHomePathLeak extends HomePathLeak {
   readonly filePath: string;
 }
 
+export interface HomePathScanReadFailure {
+  readonly filePath: string;
+  readonly reason: string;
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -71,12 +76,16 @@ export interface RunCheckHomePathsOptions {
   readonly scanOptions?: ScanHomePathOptions;
 }
 
-class HomePathScanReadError extends Error {
+export class HomePathScanReadError extends Error {
   constructor(
-    readonly filePath: string,
-    readonly reason: string
+    readonly failures: readonly HomePathScanReadFailure[],
+    readonly leaks: readonly FileHomePathLeak[] = []
   ) {
-    super(`Could not read ${filePath}: ${reason}`);
+    const summary =
+      failures.length === 1
+        ? `Could not read ${failures[0]?.filePath}: ${failures[0]?.reason ?? "Unknown error"}`
+        : `Could not read ${failures.length} files while scanning for hardcoded home paths.`;
+    super(summary);
     this.name = "HomePathScanReadError";
   }
 }
@@ -89,6 +98,7 @@ export function scanFilesForHardcodedHomePaths(
   const homePath = options.homeDir ?? homedir();
   const readFile = options.readFile ?? readFileSync;
   const leaks: FileHomePathLeak[] = [];
+  const failures: HomePathScanReadFailure[] = [];
 
   for (const filePath of filePaths) {
     const absolutePath = resolve(cwd, filePath);
@@ -100,10 +110,11 @@ export function scanFilesForHardcodedHomePaths(
     try {
       fileContent = readFile(absolutePath, "utf-8");
     } catch (error) {
-      throw new HomePathScanReadError(
+      failures.push({
         filePath,
-        error instanceof Error ? error.message : String(error)
-      );
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      continue;
     }
 
     const fileLeaks = findHomePathLeaks(fileContent, homePath);
@@ -113,6 +124,10 @@ export function scanFilesForHardcodedHomePaths(
         ...leak,
       });
     }
+  }
+
+  if (failures.length > 0) {
+    throw new HomePathScanReadError(failures, leaks);
   }
 
   return leaks;
@@ -133,7 +148,22 @@ export function runCheckHomePaths(
     leaks = scanFilesForHardcodedHomePaths(paths, options.scanOptions);
   } catch (error) {
     if (error instanceof HomePathScanReadError) {
-      stderr.write(`${error.message}\n`);
+      stderr.write(
+        "Unreadable files while scanning for hardcoded home paths:\n"
+      );
+      for (const failure of error.failures) {
+        stderr.write(`  ${failure.filePath}: ${failure.reason}\n`);
+      }
+
+      if (error.leaks.length > 0) {
+        stderr.write("\nHardcoded home directory paths detected:\n");
+        for (const leak of error.leaks) {
+          stderr.write(
+            `  ${leak.filePath}:${leak.line}:${leak.column} ${leak.lineText.trim()}\n`
+          );
+        }
+      }
+
       stderr.write(
         "Fix file permissions or remove the unreadable path before committing.\n"
       );
