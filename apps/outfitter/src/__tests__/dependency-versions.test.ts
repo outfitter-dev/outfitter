@@ -184,4 +184,23 @@ describe("applyResolvedDependencyVersions", () => {
       },
     });
   });
+
+  test("leaves unmatched catalog placeholders unchanged", () => {
+    const parsedPackageJson: Record<string, unknown> = {
+      dependencies: {
+        "unknown-dep": "catalog:",
+      },
+    };
+
+    applyResolvedDependencyVersions(parsedPackageJson, {
+      external: {},
+      internal: {},
+    });
+
+    expect(parsedPackageJson).toEqual({
+      dependencies: {
+        "unknown-dep": "catalog:",
+      },
+    });
+  });
 });

@@ -231,6 +231,9 @@ describe("init command file creation", () => {
     expect(mcpPackageJson.dependencies[corePackageJson.name]).toBe(
       "workspace:*"
     );
+    expect(JSON.stringify(cliPackageJson)).not.toContain("catalog:");
+    expect(JSON.stringify(mcpPackageJson)).not.toContain("catalog:");
+    expect(JSON.stringify(corePackageJson)).not.toContain("catalog:");
 
     const cliSource = readFileSync(
       join(tempDir, "apps", "cli", "src", "cli.ts"),
