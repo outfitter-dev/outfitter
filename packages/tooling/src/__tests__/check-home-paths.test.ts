@@ -5,7 +5,6 @@ import { join } from "node:path";
 
 import {
   findHomePathLeaks,
-  HomePathScanReadError,
   runCheckHomePaths,
   scanFilesForHardcodedHomePaths,
 } from "../cli/check-home-paths.js";
@@ -60,6 +59,19 @@ describe("findHomePathLeaks", () => {
       },
     ]);
   });
+
+  test("detects a home path at the end of a CRLF line", () => {
+    expect(
+      findHomePathLeaks(`prefix ${homedir()}\r\nnext line`, homedir())
+    ).toEqual([
+      {
+        line: 1,
+        column: 8,
+        matchedText: homedir(),
+        lineText: `prefix ${homedir()}`,
+      },
+    ]);
+  });
 });
 
 describe("scanFilesForHardcodedHomePaths", () => {
@@ -73,21 +85,24 @@ describe("scanFilesForHardcodedHomePaths", () => {
         "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling"
       );
 
-      const leaks = scanFilesForHardcodedHomePaths(["notes.md"], {
+      const result = scanFilesForHardcodedHomePaths(["notes.md"], {
         cwd: workspaceRoot,
         homeDir: "/Users/mg",
       });
 
-      expect(leaks).toEqual([
-        {
-          filePath: "notes.md",
-          line: 1,
-          column: 16,
-          matchedText: "/Users/mg",
-          lineText:
-            "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling",
-        },
-      ]);
+      expect(result).toEqual({
+        failures: [],
+        leaks: [
+          {
+            filePath: "notes.md",
+            line: 1,
+            column: 16,
+            matchedText: "/Users/mg",
+            lineText:
+              "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling",
+          },
+        ],
+      });
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
@@ -105,8 +120,7 @@ describe("scanFilesForHardcodedHomePaths", () => {
         "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling"
       );
 
-      let caught: unknown;
-      try {
+      expect(
         scanFilesForHardcodedHomePaths(["blocked.txt", "notes.md"], {
           cwd: workspaceRoot,
           homeDir: "/Users/mg",
@@ -117,29 +131,25 @@ describe("scanFilesForHardcodedHomePaths", () => {
 
             return readFileSync(path, encoding);
           },
-        });
-      } catch (error) {
-        caught = error;
-      }
-
-      expect(caught).toBeInstanceOf(HomePathScanReadError);
-      const scanError = caught as HomePathScanReadError;
-      expect(scanError.failures).toEqual([
-        {
-          filePath: "blocked.txt",
-          reason: "EACCES: permission denied",
-        },
-      ]);
-      expect(scanError.leaks).toEqual([
-        {
-          filePath: "notes.md",
-          line: 1,
-          column: 16,
-          matchedText: "/Users/mg",
-          lineText:
-            "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling",
-        },
-      ]);
+        })
+      ).toEqual({
+        failures: [
+          {
+            filePath: "blocked.txt",
+            reason: "EACCES: permission denied",
+          },
+        ],
+        leaks: [
+          {
+            filePath: "notes.md",
+            line: 1,
+            column: 16,
+            matchedText: "/Users/mg",
+            lineText:
+              "Observed path: /Users/mg/Developer/outfitter/stack/packages/tooling",
+          },
+        ],
+      });
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
@@ -185,7 +195,7 @@ describe("runCheckHomePaths", () => {
     let stderr = "";
 
     try {
-      const lineText = `{"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`;
+      const lineText = `    {"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`;
       const expectedColumn = lineText.indexOf(homedir()) + 1;
 
       writeFileSync(targetFile, lineText);
@@ -205,6 +215,7 @@ describe("runCheckHomePaths", () => {
       expect(capturedExitCode).toBe(1);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
+      expect(stderr).toContain(lineText);
       expect(stderr).toContain(JSON.stringify(homedir()));
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
@@ -252,7 +263,48 @@ describe("runCheckHomePaths", () => {
       expect(stderr).toContain(`  ${blockedFile}: EACCES: permission denied`);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
+      expect(stderr).toContain(JSON.stringify(homedir()));
       expect(stderr).toContain("Fix file permissions");
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("pluralizes the unreadable-file guidance when multiple reads fail", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const blockedFiles = [
+      join(workspaceRoot, "blocked-a.txt"),
+      join(workspaceRoot, "blocked-b.txt"),
+    ];
+    let capturedExitCode: number | undefined;
+    let stderr = "";
+
+    try {
+      for (const blockedFile of blockedFiles) {
+        writeFileSync(blockedFile, "placeholder");
+      }
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      runCheckHomePaths(blockedFiles, {
+        setExitCode: (value) => {
+          capturedExitCode = value;
+        },
+        stderr: { write: captureStderr },
+        scanOptions: {
+          readFile: () => {
+            throw new Error("EACCES: permission denied");
+          },
+        },
+      });
+
+      expect(capturedExitCode).toBe(1);
+      expect(stderr).toContain(
+        "Fix file permissions or remove the unreadable files before committing."
+      );
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
