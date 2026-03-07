@@ -59,6 +59,7 @@ export function validatePresetDeps(
 
   const absoluteRoot = join(workspaceRoot, presetRoot);
   if (!existsSync(absoluteRoot)) {
+    problems.push(`Canonical presets root not found: ${presetRoot}`);
     return;
   }
 

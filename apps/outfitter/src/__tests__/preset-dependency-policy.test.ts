@@ -83,19 +83,19 @@ describe("preset dependency policy", () => {
   test("check-preset-versions validates only the canonical presets root", () => {
     const { all: resolvedVersions } = getResolvedVersions();
     const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-presets-"));
-    const canonicalRoot = join(
+    const canonicalPresetRoot = join(
       workspaceRoot,
       "packages",
       "presets",
-      "presets",
-      "library"
+      "presets"
     );
+    const libraryPresetDir = join(canonicalPresetRoot, "library");
     const legacyRoot = join(workspaceRoot, "templates", "legacy");
 
     try {
-      mkdirSync(canonicalRoot, { recursive: true });
+      mkdirSync(libraryPresetDir, { recursive: true });
       writeFileSync(
-        join(canonicalRoot, "package.json.template"),
+        join(libraryPresetDir, "package.json.template"),
         JSON.stringify({
           dependencies: {
             "@outfitter/contracts": "workspace:*",
@@ -118,6 +118,22 @@ describe("preset dependency policy", () => {
       validatePresetDeps(workspaceRoot, resolvedVersions, problems);
 
       expect(problems).toEqual([]);
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("check-preset-versions reports a missing canonical presets root", () => {
+    const { all: resolvedVersions } = getResolvedVersions();
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-presets-"));
+
+    try {
+      const problems: string[] = [];
+      validatePresetDeps(workspaceRoot, resolvedVersions, problems);
+
+      expect(problems).toEqual([
+        "Canonical presets root not found: packages/presets/presets",
+      ]);
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
