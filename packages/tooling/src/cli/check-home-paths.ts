@@ -61,7 +61,7 @@ function buildHomePathPattern(homePath: string): RegExp | undefined {
     )
     .join("");
 
-  return new RegExp(`${patternSource}(?=[/\\\\]|$)`, "g");
+  return new RegExp(`${patternSource}(?![\\w-])`, "g");
 }
 
 export function findHomePathLeaks(
