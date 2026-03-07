@@ -210,7 +210,9 @@ export function resolvePresetDependencyVersions(): Result<
 export function applyResolvedDependencyVersions(
   parsedPackageJson: Record<string, unknown>,
   versions: ResolvedPresetDependencyVersions
-): void {
+): string[] {
+  const unresolved = new Set<string>();
+
   for (const section of DEPENDENCY_SECTIONS) {
     const sectionValue = parsedPackageJson[section];
     if (!isRecord(sectionValue)) {
@@ -233,7 +235,14 @@ export function applyResolvedDependencyVersions(
       const resolvedExternal = versions.external[name];
       if (resolvedExternal) {
         sectionValue[name] = resolvedExternal;
+        continue;
+      }
+
+      if (value === "catalog:") {
+        unresolved.add(name);
       }
     }
   }
+
+  return [...unresolved].toSorted();
 }

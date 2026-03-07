@@ -18,6 +18,16 @@ const DEPENDENCY_SECTIONS = [
   "optionalDependencies",
 ] as const;
 
+function formatUnresolvedCatalogMessage(
+  packageJsonPath: string,
+  unresolvedNames: readonly string[]
+): string {
+  return (
+    `Unresolved catalog placeholder(s) in ${packageJsonPath}: ` +
+    unresolvedNames.join(", ")
+  );
+}
+
 function getWorkspaceMemberPackageJsonPaths(
   rootDir: string,
   rootPackageJson: Record<string, unknown>
@@ -100,7 +110,17 @@ export function injectSharedConfig(
       );
     }
     const dependencyVersions = versionsResult.value;
-    applyResolvedDependencyVersions(parsed, dependencyVersions);
+    const unresolvedRootDeps = applyResolvedDependencyVersions(
+      parsed,
+      dependencyVersions
+    );
+    if (unresolvedRootDeps.length > 0) {
+      return Result.err(
+        new ScaffoldError(
+          formatUnresolvedCatalogMessage(packageJsonPath, unresolvedRootDeps)
+        )
+      );
+    }
 
     const existingDevDeps =
       (parsed["devDependencies"] as Record<string, unknown>) ?? {};
@@ -124,7 +144,20 @@ export function injectSharedConfig(
       const memberContent = readFileSync(memberPackageJsonPath, "utf-8");
       const memberParsed = JSON.parse(memberContent) as Record<string, unknown>;
       const before = JSON.stringify(memberParsed);
-      applyResolvedDependencyVersions(memberParsed, dependencyVersions);
+      const unresolvedMemberDeps = applyResolvedDependencyVersions(
+        memberParsed,
+        dependencyVersions
+      );
+      if (unresolvedMemberDeps.length > 0) {
+        return Result.err(
+          new ScaffoldError(
+            formatUnresolvedCatalogMessage(
+              memberPackageJsonPath,
+              unresolvedMemberDeps
+            )
+          )
+        );
+      }
       if (JSON.stringify(memberParsed) !== before) {
         writeFileSync(
           memberPackageJsonPath,

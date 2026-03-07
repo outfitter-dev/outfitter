@@ -164,7 +164,7 @@ describe("applyResolvedDependencyVersions", () => {
       },
     };
 
-    applyResolvedDependencyVersions(parsedPackageJson, {
+    const unresolved = applyResolvedDependencyVersions(parsedPackageJson, {
       external: {
         bunup: "^0.16.29",
         commander: "^14.0.2",
@@ -174,6 +174,7 @@ describe("applyResolvedDependencyVersions", () => {
       },
     });
 
+    expect(unresolved).toEqual([]);
     expect(parsedPackageJson).toEqual({
       dependencies: {
         "@outfitter/contracts": "^0.7.0",
@@ -192,11 +193,12 @@ describe("applyResolvedDependencyVersions", () => {
       },
     };
 
-    applyResolvedDependencyVersions(parsedPackageJson, {
+    const unresolved = applyResolvedDependencyVersions(parsedPackageJson, {
       external: {},
       internal: {},
     });
 
+    expect(unresolved).toEqual(["unknown-dep"]);
     expect(parsedPackageJson).toEqual({
       dependencies: {
         "unknown-dep": "catalog:",
