@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Error taxonomy tables must stay co-located to avoid mapping drift. */
 /**
  * Error taxonomy: categories, code maps, metadata, and lookup functions.
  *

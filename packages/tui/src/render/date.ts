@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Date parsing and formatting helpers stay together so relative-date behavior is consistent. */
 /**
  * Date range parsing utilities.
  *

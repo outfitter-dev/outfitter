@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Resource contracts and coercion helpers remain grouped for protocol clarity. */
 /**
  * Resource-related type definitions for MCP servers.
  *

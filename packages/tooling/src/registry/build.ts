@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/* eslint-disable outfitter/max-file-lines -- Registry generation stays in one script so embedded block assembly remains auditable. */
 /**
  * Registry Build Script
  *

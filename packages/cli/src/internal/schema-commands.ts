@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Schema command wiring stays together so the introspection surface is easier to follow. */
 /**
  * Commander command wiring for schema introspection.
  *

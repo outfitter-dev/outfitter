@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Indicator demo permutations stay together so comparison across states is readable. */
 /**
  * Indicators demo renderer.
  *

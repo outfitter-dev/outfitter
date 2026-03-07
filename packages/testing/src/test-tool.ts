@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Tool-test harness behavior stays in one module to preserve request and result assertions. */
 /**
  * @outfitter/testing - testTool()
  *

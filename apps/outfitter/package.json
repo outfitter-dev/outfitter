@@ -420,7 +420,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "cd ../.. && bunup --filter outfitter",
+    "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter outfitter",
     "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
     "test": "bun test",

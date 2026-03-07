@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Schema conversion helpers share one public surface; splitting would fragment usage. */
 /**
  * Schema utilities for Zod-to-JSON-Schema conversion.
  *

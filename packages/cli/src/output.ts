@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Output helpers stay grouped so format selection and transport behavior remain aligned. */
 /**
  * Output utilities for CLI commands.
  *

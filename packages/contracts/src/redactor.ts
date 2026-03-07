@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Redactor API, defaults, and audit hooks are easier to review in one file. */
 /**
  * Configuration for creating a redactor.
  */

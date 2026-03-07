@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Terminal capability detection remains centralized so rendering decisions stay consistent. */
 /**
  * Terminal detection utilities.
  *

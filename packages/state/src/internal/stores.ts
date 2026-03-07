@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Cursor store implementations share persistence and scoping rules that must stay aligned. */
 /**
  * Cursor store implementations: in-memory, persistent (file-backed), and scoped.
  *

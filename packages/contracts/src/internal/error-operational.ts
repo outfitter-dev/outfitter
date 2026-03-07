@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Operational error classes are maintained as one taxonomy catalog. */
 /**
  * Operational error classes.
  *

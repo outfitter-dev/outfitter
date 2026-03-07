@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Tier config and violation reporting are easier to maintain within one rule module. */
 import {
   asLiteralString,
   getImportSourceFromImportDeclaration,

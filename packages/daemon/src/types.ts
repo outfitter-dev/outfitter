@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Daemon contracts stay in one types module so lifecycle APIs remain discoverable. */
 /**
  * Type definitions for the daemon package.
  *

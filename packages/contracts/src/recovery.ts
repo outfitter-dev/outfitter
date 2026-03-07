@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Recovery policy helpers and their public API are easier to audit together. */
 /**
  * Error recovery heuristics
  *

@@ -83,7 +83,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd ../.. && bunup --filter @outfitter/mcp",
+    "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter @outfitter/mcp",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
     "test": "bun test",

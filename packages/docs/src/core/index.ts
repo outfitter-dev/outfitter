@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Core docs barrel intentionally centralizes the public assembly surface. */
 /**
  * @outfitter/docs-core
  *

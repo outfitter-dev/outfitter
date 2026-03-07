@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Shared AST helpers are intentionally centralized for rule reuse. */
 export interface RuleContext {
   readonly filename?: string;
   readonly options: unknown[];

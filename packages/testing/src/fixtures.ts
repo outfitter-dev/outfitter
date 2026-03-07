@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Shared testing fixtures stay together so harness setup remains discoverable. */
 /**
  * @outfitter/testing - Fixtures
  *

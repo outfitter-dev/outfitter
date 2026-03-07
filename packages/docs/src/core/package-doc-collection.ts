@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Package doc discovery and collision checks are easier to audit together. */
 /**
  * Shared package docs source discovery and output path planning.
  *

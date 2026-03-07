@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Daemon locking keeps acquisition and cleanup logic together for correctness. */
 /**
  * Daemon locking utilities.
  *

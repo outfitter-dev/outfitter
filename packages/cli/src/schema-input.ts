@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Schema-driven input helpers stay together so flag derivation remains coherent. */
 /**
  * Zod-to-Commander flag derivation.
  *

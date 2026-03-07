@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- MDX sanitization and link rewriting are a single content-processing pipeline. */
 /**
  * Source content transforms for docs sync/check.
  *

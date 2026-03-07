@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- CLI action definitions remain grouped so the public action surface stays discoverable. */
 import {
   type ActionCliInputContext,
   type ActionCliOption,

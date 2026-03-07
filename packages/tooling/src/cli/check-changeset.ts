@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Changeset validation keeps repo scanning and package coverage logic together for auditability. */
 /**
  * Check-changeset command — validates PRs touching package source include a changeset.
  *
