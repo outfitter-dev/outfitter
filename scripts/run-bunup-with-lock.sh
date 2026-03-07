@@ -24,7 +24,18 @@ trap cleanup EXIT
 while ! mkdir "$lock_dir" 2>/dev/null; do
   existing_pid="$(cat "$pid_file" 2>/dev/null || true)"
 
-  if [[ -n "$existing_pid" ]] && ! kill -0 "$existing_pid" 2>/dev/null; then
+  # A killed owner can leave the lock dir behind before it ever writes its PID.
+  # Give that bootstrap path one short grace period, then reclaim the lock.
+  if [[ -z "$existing_pid" ]]; then
+    sleep 0.2
+    existing_pid="$(cat "$pid_file" 2>/dev/null || true)"
+    if [[ -z "$existing_pid" ]]; then
+      rm -rf "$lock_dir"
+      continue
+    fi
+  fi
+
+  if ! kill -0 "$existing_pid" 2>/dev/null; then
     rm -rf "$lock_dir"
     continue
   fi
