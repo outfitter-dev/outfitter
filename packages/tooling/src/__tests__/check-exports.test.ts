@@ -281,6 +281,7 @@ describe("computeExpectedExports", () => {
     };
     const expected = computeExpectedExports(packageRoot, docsWorkspace, pkg);
 
+    expect(Object.keys(expected).length).toBeGreaterThan(1);
     expect(
       Object.keys(expected).some(
         (key) => key === "./core/internal" || key.startsWith("./core/internal/")
