@@ -126,9 +126,8 @@ function parseRetryAfterSeconds(retryAfter: string | null): number | undefined {
  * Convert an HTTP {@link Response} into a `Result<Response, OutfitterError>`.
  *
  * - **2xx** status codes return `Ok` with the original Response.
- * - Known error codes map to specific categories per the taxonomy:
- *   - 401 → auth, 403 → permission, 404 → not_found, 408 → timeout
- *   - 409 → conflict, 429 → rate_limit, 502/503 → network, 504 → timeout
+ * - Known error codes map to specific categories per the taxonomy using
+ *   {@link statusCodeMap} plus {@link HTTP_STATUS_ALIASES} for 408 and 503.
  * - Unmapped 4xx → validation, unmapped 5xx → internal.
  * - All other codes (1xx, 3xx) → internal.
  *

@@ -46,15 +46,15 @@ describe("fromFetch", () => {
 
   describe("maps specific HTTP status codes to error categories", () => {
     const specificMappings: Array<[number, ErrorCategory]> = [
-      [401, "auth"],
-      [403, "permission"],
-      [404, "not_found"],
+      [statusCodeMap.auth, "auth"],
+      [statusCodeMap.permission, "permission"],
+      [statusCodeMap.not_found, "not_found"],
       [408, "timeout"],
-      [409, "conflict"],
-      [429, "rate_limit"],
-      [502, "network"],
+      [statusCodeMap.conflict, "conflict"],
+      [statusCodeMap.rate_limit, "rate_limit"],
+      [statusCodeMap.network, "network"],
       [503, "network"],
-      [504, "timeout"],
+      [statusCodeMap.timeout, "timeout"],
     ];
 
     for (const [status, expectedCategory] of specificMappings) {
