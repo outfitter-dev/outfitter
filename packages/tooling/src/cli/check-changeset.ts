@@ -32,6 +32,11 @@ interface ChangedChangesetAnalysis {
   readonly ignoredReferences: ChangesetIgnoredReference[];
 }
 
+interface AnalyzedChangesetReferences {
+  readonly coveredPackages: string[];
+  readonly ignoredReferences: string[];
+}
+
 function toWorkspacePackageName(packageName: string): string {
   return packageName.startsWith("@outfitter/")
     ? packageName
@@ -171,6 +176,23 @@ export function parseChangesetFrontmatterPackageNames(
   return [...packages].toSorted();
 }
 
+function analyzeChangesetReferences(
+  referencedPackages: readonly string[],
+  ignored: ReadonlySet<string>
+): AnalyzedChangesetReferences {
+  const coveredPackages = referencedPackages.filter(
+    (packageName) => !ignored.has(packageName)
+  );
+  const ignoredReferences = referencedPackages.filter((packageName) =>
+    ignored.has(packageName)
+  );
+
+  return {
+    coveredPackages: coveredPackages.toSorted(),
+    ignoredReferences: ignoredReferences.toSorted(),
+  };
+}
+
 export function findIgnoredPackageReferences(input: {
   readonly changesetFiles: readonly string[];
   readonly ignoredPackages: readonly string[];
@@ -186,9 +208,10 @@ export function findIgnoredPackageReferences(input: {
   for (const file of input.changesetFiles) {
     const content = input.readChangesetFile(file);
     const referencedPackages = parseChangesetFrontmatterPackageNames(content);
-    const invalidReferences = referencedPackages.filter((pkg) =>
-      ignored.has(pkg)
-    );
+    const invalidReferences = analyzeChangesetReferences(
+      referencedPackages,
+      ignored
+    ).ignoredReferences;
     if (invalidReferences.length > 0) {
       results.push({ file, packages: invalidReferences.toSorted() });
     }
@@ -225,18 +248,16 @@ function analyzeChangedChangesets(
     try {
       const content = readFileSync(join(cwd, ".changeset", filename), "utf-8");
       const referencedPackages = parseChangesetFrontmatterPackageNames(content);
-      const invalidReferences = referencedPackages.filter((packageName) =>
-        ignored.has(packageName)
-      );
+      const analysis = analyzeChangesetReferences(referencedPackages, ignored);
 
-      for (const packageName of referencedPackages) {
+      for (const packageName of analysis.coveredPackages) {
         covered.add(packageName);
       }
 
-      if (invalidReferences.length > 0) {
+      if (analysis.ignoredReferences.length > 0) {
         ignoredReferences.push({
           file: filename,
-          packages: invalidReferences.toSorted(),
+          packages: analysis.ignoredReferences,
         });
       }
     } catch {
