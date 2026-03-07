@@ -207,6 +207,12 @@ describe("getReleasableChangedPackages", () => {
       )
     ).toEqual(["@outfitter/cli"]);
   });
+
+  test("normalizes ignored package names before filtering", () => {
+    expect(
+      getReleasableChangedPackages(["agents", "schema"], ["agents"])
+    ).toEqual(["schema"]);
+  });
 });
 
 describe("parseIgnoredPackagesFromChangesetConfig", () => {

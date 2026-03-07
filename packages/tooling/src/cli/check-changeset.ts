@@ -47,7 +47,7 @@ export function getReleasableChangedPackages(
   changedPackages: readonly string[],
   ignoredPackages: readonly string[]
 ): string[] {
-  const ignored = new Set(ignoredPackages);
+  const ignored = new Set(ignoredPackages.map(toWorkspacePackageName));
   return changedPackages.filter(
     (packageName) => !ignored.has(toWorkspacePackageName(packageName))
   );
@@ -392,7 +392,7 @@ export async function runCheckChangeset(
 
     for (const pkg of check.missingFor) {
       process.stderr.write(
-        `  ${COLORS.yellow}@outfitter/${pkg}${COLORS.reset}\n`
+        `  ${COLORS.yellow}${toWorkspacePackageName(pkg)}${COLORS.reset}\n`
       );
     }
 
