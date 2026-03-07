@@ -178,6 +178,35 @@ describe("getReleasableChangedPackages", () => {
       )
     ).toEqual(["cli", "schema"]);
   });
+
+  test("returns an empty array when no packages changed", () => {
+    expect(getReleasableChangedPackages([], ["@outfitter/agents"])).toEqual([]);
+  });
+
+  test("returns an empty array when every changed package is ignored", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["agents", "legacy"],
+        ["@outfitter/agents", "@outfitter/legacy"]
+      )
+    ).toEqual([]);
+  });
+
+  test("returns all changed packages unchanged when nothing is ignored", () => {
+    expect(getReleasableChangedPackages(["cli", "schema"], [])).toEqual([
+      "cli",
+      "schema",
+    ]);
+  });
+
+  test("accepts already-normalized workspace package names", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["@outfitter/cli", "schema"],
+        ["@outfitter/schema"]
+      )
+    ).toEqual(["@outfitter/cli"]);
+  });
 });
 
 describe("parseIgnoredPackagesFromChangesetConfig", () => {
