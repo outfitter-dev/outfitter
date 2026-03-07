@@ -2,8 +2,8 @@
   "groupId": "output-mode",
   "testedAt": "2026-02-27T18:49:05Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "bug-fixes-output-mode-output-mode"
   },
   "toolsUsed": ["shell", "bun test", "rg", "file inspection"],
   "assertions": [
@@ -111,12 +111,12 @@
           "observed": "`output-mode-parity.test.ts` includes `end-to-end output chain integration` cases; all passed."
         },
         {
-          "action": "Run real CLI with explicit `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd /Users/mg/Developer/outfitter/stack --json | head -3`",
+          "action": "Run real CLI with explicit `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd . --json | head -3`",
           "expected": "Structured JSON output",
           "observed": "Output begins with JSON object: `{\"entries\":[...],\"total\":21}`."
         },
         {
-          "action": "Run same CLI without `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd /Users/mg/Developer/outfitter/stack | head -8`",
+          "action": "Run same CLI without `--json` and env vars unset: `env -u OUTFITTER_JSON -u OUTFITTER_JSONL bun run src/cli.ts docs list --cwd . | head -8`",
           "expected": "Default human-readable output",
           "observed": "Output begins with human text banner: `Documentation Entries (21)` and formatted list rows."
         }

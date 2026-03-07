@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "The docs-worker procedure still mandates `bun run check`, which conflicts with this mission's known pre-existing formatter/check crash and can create avoidable noise during docs-only work.",
-      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/docs-worker/SKILL.md:65-69 requires `bun run check`; /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72 documents `bun run check` crashing and recommends `bun run lint` + `bun run typecheck`; /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl:3 shows this worker ran `bun run check` and then `bun run format:fix`."
+      "evidence": ".factory/skills/docs-worker/SKILL.md:65-69 requires `bun run check`; ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72 documents `bun run check` crashing and recommends `bun run lint` + `bun run typecheck`; ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/worker-transcripts.jsonl:3 shows this worker ran `bun run check` and then `bun run format:fix`."
     }
   ],
   "addressesFailureFrom": null,

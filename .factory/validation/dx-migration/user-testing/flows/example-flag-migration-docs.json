@@ -2,8 +2,8 @@
   "groupId": "example-flag-migration-docs",
   "testedAt": "2026-02-28T03:09:44Z",
   "credentials": {
-    "account": "not-applicable",
-    "namespace": "not-applicable"
+    "account": "shell-local",
+    "namespace": "dx-migration-example-flag-migration-docs"
   },
   "toolsUsed": ["shell", "bun test", "ripgrep", "file inspection"],
   "assertions": [

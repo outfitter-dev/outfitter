@@ -2,8 +2,8 @@
   "groupId": "cli-context-hints",
   "testedAt": "2026-02-27T23:39:30Z",
   "credentials": {
-    "account": "N/A",
-    "namespace": "builder-core"
+    "account": "shell-local",
+    "namespace": "builder-core-cli-context-hints"
   },
   "toolsUsed": ["Read", "Grep (rg)", "bun test", "bun run typecheck"],
   "assertions": [

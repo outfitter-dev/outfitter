@@ -30,7 +30,7 @@
     {
       "area": "knowledge",
       "observation": "Mission AGENTS pre-existing-issues section is now stale for OS-351 env cleanup behavior.",
-      "evidence": "/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:28 says testCommand uses `process.env[key] = undefined`; this feature commit changes cleanup to `delete process.env[key]` in packages/testing/src/test-command.ts."
+      "evidence": "~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:28 says testCommand uses `process.env[key] = undefined`; this feature commit changes cleanup to `delete process.env[key]` in packages/testing/src/test-command.ts."
     }
   ],
   "addressesFailureFrom": null,

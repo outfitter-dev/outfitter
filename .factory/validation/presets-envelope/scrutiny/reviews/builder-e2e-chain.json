@@ -20,7 +20,7 @@
     {
       "area": "skills",
       "observation": "The library-worker skill enforces a strict red-phase requirement that tests must fail first, but this does not map cleanly to integration-test-only features that validate already-implemented behavior across components.",
-      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/library-worker/SKILL.md (Step 2, lines 28-35) requires failing tests first; handoff skill feedback for this feature explicitly notes red/green is not a natural fit for pure integration checks (/Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T00-17-13-827Z__builder-e2e-chain__5a5c0c7c-4837-40f9-8f96-d0f6f4231fdc.json, lines 108-110)."
+      "evidence": ".factory/skills/library-worker/SKILL.md (Step 2, lines 28-35) requires failing tests first; handoff skill feedback for this feature explicitly notes red/green is not a natural fit for pure integration checks (~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T00-17-13-827Z__builder-e2e-chain__5a5c0c7c-4837-40f9-8f96-d0f6f4231fdc.json, lines 108-110)."
     }
   ],
   "addressesFailureFrom": null,

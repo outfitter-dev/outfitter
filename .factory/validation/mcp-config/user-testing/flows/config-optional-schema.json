@@ -2,8 +2,8 @@
   "groupId": "config-optional-schema",
   "testedAt": "2026-02-28T01:32:04Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "mcp-config-config-optional-schema"
   },
   "toolsUsed": [
     "shell (bun test)",
@@ -57,5 +57,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 1 assertion (VAL-CFG-001): 1 passed, 0 failed, 0 blocked."
+  "summary": "Tested 1 assertion (VAL-CFG-001): 1 passed, 0 failed, 0 blocked.",
+  "commitId": "a8370c2e0065c83ba419ac8d7f4f38fba8282d63"
 }

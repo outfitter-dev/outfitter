@@ -30,5 +30,6 @@
       "observation": "user-testing guidance is slightly inconsistent about package-scoped test commands (`bun run test --filter=...` vs package-local `bun test`), which can lead to non-isolated runs and noise during feature validation.",
       "evidence": ".factory/library/user-testing.md includes both command styles; this worker’s transcript indicates root-level filtered execution still surfaced unrelated package failures before switching to package-local tests."
     }
-  ]
+  ],
+  "commitId": "7e7a3eecbc688f99164bd587571c42d3941b16fe"
 }

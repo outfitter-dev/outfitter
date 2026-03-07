@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "docs-worker procedure/compliance tracking is slightly inconsistent for docs-only fixes: the skill procedure requires lint + typecheck + test, but this run recorded only lint while still marked followedProcedure=true with no deviations.",
-      "evidence": ".factory/skills/docs-worker/SKILL.md:65,68,71 lists bun run lint/typecheck/test under Verify; handoff for this run lists only bun run lint and sets followedProcedure true with deviations [] (.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-58-58-512Z__fix-migration-docs-accuracy__2cdf058a-dff0-4571-87d8-acbbf3e9fa19.json:36,48-49)."
+      "evidence": ".factory/skills/docs-worker/SKILL.md:65,68,71 lists bun run lint/typecheck/test under Verify; handoff for this run lists only bun run lint and sets followedProcedure true with deviations [] (~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-58-58-512Z__fix-migration-docs-accuracy__2cdf058a-dff0-4571-87d8-acbbf3e9fa19.json:36,48-49)."
     }
   ],
   "addressesFailureFrom": ".factory/validation/dx-migration/scrutiny/reviews/migration-v05-docs.json",

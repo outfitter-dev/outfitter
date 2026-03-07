@@ -2,8 +2,8 @@
   "groupId": "contracts-types",
   "testedAt": "2026-02-27T23:39:37Z",
   "credentials": {
-    "account": "N/A",
-    "namespace": "N/A"
+    "account": "shell-local",
+    "namespace": "builder-core-contracts-types"
   },
   "toolsUsed": ["shell", "bun", "rg", "Read"],
   "assertions": [
@@ -54,5 +54,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 1 assertion (VAL-BUILD-001): 1 passed, 0 failed, 0 blocked."
+  "summary": "Tested 1 assertion (VAL-BUILD-001): 1 passed, 0 failed, 0 blocked.",
+  "commitId": "d75b90d290ef83bf0fe5eeb2fb450d462b73e555"
 }

@@ -2,8 +2,8 @@
   "groupId": "package-docs",
   "testedAt": "2026-02-27T21:09:53Z",
   "credentials": {
-    "account": "n/a",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "documentation-package-docs"
   },
   "toolsUsed": ["Read", "Grep", "LS", "shell (rg-style content inspection)"],
   "assertions": [
