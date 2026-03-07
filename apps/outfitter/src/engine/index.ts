@@ -20,7 +20,6 @@ export {
   isBinaryFile,
   replacePlaceholders,
 } from "./preset.js";
-export { copyTemplateFiles, getTemplatesDir } from "./template.js";
 export type {
   EngineCollector,
   EngineOptions,
