@@ -24,6 +24,10 @@ import {
 /**
  * Maps specific HTTP status codes to error categories.
  *
+ * This list is intentionally curated rather than exhaustive. If the taxonomy
+ * gains another category with an explicit canonical HTTP mapping, add it here
+ * so fromFetch keeps treating it as a first-class transport error.
+ *
  * Unmapped 4xx codes fall back to `validation`, unmapped 5xx to `internal`.
  */
 const CANONICAL_FETCH_ERROR_CATEGORIES = [
