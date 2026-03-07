@@ -62,11 +62,23 @@ export function findHomePathLeaks(
 export interface ScanHomePathOptions {
   readonly cwd?: string;
   readonly homeDir?: string;
+  readonly readFile?: (path: string, encoding: "utf-8") => string;
 }
 
 export interface RunCheckHomePathsOptions {
   readonly setExitCode?: (code: number) => void;
   readonly stderr?: Pick<typeof process.stderr, "write">;
+  readonly scanOptions?: ScanHomePathOptions;
+}
+
+class HomePathScanReadError extends Error {
+  constructor(
+    readonly filePath: string,
+    readonly reason: string
+  ) {
+    super(`Could not read ${filePath}: ${reason}`);
+    this.name = "HomePathScanReadError";
+  }
 }
 
 export function scanFilesForHardcodedHomePaths(
@@ -75,6 +87,7 @@ export function scanFilesForHardcodedHomePaths(
 ): FileHomePathLeak[] {
   const cwd = options.cwd ?? process.cwd();
   const homePath = options.homeDir ?? homedir();
+  const readFile = options.readFile ?? readFileSync;
   const leaks: FileHomePathLeak[] = [];
 
   for (const filePath of filePaths) {
@@ -83,10 +96,17 @@ export function scanFilesForHardcodedHomePaths(
       continue;
     }
 
-    const fileLeaks = findHomePathLeaks(
-      readFileSync(absolutePath, "utf-8"),
-      homePath
-    );
+    let fileContent: string;
+    try {
+      fileContent = readFile(absolutePath, "utf-8");
+    } catch (error) {
+      throw new HomePathScanReadError(
+        filePath,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+
+    const fileLeaks = findHomePathLeaks(fileContent, homePath);
     for (const leak of fileLeaks) {
       leaks.push({
         filePath,
@@ -108,7 +128,21 @@ export function runCheckHomePaths(
     ((code: number) => {
       process.exitCode = code;
     });
-  const leaks = scanFilesForHardcodedHomePaths(paths);
+  let leaks: FileHomePathLeak[];
+  try {
+    leaks = scanFilesForHardcodedHomePaths(paths, options.scanOptions);
+  } catch (error) {
+    if (error instanceof HomePathScanReadError) {
+      stderr.write(`${error.message}\n`);
+      stderr.write(
+        "Fix file permissions or remove the unreadable path before committing.\n"
+      );
+      setExitCode(1);
+      return;
+    }
+
+    throw error;
+  }
   if (leaks.length === 0) {
     setExitCode(0);
     return;

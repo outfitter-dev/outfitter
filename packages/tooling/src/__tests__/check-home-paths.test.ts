@@ -132,10 +132,10 @@ describe("runCheckHomePaths", () => {
     let stderr = "";
 
     try {
-      writeFileSync(
-        targetFile,
-        `{"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`
-      );
+      const lineText = `{"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`;
+      const expectedColumn = lineText.indexOf(homedir()) + 1;
+
+      writeFileSync(targetFile, lineText);
 
       const captureStderr = ((chunk: unknown) => {
         stderr += String(chunk);
@@ -151,8 +151,42 @@ describe("runCheckHomePaths", () => {
 
       expect(capturedExitCode).toBe(1);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
-      expect(stderr).toContain(`${targetFile}:1:10`);
+      expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
       expect(stderr).toContain(JSON.stringify(homedir()));
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("reports unreadable files with a clean diagnostic", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const targetFile = join(workspaceRoot, "blocked.txt");
+    let capturedExitCode: number | undefined;
+    let stderr = "";
+
+    try {
+      writeFileSync(targetFile, "placeholder");
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      runCheckHomePaths([targetFile], {
+        setExitCode: (value) => {
+          capturedExitCode = value;
+        },
+        stderr: { write: captureStderr },
+        scanOptions: {
+          readFile: () => {
+            throw new Error("EACCES: permission denied");
+          },
+        },
+      });
+
+      expect(capturedExitCode).toBe(1);
+      expect(stderr).toContain(`Could not read ${targetFile}`);
+      expect(stderr).toContain("Fix file permissions");
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
