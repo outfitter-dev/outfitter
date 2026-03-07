@@ -5,6 +5,7 @@ import { expectErr, expectOk } from "@outfitter/contracts";
 import * as presets from "@outfitter/presets";
 
 import {
+  applyResolvedDependencyVersions,
   clearResolvedVersionsCache,
   resolvePresetDependencyVersions,
 } from "../engine/dependency-versions.js";
@@ -148,5 +149,60 @@ describe("resolvePresetDependencyVersions failure path", () => {
       threw = true;
     }
     expect(threw).toBe(false);
+  });
+});
+
+describe("applyResolvedDependencyVersions", () => {
+  test("replaces external catalog placeholders with resolved versions", () => {
+    const parsedPackageJson: Record<string, unknown> = {
+      dependencies: {
+        "@outfitter/contracts": "workspace:*",
+        commander: "catalog:",
+      },
+      devDependencies: {
+        bunup: "catalog:",
+      },
+    };
+
+    const unresolved = applyResolvedDependencyVersions(parsedPackageJson, {
+      external: {
+        bunup: "^0.16.29",
+        commander: "^14.0.2",
+      },
+      internal: {
+        "@outfitter/contracts": "^0.7.0",
+      },
+    });
+
+    expect(unresolved).toEqual([]);
+    expect(parsedPackageJson).toEqual({
+      dependencies: {
+        "@outfitter/contracts": "^0.7.0",
+        commander: "^14.0.2",
+      },
+      devDependencies: {
+        bunup: "^0.16.29",
+      },
+    });
+  });
+
+  test("leaves unmatched catalog placeholders unchanged", () => {
+    const parsedPackageJson: Record<string, unknown> = {
+      dependencies: {
+        "unknown-dep": "catalog:",
+      },
+    };
+
+    const unresolved = applyResolvedDependencyVersions(parsedPackageJson, {
+      external: {},
+      internal: {},
+    });
+
+    expect(unresolved).toEqual(["unknown-dep"]);
+    expect(parsedPackageJson).toEqual({
+      dependencies: {
+        "unknown-dep": "catalog:",
+      },
+    });
   });
 });

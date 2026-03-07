@@ -28,7 +28,7 @@
 		"clean:artifacts": "rm -rf dist .turbo"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.12.1",
+		"@modelcontextprotocol/sdk": "catalog:",
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/types": "workspace:*",
 		"@outfitter/mcp": "workspace:*",
