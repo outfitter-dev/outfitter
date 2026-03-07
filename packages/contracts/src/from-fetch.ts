@@ -16,6 +16,7 @@ import {
   NotFoundError,
   PermissionError,
   RateLimitError,
+  statusCodeMap,
   TimeoutError,
   ValidationError,
 } from "./errors.js";
@@ -23,18 +24,35 @@ import {
 /**
  * Maps specific HTTP status codes to error categories.
  *
+ * This list is intentionally curated rather than exhaustive. If the taxonomy
+ * gains another category with an explicit canonical HTTP mapping, add it here
+ * so fromFetch keeps treating it as a first-class transport error.
+ *
  * Unmapped 4xx codes fall back to `validation`, unmapped 5xx to `internal`.
  */
-const httpStatusToCategory: Readonly<Record<number, ErrorCategory>> = {
-  401: "auth",
-  403: "permission",
-  404: "not_found",
+const CANONICAL_FETCH_ERROR_CATEGORIES = [
+  "auth",
+  "permission",
+  "not_found",
+  "conflict",
+  "rate_limit",
+  "network",
+  "timeout",
+] as const satisfies readonly ErrorCategory[];
+
+const HTTP_STATUS_ALIASES: Readonly<Record<number, ErrorCategory>> = {
   408: "timeout",
-  409: "conflict",
-  429: "rate_limit",
-  502: "network",
   503: "network",
-  504: "timeout",
+};
+
+const httpStatusToCategory: Readonly<Record<number, ErrorCategory>> = {
+  ...Object.fromEntries(
+    CANONICAL_FETCH_ERROR_CATEGORIES.map((category) => [
+      statusCodeMap[category],
+      category,
+    ])
+  ),
+  ...HTTP_STATUS_ALIASES,
 };
 
 const UNKNOWN_HTTP_TIMEOUT_MS = -1;
@@ -112,9 +130,8 @@ function parseRetryAfterSeconds(retryAfter: string | null): number | undefined {
  * Convert an HTTP {@link Response} into a `Result<Response, OutfitterError>`.
  *
  * - **2xx** status codes return `Ok` with the original Response.
- * - Known error codes map to specific categories per the taxonomy:
- *   - 401 → auth, 403 → permission, 404 → not_found, 408 → timeout
- *   - 409 → conflict, 429 → rate_limit, 502/503 → network, 504 → timeout
+ * - Known error codes map to specific categories per the taxonomy using
+ *   {@link statusCodeMap} plus {@link HTTP_STATUS_ALIASES} for 408 and 503.
  * - Unmapped 4xx → validation, unmapped 5xx → internal.
  * - All other codes (1xx, 3xx) → internal.
  *
@@ -137,8 +154,9 @@ export function fromFetch(
   response: Response
 ): Result<Response, OutfitterError> {
   const { status, statusText } = response;
+  const rateLimitStatus = statusCodeMap.rate_limit;
   const retryAfterSeconds =
-    status === 429
+    status === rateLimitStatus
       ? parseRetryAfterSeconds(response.headers.get("Retry-After"))
       : undefined;
 
