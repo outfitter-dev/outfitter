@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Home-path leak detection keeps scanning, reporting, and error contracts together. */
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
@@ -16,6 +17,32 @@ export interface FileHomePathLeak extends HomePathLeak {
 export interface HomePathScanReadFailure {
   readonly filePath: string;
   readonly reason: string;
+}
+
+function formatLeakLineText(lineText: string): string {
+  return lineText.trimEnd();
+}
+
+function writeLeakSummary(
+  stderr: Pick<typeof process.stderr, "write">,
+  leaks: readonly FileHomePathLeak[]
+): void {
+  stderr.write("Hardcoded home directory paths detected:\n");
+  for (const leak of leaks) {
+    stderr.write(
+      `  ${leak.filePath}:${leak.line}:${leak.column} ${formatLeakLineText(leak.lineText)}\n`
+    );
+  }
+}
+
+function writeReplacementHint(
+  stderr: Pick<typeof process.stderr, "write">,
+  leaks: readonly FileHomePathLeak[],
+  fallbackPath: string
+): void {
+  stderr.write(
+    `\nReplace ${JSON.stringify(leaks[0]?.matchedText ?? fallbackPath)} with a repo-relative or home-agnostic path before committing.\n`
+  );
 }
 
 function escapeRegExp(value: string): string {
@@ -47,7 +74,7 @@ export function findHomePathLeaks(
   }
 
   const leaks: HomePathLeak[] = [];
-  const lines = content.split("\n");
+  const lines = content.split(/\r?\n/);
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index] ?? "";
@@ -76,24 +103,15 @@ export interface RunCheckHomePathsOptions {
   readonly scanOptions?: ScanHomePathOptions;
 }
 
-export class HomePathScanReadError extends Error {
-  constructor(
-    readonly failures: readonly HomePathScanReadFailure[],
-    readonly leaks: readonly FileHomePathLeak[] = []
-  ) {
-    const summary =
-      failures.length === 1
-        ? `Could not read ${failures[0]?.filePath}: ${failures[0]?.reason ?? "Unknown error"}`
-        : `Could not read ${failures.length} files while scanning for hardcoded home paths.`;
-    super(summary);
-    this.name = "HomePathScanReadError";
-  }
+export interface HomePathScanResult {
+  readonly leaks: readonly FileHomePathLeak[];
+  readonly failures: readonly HomePathScanReadFailure[];
 }
 
 export function scanFilesForHardcodedHomePaths(
   filePaths: readonly string[],
   options: ScanHomePathOptions = {}
-): FileHomePathLeak[] {
+): HomePathScanResult {
   const cwd = options.cwd ?? process.cwd();
   const homePath = options.homeDir ?? homedir();
   const readFile = options.readFile ?? readFileSync;
@@ -126,11 +144,7 @@ export function scanFilesForHardcodedHomePaths(
     }
   }
 
-  if (failures.length > 0) {
-    throw new HomePathScanReadError(failures, leaks);
-  }
-
-  return leaks;
+  return { leaks, failures };
 }
 
 export function runCheckHomePaths(
@@ -143,49 +157,37 @@ export function runCheckHomePaths(
     ((code: number) => {
       process.exitCode = code;
     });
-  let leaks: FileHomePathLeak[];
-  try {
-    leaks = scanFilesForHardcodedHomePaths(paths, options.scanOptions);
-  } catch (error) {
-    if (error instanceof HomePathScanReadError) {
-      stderr.write(
-        "Unreadable files while scanning for hardcoded home paths:\n"
-      );
-      for (const failure of error.failures) {
-        stderr.write(`  ${failure.filePath}: ${failure.reason}\n`);
-      }
-
-      if (error.leaks.length > 0) {
-        stderr.write("\nHardcoded home directory paths detected:\n");
-        for (const leak of error.leaks) {
-          stderr.write(
-            `  ${leak.filePath}:${leak.line}:${leak.column} ${leak.lineText.trim()}\n`
-          );
-        }
-      }
-
-      stderr.write(
-        "Fix file permissions or remove the unreadable path before committing.\n"
-      );
-      setExitCode(1);
-      return;
+  const configuredHomeDir = options.scanOptions?.homeDir ?? homedir();
+  const { failures, leaks } = scanFilesForHardcodedHomePaths(
+    paths,
+    options.scanOptions
+  );
+  if (failures.length > 0) {
+    const unreadableTarget = failures.length === 1 ? "file" : "files";
+    stderr.write("Unreadable files while scanning for hardcoded home paths:\n");
+    for (const failure of failures) {
+      stderr.write(`  ${failure.filePath}: ${failure.reason}\n`);
     }
 
-    throw error;
+    if (leaks.length > 0) {
+      stderr.write("\n");
+      writeLeakSummary(stderr, leaks);
+      writeReplacementHint(stderr, leaks, configuredHomeDir);
+    }
+
+    stderr.write(
+      `Fix file permissions or remove the unreadable ${unreadableTarget} before committing.\n`
+    );
+    setExitCode(1);
+    return;
   }
+
   if (leaks.length === 0) {
     setExitCode(0);
     return;
   }
 
-  stderr.write("Hardcoded home directory paths detected:\n");
-  for (const leak of leaks) {
-    stderr.write(
-      `  ${leak.filePath}:${leak.line}:${leak.column} ${leak.lineText.trim()}\n`
-    );
-  }
-  stderr.write(
-    `\nReplace ${JSON.stringify(leaks[0]?.matchedText ?? homedir())} with a repo-relative or home-agnostic path before committing.\n`
-  );
+  writeLeakSummary(stderr, leaks);
+  writeReplacementHint(stderr, leaks, configuredHomeDir);
   setExitCode(1);
 }
