@@ -156,7 +156,6 @@ describe("MCP Logging", () => {
       const server = createMcpServer({
         name: "test-server",
         version: "1.0.0",
-        defaultLogLevel: "debug",
       });
 
       const sentMessages: unknown[] = [];
@@ -171,6 +170,7 @@ describe("MCP Logging", () => {
       };
 
       server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("debug");
       server.setLogLevel?.("verbose");
       server.sendLogMessage("debug", "should still forward");
 
@@ -181,7 +181,6 @@ describe("MCP Logging", () => {
       const server = createMcpServer({
         name: "test-server",
         version: "1.0.0",
-        defaultLogLevel: "error",
       });
 
       const sentMessages: unknown[] = [];
@@ -196,6 +195,7 @@ describe("MCP Logging", () => {
       };
 
       server.bindSdkServer?.(mockSdkServer);
+      server.setLogLevel?.("error");
       server.setLogLevel?.("verbose");
       server.sendLogMessage("debug", "should still be filtered");
       server.sendLogMessage("error", "should still forward");
