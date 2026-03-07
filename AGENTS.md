@@ -34,9 +34,9 @@ cd packages/contracts && bun test          # Direct invocation
 
 # Lint/Format
 bun run lint                               # Lint checks
-bun run check                              # Lint + format checks
-bun run format:check                       # Format checks
-bun run format:fix                         # Apply formatting fixes
+bun run check                              # UNSTABLE — see note below
+bun run format:check                       # UNSTABLE — see note below
+bun run format:fix                         # UNSTABLE — see note below
 bun run typecheck                          # TypeScript validation
 
 # Release
