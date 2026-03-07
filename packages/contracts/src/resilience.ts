@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Retry and timeout helpers are a paired public API; splitting adds indirection. */
 import { Result } from "better-result";
 
 import { InternalError, type OutfitterError, TimeoutError } from "./errors.js";

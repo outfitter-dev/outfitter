@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Built-in presets remain in one module so shared CLI behavior is easy to inspect. */
 /**
  * Built-in flag presets for common CLI patterns.
  *

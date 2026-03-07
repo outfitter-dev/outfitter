@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- List rendering stays together so spacing and marker behavior remain aligned. */
 /**
  * List rendering utilities.
  *

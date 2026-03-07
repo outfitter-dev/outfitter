@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- The public config surface remains intentionally documented in one barrel module. */
 /**
  * @outfitter/config
  *

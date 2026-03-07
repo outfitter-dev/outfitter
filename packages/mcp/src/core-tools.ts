@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Core MCP tool wiring stays together so the default server surface is easy to inspect. */
 /**
  * @outfitter/mcp - Core MCP Tools
  *

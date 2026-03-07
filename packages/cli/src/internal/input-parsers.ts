@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Input parser normalization stays centralized so CLI coercion rules remain aligned. */
 /**
  * CLI input parsers: file expansion, glob, key-value, range, filter, sort.
  *

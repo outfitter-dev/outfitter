@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- VStack layout logic stays together so vertical composition behavior is easy to reason about. */
 /**
  * Vertical stack composition.
  *

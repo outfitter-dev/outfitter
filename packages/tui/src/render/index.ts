@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Render exports remain centralized so the public TUI surface is easy to navigate. */
 /**
  * Render module.
  *

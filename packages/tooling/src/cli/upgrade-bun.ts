@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Bun upgrade workflow stays together so version sync behavior is easier to follow. */
 /**
  * Bun version upgrade command
  *

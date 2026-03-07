@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Text presentation helpers stay together so CLI copy and formatting rules are auditable. */
 /**
  * Text formatting utilities.
  *

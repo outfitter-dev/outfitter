@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Box rendering stays together so layout and border composition remain aligned. */
 /**
  * Box rendering utilities.
  *

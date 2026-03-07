@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Flag preset contracts and factories are intentionally co-located for discoverability. */
 /**
  * Core flag preset types and composition utilities.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Registry parsing and reporting belong together for this rule's contract. */
 import { readFileSync } from "node:fs";
 
 import {

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- FTS5 indexing behavior stays together so query semantics and storage rules are easier to audit. */
 /**
  * @outfitter/index - FTS5 Implementation
  *

@@ -11,7 +11,7 @@
   "type": "module",
   "scripts": {
     "sync:all": "./scripts/workspace-sync.sh",
-    "build": "turbo run build && bun scripts/normalize-exports.ts",
+    "build": "turbo run build --no-daemon && bun scripts/normalize-exports.ts",
     "test": "turbo run test --no-daemon",
     "test:ci": "bun run scripts/ci-test-runner.ts",
     "lint": "turbo run lint --no-daemon",

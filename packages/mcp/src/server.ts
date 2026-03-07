@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- The server adapter stays intact so protocol registration and dispatch are traceable end to end. */
 /**
  * @outfitter/mcp - Server Implementation
  *

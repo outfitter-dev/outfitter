@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Cursor creation and encoding helpers are easier to audit in one module. */
 /**
  * Cursor creation, manipulation, encoding, and decoding functions.
  *

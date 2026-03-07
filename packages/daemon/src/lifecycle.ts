@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Lifecycle orchestration remains grouped so daemon startup and shutdown semantics stay aligned. */
 /**
  * Daemon lifecycle management.
  *

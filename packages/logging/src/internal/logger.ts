@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Logger composition stays together because it coordinates redaction, sinks, and bridge dispatch. */
 import type { Logger as LogtapeLogger } from "@logtape/logtape";
 
 import {

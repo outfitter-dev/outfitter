@@ -84,7 +84,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd ../.. && bunup --filter @outfitter/schema",
+    "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter @outfitter/schema",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "lint": "oxlint ./src",

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Surface generation and canonical file I/O stay together for drift debugging. */
 /**
  * Surface map generation and I/O.
  *

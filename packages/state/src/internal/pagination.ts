@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Pagination store helpers and public pagination API are maintained together. */
 /**
  * Pagination helpers: paginate, load/save cursors, and default store singleton.
  *

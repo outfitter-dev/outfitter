@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Parser formats, merge helpers, and parse errors are intentionally co-located. */
 import type { TaggedErrorClass } from "@outfitter/contracts";
 import { Result, TaggedError } from "@outfitter/contracts";
 import { parse as parseToml } from "smol-toml";

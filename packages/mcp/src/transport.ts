@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Transport helpers remain grouped so stream and request handling stay consistent. */
 /**
  * @outfitter/mcp - Transport Helpers
  *

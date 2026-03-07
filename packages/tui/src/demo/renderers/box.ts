@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Box demo permutations stay in one renderer so visual coverage is easy to inspect. */
 /**
  * Box demo renderer.
  *

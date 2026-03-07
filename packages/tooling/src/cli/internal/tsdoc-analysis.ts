@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- TSDoc analysis stays centralized so reporting and AST traversal remain aligned. */
 /**
  * Pure analysis functions for TSDoc coverage checking.
  *

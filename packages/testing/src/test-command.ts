@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Command-test harness behavior stays in one module to preserve end-to-end expectations. */
 /**
  * @outfitter/testing - testCommand()
  *

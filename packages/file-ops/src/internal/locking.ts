@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Exclusive locking behavior is kept in one module to preserve the protocol in one place. */
 import { writeFile as fsWriteFile, unlink } from "node:fs/promises";
 
 import { ConflictError, InternalError, Result } from "@outfitter/contracts";

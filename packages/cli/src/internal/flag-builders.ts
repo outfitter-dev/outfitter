@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Flag preset builders stay together to keep CLI option behavior consistent. */
 /**
  * Generic flag builder functions for custom-typed presets.
  *

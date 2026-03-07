@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- The logtape bridge keeps sink registration and backend wiring in one place. */
 import {
   configureSync,
   getConfig,

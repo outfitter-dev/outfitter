@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/* eslint-disable outfitter/max-file-lines -- Tooling CLI registration stays together so command wiring is easy to inspect. */
 
 /**
  * @outfitter/tooling CLI

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Stack composition types and helpers stay grouped so layout semantics remain clear. */
 /**
  * Stack composition types, delimiter registry, and marker names.
  *

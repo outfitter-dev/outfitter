@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/* eslint-disable outfitter/max-file-lines -- Markdown link validation keeps traversal and reporting together for repo guardrails. */
 
 /**
  * Check-markdown-links command -- validates that relative links in markdown

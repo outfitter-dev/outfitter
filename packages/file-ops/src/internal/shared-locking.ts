@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Shared lock coordination stays together so the lock-file protocol is readable end to end. */
 import { writeFile as fsWriteFile, unlink } from "node:fs/promises";
 
 import { ConflictError, InternalError, Result } from "@outfitter/contracts";
