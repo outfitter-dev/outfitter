@@ -13,7 +13,7 @@
     {
       "area": "services",
       "observation": "The shared command map still advertises `check: bun run check` even though mission guidance says this command crashes in this environment and workers should use lint + typecheck instead.",
-      "evidence": ".factory/services.yaml:7 shows `check: bun run check`; ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72 documents the pre-existing crash and prescribes `bun run lint` + `bun run typecheck`."
+      "evidence": ".factory/services.yaml:7 shows `check: bun run check`; ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72 documents the pre-existing crash and prescribes `bun run lint` + `bun run typecheck`."
     },
     {
       "area": "skills",

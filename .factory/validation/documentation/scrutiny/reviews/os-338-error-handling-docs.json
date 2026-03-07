@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "The docs-worker procedure requires running `bun run check`, but this mission explicitly marks `bun run check` as a known crashing command and directs workers to run `bun run lint` + `bun run typecheck` instead. The worker followed mission guidance, indicating the skill procedure is stale for this environment.",
-      "evidence": "Skill procedure: .factory/skills/docs-worker/SKILL.md:65. Mission exception: ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72. Worker command evidence: ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-09-45-364Z__os-338-error-handling-docs__61797313-e4f0-41c1-8f6e-158eac5de595.json:41,46."
+      "evidence": "Skill procedure: .factory/skills/docs-worker/SKILL.md:65. Mission exception: ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72. Worker command evidence: ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-09-45-364Z__os-338-error-handling-docs__61797313-e4f0-41c1-8f6e-158eac5de595.json:41,46."
     }
   ],
   "addressesFailureFrom": null,

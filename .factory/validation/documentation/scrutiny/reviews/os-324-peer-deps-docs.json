@@ -20,7 +20,7 @@
     {
       "area": "skills",
       "observation": "The docs-worker skill's verification procedure still directs workers to run `bun run check`, which conflicts with this mission's AGENTS guidance that `bun run check` is currently crashing and should be replaced with `bun run lint` + `bun run typecheck`.",
-      "evidence": "Skill command: .factory/skills/docs-worker/SKILL.md:65; mission guidance: ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72"
+      "evidence": "Skill command: .factory/skills/docs-worker/SKILL.md:65; mission guidance: ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72"
     }
   ],
   "addressesFailureFrom": null,

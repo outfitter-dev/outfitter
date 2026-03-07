@@ -20,7 +20,7 @@
     {
       "area": "conventions",
       "observation": "Mission AGENTS.md still references pre-centralization output-mode helpers/files as active key sources and current architecture state, which can mislead subsequent workers.",
-      "evidence": "../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md lines 56-57 list resolveOutputModeWithEnvFallback and docs-output-mode.ts; lines 62-67 still describe output mode as split across 5+ files."
+      "evidence": "~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md lines 56-57 list resolveOutputModeWithEnvFallback and docs-output-mode.ts; lines 62-67 still describe output mode as split across 5+ files."
     },
     {
       "area": "knowledge",
@@ -30,7 +30,7 @@
     {
       "area": "skills",
       "observation": "Worker reported a startup deviation due not finding mission context files locally, suggesting skill/runtime guidance is ambiguous about mission file location in subagent runs.",
-      "evidence": "handoff.skillFeedback.deviations[0] in ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T18-25-24-396Z__os-421-centralize-output-mode__113a8521-c1f1-4099-b291-e73023a91b40.json"
+      "evidence": "handoff.skillFeedback.deviations[0] in ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T18-25-24-396Z__os-421-centralize-output-mode__113a8521-c1f1-4099-b291-e73023a91b40.json"
     }
   ],
   "addressesFailureFrom": null,

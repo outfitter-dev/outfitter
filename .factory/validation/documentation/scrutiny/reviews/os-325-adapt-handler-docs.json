@@ -13,7 +13,7 @@
     {
       "area": "skills",
       "observation": "There is guidance drift between the docs-worker skill and mission guidance for verification commands. The skill says to run `bun run check`, while this mission's AGENTS.md says `bun run check` is known to crash and workers should run `bun run lint` plus `bun run typecheck` instead.",
-      "evidence": ".factory/skills/docs-worker/SKILL.md (Step 5 Verify) vs ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md (Known Pre-Existing Issues section); transcript skeleton/handoff for session c56d6c05-38b2-4b2e-acb2-b1a00cbedc3f shows lint+typecheck commands and no bun run check."
+      "evidence": ".factory/skills/docs-worker/SKILL.md (Step 5 Verify) vs ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md (Known Pre-Existing Issues section); transcript skeleton/handoff for session c56d6c05-38b2-4b2e-acb2-b1a00cbedc3f shows lint+typecheck commands and no bun run check."
     }
   ],
   "addressesFailureFrom": null,

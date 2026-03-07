@@ -13,12 +13,12 @@
     {
       "area": "knowledge",
       "observation": "Mission AGENTS.md still documents a pre-existing testCommand env-cleanup behavior that this fix has now changed, so the shared mission note is stale.",
-      "evidence": "../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:28 states testCommand uses process.env[key] = undefined; current code uses delete in packages/testing/src/test-command.ts:318."
+      "evidence": "~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:28 states testCommand uses process.env[key] = undefined; current code uses delete in packages/testing/src/test-command.ts:318."
     },
     {
       "area": "skills",
       "observation": "library-worker procedure requires running full-suite bun run test (or documenting fallback after failure), but this fix handoff marks followedProcedure=true without a full-suite command or fallback note; procedure/enforcement appears inconsistent.",
-      "evidence": ".factory/skills/library-worker/SKILL.md:60 and :69 require full-suite behavior; handoff ../../../.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-49-19-359Z__fix-dx-scanner-and-env__5d49944d-b992-44d6-94fa-33f36ca22ec6.json lists only package tests plus typecheck/lint at lines 16, 21, 26, 31."
+      "evidence": ".factory/skills/library-worker/SKILL.md:60 and :69 require full-suite behavior; handoff ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-28T02-49-19-359Z__fix-dx-scanner-and-env__5d49944d-b992-44d6-94fa-33f36ca22ec6.json lists only package tests plus typecheck/lint at lines 16, 21, 26, 31."
     }
   ],
   "addressesFailureFrom": ".factory/validation/dx-migration/scrutiny/reviews/os-235-registry-scanner.json; .factory/validation/dx-migration/scrutiny/reviews/os-351-enhanced-test-helpers.json",
