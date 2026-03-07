@@ -5,6 +5,7 @@ import {
   findIgnoredPackageReferences,
   getChangedChangesetFiles,
   getChangedPackagePaths,
+  getReleasableChangedPackages,
   parseChangesetFrontmatterPackageNames,
   parseIgnoredPackagesFromChangesetConfig,
 } from "../cli/check-changeset.js";
@@ -98,18 +99,20 @@ describe("getChangedChangesetFiles", () => {
 });
 
 describe("checkChangesetRequired", () => {
-  test("returns ok when changeset files exist", () => {
+  test("returns ok when all releasable packages are covered by changesets", () => {
     const result = checkChangesetRequired(
       ["cli", "contracts"],
-      ["happy-turtle.md"]
+      ["happy-turtle.md"],
+      ["@outfitter/cli", "@outfitter/contracts"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
 
-  test("returns ok when multiple changeset files exist", () => {
+  test("returns ok when multiple changeset files cover the releasable packages", () => {
     const result = checkChangesetRequired(
       ["cli"],
-      ["happy-turtle.md", "brave-fox.md"]
+      ["happy-turtle.md", "brave-fox.md"],
+      ["@outfitter/cli"]
     );
     expect(result).toEqual({ ok: true, missingFor: [] });
   });
@@ -130,6 +133,85 @@ describe("checkChangesetRequired", () => {
   test("returns ok when no packages changed even with changesets", () => {
     const result = checkChangesetRequired([], ["happy-turtle.md"]);
     expect(result).toEqual({ ok: true, missingFor: [] });
+  });
+
+  test("fails when only some changed packages are covered", () => {
+    const result = checkChangesetRequired(
+      ["cli", "contracts"],
+      ["happy-turtle.md"],
+      ["@outfitter/cli"]
+    );
+    expect(result).toEqual({
+      ok: false,
+      missingFor: ["contracts"],
+    });
+  });
+
+  test("fails when changeset files do not mention any changed package", () => {
+    const result = checkChangesetRequired(
+      ["tooling"],
+      ["happy-turtle.md"],
+      ["@outfitter/cli"]
+    );
+    expect(result).toEqual({
+      ok: false,
+      missingFor: ["tooling"],
+    });
+  });
+
+  test("accepts prefiltered releasable packages from the runner", () => {
+    const result = checkChangesetRequired(
+      ["tooling"],
+      ["happy-turtle.md"],
+      ["@outfitter/tooling"]
+    );
+    expect(result).toEqual({ ok: true, missingFor: [] });
+  });
+});
+
+describe("getReleasableChangedPackages", () => {
+  test("filters ignored packages after normalizing them to workspace names", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["cli", "agents", "schema"],
+        ["@outfitter/agents"]
+      )
+    ).toEqual(["cli", "schema"]);
+  });
+
+  test("returns an empty array when no packages changed", () => {
+    expect(getReleasableChangedPackages([], ["@outfitter/agents"])).toEqual([]);
+  });
+
+  test("returns an empty array when every changed package is ignored", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["agents", "legacy"],
+        ["@outfitter/agents", "@outfitter/legacy"]
+      )
+    ).toEqual([]);
+  });
+
+  test("returns all changed packages unchanged when nothing is ignored", () => {
+    expect(getReleasableChangedPackages(["cli", "schema"], [])).toEqual([
+      "cli",
+      "schema",
+    ]);
+  });
+
+  test("accepts already-normalized workspace package names", () => {
+    expect(
+      getReleasableChangedPackages(
+        ["@outfitter/cli", "schema"],
+        ["@outfitter/schema"]
+      )
+    ).toEqual(["@outfitter/cli"]);
+  });
+
+  test("normalizes ignored package names before filtering", () => {
+    expect(
+      getReleasableChangedPackages(["agents", "schema"], ["agents"])
+    ).toEqual(["schema"]);
   });
 });
 
