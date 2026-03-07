@@ -154,6 +154,27 @@ describe("scanFilesForHardcodedHomePaths", () => {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
   });
+
+  test("uses existsFile injection before attempting to read", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+
+    try {
+      expect(
+        scanFilesForHardcodedHomePaths(["missing.md"], {
+          cwd: workspaceRoot,
+          existsFile: () => false,
+          readFile: () => {
+            throw new Error("readFile should not run when existsFile is false");
+          },
+        })
+      ).toEqual({
+        failures: [],
+        leaks: [],
+      });
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("runCheckHomePaths", () => {
@@ -264,6 +285,9 @@ describe("runCheckHomePaths", () => {
       expect(stderr).toContain("Hardcoded home directory paths detected:");
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
       expect(stderr).toContain(JSON.stringify(homedir()));
+      expect(stderr).toContain(
+        "before committing.\n\nFix file permissions or remove the unreadable file before committing."
+      );
       expect(stderr).toContain("Fix file permissions");
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
