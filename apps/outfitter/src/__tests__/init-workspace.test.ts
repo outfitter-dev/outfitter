@@ -148,6 +148,7 @@ describe("init command workspace scaffolding", () => {
       readFileSync(projectPackageJsonPath, "utf-8")
     );
     expect(projectPackageJson.name).toBe("@acme/my-mcp");
+    expect(JSON.stringify(projectPackageJson)).not.toContain("catalog:");
     expect(result.value.structure).toBe("workspace");
     expect(result.value.projectDir).toBe(join(tempDir, "apps", "my-mcp"));
   });
