@@ -454,6 +454,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@outfitter/schema": "workspace:*",
     "@types/bun": "catalog:",
     "@types/node": "catalog:"
   },

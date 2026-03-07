@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { spawnSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -31,6 +32,77 @@ export interface GenerateSurfaceMapOptions extends GenerateManifestOptions {
 }
 
 const SURFACE_MAP_SCHEMA = "https://outfitter.dev/surface/v1";
+
+function compareStableKeys(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function comparableSurfaceMap(
+  surfaceMap: SurfaceMap
+): Omit<SurfaceMap, "generatedAt"> {
+  const { generatedAt: _generatedAt, ...comparable } = surfaceMap;
+  return comparable;
+}
+
+function stableJsonString(value: unknown): string {
+  if (value === undefined) {
+    return "null";
+  }
+
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableJsonString(item)).join(",")}]`;
+  }
+
+  return `{${Object.entries(value)
+    .filter(([, nestedValue]) => nestedValue !== undefined)
+    .toSorted(([left], [right]) => compareStableKeys(left, right))
+    .map(
+      ([key, nestedValue]) =>
+        `${JSON.stringify(key)}:${stableJsonString(nestedValue)}`
+    )
+    .join(",")}}`;
+}
+
+function canonicalizeSurfaceMapContent(
+  content: string,
+  outputPath: string
+): string {
+  const formatResult = spawnSync(
+    "bun",
+    ["x", "oxfmt", "--stdin-filepath", outputPath],
+    {
+      encoding: "utf-8",
+      input: content,
+      timeout: 10_000,
+    }
+  );
+
+  if (
+    formatResult.status !== 0 ||
+    typeof formatResult.stdout !== "string" ||
+    formatResult.stdout.length === 0
+  ) {
+    return content.endsWith("\n") ? content : `${content}\n`;
+  }
+
+  return formatResult.stdout.endsWith("\n")
+    ? formatResult.stdout
+    : `${formatResult.stdout}\n`;
+}
+
+function serializeSurfaceMap(
+  surfaceMap: SurfaceMap,
+  outputPath: string
+): string {
+  return canonicalizeSurfaceMapContent(
+    `${JSON.stringify(surfaceMap, null, 2)}\n`,
+    outputPath
+  );
+}
 
 // =============================================================================
 // Generation
@@ -75,8 +147,36 @@ export async function writeSurfaceMap(
   outputPath: string
 ): Promise<void> {
   await mkdir(dirname(outputPath), { recursive: true });
-  const content = `${JSON.stringify(surfaceMap, null, 2)}\n`;
-  await writeFile(outputPath, content, "utf-8");
+  let nextSurfaceMap = surfaceMap;
+  let nextContent: string | undefined;
+
+  try {
+    const existingContent = await readFile(outputPath, "utf-8");
+    const existingSurfaceMap = JSON.parse(existingContent) as SurfaceMap;
+
+    if (
+      stableJsonString(comparableSurfaceMap(existingSurfaceMap)) ===
+      stableJsonString(comparableSurfaceMap(surfaceMap))
+    ) {
+      nextSurfaceMap = {
+        ...surfaceMap,
+        generatedAt: existingSurfaceMap.generatedAt,
+      };
+
+      nextContent = serializeSurfaceMap(nextSurfaceMap, outputPath);
+      if (nextContent === existingContent) {
+        return;
+      }
+    }
+  } catch {
+    // Missing or unreadable files are rewritten from scratch.
+  }
+
+  await writeFile(
+    outputPath,
+    nextContent ?? serializeSurfaceMap(nextSurfaceMap, outputPath),
+    "utf-8"
+  );
 }
 
 /**
