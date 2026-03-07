@@ -50,7 +50,7 @@ Use for features that involve writing or modifying TypeScript code in the monore
 
 ### 5. Verify
 
-Do not use `bun run check`, `bun run format:check`, or `bun run format:fix` for validation in this repo — the formatter has a pre-existing tokio panic. Use lint + typecheck instead. If you must format touched files after the repo-wide formatter crashes, use a targeted formatter invocation and note the fallback in your handoff.
+Do not use `bun run check`, `bun run format:check`, or `bun run format:fix` for validation in this repo — the formatter has a pre-existing tokio panic. Use lint + typecheck instead. If you must format touched files after the repo-wide formatter crashes, run `bun x oxfmt --write <path>...` only on the files you changed and note the fallback in your handoff.
 
 Run these commands and report EXACT output in your handoff:
 
@@ -101,16 +101,18 @@ In non-interactive worker/exec mode, create the changeset file directly instead 
 
 ```md
 ---
-"@outfitter/contracts": patch
+"@outfitter/<pkg>": patch
 ---
 
-Add parseInput Result wrapper for schema validation.
+Describe the user-visible runtime or API change in one sentence.
 ```
 
-Save it as `.changeset/<slug>.md`, then validate the file with:
+Save it as `.changeset/<short-kebab-summary>.md`, then validate the file with:
 
 ```bash
-bun changeset status --output .changeset/.status-check.json && rm .changeset/.status-check.json
+status_file=.changeset/.status-check.json
+trap 'rm -f "$status_file"' EXIT
+bun changeset status --output "$status_file"
 ```
 
 Keep the interactive `bun changeset` flow for local/manual runs.
