@@ -110,9 +110,7 @@ Describe the user-visible runtime or API change in one sentence.
 Save it as `.changeset/<short-kebab-summary>.md`, then validate the file with:
 
 ```bash
-status_file=.changeset/.status-check.json
-trap 'rm -f "$status_file"' EXIT
-bun changeset status --output "$status_file"
+bun changeset status --output .changeset/.status-check.json; rm -f .changeset/.status-check.json
 ```
 
 Keep the interactive `bun changeset` flow for local/manual runs.
