@@ -93,6 +93,7 @@ export function findHomePathLeaks(
 
 export interface ScanHomePathOptions {
   readonly cwd?: string;
+  readonly existsFile?: (path: string) => boolean;
   readonly homeDir?: string;
   readonly readFile?: (path: string, encoding: "utf-8") => string;
 }
@@ -113,6 +114,7 @@ export function scanFilesForHardcodedHomePaths(
   options: ScanHomePathOptions = {}
 ): HomePathScanResult {
   const cwd = options.cwd ?? process.cwd();
+  const existsFile = options.existsFile ?? existsSync;
   const homePath = options.homeDir ?? homedir();
   const readFile = options.readFile ?? readFileSync;
   const leaks: FileHomePathLeak[] = [];
@@ -120,7 +122,7 @@ export function scanFilesForHardcodedHomePaths(
 
   for (const filePath of filePaths) {
     const absolutePath = resolve(cwd, filePath);
-    if (!existsSync(absolutePath)) {
+    if (!existsFile(absolutePath)) {
       continue;
     }
 
@@ -173,6 +175,7 @@ export function runCheckHomePaths(
       stderr.write("\n");
       writeLeakSummary(stderr, leaks);
       writeReplacementHint(stderr, leaks, configuredHomeDir);
+      stderr.write("\n");
     }
 
     stderr.write(
