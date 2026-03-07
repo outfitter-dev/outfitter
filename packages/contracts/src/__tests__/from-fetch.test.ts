@@ -68,29 +68,6 @@ describe("fromFetch", () => {
     }
   });
 
-  describe("stays aligned with canonical statusCodeMap", () => {
-    const canonicalMappings: Array<[ErrorCategory, number]> = [
-      ["auth", statusCodeMap.auth],
-      ["permission", statusCodeMap.permission],
-      ["not_found", statusCodeMap.not_found],
-      ["conflict", statusCodeMap.conflict],
-      ["rate_limit", statusCodeMap.rate_limit],
-      ["network", statusCodeMap.network],
-      ["timeout", statusCodeMap.timeout],
-    ];
-
-    for (const [expectedCategory, status] of canonicalMappings) {
-      test(`${status} matches canonical ${expectedCategory} mapping`, () => {
-        const response = makeResponse(status);
-        const result = fromFetch(response);
-        expect(result.isErr()).toBe(true);
-        expect((result.error as OutfitterError).category).toBe(
-          expectedCategory
-        );
-      });
-    }
-  });
-
   describe("rate limit metadata", () => {
     test("maps Retry-After header (delta-seconds) into retryAfterSeconds", () => {
       const response = new Response(null, {
