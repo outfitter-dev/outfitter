@@ -60,6 +60,17 @@ describe("findHomePathLeaks", () => {
     ]);
   });
 
+  test("detects a bare home path followed by closing punctuation", () => {
+    expect(findHomePathLeaks(`{"path":"${homedir()}"}`, homedir())).toEqual([
+      {
+        line: 1,
+        column: 10,
+        matchedText: homedir(),
+        lineText: `{"path":"${homedir()}"}`,
+      },
+    ]);
+  });
+
   test("detects a home path at the end of a CRLF line", () => {
     expect(
       findHomePathLeaks(`prefix ${homedir()}\r\nnext line`, homedir())
@@ -235,6 +246,39 @@ describe("runCheckHomePaths", () => {
 
       expect(capturedExitCode).toBe(1);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
+      expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
+      expect(stderr).toContain(lineText);
+      expect(stderr).toContain(JSON.stringify(homedir()));
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("writes the leak summary for a bare home-path value without a subpath", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const targetFile = join(workspaceRoot, "settings.json");
+    let capturedExitCode: number | undefined;
+    let stderr = "";
+
+    try {
+      const lineText = `{"path":"${homedir()}"}`;
+      const expectedColumn = lineText.indexOf(homedir()) + 1;
+
+      writeFileSync(targetFile, lineText);
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      runCheckHomePaths([targetFile], {
+        setExitCode: (value) => {
+          capturedExitCode = value;
+        },
+        stderr: { write: captureStderr },
+      });
+
+      expect(capturedExitCode).toBe(1);
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
       expect(stderr).toContain(lineText);
       expect(stderr).toContain(JSON.stringify(homedir()));
