@@ -1,5 +1,5 @@
 /* eslint-disable outfitter/max-file-lines -- Home-path leak detection keeps scanning, reporting, and error contracts together. */
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
@@ -35,6 +35,7 @@ function writeLeakSummary(
   }
 }
 
+// All leaks share the same `matchedText` because a single `homePath` drives the scan.
 function writeReplacementHint(
   stderr: Pick<typeof process.stderr, "write">,
   leaks: readonly FileHomePathLeak[]
@@ -70,9 +71,12 @@ function buildHomePathPattern(homePath: string): RegExp | undefined {
 
 export function findHomePathLeaks(
   content: string,
-  homePath: string
+  homePathOrPattern: string | RegExp
 ): HomePathLeak[] {
-  const pattern = buildHomePathPattern(homePath);
+  const pattern =
+    homePathOrPattern instanceof RegExp
+      ? homePathOrPattern
+      : buildHomePathPattern(homePathOrPattern);
   if (!pattern) {
     return [];
   }
@@ -97,7 +101,6 @@ export function findHomePathLeaks(
 
 export interface ScanHomePathOptions {
   readonly cwd?: string;
-  readonly existsFile?: (path: string) => boolean;
   readonly homeDir?: string;
   readonly readFile?: (path: string, encoding: "utf-8") => string;
 }
@@ -118,22 +121,29 @@ export function scanFilesForHardcodedHomePaths(
   options: ScanHomePathOptions = {}
 ): HomePathScanResult {
   const cwd = options.cwd ?? process.cwd();
-  const existsFile = options.existsFile ?? existsSync;
   const homePath = options.homeDir ?? homedir();
   const readFile = options.readFile ?? readFileSync;
   const leaks: FileHomePathLeak[] = [];
   const failures: HomePathScanReadFailure[] = [];
 
+  // Build the pattern once for all files instead of per-file.
+  const pattern = buildHomePathPattern(homePath);
+  if (!pattern) {
+    return { leaks, failures };
+  }
+
   for (const filePath of filePaths) {
     const absolutePath = resolve(cwd, filePath);
-    if (!existsFile(absolutePath)) {
-      continue;
-    }
 
     let fileContent: string;
     try {
       fileContent = readFile(absolutePath, "utf-8");
     } catch (error) {
+      // ENOENT means the file was removed between listing and scanning — skip silently.
+      const errno = error as NodeJS.ErrnoException;
+      if (errno.code === "ENOENT") {
+        continue;
+      }
       failures.push({
         filePath,
         reason: error instanceof Error ? error.message : String(error),
@@ -141,7 +151,7 @@ export function scanFilesForHardcodedHomePaths(
       continue;
     }
 
-    const fileLeaks = findHomePathLeaks(fileContent, homePath);
+    const fileLeaks = findHomePathLeaks(fileContent, pattern);
     for (const leak of fileLeaks) {
       leaks.push({
         filePath,

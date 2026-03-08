@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   findHomePathLeaks,
   runCheckHomePaths,
+  type RunCheckHomePathsOptions,
   scanFilesForHardcodedHomePaths,
 } from "../cli/check-home-paths.js";
 
@@ -175,17 +176,14 @@ describe("scanFilesForHardcodedHomePaths", () => {
     }
   });
 
-  test("uses existsFile injection before attempting to read", () => {
+  test("silently skips files that do not exist (ENOENT)", () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
 
     try {
       expect(
         scanFilesForHardcodedHomePaths(["missing.md"], {
           cwd: workspaceRoot,
-          existsFile: () => false,
-          readFile: () => {
-            throw new Error("readFile should not run when existsFile is false");
-          },
+          homeDir: "/Users/mg",
         })
       ).toEqual({
         failures: [],
@@ -197,140 +195,110 @@ describe("scanFilesForHardcodedHomePaths", () => {
   });
 });
 
+function withHomePathTestContext(
+  fn: (ctx: {
+    workspaceRoot: string;
+    run: (
+      paths: string[],
+      scanOptions?: RunCheckHomePathsOptions["scanOptions"]
+    ) => { exitCode: number | undefined; stderr: string };
+  }) => void
+): void {
+  const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+
+  try {
+    fn({
+      workspaceRoot,
+      run(paths, scanOptions) {
+        let exitCode: number | undefined;
+        let output = "";
+
+        const write: typeof process.stderr.write = ((chunk: unknown) => {
+          output += String(chunk);
+          return true;
+        }) as typeof process.stderr.write;
+
+        runCheckHomePaths(paths, {
+          setExitCode: (value) => {
+            exitCode = value;
+          },
+          stderr: { write },
+          scanOptions,
+        });
+
+        return { exitCode, stderr: output };
+      },
+    });
+  } finally {
+    rmSync(workspaceRoot, { recursive: true, force: true });
+  }
+}
+
 describe("runCheckHomePaths", () => {
   test("leaves stderr empty and exits zero when no leaks are found", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const targetFile = join(workspaceRoot, "README.md");
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const targetFile = join(workspaceRoot, "README.md");
       writeFileSync(
         targetFile,
         "Use repo-relative paths like packages/tooling/src/index.ts."
       );
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths([targetFile], {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-      });
-
-      expect(capturedExitCode).toBe(0);
+      const { exitCode, stderr } = run([targetFile]);
+      expect(exitCode).toBe(0);
       expect(stderr).toBe("");
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 
   test("writes the leak summary to stderr and exits non-zero when leaks are found", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const targetFile = join(workspaceRoot, "tsconfig.jsonc");
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const targetFile = join(workspaceRoot, "tsconfig.jsonc");
       const lineText = `    {"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`;
       const expectedColumn = lineText.indexOf(homedir()) + 1;
-
       writeFileSync(targetFile, lineText);
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths([targetFile], {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-      });
-
-      expect(capturedExitCode).toBe(1);
+      const { exitCode, stderr } = run([targetFile]);
+      expect(exitCode).toBe(1);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
       expect(stderr).toContain(lineText);
       expect(stderr).toContain(JSON.stringify(homedir()));
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 
   test("writes the leak summary for a bare home-path value without a subpath", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const targetFile = join(workspaceRoot, "settings.json");
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const targetFile = join(workspaceRoot, "settings.json");
       const lineText = `{"path":"${homedir()}"}`;
       const expectedColumn = lineText.indexOf(homedir()) + 1;
-
       writeFileSync(targetFile, lineText);
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths([targetFile], {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-      });
-
-      expect(capturedExitCode).toBe(1);
+      const { exitCode, stderr } = run([targetFile]);
+      expect(exitCode).toBe(1);
       expect(stderr).toContain(`${targetFile}:1:${expectedColumn}`);
       expect(stderr).toContain(lineText);
       expect(stderr).toContain(JSON.stringify(homedir()));
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 
   test("reports unreadable files with a clean diagnostic", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const blockedFile = join(workspaceRoot, "blocked.txt");
-    const targetFile = join(workspaceRoot, "notes.md");
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const blockedFile = join(workspaceRoot, "blocked.txt");
+      const targetFile = join(workspaceRoot, "notes.md");
       writeFileSync(blockedFile, "placeholder");
       const lineText = `{"path":"${homedir()}/Developer/outfitter/stack/packages/tooling"}`;
       const expectedColumn = lineText.indexOf(homedir()) + 1;
       writeFileSync(targetFile, lineText);
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths([blockedFile, targetFile], {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-        scanOptions: {
-          readFile: (path, encoding) => {
-            if (path === blockedFile) {
-              throw new Error("EACCES: permission denied");
-            }
-
-            return readFileSync(path, encoding);
-          },
+      const { exitCode, stderr } = run([blockedFile, targetFile], {
+        readFile: (path, encoding) => {
+          if (path === blockedFile) {
+            throw new Error("EACCES: permission denied");
+          }
+          return readFileSync(path, encoding);
         },
       });
 
-      expect(capturedExitCode).toBe(1);
+      expect(exitCode).toBe(1);
       expect(stderr).toContain(
         "Unreadable file while scanning for hardcoded home paths:"
       );
@@ -342,81 +310,47 @@ describe("runCheckHomePaths", () => {
         "before committing.\n\nFix file permissions or remove the unreadable file before committing."
       );
       expect(stderr).toContain("Fix file permissions");
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 
   test("separates failures-only guidance with a blank line", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const blockedFile = join(workspaceRoot, "blocked.txt");
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const blockedFile = join(workspaceRoot, "blocked.txt");
       writeFileSync(blockedFile, "placeholder");
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths([blockedFile], {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-        scanOptions: {
-          readFile: () => {
-            throw new Error("EACCES: permission denied");
-          },
+      const { exitCode, stderr } = run([blockedFile], {
+        readFile: () => {
+          throw new Error("EACCES: permission denied");
         },
       });
 
-      expect(capturedExitCode).toBe(1);
+      expect(exitCode).toBe(1);
       expect(stderr).toContain(
         "Unreadable file while scanning for hardcoded home paths:"
       );
       expect(stderr).toContain(
         `  ${blockedFile}: EACCES: permission denied\n\nFix file permissions or remove the unreadable file before committing.`
       );
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 
   test("pluralizes the unreadable-file guidance when multiple reads fail", () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
-    const blockedFiles = [
-      join(workspaceRoot, "blocked-a.txt"),
-      join(workspaceRoot, "blocked-b.txt"),
-    ];
-    let capturedExitCode: number | undefined;
-    let stderr = "";
-
-    try {
+    withHomePathTestContext(({ workspaceRoot, run }) => {
+      const blockedFiles = [
+        join(workspaceRoot, "blocked-a.txt"),
+        join(workspaceRoot, "blocked-b.txt"),
+      ];
       for (const blockedFile of blockedFiles) {
         writeFileSync(blockedFile, "placeholder");
       }
 
-      const captureStderr = ((chunk: unknown) => {
-        stderr += String(chunk);
-        return true;
-      }) as typeof process.stderr.write;
-
-      runCheckHomePaths(blockedFiles, {
-        setExitCode: (value) => {
-          capturedExitCode = value;
-        },
-        stderr: { write: captureStderr },
-        scanOptions: {
-          readFile: () => {
-            throw new Error("EACCES: permission denied");
-          },
+      const { exitCode, stderr } = run(blockedFiles, {
+        readFile: () => {
+          throw new Error("EACCES: permission denied");
         },
       });
 
-      expect(capturedExitCode).toBe(1);
+      expect(exitCode).toBe(1);
       expect(stderr).toContain(
         "Unreadable files while scanning for hardcoded home paths:"
       );
@@ -426,8 +360,6 @@ describe("runCheckHomePaths", () => {
       expect(stderr).toContain(
         "Fix file permissions or remove the unreadable files before committing."
       );
-    } finally {
-      rmSync(workspaceRoot, { recursive: true, force: true });
-    }
+    });
   });
 });
