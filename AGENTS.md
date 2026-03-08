@@ -34,9 +34,9 @@ cd packages/contracts && bun test          # Direct invocation
 
 # Lint/Format
 bun run lint                               # Lint checks
-bun run check                              # Lint + format checks
-bun run format:check                       # Format checks
-bun run format:fix                         # Apply formatting fixes
+bun run check                              # UNSTABLE — see note below
+bun run format:check                       # UNSTABLE — see note below
+bun run format:fix                         # UNSTABLE — see note below
 bun run typecheck                          # TypeScript validation
 
 # Release
@@ -51,6 +51,8 @@ bun run clean                              # Clear Turbo artifacts and node_modu
 bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 bunx @outfitter/tooling upgrade-bun x.y.z  # Upgrade to specific version
 ```
+
+**Known command instability:** `bun run check`, `bun run format:check`, and `bun run format:fix` can hit a pre-existing tokio panic in this repo. For routine validation, use `bun run lint` plus `bun run typecheck`. If formatting is still required after the repo-wide formatter crashes, use a targeted formatter invocation on the touched files and note the fallback in your handoff.
 
 **Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
 
@@ -364,7 +366,8 @@ Keep types explicit; avoid `any`. Prefer module-local organization over central 
 ### Formatting (oxfmt)
 
 - Use oxfmt/Ultracite for formatting and oxlint for lint checks
-- Prefer repo-provided scripts (`bun run check`, `bun run format:fix`) over ad hoc formatter invocations
+- Prefer repo-provided scripts when they are stable, but in this repo fall back to `bun run lint` + `bun run typecheck` for validation when `bun run check`, `bun run format:check`, or `bun run format:fix` hit the known tokio panic
+- If formatting is required after the repo-wide formatter crashes, use a targeted formatter invocation on the touched files and call out the fallback
 
 ## Testing
 
