@@ -71,6 +71,18 @@ describe("lefthook.yml preset", () => {
     expect(hasTypecheck).toBe(true);
   });
 
+  test("pre-commit includes home path leak check", async () => {
+    const content = await Bun.file(LEFTHOOK_PATH).text();
+    const parsed = parseYaml(content);
+    const preCommit = parsed["pre-commit"];
+
+    const commands = preCommit?.commands ?? {};
+    expect(commands["home-paths"]).toEqual({
+      glob: "*.{js,jsx,json,jsonc,css,md,ts,tsx,yaml,yml}",
+      run: "bun x @outfitter/tooling check-home-paths {staged_files}",
+    });
+  });
+
   test("pre-push uses tooling pre-push command", async () => {
     const content = await Bun.file(LEFTHOOK_PATH).text();
     const parsed = parseYaml(content);
