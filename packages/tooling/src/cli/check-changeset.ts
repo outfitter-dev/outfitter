@@ -368,10 +368,11 @@ export interface CheckChangesetOptions {
 }
 
 /**
- * Run check-changeset to verify PRs include changeset files.
+ * Run check-changeset to verify release-relevant PR deltas include changeset files.
  *
- * Uses `git diff --name-only origin/main...HEAD` to detect changed files,
- * then checks for changeset presence when package source files are modified.
+ * Resolves the current diff range from pull request metadata in CI and falls
+ * back to `origin/main...HEAD` elsewhere. Release-relevant package changes in
+ * that diff must be covered by a current changeset.
  *
  * Skips silently when:
  * - `NO_CHANGESET=1` env var is set

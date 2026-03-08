@@ -387,4 +387,21 @@ describe("resolveGitDiffRange", () => {
       source: "default",
     });
   });
+
+  test("falls back to origin/main...HEAD when reading the event payload throws", () => {
+    expect(
+      resolveGitDiffRange({
+        eventName: "pull_request",
+        eventPath: "/tmp/github-event.json",
+        readEventFile: () => {
+          throw new Error("ENOENT");
+        },
+      })
+    ).toEqual({
+      base: "origin/main",
+      head: "HEAD",
+      label: "origin/main...HEAD",
+      source: "default",
+    });
+  });
 });
