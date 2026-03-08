@@ -39,8 +39,13 @@ function writeReplacementHint(
   stderr: Pick<typeof process.stderr, "write">,
   leaks: readonly FileHomePathLeak[]
 ): void {
+  const matchedText = leaks[0]?.matchedText;
+  if (!matchedText) {
+    return;
+  }
+
   stderr.write(
-    `\nReplace ${JSON.stringify(leaks[0]?.matchedText)} with a repo-relative or home-agnostic path before committing.\n`
+    `\nReplace ${JSON.stringify(matchedText)} with a repo-relative or home-agnostic path before committing.\n`
   );
 }
 
