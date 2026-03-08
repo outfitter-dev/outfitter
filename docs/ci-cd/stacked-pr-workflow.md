@@ -147,3 +147,54 @@ also pass.
   stack shares state; merging partial fixes creates hard-to-resolve conflicts.
 - **Do not skip `verify:stack` because "only types changed."** Type changes are
   the most common source of invisible schema drift.
+
+## Changeset Coverage in Stacked PRs (OS-492)
+
+Stacked branches can also fail CI on `tooling check-changeset` after a lower PR
+merges. The failure mode looks different from schema drift, but the cause is
+similar: the child PR's responsibility changed underneath it.
+
+The changeset guard now evaluates the **current PR diff**, not a hardcoded
+`origin/main...HEAD` range:
+
+- In GitHub `pull_request` CI, it reads the live `base.sha` and `head.sha` from
+  `GITHUB_EVENT_PATH` and diffs that exact commit range.
+- When Graphite merges the bottom of a stack and retargets descendants, the
+  next CI run sees the new base SHA automatically. The child PR is then judged
+  only on the delta it still owns.
+- Local and non-PR runs still fall back to `origin/main...HEAD`.
+
+Only release-relevant package files count toward changeset coverage:
+
+- runtime files under `packages/*/src/**`
+- not `src/__tests__/`
+- not `src/__snapshots__/`
+- not `*.test.*`
+- not `*.spec.*`
+
+This matters for stacked follow-up PRs that only add tests or regression
+coverage in a package after the releasable change already landed lower in the
+stack.
+
+### Fast Triage: Changeset Failure After a Lower PR Merges
+
+If a child PR turns red on `Packages missing changeset coverage`, check the
+actual PR diff first:
+
+```bash
+gh pr diff <pr-number> --name-only
+```
+
+Interpret the result in this order:
+
+1. If the diff is only tests, snapshots, or specs under `packages/*/src/**`,
+   the validator should ignore it. Treat any failure as a regression in
+   `tooling check-changeset`.
+2. If the diff still contains runtime package files, the PR still owns a
+   releasable delta and needs changeset coverage for the touched package.
+3. If the PR is intentionally non-releasable, confirm it qualifies for
+   `release:none` rather than forcing a placeholder changeset into the stack.
+
+Use this before adding emergency follow-up changesets. The right fix is usually
+to narrow the validator or adjust the current PR diff, not to paper over the
+stack with duplicate release notes.
