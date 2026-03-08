@@ -28,6 +28,17 @@ function readJsonFile(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf-8"));
 }
 
+/** Extract bare semver from a range string for comparison (e.g., `^1.2.3` -> `1.2.3`). */
+export function normalizeVersionRange(version: string): string {
+  const trimmed = version.trim();
+  const semverMatch = trimmed.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/);
+  if (semverMatch) {
+    return semverMatch[0];
+  }
+  return trimmed.replace(/^[\^~>=<]+/, "");
+}
+
+/** Normalize a dependency range for resolution (e.g., bare `1.2.3` -> `^1.2.3`). Returns undefined for empty/workspace values. */
 function normalizeRange(value: string): string | undefined {
   const trimmed = value.trim();
   if (trimmed.length === 0 || trimmed === "workspace:*") {
