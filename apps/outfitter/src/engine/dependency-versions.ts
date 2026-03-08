@@ -4,8 +4,9 @@ import { fileURLToPath } from "node:url";
 
 import { InternalError, Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
+import { isPlainObject } from "@outfitter/types";
 
-const DEPENDENCY_SECTIONS = [
+export const DEPENDENCY_SECTIONS = [
   "dependencies",
   "devDependencies",
   "peerDependencies",
@@ -25,10 +26,6 @@ export function clearResolvedVersionsCache(): void {
 
 function readJsonFile(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf-8"));
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeRange(value: string): string | undefined {
@@ -51,7 +48,7 @@ function findOutfitterPackageRoot(): Result<string, InternalError> {
       try {
         const parsed = readJsonFile(packageJsonPath);
         if (
-          isRecord(parsed) &&
+          isPlainObject(parsed) &&
           typeof parsed["name"] === "string" &&
           parsed["name"] === "outfitter"
         ) {
@@ -79,7 +76,7 @@ function collectOutfitterDepsFromPackageJson(
 
   for (const section of DEPENDENCY_SECTIONS) {
     const sectionValue = packageJson[section];
-    if (!isRecord(sectionValue)) {
+    if (!isPlainObject(sectionValue)) {
       continue;
     }
 
@@ -120,7 +117,7 @@ function collectWorkspacePackageRanges(
 
     try {
       const parsed = readJsonFile(packageJsonPath);
-      if (!isRecord(parsed)) {
+      if (!isPlainObject(parsed)) {
         continue;
       }
 
@@ -181,7 +178,7 @@ export function resolvePresetDependencyVersions(): Result<
       ? readJsonFile(packageJsonPath)
       : undefined;
     const fromOutfitterPackage =
-      raw !== undefined && isRecord(raw)
+      raw !== undefined && isPlainObject(raw)
         ? collectOutfitterDepsFromPackageJson(raw)
         : {};
     const fromWorkspacePackages = collectWorkspacePackageRanges(packageRoot);
@@ -215,7 +212,7 @@ export function applyResolvedDependencyVersions(
 
   for (const section of DEPENDENCY_SECTIONS) {
     const sectionValue = parsedPackageJson[section];
-    if (!isRecord(sectionValue)) {
+    if (!isPlainObject(sectionValue)) {
       continue;
     }
 

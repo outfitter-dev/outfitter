@@ -6,17 +6,11 @@ import { Result } from "@outfitter/contracts";
 import { SHARED_DEV_DEPS, SHARED_SCRIPTS } from "../commands/shared-deps.js";
 import {
   applyResolvedDependencyVersions,
+  DEPENDENCY_SECTIONS,
   resolvePresetDependencyVersions,
 } from "./dependency-versions.js";
 import { ScaffoldError } from "./types.js";
 import { getWorkspacePatterns } from "./workspace.js";
-
-const DEPENDENCY_SECTIONS = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
 
 function formatUnresolvedCatalogMessage(
   packageJsonPath: string,
