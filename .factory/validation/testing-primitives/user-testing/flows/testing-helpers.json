@@ -8,7 +8,7 @@
         "`cd packages/testing && bun test` passed (61 pass, 0 fail); includes `src/__tests__/test-command.test.ts` coverage for stdout/stderr/exitCode, success/error paths, global restoration, and no output leakage.",
         "Source inspection: `packages/testing/src/test-command.ts` returns `captureCLI(...)` (CliTestResult: stdout/stderr/exitCode) and restores temporary env overrides in `finally`.",
         "Source inspection: `packages/testing/src/cli-helpers.ts` intercepts `process.stdout.write`, `process.stderr.write`, `process.exit`, then restores all globals in `finally`.",
-        "`cd /Users/mg/Developer/outfitter/stack && bun run typecheck` passed (34 successful tasks, exit 0)."
+        "`cd . && bun run typecheck` passed (34 successful tasks, exit 0)."
       ],
       "issues": []
     },
@@ -19,12 +19,13 @@
         "`cd packages/testing && bun test` passed (61 pass, 0 fail); includes `src/__tests__/test-tool.test.ts` cases proving invalid input returns error without handler call and valid input invokes handler exactly once.",
         "Source inspection: `packages/testing/src/test-tool.ts` validates with `tool.inputSchema.safeParse(input)` before handler execution.",
         "Source inspection: validation failure returns `Result.err(new ValidationError(...))` and does not call handler; success path performs a single `return tool.handler(parseResult.data, ctx)` call.",
-        "`cd /Users/mg/Developer/outfitter/stack && bun run typecheck` passed (34 successful tasks, exit 0)."
+        "`cd . && bun run typecheck` passed (34 successful tasks, exit 0)."
       ],
       "issues": []
     }
   },
   "frictions": [],
   "blockers": [],
-  "toolsUsed": ["bun -e", "bun test", "rg", "Read", "bun run typecheck"]
+  "toolsUsed": ["bun -e", "bun test", "rg", "Read", "bun run typecheck"],
+  "commitId": "a43cac8e12dc55c0b3cf8ae49586692a70814a8b"
 }

@@ -2,8 +2,8 @@
   "groupId": "test-helpers",
   "testedAt": "2026-02-28T03:09:11.651037+00:00",
   "credentials": {
-    "account": "n/a (shell validation)",
-    "namespace": "n/a"
+    "account": "shell-local",
+    "namespace": "dx-migration-test-helpers"
   },
   "toolsUsed": [
     "shell",
@@ -19,7 +19,7 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/testing && bun test 2>&1",
+          "action": "Run package tests: cd packages/testing && bun test 2>&1",
           "expected": "Tests for enhanced testCommand() behavior pass, including input/context/envelope-hints behavior",
           "observed": "Pass. Output includes test-command-enhanced cases: input option, context option, envelope return, and 'returns envelope with hints from JSON output'."
         },
@@ -50,7 +50,7 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/testing && bun test 2>&1",
+          "action": "Run package tests: cd packages/testing && bun test 2>&1",
           "expected": "Tests covering schema validation, context injection, and hints support pass",
           "observed": "Pass. Output includes testTool() tests for invalid input/schema mismatch, context injection, custom context overrides, and hints support."
         },
@@ -80,5 +80,6 @@
   ],
   "frictions": [],
   "blockers": [],
-  "summary": "Tested 2 assertions (VAL-DX-002, VAL-DX-003): both passed. @outfitter/testing suite passed (86/86), and code inspection confirms schema/context/hints support in testCommand() and testTool()."
+  "summary": "Tested 2 assertions (VAL-DX-002, VAL-DX-003): both passed. @outfitter/testing suite passed (86/86), and code inspection confirms schema/context/hints support in testCommand() and testTool().",
+  "commitId": "e44cf2cb2e29f038fa3bda4647b16b13cf307a1f"
 }

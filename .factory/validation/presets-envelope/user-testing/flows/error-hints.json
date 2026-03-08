@@ -2,8 +2,8 @@
   "groupId": "error-hints",
   "testedAt": "2026-02-28T00:52:01Z",
   "credentials": {
-    "account": "not-applicable-shell",
-    "namespace": "presets-envelope/error-hints"
+    "account": "shell-local",
+    "namespace": "presets-envelope-error-hints"
   },
   "toolsUsed": ["shell"],
   "assertions": [
@@ -13,17 +13,17 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run focused enrichment tests: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test src/__tests__/error-enrichment.test.ts",
+          "action": "Run focused enrichment tests: cd packages/contracts && bun test src/__tests__/error-enrichment.test.ts",
           "expected": "jsonRpcCodeMap and retryableMap coverage passes; existing exit/status maps remain unchanged",
           "observed": "18 pass, 0 fail (includes jsonRpcCodeMap, retryableMap, errorCategoryMeta, and existing map preservation checks)"
         },
         {
-          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun test",
+          "action": "Run package tests: cd packages/contracts && bun test",
           "expected": "@outfitter/contracts test suite passes",
           "observed": "437 pass, 0 fail"
         },
         {
-          "action": "Verify exports/imports: cd /Users/mg/Developer/outfitter/stack/packages/contracts && bun -e \"const m = await import('./src/index.ts'); ...\"",
+          "action": "Verify exports/imports: cd packages/contracts && bun -e \"const m = await import('./src/index.ts'); ...\"",
           "expected": "jsonRpcCodeMap/retryableMap/exitCodeMap/statusCodeMap/errorCategoryMeta exported and populated for all 10 categories",
           "observed": "exportsPresent=true, categories=10, allHaveJsonRpc=true, allHaveRetryable=true; sampleValidation={exitCode:1,statusCode:400,jsonRpcCode:-32602,retryable:false}; sampleTimeout={exitCode:5,statusCode:504,jsonRpcCode:-32001,retryable:true}"
         },
@@ -49,7 +49,7 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run focused self-doc tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/self-doc.test.ts",
+          "action": "Run focused self-doc tests: cd packages/cli && bun test src/__tests__/self-doc.test.ts",
           "expected": "No-subcommand root output verified for JSON mode/piped mode and TTY help mode, including command descriptions/options",
           "observed": "9 pass, 0 fail (includes JSON tree output, schema-derived options, piped non-TTY JSON default, and TTY help text cases)"
         },
@@ -87,12 +87,12 @@
       "status": "pass",
       "steps": [
         {
-          "action": "Run focused hint-tier tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test src/__tests__/hint-tiers.test.ts",
+          "action": "Run focused hint-tier tests: cd packages/cli && bun test src/__tests__/hint-tiers.test.ts",
           "expected": "Tier 1 command tree introspection, Tier 2 error recovery mapping, Tier 3 schema-derived params all pass",
           "observed": "24 pass, 0 fail; output includes explicit Tier 1/2/3 test groups and assertions"
         },
         {
-          "action": "Run package tests: cd /Users/mg/Developer/outfitter/stack/packages/cli && bun test",
+          "action": "Run package tests: cd packages/cli && bun test",
           "expected": "No regressions in @outfitter/cli",
           "observed": "659 pass, 0 fail"
         },

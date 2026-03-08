@@ -20,7 +20,7 @@
     {
       "area": "skills",
       "observation": "The docs-worker skill procedure mandates `bun run check`, but mission-level AGENTS guidance marks `bun run check` as a known crashing command and instructs `bun run lint` + `bun run typecheck` instead. This creates a procedure mismatch in this mission context.",
-      "evidence": "/Users/mg/Developer/outfitter/stack/.factory/skills/docs-worker/SKILL.md:64-69, /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72, /Users/mg/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-19-52-071Z__os-326-register-tool-docs__92352a1d-6f19-42e3-96e4-451e0d918f0a.json:21,26"
+      "evidence": ".factory/skills/docs-worker/SKILL.md:64-69, ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/AGENTS.md:72, ~/.factory/missions/ae41b573-bba1-46f1-8355-b618b7b79237/handoffs/2026-02-27T20-19-52-071Z__os-326-register-tool-docs__92352a1d-6f19-42e3-96e4-451e0d918f0a.json:21,26"
     }
   ],
   "addressesFailureFrom": null,

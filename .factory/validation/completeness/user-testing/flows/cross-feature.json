@@ -2,7 +2,7 @@
   "groupId": "cross-feature",
   "testedAt": "2026-02-28T16:38:26Z",
   "credentials": {
-    "account": "not-applicable-shell",
+    "account": "shell-local",
     "namespace": "completeness-cross-feature"
   },
   "toolsUsed": ["shell", "bun test", "rg", "code inspection"],
