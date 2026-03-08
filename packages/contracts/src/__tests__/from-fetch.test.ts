@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { Result } from "better-result";
 
 import type { ErrorCategory, OutfitterError } from "../errors.js";
-import { RateLimitError } from "../errors.js";
+import { RateLimitError, statusCodeMap } from "../errors.js";
 import { fromFetch } from "../from-fetch.js";
 
 /**
@@ -46,15 +46,15 @@ describe("fromFetch", () => {
 
   describe("maps specific HTTP status codes to error categories", () => {
     const specificMappings: Array<[number, ErrorCategory]> = [
-      [401, "auth"],
-      [403, "permission"],
-      [404, "not_found"],
+      [statusCodeMap.auth, "auth"],
+      [statusCodeMap.permission, "permission"],
+      [statusCodeMap.not_found, "not_found"],
       [408, "timeout"],
-      [409, "conflict"],
-      [429, "rate_limit"],
-      [502, "network"],
+      [statusCodeMap.conflict, "conflict"],
+      [statusCodeMap.rate_limit, "rate_limit"],
+      [statusCodeMap.network, "network"],
       [503, "network"],
-      [504, "timeout"],
+      [statusCodeMap.timeout, "timeout"],
     ];
 
     for (const [status, expectedCategory] of specificMappings) {
@@ -71,7 +71,7 @@ describe("fromFetch", () => {
   describe("rate limit metadata", () => {
     test("maps Retry-After header (delta-seconds) into retryAfterSeconds", () => {
       const response = new Response(null, {
-        status: 429,
+        status: statusCodeMap.rate_limit,
         statusText: "Too Many Requests",
         headers: {
           "Retry-After": "120",
@@ -86,7 +86,7 @@ describe("fromFetch", () => {
 
     test("ignores invalid Retry-After header values", () => {
       const response = new Response(null, {
-        status: 429,
+        status: statusCodeMap.rate_limit,
         statusText: "Too Many Requests",
         headers: {
           "Retry-After": "definitely-not-a-number",
