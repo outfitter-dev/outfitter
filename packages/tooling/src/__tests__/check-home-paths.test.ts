@@ -421,6 +421,9 @@ describe("runCheckHomePaths", () => {
         "Unreadable files while scanning for hardcoded home paths:"
       );
       expect(stderr).toContain(
+        `  ${blockedFiles[1]}: EACCES: permission denied\n\nFix file permissions or remove the unreadable files before committing.`
+      );
+      expect(stderr).toContain(
         "Fix file permissions or remove the unreadable files before committing."
       );
     } finally {
