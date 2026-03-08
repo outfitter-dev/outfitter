@@ -55,8 +55,11 @@ function isErrorCategory(value: string): value is ErrorCategory {
 
 /**
  * Extract a human-readable message from an unknown error value.
+ *
+ * Handles Error instances, plain strings, objects with a `message` property,
+ * and falls back to `"Unknown error"` for everything else.
  */
-function extractMessage(error: unknown): string {
+export function extractMessage(error: unknown): string {
   if (typeof error === "string") {
     return error || "Unknown error";
   }
