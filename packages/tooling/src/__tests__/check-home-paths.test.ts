@@ -380,6 +380,9 @@ describe("runCheckHomePaths", () => {
 
       expect(capturedExitCode).toBe(1);
       expect(stderr).toContain(
+        "Unreadable files while scanning for hardcoded home paths:"
+      );
+      expect(stderr).toContain(
         "Fix file permissions or remove the unreadable files before committing."
       );
     } finally {

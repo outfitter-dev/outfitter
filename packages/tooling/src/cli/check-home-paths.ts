@@ -37,11 +37,10 @@ function writeLeakSummary(
 
 function writeReplacementHint(
   stderr: Pick<typeof process.stderr, "write">,
-  leaks: readonly FileHomePathLeak[],
-  fallbackPath: string
+  leaks: readonly FileHomePathLeak[]
 ): void {
   stderr.write(
-    `\nReplace ${JSON.stringify(leaks[0]?.matchedText ?? fallbackPath)} with a repo-relative or home-agnostic path before committing.\n`
+    `\nReplace ${JSON.stringify(leaks[0]?.matchedText)} with a repo-relative or home-agnostic path before committing.\n`
   );
 }
 
@@ -159,7 +158,6 @@ export function runCheckHomePaths(
     ((code: number) => {
       process.exitCode = code;
     });
-  const configuredHomeDir = options.scanOptions?.homeDir ?? homedir();
   const { failures, leaks } = scanFilesForHardcodedHomePaths(
     paths,
     options.scanOptions
@@ -176,7 +174,7 @@ export function runCheckHomePaths(
     if (leaks.length > 0) {
       stderr.write("\n");
       writeLeakSummary(stderr, leaks);
-      writeReplacementHint(stderr, leaks, configuredHomeDir);
+      writeReplacementHint(stderr, leaks);
       stderr.write("\n");
     }
 
@@ -193,6 +191,6 @@ export function runCheckHomePaths(
   }
 
   writeLeakSummary(stderr, leaks);
-  writeReplacementHint(stderr, leaks, configuredHomeDir);
+  writeReplacementHint(stderr, leaks);
   setExitCode(1);
 }
