@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Environment schemas and helpers stay together to keep env parsing discoverable. */
 /**
  * Centralized environment variable access with Zod validation.
  *

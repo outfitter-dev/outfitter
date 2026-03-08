@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Sentinel replacement and package-table generation form one narrow docs utility. */
 /**
  * Sentinel-wrapped section generator for markdown files.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Truncation policy and pagination hints stay together to preserve output semantics. */
 /**
  * Output truncation with pagination hints and file pointers.
  *

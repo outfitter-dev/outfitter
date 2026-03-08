@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Cursor and store contracts are intentionally co-located for discoverability. */
 /**
  * Type definitions for pagination cursor persistence and state management.
  *

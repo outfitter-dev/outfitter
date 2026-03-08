@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Config loading keeps file discovery, merge order, and validation in one cohesive module. */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 

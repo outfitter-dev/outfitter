@@ -116,12 +116,7 @@ export function toEnvelope<T, E extends OutfitterError>(
 
   return {
     ok: false,
-    // eslint-disable-next-line outfitter/no-process-env-in-packages -- boundary: production detection for stack-trace stripping
-    error: serializeError(
-      result.error,
-      undefined,
-      process.env["NODE_ENV"] === "production"
-    ),
+    error: serializeError(result.error),
     meta: envelopeMeta,
   };
 }

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Query-mode presets stay together so shared CLI query behavior remains consistent. */
 /**
  * Queryability conventions for CLI commands.
  *

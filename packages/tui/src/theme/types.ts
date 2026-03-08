@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Theme contracts remain centralized so visual configuration stays discoverable. */
 /**
  * Visual Theme System types.
  *

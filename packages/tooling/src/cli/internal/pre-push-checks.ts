@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Pre-push check helpers remain grouped so hook behavior is easier to audit. */
 /**
  * Individual check functions and helpers for pre-push verification.
  *

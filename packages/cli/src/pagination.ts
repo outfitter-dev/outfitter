@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Pagination helpers remain grouped to keep cursor and output behavior aligned. */
 /**
  * Pagination state persistence utilities.
  *

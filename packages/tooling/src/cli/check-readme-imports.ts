@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- README import validation stays grouped so export-surface checks remain traceable. */
 /**
  * Check-readme-imports command — validates README import examples against package.json exports.
  *

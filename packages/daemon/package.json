@@ -78,7 +78,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd ../.. && bunup --filter @outfitter/daemon",
+    "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter @outfitter/daemon",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint --fix ./src",
     "test": "bun test",

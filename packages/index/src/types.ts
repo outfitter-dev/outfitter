@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Index contracts remain centralized so query and document shapes stay coherent. */
 /**
  * @outfitter/index - Type Definitions
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Indicator rendering rules stay together so state-to-symbol behavior remains coherent. */
 /**
  * Indicator primitives for CLI output.
  *

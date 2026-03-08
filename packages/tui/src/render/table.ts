@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Table rendering stays together so measurement and cell formatting remain coherent. */
 /**
  * Table rendering utilities.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Envelope hint and metadata helpers are easier to audit together. */
 /**
  * Envelope construction and internal helper functions.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Public contracts barrel; splitting fragments the import surface. */
 /**
  * @outfitter/contracts
  *

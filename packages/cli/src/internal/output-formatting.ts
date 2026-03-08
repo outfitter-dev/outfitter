@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Output formatting rules stay together to keep transport rendering behavior predictable. */
 /**
  * Output formatting utilities for CLI commands.
  *

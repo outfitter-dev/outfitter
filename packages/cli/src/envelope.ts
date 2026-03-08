@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Envelope orchestration keeps output contracts and rendering flow in one module. */
 /**
  * Response envelope and handler lifecycle bridge for CLI commands.
  *

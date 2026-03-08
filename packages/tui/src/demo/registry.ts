@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Demo metadata stays centralized so renderer registration remains discoverable. */
 /**
  * Type-safe demo registry.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- AST guards and Handler return-type checks are easier to audit together. */
 import {
   asIdentifierName,
   type RuleContext,

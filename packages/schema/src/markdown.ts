@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Markdown rendering intentionally keeps the full manifest-to-doc pipeline in one formatter. */
 /**
  * Markdown documentation generation from action manifests.
  *

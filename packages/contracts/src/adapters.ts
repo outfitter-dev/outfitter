@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Types-only public adapter contracts; splitting interfaces hurts discoverability. */
 import type { Result } from "better-result";
 
 /**

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Pre-push orchestration stays together so repo guardrails remain readable end to end. */
 /**
  * TDD-aware pre-push verification command
  *

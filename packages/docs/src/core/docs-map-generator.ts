@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Docs map generate/read/write logic is a cohesive manifest module. */
 /**
  * Docs map generator.
  *

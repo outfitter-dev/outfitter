@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Demo registry and rendering entry points stay together for self-documenting examples. */
 /**
  * Self-documenting demo system for CLI primitives.
  *

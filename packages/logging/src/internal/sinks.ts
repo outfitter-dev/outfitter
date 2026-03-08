@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Sink factories and formatters are intentionally grouped so logging outputs are easier to trace. */
 import { registeredSinks } from "./bridge.js";
 import type {
   ConsoleSinkOptions,

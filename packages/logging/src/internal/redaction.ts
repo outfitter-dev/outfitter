@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Redaction patterns and metadata traversal remain co-located to keep secret handling auditable. */
 import type { GlobalRedactionConfig, RedactionConfig } from "./types.js";
 
 // ============================================================================

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Layout primitives stay together so wrapping and alignment rules remain consistent. */
 /**
  * Layout utilities for arranging text blocks.
  *

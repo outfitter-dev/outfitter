@@ -76,7 +76,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd ../.. && bunup --filter @outfitter/types",
+    "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter @outfitter/types",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",

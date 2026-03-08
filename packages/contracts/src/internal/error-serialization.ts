@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Error serialization registry and context mapping must stay aligned in one module. */
 /**
  * Error serialization and deserialization for transport across process
  * boundaries (MCP, IPC, HTTP).

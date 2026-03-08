@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Health checks keep probe logic and reporting together for daemon observability. */
 /**
  * Health check utilities for daemon processes.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Border presets remain grouped so box rendering behavior is easy to audit. */
 /**
  * Box-drawing border utilities.
  *

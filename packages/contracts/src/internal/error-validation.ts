@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Validation error catalog and helpers are maintained as one taxonomy unit. */
 /**
  * Validation and resource error classes.
  *

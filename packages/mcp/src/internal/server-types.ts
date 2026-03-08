@@ -1,3 +1,4 @@
+/* eslint-disable outfitter/max-file-lines -- Server type contracts stay centralized so handler and transport shapes remain aligned. */
 /**
  * Server-related type definitions for MCP servers.
  *
