@@ -166,7 +166,9 @@ export function runCheckHomePaths(
   );
   if (failures.length > 0) {
     const unreadableTarget = failures.length === 1 ? "file" : "files";
-    stderr.write("Unreadable files while scanning for hardcoded home paths:\n");
+    stderr.write(
+      `Unreadable ${unreadableTarget} while scanning for hardcoded home paths:\n`
+    );
     for (const failure of failures) {
       stderr.write(`  ${failure.filePath}: ${failure.reason}\n`);
     }

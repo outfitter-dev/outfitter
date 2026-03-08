@@ -332,7 +332,7 @@ describe("runCheckHomePaths", () => {
 
       expect(capturedExitCode).toBe(1);
       expect(stderr).toContain(
-        "Unreadable files while scanning for hardcoded home paths:"
+        "Unreadable file while scanning for hardcoded home paths:"
       );
       expect(stderr).toContain(`  ${blockedFile}: EACCES: permission denied`);
       expect(stderr).toContain("Hardcoded home directory paths detected:");
