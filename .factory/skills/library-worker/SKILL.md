@@ -101,11 +101,13 @@ In non-interactive worker/exec mode, create the changeset file directly instead 
 
 ```md
 ---
-"@outfitter/<pkg>": patch
+"@outfitter/<pkg>": <bump-level>
 ---
 
 Describe the user-visible runtime or API change in one sentence.
 ```
+
+Use `patch` for bug fixes, `minor` for new features, and `major` for breaking changes so the non-interactive flow matches the interactive prompt.
 
 Save it as `.changeset/<short-kebab-summary>.md`, then validate the file with:
 
