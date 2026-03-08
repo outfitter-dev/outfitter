@@ -6,7 +6,7 @@ import { extractMessage, InternalError, Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
 import { isPlainObject } from "@outfitter/types";
 
-const OUTFITTER_PACKAGE_NAME = "outfitter" as const;
+const OUTFITTER_PACKAGE_NAME = "outfitter";
 
 export const DEPENDENCY_SECTIONS = [
   "dependencies",

@@ -202,7 +202,7 @@ function validateBunVersionConsistency(
     parsedRootPackage = JSON.parse(readFileSync(rootPackagePath, "utf-8"));
   } catch (error) {
     problems.push(
-      `Root package.json not found or unreadable: ${extractMessage(error)}`
+      `Root package.json could not be read or parsed: ${extractMessage(error)}`
     );
     return;
   }
