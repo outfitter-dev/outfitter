@@ -6,7 +6,10 @@ import { getResolvedVersions } from "@outfitter/presets";
 import { isTypesBunVersionCompatible } from "@outfitter/tooling";
 import { isPlainObject } from "@outfitter/types";
 
-import { DEPENDENCY_SECTIONS } from "../engine/dependency-versions.js";
+import {
+  DEPENDENCY_SECTIONS,
+  normalizeVersionRange,
+} from "../engine/dependency-versions.js";
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
@@ -31,15 +34,6 @@ export class CheckPresetVersionsError extends Error {
     super(message);
     this.name = "CheckPresetVersionsError";
   }
-}
-
-function normalizeVersionRange(version: string): string {
-  const trimmed = version.trim();
-  const semverMatch = trimmed.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/);
-  if (semverMatch) {
-    return semverMatch[0];
-  }
-  return trimmed.replace(/^[\^~>=<]+/, "");
 }
 
 export function validatePresetDeps(
