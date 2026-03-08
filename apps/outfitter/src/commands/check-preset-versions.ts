@@ -4,16 +4,12 @@ import { join, resolve } from "node:path";
 import { Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
 import { isTypesBunVersionCompatible } from "@outfitter/tooling";
+import { isPlainObject } from "@outfitter/types";
 
+import { DEPENDENCY_SECTIONS } from "../engine/dependency-versions.js";
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
-const DEPENDENCY_SECTIONS = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
 export const EXTERNAL_TEMPLATE_VERSION = "catalog:";
 
 type DependencySection = (typeof DEPENDENCY_SECTIONS)[number];
@@ -35,10 +31,6 @@ export class CheckPresetVersionsError extends Error {
     super(message);
     this.name = "CheckPresetVersionsError";
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeVersionRange(version: string): string {
@@ -73,13 +65,13 @@ export function validatePresetDeps(
     const parsed: unknown = JSON.parse(
       readFileSync(absoluteTemplatePath, "utf-8")
     );
-    if (!isRecord(parsed)) {
+    if (!isPlainObject(parsed)) {
       continue;
     }
 
     for (const section of DEPENDENCY_SECTIONS) {
       const deps = parsed[section];
-      if (!isRecord(deps)) {
+      if (!isPlainObject(deps)) {
         continue;
       }
 
@@ -135,14 +127,14 @@ function validateRegistryVersions(
     return;
   }
 
-  if (!isRecord(registry)) {
+  if (!isPlainObject(registry)) {
     problems.push(
       `Registry has invalid shape (expected object): ${registryPath}`
     );
     return;
   }
 
-  if (!isRecord(registry["blocks"])) {
+  if (!isPlainObject(registry["blocks"])) {
     problems.push(
       `Registry has invalid shape (missing object "blocks" field): ${registryPath}`
     );
@@ -150,12 +142,12 @@ function validateRegistryVersions(
   }
 
   for (const [blockName, block] of Object.entries(registry["blocks"])) {
-    if (!isRecord(block)) {
+    if (!isPlainObject(block)) {
       continue;
     }
 
     const devDeps = block["devDependencies"];
-    if (!isRecord(devDeps)) {
+    if (!isPlainObject(devDeps)) {
       continue;
     }
 
@@ -187,7 +179,7 @@ function readDependencyVersion(
   name: string
 ): string | undefined {
   const container = packageJson[section];
-  if (!isRecord(container)) {
+  if (!isPlainObject(container)) {
     return undefined;
   }
 
@@ -206,12 +198,12 @@ function validateBunVersionConsistency(
   const parsedRootPackage = JSON.parse(
     readFileSync(rootPackagePath, "utf-8")
   ) as unknown;
-  if (!isRecord(parsedRootPackage)) {
+  if (!isPlainObject(parsedRootPackage)) {
     return;
   }
 
   const engines = parsedRootPackage["engines"];
-  if (isRecord(engines) && typeof engines["bun"] === "string") {
+  if (isPlainObject(engines) && typeof engines["bun"] === "string") {
     const engineBun = normalizeVersionRange(engines["bun"]);
     if (engineBun !== bunVersionFile) {
       problems.push(
@@ -232,7 +224,7 @@ function validateBunVersionConsistency(
 
   let bunTypesVersion: string | undefined;
   const catalog = parsedRootPackage["catalog"];
-  if (isRecord(catalog) && typeof catalog["@types/bun"] === "string") {
+  if (isPlainObject(catalog) && typeof catalog["@types/bun"] === "string") {
     bunTypesVersion = catalog["@types/bun"];
   }
 
