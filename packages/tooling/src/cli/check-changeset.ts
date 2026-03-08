@@ -1,6 +1,6 @@
 /* eslint-disable outfitter/max-file-lines -- Changeset validation keeps repo scanning and package coverage logic together for auditability. */
 /**
- * Check-changeset command — validates PRs touching package source include a changeset.
+ * Check-changeset command — validates release-relevant package deltas include a changeset.
  *
  * Pure core functions for detecting changed packages and verifying changeset
  * presence. The CLI runner in {@link runCheckChangeset} handles git discovery
@@ -37,6 +37,13 @@ interface AnalyzedChangesetReferences {
   readonly ignoredReferences: string[];
 }
 
+export interface GitDiffRange {
+  readonly base: string;
+  readonly head: string;
+  readonly label: string;
+  readonly source: "pull_request" | "default";
+}
+
 function toWorkspacePackageName(packageName: string): string {
   return packageName.startsWith("@outfitter/")
     ? packageName
@@ -60,19 +67,20 @@ export function getReleasableChangedPackages(
 /**
  * Extract unique package names from changed file paths.
  *
- * Only considers files matching the pattern "packages/NAME/src/..." and
- * ignores apps/, root files, and package-level config.
+ * Only considers release-relevant files matching the pattern
+ * "packages/NAME/src/...". Test-only sources are ignored so stacked follow-up
+ * PRs do not need changesets for coverage-only edits.
  *
  * @param files - List of changed file paths relative to repo root
  * @returns Sorted array of unique package names
  */
 export function getChangedPackagePaths(files: string[]): string[] {
   const packageNames = new Set<string>();
-  const pattern = /^packages\/([^/]+)\/src\//;
+  const pattern = /^packages\/([^/]+)\/src\/(.+)$/;
 
   for (const file of files) {
     const match = pattern.exec(file);
-    if (match?.[1]) {
+    if (match?.[1] && match[2] && isReleaseRelevantSourcePath(match[2])) {
       packageNames.add(match[1]);
     }
   }
@@ -174,6 +182,71 @@ export function parseChangesetFrontmatterPackageNames(
   }
 
   return [...packages].toSorted();
+}
+
+function isReleaseRelevantSourcePath(relativePath: string): boolean {
+  if (/(^|\/)__tests__\//.test(relativePath)) {
+    return false;
+  }
+
+  if (/(^|\/)__snapshots__\//.test(relativePath)) {
+    return false;
+  }
+
+  if (/\.(test|spec)\.[^/]+$/.test(relativePath)) {
+    return false;
+  }
+
+  return true;
+}
+
+function getDefaultGitDiffRange(): GitDiffRange {
+  return {
+    base: "origin/main",
+    head: "HEAD",
+    label: "origin/main...HEAD",
+    source: "default",
+  };
+}
+
+export function resolveGitDiffRange(input: {
+  readonly eventName?: string | undefined;
+  readonly eventPath?: string | undefined;
+  readonly readEventFile?: ((path: string) => string) | undefined;
+}): GitDiffRange {
+  if (input.eventName !== "pull_request" || !input.eventPath) {
+    return getDefaultGitDiffRange();
+  }
+
+  const readEventFile =
+    input.readEventFile ?? ((path: string) => readFileSync(path, "utf-8"));
+
+  try {
+    const payload = JSON.parse(readEventFile(input.eventPath)) as {
+      pull_request?: {
+        base?: { ref?: string; sha?: string };
+        head?: { ref?: string; sha?: string };
+      };
+    };
+
+    const baseRef = payload.pull_request?.base?.ref;
+    const baseSha = payload.pull_request?.base?.sha;
+    const headRef = payload.pull_request?.head?.ref;
+    const headSha = payload.pull_request?.head?.sha;
+
+    if (!baseSha || !headSha) {
+      return getDefaultGitDiffRange();
+    }
+
+    return {
+      base: baseSha,
+      head: headSha,
+      label: `${baseRef ?? "base"} (${baseSha})...${headRef ?? "head"} (${headSha})`,
+      source: "pull_request",
+    };
+  } catch {
+    return getDefaultGitDiffRange();
+  }
 }
 
 function analyzeChangesetReferences(
@@ -332,10 +405,17 @@ export async function runCheckChangeset(
 
   // Get changed files from git using array-based spawn (safe from injection)
   const cwd = process.cwd();
+  const diffRange = resolveGitDiffRange({
+    // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
+    eventName: process.env["GITHUB_EVENT_NAME"],
+    // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
+    eventPath: process.env["GITHUB_EVENT_PATH"],
+    readEventFile: (path) => readFileSync(path, "utf-8"),
+  });
   let changedFiles: string[];
   try {
     const proc = Bun.spawnSync(
-      ["git", "diff", "--name-only", "origin/main...HEAD"],
+      ["git", "diff", "--name-only", `${diffRange.base}...${diffRange.head}`],
       { cwd }
     );
     if (proc.exitCode !== 0) {
@@ -352,6 +432,13 @@ export async function runCheckChangeset(
     // Git not available or other error -- pass silently
     process.exitCode = 0;
     return;
+  }
+
+  // oxlint-disable-next-line outfitter/no-process-env-in-packages -- boundary: CLI script reads env at startup
+  if (process.env["GITHUB_EVENT_NAME"]) {
+    process.stdout.write(
+      `${COLORS.dim}check-changeset diff basis: ${diffRange.label}${COLORS.reset}\n`
+    );
   }
 
   const changedPackages = getChangedPackagePaths(changedFiles);

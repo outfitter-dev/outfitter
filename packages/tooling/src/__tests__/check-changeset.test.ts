@@ -8,6 +8,7 @@ import {
   getReleasableChangedPackages,
   parseChangesetFrontmatterPackageNames,
   parseIgnoredPackagesFromChangesetConfig,
+  resolveGitDiffRange,
 } from "../cli/check-changeset.js";
 
 describe("getChangedPackagePaths", () => {
@@ -58,6 +59,26 @@ describe("getChangedPackagePaths", () => {
   test("handles deeply nested src paths", () => {
     const files = ["packages/daemon/src/ipc/health/check.ts"];
     expect(getChangedPackagePaths(files)).toEqual(["daemon"]);
+  });
+
+  test("ignores test-only package files under src", () => {
+    const files = [
+      "packages/tooling/src/__tests__/check-exports.test.ts",
+      "packages/tooling/src/check-exports.test.ts",
+      "packages/tooling/src/check-exports.spec.ts",
+      "packages/tooling/src/__snapshots__/check-exports.test.ts.snap",
+    ];
+
+    expect(getChangedPackagePaths(files)).toEqual([]);
+  });
+
+  test("still counts package changes when runtime files change alongside tests", () => {
+    const files = [
+      "packages/tooling/src/__tests__/check-exports.test.ts",
+      "packages/tooling/src/cli/check-changeset.ts",
+    ];
+
+    expect(getChangedPackagePaths(files)).toEqual(["tooling"]);
   });
 });
 
@@ -299,5 +320,71 @@ describe("findIgnoredPackageReferences", () => {
     expect(references).toEqual([
       { file: "exists.md", packages: ["@outfitter/agents"] },
     ]);
+  });
+});
+
+describe("resolveGitDiffRange", () => {
+  test("uses the current pull request base/head SHAs from the GitHub event payload", () => {
+    const result = resolveGitDiffRange({
+      eventName: "pull_request",
+      eventPath: "/tmp/github-event.json",
+      readEventFile: () =>
+        JSON.stringify({
+          pull_request: {
+            base: {
+              ref: "main",
+              sha: "1111111111111111111111111111111111111111",
+            },
+            head: {
+              ref: "os-492-make-check-changeset-pr-base-aware-and-ignore-test-only",
+              sha: "2222222222222222222222222222222222222222",
+            },
+          },
+        }),
+    });
+
+    expect(result).toEqual({
+      base: "1111111111111111111111111111111111111111",
+      head: "2222222222222222222222222222222222222222",
+      label:
+        "main (1111111111111111111111111111111111111111)...os-492-make-check-changeset-pr-base-aware-and-ignore-test-only (2222222222222222222222222222222222222222)",
+      source: "pull_request",
+    });
+  });
+
+  test("falls back to origin/main...HEAD when the event is not a pull request", () => {
+    expect(
+      resolveGitDiffRange({
+        eventName: "push",
+        eventPath: "/tmp/github-event.json",
+        readEventFile: () => "",
+      })
+    ).toEqual({
+      base: "origin/main",
+      head: "HEAD",
+      label: "origin/main...HEAD",
+      source: "default",
+    });
+  });
+
+  test("falls back to origin/main...HEAD when the pull request payload is missing SHAs", () => {
+    expect(
+      resolveGitDiffRange({
+        eventName: "pull_request",
+        eventPath: "/tmp/github-event.json",
+        readEventFile: () =>
+          JSON.stringify({
+            pull_request: {
+              base: { ref: "main" },
+              head: { ref: "feature" },
+            },
+          }),
+      })
+    ).toEqual({
+      base: "origin/main",
+      head: "HEAD",
+      label: "origin/main...HEAD",
+      source: "default",
+    });
   });
 });

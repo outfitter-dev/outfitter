@@ -112,7 +112,15 @@ bunx @outfitter/tooling check-bunup-registry
 
 ### `tooling check-changeset`
 
-Validate that PRs touching package source include a changeset.
+Validate that release-relevant package changes in the current PR diff include a
+changeset.
+
+- In GitHub `pull_request` CI, the command diffs against the PR's current
+  `base.sha...head.sha` from the event payload. This keeps stacked PRs valid
+  after lower branches merge and Graphite retargets descendants.
+- Outside `pull_request` CI, it falls back to `origin/main...HEAD`.
+- Test-only package files are ignored: `src/__tests__/`, `src/__snapshots__/`,
+  `*.test.*`, and `*.spec.*`.
 
 ```bash
 bunx @outfitter/tooling check-changeset
