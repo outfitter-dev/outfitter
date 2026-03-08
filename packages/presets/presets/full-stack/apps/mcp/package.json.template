@@ -29,7 +29,7 @@
 		"{{packageName}}-core": "workspace:*",
 		"@outfitter/contracts": "workspace:*",
 		"@outfitter/mcp": "workspace:*",
-		"zod": "^4.3.5"
+		"zod": "catalog:"
 	},
 	"devDependencies": {},
 	"license": "MIT"

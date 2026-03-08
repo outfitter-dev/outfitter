@@ -12,12 +12,10 @@ import { fileURLToPath } from "node:url";
 
 import { getResolvedVersions } from "@outfitter/presets";
 
-import { validatePresetDeps } from "../commands/check-preset-versions.js";
-
-function stripRangePrefix(version: string): string {
-  return version.replace(/^[\^~>=<]+/, "");
-}
-
+import {
+  EXTERNAL_TEMPLATE_VERSION,
+  validatePresetDeps,
+} from "../commands/check-preset-versions.js";
 const DEPENDENCY_SECTIONS = [
   "dependencies",
   "devDependencies",
@@ -66,14 +64,29 @@ describe("preset dependency policy", () => {
           )) {
             if (name.startsWith("@outfitter/")) {
               expect(value).toBe("workspace:*");
+              continue;
+            }
+
+            if (
+              typeof value !== "string" ||
+              name.includes("{{") ||
+              value.startsWith("workspace:")
+            ) {
+              continue;
             }
 
             const expectedExternal = resolvedVersions[name];
-            if (expectedExternal && typeof value === "string") {
-              expect(stripRangePrefix(value as string)).toBe(
-                stripRangePrefix(expectedExternal)
+            if (expectedExternal) {
+              expect(value).toBe(EXTERNAL_TEMPLATE_VERSION);
+              expect(expectedExternal).toMatch(
+                /^(\^|~|>=|>|<=|<)?\d+\.\d+\.\d+/
               );
+              continue;
             }
+
+            expect.fail(
+              `${presetPath}: "${name}" is not declared in the presets catalog`
+            );
           }
         }
       }
@@ -134,6 +147,52 @@ describe("preset dependency policy", () => {
       expect(problems).toEqual([
         "Canonical presets root not found: packages/presets/presets",
       ]);
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("check-preset-versions rejects hardcoded external semver pins in canonical templates", () => {
+    const { all: resolvedVersions } = getResolvedVersions();
+    const sdkVersion = resolvedVersions["@modelcontextprotocol/sdk"];
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-presets-"));
+    const presetRoot = join(
+      workspaceRoot,
+      "packages",
+      "presets",
+      "presets",
+      "mcp"
+    );
+
+    try {
+      expect(
+        sdkVersion,
+        "@modelcontextprotocol/sdk must be present in the catalog for this test to be meaningful"
+      ).toBeDefined();
+      if (!sdkVersion) {
+        throw new Error(
+          "@modelcontextprotocol/sdk must be present in the catalog for this test to be meaningful"
+        );
+      }
+
+      mkdirSync(presetRoot, { recursive: true });
+      writeFileSync(
+        join(presetRoot, "package.json.template"),
+        JSON.stringify({
+          dependencies: {
+            "@modelcontextprotocol/sdk": sdkVersion,
+          },
+        })
+      );
+
+      const problems: string[] = [];
+      validatePresetDeps(workspaceRoot, resolvedVersions, problems);
+
+      expect(problems).toContain(
+        "packages/presets/presets/mcp/package.json.template: @modelcontextprotocol/sdk must use catalog: (found " +
+          sdkVersion +
+          ")"
+      );
     } finally {
       rmSync(workspaceRoot, { recursive: true, force: true });
     }
