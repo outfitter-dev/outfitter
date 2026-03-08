@@ -93,6 +93,23 @@ describe("findHomePathLeaks", () => {
       },
     ]);
   });
+
+  test("throws TypeError when RegExp lacks the global flag", () => {
+    expect(() => findHomePathLeaks("some content", /\/Users\/mg/)).toThrow(
+      TypeError
+    );
+  });
+
+  test("accepts a RegExp with the global flag", () => {
+    expect(findHomePathLeaks("path /Users/mg/dev", /\/Users\/mg/g)).toEqual([
+      {
+        line: 1,
+        column: 6,
+        matchedText: "/Users/mg",
+        lineText: "path /Users/mg/dev",
+      },
+    ]);
+  });
 });
 
 describe("scanFilesForHardcodedHomePaths", () => {
@@ -195,6 +212,7 @@ describe("scanFilesForHardcodedHomePaths", () => {
   });
 });
 
+// Synchronous-only — async callbacks would tear down workspaceRoot before resolving.
 function withHomePathTestContext(
   fn: (ctx: {
     workspaceRoot: string;

@@ -35,7 +35,9 @@ function writeLeakSummary(
   }
 }
 
-// All leaks share the same `matchedText` because a single `homePath` drives the scan.
+// Uses leaks[0].matchedText as a representative example for the replacement hint.
+// For Windows paths the regex tolerates variable backslash counts, so matched text
+// may differ across leaks, but the first match is good enough for the hint.
 function writeReplacementHint(
   stderr: Pick<typeof process.stderr, "write">,
   leaks: readonly FileHomePathLeak[]
@@ -73,10 +75,17 @@ export function findHomePathLeaks(
   content: string,
   homePathOrPattern: string | RegExp
 ): HomePathLeak[] {
-  const pattern =
-    homePathOrPattern instanceof RegExp
-      ? homePathOrPattern
-      : buildHomePathPattern(homePathOrPattern);
+  let pattern: RegExp | undefined;
+  if (homePathOrPattern instanceof RegExp) {
+    if (!homePathOrPattern.flags.includes("g")) {
+      throw new TypeError(
+        "findHomePathLeaks: RegExp must have the global (g) flag set"
+      );
+    }
+    pattern = homePathOrPattern;
+  } else {
+    pattern = buildHomePathPattern(homePathOrPattern);
+  }
   if (!pattern) {
     return [];
   }
