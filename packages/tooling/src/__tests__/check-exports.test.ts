@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   type CheckResult,
@@ -7,6 +9,12 @@ import {
   entryToSubpath,
   resolveJsonMode,
 } from "../cli/check-exports.js";
+import {
+  computeExpectedExports,
+  type WorkspaceEntry,
+} from "../cli/internal/exports-fs.js";
+
+const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 
 describe("entryToSubpath", () => {
   test("maps root index.ts to '.'", () => {
@@ -248,5 +256,36 @@ describe("resolveJsonMode", () => {
     process.env["OUTFITTER_JSON"] = "0";
     expect(resolveJsonMode()).toBe(false);
     delete process.env["OUTFITTER_JSON"];
+  });
+});
+
+describe("computeExpectedExports", () => {
+  test("does not include excluded internal docs subpaths", async () => {
+    const configModule = await import(
+      fileURLToPath(new URL("../../../../bunup.config.ts", import.meta.url))
+    );
+    const workspaces = configModule.default as WorkspaceEntry[];
+    const docsWorkspace = workspaces.find(
+      (workspace) => workspace.name === "@outfitter/docs"
+    );
+
+    if (!docsWorkspace) {
+      throw new Error("Expected @outfitter/docs workspace in bunup config");
+    }
+
+    const packageRoot = resolve(repoRoot, docsWorkspace.root);
+    const pkg = (await Bun.file(
+      resolve(packageRoot, "package.json")
+    ).json()) as {
+      files?: string[];
+    };
+    const expected = computeExpectedExports(packageRoot, docsWorkspace, pkg);
+
+    expect(Object.keys(expected).length).toBeGreaterThan(1);
+    expect(
+      Object.keys(expected).some(
+        (key) => key === "./core/internal" || key.startsWith("./core/internal/")
+      )
+    ).toBe(false);
   });
 });
