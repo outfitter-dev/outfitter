@@ -176,6 +176,8 @@ export function runCheckHomePaths(
       writeLeakSummary(stderr, leaks);
       writeReplacementHint(stderr, leaks);
       stderr.write("\n");
+    } else {
+      stderr.write("\n");
     }
 
     stderr.write(

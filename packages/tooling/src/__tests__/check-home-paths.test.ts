@@ -347,6 +347,44 @@ describe("runCheckHomePaths", () => {
     }
   });
 
+  test("separates failures-only guidance with a blank line", () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
+    const blockedFile = join(workspaceRoot, "blocked.txt");
+    let capturedExitCode: number | undefined;
+    let stderr = "";
+
+    try {
+      writeFileSync(blockedFile, "placeholder");
+
+      const captureStderr = ((chunk: unknown) => {
+        stderr += String(chunk);
+        return true;
+      }) as typeof process.stderr.write;
+
+      runCheckHomePaths([blockedFile], {
+        setExitCode: (value) => {
+          capturedExitCode = value;
+        },
+        stderr: { write: captureStderr },
+        scanOptions: {
+          readFile: () => {
+            throw new Error("EACCES: permission denied");
+          },
+        },
+      });
+
+      expect(capturedExitCode).toBe(1);
+      expect(stderr).toContain(
+        "Unreadable file while scanning for hardcoded home paths:"
+      );
+      expect(stderr).toContain(
+        `  ${blockedFile}: EACCES: permission denied\n\nFix file permissions or remove the unreadable file before committing.`
+      );
+    } finally {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
   test("pluralizes the unreadable-file guidance when multiple reads fail", () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), "outfitter-home-paths-"));
     const blockedFiles = [
