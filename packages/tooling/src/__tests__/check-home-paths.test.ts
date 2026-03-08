@@ -44,6 +44,12 @@ describe("findHomePathLeaks", () => {
     ).toEqual([]);
   });
 
+  test("does not flag dot-separated suffixes after the home path", () => {
+    expect(findHomePathLeaks("/Users/mg.config/project", "/Users/mg")).toEqual(
+      []
+    );
+  });
+
   test("detects escaped Windows home paths in serialized content", () => {
     expect(
       findHomePathLeaks(
@@ -61,12 +67,15 @@ describe("findHomePathLeaks", () => {
   });
 
   test("detects a bare home path followed by closing punctuation", () => {
-    expect(findHomePathLeaks(`{"path":"${homedir()}"}`, homedir())).toEqual([
+    const prefix = '{"path":"';
+    const lineText = `${prefix}${homedir()}"}`;
+
+    expect(findHomePathLeaks(lineText, homedir())).toEqual([
       {
         line: 1,
-        column: 10,
+        column: prefix.length + 1,
         matchedText: homedir(),
-        lineText: `{"path":"${homedir()}"}`,
+        lineText,
       },
     ]);
   });
