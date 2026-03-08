@@ -112,7 +112,10 @@ Use `patch` for bug fixes, `minor` for new features, and `major` for breaking ch
 Save it as `.changeset/<short-kebab-summary>.md`, then validate the file with:
 
 ```bash
-bun changeset status --output .changeset/.status-check.json; rm -f .changeset/.status-check.json
+status=0
+bun changeset status --output .changeset/.status-check.json || status=$?
+rm -f .changeset/.status-check.json
+(exit "$status")
 ```
 
 Keep the interactive `bun changeset` flow for local/manual runs.
