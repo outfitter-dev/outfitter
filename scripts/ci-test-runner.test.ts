@@ -20,6 +20,8 @@ describe("resolveCiTestRunnerConfig", () => {
     expect(config.logOrder).toBe("stream");
     expect(config.outputLogs).toBe("full");
     expect(config.runId).toBe("local-20260225T120000000Z");
+    expect(config.filters).toEqual([]);
+    expect(config.shard).toBeNull();
   });
 
   test("accepts CI env overrides and GitHub run metadata", () => {
@@ -42,12 +44,56 @@ describe("resolveCiTestRunnerConfig", () => {
     expect(config.outputLogs).toBe("errors-only");
     expect(config.runId).toBe("gha-42-3-20260225T120000000Z");
   });
+
+  test("parses OUTFITTER_CI_TEST_FILTER into filters array", () => {
+    const config = resolveCiTestRunnerConfig({
+      cwd: "/repo",
+      env: {
+        OUTFITTER_CI_TEST_FILTER:
+          "@outfitter/contracts,@outfitter/types, @outfitter/config",
+      },
+      now: new Date("2026-02-25T12:00:00.000Z"),
+    });
+
+    expect(config.filters).toEqual([
+      "@outfitter/contracts",
+      "@outfitter/types",
+      "@outfitter/config",
+    ]);
+  });
+
+  test("parses OUTFITTER_CI_TEST_SHARD into shard label", () => {
+    const config = resolveCiTestRunnerConfig({
+      cwd: "/repo",
+      env: { OUTFITTER_CI_TEST_SHARD: "foundation" },
+      now: new Date("2026-02-25T12:00:00.000Z"),
+    });
+
+    expect(config.shard).toBe("foundation");
+  });
+
+  test("returns empty filters for missing or empty OUTFITTER_CI_TEST_FILTER", () => {
+    const empty = resolveCiTestRunnerConfig({
+      cwd: "/repo",
+      env: { OUTFITTER_CI_TEST_FILTER: "" },
+      now: new Date("2026-02-25T12:00:00.000Z"),
+    });
+    expect(empty.filters).toEqual([]);
+
+    const missing = resolveCiTestRunnerConfig({
+      cwd: "/repo",
+      env: {},
+      now: new Date("2026-02-25T12:00:00.000Z"),
+    });
+    expect(missing.filters).toEqual([]);
+  });
 });
 
 describe("buildTurboCiTestCommand", () => {
-  test("builds an explicit turbo + bun-concurrency command", () => {
+  test("builds command without filters when none provided", () => {
     const command = buildTurboCiTestCommand({
       bunMaxConcurrency: 3,
+      filters: [],
       logOrder: "grouped",
       outputLogs: "errors-only",
       turboConcurrency: 1,
@@ -73,6 +119,42 @@ describe("buildTurboCiTestCommand", () => {
       "--",
       "--max-concurrency",
       "3",
+    ]);
+  });
+
+  test("injects --filter flags before --no-daemon", () => {
+    const command = buildTurboCiTestCommand({
+      bunMaxConcurrency: 4,
+      filters: ["@outfitter/contracts", "@outfitter/types"],
+      logOrder: "stream",
+      outputLogs: "full",
+      turboConcurrency: 2,
+    });
+
+    expect(command).toEqual([
+      "bun",
+      "x",
+      "turbo",
+      "run",
+      "test",
+      "--filter",
+      "@outfitter/contracts",
+      "--filter",
+      "@outfitter/types",
+      "--no-daemon",
+      "--only",
+      "--concurrency",
+      "2",
+      "--output-logs",
+      "full",
+      "--log-order",
+      "stream",
+      "--log-prefix",
+      "task",
+      "--summarize",
+      "--",
+      "--max-concurrency",
+      "4",
     ]);
   });
 });
