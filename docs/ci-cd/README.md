@@ -43,4 +43,4 @@ Add the `release:none` label to PRs that don't need a release (docs, CI, tests).
 | `auto-label.yml` | PR open/update                                  | Label PRs by file changes and release type                           |
 | `release.yml`    | Push to main, manual dispatch, release PR merge | Unified release flow: canary publish, stable prepare, stable publish |
 | `label-sync.yml` | Push to main                                    | Sync label definitions                                               |
-| `ci.yml`         | PR/push                                         | Build and test                                                       |
+| `ci.yml`         | PR/push                                         | Build, lint, typecheck, checks, and sharded tests (8 parallel jobs)  |

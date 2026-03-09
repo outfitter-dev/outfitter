@@ -113,6 +113,9 @@ jobs:
       - name: Surface map format
         run: bun run apps/outfitter/src/cli.ts check surface-map-format --cwd .
 
+      - name: Shard coverage
+        run: bun scripts/check-shard-coverage.ts .
+
       - name: Schema drift
         run: bun run schema:diff
 
