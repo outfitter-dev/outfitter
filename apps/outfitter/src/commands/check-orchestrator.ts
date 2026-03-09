@@ -4,6 +4,11 @@
  * Provides hook-aware check bundles with unified output and optional
  * clean-tree enforcement for read-only modes.
  *
+ * **CI note:** The `--ci` mode is intended for local validation. In GitHub
+ * Actions, the CI workflow runs each step as a separate job for per-step
+ * failure visibility. The step list here remains the source of truth for
+ * which checks exist; CI mirrors them as individual `run:` blocks.
+ *
  * @packageDocumentation
  */
 
