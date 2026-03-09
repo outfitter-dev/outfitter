@@ -41,6 +41,12 @@ describe("extractMessage", () => {
     expect(extractMessage({ message: "from object" })).toBe("from object");
   });
 
+  it("falls back to 'Unknown error' for plain object with empty or falsy message", () => {
+    expect(extractMessage({ message: "" })).toBe("Unknown error");
+    expect(extractMessage({ message: null })).toBe("Unknown error");
+    expect(extractMessage({ message: 0 })).toBe("Unknown error");
+  });
+
   it("falls back to 'Unknown error' for null, undefined, and numbers", () => {
     expect(extractMessage(null)).toBe("Unknown error");
     expect(extractMessage(undefined)).toBe("Unknown error");
