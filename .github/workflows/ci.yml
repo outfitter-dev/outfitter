@@ -290,3 +290,36 @@ jobs:
           path: |
             .outfitter/reports/ci/**
             .turbo/runs/*.json
+
+  ci-summary:
+    name: CI Summary
+    if: always()
+    needs:
+      [
+        build,
+        lint-typecheck,
+        checks,
+        test-foundation,
+        test-runtime,
+        test-tooling,
+        test-app,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## CI Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Job | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Build | \`${{ needs.build.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint & Typecheck | \`${{ needs.lint-typecheck.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Checks | \`${{ needs.checks.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test (Foundation) | \`${{ needs.test-foundation.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test (Runtime) | \`${{ needs.test-runtime.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test (Tooling) | \`${{ needs.test-tooling.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Test (App) | \`${{ needs.test-app.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check for failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
