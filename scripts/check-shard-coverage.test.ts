@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   findShardCoverageViolations,
+  findTestablePackages,
   parseShardFilters,
 } from "./check-shard-coverage";
 
@@ -24,6 +25,19 @@ describe("parseShardFilters", () => {
         ["foundation", ["@outfitter/contracts", "@outfitter/types"]],
         ["runtime", ["@outfitter/cli", "@outfitter/mcp"]],
       ])
+    );
+  });
+
+  test("pairs correctly when FILTER appears before SHARD", () => {
+    const yaml = `
+  test-reversed:
+    env:
+      OUTFITTER_CI_TEST_FILTER: "@outfitter/cli,@outfitter/mcp"
+      OUTFITTER_CI_TEST_SHARD: reversed
+`;
+    const result = parseShardFilters(yaml);
+    expect(result).toEqual(
+      new Map([["reversed", ["@outfitter/cli", "@outfitter/mcp"]]])
     );
   });
 
@@ -106,5 +120,26 @@ describe("findShardCoverageViolations", () => {
 
     const violations = findShardCoverageViolations(shards, testablePackages);
     expect(violations).toEqual({ missing: [], duplicated: [] });
+  });
+});
+
+describe("findTestablePackages", () => {
+  test("discovers testable packages from the repo root", () => {
+    const root = import.meta.dir.replace(/\/scripts$/, "");
+    const result = findTestablePackages(root);
+
+    // Should find packages with test scripts
+    expect(result).toContain("@outfitter/contracts");
+    expect(result).toContain("@outfitter/cli");
+    expect(result).toContain("outfitter");
+
+    // Should NOT include packages without test scripts (plugins)
+    expect(result).not.toContain("@outfitter-agents/kit");
+    expect(result).not.toContain("@outfitter-agents/outfitter");
+    expect(result).not.toContain("@outfitter-agents/team");
+
+    // Should be sorted
+    const sorted = [...result].toSorted();
+    expect(result).toEqual(sorted);
   });
 });

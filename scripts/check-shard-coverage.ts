@@ -18,27 +18,27 @@ interface ShardCoverageViolations {
 
 /**
  * Parse `OUTFITTER_CI_TEST_SHARD` / `OUTFITTER_CI_TEST_FILTER` pairs from
- * the CI workflow YAML. Uses simple regex — no YAML parser needed.
+ * the CI workflow YAML. Matches shard+filter within the same env block
+ * so ordering doesn't matter.
  */
 export function parseShardFilters(yaml: string): Map<string, string[]> {
   const shards = new Map<string, string[]>();
-  const shardRegex = /OUTFITTER_CI_TEST_SHARD:\s*["']?(\w+)["']?/g;
-  const filterRegex = /OUTFITTER_CI_TEST_FILTER:\s*["']?([^"'\n]+)["']?/g;
 
-  const shardMatches = [...yaml.matchAll(shardRegex)].map((m) => m[1]!);
-  const filterMatches = [...yaml.matchAll(filterRegex)].map((m) =>
-    m[1]!
+  // Match env blocks that contain both SHARD and FILTER, regardless of order
+  const blockRegex =
+    /OUTFITTER_CI_TEST_SHARD:\s*["']?(\w+)["']?[\s\S]*?OUTFITTER_CI_TEST_FILTER:\s*["']?([^"'\n]+)["']?|OUTFITTER_CI_TEST_FILTER:\s*["']?([^"'\n]+)["']?[\s\S]*?OUTFITTER_CI_TEST_SHARD:\s*["']?(\w+)["']?/g;
+
+  for (const match of yaml.matchAll(blockRegex)) {
+    const shard = match[1] ?? match[4];
+    const filterRaw = match[2] ?? match[3];
+    if (!shard || !filterRaw) continue;
+
+    const filters = filterRaw
       .split(",")
       .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-  );
+      .filter((s) => s.length > 0);
 
-  for (let i = 0; i < shardMatches.length; i++) {
-    const shard = shardMatches[i]!;
-    const filters = filterMatches[i];
-    if (filters) {
-      shards.set(shard, filters);
-    }
+    shards.set(shard, filters);
   }
 
   return shards;
@@ -78,8 +78,8 @@ export function findShardCoverageViolations(
   return { missing, duplicated };
 }
 
-function findTestablePackages(rootDir: string): string[] {
-  const workspaceDirs = ["packages", "apps", "examples"];
+export function findTestablePackages(rootDir: string): string[] {
+  const workspaceDirs = ["packages", "apps", "examples", "plugins"];
   const testable: string[] = [];
 
   for (const wsDir of workspaceDirs) {
@@ -92,10 +92,13 @@ function findTestablePackages(rootDir: string): string[] {
       const pkgPath = join(dir, entry.name, "package.json");
       if (!existsSync(pkgPath)) continue;
 
-      const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as {
-        name?: string;
-        scripts?: Record<string, string>;
-      };
+      let pkg: { name?: string; scripts?: Record<string, string> };
+      try {
+        pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
+      } catch {
+        console.warn(`Skipping malformed package.json: ${pkgPath}`);
+        continue;
+      }
       if (!pkg.name) continue;
 
       // A package is testable if it has a `test` script
