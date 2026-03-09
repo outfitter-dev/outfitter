@@ -67,3 +67,6 @@ apps/outfitter/.outfitter/surface.json
 
 # Local Claude settings
 .claude/settings.local.json
+
+# Claude runtime locks
+.claude/*.lock

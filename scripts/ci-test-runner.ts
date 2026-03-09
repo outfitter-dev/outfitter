@@ -32,15 +32,18 @@ interface ResolveCiTestRunnerConfigOptions {
 export interface CiTestRunnerConfig {
   readonly bunMaxConcurrency: number;
   readonly diagnosticsDir: string;
+  readonly filters: readonly string[];
   readonly logOrder: TurboLogOrder;
   readonly outputLogs: TurboOutputLogs;
   readonly rootDir: string;
   readonly runId: string;
+  readonly shard: string | null;
   readonly turboConcurrency: number;
 }
 
 interface TurboCommandOptions {
   readonly bunMaxConcurrency: number;
+  readonly filters: readonly string[];
   readonly logOrder: TurboLogOrder;
   readonly outputLogs: TurboOutputLogs;
   readonly turboConcurrency: number;
@@ -61,6 +64,7 @@ interface CiRunMetadata {
     readonly turboConcurrency: number;
   };
   readonly exitCode: number;
+  readonly filters: readonly string[];
   readonly finishedAt: string;
   readonly github: {
     readonly attempt: string | null;
@@ -68,6 +72,7 @@ interface CiRunMetadata {
     readonly sha: string | null;
   };
   readonly runId: string;
+  readonly shard: string | null;
   readonly startedAt: string;
   readonly status: "failed" | "passed";
 }
@@ -133,11 +138,22 @@ export function resolveCiTestRunnerConfig(
 
   const logOrderRaw = env["OUTFITTER_CI_TURBO_LOG_ORDER"];
   const outputLogsRaw = env["OUTFITTER_CI_TURBO_OUTPUT_LOGS"];
+  const filterRaw = env["OUTFITTER_CI_TEST_FILTER"];
+  const shardRaw = env["OUTFITTER_CI_TEST_SHARD"];
+
+  const filters = filterRaw
+    ? filterRaw
+        .split(",")
+        .map((f) => f.trim())
+        .filter((f) => f.length > 0)
+    : [];
 
   return {
     rootDir,
     diagnosticsDir,
+    filters,
     runId: resolveRunId(env, now),
+    shard: shardRaw?.trim() || null,
     turboConcurrency: parsePositiveInt(
       env["OUTFITTER_CI_TURBO_CONCURRENCY"],
       DEFAULT_TURBO_CONCURRENCY
@@ -160,12 +176,15 @@ export function resolveCiTestRunnerConfig(
 export function buildTurboCiTestCommand(
   options: TurboCommandOptions
 ): readonly string[] {
+  const filterFlags = options.filters.flatMap((f) => ["--filter", f]);
+
   return [
     "bun",
     "x",
     "turbo",
     "run",
     "test",
+    ...filterFlags,
     "--no-daemon",
     "--only",
     "--concurrency",
@@ -240,17 +259,22 @@ function logStart(
   config: CiTestRunnerConfig,
   command: readonly string[]
 ): void {
-  process.stdout.write(
-    [
-      "[ci-test-runner] Starting CI test run",
-      `[ci-test-runner] runId=${config.runId}`,
-      `[ci-test-runner] turboConcurrency=${config.turboConcurrency}`,
-      `[ci-test-runner] bunMaxConcurrency=${config.bunMaxConcurrency}`,
-      `[ci-test-runner] turboLogOrder=${config.logOrder}`,
-      `[ci-test-runner] turboOutputLogs=${config.outputLogs}`,
-      `[ci-test-runner] command=${command.join(" ")}`,
-    ].join("\n") + "\n"
-  );
+  const logLines = [
+    "[ci-test-runner] Starting CI test run",
+    `[ci-test-runner] runId=${config.runId}`,
+    `[ci-test-runner] turboConcurrency=${config.turboConcurrency}`,
+    `[ci-test-runner] bunMaxConcurrency=${config.bunMaxConcurrency}`,
+    `[ci-test-runner] turboLogOrder=${config.logOrder}`,
+    `[ci-test-runner] turboOutputLogs=${config.outputLogs}`,
+  ];
+  if (config.shard) {
+    logLines.push(`[ci-test-runner] shard=${config.shard}`);
+  }
+  if (config.filters.length > 0) {
+    logLines.push(`[ci-test-runner] filters=${config.filters.join(",")}`);
+  }
+  logLines.push(`[ci-test-runner] command=${command.join(" ")}`);
+  process.stdout.write(logLines.join("\n") + "\n");
 }
 
 export async function runCiTests(config: CiTestRunnerConfig): Promise<{
@@ -261,7 +285,13 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
 }> {
   mkdirSync(config.diagnosticsDir, { recursive: true });
 
-  const command = buildTurboCiTestCommand(config);
+  const command = buildTurboCiTestCommand({
+    bunMaxConcurrency: config.bunMaxConcurrency,
+    filters: config.filters,
+    logOrder: config.logOrder,
+    outputLogs: config.outputLogs,
+    turboConcurrency: config.turboConcurrency,
+  });
   const startedAt = new Date();
   const startedAtMs = Date.now();
   const beforeRun = new Set(listTurboRunSummaries(config.rootDir));
@@ -311,28 +341,30 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
 
   const metadata: CiRunMetadata = {
     $schema: "https://outfitter.dev/reports/ci-tests/v1",
-    runId: config.runId,
-    status: exitCode === 0 ? "passed" : "failed",
-    exitCode,
-    startedAt: startedAt.toISOString(),
-    finishedAt: finishedAt.toISOString(),
-    durationMs,
-    command,
-    environment: {
-      turboConcurrency: config.turboConcurrency,
-      bunMaxConcurrency: config.bunMaxConcurrency,
-      logOrder: config.logOrder,
-      outputLogs: config.outputLogs,
-    },
     artifacts: {
       log: logPath,
       turboSummary: copiedTurboSummaryPath,
     },
+    command,
+    durationMs,
+    environment: {
+      bunMaxConcurrency: config.bunMaxConcurrency,
+      logOrder: config.logOrder,
+      outputLogs: config.outputLogs,
+      turboConcurrency: config.turboConcurrency,
+    },
+    exitCode,
+    filters: config.filters,
+    finishedAt: finishedAt.toISOString(),
     github: {
-      runId: process.env["GITHUB_RUN_ID"] ?? null,
       attempt: process.env["GITHUB_RUN_ATTEMPT"] ?? null,
+      runId: process.env["GITHUB_RUN_ID"] ?? null,
       sha: process.env["GITHUB_SHA"] ?? null,
     },
+    runId: config.runId,
+    shard: config.shard,
+    startedAt: startedAt.toISOString(),
+    status: exitCode === 0 ? "passed" : "failed",
   };
 
   writeMetadata(metadataPath, metadata);
