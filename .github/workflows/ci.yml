@@ -119,12 +119,17 @@ jobs:
       - name: Tree clean
         run: bun run apps/outfitter/src/commands/repo.ts check tree --cwd .
 
-  test:
-    name: Test
+  # Every workspace package must appear in exactly one shard's OUTFITTER_CI_TEST_FILTER.
+  # When adding a new package, update the appropriate shard below.
+
+  test-foundation:
+    name: Test (Foundation)
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      OUTFITTER_CI_TEST_SHARD: foundation
+      OUTFITTER_CI_TEST_FILTER: "@outfitter/contracts,@outfitter/types,@outfitter/config,@outfitter/state,@outfitter/file-ops,@outfitter/presets"
       OUTFITTER_CI_TURBO_CONCURRENCY: "2"
       OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
       OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
@@ -153,7 +158,134 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-test-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ci-test-foundation-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            .outfitter/reports/ci/**
+            .turbo/runs/*.json
+
+  test-runtime:
+    name: Test (Runtime)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OUTFITTER_CI_TEST_SHARD: runtime
+      OUTFITTER_CI_TEST_FILTER: "@outfitter/cli,@outfitter/mcp,@outfitter/tui,@outfitter/logging,@outfitter/index,@outfitter/daemon,@outfitter/schema"
+      OUTFITTER_CI_TURBO_CONCURRENCY: "2"
+      OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
+      OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
+      OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: bun run build
+
+      - name: Test
+        run: bash scripts/ci-test-oom-retry.sh
+
+      - name: Tree clean
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Upload test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-test-runtime-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            .outfitter/reports/ci/**
+            .turbo/runs/*.json
+
+  test-tooling:
+    name: Test (Tooling)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OUTFITTER_CI_TEST_SHARD: tooling
+      OUTFITTER_CI_TEST_FILTER: "@outfitter/tooling,@outfitter/oxlint-plugin,@outfitter/docs,@outfitter/testing"
+      OUTFITTER_CI_TURBO_CONCURRENCY: "2"
+      OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
+      OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
+      OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: bun run build
+
+      - name: Test
+        run: bash scripts/ci-test-oom-retry.sh
+
+      - name: Tree clean
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Upload test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-test-tooling-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            .outfitter/reports/ci/**
+            .turbo/runs/*.json
+
+  test-app:
+    name: Test (App)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OUTFITTER_CI_TEST_SHARD: app
+      # Unscoped names match the "name" field in each package.json
+      OUTFITTER_CI_TEST_FILTER: "outfitter,outfitter-cli-demo,@outfitter/reference"
+      OUTFITTER_CI_TURBO_CONCURRENCY: "2"
+      OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
+      OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
+      OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: bun run build
+
+      - name: Test
+        run: bash scripts/ci-test-oom-retry.sh
+
+      - name: Tree clean
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Upload test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-test-app-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: ignore
           path: |
             .outfitter/reports/ci/**
