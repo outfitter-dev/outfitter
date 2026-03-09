@@ -11,9 +11,42 @@ import {
 import {
   type ErrorMapper,
   composeMappers,
+  extractMessage,
   isOutfitterError,
   wrapError,
 } from "../wrap-error.js";
+
+// ---------------------------------------------------------------------------
+// extractMessage — human-readable message extraction
+// ---------------------------------------------------------------------------
+describe("extractMessage", () => {
+  it("returns the message from an Error instance", () => {
+    expect(extractMessage(new Error("boom"))).toBe("boom");
+  });
+
+  it("falls back to 'Unknown error' for Error with empty message", () => {
+    expect(extractMessage(new Error())).toBe("Unknown error");
+    expect(extractMessage(new Error(""))).toBe("Unknown error");
+  });
+
+  it("returns a non-empty string as-is", () => {
+    expect(extractMessage("something failed")).toBe("something failed");
+  });
+
+  it("falls back to 'Unknown error' for empty string", () => {
+    expect(extractMessage("")).toBe("Unknown error");
+  });
+
+  it("extracts message from plain object with message property", () => {
+    expect(extractMessage({ message: "from object" })).toBe("from object");
+  });
+
+  it("falls back to 'Unknown error' for null, undefined, and numbers", () => {
+    expect(extractMessage(null)).toBe("Unknown error");
+    expect(extractMessage(undefined)).toBe("Unknown error");
+    expect(extractMessage(42)).toBe("Unknown error");
+  });
+});
 
 // ---------------------------------------------------------------------------
 // isOutfitterError — type guard

@@ -64,7 +64,7 @@ export function extractMessage(error: unknown): string {
     return error || "Unknown error";
   }
   if (error instanceof Error) {
-    return error.message;
+    return error.message || "Unknown error";
   }
   if (error != null && typeof error === "object" && "message" in error) {
     return String((error as Record<string, unknown>)["message"]);
