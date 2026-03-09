@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { Result } from "@outfitter/contracts";
+import { extractMessage, Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
 import { isTypesBunVersionCompatible } from "@outfitter/tooling";
 import { isPlainObject } from "@outfitter/types";
@@ -186,12 +186,26 @@ function validateBunVersionConsistency(
   problems: string[]
 ): void {
   const bunVersionPath = join(workspaceRoot, ".bun-version");
-  const bunVersionFile = readFileSync(bunVersionPath, "utf-8").trim();
+  let bunVersionFile: string;
+  try {
+    bunVersionFile = readFileSync(bunVersionPath, "utf-8").trim();
+  } catch (error) {
+    problems.push(
+      `.bun-version not found or unreadable: ${extractMessage(error)}`
+    );
+    return;
+  }
 
   const rootPackagePath = join(workspaceRoot, "package.json");
-  const parsedRootPackage = JSON.parse(
-    readFileSync(rootPackagePath, "utf-8")
-  ) as unknown;
+  let parsedRootPackage: unknown;
+  try {
+    parsedRootPackage = JSON.parse(readFileSync(rootPackagePath, "utf-8"));
+  } catch (error) {
+    problems.push(
+      `Root package.json could not be read or parsed: ${extractMessage(error)}`
+    );
+    return;
+  }
   if (!isPlainObject(parsedRootPackage)) {
     return;
   }
@@ -308,11 +322,7 @@ export async function runCheckPresetVersions(
       ok: problems.length === 0,
     });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to check preset versions";
-    return Result.err(new CheckPresetVersionsError(message));
+    return Result.err(new CheckPresetVersionsError(extractMessage(error)));
   }
 }
 

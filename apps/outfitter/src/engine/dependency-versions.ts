@@ -2,9 +2,11 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { InternalError, Result } from "@outfitter/contracts";
+import { extractMessage, InternalError, Result } from "@outfitter/contracts";
 import { getResolvedVersions } from "@outfitter/presets";
 import { isPlainObject } from "@outfitter/types";
+
+const OUTFITTER_PACKAGE_NAME = "outfitter";
 
 export const DEPENDENCY_SECTIONS = [
   "dependencies",
@@ -20,6 +22,7 @@ export interface ResolvedPresetDependencyVersions {
 
 let cachedResolvedVersions: ResolvedPresetDependencyVersions | undefined;
 
+/** @internal Test-only cache reset. */
 export function clearResolvedVersionsCache(): void {
   cachedResolvedVersions = undefined;
 }
@@ -61,7 +64,7 @@ function findOutfitterPackageRoot(): Result<string, InternalError> {
         if (
           isPlainObject(parsed) &&
           typeof parsed["name"] === "string" &&
-          parsed["name"] === "outfitter"
+          parsed["name"] === OUTFITTER_PACKAGE_NAME
         ) {
           return Result.ok(currentDir);
         }
@@ -206,10 +209,9 @@ export function resolvePresetDependencyVersions(): Result<
     };
     return Result.ok(cachedResolvedVersions);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     return Result.err(
       InternalError.create(
-        `Failed to resolve preset dependency versions: ${message}`
+        `Failed to resolve preset dependency versions: ${extractMessage(error)}`
       )
     );
   }

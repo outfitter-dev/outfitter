@@ -164,11 +164,7 @@ describe("preset dependency policy", () => {
         sdkVersion,
         "@modelcontextprotocol/sdk must be present in the catalog for this test to be meaningful"
       ).toBeDefined();
-      if (!sdkVersion) {
-        throw new Error(
-          "@modelcontextprotocol/sdk must be present in the catalog for this test to be meaningful"
-        );
-      }
+      if (!sdkVersion) return;
 
       mkdirSync(presetRoot, { recursive: true });
       writeFileSync(

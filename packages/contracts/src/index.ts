@@ -209,6 +209,7 @@ export {
 export {
   composeMappers,
   type ErrorMapper,
+  extractMessage,
   isOutfitterError,
   wrapError,
 } from "./wrap-error.js";
