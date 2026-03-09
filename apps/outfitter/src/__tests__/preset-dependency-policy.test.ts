@@ -16,12 +16,7 @@ import {
   EXTERNAL_TEMPLATE_VERSION,
   validatePresetDeps,
 } from "../commands/check-preset-versions.js";
-const DEPENDENCY_SECTIONS = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
+import { DEPENDENCY_SECTIONS } from "../engine/dependency-versions.js";
 
 function getPresetPackageJsonPaths(rootDir: string): readonly string[] {
   const glob = new Bun.Glob("**/package.json.template");
