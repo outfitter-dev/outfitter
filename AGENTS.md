@@ -34,9 +34,9 @@ cd packages/contracts && bun test          # Direct invocation
 
 # Lint/Format
 bun run lint                               # Lint checks
-bun run check                              # UNSTABLE — see note below
-bun run format:check                       # UNSTABLE — see note below
-bun run format:fix                         # UNSTABLE — see note below
+bun run check                              # Lint + format check
+bun run format:check                       # Format check only
+bun run format:fix                         # Auto-fix formatting
 bun run typecheck                          # TypeScript validation
 
 # Release
@@ -52,13 +52,30 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 bunx @outfitter/tooling upgrade-bun x.y.z  # Upgrade to specific version
 ```
 
-**Known command instability:** `bun run check`, `bun run format:check`, and `bun run format:fix` can hit a pre-existing tokio panic in this repo. For routine validation, use `bun run lint` plus `bun run typecheck`. If formatting is still required after the repo-wide formatter crashes, use a targeted formatter invocation on the touched files and note the fallback in your handoff.
-
 **Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
 
 1. Run `bunx @outfitter/tooling upgrade-bun <version>`
 2. Command updates `.bun-version`, `engines.bun`, `@types/bun`, installs locally, and updates `bun.lock`
 3. Commit all files together
+
+### CI Jobs
+
+CI runs 8 jobs total: a shared build job, followed by 6 parallel jobs and a summary:
+
+| Job               | Purpose                                                          |
+| ----------------- | ---------------------------------------------------------------- |
+| `build`           | Populates Turbo remote cache                                     |
+| `lint-typecheck`  | Typecheck + oxlint + export checks                               |
+| `checks`          | 14 validation steps (block-drift, changeset, schema drift, etc.) |
+| `test-foundation` | Tests: contracts, types, config, state, file-ops, presets        |
+| `test-runtime`    | Tests: cli, mcp, tui, logging, index, daemon, schema             |
+| `test-tooling`    | Tests: tooling, oxlint-plugin, docs, testing                     |
+| `test-app`        | Tests: outfitter, outfitter-cli-demo, reference                  |
+| `ci-summary`      | Aggregates results, fails if any job failed or was cancelled     |
+
+Test shards use `OUTFITTER_CI_TEST_FILTER` (comma-separated package names) and `OUTFITTER_CI_TEST_SHARD` (label) env vars. OOM retry (3 attempts, exit 137) is on test jobs only.
+
+Local `outfitter check --ci` and `bun run verify:ci` still work unchanged for local validation. CI runs steps directly instead of through the orchestrator for per-step failure visibility.
 
 ## Architecture
 
@@ -366,8 +383,6 @@ Keep types explicit; avoid `any`. Prefer module-local organization over central 
 ### Formatting (oxfmt)
 
 - Use oxfmt/Ultracite for formatting and oxlint for lint checks
-- Prefer repo-provided scripts when they are stable, but in this repo fall back to `bun run lint` + `bun run typecheck` for validation when `bun run check`, `bun run format:check`, or `bun run format:fix` hit the known tokio panic
-- If formatting is required after the repo-wide formatter crashes, use a targeted formatter invocation on the touched files and call out the fallback
 
 ## Testing
 
