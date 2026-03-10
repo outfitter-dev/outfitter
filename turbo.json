@@ -9,6 +9,8 @@
       "dependsOn": ["^build"],
       "inputs": [
         "src/**",
+        "configs/**",
+        "scripts/**",
         "tsconfig.json",
         "package.json",
         "../../bunup.config.ts"

@@ -169,7 +169,7 @@ describe("init command file creation", () => {
     };
     const shippedOxlintConfig = JSON.parse(
       readFileSync(
-        join(process.cwd(), "packages/tooling/configs/.oxlintrc.json"),
+        join(repoRoot, "packages/tooling/configs/.oxlintrc.json"),
         "utf-8"
       )
     ) as {
