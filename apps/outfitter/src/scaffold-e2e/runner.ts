@@ -91,7 +91,7 @@ async function runCommand(
 
   const race = await Promise.race([proc.exited.then(() => "exit"), timeout]);
   if (race === "timeout") {
-    proc.kill();
+    proc.kill("SIGKILL");
   }
 
   const [exitCode, stdout, stderr] = await Promise.all([
@@ -149,6 +149,8 @@ async function runInitViaCli(
       "--skip-install",
       "--skip-git",
       "--skip-commit",
+      // Smoke scaffolds should exercise the default tooling footprint that
+      // real `outfitter init` users get, including generated `verify:ci`.
     ],
     timeoutMs
   );

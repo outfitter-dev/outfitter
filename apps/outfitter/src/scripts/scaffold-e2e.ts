@@ -167,4 +167,9 @@ async function main(): Promise<void> {
   }
 }
 
-await main();
+await main().catch((error: unknown) => {
+  process.stderr.write(
+    `[scaffold-e2e] error: ${error instanceof Error ? error.message : String(error)}\n`
+  );
+  process.exit(1);
+});
