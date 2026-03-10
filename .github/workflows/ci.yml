@@ -298,6 +298,8 @@ jobs:
     name: Scaffold Smoke
     needs: build
     runs-on: ubuntu-latest
+    # The shared scaffold CI profile caps three presets x three commands at an
+    # 18-minute timeout budget, leaving room for checkout, setup, and build.
     timeout-minutes: 25
     env:
       OUTFITTER_SCAFFOLD_E2E_ROOT: ${{ github.workspace }}/.outfitter/scaffold-e2e
@@ -314,7 +316,7 @@ jobs:
         run: bun run build
 
       - name: Scaffold smoke
-        run: bun run scaffold:e2e --preset cli,library,full-stack
+        run: bun run scaffold:e2e:ci
 
       - name: Tree clean
         run: |
