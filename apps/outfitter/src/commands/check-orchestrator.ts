@@ -489,7 +489,7 @@ async function readOutputStream(
 
   const reader = stream.getReader();
   const decoder = new TextDecoder();
-  let output = "";
+  const chunks: string[] = [];
 
   try {
     while (true) {
@@ -503,17 +503,17 @@ async function readOutputStream(
         continue;
       }
 
-      output += chunk;
+      chunks.push(chunk);
       target?.write(chunk);
     }
 
     const trailingChunk = decoder.decode();
     if (trailingChunk.length > 0) {
-      output += trailingChunk;
+      chunks.push(trailingChunk);
       target?.write(trailingChunk);
     }
 
-    return output;
+    return chunks.join("");
   } finally {
     reader.releaseLock();
   }
