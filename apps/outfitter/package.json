@@ -382,10 +382,28 @@
       }
     },
     "./package.json": "./package.json",
+    "./scaffold-e2e/runner": {
+      "import": {
+        "types": "./dist/scaffold-e2e/runner.d.ts",
+        "default": "./dist/scaffold-e2e/runner.js"
+      }
+    },
     "./scaffold-e2e/template-guardrails": {
       "import": {
         "types": "./dist/scaffold-e2e/template-guardrails.d.ts",
         "default": "./dist/scaffold-e2e/template-guardrails.js"
+      }
+    },
+    "./scaffold-e2e/workspace": {
+      "import": {
+        "types": "./dist/scaffold-e2e/workspace.d.ts",
+        "default": "./dist/scaffold-e2e/workspace.js"
+      }
+    },
+    "./scripts/scaffold-e2e": {
+      "import": {
+        "types": "./dist/scripts/scaffold-e2e.d.ts",
+        "default": "./dist/scripts/scaffold-e2e.js"
       }
     },
     "./targets": {
@@ -429,6 +447,8 @@
     "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter outfitter",
     "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
+    "scaffold:e2e": "bun run ./src/scripts/scaffold-e2e.ts",
+    "scaffold:e2e:clean": "bun run ./src/scripts/scaffold-e2e.ts --clean",
     "test": "bun test",
     "test:init-integration": "bun test ./src/__tests__/init-*.test.ts",
     "test:upgrade-integration": "bun test ./src/__tests__/upgrade-integration-*.test.ts",

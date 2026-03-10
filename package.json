@@ -25,6 +25,8 @@
     "check-exports": "bun run apps/outfitter/src/commands/repo.ts check exports --cwd .",
     "exports:check": "bun scripts/normalize-exports.ts --check",
     "schema:diff": "bun run apps/outfitter/src/cli.ts schema diff",
+    "scaffold:e2e": "bun run --filter outfitter scaffold:e2e",
+    "scaffold:e2e:clean": "bun run --filter outfitter scaffold:e2e:clean",
     "verify:push": "OUTFITTER_CHECK_COMMAND_PROFILE=hook bun run apps/outfitter/src/cli.ts check --ci",
     "verify:ci": "bun run apps/outfitter/src/cli.ts check --ci",
     "verify:stack": "./scripts/verify-stack.sh",
