@@ -26,20 +26,10 @@ export interface RunStreamedCommandOptions {
   readonly onHeartbeat?:
     | ((heartbeat: StreamCommandHeartbeat) => void)
     | undefined;
-  readonly postExitDrainTimeoutMs?: number;
-  readonly postKillDrainTimeoutMs?: number;
   readonly spawn?: typeof Bun.spawn;
   readonly stderrTargets?: readonly OutputTarget[];
   readonly stdoutTargets?: readonly OutputTarget[];
   readonly timeoutMs: number;
-}
-
-const DEFAULT_POST_EXIT_DRAIN_TIMEOUT_MS = 5_000;
-const DEFAULT_POST_KILL_DRAIN_TIMEOUT_MS = 5_000;
-
-interface MirroredStream {
-  cancel(): Promise<void>;
-  readonly done: Promise<void>;
 }
 
 function writeToTargets(
@@ -55,63 +45,38 @@ function writeToTargets(
   }
 }
 
-function mirrorStream(
+async function mirrorStream(
   stream: ReadableStream<Uint8Array> | null | undefined,
   targets: readonly OutputTarget[] | undefined,
   onChunk: () => void
-): MirroredStream {
+): Promise<void> {
   if (!stream) {
-    return {
-      async cancel() {},
-      done: Promise.resolve(),
-    };
+    return;
   }
 
   const reader = stream.getReader();
-  let released = false;
-
-  const done = (async (): Promise<void> => {
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        if (!value || value.length === 0) {
-          continue;
-        }
-
-        onChunk();
-        writeToTargets(targets, value);
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
       }
-    } finally {
-      released = true;
-      reader.releaseLock();
+      if (!value || value.length === 0) {
+        continue;
+      }
+
+      onChunk();
+      writeToTargets(targets, value);
     }
-  })();
-
-  return {
-    async cancel(): Promise<void> {
-      if (released) {
-        return;
-      }
-
-      try {
-        await reader.cancel();
-      } catch {}
-    },
-    done,
-  };
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 export async function runStreamedCommand(
   options: RunStreamedCommandOptions
 ): Promise<StreamCommandResult> {
   const spawn = options.spawn ?? Bun.spawn;
-  const postExitDrainTimeoutMs =
-    options.postExitDrainTimeoutMs ?? DEFAULT_POST_EXIT_DRAIN_TIMEOUT_MS;
-  const postKillDrainTimeoutMs =
-    options.postKillDrainTimeoutMs ?? DEFAULT_POST_KILL_DRAIN_TIMEOUT_MS;
   const startedAtMs = Date.now();
   let lastOutputAtMs = startedAtMs;
 
@@ -125,7 +90,7 @@ export async function runStreamedCommand(
     lastOutputAtMs = Date.now();
   };
 
-  let heartbeatTimer: ReturnType<typeof setInterval> | undefined =
+  const heartbeatTimer =
     options.heartbeatIntervalMs && options.heartbeatIntervalMs > 0
       ? setInterval(() => {
           options.onHeartbeat?.({
@@ -137,15 +102,6 @@ export async function runStreamedCommand(
         }, options.heartbeatIntervalMs)
       : undefined;
 
-  const clearHeartbeatTimer = (): void => {
-    if (!heartbeatTimer) {
-      return;
-    }
-
-    clearInterval(heartbeatTimer);
-    heartbeatTimer = undefined;
-  };
-
   const timeout = new Promise<"timeout">((resolveTimeout) => {
     const timer = setTimeout(
       () => resolveTimeout("timeout"),
@@ -154,75 +110,20 @@ export async function runStreamedCommand(
     handle.exited.finally(() => clearTimeout(timer));
   });
 
-  // Start draining immediately so subprocess output cannot block on full pipes.
-  const stdoutStream = mirrorStream(
-    handle.stdout,
-    options.stdoutTargets,
-    markOutput
-  );
-  const stderrStream = mirrorStream(
-    handle.stderr,
-    options.stderrTargets,
-    markOutput
-  );
-  const drainStreams = Promise.all([stdoutStream.done, stderrStream.done]).then(
-    () => undefined
-  );
-
-  const cancelDrainStreams = async (): Promise<void> => {
-    await Promise.allSettled([stdoutStream.cancel(), stderrStream.cancel()]);
-  };
-
   try {
     const race = await Promise.race([
-      handle.exited.then(() => "exit" as const),
+      handle.exited.then(() => "exit"),
       timeout,
     ]);
-    clearHeartbeatTimer();
-
     if (race === "timeout") {
       handle.kill("SIGKILL");
     }
 
-    const exitCode =
-      race === "timeout"
-        ? await (async () => {
-            let killDrainTimerId: ReturnType<typeof setTimeout> | undefined;
-            const killDrainTimeout = new Promise<[number, undefined]>(
-              (resolve) => {
-                killDrainTimerId = setTimeout(() => {
-                  void cancelDrainStreams();
-                  resolve([124, undefined]);
-                }, postKillDrainTimeoutMs);
-              }
-            );
-
-            const [resolvedExitCode] = await Promise.race([
-              Promise.all([handle.exited, drainStreams]),
-              killDrainTimeout,
-            ]);
-            clearTimeout(killDrainTimerId);
-            return resolvedExitCode;
-          })()
-        : await handle.exited.then(async (resolvedExitCode) => {
-            let exitDrainTimerId: ReturnType<typeof setTimeout> | undefined;
-            const exitDrainTimeout = new Promise<"drain-timeout">((resolve) => {
-              exitDrainTimerId = setTimeout(() => {
-                resolve("drain-timeout");
-              }, postExitDrainTimeoutMs);
-            });
-
-            const drainResult = await Promise.race([
-              drainStreams.then(() => "drained" as const),
-              exitDrainTimeout,
-            ]);
-            clearTimeout(exitDrainTimerId);
-            if (drainResult === "drain-timeout") {
-              await cancelDrainStreams();
-            }
-
-            return resolvedExitCode;
-          });
+    const [exitCode] = await Promise.all([
+      handle.exited,
+      mirrorStream(handle.stdout, options.stdoutTargets, markOutput),
+      mirrorStream(handle.stderr, options.stderrTargets, markOutput),
+    ]);
 
     return {
       durationMs: Date.now() - startedAtMs,
@@ -230,6 +131,8 @@ export async function runStreamedCommand(
       timedOut: race === "timeout",
     };
   } finally {
-    clearHeartbeatTimer();
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+    }
   }
 }
