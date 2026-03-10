@@ -15,6 +15,8 @@ import {
 } from "node:fs";
 import { join, resolve } from "node:path";
 
+import { runStreamedCommand } from "./run-streamed-command";
+
 type TurboLogOrder = "auto" | "stream" | "grouped";
 type TurboOutputLogs =
   | "full"
@@ -33,11 +35,13 @@ export interface CiTestRunnerConfig {
   readonly bunMaxConcurrency: number;
   readonly diagnosticsDir: string;
   readonly filters: readonly string[];
+  readonly heartbeatIntervalMs: number;
   readonly logOrder: TurboLogOrder;
   readonly outputLogs: TurboOutputLogs;
   readonly rootDir: string;
   readonly runId: string;
   readonly shard: string | null;
+  readonly timeoutMs: number;
   readonly turboConcurrency: number;
 }
 
@@ -59,8 +63,10 @@ interface CiRunMetadata {
   readonly durationMs: number;
   readonly environment: {
     readonly bunMaxConcurrency: number;
+    readonly heartbeatIntervalMs: number;
     readonly logOrder: TurboLogOrder;
     readonly outputLogs: TurboOutputLogs;
+    readonly timeoutMs: number;
     readonly turboConcurrency: number;
   };
   readonly exitCode: number;
@@ -74,13 +80,15 @@ interface CiRunMetadata {
   readonly runId: string;
   readonly shard: string | null;
   readonly startedAt: string;
-  readonly status: "failed" | "passed";
+  readonly status: "failed" | "passed" | "timed_out";
 }
 
 const DEFAULT_TURBO_CONCURRENCY = 2;
 const DEFAULT_BUN_MAX_CONCURRENCY = 4;
 const DEFAULT_LOG_ORDER: TurboLogOrder = "stream";
 const DEFAULT_OUTPUT_LOGS: TurboOutputLogs = "full";
+const DEFAULT_TEST_TIMEOUT_MS = 5 * 60_000;
+const DEFAULT_HEARTBEAT_INTERVAL_MS = 15_000;
 
 function isTurboLogOrder(value: string): value is TurboLogOrder {
   return value === "auto" || value === "stream" || value === "grouped";
@@ -152,8 +160,16 @@ export function resolveCiTestRunnerConfig(
     rootDir,
     diagnosticsDir,
     filters,
+    heartbeatIntervalMs: parsePositiveInt(
+      env["OUTFITTER_CI_TEST_HEARTBEAT_MS"],
+      DEFAULT_HEARTBEAT_INTERVAL_MS
+    ),
     runId: resolveRunId(env, now),
     shard: shardRaw?.trim() || null,
+    timeoutMs: parsePositiveInt(
+      env["OUTFITTER_CI_TEST_TIMEOUT_MS"],
+      DEFAULT_TEST_TIMEOUT_MS
+    ),
     turboConcurrency: parsePositiveInt(
       env["OUTFITTER_CI_TURBO_CONCURRENCY"],
       DEFAULT_TURBO_CONCURRENCY
@@ -235,26 +251,6 @@ function writeMetadata(path: string, metadata: CiRunMetadata): void {
   writeFileSync(path, `${JSON.stringify(metadata, null, 2)}\n`, "utf-8");
 }
 
-async function mirrorStreamToOutputs(
-  stream: ReadableStream<Uint8Array> | null,
-  destination: NodeJS.WriteStream,
-  logSink: ReturnType<typeof createWriteStream>
-): Promise<void> {
-  if (!stream) return;
-  const reader = stream.getReader();
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-      destination.write(value);
-      logSink.write(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-}
-
 function logStart(
   config: CiTestRunnerConfig,
   command: readonly string[]
@@ -264,6 +260,8 @@ function logStart(
     `[ci-test-runner] runId=${config.runId}`,
     `[ci-test-runner] turboConcurrency=${config.turboConcurrency}`,
     `[ci-test-runner] bunMaxConcurrency=${config.bunMaxConcurrency}`,
+    `[ci-test-runner] timeoutMs=${config.timeoutMs}`,
+    `[ci-test-runner] heartbeatIntervalMs=${config.heartbeatIntervalMs}`,
     `[ci-test-runner] turboLogOrder=${config.logOrder}`,
     `[ci-test-runner] turboOutputLogs=${config.outputLogs}`,
   ];
@@ -282,6 +280,7 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
   readonly logPath: string;
   readonly metadataPath: string;
   readonly summaryArtifactPath: string | null;
+  readonly timedOut: boolean;
 }> {
   mkdirSync(config.diagnosticsDir, { recursive: true });
 
@@ -317,17 +316,32 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
     ].join("\n")
   );
 
-  const handle = Bun.spawn([...command], {
-    cwd: config.rootDir,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  const writeHeartbeat = (line: string): void => {
+    process.stdout.write(`${line}\n`);
+    logSink.write(`${line}\n`);
+  };
 
-  const [exitCode] = await Promise.all([
-    handle.exited,
-    mirrorStreamToOutputs(handle.stdout, process.stdout, logSink),
-    mirrorStreamToOutputs(handle.stderr, process.stderr, logSink),
-  ]);
+  const commandResult = await runStreamedCommand({
+    command,
+    cwd: config.rootDir,
+    heartbeatIntervalMs: config.heartbeatIntervalMs,
+    onHeartbeat: ({ elapsedMs, idleMs, timeoutMs }) => {
+      if (idleMs < config.heartbeatIntervalMs) {
+        return;
+      }
+
+      writeHeartbeat(
+        `[ci-test-runner] still running elapsedMs=${elapsedMs} idleMs=${idleMs} timeoutMs=${timeoutMs}`
+      );
+    },
+    stderrTargets: [process.stderr, logSink],
+    stdoutTargets: [process.stdout, logSink],
+    timeoutMs: config.timeoutMs,
+  });
+  const exitCode = commandResult.timedOut ? 124 : commandResult.exitCode;
+  if (commandResult.timedOut) {
+    writeHeartbeat(`[ci-test-runner] timed out after ${config.timeoutMs}ms`);
+  }
 
   const finishedAt = new Date();
   const durationMs = Date.now() - startedAtMs;
@@ -349,8 +363,10 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
     durationMs,
     environment: {
       bunMaxConcurrency: config.bunMaxConcurrency,
+      heartbeatIntervalMs: config.heartbeatIntervalMs,
       logOrder: config.logOrder,
       outputLogs: config.outputLogs,
+      timeoutMs: config.timeoutMs,
       turboConcurrency: config.turboConcurrency,
     },
     exitCode,
@@ -364,7 +380,12 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
     runId: config.runId,
     shard: config.shard,
     startedAt: startedAt.toISOString(),
-    status: exitCode === 0 ? "passed" : "failed",
+    status:
+      exitCode === 0
+        ? "passed"
+        : commandResult.timedOut
+          ? "timed_out"
+          : "failed",
   };
 
   writeMetadata(metadataPath, metadata);
@@ -373,6 +394,7 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
   process.stdout.write(
     [
       `[ci-test-runner] exitCode=${exitCode}`,
+      `[ci-test-runner] timedOut=${commandResult.timedOut}`,
       `[ci-test-runner] diagnostics=${config.diagnosticsDir}`,
       `[ci-test-runner] metadata=${metadataPath}`,
       `[ci-test-runner] turboSummary=${copiedTurboSummaryPath ?? "none"}`,
@@ -384,6 +406,7 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
     logPath,
     metadataPath,
     summaryArtifactPath: copiedTurboSummaryPath,
+    timedOut: commandResult.timedOut,
   };
 }
 
