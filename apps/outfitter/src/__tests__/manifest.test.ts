@@ -145,6 +145,28 @@ describe("manifest", () => {
       expect(validated.version).toBe(1);
       expect(validated.blocks["lefthook"]?.installedFrom).toBe("0.2.1");
     });
+
+    test("writes manifest with two-space indentation", async () => {
+      const manifest: Manifest = {
+        version: 1,
+        blocks: {
+          linter: {
+            installedFrom: "0.3.4",
+            installedAt: "2026-03-09T23:00:00.000Z",
+          },
+        },
+      };
+
+      await writeManifest(testDir, manifest);
+
+      const raw = readFileSync(
+        join(testDir, ".outfitter/manifest.json"),
+        "utf-8"
+      );
+
+      expect(raw).toContain('\n  "version": 1,');
+      expect(raw).not.toContain("\t");
+    });
   });
 
   // =========================================================================

@@ -7,20 +7,20 @@ import { createMcpServer, defineTool, connectStdio } from "@outfitter/mcp";
 import { z } from "zod";
 
 const server = createMcpServer({
-	name: "{{binName}}",
-	version: "{{version}}",
+  name: "{{binName}}",
+  version: "{{version}}",
 });
 
 const helloTool = defineTool({
-	name: "hello",
-	description: "Say hello to someone",
-	inputSchema: z.object({
-		name: z.string().default("World").describe("Name to greet"),
-	}),
-	handler: async (input, ctx) => {
-		ctx.logger.info(`Greeting ${input.name}`);
-		return Result.ok({ greeting: `Hello, ${input.name}!` });
-	},
+  name: "hello",
+  description: "Say hello to someone",
+  inputSchema: z.object({
+    name: z.string().default("World").describe("Name to greet"),
+  }),
+  handler: async (input, ctx) => {
+    ctx.logger.info(`Greeting ${input.name}`);
+    return Result.ok({ greeting: `Hello, ${input.name}!` });
+  },
 });
 
 server.registerTool(helloTool);
@@ -29,5 +29,5 @@ export { server };
 
 /** Start the MCP server over stdio transport. */
 export async function startServer(): Promise<void> {
-	await connectStdio(server);
+  await connectStdio(server);
 }

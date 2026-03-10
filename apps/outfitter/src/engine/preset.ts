@@ -10,6 +10,7 @@ import { extname, join } from "node:path";
 
 import { Result } from "@outfitter/contracts";
 import { getPresetsDir } from "@outfitter/presets";
+import ts from "typescript";
 
 import type { EngineOptions, PlaceholderValues } from "./types.js";
 import { ScaffoldError } from "./types.js";
@@ -81,6 +82,135 @@ export function replacePlaceholders(
     }
     return match;
   });
+}
+
+const IMPORT_SORTABLE_EXTENSIONS = new Set([
+  ".cjs",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+  ".ts",
+  ".tsx",
+]);
+
+function getScriptKind(filePath: string): ts.ScriptKind {
+  switch (extname(filePath).toLowerCase()) {
+    case ".js":
+      return ts.ScriptKind.JS;
+    case ".jsx":
+      return ts.ScriptKind.JSX;
+    case ".tsx":
+      return ts.ScriptKind.TSX;
+    default:
+      return ts.ScriptKind.TS;
+  }
+}
+
+function getImportSortKey(
+  statement: ts.ImportDeclaration | ts.ImportEqualsDeclaration,
+  sourceFile: ts.SourceFile,
+  content: string
+): string {
+  if (ts.isImportDeclaration(statement)) {
+    const moduleSpecifier = statement.moduleSpecifier;
+    return ts.isStringLiteral(moduleSpecifier)
+      ? moduleSpecifier.text
+      : moduleSpecifier.getText(sourceFile);
+  }
+
+  const reference = statement.moduleReference;
+  if (
+    ts.isExternalModuleReference(reference) &&
+    reference.expression &&
+    ts.isStringLiteral(reference.expression)
+  ) {
+    return reference.expression.text;
+  }
+
+  return content.slice(statement.getStart(sourceFile), statement.end);
+}
+
+function getImportGroup(sortKey: string): number {
+  // Keep runtime-provided modules ahead of package imports to match oxfmt.
+  if (sortKey.startsWith("bun:") || sortKey.startsWith("node:")) {
+    return 0;
+  }
+
+  if (sortKey.startsWith(".") || sortKey.startsWith("/")) {
+    return 2;
+  }
+
+  return 1;
+}
+
+export function sortLeadingImports(filePath: string, content: string): string {
+  if (!IMPORT_SORTABLE_EXTENSIONS.has(extname(filePath).toLowerCase())) {
+    return content;
+  }
+
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    getScriptKind(filePath)
+  );
+  const imports: (ts.ImportDeclaration | ts.ImportEqualsDeclaration)[] = [];
+
+  for (const statement of sourceFile.statements) {
+    if (
+      ts.isImportDeclaration(statement) ||
+      ts.isImportEqualsDeclaration(statement)
+    ) {
+      imports.push(statement);
+      continue;
+    }
+
+    break;
+  }
+
+  if (imports.length < 2) {
+    return content;
+  }
+
+  const firstImportStart = imports[0]!.getStart(sourceFile);
+  const lastImportEnd = imports[imports.length - 1]!.end;
+  const sortedImports = [...imports]
+    .map((statement) => ({
+      statement,
+      sortKey: getImportSortKey(statement, sourceFile, content),
+    }))
+    .toSorted((left, right) => {
+      const groupDifference =
+        getImportGroup(left.sortKey) - getImportGroup(right.sortKey);
+      if (groupDifference !== 0) {
+        return groupDifference;
+      }
+      return left.sortKey.localeCompare(right.sortKey);
+    });
+  let importsBlock = "";
+
+  for (const [index, entry] of sortedImports.entries()) {
+    const importText = content
+      .slice(entry.statement.getStart(sourceFile), entry.statement.end)
+      .trimEnd();
+    if (index === 0) {
+      importsBlock = importText;
+      continue;
+    }
+
+    const previous = sortedImports[index - 1];
+    const separator =
+      previous &&
+      getImportGroup(previous.sortKey) !== getImportGroup(entry.sortKey)
+        ? "\n\n"
+        : "\n";
+    importsBlock = `${importsBlock}${separator}${importText}`;
+  }
+
+  return `${content.slice(0, firstImportStart)}${importsBlock}${content.slice(lastImportEnd)}`;
 }
 
 export function copyPresetFiles(
@@ -197,7 +327,10 @@ export function copyPresetFiles(
       }
 
       const content = readFileSync(sourcePath, "utf-8");
-      const processedContent = replacePlaceholders(content, values);
+      const processedContent = sortLeadingImports(
+        targetPath,
+        replacePlaceholders(content, values)
+      );
       writeFileSync(targetPath, processedContent, "utf-8");
       copyOptions?.writtenPaths?.add(targetPath);
     }
