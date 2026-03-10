@@ -106,16 +106,16 @@ export function buildCheckOrchestratorPlan(
 ): readonly CheckOrchestratorStep[] {
   const stagedFiles = normalizePaths(options.stagedFiles);
   const commandProfile = options.commandProfile ?? "default";
-  const typecheckCommand =
-    commandProfile === "hook"
-      ? ["bun", "run", "typecheck:hook"]
-      : ["bun", "run", "typecheck", "--", "--only"];
-  const lintAndFormatCommand =
-    commandProfile === "hook"
-      ? ["bun", "run", "check:hook"]
-      : ["bun", "run", "check"];
 
   if (options.mode === "all" || options.mode === "ci") {
+    const typecheckCommand =
+      commandProfile === "hook"
+        ? ["bun", "run", "typecheck:hook"]
+        : ["bun", "run", "typecheck", "--", "--only"];
+    const lintAndFormatCommand =
+      commandProfile === "hook"
+        ? ["bun", "run", "check:hook"]
+        : ["bun", "run", "check"];
     const steps: CheckOrchestratorStep[] = [
       {
         id: "block-drift",
