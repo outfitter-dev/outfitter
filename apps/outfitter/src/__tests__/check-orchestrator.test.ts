@@ -430,7 +430,7 @@ describe("runCheckOrchestrator", () => {
       resolveFirstExitCode = resolve;
     });
 
-    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((command) => {
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((_command) => {
       const invocationCount = spawnSpy.mock.calls.length;
       if (invocationCount === 1) {
         return createSpawnResult({
