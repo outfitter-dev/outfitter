@@ -121,6 +121,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  const presets = resolveScaffoldE2EPresets(args.presets);
   const pruneResult = pruneScaffoldE2ERuns({
     rootDir,
     maxAgeMs: args.maxAgeMs,
@@ -133,11 +134,7 @@ async function main(): Promise<void> {
     );
   }
 
-  const runDir = createScaffoldE2ERunDir({
-    rootDir,
-    runLabel: "manual",
-  });
-  const presets = resolveScaffoldE2EPresets(args.presets);
+  const runDir = createScaffoldE2ERunDir({ rootDir, runLabel: "manual" });
   let completed = false;
 
   process.stdout.write(`[scaffold-e2e] run dir: ${runDir}\n`);
