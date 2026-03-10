@@ -221,6 +221,8 @@ export const checkAction: CheckAction = defineAction({
     if (mode !== undefined) {
       const commandProfile =
         process.env[CHECK_COMMAND_PROFILE_ENV] === "hook" ? "hook" : "default";
+      // Stream live output for all human-mode runs so local check commands and
+      // hooks share the same step-by-step visibility.
       const liveOutput = resolveStructuredOutputMode(outputMode) === undefined;
       const orchestratorResult = await runCheckOrchestrator({
         commandProfile,
