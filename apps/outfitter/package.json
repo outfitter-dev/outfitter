@@ -382,6 +382,12 @@
       }
     },
     "./package.json": "./package.json",
+    "./scaffold-e2e/config": {
+      "import": {
+        "types": "./dist/scaffold-e2e/config.d.ts",
+        "default": "./dist/scaffold-e2e/config.js"
+      }
+    },
     "./scaffold-e2e/runner": {
       "import": {
         "types": "./dist/scaffold-e2e/runner.d.ts",
@@ -447,6 +453,7 @@
     "build": "cd ../.. && bash ./scripts/run-bunup-with-lock.sh bunup --filter outfitter",
     "postbuild": "bun link",
     "dev": "bun run src/cli.ts",
+    "scaffold:e2e:ci": "bun run ./src/scripts/scaffold-e2e.ts --ci",
     "scaffold:e2e": "bun run ./src/scripts/scaffold-e2e.ts",
     "scaffold:e2e:clean": "bun run ./src/scripts/scaffold-e2e.ts --clean",
     "test": "bun test",

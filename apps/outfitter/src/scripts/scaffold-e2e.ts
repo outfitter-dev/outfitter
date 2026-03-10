@@ -6,93 +6,18 @@
  * @packageDocumentation
  */
 
+import { parseScaffoldE2EArgs } from "../scaffold-e2e/cli.js";
+import { resolveScaffoldE2EProfile } from "../scaffold-e2e/config.js";
 import {
   resolveScaffoldE2EPresets,
   runScaffoldE2ESuite,
 } from "../scaffold-e2e/runner.js";
 import {
-  DEFAULT_SCAFFOLD_E2E_RETENTION_MS,
   cleanupScaffoldE2ERunDir,
   createScaffoldE2ERunDir,
   pruneScaffoldE2ERuns,
   resolveScaffoldE2ERoot,
 } from "../scaffold-e2e/workspace.js";
-
-interface ParsedArgs {
-  readonly clean: boolean;
-  readonly keep: boolean;
-  readonly maxAgeMs: number;
-  readonly presets: readonly string[] | undefined;
-  readonly rootDir: string | undefined;
-}
-
-function parseArgs(argv: readonly string[]): ParsedArgs {
-  let clean = false;
-  let keep = process.env["OUTFITTER_SCAFFOLD_E2E_KEEP"] === "1";
-  let rootDir = process.env["OUTFITTER_SCAFFOLD_E2E_ROOT"];
-  let maxAgeMs = DEFAULT_SCAFFOLD_E2E_RETENTION_MS;
-  const presets: string[] = [];
-
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-
-    if (arg === "--clean") {
-      clean = true;
-      continue;
-    }
-
-    if (arg === "--keep") {
-      keep = true;
-      continue;
-    }
-
-    if (arg === "--root") {
-      const value = argv[index + 1];
-      if (!value) {
-        throw new Error("Missing value for --root");
-      }
-      rootDir = value;
-      index += 1;
-      continue;
-    }
-
-    if (arg === "--max-age-hours") {
-      const value = argv[index + 1];
-      if (!value) {
-        throw new Error("Missing value for --max-age-hours");
-      }
-
-      const hours = Number(value);
-      if (!Number.isFinite(hours) || hours < 0) {
-        throw new Error(`Invalid --max-age-hours value: ${value}`);
-      }
-
-      maxAgeMs = hours * 60 * 60 * 1000;
-      index += 1;
-      continue;
-    }
-
-    if (arg === "--preset") {
-      const value = argv[index + 1];
-      if (!value) {
-        throw new Error("Missing value for --preset");
-      }
-      presets.push(value);
-      index += 1;
-      continue;
-    }
-
-    throw new Error(`Unknown argument: ${arg}`);
-  }
-
-  return {
-    clean,
-    keep,
-    maxAgeMs,
-    presets: presets.length > 0 ? presets : undefined,
-    rootDir,
-  };
-}
 
 function printPruneSummary(
   action: "pruned" | "cleaned",
@@ -105,7 +30,7 @@ function printPruneSummary(
 }
 
 async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseScaffoldE2EArgs(process.argv.slice(2));
   const rootDir = resolveScaffoldE2ERoot(args.rootDir);
 
   if (args.clean) {
@@ -121,6 +46,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  const profile = resolveScaffoldE2EProfile(args.profile);
   const presets = resolveScaffoldE2EPresets(args.presets);
   const pruneResult = pruneScaffoldE2ERuns({
     rootDir,
@@ -138,10 +64,12 @@ async function main(): Promise<void> {
   let completed = false;
 
   process.stdout.write(`[scaffold-e2e] run dir: ${runDir}\n`);
+  process.stdout.write(`[scaffold-e2e] profile: ${profile.id}\n`);
   process.stdout.write(`[scaffold-e2e] presets: ${presets.join(", ")}\n`);
 
   try {
     const results = await runScaffoldE2ESuite({
+      profile: args.profile,
       runDir,
       presets,
     });

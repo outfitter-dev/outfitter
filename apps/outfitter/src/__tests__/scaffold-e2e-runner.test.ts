@@ -80,6 +80,30 @@ describe("scaffold e2e runner preset resolution", () => {
     }
   });
 
+  test("uses the ci smoke profile when requested", async () => {
+    const commands: string[][] = [];
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((command) => {
+      commands.push([...(command as string[])]);
+      return createSpawnResult({ exitCode: 0 });
+    });
+
+    try {
+      const results = await runScaffoldE2ESuite({
+        profile: "ci",
+        runDir: "/tmp/outfitter-scaffold-e2e-runner-ci",
+      });
+
+      expect(results.map((result) => result.preset)).toEqual([
+        "cli",
+        "library",
+        "full-stack",
+      ]);
+      expect(commands).toHaveLength(9);
+    } finally {
+      spawnSpy.mockRestore();
+    }
+  });
+
   test("kills timed-out commands with SIGKILL", async () => {
     let resolveExitCode: ((value: number) => void) | undefined;
     const timedOutExitCode = new Promise<number>((resolve) => {

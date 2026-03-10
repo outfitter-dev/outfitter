@@ -10,6 +10,13 @@ import {
   type InitPresetId,
   isValidInitPreset,
 } from "../commands/init-option-resolution.js";
+import {
+  DEFAULT_SCAFFOLD_E2E_PRESETS,
+  resolveScaffoldE2EProfile,
+  type ScaffoldE2EProfileId,
+} from "./config.js";
+
+export { DEFAULT_SCAFFOLD_E2E_PRESETS } from "./config.js";
 
 export interface CommandResult {
   readonly exitCode: number;
@@ -28,19 +35,11 @@ export interface ScaffoldPresetVerificationResult {
 }
 
 export interface RunScaffoldE2ESuiteOptions {
+  readonly profile?: ScaffoldE2EProfileId;
   readonly presets?: readonly InitPresetId[];
   readonly runDir: string;
   readonly timeoutMs?: number;
 }
-
-export const DEFAULT_SCAFFOLD_E2E_PRESETS: readonly InitPresetId[] = [
-  "cli",
-  "library",
-  "full-stack",
-  "minimal",
-  "mcp",
-  "daemon",
-] as const;
 
 const cliEntry = join(import.meta.dir, "..", "cli.ts");
 const repoRoot = join(import.meta.dir, "..", "..", "..", "..");
@@ -159,8 +158,9 @@ async function runInitViaCli(
 export async function runScaffoldE2ESuite(
   options: RunScaffoldE2ESuiteOptions
 ): Promise<readonly ScaffoldPresetVerificationResult[]> {
-  const timeoutMs = options.timeoutMs ?? 240_000;
-  const presets = options.presets ?? DEFAULT_SCAFFOLD_E2E_PRESETS;
+  const profile = resolveScaffoldE2EProfile(options.profile);
+  const timeoutMs = options.timeoutMs ?? profile.commandTimeoutMs;
+  const presets = options.presets ?? profile.presets;
   const results: ScaffoldPresetVerificationResult[] = [];
 
   for (const preset of presets) {
