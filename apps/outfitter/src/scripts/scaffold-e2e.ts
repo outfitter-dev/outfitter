@@ -6,12 +6,11 @@
  * @packageDocumentation
  */
 
-import { parseScaffoldE2EArgs } from "../scaffold-e2e/cli.js";
-import { resolveScaffoldE2EProfile } from "../scaffold-e2e/config.js";
 import {
-  resolveScaffoldE2EPresets,
-  runScaffoldE2ESuite,
-} from "../scaffold-e2e/runner.js";
+  parseScaffoldE2EArgs,
+  resolveScaffoldE2EScriptPlan,
+} from "../scaffold-e2e/cli.js";
+import { runScaffoldE2ESuite } from "../scaffold-e2e/runner.js";
 import {
   cleanupScaffoldE2ERunDir,
   createScaffoldE2ERunDir,
@@ -46,8 +45,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const profile = resolveScaffoldE2EProfile(args.profile);
-  const presets = resolveScaffoldE2EPresets(args.presets);
+  const plan = resolveScaffoldE2EScriptPlan(args);
   const pruneResult = pruneScaffoldE2ERuns({
     rootDir,
     maxAgeMs: args.maxAgeMs,
@@ -64,14 +62,14 @@ async function main(): Promise<void> {
   let completed = false;
 
   process.stdout.write(`[scaffold-e2e] run dir: ${runDir}\n`);
-  process.stdout.write(`[scaffold-e2e] profile: ${profile.id}\n`);
-  process.stdout.write(`[scaffold-e2e] presets: ${presets.join(", ")}\n`);
+  process.stdout.write(`[scaffold-e2e] profile: ${plan.profile.id}\n`);
+  process.stdout.write(`[scaffold-e2e] presets: ${plan.presets.join(", ")}\n`);
 
   try {
     const results = await runScaffoldE2ESuite({
       profile: args.profile,
       runDir,
-      presets,
+      presets: plan.presets,
     });
 
     completed = true;

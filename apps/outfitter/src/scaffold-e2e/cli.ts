@@ -4,7 +4,10 @@
  * @packageDocumentation
  */
 
+import type { InitPresetId } from "../commands/init-option-resolution.js";
 import type { ScaffoldE2EProfileId } from "./config.js";
+import { resolveScaffoldE2EProfile } from "./config.js";
+import { resolveScaffoldE2EPresets } from "./runner.js";
 import { DEFAULT_SCAFFOLD_E2E_RETENTION_MS } from "./workspace.js";
 
 export interface ParsedScaffoldE2EArgs {
@@ -94,5 +97,20 @@ export function parseScaffoldE2EArgs(
     presets: presets.length > 0 ? presets : undefined,
     profile,
     rootDir,
+  };
+}
+
+export function resolveScaffoldE2EScriptPlan(args: ParsedScaffoldE2EArgs): {
+  readonly presets: readonly InitPresetId[];
+  readonly profile: ReturnType<typeof resolveScaffoldE2EProfile>;
+} {
+  const profile = resolveScaffoldE2EProfile(args.profile);
+  const presets = args.presets
+    ? resolveScaffoldE2EPresets(args.presets)
+    : profile.presets;
+
+  return {
+    profile,
+    presets,
   };
 }
