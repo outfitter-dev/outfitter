@@ -167,8 +167,18 @@ describe("init command file creation", () => {
     ) as {
       rules?: Record<string, unknown>;
     };
-    expect(oxlintConfig.rules?.["outfitter/no-process-env-in-packages"]).toBe(
-      "warn"
+    const shippedOxlintConfig = JSON.parse(
+      readFileSync(
+        join(process.cwd(), "packages/tooling/configs/.oxlintrc.json"),
+        "utf-8"
+      )
+    ) as {
+      rules?: Record<string, unknown>;
+    };
+    expect(
+      oxlintConfig.rules?.["outfitter/no-process-env-in-packages"]
+    ).toEqual(
+      shippedOxlintConfig.rules?.["outfitter/no-process-env-in-packages"]
     );
 
     for (const relativePath of [
