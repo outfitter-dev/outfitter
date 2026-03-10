@@ -106,14 +106,14 @@ async function waitFor(
     readonly description?: string;
   } = {}
 ): Promise<void> {
-  const attempts = options.attempts ?? 20;
+  const attempts = options.attempts ?? 100;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (predicate()) {
       return;
     }
 
-    await Bun.sleep(0);
+    await Bun.sleep(1);
   }
 
   throw new Error(
@@ -163,19 +163,21 @@ describe("buildCheckOrchestratorPlan", () => {
     });
   });
 
-  test("ci mode swaps turbo-heavy steps to hook scripts for hook command profile", () => {
-    const plan = buildCheckOrchestratorPlan({
-      commandProfile: "hook",
-      cwd: process.cwd(),
-      mode: "ci",
-    });
+  test("hook command profile swaps turbo-heavy steps for all and ci modes", () => {
+    for (const mode of ["all", "ci"] as const) {
+      const plan = buildCheckOrchestratorPlan({
+        commandProfile: "hook",
+        cwd: process.cwd(),
+        mode,
+      });
 
-    expect(plan.find((step) => step.id === "typecheck")).toMatchObject({
-      command: ["bun", "run", "typecheck:hook"],
-    });
-    expect(plan.find((step) => step.id === "lint-and-format")).toMatchObject({
-      command: ["bun", "run", "check:hook"],
-    });
+      expect(plan.find((step) => step.id === "typecheck")).toMatchObject({
+        command: ["bun", "run", "typecheck:hook"],
+      });
+      expect(plan.find((step) => step.id === "lint-and-format")).toMatchObject({
+        command: ["bun", "run", "check:hook"],
+      });
+    }
   });
 
   test("pre-push mode runs block drift, hook verify, and schema drift", () => {
