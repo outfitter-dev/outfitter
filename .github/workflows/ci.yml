@@ -331,6 +331,7 @@ jobs:
           if-no-files-found: ignore
           path: |
             .outfitter/scaffold-e2e/**
+            !.outfitter/scaffold-e2e/**/node_modules/**
             .outfitter/reports/ci/**
             .turbo/runs/*.json
 
