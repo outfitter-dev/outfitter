@@ -306,6 +306,13 @@ describe("init command file creation", () => {
     expect(indexContent).toContain('export * from "./types.js";');
     expect(indexContent).toContain('export * from "./handlers.js";');
 
+    const typesPath = join(tempDir, "src", "types.ts");
+    const typesContent = readFileSync(typesPath, "utf-8");
+    expect(typesContent).toContain('import { type ZodType, z } from "zod";');
+    expect(typesContent).toContain(
+      "export const greetingInputSchema: ZodType<GreetingInput> = z.object({"
+    );
+
     const handlerPath = join(tempDir, "src", "handlers.ts");
     const handlerContent = readFileSync(handlerPath, "utf-8");
     expect(handlerContent).toContain("Result.ok");
@@ -427,6 +434,15 @@ describe("init command file creation", () => {
     );
     expect(coreHandlerSource).toContain(
       "Promise<Result<Greeting, ValidationError>>"
+    );
+
+    const coreTypesSource = readFileSync(
+      join(tempDir, "packages", "core", "src", "types.ts"),
+      "utf-8"
+    );
+    expect(coreTypesSource).toContain('import { type ZodType, z } from "zod";');
+    expect(coreTypesSource).toContain(
+      "export const greetingInputSchema: ZodType<GreetingInput> = z.object({"
     );
   });
 

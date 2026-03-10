@@ -1,11 +1,14 @@
-import { z } from "zod";
+import { type ZodType, z } from "zod";
 
-export const greetingInputSchema = z.object({
+export interface GreetingInput {
+  readonly name: string;
+  readonly excited: boolean;
+}
+
+export const greetingInputSchema: ZodType<GreetingInput> = z.object({
   name: z.string().min(1, "name is required"),
   excited: z.boolean().default(false),
 });
-
-export type GreetingInput = z.infer<typeof greetingInputSchema>;
 
 export interface Greeting {
   readonly message: string;

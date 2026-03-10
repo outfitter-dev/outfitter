@@ -43,7 +43,7 @@ const TOOLING_ARTIFACTS = [
   "packages/tooling/configs/.oxfmtrc.jsonc",
 ] as const;
 
-type GuardrailTool = "oxfmt" | "oxlint" | "ultracite";
+type GuardrailTool = "oxfmt" | "oxlint" | "schema-annotation" | "ultracite";
 
 export interface TemplateGuardrailFailure {
   readonly output: string;
@@ -60,6 +60,15 @@ export interface TemplateGuardrailResult {
 export interface RunTemplateGuardrailsOptions {
   readonly workspaceRoot: string;
 }
+
+interface MissingSchemaAnnotation {
+  readonly line: number;
+  readonly path: string;
+  readonly source: string;
+}
+
+const EXPORTED_SCHEMA_WITHOUT_ANNOTATION_PATTERN =
+  /export const [A-Za-z0-9_]+Schema\s*=\s*z\./;
 
 function stripTemplateSuffix(filePath: string): string {
   return filePath.endsWith(".template")
@@ -116,6 +125,59 @@ function mirrorArtifacts(
   }
 
   return mirrored;
+}
+
+export function findMissingExportedSchemaAnnotations(
+  files: readonly {
+    readonly content: string;
+    readonly path: string;
+  }[]
+): readonly MissingSchemaAnnotation[] {
+  const failures: MissingSchemaAnnotation[] = [];
+
+  for (const file of files) {
+    const lines = file.content.split("\n");
+    for (const [index, line] of lines.entries()) {
+      if (!EXPORTED_SCHEMA_WITHOUT_ANNOTATION_PATTERN.test(line)) {
+        continue;
+      }
+
+      failures.push({
+        path: file.path,
+        line: index + 1,
+        source: line.trim(),
+      });
+    }
+  }
+
+  return failures;
+}
+
+function findSchemaAnnotationFailure(
+  workspaceRoot: string,
+  artifactPaths: readonly string[]
+): TemplateGuardrailFailure | undefined {
+  const filesToCheck = artifactPaths
+    .filter((path) => path.endsWith(".ts") || path.endsWith(".ts.template"))
+    .map((path) => ({
+      path,
+      content: readFileSync(join(workspaceRoot, path), "utf-8"),
+    }));
+  const missingAnnotations = findMissingExportedSchemaAnnotations(filesToCheck);
+  if (missingAnnotations.length === 0) {
+    return undefined;
+  }
+
+  return {
+    tool: "schema-annotation",
+    paths: missingAnnotations.map((entry) => entry.path),
+    output: missingAnnotations
+      .map(
+        (entry) =>
+          `${entry.path}:${entry.line} exported Zod schema is missing an explicit type annotation: ${entry.source}`
+      )
+      .join("\n"),
+  };
 }
 
 function runTool(
@@ -193,6 +255,7 @@ export async function runTemplateGuardrails(
     );
 
     const failures = [
+      findSchemaAnnotationFailure(workspaceRoot, artifactPaths),
       oxfmtPaths.length > 0
         ? runTool(workspaceRoot, workspaceRoot, "oxfmt", [
             "--config",
