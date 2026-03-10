@@ -17,6 +17,19 @@ function createTextStream(text: string): ReadableStream<Uint8Array> {
   });
 }
 
+function createReaderBackedStream(
+  onRead: () => Promise<ReadableStreamReadResult<Uint8Array>>
+): ReadableStream<Uint8Array> {
+  return {
+    getReader() {
+      return {
+        read: onRead,
+        releaseLock() {},
+      };
+    },
+  } as ReadableStream<Uint8Array>;
+}
+
 function createWritableTarget(
   chunks: string[]
 ): Pick<typeof process.stdout, "write"> {
@@ -28,6 +41,23 @@ function createWritableTarget(
         chunks.push(new TextDecoder().decode(chunk));
       }
       return true;
+    },
+  };
+}
+
+function createDeferred<T>(): {
+  readonly promise: Promise<T>;
+  readonly resolve: (value: T) => void;
+} {
+  let resolvePromise: ((value: T) => void) | undefined;
+  const promise = new Promise<T>((resolve) => {
+    resolvePromise = resolve;
+  });
+
+  return {
+    promise,
+    resolve(value: T): void {
+      resolvePromise?.(value);
     },
   };
 }
@@ -94,5 +124,103 @@ describe("runStreamedCommand", () => {
     expect(result.timedOut).toBe(true);
     expect(killSignals).toEqual(["SIGKILL"]);
     expect(heartbeats.length).toBeGreaterThan(0);
+  });
+
+  test("starts draining subprocess output before exit resolves", async () => {
+    const stdoutChunks: string[] = [];
+    const encoder = new TextEncoder();
+    const exit = createDeferred<number>();
+    const readStarted = createDeferred<void>();
+    let readCount = 0;
+
+    const resultPromise = runStreamedCommand({
+      command: ["bun", "x", "turbo", "run", "test"],
+      cwd: process.cwd(),
+      stdoutTargets: [createWritableTarget(stdoutChunks)],
+      timeoutMs: 1_000,
+      spawn: (() =>
+        ({
+          exited: exit.promise,
+          kill: () => {},
+          stderr: createTextStream(""),
+          stdout: createReaderBackedStream(async () => {
+            readCount += 1;
+            if (readCount === 1) {
+              readStarted.resolve();
+              return {
+                done: false,
+                value: encoder.encode("stdout\n"),
+              };
+            }
+
+            return {
+              done: true,
+              value: undefined,
+            };
+          }),
+        }) as unknown as ReturnType<typeof Bun.spawn>) as typeof Bun.spawn,
+    });
+
+    const startedBeforeExit = await Promise.race([
+      readStarted.promise.then(() => true),
+      Bun.sleep(25).then(() => false),
+    ]);
+
+    exit.resolve(0);
+    const result = await resultPromise;
+
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(startedBeforeExit).toBe(true);
+    expect(stdoutChunks.join("")).toBe("stdout\n");
+  });
+
+  test("stops heartbeats as soon as the subprocess exit is known", async () => {
+    const encoder = new TextEncoder();
+    const exit = createDeferred<number>();
+    const releaseDrain = createDeferred<void>();
+    const heartbeats: StreamCommandHeartbeat[] = [];
+    let readCount = 0;
+
+    const resultPromise = runStreamedCommand({
+      command: ["bun", "x", "turbo", "run", "test"],
+      cwd: process.cwd(),
+      heartbeatIntervalMs: 10,
+      onHeartbeat: (heartbeat) => {
+        heartbeats.push(heartbeat);
+      },
+      timeoutMs: 1_000,
+      spawn: (() =>
+        ({
+          exited: exit.promise,
+          kill: () => {},
+          stderr: createTextStream(""),
+          stdout: createReaderBackedStream(async () => {
+            readCount += 1;
+            if (readCount === 1) {
+              return {
+                done: false,
+                value: encoder.encode("stdout\n"),
+              };
+            }
+
+            await releaseDrain.promise;
+            return {
+              done: true,
+              value: undefined,
+            };
+          }),
+        }) as unknown as ReturnType<typeof Bun.spawn>) as typeof Bun.spawn,
+    });
+
+    exit.resolve(0);
+    await Bun.sleep(35);
+    releaseDrain.resolve();
+
+    const result = await resultPromise;
+
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(heartbeats).toEqual([]);
   });
 });

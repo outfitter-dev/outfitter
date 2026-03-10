@@ -90,7 +90,7 @@ export async function runStreamedCommand(
     lastOutputAtMs = Date.now();
   };
 
-  const heartbeatTimer =
+  let heartbeatTimer: ReturnType<typeof setInterval> | undefined =
     options.heartbeatIntervalMs && options.heartbeatIntervalMs > 0
       ? setInterval(() => {
           options.onHeartbeat?.({
@@ -102,6 +102,15 @@ export async function runStreamedCommand(
         }, options.heartbeatIntervalMs)
       : undefined;
 
+  const clearHeartbeatTimer = (): void => {
+    if (!heartbeatTimer) {
+      return;
+    }
+
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = undefined;
+  };
+
   const timeout = new Promise<"timeout">((resolveTimeout) => {
     const timer = setTimeout(
       () => resolveTimeout("timeout"),
@@ -110,19 +119,33 @@ export async function runStreamedCommand(
     handle.exited.finally(() => clearTimeout(timer));
   });
 
+  // Start draining immediately so subprocess output cannot block on full pipes.
+  const stdoutDone = mirrorStream(
+    handle.stdout,
+    options.stdoutTargets,
+    markOutput
+  );
+  const stderrDone = mirrorStream(
+    handle.stderr,
+    options.stderrTargets,
+    markOutput
+  );
+
   try {
     const race = await Promise.race([
       handle.exited.then(() => "exit"),
       timeout,
     ]);
+    clearHeartbeatTimer();
+
     if (race === "timeout") {
       handle.kill("SIGKILL");
     }
 
     const [exitCode] = await Promise.all([
       handle.exited,
-      mirrorStream(handle.stdout, options.stdoutTargets, markOutput),
-      mirrorStream(handle.stderr, options.stderrTargets, markOutput),
+      stdoutDone,
+      stderrDone,
     ]);
 
     return {
@@ -131,8 +154,6 @@ export async function runStreamedCommand(
       timedOut: race === "timeout",
     };
   } finally {
-    if (heartbeatTimer) {
-      clearInterval(heartbeatTimer);
-    }
+    clearHeartbeatTimer();
   }
 }
