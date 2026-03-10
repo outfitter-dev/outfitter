@@ -89,7 +89,6 @@ async function runCommand(
     proc.exited.finally(() => clearTimeout(timer));
   });
 
-  const startedAt = Date.now();
   const race = await Promise.race([proc.exited.then(() => "exit"), timeout]);
   if (race === "timeout") {
     proc.kill();
@@ -105,7 +104,9 @@ async function runCommand(
     exitCode,
     stdout,
     stderr,
-    timedOut: race === "timeout" || Date.now() - startedAt > timeoutMs,
+    // The race is the timeout source of truth; draining buffered output can
+    // finish after the process exits without meaning the command timed out.
+    timedOut: race === "timeout",
   };
 }
 

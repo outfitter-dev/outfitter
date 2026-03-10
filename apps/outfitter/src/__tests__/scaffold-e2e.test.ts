@@ -9,7 +9,6 @@
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-const SCAFFOLD_E2E_ENABLED = process.env["OUTFITTER_RUN_SCAFFOLD_E2E"] === "1";
 import {
   DEFAULT_SCAFFOLD_E2E_PRESETS,
   runScaffoldE2ESuite,
@@ -20,9 +19,16 @@ import {
   pruneScaffoldE2ERuns,
 } from "../scaffold-e2e/workspace.js";
 
-let tempDir: string;
+const SCAFFOLD_E2E_ENABLED = process.env["OUTFITTER_RUN_SCAFFOLD_E2E"] === "1";
+
+let tempDir: string | undefined;
 
 beforeEach(() => {
+  if (!SCAFFOLD_E2E_ENABLED) {
+    tempDir = undefined;
+    return;
+  }
+
   pruneScaffoldE2ERuns();
   tempDir = createScaffoldE2ERunDir({
     runLabel: "test",
@@ -30,15 +36,22 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  if (!SCAFFOLD_E2E_ENABLED || tempDir === undefined) {
+    return;
+  }
+
   if (process.env["OUTFITTER_SCAFFOLD_E2E_KEEP"] !== "1") {
     cleanupScaffoldE2ERunDir(tempDir);
   }
+
+  tempDir = undefined;
 });
 
 describe("scaffold e2e verification", () => {
   if (!SCAFFOLD_E2E_ENABLED) {
     test("is disabled unless OUTFITTER_RUN_SCAFFOLD_E2E=1", () => {
       expect(SCAFFOLD_E2E_ENABLED).toBe(false);
+      expect(tempDir).toBeUndefined();
     });
     return;
   }
@@ -47,7 +60,7 @@ describe("scaffold e2e verification", () => {
     "scaffolds each supported preset and runs generated build + tests",
     async () => {
       const results = await runScaffoldE2ESuite({
-        runDir: tempDir,
+        runDir: tempDir!,
         presets: DEFAULT_SCAFFOLD_E2E_PRESETS,
       });
 
