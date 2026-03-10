@@ -3,6 +3,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import {
   DEFAULT_SCAFFOLD_E2E_PRESETS,
   resolveScaffoldE2EPresets,
+  resolveScaffoldCliEntry,
   runScaffoldE2ESuite,
 } from "../scaffold-e2e/runner.js";
 
@@ -57,6 +58,15 @@ describe("scaffold e2e runner preset resolution", () => {
     expect(() => resolveScaffoldE2EPresets(["cli", "unknown"])).toThrow(
       "Unknown scaffold E2E preset(s): unknown"
     );
+  });
+
+  test("falls back to the built CLI entry when source files are unavailable", () => {
+    expect(
+      resolveScaffoldCliEntry(
+        "/tmp/outfitter/apps/outfitter/dist/scaffold-e2e",
+        (path) => path.endsWith("cli.js")
+      )
+    ).toBe("/tmp/outfitter/apps/outfitter/dist/cli.js");
   });
 
   test("keeps default tooling enabled for smoke scaffolds", async () => {

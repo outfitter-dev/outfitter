@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -41,7 +42,24 @@ export interface RunScaffoldE2ESuiteOptions {
   readonly timeoutMs?: number;
 }
 
-const cliEntry = join(import.meta.dir, "..", "cli.ts");
+export function resolveScaffoldCliEntry(
+  baseDir: string,
+  fileExists: (path: string) => boolean = existsSync
+): string {
+  const sourceEntry = join(baseDir, "..", "cli.ts");
+  if (fileExists(sourceEntry)) {
+    return sourceEntry;
+  }
+
+  const builtEntry = join(baseDir, "..", "cli.js");
+  if (fileExists(builtEntry)) {
+    return builtEntry;
+  }
+
+  throw new Error(`Unable to resolve outfitter CLI entry from ${baseDir}`);
+}
+
+const cliEntry = resolveScaffoldCliEntry(import.meta.dir);
 const repoRoot = join(import.meta.dir, "..", "..", "..", "..");
 
 function createProjectName(preset: InitPresetId): string {
@@ -164,6 +182,8 @@ export async function runScaffoldE2ESuite(
   const results: ScaffoldPresetVerificationResult[] = [];
 
   for (const preset of presets) {
+    const presetStartedAt = Date.now();
+    process.stderr.write(`[scaffold-e2e] starting preset: ${preset}\n`);
     const targetDir = join(options.runDir, preset);
     const steps: { command: string; durationMs: number }[] = [];
 
@@ -205,6 +225,10 @@ export async function runScaffoldE2ESuite(
       targetDir,
       steps,
     });
+    const presetDurationMs = Date.now() - presetStartedAt;
+    process.stderr.write(
+      `[scaffold-e2e] completed preset: ${preset} (${presetDurationMs}ms)\n`
+    );
   }
 
   return results;
