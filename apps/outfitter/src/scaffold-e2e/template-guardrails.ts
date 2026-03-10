@@ -18,7 +18,14 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { delimiter, dirname, join, relative, resolve } from "node:path";
+import {
+  delimiter,
+  dirname,
+  extname,
+  join,
+  relative,
+  resolve,
+} from "node:path";
 
 const OXFMT_EXTENSIONS = new Set([
   ".ts",
@@ -74,17 +81,6 @@ function stripTemplateSuffix(filePath: string): string {
   return filePath.endsWith(".template")
     ? filePath.slice(0, -".template".length)
     : filePath;
-}
-
-function fileExtension(filePath: string): string {
-  const segments = filePath.split("/");
-  const fileName = segments[segments.length - 1] ?? "";
-  const dotIndex = fileName.indexOf(".");
-  if (dotIndex === -1) {
-    return "";
-  }
-
-  return fileName.slice(dotIndex);
 }
 
 function collectArtifactPaths(workspaceRoot: string): string[] {
@@ -242,13 +238,13 @@ export async function runTemplateGuardrails(
       artifactPaths
     );
     const oxfmtPaths = mirroredPaths.filter((path) =>
-      OXFMT_EXTENSIONS.has(fileExtension(path))
+      OXFMT_EXTENSIONS.has(extname(path))
     );
     const oxlintPaths = mirroredPaths.filter((path) =>
-      OXLINT_EXTENSIONS.has(fileExtension(path))
+      OXLINT_EXTENSIONS.has(extname(path))
     );
     const ultracitePaths = mirroredPaths.filter((path) =>
-      ULTRACITE_EXTENSIONS.has(fileExtension(path))
+      ULTRACITE_EXTENSIONS.has(extname(path))
     );
     const relativeOxlintPaths = oxlintPaths.map((path) =>
       relative(tempDir, path)
