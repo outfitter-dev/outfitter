@@ -57,6 +57,70 @@ async function captureStdout(run: () => Promise<void> | void): Promise<string> {
   }
 }
 
+function captureOutputWrites(): {
+  readonly stderrChunks: string[];
+  restore: () => void;
+  readonly stdoutChunks: string[];
+} {
+  const stdoutChunks: string[] = [];
+  const stderrChunks: string[] = [];
+  const originalStdoutWrite = process.stdout.write;
+  const originalStderrWrite = process.stderr.write;
+
+  process.stdout.write = ((chunk: unknown): boolean => {
+    if (typeof chunk === "string") {
+      stdoutChunks.push(chunk);
+    } else if (chunk instanceof Uint8Array) {
+      stdoutChunks.push(new TextDecoder().decode(chunk));
+    } else {
+      stdoutChunks.push(String(chunk));
+    }
+    return true;
+  }) as typeof process.stdout.write;
+
+  process.stderr.write = ((chunk: unknown): boolean => {
+    if (typeof chunk === "string") {
+      stderrChunks.push(chunk);
+    } else if (chunk instanceof Uint8Array) {
+      stderrChunks.push(new TextDecoder().decode(chunk));
+    } else {
+      stderrChunks.push(String(chunk));
+    }
+    return true;
+  }) as typeof process.stderr.write;
+
+  return {
+    stdoutChunks,
+    stderrChunks,
+    restore: () => {
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+    },
+  };
+}
+
+async function waitFor(
+  predicate: () => boolean,
+  options: {
+    readonly attempts?: number;
+    readonly description?: string;
+  } = {}
+): Promise<void> {
+  const attempts = options.attempts ?? 20;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (predicate()) {
+      return;
+    }
+
+    await Bun.sleep(0);
+  }
+
+  throw new Error(
+    `Timed out waiting for ${options.description ?? "the expected condition"}`
+  );
+}
+
 describe("buildCheckOrchestratorPlan", () => {
   test("all mode includes core checks and excludes tests", () => {
     const plan = buildCheckOrchestratorPlan({
@@ -96,6 +160,21 @@ describe("buildCheckOrchestratorPlan", () => {
     expect(stepIds.at(-1)).toBe("tests");
     expect(plan.find((step) => step.id === "tests")).toMatchObject({
       command: ["bun", "run", "test:ci"],
+    });
+  });
+
+  test("ci mode swaps turbo-heavy steps to hook scripts for hook command profile", () => {
+    const plan = buildCheckOrchestratorPlan({
+      commandProfile: "hook",
+      cwd: process.cwd(),
+      mode: "ci",
+    });
+
+    expect(plan.find((step) => step.id === "typecheck")).toMatchObject({
+      command: ["bun", "run", "typecheck:hook"],
+    });
+    expect(plan.find((step) => step.id === "lint-and-format")).toMatchObject({
+      command: ["bun", "run", "check:hook"],
     });
   });
 
@@ -338,6 +417,112 @@ describe("runCheckOrchestrator", () => {
       spawnSyncSpy.mockRestore();
     }
   });
+
+  test("streams child output before a step exits when live output is enabled", async () => {
+    const spawnSyncSpy = spyOn(Bun, "spawnSync").mockReturnValue({
+      exitCode: 0,
+      stdout: new TextEncoder().encode(""),
+      stderr: new TextEncoder().encode(""),
+    } as unknown as ReturnType<typeof Bun.spawnSync>);
+
+    let resolveFirstExitCode: ((value: number) => void) | undefined;
+    const firstExitCode = new Promise<number>((resolve) => {
+      resolveFirstExitCode = resolve;
+    });
+
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation((command) => {
+      const invocationCount = spawnSpy.mock.calls.length;
+      if (invocationCount === 1) {
+        return createSpawnResult({
+          exitCode: firstExitCode,
+          stdout: "streamed stdout\n",
+          stderr: "streamed stderr\n",
+        });
+      }
+
+      return createSpawnResult({ exitCode: 0 });
+    });
+
+    const captured = captureOutputWrites();
+
+    try {
+      const runPromise = runCheckOrchestrator({
+        cwd: process.cwd(),
+        mode: "pre-push",
+        streamOutput: true,
+      });
+
+      await waitFor(
+        () =>
+          captured.stdoutChunks.join("").includes("streamed stdout") &&
+          captured.stderrChunks.join("").includes("streamed stderr"),
+        {
+          description: "streamed child output",
+        }
+      );
+
+      expect(captured.stdoutChunks.join("")).toContain("Block drift");
+      expect(captured.stdoutChunks.join("")).toContain("streamed stdout");
+      expect(captured.stderrChunks.join("")).toContain("streamed stderr");
+
+      resolveFirstExitCode?.(0);
+      const result = await runPromise;
+      expect(result.isOk()).toBe(true);
+    } finally {
+      captured.restore();
+      spawnSpy.mockRestore();
+      spawnSyncSpy.mockRestore();
+    }
+  });
+
+  test("keeps child output buffered when live output is disabled", async () => {
+    const spawnSyncSpy = spyOn(Bun, "spawnSync").mockReturnValue({
+      exitCode: 0,
+      stdout: new TextEncoder().encode(""),
+      stderr: new TextEncoder().encode(""),
+    } as unknown as ReturnType<typeof Bun.spawnSync>);
+
+    let resolveFirstExitCode: ((value: number) => void) | undefined;
+    const firstExitCode = new Promise<number>((resolve) => {
+      resolveFirstExitCode = resolve;
+    });
+
+    const spawnSpy = spyOn(Bun, "spawn").mockImplementation(() =>
+      createSpawnResult({
+        exitCode: firstExitCode,
+        stdout: "streamed stdout\n",
+        stderr: "streamed stderr\n",
+      })
+    );
+
+    const captured = captureOutputWrites();
+
+    try {
+      const runPromise = runCheckOrchestrator({
+        cwd: process.cwd(),
+        mode: "pre-push",
+      });
+
+      await Bun.sleep(0);
+
+      expect(captured.stdoutChunks).toHaveLength(0);
+      expect(captured.stderrChunks).toHaveLength(0);
+
+      resolveFirstExitCode?.(1);
+      const result = await runPromise;
+      expect(result.isOk()).toBe(true);
+      if (result.isErr()) {
+        return;
+      }
+
+      expect(result.value.steps[0]?.stdout).toContain("streamed stdout");
+      expect(result.value.steps[0]?.stderr).toContain("streamed stderr");
+    } finally {
+      captured.restore();
+      spawnSpy.mockRestore();
+      spawnSyncSpy.mockRestore();
+    }
+  });
 });
 
 describe("printCheckOrchestratorResults", () => {
@@ -414,5 +599,41 @@ describe("printCheckOrchestratorResults", () => {
     });
     expect(payload["mode"]).toBe("ci");
     expect(payload["ok"]).toBe(true);
+  });
+
+  test("human mode avoids duplicating failure output after live streaming", async () => {
+    const output = await captureStdout(async () => {
+      await printCheckOrchestratorResults(
+        {
+          mode: "pre-push",
+          ok: false,
+          treeClean: true,
+          mutatedPaths: [],
+          failedStepIds: ["pre-push-verify"],
+          steps: [
+            {
+              id: "pre-push-verify",
+              label: "Hook verify",
+              command: [
+                "bun",
+                "run",
+                "packages/tooling/src/cli/index.ts",
+                "pre-push",
+              ],
+              exitCode: 1,
+              stdout: "full live output already shown",
+              stderr: "streamed failure output",
+              durationMs: 250,
+            },
+          ],
+        },
+        { liveOutput: true }
+      );
+    });
+
+    expect(output).toContain("Hook verify");
+    expect(output).toContain("Live step output shown above.");
+    expect(output).not.toContain("full live output already shown");
+    expect(output).not.toContain("streamed failure output");
   });
 });

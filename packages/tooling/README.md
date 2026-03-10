@@ -80,8 +80,9 @@ RED phase branches follow these patterns:
 
 Verification order:
 
-1. Run `verify:ci` if present.
-2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
+1. Run `verify:push` if present.
+2. Otherwise run `verify:ci` if present.
+3. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
 
 ```bash
 # Normal usage (in lefthook.yml)
