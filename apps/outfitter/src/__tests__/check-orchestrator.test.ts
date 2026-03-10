@@ -515,6 +515,8 @@ describe("runCheckOrchestrator", () => {
         return;
       }
 
+      expect(result.value.ok).toBe(false);
+      expect(result.value.failedStepIds).toEqual(["block-drift"]);
       expect(result.value.steps[0]?.stdout).toContain("streamed stdout");
       expect(result.value.steps[0]?.stderr).toContain("streamed stderr");
     } finally {
