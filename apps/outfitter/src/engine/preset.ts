@@ -178,9 +178,10 @@ export function sortLeadingImports(filePath: string, content: string): string {
   const firstImportStart = imports[0]!.getStart(sourceFile);
   const lastImportEnd = imports[imports.length - 1]!.end;
   const sortedImports = [...imports]
-    .map((statement) => ({
+    .map((statement, index) => ({
       statement,
       sortKey: getImportSortKey(statement, sourceFile, content),
+      textStart: index === 0 ? statement.getStart(sourceFile) : statement.pos,
     }))
     .toSorted((left, right) => {
       const groupDifference =
@@ -194,8 +195,8 @@ export function sortLeadingImports(filePath: string, content: string): string {
 
   for (const [index, entry] of sortedImports.entries()) {
     const importText = content
-      .slice(entry.statement.getStart(sourceFile), entry.statement.end)
-      .trimEnd();
+      .slice(entry.textStart, entry.statement.end)
+      .trim();
     if (index === 0) {
       importsBlock = importText;
       continue;
