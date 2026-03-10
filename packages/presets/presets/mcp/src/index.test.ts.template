@@ -1,0 +1,11 @@
+import { describe, expect, test } from "bun:test";
+
+import { server } from "./index.js";
+
+describe("server", () => {
+  test("registers the hello tool", () => {
+    const registered = server.getTools().some((tool) => tool.name === "hello");
+
+    expect(registered).toBe(true);
+  });
+});

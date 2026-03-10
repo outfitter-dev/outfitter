@@ -1,0 +1,14 @@
+import { describe, expect, test } from "bun:test";
+
+import { program } from "./index.js";
+
+describe("program", () => {
+  test("registers the hello command", () => {
+    expect(program.program.name()).toBe("{{binName}}");
+
+    const registered = program.program.commands.some(
+      (cmd) => cmd.name() === "hello"
+    );
+    expect(registered).toBe(true);
+  });
+});

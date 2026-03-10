@@ -339,6 +339,12 @@
         "default": "./dist/engine/names.js"
       }
     },
+    "./engine/package-json": {
+      "import": {
+        "types": "./dist/engine/package-json.d.ts",
+        "default": "./dist/engine/package-json.js"
+      }
+    },
     "./engine/post-scaffold": {
       "import": {
         "types": "./dist/engine/post-scaffold.d.ts",
@@ -376,6 +382,12 @@
       }
     },
     "./package.json": "./package.json",
+    "./scaffold-e2e/template-guardrails": {
+      "import": {
+        "types": "./dist/scaffold-e2e/template-guardrails.d.ts",
+        "default": "./dist/scaffold-e2e/template-guardrails.js"
+      }
+    },
     "./targets": {
       "import": {
         "types": "./dist/targets/index.d.ts",

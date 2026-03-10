@@ -1,0 +1,13 @@
+import { describe, expect, spyOn, test } from "bun:test";
+
+import { main } from "./index.js";
+
+describe("main", () => {
+  test("logs the starter message", () => {
+    using logSpy = spyOn(console, "log").mockImplementation(() => undefined);
+
+    main();
+
+    expect(logSpy).toHaveBeenCalledWith("Hello from {{projectName}}!");
+  });
+});

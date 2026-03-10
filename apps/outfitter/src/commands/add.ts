@@ -22,6 +22,7 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult, Block, Registry } from "@outfitter/tooling";
 
+import { serializePackageJson } from "../engine/package-json.js";
 import { stampBlock } from "../manifest.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
@@ -311,7 +312,7 @@ function updatePackageJson(
     if (Object.keys(existingDevDeps).length > 0) {
       pkg["devDependencies"] = existingDevDeps;
     }
-    writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`);
+    writeFileSync(packageJsonPath, serializePackageJson(pkg));
   }
 
   return { dependencies: addedDeps, devDependencies: addedDevDeps };
