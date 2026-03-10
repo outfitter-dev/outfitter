@@ -51,6 +51,7 @@ const TOOLING_ARTIFACTS = [
 ] as const;
 
 type GuardrailTool = "oxfmt" | "oxlint" | "schema-annotation" | "ultracite";
+type ExecutableGuardrailTool = Exclude<GuardrailTool, "schema-annotation">;
 
 export interface TemplateGuardrailFailure {
   readonly output: string;
@@ -179,21 +180,26 @@ function findSchemaAnnotationFailure(
 function runTool(
   workspaceRoot: string,
   cwd: string,
-  tool: GuardrailTool,
+  tool: ExecutableGuardrailTool,
   args: readonly string[]
 ): TemplateGuardrailFailure | undefined {
-  const executable =
-    tool === "oxfmt"
-      ? join(workspaceRoot, "node_modules/.bin/oxfmt")
-      : tool === "oxlint"
-        ? join(workspaceRoot, "node_modules/.bin/oxlint")
-        : join(workspaceRoot, "node_modules/.bin/ultracite");
-  const command =
-    tool === "oxfmt"
-      ? ["--check", ...args]
-      : tool === "oxlint"
-        ? [...args]
-        : ["check", ...args];
+  let executable: string;
+  let command: string[];
+
+  switch (tool) {
+    case "oxfmt":
+      executable = join(workspaceRoot, "node_modules/.bin/oxfmt");
+      command = ["--check", ...args];
+      break;
+    case "oxlint":
+      executable = join(workspaceRoot, "node_modules/.bin/oxlint");
+      command = [...args];
+      break;
+    case "ultracite":
+      executable = join(workspaceRoot, "node_modules/.bin/ultracite");
+      command = ["check", ...args];
+      break;
+  }
 
   const result = spawnSync(executable, command, {
     cwd,
