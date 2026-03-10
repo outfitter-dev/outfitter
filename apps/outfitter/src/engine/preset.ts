@@ -181,6 +181,10 @@ export function sortLeadingImports(filePath: string, content: string): string {
     .map((statement, index) => ({
       statement,
       sortKey: getImportSortKey(statement, sourceFile, content),
+      // getStart() excludes leading trivia (comments/whitespace) for the first
+      // import; subsequent imports use .pos which includes it. If imports are
+      // reordered, inter-import comments may be misplaced. Shipped templates
+      // don't contain inter-import comments so this is fine in practice.
       textStart: index === 0 ? statement.getStart(sourceFile) : statement.pos,
     }))
     .toSorted((left, right) => {
