@@ -2,7 +2,7 @@ name: Droid Auto Review
 
 on:
   pull_request:
-    types: [opened, ready_for_review, reopened]
+    types: [opened, ready_for_review, reopened, synchronize]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -83,3 +83,6 @@ jobs:
         with:
           factory_api_key: ${{ secrets.FACTORY_API_KEY }}
           automatic_review: true
+          # `droid-action@v3` defaults review_model to gpt-5.2, which currently
+          # exits early in automatic review mode with the GitHub review tool bundle.
+          review_model: claude-sonnet-4-5-20250929
