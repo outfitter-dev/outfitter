@@ -26,11 +26,14 @@ export interface RunStreamedCommandOptions {
   readonly onHeartbeat?:
     | ((heartbeat: StreamCommandHeartbeat) => void)
     | undefined;
+  readonly postKillDrainTimeoutMs?: number;
   readonly spawn?: typeof Bun.spawn;
   readonly stderrTargets?: readonly OutputTarget[];
   readonly stdoutTargets?: readonly OutputTarget[];
   readonly timeoutMs: number;
 }
+
+const DEFAULT_POST_KILL_DRAIN_TIMEOUT_MS = 5_000;
 
 function writeToTargets(
   targets: readonly OutputTarget[] | undefined,
@@ -77,6 +80,8 @@ export async function runStreamedCommand(
   options: RunStreamedCommandOptions
 ): Promise<StreamCommandResult> {
   const spawn = options.spawn ?? Bun.spawn;
+  const postKillDrainTimeoutMs =
+    options.postKillDrainTimeoutMs ?? DEFAULT_POST_KILL_DRAIN_TIMEOUT_MS;
   const startedAtMs = Date.now();
   let lastOutputAtMs = startedAtMs;
 
@@ -142,11 +147,20 @@ export async function runStreamedCommand(
       handle.kill("SIGKILL");
     }
 
-    const [exitCode] = await Promise.all([
+    const drainResult = Promise.all([
       handle.exited,
       stdoutDone,
       stderrDone,
-    ]);
+    ]).then(([exitCode]) => exitCode);
+
+    const exitCode =
+      race === "timeout"
+        ? await Promise.race([
+            drainResult,
+            // Guard against pathological cases where SIGKILL still doesn't unblock exit.
+            Bun.sleep(postKillDrainTimeoutMs).then(() => 124),
+          ])
+        : await drainResult;
 
     return {
       durationMs: Date.now() - startedAtMs,
