@@ -223,4 +223,49 @@ describe("runStreamedCommand", () => {
     expect(result.timedOut).toBe(false);
     expect(heartbeats).toEqual([]);
   });
+
+  test("stops waiting forever when a timed out subprocess never drains", async () => {
+    const killSignals: string[] = [];
+
+    const settled = await Promise.race([
+      runStreamedCommand({
+        command: ["bun", "x", "turbo", "run", "test"],
+        cwd: process.cwd(),
+        timeoutMs: 10,
+        spawn: (() =>
+          ({
+            exited: new Promise<number>(() => {}),
+            kill: (signal?: string | number) => {
+              killSignals.push(String(signal));
+            },
+            stderr: createReaderBackedStream(
+              async () =>
+                await new Promise<ReadableStreamReadResult<Uint8Array>>(
+                  () => {}
+                )
+            ),
+            stdout: createReaderBackedStream(
+              async () =>
+                await new Promise<ReadableStreamReadResult<Uint8Array>>(
+                  () => {}
+                )
+            ),
+          }) as unknown as ReturnType<typeof Bun.spawn>) as typeof Bun.spawn,
+        postKillDrainTimeoutMs: 20,
+      } as Parameters<typeof runStreamedCommand>[0]).then((result) => ({
+        kind: "result" as const,
+        result,
+      })),
+      Bun.sleep(75).then(() => ({ kind: "hung" as const })),
+    ]);
+
+    expect(settled.kind).toBe("result");
+    if (settled.kind !== "result") {
+      return;
+    }
+
+    expect(settled.result.exitCode).toBe(124);
+    expect(settled.result.timedOut).toBe(true);
+    expect(killSignals).toEqual(["SIGKILL"]);
+  });
 });
