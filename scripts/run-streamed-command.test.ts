@@ -18,11 +18,13 @@ function createTextStream(text: string): ReadableStream<Uint8Array> {
 }
 
 function createReaderBackedStream(
-  onRead: () => Promise<ReadableStreamReadResult<Uint8Array>>
+  onRead: () => Promise<ReadableStreamReadResult<Uint8Array>>,
+  onCancel: () => Promise<void> = async () => {}
 ): ReadableStream<Uint8Array> {
   return {
     getReader() {
       return {
+        cancel: onCancel,
         read: onRead,
         releaseLock() {},
       };
@@ -267,5 +269,54 @@ describe("runStreamedCommand", () => {
     expect(settled.result.exitCode).toBe(124);
     expect(settled.result.timedOut).toBe(true);
     expect(killSignals).toEqual(["SIGKILL"]);
+  });
+
+  test("stops waiting forever when a normally exited subprocess never drains", async () => {
+    let cancelCalls = 0;
+
+    const settled = await Promise.race([
+      runStreamedCommand({
+        command: ["bun", "x", "turbo", "run", "test"],
+        cwd: process.cwd(),
+        timeoutMs: 1_000,
+        spawn: (() =>
+          ({
+            exited: Promise.resolve(0),
+            kill: () => {},
+            stderr: createReaderBackedStream(
+              async () =>
+                await new Promise<ReadableStreamReadResult<Uint8Array>>(
+                  () => {}
+                ),
+              async () => {
+                cancelCalls += 1;
+              }
+            ),
+            stdout: createReaderBackedStream(
+              async () =>
+                await new Promise<ReadableStreamReadResult<Uint8Array>>(
+                  () => {}
+                ),
+              async () => {
+                cancelCalls += 1;
+              }
+            ),
+          }) as unknown as ReturnType<typeof Bun.spawn>) as typeof Bun.spawn,
+        postExitDrainTimeoutMs: 20,
+      } as Parameters<typeof runStreamedCommand>[0]).then((result) => ({
+        kind: "result" as const,
+        result,
+      })),
+      Bun.sleep(75).then(() => ({ kind: "hung" as const })),
+    ]);
+
+    expect(settled.kind).toBe("result");
+    if (settled.kind !== "result") {
+      return;
+    }
+
+    expect(settled.result.exitCode).toBe(0);
+    expect(settled.result.timedOut).toBe(false);
+    expect(cancelCalls).toBe(2);
   });
 });
