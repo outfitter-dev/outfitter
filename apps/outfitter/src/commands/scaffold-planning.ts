@@ -26,6 +26,7 @@ import {
   validatePackageName,
   validateProjectDirectoryName,
 } from "../engine/index.js";
+import { serializePackageJson } from "../engine/package-json.js";
 import {
   detectWorkspaceRoot,
   getWorkspacePatterns,
@@ -294,11 +295,7 @@ export function ensureWorkspacePattern(
     nextPkg["workspaces"] = nextPatterns;
   }
 
-  writeFileSync(
-    packageJsonPath,
-    `${JSON.stringify(nextPkg, null, 2)}\n`,
-    "utf-8"
-  );
+  writeFileSync(packageJsonPath, serializePackageJson(nextPkg), "utf-8");
   return Result.ok(true);
 }
 

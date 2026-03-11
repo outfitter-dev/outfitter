@@ -1,31 +1,36 @@
-import { Result, ValidationError, type Handler } from "@outfitter/contracts";
+import {
+  Result,
+  ValidationError,
+  type HandlerContext,
+} from "@outfitter/contracts";
 import { createLogger } from "@outfitter/logging";
+
 import { greetingInputSchema, type Greeting } from "./types.js";
 
 const logger = createLogger({ name: "{{projectName}}" });
 
-export const createGreeting: Handler<unknown, Greeting, ValidationError> = async (
-	input,
-	ctx
-) => {
-	const parsed = greetingInputSchema.safeParse(input);
-	if (!parsed.success) {
-		return Result.err(
-			new ValidationError({
-				message: "Invalid greeting input",
-				field: "name",
-			})
-		);
-	}
+export async function createGreeting(
+  input: unknown,
+  ctx: HandlerContext
+): Promise<Result<Greeting, ValidationError>> {
+  const parsed = greetingInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return Result.err(
+      new ValidationError({
+        message: "Invalid greeting input",
+        field: "name",
+      })
+    );
+  }
 
-	const suffix = parsed.data.excited ? "!" : ".";
-	const greeting: Greeting = {
-		message: `Hello, ${parsed.data.name}${suffix}`,
-		issuedAt: new Date().toISOString(),
-	};
+  const suffix = parsed.data.excited ? "!" : ".";
+  const greeting: Greeting = {
+    message: `Hello, ${parsed.data.name}${suffix}`,
+    issuedAt: new Date().toISOString(),
+  };
 
-	logger.info(`Created greeting for ${parsed.data.name}`, {
-		requestId: ctx.requestId,
-	});
-	return Result.ok(greeting);
-};
+  logger.info(`Created greeting for ${parsed.data.name}`, {
+    requestId: ctx.requestId,
+  });
+  return Result.ok(greeting);
+}

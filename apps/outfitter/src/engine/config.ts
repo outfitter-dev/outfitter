@@ -9,6 +9,7 @@ import {
   DEPENDENCY_SECTIONS,
   resolvePresetDependencyVersions,
 } from "./dependency-versions.js";
+import { serializePackageJson } from "./package-json.js";
 import { ScaffoldError } from "./types.js";
 import { getWorkspacePatterns } from "./workspace.js";
 
@@ -124,11 +125,7 @@ export function injectSharedConfig(
       (parsed["scripts"] as Record<string, unknown>) ?? {};
     parsed["scripts"] = { ...SHARED_SCRIPTS, ...existingScripts };
 
-    writeFileSync(
-      packageJsonPath,
-      `${JSON.stringify(parsed, null, 2)}\n`,
-      "utf-8"
-    );
+    writeFileSync(packageJsonPath, serializePackageJson(parsed), "utf-8");
 
     const workspaceMembers = getWorkspaceMemberPackageJsonPaths(
       targetDir,
@@ -155,7 +152,7 @@ export function injectSharedConfig(
       if (JSON.stringify(memberParsed) !== before) {
         writeFileSync(
           memberPackageJsonPath,
-          `${JSON.stringify(memberParsed, null, 2)}\n`,
+          serializePackageJson(memberParsed),
           "utf-8"
         );
       }
@@ -182,11 +179,7 @@ export function rewriteLocalDependencies(
     const content = readFileSync(packageJsonPath, "utf-8");
     const parsed = JSON.parse(content) as Record<string, unknown>;
     if (rewriteOutfitterDepsToWorkspace(parsed)) {
-      writeFileSync(
-        packageJsonPath,
-        `${JSON.stringify(parsed, null, 2)}\n`,
-        "utf-8"
-      );
+      writeFileSync(packageJsonPath, serializePackageJson(parsed), "utf-8");
     }
 
     const workspaceMembers = getWorkspaceMemberPackageJsonPaths(
@@ -199,7 +192,7 @@ export function rewriteLocalDependencies(
       if (rewriteOutfitterDepsToWorkspace(memberParsed)) {
         writeFileSync(
           memberPackageJsonPath,
-          `${JSON.stringify(memberParsed, null, 2)}\n`,
+          serializePackageJson(memberParsed),
           "utf-8"
         );
       }

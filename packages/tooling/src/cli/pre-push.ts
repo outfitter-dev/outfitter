@@ -194,6 +194,7 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     log(plan.error);
     log("");
     log("Add one of:");
+    log("  - verify:push");
     log("  - verify:ci");
     log("  - typecheck + (check or lint) + build + test");
     process.exitCode = 1;
@@ -203,8 +204,8 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   log(
     `Running strict verification for branch: ${COLORS.blue}${branch}${COLORS.reset}`
   );
-  if (plan.source === "verify:ci") {
-    log("Using `verify:ci` script.");
+  if (plan.source === "verify:push" || plan.source === "verify:ci") {
+    log(`Using \`${plan.source}\` script.`);
   } else {
     log(`Using fallback scripts: ${plan.scripts.join(" -> ")}`);
   }

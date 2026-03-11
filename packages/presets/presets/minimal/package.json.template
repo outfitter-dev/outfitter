@@ -1,46 +1,46 @@
 {
-	"name": "{{packageName}}",
-	"version": "{{version}}",
-	"description": "{{description}}",
-	"type": "module",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
-	],
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		}
-	},
-	"scripts": {
-		"build": "bun build ./src/index.ts --outdir=dist --format=esm",
-		"dev": "bun run --watch src/index.ts",
-		"test": "bun test",
-		"test:watch": "bun test --watch",
-		"typecheck": "tsc --noEmit",
-		"check": "ultracite check",
-		"verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
-		"lint": "oxlint .",
-		"lint:fix": "oxlint --fix .",
-		"format": "oxfmt --write .",
-		"clean:artifacts": "rm -rf dist .turbo",
-		"clean": "rm -rf dist"
-	},
-	"devDependencies": {},
-	"outfitter": {
-		"template": {
-			"kind": "library",
-			"placement": "packages",
-			"surfaces": []
-		}
-	},
-	"engines": {
-		"bun": ">=1.3.10"
-	},
-	"keywords": [],
-	"license": "MIT"
+  "name": "{{packageName}}",
+  "version": "{{version}}",
+  "description": "{{description}}",
+  "keywords": [],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir=dist --format=esm",
+    "dev": "bun run --watch src/index.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "check": "ultracite check",
+    "verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --write .",
+    "clean:artifacts": "rm -rf dist .turbo",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {},
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "outfitter": {
+    "template": {
+      "kind": "library",
+      "placement": "packages",
+      "surfaces": []
+    }
+  }
 }

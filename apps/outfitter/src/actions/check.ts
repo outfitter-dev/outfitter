@@ -31,7 +31,10 @@ import {
 } from "../commands/check-orchestrator.js";
 import { runCheckTsdoc } from "../commands/check-tsdoc.js";
 import { printCheckResults, runCheck } from "../commands/check.js";
-import type { CliOutputMode } from "../output-mode.js";
+import {
+  type CliOutputMode,
+  resolveStructuredOutputMode,
+} from "../output-mode.js";
 import {
   actionInternalErr,
   outputModeSchema,
@@ -71,6 +74,7 @@ type CheckTsdocAction = ReturnType<
 >;
 
 const checkOrchestratorModes = ["all", "ci", "pre-commit", "pre-push"] as const;
+const CHECK_COMMAND_PROFILE_ENV = "OUTFITTER_CHECK_COMMAND_PROFILE";
 
 const checkInputSchema = z.object({
   compact: z.boolean(),
@@ -215,9 +219,16 @@ export const checkAction: CheckAction = defineAction({
     const { outputMode, mode, stagedFiles, compact, ...checkInput } = input;
 
     if (mode !== undefined) {
+      const commandProfile =
+        process.env[CHECK_COMMAND_PROFILE_ENV] === "hook" ? "hook" : "default";
+      // Stream live output for all human-mode runs so local check commands and
+      // hooks share the same step-by-step visibility.
+      const liveOutput = resolveStructuredOutputMode(outputMode) === undefined;
       const orchestratorResult = await runCheckOrchestrator({
+        commandProfile,
         cwd: checkInput.cwd,
         mode,
+        streamOutput: liveOutput,
         ...(stagedFiles && stagedFiles.length > 0 ? { stagedFiles } : {}),
       });
 
@@ -227,6 +238,7 @@ export const checkAction: CheckAction = defineAction({
 
       await printCheckOrchestratorResults(orchestratorResult.value, {
         compact,
+        liveOutput,
         mode: outputMode,
       });
 

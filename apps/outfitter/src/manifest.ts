@@ -173,7 +173,7 @@ export async function writeManifest(
       mkdirSync(dirPath, { recursive: true });
     }
 
-    const content = JSON.stringify(manifest, null, "\t");
+    const content = JSON.stringify(manifest, null, 2);
     await Bun.write(path, `${content}\n`);
     return Result.ok(undefined);
   } catch {

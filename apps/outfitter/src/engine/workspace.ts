@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { Result } from "@outfitter/contracts";
 
 import { sanitizePackageName } from "./names.js";
+import { serializePackageJson } from "./package-json.js";
 import { ScaffoldError } from "./types.js";
 
 function deriveWorkspaceScopeForExamples(workspaceName: string): string {
@@ -84,7 +85,7 @@ export function buildWorkspaceRootPackageJson(workspaceName: string): string {
     },
   };
 
-  return `${JSON.stringify(workspacePackage, null, 2)}\n`;
+  return serializePackageJson(workspacePackage);
 }
 
 export function scaffoldWorkspaceRoot(

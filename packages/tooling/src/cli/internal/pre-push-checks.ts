@@ -257,7 +257,7 @@ export type VerificationPlan =
   | {
       readonly ok: true;
       readonly scripts: readonly string[];
-      readonly source: "verify:ci" | "fallback";
+      readonly source: "verify:push" | "verify:ci" | "fallback";
     }
   | {
       readonly ok: false;
@@ -268,10 +268,15 @@ export type VerificationPlan =
  * Derive strict pre-push verification from package scripts.
  *
  * Priority:
- * 1) `verify:ci`
- * 2) fallback sequence: `typecheck`, `check|lint`, `build`, `test`
+ * 1) `verify:push`
+ * 2) `verify:ci`
+ * 3) fallback sequence: `typecheck`, `check|lint`, `build`, `test`
  */
 export function createVerificationPlan(scripts: ScriptMap): VerificationPlan {
+  if (scripts["verify:push"]) {
+    return { ok: true, scripts: ["verify:push"], source: "verify:push" };
+  }
+
   if (scripts["verify:ci"]) {
     return { ok: true, scripts: ["verify:ci"], source: "verify:ci" };
   }

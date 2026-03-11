@@ -1,52 +1,52 @@
 {
-	"name": "{{packageName}}",
-	"version": "{{version}}",
-	"description": "{{description}}",
-	"type": "module",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
-	],
-	"sideEffects": false,
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.cjs"
-		}
-	},
-	"scripts": {
-		"build": "bunup",
-		"dev": "bun --watch src/index.ts",
-		"test": "bun test",
-		"test:watch": "bun test --watch",
-		"typecheck": "tsc --noEmit",
-		"lint": "oxlint .",
-		"lint:fix": "oxlint --fix .",
-		"format": "oxfmt --write .",
-		"clean:artifacts": "rm -rf dist .turbo",
-		"clean": "rm -rf dist"
-	},
-	"dependencies": {
-		"@outfitter/contracts": "workspace:*",
-		"@outfitter/logging": "workspace:*",
-		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"bunup": "catalog:"
-	},
-	"outfitter": {
-		"template": {
-			"kind": "library",
-			"placement": "packages",
-			"surfaces": []
-		}
-	},
-	"engines": {
-		"bun": ">=1.3.10"
-	},
-	"keywords": [],
-	"license": "MIT"
+  "name": "{{packageName}}",
+  "version": "{{version}}",
+  "description": "{{description}}",
+  "keywords": [],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "bunup",
+    "dev": "bun --watch src/index.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --write .",
+    "clean:artifacts": "rm -rf dist .turbo",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*",
+    "@outfitter/logging": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "bunup": "catalog:"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "outfitter": {
+    "template": {
+      "kind": "library",
+      "placement": "packages",
+      "surfaces": []
+    }
+  }
 }

@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -19,6 +20,38 @@ import {
 setupInitTestHarness();
 
 const resolvedVersions = getResolvedVersions().all;
+const repoRoot = join(import.meta.dir, "..", "..", "..", "..");
+
+function expectUltraciteCheckToPass(
+  projectDir: string,
+  relativePath = "package.json"
+): void {
+  const result = spawnSync(
+    join(repoRoot, "node_modules/.bin/ultracite"),
+    ["check", relativePath],
+    {
+      cwd: projectDir,
+      encoding: "utf-8",
+      env: {
+        ...process.env,
+        PATH: `${join(repoRoot, "node_modules/.bin")}:${process.env["PATH"] ?? ""}`,
+        NODE_PATH: join(repoRoot, "node_modules"),
+      },
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      [
+        `Ultracite check failed for ${join(projectDir, relativePath)}`,
+        result.stdout,
+        result.stderr,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+  }
+}
 
 describe("init command file creation", () => {
   test("creates package.json in target directory", async () => {
@@ -105,6 +138,75 @@ describe("init command file creation", () => {
     const programPath = join(tempDir, "src", "program.ts");
     const programContent = readFileSync(programPath, "utf-8");
     expect(programContent).toMatch(/createCLI/);
+
+    const testPath = join(tempDir, "src", "index.test.ts");
+    expect(existsSync(testPath)).toBe(true);
+
+    const testContent = readFileSync(testPath, "utf-8");
+    expect(testContent).toContain('import { program } from "./index.js";');
+    expect(testContent).toContain("program.program.commands");
+  });
+
+  test("creates CLI tooling files that match the shipped lint config", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      preset: "cli",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const oxlintConfig = JSON.parse(
+      readFileSync(join(tempDir, ".oxlintrc.json"), "utf-8")
+    ) as {
+      rules?: Record<string, unknown>;
+    };
+    const shippedOxlintConfig = JSON.parse(
+      readFileSync(
+        join(repoRoot, "packages/tooling/configs/.oxlintrc.json"),
+        "utf-8"
+      )
+    ) as {
+      rules?: Record<string, unknown>;
+    };
+    expect(
+      oxlintConfig.rules?.["outfitter/no-process-env-in-packages"]
+    ).toEqual(
+      shippedOxlintConfig.rules?.["outfitter/no-process-env-in-packages"]
+    );
+
+    for (const relativePath of [
+      "package.json",
+      "tsconfig.json",
+      "src/program.ts",
+      ".outfitter/manifest.json",
+    ]) {
+      const content = readFileSync(join(tempDir, relativePath), "utf-8");
+      expect(content).not.toContain("\t");
+    }
+  });
+
+  test("writes CLI test source in ultracite-canonical order when tooling is enabled", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-project",
+      preset: "cli",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    expectUltraciteCheckToPass(tempDir, "src/index.test.ts");
   });
 
   test("creates MCP template with resolved external dependency versions", async () => {
@@ -129,6 +231,52 @@ describe("init command file creation", () => {
       resolvedVersions["@modelcontextprotocol/sdk"]
     );
     expect(JSON.stringify(packageJson)).not.toContain("catalog:");
+
+    const testPath = join(tempDir, "src", "index.test.ts");
+    expect(existsSync(testPath)).toBe(true);
+
+    const testContent = readFileSync(testPath, "utf-8");
+    expect(testContent).toContain('import { server } from "./index.js";');
+    expect(testContent).toContain("server.getTools()");
+  });
+
+  test("creates daemon template with CLI commands and smoke test", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-daemon",
+      preset: "daemon",
+      force: false,
+      noTooling: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+
+    const cliPath = join(tempDir, "src", "cli.ts");
+    const cliContent = readFileSync(cliPath, "utf-8");
+    expect(cliContent).toContain('from "@outfitter/cli/command"');
+    expect(cliContent).toContain('"start"');
+    expect(cliContent).toContain('"stop"');
+    expect(cliContent).toContain('"status"');
+    expect(cliContent).not.toContain("logger.info`");
+    expect(cliContent).not.toContain("logger.warn`");
+    expect(cliContent).not.toContain("logger.error`");
+
+    const daemonMainPath = join(tempDir, "src", "daemon-main.ts");
+    const daemonMainContent = readFileSync(daemonMainPath, "utf-8");
+    expect(daemonMainContent).not.toContain("logger.info`");
+    expect(daemonMainContent).not.toContain("logger.error`");
+
+    const testPath = join(tempDir, "src", "index.test.ts");
+    expect(existsSync(testPath)).toBe(true);
+
+    const testContent = readFileSync(testPath, "utf-8");
+    expect(testContent).toContain('import { runDaemon } from "./index.js";');
+    expect(testContent).toContain("typeof runDaemon");
   });
 
   test("creates library template with Result handler pattern and no binary entrypoint", async () => {
@@ -168,14 +316,58 @@ describe("init command file creation", () => {
     expect(indexContent).toContain('export * from "./types.js";');
     expect(indexContent).toContain('export * from "./handlers.js";');
 
+    const typesPath = join(tempDir, "src", "types.ts");
+    const typesContent = readFileSync(typesPath, "utf-8");
+    expect(typesContent).toContain('import { type ZodType, z } from "zod";');
+    expect(typesContent).toContain(
+      "export const greetingInputSchema: ZodType<GreetingInput> = z.object({"
+    );
+
     const handlerPath = join(tempDir, "src", "handlers.ts");
     const handlerContent = readFileSync(handlerPath, "utf-8");
     expect(handlerContent).toContain("Result.ok");
     expect(handlerContent).toContain("createLogger");
     expect(handlerContent).toContain("logger.info(");
+    expect(handlerContent).toContain(
+      "Promise<Result<Greeting, ValidationError>>"
+    );
 
     expect(existsSync(join(tempDir, "src", "index.test.ts"))).toBe(true);
     expect(existsSync(join(tempDir, "bunup.config.ts"))).toBe(true);
+  });
+
+  test("writes library package.json in ultracite-canonical order when tooling is enabled", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-library",
+      preset: "library",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    expectUltraciteCheckToPass(tempDir);
+  });
+
+  test("writes library test source in ultracite-canonical order when tooling is enabled", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-library",
+      preset: "library",
+      force: false,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    expectUltraciteCheckToPass(tempDir, "src/index.test.ts");
   });
 
   test("creates full-stack preset workspace with shared core handler wiring", async () => {
@@ -245,6 +437,41 @@ describe("init command file creation", () => {
     );
     expect(cliSource).toContain(corePackageJson.name);
     expect(mcpSource).toContain(corePackageJson.name);
+
+    const coreHandlerSource = readFileSync(
+      join(tempDir, "packages", "core", "src", "handlers.ts"),
+      "utf-8"
+    );
+    expect(coreHandlerSource).toContain(
+      "Promise<Result<Greeting, ValidationError>>"
+    );
+
+    const coreTypesSource = readFileSync(
+      join(tempDir, "packages", "core", "src", "types.ts"),
+      "utf-8"
+    );
+    expect(coreTypesSource).toContain('import { type ZodType, z } from "zod";');
+    expect(coreTypesSource).toContain(
+      "export const greetingInputSchema: ZodType<GreetingInput> = z.object({"
+    );
+  });
+
+  test("writes full-stack MCP source in ultracite-canonical order", async () => {
+    const { runInit } = await import("../commands/init.js");
+
+    const result = await runInit({
+      targetDir: tempDir,
+      name: "test-stack",
+      preset: "full-stack",
+      force: false,
+      yes: true,
+      skipInstall: true,
+      skipGit: true,
+      skipCommit: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    expectUltraciteCheckToPass(tempDir, "apps/mcp/src/mcp.ts");
   });
 
   test("applies tooling files at full-stack workspace root only", async () => {
@@ -300,6 +527,13 @@ describe("init command file creation", () => {
 
     const indexPath = join(tempDir, "src", "index.ts");
     expect(existsSync(indexPath)).toBe(true);
+
+    const testPath = join(tempDir, "src", "index.test.ts");
+    expect(existsSync(testPath)).toBe(true);
+
+    const testContent = readFileSync(testPath, "utf-8");
+    expect(testContent).toContain('import { main } from "./index.js";');
+    expect(testContent).toContain("Hello from test-project!");
   });
 });
 
