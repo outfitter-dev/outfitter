@@ -138,7 +138,7 @@ export async function runStreamedCommand(
 
   try {
     const race = await Promise.race([
-      handle.exited.then(() => "exit"),
+      handle.exited.then(() => "exit" as const),
       timeout,
     ]);
     clearHeartbeatTimer();
