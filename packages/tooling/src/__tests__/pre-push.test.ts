@@ -40,6 +40,23 @@ describe("pre-push branch detection", () => {
 });
 
 describe("createVerificationPlan", () => {
+  test("prefers verify:push when available", () => {
+    const plan = createVerificationPlan({
+      "verify:push": "OUTFITTER_CHECK_COMMAND_PROFILE=hook bun run check --ci",
+      "verify:ci":
+        "bun run typecheck && bun run check && bun run build && bun run test",
+      test: "bun test",
+    });
+
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) {
+      return;
+    }
+
+    expect(plan.source).toBe("verify:push");
+    expect(plan.scripts).toEqual(["verify:push"]);
+  });
+
   test("prefers verify:ci when available", () => {
     const plan = createVerificationPlan({
       "verify:ci":

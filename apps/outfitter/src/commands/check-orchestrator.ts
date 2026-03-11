@@ -22,6 +22,7 @@ import { resolveStructuredOutputMode } from "../output-mode.js";
 
 /** Check bundle mode controlling which steps are included and whether a clean tree is enforced. */
 export type CheckOrchestratorMode = "all" | "ci" | "pre-commit" | "pre-push";
+type CheckOrchestratorCommandProfile = "default" | "hook";
 
 interface CheckOrchestratorStep {
   readonly command: readonly string[];
@@ -31,11 +32,15 @@ interface CheckOrchestratorStep {
 
 /** Options controlling which checks the orchestrator runs. */
 export interface CheckOrchestratorOptions {
+  /** Command profile for nested tool invocations. */
+  readonly commandProfile?: CheckOrchestratorCommandProfile;
   /** Workspace root for resolving commands and tree-clean detection. */
   readonly cwd: string;
   readonly mode: CheckOrchestratorMode;
   /** Staged file paths for pre-commit scoping. Ignored by other modes. */
   readonly stagedFiles?: readonly string[];
+  /** Stream child process output to the terminal as each step runs. */
+  readonly streamOutput?: boolean;
 }
 
 interface CheckOrchestratorStepResult {
@@ -100,8 +105,17 @@ export function buildCheckOrchestratorPlan(
   options: CheckOrchestratorOptions
 ): readonly CheckOrchestratorStep[] {
   const stagedFiles = normalizePaths(options.stagedFiles);
+  const commandProfile = options.commandProfile ?? "default";
 
   if (options.mode === "all" || options.mode === "ci") {
+    const typecheckCommand =
+      commandProfile === "hook"
+        ? ["bun", "run", "typecheck:hook"]
+        : ["bun", "run", "typecheck", "--", "--only"];
+    const lintAndFormatCommand =
+      commandProfile === "hook"
+        ? ["bun", "run", "check:hook"]
+        : ["bun", "run", "check"];
     const steps: CheckOrchestratorStep[] = [
       {
         id: "block-drift",
@@ -119,12 +133,12 @@ export function buildCheckOrchestratorPlan(
       {
         id: "typecheck",
         label: "Typecheck",
-        command: ["bun", "run", "typecheck", "--", "--only"],
+        command: typecheckCommand,
       },
       {
         id: "lint-and-format",
         label: "Lint/Format checks",
-        command: ["bun", "run", "check"],
+        command: lintAndFormatCommand,
       },
       {
         id: "publish-guardrails",
@@ -436,7 +450,8 @@ function diffTreePaths(
 
 async function runStep(
   cwd: string,
-  step: CheckOrchestratorStep
+  step: CheckOrchestratorStep,
+  options: { readonly streamOutput?: boolean | undefined } = {}
 ): Promise<CheckOrchestratorStepResult> {
   const startedAt = Date.now();
   const processHandle = Bun.spawn([...step.command], {
@@ -445,10 +460,12 @@ async function runStep(
     stderr: "pipe",
   });
 
+  const stdoutTarget = options.streamOutput ? process.stdout : undefined;
+  const stderrTarget = options.streamOutput ? process.stderr : undefined;
   const [exitCode, stdout, stderr] = await Promise.all([
     processHandle.exited,
-    new Response(processHandle.stdout).text(),
-    new Response(processHandle.stderr).text(),
+    readOutputStream(processHandle.stdout, stdoutTarget),
+    readOutputStream(processHandle.stderr, stderrTarget),
   ]);
 
   return {
@@ -460,6 +477,46 @@ async function runStep(
     stderr,
     durationMs: Date.now() - startedAt,
   };
+}
+
+async function readOutputStream(
+  stream: ReadableStream<Uint8Array> | null | undefined,
+  target: Pick<typeof process.stdout, "write"> | undefined
+): Promise<string> {
+  if (!stream) {
+    return "";
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      const chunk = decoder.decode(value, { stream: true });
+      if (chunk.length === 0) {
+        continue;
+      }
+
+      chunks.push(chunk);
+      target?.write(chunk);
+    }
+
+    const trailingChunk = decoder.decode();
+    if (trailingChunk.length > 0) {
+      chunks.push(trailingChunk);
+      target?.write(trailingChunk);
+    }
+
+    return chunks.join("");
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 function extractSuccessAdvisory(stderr: string): string | undefined {
@@ -509,8 +566,16 @@ export async function runCheckOrchestrator(
 
     const treeBefore = readTreePaths(cwd);
     const stepResults: CheckOrchestratorStepResult[] = [];
-    for (const step of plan) {
-      const result = await runStep(cwd, step);
+    for (const [index, step] of plan.entries()) {
+      if (options.streamOutput) {
+        process.stdout.write(
+          `[check ${index + 1}/${plan.length}] ${step.label}\n`
+        );
+      }
+
+      const result = await runStep(cwd, step, {
+        streamOutput: options.streamOutput,
+      });
       stepResults.push(result);
       if (result.exitCode !== 0) {
         break;
@@ -546,6 +611,7 @@ export async function runCheckOrchestrator(
 
 interface PrintCheckOrchestratorResultsOptions {
   readonly compact?: boolean;
+  readonly liveOutput?: boolean;
   readonly mode?: OutputMode;
 }
 
@@ -614,9 +680,15 @@ export async function printCheckOrchestratorResults(
     );
 
     if (step.exitCode !== 0) {
-      const snippet = `${step.stdout}\n${step.stderr}`.trim();
-      if (snippet.length > 0) {
-        process.stdout.write(`${theme.muted(snippet)}\n`);
+      if (options.liveOutput) {
+        process.stdout.write(
+          `    ${theme.muted("Live step output shown above.")}\n`
+        );
+      } else {
+        const snippet = `${step.stdout}\n${step.stderr}`.trim();
+        if (snippet.length > 0) {
+          process.stdout.write(`${theme.muted(snippet)}\n`);
+        }
       }
     } else {
       const advisory = extractSuccessAdvisory(step.stderr);
