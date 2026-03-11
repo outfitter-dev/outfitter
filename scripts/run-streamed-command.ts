@@ -186,24 +186,40 @@ export async function runStreamedCommand(
 
     const exitCode =
       race === "timeout"
-        ? await Promise.race([
-            Promise.all([handle.exited, drainStreams]).then(
-              ([resolvedExitCode]) => resolvedExitCode
-            ),
-            // Guard against pathological cases where SIGKILL still doesn't unblock exit.
-            Bun.sleep(postKillDrainTimeoutMs).then(async () => {
-              await cancelDrainStreams();
-              return 124;
-            }),
-          ])
-        : await handle.exited.then(async (resolvedExitCode) => {
-            await Promise.race([
-              drainStreams,
-              // Guard against grandchildren keeping inherited pipes open after exit.
-              Bun.sleep(postExitDrainTimeoutMs).then(async () => {
-                await cancelDrainStreams();
-              }),
+        ? await (async () => {
+            let killDrainTimerId: ReturnType<typeof setTimeout> | undefined;
+            const killDrainTimeout = new Promise<[number, undefined]>(
+              (resolve) => {
+                killDrainTimerId = setTimeout(() => {
+                  void cancelDrainStreams();
+                  resolve([124, undefined]);
+                }, postKillDrainTimeoutMs);
+              }
+            );
+
+            const [resolvedExitCode] = await Promise.race([
+              Promise.all([handle.exited, drainStreams]),
+              killDrainTimeout,
             ]);
+            clearTimeout(killDrainTimerId);
+            return resolvedExitCode;
+          })()
+        : await handle.exited.then(async (resolvedExitCode) => {
+            let exitDrainTimerId: ReturnType<typeof setTimeout> | undefined;
+            const exitDrainTimeout = new Promise<"drain-timeout">((resolve) => {
+              exitDrainTimerId = setTimeout(() => {
+                resolve("drain-timeout");
+              }, postExitDrainTimeoutMs);
+            });
+
+            const drainResult = await Promise.race([
+              drainStreams.then(() => "drained" as const),
+              exitDrainTimeout,
+            ]);
+            clearTimeout(exitDrainTimerId);
+            if (drainResult === "drain-timeout") {
+              await cancelDrainStreams();
+            }
 
             return resolvedExitCode;
           });

@@ -62,16 +62,16 @@ bunx @outfitter/tooling upgrade-bun x.y.z  # Upgrade to specific version
 
 CI runs 8 jobs total: a shared build job, followed by 6 parallel jobs and a summary:
 
-| Job               | Purpose                                                          |
-| ----------------- | ---------------------------------------------------------------- |
-| `build`           | Populates Turbo remote cache                                     |
-| `lint-typecheck`  | Typecheck + oxlint + export checks                               |
+| Job               | Purpose                                                                          |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `build`           | Populates Turbo remote cache                                                     |
+| `lint-typecheck`  | Typecheck + oxlint + export checks                                               |
 | `checks`          | 15 validation steps (block-drift, changeset, schema drift, shard coverage, etc.) |
-| `test-foundation` | Tests: contracts, types, config, state, file-ops, presets        |
-| `test-runtime`    | Tests: cli, mcp, tui, logging, index, daemon, schema             |
-| `test-tooling`    | Tests: tooling, oxlint-plugin, docs, testing                     |
-| `test-app`        | Tests: outfitter, outfitter-cli-demo, reference                  |
-| `ci-summary`      | Aggregates results, fails if any job failed or was cancelled     |
+| `test-foundation` | Tests: contracts, types, config, state, file-ops, presets                        |
+| `test-runtime`    | Tests: cli, mcp, tui, logging, index, daemon, schema                             |
+| `test-tooling`    | Tests: tooling, oxlint-plugin, docs, testing                                     |
+| `test-app`        | Tests: outfitter, outfitter-cli-demo, reference                                  |
+| `ci-summary`      | Aggregates results, fails if any job failed or was cancelled                     |
 
 Test shards use `OUTFITTER_CI_TEST_FILTER` (comma-separated package names) and `OUTFITTER_CI_TEST_SHARD` (label) env vars. OOM retry (3 attempts, exit 137) is on test jobs only. Shard coverage is validated in the `checks` job — every testable package must appear in exactly one shard.
 
