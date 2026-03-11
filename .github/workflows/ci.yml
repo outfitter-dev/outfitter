@@ -294,6 +294,47 @@ jobs:
             .outfitter/reports/ci/**
             .turbo/runs/*.json
 
+  scaffold-smoke:
+    name: Scaffold Smoke
+    needs: build
+    runs-on: ubuntu-latest
+    # The shared scaffold CI profile caps three presets x three commands at an
+    # 18-minute timeout budget, leaving room for checkout, setup, and build.
+    timeout-minutes: 25
+    env:
+      OUTFITTER_SCAFFOLD_E2E_ROOT: ${{ github.workspace }}/.outfitter/scaffold-e2e
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: bun run build
+
+      - name: Scaffold smoke
+        run: bun run scaffold:e2e:ci
+
+      - name: Tree clean
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Upload scaffold diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-scaffold-smoke-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          path: |
+            .outfitter/scaffold-e2e/**
+            !.outfitter/scaffold-e2e/**/node_modules/**
+            .outfitter/reports/ci/**
+            .turbo/runs/*.json
+
   ci-summary:
     name: CI Summary
     if: always()
@@ -306,6 +347,7 @@ jobs:
         test-runtime,
         test-tooling,
         test-app,
+        scaffold-smoke,
       ]
     runs-on: ubuntu-latest
     steps:
@@ -322,6 +364,7 @@ jobs:
           echo "| Test (Runtime) | \`${{ needs.test-runtime.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Test (Tooling) | \`${{ needs.test-tooling.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Test (App) | \`${{ needs.test-app.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Scaffold Smoke | \`${{ needs.scaffold-smoke.result }}\` |" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check for failures
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
