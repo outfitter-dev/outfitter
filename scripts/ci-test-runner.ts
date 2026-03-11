@@ -340,7 +340,9 @@ export async function runCiTests(config: CiTestRunnerConfig): Promise<{
   });
   const exitCode = commandResult.timedOut ? 124 : commandResult.exitCode;
   if (commandResult.timedOut) {
-    writeHeartbeat(`[ci-test-runner] timed out after ${config.timeoutMs}ms`);
+    writeHeartbeat(
+      `[ci-test-runner] timed out after ${config.timeoutMs}ms (subprocess exitCode=${commandResult.exitCode})`
+    );
   }
 
   const finishedAt = new Date();
