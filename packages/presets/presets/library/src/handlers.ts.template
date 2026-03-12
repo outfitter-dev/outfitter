@@ -3,22 +3,36 @@ import {
   ValidationError,
   type HandlerContext,
 } from "@outfitter/contracts";
-import { createLogger } from "@outfitter/logging";
 
 import { greetingInputSchema, type Greeting } from "./types.js";
 
-const logger = createLogger({ name: "{{projectName}}" });
-
+/**
+ * Create a greeting from unvalidated input.
+ *
+ * @param input - Raw input to validate against {@link greetingInputSchema}
+ * @param ctx - Handler context with logger and request metadata
+ * @returns Validated greeting or a ValidationError with Zod field details
+ *
+ * @example
+ * ```typescript
+ * const result = await createGreeting({ name: "World" }, ctx);
+ * if (result.isOk()) {
+ *   console.log(result.value.message); // "Hello, World."
+ * }
+ * ```
+ */
 export async function createGreeting(
   input: unknown,
   ctx: HandlerContext
 ): Promise<Result<Greeting, ValidationError>> {
   const parsed = greetingInputSchema.safeParse(input);
   if (!parsed.success) {
+    const issue = parsed.error.issues[0];
     return Result.err(
       new ValidationError({
-        message: "Invalid greeting input",
-        field: "name",
+        message: issue?.message ?? "Invalid greeting input",
+        field: issue?.path.join(".") || "input",
+        context: { issues: parsed.error.issues },
       })
     );
   }
@@ -29,8 +43,6 @@ export async function createGreeting(
     issuedAt: new Date().toISOString(),
   };
 
-  logger.info(`Created greeting for ${parsed.data.name}`, {
-    requestId: ctx.requestId,
-  });
+  ctx.logger.info(`Created greeting for ${parsed.data.name}`);
   return Result.ok(greeting);
 }
