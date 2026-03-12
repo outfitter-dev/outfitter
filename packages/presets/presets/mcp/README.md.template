@@ -10,15 +10,16 @@ MCP (Model Context Protocol) server for integration with AI assistants.
 bun add {{packageName}}
 ```
 
-## Usage with Claude Desktop
+## Claude Desktop Configuration
 
-Add to your Claude Desktop config:
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
-    "{{binName}}": {
-      "command": "{{binName}}"
+    "{{projectName}}": {
+      "command": "bun",
+      "args": ["run", "path/to/{{projectName}}/src/index.ts"]
     }
   }
 }
