@@ -7,10 +7,19 @@ import { server } from "./mcp.js";
 import { helloTool } from "./tools/hello.js";
 
 describe("server", () => {
+  const harness = createMcpHarness(server);
+
   test("registers the hello tool", () => {
-    const registered = server.getTools().some((tool) => tool.name === "hello");
+    const tools = harness.listTools();
+    const registered = tools.some((tool) => tool.name === "hello");
 
     expect(registered).toBe(true);
+  });
+
+  test("can call hello tool via harness", async () => {
+    const result = await harness.callTool("hello", { name: "Outfitter" });
+
+    expect(result.isOk()).toBe(true);
   });
 });
 

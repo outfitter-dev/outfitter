@@ -28,7 +28,7 @@ MCP (Model Context Protocol) server built with `@modelcontextprotocol/sdk` and `
 
 ### Tool Definition
 
-Tools are defined with `defineTool()` using Zod schemas for input validation and tool annotations for safety metadata:
+Tools are defined with `defineTool()` using Zod schemas for input validation and Result types for output:
 
 ```typescript
 import { Result, ValidationError } from "@outfitter/contracts";
@@ -38,11 +38,30 @@ import { z } from "zod";
 const myTool = defineTool({
   name: "my-tool",
   description: "Does something useful",
-  inputSchema: z.object({ input: z.string() }),
+  inputSchema: z.object({ query: z.string().min(1) }),
   annotations: { readOnlyHint: true },
-  handler: async (args, _ctx) => {
-    return Result.ok({ result: args.input });
+  handler: async (input, ctx): Promise<Result<MyOutput, ValidationError>> => {
+    if (!isValid(input.query)) {
+      return Result.err(ValidationError.create("query", "invalid format"));
+    }
+    return Result.ok({ data: await fetchData(input.query) });
   },
+});
+```
+
+### Resource Definition
+
+Static resources use `defineResource()`:
+
+```typescript
+import { Result } from "@outfitter/contracts";
+import { defineResource } from "@outfitter/mcp";
+
+const myResource = defineResource({
+  uri: "myapp:///config",
+  name: "Config",
+  handler: async (uri, _ctx) =>
+    Result.ok([{ uri, text: JSON.stringify(config) }]),
 });
 ```
 
@@ -63,6 +82,7 @@ const myTool = defineTool({
 ## Testing
 
 - Runner: Bun test runner
+- Harness: `createMcpHarness()` from `@outfitter/testing` for protocol-level tests
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
 - Test tool handlers directly by importing from `src/index.ts`
