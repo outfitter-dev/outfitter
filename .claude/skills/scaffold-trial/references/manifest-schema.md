@@ -43,12 +43,12 @@ Each preset progresses through:
 pending → running → completed | errored
 ```
 
-| Status | Meaning | Fields Set |
-|--------|---------|------------|
-| `pending` | Not yet dispatched | `reportPath` |
-| `running` | Agent dispatched, awaiting completion | `agentId`, `reportPath` |
-| `completed` | Agent finished, report.json available | `agentId`, `reportPath` |
-| `errored` | Agent crashed, timed out, or failed | `agentId`, `reportPath`, `error` |
+| Status      | Meaning                               | Fields Set                       |
+| ----------- | ------------------------------------- | -------------------------------- |
+| `pending`   | Not yet dispatched                    | `reportPath`                     |
+| `running`   | Agent dispatched, awaiting completion | `agentId`, `reportPath`          |
+| `completed` | Agent finished, report.json available | `agentId`, `reportPath`          |
+| `errored`   | Agent crashed, timed out, or failed   | `agentId`, `reportPath`, `error` |
 
 ## Field Details
 
@@ -71,6 +71,7 @@ Set after synthesis step completes. Points to the generated `summary.json`.
 ## Usage
 
 The coordinator updates the manifest at each stage:
+
 1. **Create**: All presets as `pending`
 2. **Dispatch**: Update to `running` with `agentId`
 3. **Complete**: Update to `completed` or `errored`

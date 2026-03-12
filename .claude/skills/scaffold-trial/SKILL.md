@@ -20,6 +20,7 @@ If `$ARGUMENTS` is provided:
 - Empty → offer smart selection (see below)
 
 **Smart selection** (when no arguments):
+
 1. Run `git log --oneline -20` to see recent changes
 2. Map changed packages to affected presets:
    - `@outfitter/cli` changes → cli, full-stack
@@ -47,6 +48,7 @@ Create `.test/scaffolds/` if it doesn't exist.
 Generate run ID: `YYYYMMDDTHHmmss-trial-<uuid-v7>`
 
 Create directory structure:
+
 ```
 .test/scaffolds/<run-id>/
   <preset>/     # One subdir per selected preset
@@ -71,7 +73,10 @@ Write `manifest.json` to the run directory:
   "runId": "<run-id>",
   "startedAt": "<ISO 8601>",
   "presets": {
-    "<preset>": { "status": "pending", "reportPath": ".test/scaffolds/<run-id>/<preset>/report.json" }
+    "<preset>": {
+      "status": "pending",
+      "reportPath": ".test/scaffolds/<run-id>/<preset>/report.json"
+    }
   }
 }
 ```
@@ -103,6 +108,7 @@ Agent tool call:
 Launch ALL preset agents in a single message (parallel dispatch). Record each agent ID in the manifest immediately.
 
 Update manifest after each dispatch:
+
 ```json
 { "status": "running", "agentId": "<agent-id>" }
 ```
@@ -110,6 +116,7 @@ Update manifest after each dispatch:
 ### Step 6: Track Completion
 
 As agents complete (you'll be notified automatically — do NOT poll):
+
 - Update manifest status to `completed` or `errored`
 - If an agent errors, record the error message in the manifest
 - Continue waiting for remaining agents
@@ -119,12 +126,14 @@ Timeout: If an agent hasn't completed after 10 minutes, note it as timed out in 
 ### Step 7: Handle Failures
 
 For any agent that crashes or times out:
+
 - Mark as `errored` in manifest with error details
 - Continue with available reports — don't abort the whole run
 
 ### Step 8: Synthesize
 
 Once all agents have completed (or timed out):
+
 1. Load the `scaffold-reporting` skill
 2. Follow its workflow to generate `summary.json` and `summary.md`
 3. File Linear issues for blocking/degraded findings

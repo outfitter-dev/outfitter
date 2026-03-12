@@ -13,6 +13,7 @@ Smoke test a single scaffold preset end-to-end and produce a structured quality 
 ### Phase 1: Read Context
 
 Read the preset name and run directory from the prompt context. Confirm:
+
 - Preset name (one of: basic, cli, library, full-stack, minimal, mcp, daemon)
 - Run directory path (where to scaffold and write report.json)
 - Report output path (typically `<run-dir>/<preset>/report.json`)
@@ -60,6 +61,7 @@ Read key files and apply the scoring rubric:
 Load the `outfitter-atlas` skill to cross-check against documented patterns. Note any inconsistencies between what the docs say and what the scaffold produces.
 
 Apply scoring rubric from `references/scoring-rubric.md`:
+
 - Agent Readiness (1-10)
 - Documentation Completeness (1-10)
 - Error Clarity (1-10)
@@ -74,6 +76,7 @@ Every score MUST cite specific files, line numbers, or command output. No hand-w
 Write `report.json` to the preset directory following the schema in `references/report-schema.md`.
 
 Include:
+
 - All phase results (ok/failed/skipped with duration, stdout, stderr)
 - All scores with reasoning
 - Findings (blocking, degraded, cosmetic) with file/line references
