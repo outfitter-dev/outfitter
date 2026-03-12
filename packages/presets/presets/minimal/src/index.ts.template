@@ -6,21 +6,16 @@
  * @packageDocumentation
  */
 
-/**
- * Main entry point for {{projectName}}.
- *
- * @example
- * ```typescript
- * import { main } from "{{packageName}}";
- *
- * main();
- * ```
- */
-export function main(): void {
-  console.log("Hello from {{projectName}}!");
+import { Result } from "@outfitter/contracts";
+
+export interface Greeting {
+  readonly message: string;
 }
 
-// Run if executed directly
-if (import.meta.main) {
-  main();
+export function greet(name: string): Result<Greeting, Error> {
+  if (!name) {
+    return Result.err(new Error("name is required"));
+  }
+
+  return Result.ok({ message: `Hello, ${name}!` });
 }

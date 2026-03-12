@@ -236,7 +236,7 @@ describe("init command file creation", () => {
     expect(existsSync(testPath)).toBe(true);
 
     const testContent = readFileSync(testPath, "utf-8");
-    expect(testContent).toContain('import { server } from "./index.js";');
+    expect(testContent).toContain('import { server } from "./mcp.js";');
     expect(testContent).toContain("server.getTools()");
   });
 
@@ -532,8 +532,8 @@ describe("init command file creation", () => {
     expect(existsSync(testPath)).toBe(true);
 
     const testContent = readFileSync(testPath, "utf-8");
-    expect(testContent).toContain('import { main } from "./index.js";');
-    expect(testContent).toContain("Hello from test-project!");
+    expect(testContent).toContain('import { greet } from "./index.js";');
+    expect(testContent).toContain("greet(");
   });
 });
 
@@ -687,7 +687,6 @@ describe("init command default behavior", () => {
     const indexPath = join(tempDir, "src", "index.ts");
     const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("scoped-project");
-    expect(content).toContain("@outfitter/scoped-project");
   });
 });
 

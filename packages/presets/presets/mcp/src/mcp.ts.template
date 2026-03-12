@@ -2,25 +2,13 @@
  * {{projectName}} - MCP server definition
  */
 
-import { Result } from "@outfitter/contracts";
-import { createMcpServer, defineTool, connectStdio } from "@outfitter/mcp";
-import { z } from "zod";
+import { createMcpServer, connectStdio } from "@outfitter/mcp";
+
+import { helloTool } from "./tools/hello.js";
 
 const server = createMcpServer({
   name: "{{binName}}",
   version: "{{version}}",
-});
-
-const helloTool = defineTool({
-  name: "hello",
-  description: "Say hello to someone",
-  inputSchema: z.object({
-    name: z.string().default("World").describe("Name to greet"),
-  }),
-  handler: async (input, ctx) => {
-    ctx.logger.info(`Greeting ${input.name}`);
-    return Result.ok({ greeting: `Hello, ${input.name}!` });
-  },
 });
 
 server.registerTool(helloTool);

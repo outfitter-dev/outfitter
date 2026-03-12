@@ -33,7 +33,8 @@
     "@outfitter/contracts": "workspace:*",
     "@outfitter/logging": "workspace:*",
     "@outfitter/mcp": "workspace:*",
-    "@outfitter/types": "workspace:*"
+    "@outfitter/types": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {},
   "outfitter": {
