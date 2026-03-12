@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "@outfitter/contracts": "workspace:*",
-    "@outfitter/logging": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

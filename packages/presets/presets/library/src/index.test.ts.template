@@ -5,33 +5,33 @@ import { createContext } from "@outfitter/contracts";
 import { createGreeting } from "./handlers.js";
 
 describe("createGreeting", () => {
+  const ctx = createContext({ cwd: process.cwd(), env: process.env });
+
   test("returns greeting for valid input", async () => {
-    const ctx = createContext({
-      cwd: process.cwd(),
-      env: process.env,
-    });
     const result = await createGreeting(
       { name: "Outfitter", excited: true },
       ctx
     );
 
     expect(result.isOk()).toBe(true);
-    if (result.isErr()) {
-      return;
-    }
+    if (result.isErr()) return;
     expect(result.value.message).toBe("Hello, Outfitter!");
   });
 
-  test("returns validation error for invalid input", async () => {
-    const ctx = createContext({
-      cwd: process.cwd(),
-      env: process.env,
-    });
+  test("returns validation error for empty name", async () => {
     const result = await createGreeting({ name: "" }, ctx);
 
     expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.name).toBe("ValidationError");
-    }
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("ValidationError");
+    expect(result.error.message).toBe("name is required");
+  });
+
+  test("returns validation error for missing input", async () => {
+    const result = await createGreeting({}, ctx);
+
+    expect(result.isErr()).toBe(true);
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("ValidationError");
   });
 });
