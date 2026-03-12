@@ -9,7 +9,6 @@ import type {
 } from "./types.js";
 
 const TARGET_ALIASES: ReadonlyMap<string, TargetId> = new Map([
-  ["basic", "minimal"],
   ["lib", "library"],
 ]);
 
@@ -25,6 +24,19 @@ export const TARGET_REGISTRY: ReadonlyMap<TargetId, TargetDefinition> = new Map<
       category: "library",
       placement: "packages",
       presetDir: "minimal",
+      defaultBlocks: ["scaffolding"],
+      status: "ready",
+      scope: "init-only",
+    },
+  ],
+  [
+    "basic",
+    {
+      id: "basic",
+      description: "Basic Bun + TypeScript project with Outfitter conventions",
+      category: "library",
+      placement: "packages",
+      presetDir: "basic",
       defaultBlocks: ["scaffolding"],
       status: "ready",
       scope: "init-only",

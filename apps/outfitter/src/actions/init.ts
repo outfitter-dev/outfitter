@@ -62,6 +62,7 @@ interface InitActionInput extends InitOptions {
 
 const initPresetValues = [
   "minimal",
+  "basic",
   "cli",
   "mcp",
   "daemon",
@@ -215,7 +216,7 @@ function createInitAction(options: {
   const presetOption: ActionCliOption = {
     flags: "-p, --preset <preset>",
     description:
-      "Preset to use (minimal, cli, mcp, daemon, library, full-stack, lib)",
+      "Preset to use (minimal, basic, cli, mcp, daemon, library, full-stack, lib)",
   };
 
   const initOptions: ActionCliOption[] = [...commonInitOptions];
@@ -355,6 +356,15 @@ export const initLibraryAction: ActionSpec<InitActionInput, unknown> =
     description: "Create a new library project",
     command: "library [directory]",
     presetOverride: "library",
+  });
+
+/** Create a basic project using the `basic` preset. */
+export const initBasicAction: ActionSpec<InitActionInput, unknown> =
+  createInitAction({
+    id: "init.basic",
+    description: "Create a basic project",
+    command: "basic [directory]",
+    presetOverride: "basic",
   });
 
 /** Create a full-stack workspace with CLI, MCP, daemon, and library targets. */
