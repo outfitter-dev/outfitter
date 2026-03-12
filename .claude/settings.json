@@ -25,6 +25,17 @@
       }
     ]
   },
-  "enabledPlugins": {},
-  "extraKnownMarketplaces": {}
+  "enabledPlugins": {
+    "outfitter@outfitter": true,
+    "fieldguides@outfitter": true
+  },
+  "extraKnownMarketplaces": {
+    "outfitter": {
+      "source": {
+        "source": "github",
+        "repo": "outfitter-dev/outfitter",
+        "sparsePaths": [".claude-plugin", "plugins"]
+      }
+    }
+  }
 }
