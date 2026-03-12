@@ -34,7 +34,7 @@ All domain logic lives in `packages/core/` as transport-agnostic handlers return
 async function handler(
   input: unknown,
   ctx: HandlerContext
-): Promise<Result<Output, ValidationError>>
+): Promise<Result<Output, ValidationError>>;
 ```
 
 CLI and MCP are thin adapters over shared handlers. Write the handler once in core, expose it everywhere.
