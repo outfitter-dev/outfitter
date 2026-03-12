@@ -102,12 +102,14 @@ Each phase is one of:
 ### `scores`
 
 Each score has:
+
 - `score`: Integer 1-10
 - `reasoning`: String citing specific evidence (file paths, line numbers, command output)
 
 ### `findings`
 
 Severity levels:
+
 - `blocking`: Prevents setup or core functionality from working
 - `degraded`: Works but with significant quality issues
 - `cosmetic`: Minor issues that don't affect functionality
@@ -115,6 +117,7 @@ Severity levels:
 ### `docInconsistencies`
 
 Found by cross-checking scaffold output against `outfitter-atlas` patterns:
+
 - `source`: Which reference document or pattern
 - `claim`: What the reference says should be true
 - `actual`: What the scaffold actually produces
