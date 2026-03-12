@@ -1,0 +1,53 @@
+# CLAUDE.md
+
+Bun-first TypeScript daemon. Tests before code. Result types, not exceptions.
+
+## Commands
+
+```bash
+bun run build        # Build CLI + daemon to dist/
+bun run dev          # Watch mode (foreground)
+bun run dev:daemon   # Watch mode (foreground, explicit)
+bun run test         # Run tests
+bun run typecheck    # TypeScript validation
+bun run check        # Lint + format check
+bun run lint:fix     # Auto-fix lint issues
+bun run format       # Auto-fix formatting
+```
+
+## Architecture
+
+Background daemon with CLI control interface, built with `@outfitter/daemon` and `@outfitter/cli`.
+
+### Project Structure
+
+- `src/daemon.ts` — Daemon entry point (background process)
+- `src/daemon-main.ts` — Daemon lifecycle and IPC server
+- `src/cli.ts` — CLI control commands (start, stop, status, health)
+- `src/index.ts` — Library re-exports
+
+### Daemon Lifecycle
+
+The daemon uses `createDaemon()` and `createIpcServer()` from `@outfitter/daemon`:
+
+- **start** — Spawns background process, writes PID file
+- **stop** — Sends shutdown signal via IPC
+- **status** — Checks if daemon is running
+- **health** — Queries daemon health endpoint
+
+### Handler Contract
+
+CLI commands and daemon operations use handlers returning `Result<T, E>`. Use structured logging via `@outfitter/logging` instead of `console.error`.
+
+## Development Principles
+
+- **TDD-First** — Write the test before the code (Red / Green / Refactor)
+- **Result Types** — Handlers return `Result<T, E>`, not exceptions
+- **Bun-First** — Use Bun-native APIs before npm packages
+- **Strict TypeScript** — No `any`, no `as` casts; narrow instead of assert
+
+## Testing
+
+- Runner: Bun test runner
+- Files: `src/__tests__/*.test.ts`
+- Run: `bun test` or `bun run test`

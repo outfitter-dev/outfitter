@@ -1,0 +1,66 @@
+# CLAUDE.md
+
+Bun-first TypeScript MCP server. Tests before code. Result types, not exceptions.
+
+## Commands
+
+```bash
+bun run build        # Build server + library to dist/
+bun run dev          # Watch mode (auto-restart on changes)
+bun run test         # Run tests
+bun run typecheck    # TypeScript validation
+bun run check        # Lint + format check
+bun run lint:fix     # Auto-fix lint issues
+bun run format       # Auto-fix formatting
+```
+
+## Architecture
+
+MCP (Model Context Protocol) server built with `@modelcontextprotocol/sdk` and `@outfitter/mcp`.
+
+### Project Structure
+
+- `src/server.ts` — Server entry point (stdio transport)
+- `src/mcp.ts` — Tool and resource registration
+- `src/tools/` — Tool definitions with Zod schemas and handler logic
+- `src/index.ts` — Library re-exports for testing
+
+### Tool Definition
+
+Tools are defined with `defineTool()` using Zod schemas for input validation and tool annotations for safety metadata:
+
+```typescript
+import { defineTool } from "@outfitter/mcp/server";
+
+const myTool = defineTool({
+  name: "my-tool",
+  description: "Does something useful",
+  schema: z.object({ input: z.string() }),
+  annotations: { readOnlyHint: true },
+  handler: async (args, ctx) => {
+    // Return MCP content array
+    return [{ type: "text", text: "result" }];
+  },
+});
+```
+
+### Adding a Tool
+
+1. Create tool file in `src/tools/<name>.ts` with `defineTool()`
+2. Import and register in `src/mcp.ts`
+3. Re-export from `src/index.ts`
+4. Add tests in `src/__tests__/<name>.test.ts`
+
+## Development Principles
+
+- **TDD-First** — Write the test before the code (Red / Green / Refactor)
+- **Result Types** — Handlers return `Result<T, E>`, not exceptions
+- **Bun-First** — Use Bun-native APIs before npm packages
+- **Strict TypeScript** — No `any`, no `as` casts; narrow instead of assert
+
+## Testing
+
+- Runner: Bun test runner
+- Files: `src/__tests__/*.test.ts`
+- Run: `bun test` or `bun run test`
+- Test tool handlers directly by importing from `src/index.ts`

@@ -1,0 +1,61 @@
+# CLAUDE.md
+
+Bun-first TypeScript monorepo. Tests before code. Result types, not exceptions.
+
+## Commands
+
+```bash
+# Root (all packages)
+bun run build        # Build all packages (Turbo)
+bun run test         # Test all packages
+bun run typecheck    # TypeScript validation
+
+# Single package
+bun run build --filter=@{{name}}/core
+bun run test --filter=@{{name}}/core
+cd packages/core && bun test
+```
+
+## Architecture
+
+Monorepo with shared core library, CLI app, and MCP server.
+
+### Project Structure
+
+- `packages/core/` — Shared handlers and types (library)
+- `apps/cli/` — CLI application (thin adapter over core handlers)
+- `apps/mcp/` — MCP server (thin adapter over core handlers)
+
+### Handler Contract
+
+All domain logic lives in `packages/core/` as transport-agnostic handlers returning `Result<T, E>`:
+
+```typescript
+async function handler(
+  input: unknown,
+  ctx: HandlerContext
+): Promise<Result<Output, ValidationError>>
+```
+
+CLI and MCP are thin adapters over shared handlers. Write the handler once in core, expose it everywhere.
+
+### Adding a Feature
+
+1. Define types and Zod schema in `packages/core/src/types.ts`
+2. Implement handler in `packages/core/src/handlers.ts` returning `Result<T, E>`
+3. Add tests in `packages/core/src/__tests__/`
+4. Wire CLI command in `apps/cli/src/` using CommandBuilder
+5. Wire MCP tool in `apps/mcp/src/` using `defineTool()`
+
+## Development Principles
+
+- **TDD-First** — Write the test before the code (Red / Green / Refactor)
+- **Result Types** — Handlers return `Result<T, E>`, not exceptions
+- **Bun-First** — Use Bun-native APIs before npm packages
+- **Strict TypeScript** — No `any`, no `as` casts; narrow instead of assert
+
+## Testing
+
+- Runner: Bun test runner
+- Files: `src/__tests__/*.test.ts` within each package
+- Run: `bun test` (per package) or `bun run test` (all packages from root)
