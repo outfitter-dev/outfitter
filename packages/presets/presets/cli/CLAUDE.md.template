@@ -12,6 +12,7 @@ bun run typecheck    # TypeScript validation
 bun run check        # Lint + format check
 bun run lint:fix     # Auto-fix lint issues
 bun run format       # Auto-fix formatting
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
 ```
 
 ## Architecture
@@ -43,7 +44,7 @@ CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@o
 1. Define types and Zod schema in `src/types.ts`
 2. Create handler in `src/commands/<name>.ts` returning `Result<T, E>`
 3. Wire command in `src/program.ts` using the CommandBuilder pattern
-4. Add tests in `src/__tests__/<name>.test.ts`
+4. Add tests in `src/<name>.test.ts`
 
 ## Development Principles
 
@@ -55,5 +56,5 @@ CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@o
 ## Testing
 
 - Runner: Bun test runner
-- Files: `src/__tests__/*.test.ts`
+- Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`

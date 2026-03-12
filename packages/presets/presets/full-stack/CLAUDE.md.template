@@ -57,5 +57,5 @@ CLI and MCP are thin adapters over shared handlers. Write the handler once in co
 ## Testing
 
 - Runner: Bun test runner
-- Files: `src/__tests__/*.test.ts` within each package
+- Files: `src/*.test.ts` within each package
 - Run: `bun test` (per package) or `bun run test` (all packages from root)

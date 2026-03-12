@@ -13,6 +13,7 @@ bun run typecheck    # TypeScript validation
 bun run check        # Lint + format check
 bun run lint:fix     # Auto-fix lint issues
 bun run format       # Auto-fix formatting
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
 ```
 
 ## Architecture
@@ -49,5 +50,5 @@ CLI commands and daemon operations use handlers returning `Result<T, E>`. Use st
 ## Testing
 
 - Runner: Bun test runner
-- Files: `src/__tests__/*.test.ts`
+- Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
