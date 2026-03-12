@@ -12,6 +12,7 @@ bun run typecheck    # TypeScript validation
 bun run check        # Lint + format check
 bun run lint:fix     # Auto-fix lint issues
 bun run format       # Auto-fix formatting
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
 ```
 
 ## Architecture
@@ -49,7 +50,7 @@ const myTool = defineTool({
 1. Create tool file in `src/tools/<name>.ts` with `defineTool()`
 2. Import and register in `src/mcp.ts`
 3. Re-export from `src/index.ts`
-4. Add tests in `src/__tests__/<name>.test.ts`
+4. Add tests in `src/<name>.test.ts`
 
 ## Development Principles
 
@@ -61,6 +62,6 @@ const myTool = defineTool({
 ## Testing
 
 - Runner: Bun test runner
-- Files: `src/__tests__/*.test.ts`
+- Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
 - Test tool handlers directly by importing from `src/index.ts`
