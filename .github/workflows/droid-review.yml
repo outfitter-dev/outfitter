@@ -2,7 +2,7 @@ name: Droid Auto Review
 
 on:
   pull_request:
-    types: [opened, ready_for_review, reopened]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -13,10 +13,9 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
       issues: write
-      id-token: write
       actions: read
     steps:
       - name: Authorize trigger actor
@@ -73,13 +72,9 @@ jobs:
 
             core.info(`Authorized trigger actor: ${context.actor}`);
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
       - name: Run Droid Auto Review
-        uses: Factory-AI/droid-action@v3
+        uses: Factory-AI/droid-code-review@latest
         with:
-          factory_api_key: ${{ secrets.FACTORY_API_KEY }}
-          automatic_review: true
+          factory-api-key: ${{ secrets.FACTORY_API_KEY }}
+          pr-number: ${{ github.event.pull_request.number }}
+          pr-head-sha: ${{ github.event.pull_request.head.sha }}
