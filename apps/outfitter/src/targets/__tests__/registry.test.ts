@@ -32,9 +32,9 @@ function findRepoRoot(): string {
 }
 
 describe("target registry", () => {
-  test("contains exactly 9 targets", () => {
-    expect(TARGET_REGISTRY.size).toBe(9);
-    expect(TARGET_IDS.length).toBe(9);
+  test("contains exactly 10 targets", () => {
+    expect(TARGET_REGISTRY.size).toBe(10);
+    expect(TARGET_IDS.length).toBe(10);
   });
 
   test("all target IDs are unique", () => {
@@ -64,13 +64,13 @@ describe("target registry", () => {
     expect(result.value.id).toBe("cli");
   });
 
-  test("getTarget supports legacy basic alias", () => {
+  test("getTarget resolves basic as its own target", () => {
     const result = getTarget("basic");
     expect(result.isOk()).toBe(true);
     if (result.isErr()) {
       return;
     }
-    expect(result.value.id).toBe("minimal");
+    expect(result.value.id).toBe("basic");
   });
 
   test("getTarget supports legacy lib alias", () => {
