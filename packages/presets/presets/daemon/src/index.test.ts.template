@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { runDaemon } from "./index.js";
 
-describe("runDaemon", () => {
+describe("daemon", () => {
   test("exports the daemon entrypoint", () => {
     expect(typeof runDaemon).toBe("function");
   });
