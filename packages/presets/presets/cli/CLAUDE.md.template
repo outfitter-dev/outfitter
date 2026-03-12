@@ -30,7 +30,10 @@ CLI application built with Commander and `@outfitter/cli`.
 All domain logic uses handlers returning `Result<T, E>`:
 
 ```typescript
-function handler(input: Input, ctx: HandlerContext): Promise<Result<Output, Error>>
+function handler(
+  input: Input,
+  ctx: HandlerContext
+): Promise<Result<Output, Error>>;
 ```
 
 CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@outfitter/cli/envelope` to wrap handler results in output envelopes.
