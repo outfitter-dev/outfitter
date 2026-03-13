@@ -39,6 +39,19 @@ describe("normalizePackageJsonForWrite", () => {
     );
   });
 
+  test("sorts scripts section alphabetically", () => {
+    const result = normalizePackageJsonForWrite({
+      name: "pkg",
+      scripts: { verify: "...", build: "...", check: "..." },
+    });
+
+    expect(Object.keys(result.scripts as Record<string, unknown>)).toEqual([
+      "build",
+      "check",
+      "verify",
+    ]);
+  });
+
   test("handles empty object", () => {
     const result = normalizePackageJsonForWrite({});
 
