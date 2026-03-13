@@ -7,6 +7,7 @@
  * to the telemetry log in the run directory.
  *
  * Env: OUTFITTER_SCAFFOLD_TRIAL_RUN_DIR — path to the run directory.
+ * Fallback: reads from ".test/scaffolds/.current-run-dir" when env var is absent.
  * Always exits 0 to never block the agent.
  */
 
@@ -14,7 +15,15 @@ import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 
 try {
-  const runDir = process.env["OUTFITTER_SCAFFOLD_TRIAL_RUN_DIR"];
+  const runDir =
+    process.env["OUTFITTER_SCAFFOLD_TRIAL_RUN_DIR"] ??
+    ((
+      await Bun.file(".test/scaffolds/.current-run-dir")
+        .text()
+        .catch(() => "")
+    ).trim() ||
+      undefined);
+
   if (!runDir) {
     process.exit(0);
   }

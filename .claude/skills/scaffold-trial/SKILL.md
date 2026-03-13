@@ -52,6 +52,16 @@ Create directory structure:
   <preset>/     # One subdir per selected preset
 ```
 
+### Step 3b: Write Run Directory Marker
+
+Write the run directory absolute path to `.test/scaffolds/.current-run-dir` so PostToolUse hooks in subagent processes can discover it (env vars cannot be injected into hook subprocesses):
+
+```bash
+echo "<absolute-path-to-run-dir>" > .test/scaffolds/.current-run-dir
+```
+
+This file is the fallback for `OUTFITTER_SCAFFOLD_TRIAL_RUN_DIR`. The `log-telemetry.ts` hook checks the env var first, then falls back to reading this file.
+
 ### Step 4: Initialize Manifest
 
 Write `manifest.json` to the run directory:
