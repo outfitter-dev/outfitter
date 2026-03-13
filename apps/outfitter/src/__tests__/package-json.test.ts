@@ -66,4 +66,19 @@ describe("serializePackageJson", () => {
     expect(output).toEndWith("\n");
     expect(JSON.parse(output)).toEqual({ name: "pkg", version: "1.0.0" });
   });
+
+  test("preserves key ordering and sorts scripts through round-trip", () => {
+    const output = serializePackageJson({
+      scripts: { verify: "...", build: "..." },
+      name: "pkg",
+      version: "1.0.0",
+    });
+    const parsed = JSON.parse(output) as Record<string, unknown>;
+
+    expect(Object.keys(parsed)).toEqual(["name", "version", "scripts"]);
+    expect(Object.keys(parsed.scripts as Record<string, unknown>)).toEqual([
+      "build",
+      "verify",
+    ]);
+  });
 });
