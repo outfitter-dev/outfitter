@@ -11,7 +11,7 @@ import { greetingInputSchema, type Greeting } from "./types.js";
  *
  * @param input - Raw input to validate against {@link greetingInputSchema}
  * @param ctx - Handler context with logger and request metadata
- * @returns Validated greeting or a ValidationError with Zod field details
+ * @returns Validated greeting or a `ValidationError` with field-level validation details
  *
  * @example
  * ```typescript
