@@ -9,7 +9,7 @@
  */
 
 /**
- * Top-level field ordering that matches oxfmt's expected package.json layout.
+ * Canonical top-level field ordering for outfitter-managed package.json files.
  * Fields not listed here are appended in their original order after the known
  * fields, preserving any custom keys the template defines.
  */
