@@ -73,7 +73,7 @@ jobs:
             core.info(`Authorized trigger actor: ${context.actor}`);
 
       - name: Run Droid Auto Review
-        uses: Factory-AI/droid-code-review@latest
+        uses: Factory-AI/droid-code-review@3d3c24d5def30e51b3ffb5844fb1c0595a3a974c # latest
         with:
           factory-api-key: ${{ secrets.FACTORY_API_KEY }}
           pr-number: ${{ github.event.pull_request.number }}
