@@ -24,6 +24,8 @@ Add to your Claude Desktop config:
 
 Replace `/absolute/path/to/` with the actual path to your project directory.
 
+> **Note:** On macOS, `bun` may not be on Claude Desktop's PATH. If the server fails to start, replace `"bun"` with the full path (e.g., `"/Users/you/.bun/bin/bun"` — run `which bun` to find it).
+
 ## Available Tools
 
 ### hello
