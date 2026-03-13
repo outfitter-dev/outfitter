@@ -5,7 +5,11 @@
 ## Installation
 
 ```bash
-bun add {{packageName}}
+# Run directly
+bunx {{packageName}}
+
+# Or install globally
+bun add -g {{packageName}}
 ```
 
 ## Usage
