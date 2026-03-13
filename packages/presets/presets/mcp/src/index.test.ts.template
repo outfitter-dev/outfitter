@@ -25,9 +25,8 @@ describe("versionResource", () => {
 });
 
 describe("helloTool", () => {
-  const ctx = createContext({ cwd: process.cwd(), env: process.env });
-
   test("returns greeting for valid input", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
     const result = await helloTool.handler({ name: "Outfitter" }, ctx);
 
     expect(result.isOk()).toBe(true);
@@ -38,6 +37,7 @@ describe("helloTool", () => {
   // Direct handler invocation returns ValidationError.
   // Via harness.callTool(), errors are wrapped as McpError by translateError().
   test("returns error for reserved name", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
     const result = await helloTool.handler({ name: "error" }, ctx);
 
     expect(result.isErr()).toBe(true);
