@@ -46,12 +46,12 @@ Gracefully shuts down the daemon.
 # Install dependencies
 bun install
 
-# Run from source
-bun run src/cli.ts start
+# Run from source (foreground only — background spawn requires a build)
+bun run src/cli.ts start --foreground
 bun run src/cli.ts status
 bun run src/cli.ts stop
 
-# Run daemon in foreground
+# Run daemon in foreground (via dev script)
 bun run dev
 
 # Build
