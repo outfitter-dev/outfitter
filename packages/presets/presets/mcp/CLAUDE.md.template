@@ -31,16 +31,16 @@ MCP (Model Context Protocol) server built with `@modelcontextprotocol/sdk` and `
 Tools are defined with `defineTool()` using Zod schemas for input validation and tool annotations for safety metadata:
 
 ```typescript
-import { defineTool } from "@outfitter/mcp/server";
+import { Result, ValidationError } from "@outfitter/contracts";
+import { defineTool } from "@outfitter/mcp";
 
 const myTool = defineTool({
   name: "my-tool",
   description: "Does something useful",
-  schema: z.object({ input: z.string() }),
+  inputSchema: z.object({ input: z.string() }),
   annotations: { readOnlyHint: true },
-  handler: async (args, ctx) => {
-    // Return MCP content array
-    return [{ type: "text", text: "result" }];
+  handler: async (args, _ctx) => {
+    return Result.ok({ result: args.input });
   },
 });
 ```
