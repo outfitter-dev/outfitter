@@ -6,6 +6,7 @@ Bun-first TypeScript project. Tests before code. Result types, not exceptions.
 
 ```bash
 bun run build        # Build the project
+bun run dev          # Watch mode (auto-restart on changes)
 bun run test         # Run tests
 bun run typecheck    # TypeScript validation
 bun run check        # Lint + format check
