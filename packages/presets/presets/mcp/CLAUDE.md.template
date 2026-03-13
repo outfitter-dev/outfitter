@@ -67,6 +67,8 @@ const myResource = defineResource({
 
 ### Adding a Resource
 
+Simple resources (like the built-in version resource) can be defined inline in `src/mcp.ts`. For resources with non-trivial logic:
+
 1. Create resource file in `src/resources/<name>.ts` with `defineResource()`
 2. Import and register in `src/mcp.ts` via `server.registerResource()`
 3. Re-export from `src/index.ts`
