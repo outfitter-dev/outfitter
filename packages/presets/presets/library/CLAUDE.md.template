@@ -9,6 +9,7 @@ bun run build        # Build library with bunup (ESM + types)
 bun run dev          # Watch mode
 bun run test         # Run tests
 bun run typecheck    # TypeScript validation
+bun run check        # Lint + format check (ultracite)
 bun run lint         # Lint checks (oxlint)
 bun run lint:fix     # Auto-fix lint issues
 bun run format       # Auto-fix formatting (oxfmt)
