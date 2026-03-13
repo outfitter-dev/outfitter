@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { createContext } from "@outfitter/contracts";
 
 import { server } from "./mcp.js";
-import { helloTool } from "./tools/hello.js";
+import { helloInputSchema, helloTool } from "./tools/hello.js";
 
 describe("server", () => {
   test("registers the hello tool", () => {
@@ -35,7 +35,8 @@ describe("helloTool", () => {
   });
 
   test("returns greeting with default name", async () => {
-    const result = await helloTool.handler({ name: "World" }, ctx);
+    const parsed = helloInputSchema.parse({});
+    const result = await helloTool.handler(parsed, ctx);
 
     expect(result.isOk()).toBe(true);
     if (result.isErr()) return;
