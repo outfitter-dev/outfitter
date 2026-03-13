@@ -2,7 +2,7 @@
 /**
  * {{projectName}} CLI entry point
  *
- * Commands: start, stop, restart, status
+ * Commands: start, stop, status
  */
 
 import { spawn } from "node:child_process";
