@@ -13,7 +13,7 @@ export interface HelloInput {
 
 /** Zod schema for hello tool input validation. */
 export const helloInputSchema: ZodType<HelloInput> = z.object({
-  name: z.string().default("World").describe("Name to greet"),
+  name: z.string().min(1, "name must not be empty").describe("Name to greet"),
 });
 
 /** Output from the hello tool. */
@@ -34,6 +34,15 @@ export const helloTool = defineTool({
     input,
     _ctx
   ): Promise<Result<HelloOutput, ValidationError>> => {
+    // Demonstrate Result.err() for business logic errors
+    if (input.name.toLowerCase() === "error") {
+      return Result.err(
+        ValidationError.create("name", "reserved name not allowed", {
+          reserved: ["error"],
+        })
+      );
+    }
+
     return Result.ok({ greeting: `Hello, ${input.name}!` });
   },
 });
