@@ -7,9 +7,13 @@ Bun-first TypeScript monorepo. Tests before code. Result types, not exceptions.
 ```bash
 # Root (all packages)
 bun run build        # Build all packages (Bun workspaces)
+bun run dev          # Dev mode for all packages
 bun run test         # Test all packages
 bun run typecheck    # TypeScript validation
-bun run verify:ci    # Full CI validation (typecheck + build + test)
+bun run check        # Lint checks (all packages)
+bun run lint:fix     # Auto-fix lint issues (all packages)
+bun run format       # Auto-fix formatting (all packages)
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
 
 # Single package
 bun run --filter={{packageName}}-core build
