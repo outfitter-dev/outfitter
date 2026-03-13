@@ -15,7 +15,7 @@ Orchestrate agent-driven scaffold smoke testing across all presets.
 ### Step 1: Parse Arguments
 
 If `$ARGUMENTS` is provided:
-- `all` → test all 6 presets: cli, library, full-stack, minimal, mcp, daemon
+- `all` → test all 7 presets: cli, library, full-stack, minimal, basic, mcp, daemon
 - Comma-separated list → test only those presets (validate each is a valid preset name)
 - Empty → offer smart selection (see below)
 
