@@ -35,12 +35,14 @@ describe("helloTool", () => {
     expect(result.value.greeting).toBe("Hello, Outfitter!");
   });
 
-  test("returns greeting with default name", async () => {
-    const parsed = helloInputSchema.parse({});
-    const result = await helloTool.handler(parsed, ctx);
+  // Direct handler invocation returns ValidationError.
+  // Via harness.callTool(), errors are wrapped as McpError by translateError().
+  test("returns error for reserved name", async () => {
+    const result = await helloTool.handler({ name: "error" }, ctx);
 
-    expect(result.isOk()).toBe(true);
-    if (result.isErr()) return;
-    expect(result.value.greeting).toBe("Hello, World!");
+    expect(result.isErr()).toBe(true);
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("ValidationError");
+    expect(result.error.message).toBe("name: reserved name not allowed");
   });
 });
