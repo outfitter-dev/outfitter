@@ -108,7 +108,10 @@ describe("createMCPTestHarness()", () => {
     const result = await harness.callTool("echo", { value: "hello" });
 
     expect(result.isOk()).toBe(true);
-    expect(result.unwrap().content[0].text).toBe("hello");
+    const value = result.unwrap() as {
+      content: Array<{ type: string; text: string }>;
+    };
+    expect(value.content[0].text).toBe("hello");
   });
 
   it("supports alternate casing alias", () => {
@@ -117,7 +120,7 @@ describe("createMCPTestHarness()", () => {
 });
 
 describe("McpHarness tool invocation", () => {
-  it("returns MCP-formatted content on success", async () => {
+  it("returns raw handler output on success", async () => {
     const tools: SerializedTool[] = [
       {
         name: "add",
@@ -139,7 +142,10 @@ describe("McpHarness tool invocation", () => {
     const result = await harness.callTool("add", { a: 2, b: 3 });
 
     expect(result.isOk()).toBe(true);
-    const data = JSON.parse(result.unwrap().content[0].text ?? "{}");
+    const value = result.unwrap() as {
+      content: Array<{ type: string; text?: string }>;
+    };
+    const data = JSON.parse(value.content[0].text ?? "{}");
     expect(data.sum).toBe(5);
   });
 
