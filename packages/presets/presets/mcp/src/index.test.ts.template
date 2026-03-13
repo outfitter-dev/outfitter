@@ -1,11 +1,48 @@
 import { describe, expect, test } from "bun:test";
 
-import { server } from "./index.js";
+import { createContext } from "@outfitter/contracts";
+import { createMcpHarness } from "@outfitter/testing";
+
+import { server } from "./mcp.js";
+import { helloTool } from "./tools/hello.js";
 
 describe("server", () => {
   test("registers the hello tool", () => {
     const registered = server.getTools().some((tool) => tool.name === "hello");
 
     expect(registered).toBe(true);
+  });
+});
+
+describe("versionResource", () => {
+  test("version resource is registered", () => {
+    const harness = createMcpHarness(server);
+    const resources = harness.listResources();
+    const registered = resources.some((r) => r.name === "Server Version");
+
+    expect(registered).toBe(true);
+  });
+});
+
+describe("helloTool", () => {
+  test("returns greeting for valid input", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
+    const result = await helloTool.handler({ name: "Outfitter" }, ctx);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) return;
+    expect(result.value.greeting).toBe("Hello, Outfitter!");
+  });
+
+  // Direct handler invocation returns ValidationError.
+  // Via harness.callTool(), errors are wrapped as McpError by translateError().
+  test("returns error for reserved name", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
+    const result = await helloTool.handler({ name: "error" }, ctx);
+
+    expect(result.isErr()).toBe(true);
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("ValidationError");
+    expect(result.error.message).toBe("name: reserved name not allowed");
   });
 });

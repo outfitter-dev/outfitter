@@ -33,7 +33,8 @@
     "@outfitter/contracts": "workspace:*",
     "@outfitter/logging": "workspace:*",
     "@outfitter/types": "workspace:*",
-    "commander": "catalog:"
+    "commander": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {},
   "outfitter": {

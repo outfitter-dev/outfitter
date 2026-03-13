@@ -6,21 +6,28 @@
  * @packageDocumentation
  */
 
-/**
- * Main entry point for {{projectName}}.
- *
- * @example
- * ```typescript
- * import { main } from "{{packageName}}";
- *
- * main();
- * ```
- */
-export function main(): void {
-  console.log("Hello from {{projectName}}!");
+import { Result, ValidationError } from "@outfitter/contracts";
+import { type ZodType, z } from "zod";
+
+export interface GreetingInput {
+  readonly name: string;
 }
 
-// Run if executed directly
-if (import.meta.main) {
-  main();
+export const greetingInputSchema: ZodType<GreetingInput> = z.object({
+  name: z.string().min(1, "name is required"),
+});
+
+export interface Greeting {
+  readonly message: string;
+}
+
+export function greet(input: unknown): Result<Greeting, ValidationError> {
+  const parsed = greetingInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return Result.err(
+      new ValidationError({ message: "Invalid input", field: "name" })
+    );
+  }
+
+  return Result.ok({ message: `Hello, ${parsed.data.name}!` });
 }

@@ -32,6 +32,9 @@
     "clean:artifacts": "rm -rf dist .turbo",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "@outfitter/contracts": "workspace:*"
+  },
   "devDependencies": {},
   "engines": {
     "bun": ">=1.3.10"

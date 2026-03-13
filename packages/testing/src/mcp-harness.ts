@@ -13,6 +13,7 @@ import {
   createMcpServer,
   type McpError,
   type McpServer,
+  type ResourceDefinition,
   type SerializedTool,
   type ToolDefinition,
 } from "@outfitter/mcp";
@@ -61,6 +62,11 @@ export interface McpHarness {
   reset(): void;
 
   /**
+   * List all registered resources.
+   */
+  listResources(): ResourceDefinition[];
+
+  /**
    * Search tools by name or description (case-insensitive).
    */
   searchTools(query: string): SerializedTool[];
@@ -103,6 +109,10 @@ export function createMcpHarness(
 
     listTools(): SerializedTool[] {
       return server.getTools();
+    },
+
+    listResources(): ResourceDefinition[] {
+      return server.getResources();
     },
 
     searchTools(query: string): SerializedTool[] {
