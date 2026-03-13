@@ -18,6 +18,7 @@ describe("server", () => {
 
   // callTool passes through the raw handler output — assert on the actual
   // shape your handler returns, not on the MCP content[] wrapper.
+  // For typed property access, use the direct handler tests below.
   test("can call hello tool via harness", async () => {
     const result = await harness.callTool("hello", { name: "Outfitter" });
 
