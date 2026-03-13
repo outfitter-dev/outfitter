@@ -36,10 +36,12 @@ describe("createGreeting", () => {
     expect(result.isErr()).toBe(true);
     if (!result.isErr()) return;
     expect(result.error.name).toBe("ValidationError");
-    // Zod's "Required" message (type check) fires before .min(1)
-    expect(result.error.message).toBe("Required");
-    expect(result.error.context).toEqual({
-      fields: [{ path: "name", message: "Required" }],
-    });
+    // Check field path rather than message text — Zod error messages
+    // differ between v3 ("Required") and v4 ("Invalid input: ...").
+    expect(result.error.context?.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "name" }),
+      ])
+    );
   });
 });
