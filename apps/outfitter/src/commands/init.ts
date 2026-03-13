@@ -496,7 +496,7 @@ const withCommonOptions = (command: Command): Command =>
     )
     .option(
       "-p, --preset <preset>",
-      "Preset to use (minimal|cli|mcp|daemon|library|full-stack)"
+      "Preset to use (basic|minimal|cli|mcp|daemon|library|full-stack)"
     )
     .option("-s, --structure <mode>", "Project structure (single|workspace)")
     .option("--workspace-name <name>", "Workspace root package name")

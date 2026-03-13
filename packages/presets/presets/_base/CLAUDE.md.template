@@ -1,0 +1,35 @@
+# CLAUDE.md
+
+Bun-first TypeScript project. Tests before code. Result types, not exceptions.
+
+## Commands
+
+```bash
+bun run build        # Build the project
+bun run dev          # Watch mode (auto-restart on changes)
+bun run test         # Run tests
+bun run typecheck    # TypeScript validation
+bun run check        # Lint + format check
+bun run lint:fix     # Auto-fix lint issues
+bun run format       # Auto-fix formatting
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
+```
+
+## Architecture
+
+Single-package TypeScript project built with Bun.
+
+Handlers are pure functions returning `Result<T, E>`. Write the handler once, test it directly.
+
+## Development Principles
+
+- **TDD-First** — Write the test before the code (Red / Green / Refactor)
+- **Result Types** — Handlers return `Result<T, E>`, not exceptions
+- **Bun-First** — Use Bun-native APIs before npm packages
+- **Strict TypeScript** — No `any`, no `as` casts; narrow instead of assert
+
+## Testing
+
+- Runner: Bun test runner
+- Files: `src/*.test.ts`
+- Run: `bun test` or `bun run test`

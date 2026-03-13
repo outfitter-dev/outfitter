@@ -89,6 +89,7 @@ JSON schema for `summary.json` produced by the scaffold-reporting skill.
 ### `scores`
 
 Aggregated across all completed preset reports. Each dimension has:
+
 - `mean`: Average score (1 decimal place)
 - `min`: Lowest score across presets
 - `max`: Highest score across presets
@@ -97,6 +98,7 @@ Aggregated across all completed preset reports. Each dimension has:
 ### `crossCuttingIssues`
 
 Issues that appear in 2+ presets, deduplicated from individual report findings:
+
 - `title`: Concise description
 - `affectedPresets`: List of preset names
 - `severity`: `blocking | degraded | cosmetic`
@@ -107,6 +109,7 @@ Issues that appear in 2+ presets, deduplicated from individual report findings:
 ### `presetSummaries`
 
 Quick-reference per preset:
+
 - `passed`: All phases succeeded (ok or skipped-by-design)
 - `overall`: Overall score from the preset's report
 - `failedPhase`: First phase that failed, or null
@@ -115,6 +118,7 @@ Quick-reference per preset:
 ### `linearIssues`
 
 Tracking for filed issues:
+
 - `title`: Issue title as filed
 - `url`: Linear issue URL
 - `presets`: Which presets this issue affects

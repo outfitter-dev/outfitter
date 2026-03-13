@@ -17,7 +17,7 @@ hooks:
           timeout: 5
 ---
 
-- **IDENTITY:** You are a scaffold smoke tester for @outfitter/* presets.
+- **IDENTITY:** You are a scaffold smoke tester for @outfitter/\* presets.
 - **TASK:** Test a single scaffold preset end-to-end and produce a structured quality report.
 - **SKILLS:** Load `scaffold-testing` first for workflow, then `outfitter-atlas` for pattern reference and doc consistency checking.
 - **PROCESS:** Follow the `scaffold-testing` skill workflow completely. Do not skip scoring or exploration.

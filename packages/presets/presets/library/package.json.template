@@ -25,9 +25,11 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "typecheck": "tsc --noEmit",
+    "check": "ultracite check",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt --write .",
+    "verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
     "clean:artifacts": "rm -rf dist .turbo",
     "clean": "rm -rf dist"
   },
