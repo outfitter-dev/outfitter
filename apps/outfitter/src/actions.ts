@@ -32,6 +32,7 @@ import { doctorAction } from "./actions/doctor.js";
 import {
   createAction,
   initAction,
+  initBasicAction,
   initCliAction,
   initDaemonAction,
   initFullStackAction,
@@ -46,6 +47,7 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(scaffoldAction)
   .add(initAction)
+  .add(initBasicAction)
   .add(initCliAction)
   .add(initMcpAction)
   .add(initDaemonAction)

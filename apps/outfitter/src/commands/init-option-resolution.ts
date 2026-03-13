@@ -5,7 +5,7 @@ import type { TargetId } from "../targets/index.js";
 /** Subset of target IDs that are valid presets for `outfitter init`. */
 export type InitPresetId = Extract<
   TargetId,
-  "minimal" | "cli" | "mcp" | "daemon" | "library" | "full-stack"
+  "minimal" | "basic" | "cli" | "mcp" | "daemon" | "library" | "full-stack"
 >;
 
 /**
@@ -36,6 +36,7 @@ export function isBinaryPreset(preset: InitPresetId): boolean {
 export function isValidInitPreset(value: string): value is InitPresetId {
   return (
     value === "minimal" ||
+    value === "basic" ||
     value === "cli" ||
     value === "mcp" ||
     value === "daemon" ||

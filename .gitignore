@@ -63,6 +63,12 @@ apps/outfitter/.outfitter/surface.json
 # Agent memory
 **/.claude/agent-memory/
 
+# Scaffold trial output
+.test/
+
+# Obsidian (prevent accidental commits)
+.obsidian
+
 # Local Claude worktrees
 .claude/worktrees/
 
