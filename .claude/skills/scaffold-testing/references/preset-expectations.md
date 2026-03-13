@@ -134,15 +134,18 @@ Expected scripts in `package.json`:
 **Purpose**: Simple starting point with @outfitter/contracts patterns.
 
 **Expected files**:
+
 - `src/index.ts` — Main module with handler
 - `src/index.test.ts` — Tests for handler
 
 **Expected patterns**:
+
 - Handler returning `Result<T, E>`
 - Zod schemas for input validation
 - `createContext()` usage in tests
 
 **Common issues**:
+
 - Missing @outfitter/contracts dependency
 - Handler not using Result types
 - No error path test coverage
