@@ -22,7 +22,6 @@ import {
   createMCPTestHarness,
   createMcpHarness,
   createMcpTestHarness,
-  type McpToolResponse,
 } from "../mcp-harness.js";
 
 // ============================================================================
@@ -35,7 +34,7 @@ function createMockServer(
     string,
     (
       input: Record<string, unknown>
-    ) => Result<McpToolResponse, InstanceType<typeof McpError>>
+    ) => Result<unknown, InstanceType<typeof McpError>>
   >
 ): McpServer {
   return {

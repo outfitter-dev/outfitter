@@ -16,13 +16,8 @@ describe("server", () => {
     expect(registered).toBe(true);
   });
 
-  // callTool passes through the raw handler output — assert on the actual
-  // shape your handler returns, not on the MCP content[] wrapper.
-  // Note: TypeScript types result.value as McpToolResponse (with a content[]
-  // array), but the runtime value is the raw handler output. Accessing
-  // result.value.content will always be undefined at runtime even though
-  // TypeScript accepts it — use objectContaining or the direct handler
-  // tests below for type-safe assertions instead.
+  // callTool returns the raw handler output (typed as unknown), not the
+  // MCP content[] wrapper. Use objectContaining to assert on the shape.
   test("can call hello tool via harness", async () => {
     const result = await harness.callTool("hello", { name: "Outfitter" });
 
