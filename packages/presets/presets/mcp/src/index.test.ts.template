@@ -16,6 +16,8 @@ describe("server", () => {
     expect(registered).toBe(true);
   });
 
+  // callTool passes through the raw handler output — assert on the actual
+  // shape your handler returns, not on the MCP content[] wrapper.
   test("can call hello tool via harness", async () => {
     const result = await harness.callTool("hello", { name: "Outfitter" });
 
