@@ -36,7 +36,9 @@
     "@outfitter/types": "workspace:*",
     "zod": "catalog:"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@outfitter/testing": "workspace:*"
+  },
   "outfitter": {
     "template": {
       "kind": "runnable",
