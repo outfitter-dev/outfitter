@@ -20,6 +20,10 @@ describe("server", () => {
     const result = await harness.callTool("hello", { name: "Outfitter" });
 
     expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value).toEqual(
+      expect.objectContaining({ greeting: "Hello, Outfitter!" })
+    );
   });
 });
 

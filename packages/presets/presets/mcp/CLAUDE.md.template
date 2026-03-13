@@ -65,6 +65,13 @@ const myResource = defineResource({
 });
 ```
 
+### Adding a Resource
+
+1. Create resource file in `src/resources/<name>.ts` with `defineResource()`
+2. Import and register in `src/mcp.ts` via `server.registerResource()`
+3. Re-export from `src/index.ts`
+4. Add tests in `src/<name>.test.ts`
+
 ### Adding a Tool
 
 1. Create tool file in `src/tools/<name>.ts` with `defineTool()`
