@@ -32,7 +32,12 @@ export async function createGreeting(
       new ValidationError({
         message: issue?.message ?? "Invalid greeting input",
         field: issue?.path.join(".") || "input",
-        context: { issues: parsed.error.issues },
+        context: {
+          fields: parsed.error.issues.map((i) => ({
+            path: i.path.join("."),
+            message: i.message,
+          })),
+        },
       })
     );
   }
