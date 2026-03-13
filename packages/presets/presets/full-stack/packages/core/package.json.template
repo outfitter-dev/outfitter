@@ -21,6 +21,7 @@
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt --write .",
+    "check": "ultracite check",
     "clean:artifacts": "rm -rf dist .turbo"
   },
   "dependencies": {
