@@ -123,6 +123,7 @@ describe("init command file creation", () => {
       workspaceVersion("@outfitter/logging")
     );
     expect(packageJson.dependencies.commander).toBe(resolvedVersions.commander);
+    expect(packageJson.dependencies.zod).toBe(resolvedVersions.zod);
     expect(JSON.stringify(packageJson)).not.toContain("catalog:");
     expect(packageJson.dependencies["@outfitter/config"]).toBeUndefined();
     expect(packageJson.outfitter.template.kind).toBe("runnable");
@@ -229,6 +230,9 @@ describe("init command file creation", () => {
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     expect(packageJson.dependencies["@modelcontextprotocol/sdk"]).toBe(
       resolvedVersions["@modelcontextprotocol/sdk"]
+    );
+    expect(packageJson.devDependencies["@outfitter/testing"]).toBe(
+      workspaceVersion("@outfitter/testing")
     );
     expect(JSON.stringify(packageJson)).not.toContain("catalog:");
 
