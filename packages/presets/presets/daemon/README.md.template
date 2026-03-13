@@ -7,19 +7,6 @@ A background daemon with CLI control interface.
 ## Usage
 
 ```bash
-# Start the daemon
-bun run src/cli.ts start
-
-# Check daemon status
-bun run src/cli.ts status
-
-# Stop the daemon
-bun run src/cli.ts stop
-```
-
-## CLI Commands
-
-```bash
 # Start daemon in background
 {{binName}} start
 
@@ -58,6 +45,11 @@ Gracefully shuts down the daemon.
 ```bash
 # Install dependencies
 bun install
+
+# Run from source
+bun run src/cli.ts start
+bun run src/cli.ts status
+bun run src/cli.ts stop
 
 # Run daemon in foreground
 bun run dev
