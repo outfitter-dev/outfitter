@@ -34,7 +34,7 @@ export async function createGreeting(
         field: issue?.path.join(".") || "input",
         context: {
           fields: parsed.error.issues.map((i) => ({
-            path: i.path.join("."),
+            path: i.path.join(".") || "input",
             message: i.message,
           })),
         },
