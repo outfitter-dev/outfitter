@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { createContext } from "@outfitter/contracts";
+import { createMcpHarness } from "@outfitter/testing";
 
 import { server } from "./mcp.js";
 import { helloInputSchema, helloTool } from "./tools/hello.js";
