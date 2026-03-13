@@ -33,6 +33,7 @@ Tools are defined with `defineTool()` using Zod schemas for input validation and
 ```typescript
 import { Result, ValidationError } from "@outfitter/contracts";
 import { defineTool } from "@outfitter/mcp";
+import { z } from "zod";
 
 const myTool = defineTool({
   name: "my-tool",
