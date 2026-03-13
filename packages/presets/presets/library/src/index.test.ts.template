@@ -25,6 +25,9 @@ describe("createGreeting", () => {
     if (!result.isErr()) return;
     expect(result.error.name).toBe("ValidationError");
     expect(result.error.message).toBe("name is required");
+    expect(result.error.context).toEqual({
+      fields: [{ path: "name", message: "name is required" }],
+    });
   });
 
   test("returns validation error for missing input", async () => {
