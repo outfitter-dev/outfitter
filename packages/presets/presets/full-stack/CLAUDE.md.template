@@ -12,8 +12,8 @@ bun run typecheck    # TypeScript validation
 bun run verify:ci    # Full CI validation (typecheck + build + test)
 
 # Single package
-bun run build --filter={{packageName}}-core
-bun run test --filter={{packageName}}-core
+bun run --filter={{packageName}}-core build
+bun run --filter={{packageName}}-core test
 cd packages/core && bun test
 ```
 
