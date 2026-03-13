@@ -23,18 +23,17 @@ Background daemon with CLI control interface, built with `@outfitter/daemon` and
 ### Project Structure
 
 - `src/daemon.ts` — Daemon entry point (background process)
-- `src/daemon-main.ts` — Daemon lifecycle and IPC server
-- `src/cli.ts` — CLI control commands (start, stop, status, health)
+- `src/daemon-main.ts` — Daemon lifecycle and HTTP server (Unix socket)
+- `src/cli.ts` — CLI control commands (start, stop, status)
 - `src/index.ts` — Library re-exports
 
 ### Daemon Lifecycle
 
-The daemon uses `createDaemon()` and `createIpcServer()` from `@outfitter/daemon`:
+The daemon uses `acquireDaemonLock()` and `releaseDaemonLock()` from `@outfitter/daemon` with `Bun.serve()` on a Unix socket:
 
-- **start** — Spawns background process, writes PID file
-- **stop** — Sends shutdown signal via IPC
-- **status** — Checks if daemon is running
-- **health** — Queries daemon health endpoint
+- **start** — Checks liveness, spawns background process (or runs in foreground with `--foreground`)
+- **stop** — Checks liveness, then sends POST to `/shutdown` endpoint
+- **status** — Checks liveness via `isDaemonAlive()`, then fetches `/health` for uptime and version
 
 ### Handler Contract
 
