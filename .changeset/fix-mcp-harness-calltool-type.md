@@ -2,6 +2,6 @@
 "@outfitter/testing": minor
 ---
 
-Fix `McpHarness.callTool` return type from `Result<McpToolResponse>` to `Result<unknown>`
+Add generic type parameter to `McpHarness.callTool<T>()` and fix default return type
 
-The previous return type was incorrect — `callTool` returns the raw handler output, not an MCP-wrapped `McpToolResponse`. Callers accessing `.content` on the result would get a TypeScript pass but a runtime `undefined`. The new type accurately reflects runtime behavior and forces callers to narrow the type explicitly.
+The previous return type (`Result<McpToolResponse>`) was incorrect — `callTool` returns the raw handler output, not an MCP-wrapped `McpToolResponse`. The new signature defaults to `Result<unknown>` but accepts a type parameter so callers who know the handler shape can write `harness.callTool<MyOutput>("tool", input)` without unsafe casts.

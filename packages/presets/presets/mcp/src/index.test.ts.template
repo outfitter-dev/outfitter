@@ -15,17 +15,17 @@ describe("server", () => {
     expect(registered).toBe(true);
   });
 
-  // callTool returns the raw handler output (typed as unknown), not the
-  // MCP content[] wrapper. Use objectContaining to assert on the shape.
+  // callTool<T> returns the raw handler output. Pass the expected type
+  // parameter to get typed access without manual narrowing.
   test("can call hello tool via harness", async () => {
     const harness = createMcpHarness(server);
-    const result = await harness.callTool("hello", { name: "Outfitter" });
+    const result = await harness.callTool<{ greeting: string }>("hello", {
+      name: "Outfitter",
+    });
 
     expect(result.isOk()).toBe(true);
     if (!result.isOk()) return;
-    expect(result.value).toEqual(
-      expect.objectContaining({ greeting: "Hello, Outfitter!" })
-    );
+    expect(result.value.greeting).toBe("Hello, Outfitter!");
   });
 });
 
