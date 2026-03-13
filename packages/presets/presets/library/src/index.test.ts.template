@@ -33,5 +33,7 @@ describe("createGreeting", () => {
     expect(result.isErr()).toBe(true);
     if (!result.isErr()) return;
     expect(result.error.name).toBe("ValidationError");
+    // Zod's "Required" message (type check) fires before .min(1)
+    expect(result.error.message).toBe("Required");
   });
 });
