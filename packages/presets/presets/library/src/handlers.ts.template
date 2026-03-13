@@ -48,6 +48,8 @@ export async function createGreeting(
     issuedAt: new Date().toISOString(),
   };
 
-  ctx.logger.info(`Created greeting for ${parsed.data.name}`, { requestId: ctx.requestId });
+  ctx.logger.info(`Created greeting for ${parsed.data.name}`, {
+    requestId: ctx.requestId,
+  });
   return Result.ok(greeting);
 }
