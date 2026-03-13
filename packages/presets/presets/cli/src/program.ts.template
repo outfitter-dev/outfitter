@@ -18,8 +18,12 @@ program.register(
   command("hello [name]")
     .description("Say hello")
     .action(async ({ args }) => {
-      const ctx = createContext({ cwd: process.cwd(), env: process.env });
-      const result = await greet({ name: args[0] ?? "World" }, ctx);
-      runHandler(result, { command: "hello" });
+      await runHandler({
+        command: "hello",
+        input: { name: args[0] ?? "World" },
+        contextFactory: () =>
+          createContext({ cwd: process.cwd(), env: process.env }),
+        handler: greet,
+      });
     })
 );
