@@ -241,7 +241,7 @@ describe("init command file creation", () => {
 
     const testContent = readFileSync(testPath, "utf-8");
     expect(testContent).toContain('import { server } from "./mcp.js";');
-    expect(testContent).toContain("server.getTools()");
+    expect(testContent).toContain("createMcpHarness");
   });
 
   test("creates daemon template with CLI commands and smoke test", async () => {
@@ -306,9 +306,6 @@ describe("init command file creation", () => {
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
       workspaceVersion("@outfitter/contracts")
     );
-    expect(packageJson.dependencies["@outfitter/logging"]).toBe(
-      workspaceVersion("@outfitter/logging")
-    );
     expect(packageJson.dependencies.zod).toBe(resolvedVersions.zod);
     expect(JSON.stringify(packageJson)).not.toContain("catalog:");
     expect(packageJson.outfitter.template.kind).toBe("library");
@@ -330,8 +327,7 @@ describe("init command file creation", () => {
     const handlerPath = join(tempDir, "src", "handlers.ts");
     const handlerContent = readFileSync(handlerPath, "utf-8");
     expect(handlerContent).toContain("Result.ok");
-    expect(handlerContent).toContain("createLogger");
-    expect(handlerContent).toContain("logger.info(");
+    expect(handlerContent).toContain("ctx.logger.info(");
     expect(handlerContent).toContain(
       "Promise<Result<Greeting, ValidationError>>"
     );

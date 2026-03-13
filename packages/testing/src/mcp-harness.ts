@@ -39,12 +39,15 @@ export interface McpToolResponse {
 export interface McpHarness {
   /**
    * Call a tool by name with input parameters.
-   * Returns the MCP-formatted response.
+   * Returns the raw handler output (not MCP-wrapped content).
+   *
+   * Callers who know the handler's return shape can pass a type parameter
+   * to avoid manual narrowing: `harness.callTool<MyOutput>("tool", input)`.
    */
-  callTool(
+  callTool<T = unknown>(
     name: string,
     input: Record<string, unknown>
-  ): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>>;
+  ): Promise<Result<T, InstanceType<typeof McpError>>>;
 
   /**
    * List all registered tools with schemas.
@@ -100,11 +103,11 @@ export function createMcpHarness(
   options: McpHarnessOptions = {}
 ): McpHarness {
   return {
-    callTool(
+    callTool<T = unknown>(
       name: string,
       input: Record<string, unknown>
-    ): Promise<Result<McpToolResponse, InstanceType<typeof McpError>>> {
-      return server.invokeTool<McpToolResponse>(name, input);
+    ): Promise<Result<T, InstanceType<typeof McpError>>> {
+      return server.invokeTool<T>(name, input);
     },
 
     listTools(): SerializedTool[] {

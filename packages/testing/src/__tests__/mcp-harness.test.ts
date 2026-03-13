@@ -22,7 +22,6 @@ import {
   createMCPTestHarness,
   createMcpHarness,
   createMcpTestHarness,
-  type McpToolResponse,
 } from "../mcp-harness.js";
 
 // ============================================================================
@@ -35,7 +34,7 @@ function createMockServer(
     string,
     (
       input: Record<string, unknown>
-    ) => Result<McpToolResponse, InstanceType<typeof McpError>>
+    ) => Result<unknown, InstanceType<typeof McpError>>
   >
 ): McpServer {
   return {
@@ -105,8 +104,14 @@ describe("createMCPTestHarness()", () => {
         }),
     });
 
+    interface EchoOutput {
+      content: Array<{ type: string; text: string }>;
+    }
+
     const harness = createMCPTestHarness({ tools: [tool] });
-    const result = await harness.callTool("echo", { value: "hello" });
+    const result = await harness.callTool<EchoOutput>("echo", {
+      value: "hello",
+    });
 
     expect(result.isOk()).toBe(true);
     expect(result.unwrap().content[0].text).toBe("hello");
@@ -118,7 +123,7 @@ describe("createMCPTestHarness()", () => {
 });
 
 describe("McpHarness tool invocation", () => {
-  it("returns MCP-formatted content on success", async () => {
+  it("returns raw handler output on success", async () => {
     const tools: SerializedTool[] = [
       {
         name: "add",
@@ -136,8 +141,12 @@ describe("McpHarness tool invocation", () => {
       },
     });
 
+    interface AddOutput {
+      content: Array<{ type: string; text?: string }>;
+    }
+
     const harness = createMcpHarness(server);
-    const result = await harness.callTool("add", { a: 2, b: 3 });
+    const result = await harness.callTool<AddOutput>("add", { a: 2, b: 3 });
 
     expect(result.isOk()).toBe(true);
     const data = JSON.parse(result.unwrap().content[0].text ?? "{}");

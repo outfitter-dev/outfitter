@@ -8,9 +8,24 @@ import { helloTool } from "./tools/hello.js";
 
 describe("server", () => {
   test("registers the hello tool", () => {
-    const registered = server.getTools().some((tool) => tool.name === "hello");
+    const harness = createMcpHarness(server);
+    const tools = harness.listTools();
+    const registered = tools.some((tool) => tool.name === "hello");
 
     expect(registered).toBe(true);
+  });
+
+  // callTool<T> returns the raw handler output. Pass the expected type
+  // parameter to get typed access without manual narrowing.
+  test("can call hello tool via harness", async () => {
+    const harness = createMcpHarness(server);
+    const result = await harness.callTool<{ greeting: string }>("hello", {
+      name: "Outfitter",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+    expect(result.value.greeting).toBe("Hello, Outfitter!");
   });
 });
 
