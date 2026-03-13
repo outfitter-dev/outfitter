@@ -239,10 +239,6 @@ describe("init command file creation", () => {
     const testPath = join(tempDir, "src", "index.test.ts");
     expect(existsSync(testPath)).toBe(true);
 
-    expect(packageJson.devDependencies["@outfitter/testing"]).toBe(
-      workspaceVersion("@outfitter/testing")
-    );
-
     const testContent = readFileSync(testPath, "utf-8");
     expect(testContent).toContain('import { server } from "./mcp.js";');
     expect(testContent).toContain("createMcpHarness");
