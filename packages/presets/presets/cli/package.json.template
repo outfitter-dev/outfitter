@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap && chmod +x dist/cli.js",
+    "build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
     "dev": "bun --watch src/cli.ts",
     "typecheck": "tsc --noEmit",
     "check": "ultracite check",

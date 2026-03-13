@@ -4,12 +4,6 @@
 
 A background daemon with CLI control interface.
 
-## Installation
-
-```bash
-bun add {{packageName}}
-```
-
 ## Usage
 
 ```bash
