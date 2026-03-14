@@ -213,6 +213,11 @@ export async function runPostScaffold(
         command: "bun install",
         cwd: options.rootDir,
       });
+      collector?.add({
+        type: "install",
+        command: "bunx oxfmt --write .",
+        cwd: options.projectDir,
+      });
       installResult = "skipped";
     } else {
       const result = await runBunInstall(
