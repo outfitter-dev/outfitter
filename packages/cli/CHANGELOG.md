@@ -16,7 +16,6 @@
 - f4f5cdf: Add `.input(schema)` method to `CommandBuilder` for Zod-to-Commander auto-derive. Accepts a Zod object schema and auto-derives Commander flags: `z.string()` → string option, `z.number()` → number option with coercion, `z.boolean()` → boolean flag, `z.enum()` → choices option. `.describe()` text becomes option descriptions, `.default()` values become option defaults. Explicit `.option()`/`.requiredOption()` calls compose alongside `.input()` — they override or supplement auto-derived flags. The `.action()` handler receives a validated, typed `input` object when `.input()` is used.
 - e5ab5d0: Add `.readOnly(bool)` and `.idempotent(bool)` methods to `CommandBuilder` for declaring safety metadata on commands. When set to `true`, these signals are included in the self-documenting root command tree (JSON mode) under a `metadata` field. In the MCP package, `buildMcpTools()` maps `readOnly` to `readOnlyHint` and `idempotent` to `idempotentHint` in MCP tool annotations via the `ActionMcpSpec` interface. Default is non-read-only, non-idempotent (metadata omitted when not set).
 - 2eadac8: Add output truncation with pagination hints and file pointers
-
   - New `truncation.ts` module: `truncateOutput()` function for truncating array output with configurable `limit` and `offset`
   - Without `limit`, output passes through untouched (off by default)
   - When data exceeds limit: truncates to limit items with `{ showing, total, truncated: true }` metadata
@@ -31,7 +30,6 @@
 - 1359264: Add schema-driven presets via `createSchemaPreset()` and refactor `.preset()` to accept both `FlagPreset` and `SchemaPreset`. Schema presets use Zod schema fragments for auto-deriving Commander flags (same as `.input()`), eliminating the need for manual option declarations. Preset schemas compose with `.input()` — merged flags include both command input fields and preset fields. Existing `FlagPreset`-based presets continue to work unchanged (backward compatible). Also exports `isSchemaPreset()` type guard and `AnyPreset` union type.
 - 1359264: Add self-documenting root command and hint generation tiers. When no subcommand is given, `createCLI()` outputs the full command tree as JSON (piped/JSON mode) or help text (TTY mode). The command tree includes all registered commands with descriptions and available options. Implement three hint generation tiers: Tier 1 (`commandTreeHints()`) auto-generates CLIHint[] from the Commander command registry. Tier 2 (`errorRecoveryHints()`) produces standard recovery actions per error category using enriched ErrorCategory metadata (retryable flags). Tier 3 (`schemaHintParams()`) populates hint params from Zod input schemas. All functions exported from `@outfitter/cli/hints` subpath.
 - c21b340: Add NDJSON streaming adapter with `--stream` flag support
-
   - New `streaming.ts` module: `createNdjsonProgress()`, `writeNdjsonLine()`, `writeStreamEnvelope()` for writing progress events as NDJSON lines to stdout
   - New `streamPreset()` flag preset in `query.ts`: adds `--stream` boolean flag
   - `runHandler()` accepts `stream: true` option: emits start event, provides `ctx.progress` callback to handler, writes terminal envelope as last NDJSON line
@@ -154,7 +152,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -182,7 +179,6 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
-
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -238,14 +234,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Output utilities**
-
   - `output()` - Auto-detecting output with support for human, JSON, and JSONL modes
   - `exitWithError()` - Error formatting with category-based exit codes
   - TTY detection for automatic mode selection
   - `OUTFITTER_OUTPUT_FORMAT` environment variable support
 
 - **Input utilities**
-
   - `collectIds()` - Multi-format ID collection (space/comma-separated, `@file`, stdin)
   - `expandFileArg()` - `@file` reference expansion with size limits
   - `parseGlob()` - Glob pattern expansion using `Bun.Glob`
@@ -257,13 +251,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `confirmDestructive()` - Destructive operation confirmation with `--yes` bypass
 
 - **Pagination utilities**
-
   - `loadCursor()` - Load persisted pagination state
   - `saveCursor()` - Save pagination state to XDG state directory
   - `clearCursor()` - Clear pagination state for `--reset` support
 
 - **Error handling**
-
   - Exit code mapping from error categories (validation, not_found, permission, etc.)
   - Structured JSON error output for non-TTY environments
   - Human-readable error formatting for TTY environments

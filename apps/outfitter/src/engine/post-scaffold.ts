@@ -159,10 +159,14 @@ function runFormat(cwd: string): void {
     if (result.exitCode !== 0) {
       const detail = result.stderr?.toString().trim();
       const suffix = detail ? `: ${detail}` : "";
-      process.stderr.write(`Warning: oxfmt format step failed${suffix}, skipping.\n`);
+      process.stderr.write(
+        `Warning: oxfmt format step failed${suffix}, skipping.\n`
+      );
     }
   } catch {
-    process.stderr.write("Warning: oxfmt not available, skipping format step.\n");
+    process.stderr.write(
+      "Warning: oxfmt not available, skipping format step.\n"
+    );
   }
 }
 
