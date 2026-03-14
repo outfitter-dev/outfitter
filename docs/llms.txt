@@ -2,11 +2,10 @@
 
 Outfitter package docs index for LLM retrieval.
 
-## agents
-- docs/packages/agents/README.md — @outfitter/agents
-
 ## cli
+- docs/packages/cli/docs/cli-patterns.md — CLI Patterns
 - docs/packages/cli/docs/output-modes.md — Output Modes
+- docs/packages/cli/docs/peer-dependencies.md — Peer Dependencies
 - docs/packages/cli/HARVEST_MAP.md — @outfitter/cli Harvest Map
 - docs/packages/cli/README.md — @outfitter/cli
 
@@ -14,6 +13,7 @@ Outfitter package docs index for LLM retrieval.
 - docs/packages/config/README.md — @outfitter/config
 
 ## contracts
+- docs/packages/contracts/docs/error-handling-patterns.md — Error Handling Patterns
 - docs/packages/contracts/docs/error-taxonomy.md — Error Taxonomy
 - docs/packages/contracts/README.md — @outfitter/contracts
 
@@ -33,6 +33,8 @@ Outfitter package docs index for LLM retrieval.
 - docs/packages/logging/README.md — @outfitter/logging
 
 ## mcp
+- docs/packages/mcp/docs/adapt-handler.md — Bridging Domain Errors with `adaptHandler()`
+- docs/packages/mcp/docs/dynamic-tool-registration.md — Dynamic Tool Registration
 - docs/packages/mcp/README.md — @outfitter/mcp
 
 ## oxlint-plugin

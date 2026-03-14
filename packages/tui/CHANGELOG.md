@@ -1,5 +1,11 @@
 # @outfitter/tui
 
+## 0.2.3
+
+### Patch Changes
+
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+
 ## 0.2.2
 
 ### Patch Changes

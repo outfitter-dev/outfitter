@@ -1,5 +1,11 @@
 # @outfitter/docs
 
+## 0.2.1
+
+### Patch Changes
+
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+
 ## 0.2.0
 
 ### Minor Changes
@@ -28,6 +34,7 @@
 ### Patch Changes
 
 - 573c6d3: Improve repo-maintenance bootstrap and boundary enforcement support.
+
   - Add source-first module loading for docs command execution in monorepo development (with dist fallback)
   - Remove `@outfitter/docs-core` runnable CLI surface and route prebuild docs sync through canonical `outfitter repo` command flow
   - Update boundary-invocation check fixtures and migration support for canonical repo command usage

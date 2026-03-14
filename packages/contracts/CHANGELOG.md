@@ -1,5 +1,26 @@
 # @outfitter/contracts
 
+## 0.5.0
+
+### Minor Changes
+
+- 2d9e5fa: Add `expectOk(result)` and `expectErr(result)` test assertion helpers. `expectOk` asserts a Result is Ok and returns the narrowed `T` value; throws a descriptive error if Err. `expectErr` does the inverse — asserts Err and returns narrowed `E`. Both accept an optional message parameter and work with Bun's test runner.
+- 2d9e5fa: Add `fromFetch(response)` helper that converts an HTTP Response into a `Result<Response, OutfitterError>`. Maps HTTP status codes to error categories per the taxonomy: 2xx → Ok, 404 → not_found, 401 → auth, 429 → rate_limit, 403 → permission, 408/504 → timeout, 502/503 → network, 409 → conflict, other 5xx → internal.
+- f4f5cdf: Add `ActionHint`, `CLIHint`, and `MCPHint` types for agent-navigable responses. Exported from `@outfitter/contracts` root and `@outfitter/contracts/hints` subpath. Types only — no runtime code.
+- e5ab5d0: Add `.readOnly(bool)` and `.idempotent(bool)` methods to `CommandBuilder` for declaring safety metadata on commands. When set to `true`, these signals are included in the self-documenting root command tree (JSON mode) under a `metadata` field. In the MCP package, `buildMcpTools()` maps `readOnly` to `readOnlyHint` and `idempotent` to `idempotentHint` in MCP tool annotations via the `ActionMcpSpec` interface. Default is non-read-only, non-idempotent (metadata omitted when not set).
+- 2d9e5fa: Add `parseInput(schema, data)` Zod-to-Result helper. Wraps `safeParse` into `Result<T, ValidationError>` where `T` is automatically inferred from the schema — no manual type argument needed.
+- c21b340: Add transport-agnostic streaming types: `StreamEvent` discriminated union (`StreamStartEvent`, `StreamStepEvent`, `StreamProgressEvent`), `ProgressCallback` type, and optional `progress` field on `HandlerContext`. Handlers can call `ctx.progress?.()` to emit progress events without knowing which transport consumes them.
+- 2d9e5fa: Add `wrapError(error, mapper?)` for normalizing unknown errors into typed OutfitterErrors. Typed errors pass through unchanged (same reference, mapper not called). Untyped errors go through optional mapper; unmatched errors wrap as InternalError. Also adds `composeMappers()` for composable mapper pipelines that short-circuit on first match, and `isOutfitterError()` type guard.
+- 1359264: Add `jsonRpcCodeMap`, `retryableMap`, and `errorCategoryMeta()` to enrich ErrorCategory with JSON-RPC codes (for MCP protocol compliance) and retryable flags (for agent safety)
+
+### Patch Changes
+
+- 56594cb: Add standalone reference project in examples/ demonstrating v0.4-v0.6 integration
+- 5079ff4: Export `extractMessage` utility from wrap-error module for reuse across packages.
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+- cc525da: Refresh release metadata for the remaining stacked contracts follow-up PRs after the base changeset merged to `main`.
+- cb36241: Land the stacked follow-up fixes across tooling, runtime, and scaffold packages after the repo-shape cleanup.
+
 ## 0.4.2
 
 ### Patch Changes
@@ -50,6 +71,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -68,6 +90,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

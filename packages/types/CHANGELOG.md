@@ -1,5 +1,24 @@
 # @outfitter/types
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [c21b340]
+- Updated dependencies [56594cb]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [1359264]
+- Updated dependencies [5079ff4]
+- Updated dependencies [a151534]
+- Updated dependencies [cc525da]
+- Updated dependencies [cb36241]
+  - @outfitter/contracts@0.5.0
+
 ## 0.2.4
 
 ### Patch Changes
@@ -56,6 +75,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -78,6 +98,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

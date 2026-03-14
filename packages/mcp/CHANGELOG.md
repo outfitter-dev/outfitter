@@ -1,5 +1,27 @@
 # @outfitter/mcp
 
+## 0.5.0
+
+### Minor Changes
+
+- 623fef7: Enhance `defineResourceTemplate()` with Zod schema validation for URI template parameters. When `paramSchema` is provided, URI template variables are validated and coerced before handler invocation — parallel to how `defineTool()` validates input. Add `TypedResourceTemplateDefinition<TParams>` type with typed handler. Backward compatible — existing usage without `paramSchema` works unchanged.
+- e5ab5d0: Add `.readOnly(bool)` and `.idempotent(bool)` methods to `CommandBuilder` for declaring safety metadata on commands. When set to `true`, these signals are included in the self-documenting root command tree (JSON mode) under a `metadata` field. In the MCP package, `buildMcpTools()` maps `readOnly` to `readOnlyHint` and `idempotent` to `idempotentHint` in MCP tool annotations via the `ActionMcpSpec` interface. Default is non-read-only, non-idempotent (metadata omitted when not set).
+- c21b340: Add MCP progress adapter translating ctx.progress StreamEvent to notifications/progress.
+
+  When an MCP client provides a progressToken in tool call params, ctx.progress is now a
+  ProgressCallback (from @outfitter/contracts) that emits `notifications/progress` via the
+  MCP SDK for each StreamEvent. Without a progressToken, ctx.progress remains undefined.
+
+  The adapter is a separate module (`progress.ts`) for modularity, parallel to the CLI
+  NDJSON adapter in @outfitter/cli.
+
+### Patch Changes
+
+- 56594cb: Add standalone reference project in examples/ demonstrating v0.4-v0.6 integration
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+- 2eb44e7: Validate `setLogLevel` inputs before updating the MCP client log threshold.
+- cb36241: Land the stacked follow-up fixes across tooling, runtime, and scaffold packages after the repo-shape cleanup.
+
 ## 0.4.3
 
 ### Patch Changes
@@ -84,6 +106,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -107,6 +130,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

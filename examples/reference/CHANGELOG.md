@@ -1,10 +1,11 @@
-# outfitter-cli-demo
+# @outfitter/reference
 
-## 0.1.7
+## 0.1.1
 
 ### Patch Changes
 
 - Updated dependencies [f4f5cdf]
+- Updated dependencies [623fef7]
 - Updated dependencies [e5ab5d0]
 - Updated dependencies [1359264]
 - Updated dependencies [2d9e5fa]
@@ -30,68 +31,13 @@
 - Updated dependencies [c21b340]
 - Updated dependencies [f4f5cdf]
 - Updated dependencies [a151534]
+- Updated dependencies [c21b340]
 - Updated dependencies [7e94389]
 - Updated dependencies [c21b340]
 - Updated dependencies [72a1e71]
 - Updated dependencies [cc525da]
+- Updated dependencies [2eb44e7]
 - Updated dependencies [cb36241]
   - @outfitter/cli@1.0.0
+  - @outfitter/mcp@0.5.0
   - @outfitter/contracts@0.5.0
-  - @outfitter/tui@0.2.3
-
-## 0.1.6
-
-### Patch Changes
-
-- Updated dependencies [debf2e2]
-  - @outfitter/cli@0.5.3
-  - @outfitter/contracts@0.4.2
-  - @outfitter/tui@0.2.2
-
-## 0.1.5
-
-### Patch Changes
-
-- Updated dependencies [9fc51cc]
-  - @outfitter/cli@0.5.2
-  - @outfitter/contracts@0.4.1
-  - @outfitter/tui@0.2.1
-
-## 0.1.4
-
-### Patch Changes
-
-- Updated dependencies [4352c6d]
-  - @outfitter/cli@0.5.1
-  - @outfitter/tui@0.2.0
-
-## 0.1.3
-
-### Patch Changes
-
-- Updated dependencies [26f51bb]
-- Updated dependencies [13b36de]
-- Updated dependencies [1c70a3e]
-  - @outfitter/cli@0.5.0
-  - @outfitter/contracts@0.4.0
-  - @outfitter/tui@0.2.0
-
-## 0.1.2
-
-### Patch Changes
-
-- Updated dependencies [2395095]
-  - @outfitter/cli@0.4.1
-  - @outfitter/tui@0.2.0
-
-## 0.1.1
-
-### Patch Changes
-
-- Updated dependencies [d683522]
-- Updated dependencies [839b4e1]
-- Updated dependencies [d683522]
-- Updated dependencies [839b4e1]
-  - @outfitter/cli@0.4.0
-  - @outfitter/contracts@0.3.0
-  - @outfitter/tui@0.2.0

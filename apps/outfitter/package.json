@@ -1,7 +1,7 @@
 {
   "name": "outfitter",
   "description": "Outfitter umbrella CLI for scaffolding and project management",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "type": "module",
   "files": [
     "dist"
@@ -407,10 +407,7 @@
       }
     },
     "./scripts/scaffold-e2e": {
-      "import": {
-        "types": "./dist/scripts/scaffold-e2e.d.ts",
-        "default": "./dist/scripts/scaffold-e2e.js"
-      }
+      "import": "./dist/scripts/scaffold-e2e.js"
     },
     "./targets": {
       "import": {
