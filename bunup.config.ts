@@ -462,7 +462,12 @@ function withDefaults(config?: {
     exclude?: string[];
     customExports?: Record<string, string> | (() => Record<string, string>);
   };
-}): { exports: { exclude: string[]; customExports?: Record<string, string> } } {
+}): {
+  exports: {
+    exclude: string[];
+    customExports?: Record<string, string> | (() => Record<string, string>);
+  };
+} {
   const packageExclude = config?.exports?.exclude ?? [];
   return {
     ...config,
