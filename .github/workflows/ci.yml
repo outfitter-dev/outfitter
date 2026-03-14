@@ -263,7 +263,7 @@ jobs:
       OUTFITTER_CI_TURBO_CONCURRENCY: "2"
       OUTFITTER_CI_BUN_MAX_CONCURRENCY: "4"
       OUTFITTER_CI_TURBO_LOG_ORDER: "stream"
-      OUTFITTER_CI_TURBO_OUTPUT_LOGS: "errors-only"
+      OUTFITTER_CI_TURBO_OUTPUT_LOGS: "new-only"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
