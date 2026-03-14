@@ -3,294 +3,379 @@
 Outfitter package docs corpus for LLM retrieval.
 
 ---
-path: docs/packages/agents/README.md
-package: agents
-title: @outfitter/agents
+path: docs/packages/cli/docs/cli-patterns.md
+package: cli
+title: CLI Patterns
 ---
 
-# @outfitter/agents
+# CLI Patterns
 
-> **⚠️ DEPRECATED**: This package is deprecated. Use `npx outfitter add scaffolding` instead.
->
-> The shadcn-style registry in `outfitter` CLI now provides the same functionality with better flexibility:
->
-> ```bash
-> # Add all scaffolding files
-> npx outfitter add scaffolding
->
-> # Or add individual blocks
-> npx outfitter add claude      # Claude Code settings & hooks
-> npx outfitter add linter      # oxlint/oxfmt configuration
-> npx outfitter add lefthook    # Git hooks
-> npx outfitter add bootstrap   # Bootstrap script
-> ```
->
-> See the [outfitter CLI documentation](https://github.com/outfitter-dev/outfitter) for more details.
+Advanced patterns for `@outfitter/cli` covering incremental migration, Commander integration, environment bridging, and preset composition.
 
----
+## Incremental Registration with `cli.register()`
 
-Agent scaffolding and bootstrap utilities for AI-ready projects.
+`createCLI()` returns a `CLI` instance whose `register()` method accepts both a `CommandBuilder` (from the fluent `command()` API) and a raw Commander `Command`. This enables incremental migration — existing Commander commands work alongside builder-style commands without rewriting everything at once.
 
-## Installation
-
-```bash
-bun add @outfitter/agents
-```
-
-## Quick Start
-
-Initialize agent documentation in your project:
+### Builder-Style Commands
 
 ```typescript
-import { initAgentDocs } from "@outfitter/agents";
+import { createCLI, command } from "@outfitter/cli/command";
+import { output } from "@outfitter/cli/output";
 
-await initAgentDocs();
-```
-
-This creates:
-
-- `AGENTS.md` — Guidelines for AI agents working in your project
-- `CLAUDE.md` — Project-level instructions for Claude
-- `.claude/CLAUDE.md` — Additional Claude-specific guidance
-- `.claude/settings.json` — Claude Code settings
-- `.claude/hooks/bootstrap.sh` — Bootstrap hook script
-
-## Features
-
-- **Agent Documentation** — Scaffolds `AGENTS.md` and `CLAUDE.md` templates
-- **Bootstrap Tooling** — Ensures core development tools are installed
-- **Settings Management** — Merges Claude Code settings without overwriting
-- **CI-Friendly** — Quiet mode for automated environments
-
-## API Reference
-
-### initAgentDocs(options)
-
-Initialize agent documentation in a directory.
-
-```typescript
-interface InitOptions {
-  target?: string; // Target directory (default: cwd)
-  merge?: boolean; // Merge with existing files (default: false)
-  force?: boolean; // Overwrite existing files (default: false)
-  quiet?: boolean; // Suppress output (default: false)
-}
-
-// Basic initialization
-await initAgentDocs();
-
-// Initialize in specific directory
-await initAgentDocs({ target: "/path/to/project" });
-
-// Merge settings.json with existing
-await initAgentDocs({ merge: true });
-
-// Force overwrite all files
-await initAgentDocs({ force: true });
-```
-
-**Behavior:**
-
-- Without `force` or `merge`, existing files are skipped
-- With `merge`, only `settings.json` is merged; other files are skipped
-- With `force`, all files are overwritten
-
-### bootstrap(options)
-
-Run development environment bootstrap with optional extensions.
-
-```typescript
-interface BootstrapOptions {
-  tools?: string[]; // Additional tools to install
-  extend?: () => Promise<void>; // Project-specific setup
-  force?: boolean; // Skip checks, run full bootstrap
-  quiet?: boolean; // Suppress output (for CI)
-}
-
-// Basic bootstrap
-await bootstrap();
-
-// With additional tools
-await bootstrap({
-  tools: ["ripgrep", "fd"],
+const cli = createCLI({
+  name: "myapp",
+  version: "1.0.0",
 });
 
-// With project extensions
-await bootstrap({
-  extend: async () => {
-    await setupDatabase();
-    await seedTestData();
+cli.register(
+  command("list")
+    .description("List items")
+    .option("--limit <n>", "Max results", "20")
+    .action(async ({ flags }) => {
+      const items = await getItems(Number(flags["limit"]));
+      output(items);
+    })
+);
+
+await cli.parse();
+```
+
+### Raw Commander Commands
+
+```typescript
+import { createCLI } from "@outfitter/cli/command";
+import { Command } from "commander";
+
+const cli = createCLI({ name: "myapp", version: "1.0.0" });
+
+// Existing Commander command — works as-is
+const legacy = new Command("migrate")
+  .description("Run database migrations")
+  .option("--dry-run", "Preview changes")
+  .action((opts) => {
+    console.log("Migrating...", opts);
+  });
+
+cli.register(legacy);
+
+await cli.parse();
+```
+
+### Mixing Both Styles
+
+```typescript
+import { createCLI, command } from "@outfitter/cli/command";
+import { Command } from "commander";
+
+const cli = createCLI({ name: "myapp", version: "1.0.0" });
+
+// New builder-style command
+cli.register(
+  command("list")
+    .description("List items")
+    .action(async () => {
+      /* ... */
+    })
+);
+
+// Legacy Commander command — no changes needed
+const legacyCmd = new Command("legacy-export").action(() => {
+  /* ... */
+});
+cli.register(legacyCmd);
+
+await cli.parse();
+```
+
+The detection works via duck typing: if the argument has a `build` method, it's treated as a `CommandBuilder` and `.build()` is called to extract the underlying `Command`. Otherwise it's added directly via `program.addCommand()`.
+
+`register()` returns the `CLI` instance for chaining:
+
+```typescript
+cli.register(listCmd).register(showCmd).register(deleteCmd);
+```
+
+## `exitOverride` Behavior
+
+`createCLI()` calls Commander's `program.exitOverride()` internally. This is not optional — it's always applied. Here's why and what it means for your code.
+
+### Why `exitOverride` is Used
+
+Commander normally calls `process.exit()` directly for help display, version output, and errors. `exitOverride()` makes Commander throw instead, so `createCLI` can route **all** exits through a single configurable hook.
+
+### How It Works
+
+When Commander would exit (help display, version output, parse errors), it throws an error with a `.code` property instead. The `parse()` method catches these:
+
+- **Help/version** (`commander.helpDisplayed`, `commander.version`, `commander.help`) → calls `onExit(0)`
+- **Parse errors** (missing required options, unknown flags) → calls `onError` if configured, then `onExit(exitCode)`
+- **Successful execution** → normal return
+
+### Configuring Exit Behavior
+
+The `CLIConfig` interface provides two hooks:
+
+```typescript
+import { createCLI } from "@outfitter/cli/command";
+
+const cli = createCLI({
+  name: "myapp",
+  version: "1.0.0",
+
+  // Called on errors before exit (optional)
+  onError: (error) => {
+    logger.error("CLI error", { error: error.message });
   },
-});
 
-// Quiet mode for CI
-await bootstrap({ quiet: true });
-```
-
-**Core tools installed:**
-
-- `gh` — GitHub CLI
-- `gt` — Graphite CLI for stacked PRs
-- `markdownlint-cli2` — Markdown linting
-
-**Authentication checks:**
-
-- GitHub CLI (`gh auth status` or `GH_TOKEN`/`GITHUB_TOKEN`)
-- Graphite CLI (`gt auth status` or `GT_AUTH_TOKEN`)
-
-### mergeSettings(existing, defaults)
-
-Merge Claude Code settings without losing user customizations.
-
-```typescript
-interface SettingsJson {
-  mcpServers?: Record<string, unknown>;
-  hooks?: Record<string, HookConfig>;
-  allowedTools?: string[];
-  customInstructions?: string;
-  // ... other settings
-}
-
-interface HookConfig {
-  command: string;
-  event: string;
-  // ... hook configuration
-}
-
-const merged = mergeSettings(existingSettings, defaultSettings);
-```
-
-**Merge behavior:**
-
-- Arrays are concatenated and deduplicated
-- Objects are recursively merged
-- User values take precedence over defaults
-
-## Generated Files
-
-### AGENTS.md
-
-Guidelines for AI agents working in your codebase:
-
-```markdown
-# AGENTS.md
-
-Guidelines for AI agents and developers working in this repository.
-
-## Project Overview
-
-[Project description and context]
-
-## Project Structure
-
-[Directory layout and conventions]
-
-## Commands
-
-[Build, test, lint commands]
-
-## Architecture
-
-[Key patterns and decisions]
-```
-
-### CLAUDE.md
-
-Project-level instructions for Claude:
-
-```markdown
-# CLAUDE.md
-
-This file provides AI agents with project-specific context.
-
-@.claude/CLAUDE.md
-@AGENTS.md
-```
-
-### .claude/settings.json
-
-Claude Code settings with hooks:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "command": ".claude/hooks/bootstrap.sh",
-        "event": "Bash",
-        "matcher": "bun install"
-      }
-    ]
-  }
-}
-```
-
-### .claude/hooks/bootstrap.sh
-
-Bootstrap hook that runs after `bun install`:
-
-```bash
-#!/bin/bash
-# Runs after bun install to ensure environment is ready
-bun run bootstrap 2>/dev/null || true
-```
-
-## Usage Patterns
-
-### CI/CD Bootstrap
-
-```typescript
-// In CI, run quietly and skip interactive prompts
-await bootstrap({ quiet: true, force: true });
-```
-
-### Monorepo Setup
-
-```typescript
-// Initialize docs at monorepo root
-await initAgentDocs({ target: "/path/to/monorepo" });
-
-// Individual packages can extend with their own AGENTS.md
-```
-
-### Custom Tool Requirements
-
-```typescript
-await bootstrap({
-  tools: ["jq", "yq", "fzf"],
-  extend: async () => {
-    // Project-specific setup after core tools
-    console.log("Running database migrations...");
-    await runMigrations();
+  // Called for ALL exits — defaults to process.exit()
+  onExit: async (code) => {
+    await cleanup();
+    process.exit(code);
   },
 });
 ```
 
-### Pre-commit Hook Integration
+The `onExit` hook supports async operations — useful for flushing logs, closing connections, or cleanup before the process terminates.
 
-```bash
-#!/bin/bash
-# .husky/pre-commit or lefthook.yml
-bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ quiet: true })"
+### Testing Implications
+
+`exitOverride` makes CLIs testable without mocking `process.exit`. Provide a custom `onExit` that captures the exit code instead of terminating:
+
+```typescript
+let exitCode: number | undefined;
+
+const cli = createCLI({
+  name: "test-cli",
+  version: "0.0.0",
+  onExit: (code) => {
+    exitCode = code;
+  },
+});
+
+// Parse will call onExit(0) for --help instead of process.exit(0)
+await cli.parse(["node", "test-cli", "--help"]);
+expect(exitCode).toBe(0);
 ```
 
-## Environment Variables
+## `OUTFITTER_JSON` Environment Variable Bridge
 
-| Variable        | Description                         |
-| --------------- | ----------------------------------- |
-| `GH_TOKEN`      | GitHub CLI authentication token     |
-| `GITHUB_TOKEN`  | Alternative GitHub token (fallback) |
-| `GT_AUTH_TOKEN` | Graphite CLI authentication token   |
+`createCLI()` installs a `preAction` / `postAction` hook pair that bridges the `--json` flag into the `OUTFITTER_JSON` environment variable. This is how `output()` auto-detects JSON mode without manual branching.
 
-## Platform Support
+### The Bridge Mechanism
 
-- **macOS**: Uses Homebrew for `gh` and `gt` installation
-- **Linux/Windows**: Falls back to npm/bun global installs
+1. `createCLI()` registers a global `--json` flag on the root program
+2. A `preAction` hook checks `optsWithGlobals()` for `json === true`
+3. If set, the hook saves the current `OUTFITTER_JSON` env value and sets `OUTFITTER_JSON=1`
+4. After the action completes, a `postAction` hook restores the previous value
+5. A `finally` block in `parse()` also restores the value (safety net for thrown errors)
 
-## Related Packages
+### Why This Exists
 
-- [@outfitter/cli](../cli/README.md) — CLI framework for building tools
-- [@outfitter/config](../config/README.md) — XDG-compliant configuration
+`output()` detects mode from environment variables — it doesn't receive flags directly. The bridge means any command using `output()` automatically respects `--json` without extra wiring:
+
+```typescript
+import { output } from "@outfitter/cli/output";
+
+// No need for conditional format logic:
+// ❌ if (opts.json) output(data, "json"); else output(data);
+
+// Just call output() — the bridge handles it:
+// ✅
+output(data);
+```
+
+### Global vs Subcommand Flags
+
+The `--json` flag is registered globally. The bridge uses `optsWithGlobals()`, so both placements work:
+
+```bash
+# Global placement
+myapp --json list
+
+# After subcommand (Commander coalesces globals)
+myapp list --json
+```
+
+Subcommands should **not** define their own `--json` flag — use the global one. If they do, both coalesce safely through `optsWithGlobals()`.
+
+### Env Var Restoration
+
+The bridge preserves the previous `OUTFITTER_JSON` value and restores it after the action completes. This means:
+
+- If `OUTFITTER_JSON` was already set externally, it's restored after the command runs
+- If it was unset, it returns to `undefined`
+- The `finally` block in `parse()` ensures restoration even on error paths
+
+## Preset Composition Patterns
+
+Flag presets bundle option definitions with typed resolvers. Compose them to build consistent command interfaces without duplicating flag logic.
+
+### Using a Single Preset
+
+Apply a preset to a command with `.preset()`:
+
+```typescript
+import { command } from "@outfitter/cli/command";
+import { outputModePreset } from "@outfitter/cli/query";
+
+const mode = outputModePreset({ includeJsonl: true });
+
+command("list")
+  .description("List items")
+  .preset(mode)
+  .action(async ({ flags }) => {
+    const { outputMode } = mode.resolve(flags);
+    // outputMode: "human" | "json" | "jsonl"
+  });
+```
+
+### Composing Multiple Presets
+
+Use `composePresets()` from `@outfitter/cli/flags` to merge multiple presets into one. Options are deduplicated by preset `id` (first occurrence wins):
+
+```typescript
+import { composePresets, cwdPreset, verbosePreset } from "@outfitter/cli/flags";
+import { outputModePreset } from "@outfitter/cli/query";
+
+const preset = composePresets(outputModePreset(), cwdPreset(), verbosePreset());
+
+command("build")
+  .description("Build the project")
+  .preset(preset)
+  .action(async ({ flags }) => {
+    const { outputMode, cwd, verbose } = preset.resolve(flags);
+  });
+```
+
+### Mixing Presets with Custom Flags
+
+Presets and manual `.option()` calls work together. Custom flags appear in the `flags` object alongside preset-resolved values:
+
+```typescript
+import {
+  composePresets,
+  dryRunPreset,
+  forcePreset,
+} from "@outfitter/cli/flags";
+import { outputModePreset } from "@outfitter/cli/query";
+
+const preset = composePresets(
+  outputModePreset(),
+  dryRunPreset(),
+  forcePreset()
+);
+
+command("deploy <env>")
+  .description("Deploy to environment")
+  .preset(preset)
+  .option("--tag <tag>", "Deploy tag")
+  .action(async ({ args, flags }) => {
+    const [env] = args;
+    const { outputMode, dryRun, force } = preset.resolve(flags);
+    const tag = flags["tag"] as string | undefined;
+  });
+```
+
+### Creating Custom Presets
+
+Use `createPreset()` for domain-specific flag bundles:
+
+```typescript
+import { createPreset } from "@outfitter/cli/flags";
+
+const authPreset = createPreset({
+  id: "auth",
+  options: [
+    { flags: "--token <token>", description: "API token" },
+    { flags: "--profile <name>", description: "Auth profile" },
+  ],
+  resolve: (flags) => ({
+    token: typeof flags["token"] === "string" ? flags["token"] : undefined,
+    profile:
+      typeof flags["profile"] === "string" ? flags["profile"] : "default",
+  }),
+});
+```
+
+Typed custom flag builders are available for common patterns:
+
+```typescript
+import { booleanFlagPreset, enumFlagPreset } from "@outfitter/cli/flags";
+
+const watchPreset = booleanFlagPreset({
+  id: "watch",
+  key: "watch",
+  flags: "-w, --watch",
+  description: "Watch for changes",
+  defaultValue: false,
+});
+
+const formatPreset = enumFlagPreset({
+  id: "format",
+  key: "format",
+  flags: "--format <type>",
+  description: "Output format",
+  values: ["table", "csv", "yaml"] as const,
+  defaultValue: "table",
+});
+```
+
+### Deduplication in Composition
+
+`composePresets()` deduplicates by preset `id`. If two presets share an `id`, the first one wins:
+
+```typescript
+import { composePresets, verbosePreset } from "@outfitter/cli/flags";
+
+// Second verbosePreset() is ignored — same id
+const preset = composePresets(verbosePreset(), verbosePreset());
+// Only one --verbose flag in the resulting command
+```
+
+This is useful when composing higher-level preset groups that may internally include the same base preset.
+
+### Built-in Preset Catalog
+
+| Preset                | Import Path            | Flags Added                                    | Resolved Type                                            |
+| --------------------- | ---------------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `outputModePreset()`  | `@outfitter/cli/query` | `-o, --output <mode>`                          | `{ outputMode: OutputMode }`                             |
+| `jqPreset()`          | `@outfitter/cli/query` | `--jq <expr>`                                  | `{ jq: string \| undefined }`                            |
+| `verbosePreset()`     | `@outfitter/cli/flags` | `-v, --verbose`                                | `{ verbose: boolean }`                                   |
+| `cwdPreset()`         | `@outfitter/cli/flags` | `--cwd <path>`                                 | `{ cwd: string }`                                        |
+| `dryRunPreset()`      | `@outfitter/cli/flags` | `--dry-run`                                    | `{ dryRun: boolean }`                                    |
+| `forcePreset()`       | `@outfitter/cli/flags` | `-f, --force`                                  | `{ force: boolean }`                                     |
+| `interactionPreset()` | `@outfitter/cli/flags` | `--non-interactive`, `--no-input`, `-y, --yes` | `{ interactive: boolean, yes: boolean }`                 |
+| `strictPreset()`      | `@outfitter/cli/flags` | `--strict`                                     | `{ strict: boolean }`                                    |
+| `colorPreset()`       | `@outfitter/cli/flags` | `--color [mode]`, `--no-color`                 | `{ color: ColorMode }`                                   |
+| `projectionPreset()`  | `@outfitter/cli/flags` | `--fields`, `--exclude-fields`, `--count`      | `{ fields, excludeFields, count }`                       |
+| `paginationPreset()`  | `@outfitter/cli/flags` | `-l, --limit <n>`, `--next`, `--reset`         | `{ limit: number, next: boolean, reset: boolean }`       |
+| `timeWindowPreset()`  | `@outfitter/cli/flags` | `--since <date>`, `--until <date>`             | `{ since: Date \| undefined, until: Date \| undefined }` |
+| `executionPreset()`   | `@outfitter/cli/flags` | `--timeout <ms>`, `--retries <n>`, `--offline` | `{ timeout, retries, offline }`                          |
+
+### Centralized Output Mode Resolution
+
+For action-level code that needs both the mode **and** how it was determined, use `resolveOutputMode()` from `@outfitter/cli/query`:
+
+```typescript
+import { resolveOutputMode } from "@outfitter/cli/query";
+
+const { mode, source } = resolveOutputMode(context.flags);
+// mode: "human" | "json" | "jsonl"
+// source: "flag" | "env" | "default"
+
+if (source === "flag") {
+  // User explicitly requested this mode
+}
+```
+
+Resolution order (highest wins):
+
+1. Explicit `--output` / `-o` flag → source: `"flag"`
+2. Legacy `--json` / `--jsonl` boolean flags → source: `"flag"`
+3. `OUTFITTER_JSONL=1` / `OUTFITTER_JSON=1` env vars → source: `"env"`
+4. Configured default (typically `"human"`) → source: `"default"`
+
+See [output-modes.md](./output-modes.md) for mode details and the `--jq` flag.
 
 ---
 path: docs/packages/cli/docs/output-modes.md
@@ -359,6 +444,160 @@ const jq = jqPreset();
 ```
 
 See [CLI Flag Conventions](../../../cli/conventions.md) for the full preset catalog.
+
+---
+path: docs/packages/cli/docs/peer-dependencies.md
+package: cli
+title: Peer Dependencies
+---
+
+# Peer Dependencies
+
+`@outfitter/cli` declares six peer dependencies. Three are required for core functionality; three are optional and only needed for specific subpath imports.
+
+## Quick Reference
+
+| Peer                   | Status       | Needed For                                         |
+| ---------------------- | ------------ | -------------------------------------------------- |
+| `commander`            | **Required** | `createCLI()`, `command()`, all CLI construction   |
+| `@outfitter/contracts` | **Required** | `output()`, `exitWithError()`, error taxonomy      |
+| `@outfitter/config`    | **Required** | Environment/verbose resolution, terminal detection |
+| `@outfitter/schema`    | Optional     | `@outfitter/cli/schema` subpath only               |
+| `zod`                  | Optional     | Action input/output schema definitions             |
+| `@outfitter/types`     | Optional     | Version alignment only (not directly imported)     |
+
+## Installation
+
+Install the package with all required peers:
+
+```bash
+bun add @outfitter/cli commander @outfitter/contracts @outfitter/config
+```
+
+Add optional peers as needed:
+
+```bash
+# For schema introspection (surface maps, manifest generation)
+bun add @outfitter/schema
+
+# For defining actions with Zod schemas (also available transitively via @outfitter/contracts)
+bun add zod
+```
+
+## Required Peers
+
+### `commander` ≥14.0.0
+
+Commander is the underlying CLI framework. Every CLI-building entry point depends on it.
+
+**Subpaths that import `commander`:**
+
+| Subpath                     | Usage                                            |
+| --------------------------- | ------------------------------------------------ |
+| `@outfitter/cli/command`    | `createCLI()`, `command()` builder               |
+| `@outfitter/cli/actions`    | `buildCliCommands()` action-to-command wiring    |
+| `@outfitter/cli/completion` | Shell completion script generation               |
+| `@outfitter/cli/schema`     | `createSchemaCommand()` introspection subcommand |
+| `@outfitter/cli/types`      | Type-only import for `Command` type              |
+
+### `@outfitter/contracts` ≥0.2.0
+
+Provides the error taxonomy, exit code mapping, and Result-pattern types used throughout the package.
+
+**Subpaths that import `@outfitter/contracts`:**
+
+| Subpath                  | Usage                                                        |
+| ------------------------ | ------------------------------------------------------------ |
+| `@outfitter/cli`         | Root export — `output()` uses `exitCodeMap`, `safeStringify` |
+| `@outfitter/cli/output`  | `exitWithError()` maps `ErrorCategory` to exit codes         |
+| `@outfitter/cli/input`   | `ValidationError` for input parsing failures                 |
+| `@outfitter/cli/actions` | `ActionRegistry`, `validateInput`, `createContext`           |
+| `@outfitter/cli/flags`   | `ActionCliOption` type for preset definitions                |
+| `@outfitter/cli/types`   | `ActionCliOption` type re-exports                            |
+| `@outfitter/cli/schema`  | `ActionSurface` type                                         |
+
+### `@outfitter/config` ≥0.3.0
+
+Provides environment profile resolution (`OUTFITTER_ENV`) and environment variable helpers.
+
+**Subpaths that import `@outfitter/config`:**
+
+| Subpath                             | Usage                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `@outfitter/cli/output`             | `getEnvironment()`, `getEnvironmentDefaults()` for verbose and output mode resolution |
+| `@outfitter/cli/terminal/detection` | `getEnvBoolean()` for color/TTY detection                                             |
+
+Since `output()` is part of the root export (`@outfitter/cli`), this peer is required for basic usage.
+
+## Optional Peers
+
+### `@outfitter/schema` ≥0.1.0
+
+Only needed if you use the `@outfitter/cli/schema` subpath for action introspection, manifest generation, or surface map diffing.
+
+```typescript
+// Only this import requires @outfitter/schema
+import { createSchemaCommand, generateManifest } from "@outfitter/cli/schema";
+```
+
+If you don't use schema introspection, skip this peer entirely.
+
+### `zod` ≥4.0.0
+
+Needed when defining action input/output schemas via `@outfitter/cli/actions`. Action definitions use Zod schemas for validation:
+
+```typescript
+import { z } from "zod";
+import { defineAction } from "@outfitter/contracts";
+
+const myAction = defineAction({
+  id: "my.action",
+  input: z.object({ name: z.string() }), // ← requires zod
+  output: z.object({ id: z.string() }),
+  // ...
+});
+```
+
+> **Note:** `zod` is a direct dependency of `@outfitter/contracts`, so it is available transitively when `@outfitter/contracts` is installed. The peer dependency listing ensures version alignment across the workspace.
+
+### `@outfitter/types` ≥0.2.0
+
+Not directly imported by any source file in `@outfitter/cli`. Listed as a peer dependency for version alignment across the monorepo. Safe to omit unless another package in your dependency tree requires it.
+
+## Subpath → Peer Dependency Matrix
+
+Which peers are needed for each import path:
+
+| Subpath                             | `commander` | `contracts` | `config` | `schema` | `zod` | `types` |
+| ----------------------------------- | :---------: | :---------: | :------: | :------: | :---: | :-----: |
+| `@outfitter/cli`                    |             |      ✓      |    ✓     |          |       |         |
+| `@outfitter/cli/command`            |      ✓      |             |          |          |       |         |
+| `@outfitter/cli/output`             |             |      ✓      |    ✓     |          |       |         |
+| `@outfitter/cli/input`              |             |      ✓      |          |          |       |         |
+| `@outfitter/cli/flags`              |             |      ✓      |          |          |       |         |
+| `@outfitter/cli/query`              |             |             |          |          |       |         |
+| `@outfitter/cli/actions`            |      ✓      |      ✓      |          |          |  ✓\*  |         |
+| `@outfitter/cli/schema`             |      ✓      |      ✓      |          |    ✓     |       |         |
+| `@outfitter/cli/completion`         |      ✓      |             |          |          |       |         |
+| `@outfitter/cli/pagination`         |             |             |          |          |       |         |
+| `@outfitter/cli/colors`             |             |             |          |          |       |         |
+| `@outfitter/cli/text`               |             |             |          |          |       |         |
+| `@outfitter/cli/terminal`           |             |             |    ✓     |          |       |         |
+| `@outfitter/cli/terminal/detection` |             |             |    ✓     |          |       |         |
+| `@outfitter/cli/verbs`              |             |             |          |          |       |         |
+| `@outfitter/cli/types`              |      ✓      |      ✓      |          |          |       |         |
+
+\* `zod` is available transitively via `@outfitter/contracts`.
+
+## Peer-Free Subpaths
+
+These subpaths have no peer dependencies and can be used standalone:
+
+- `@outfitter/cli/query` — Output mode and jq presets
+- `@outfitter/cli/pagination` — Cursor state persistence
+- `@outfitter/cli/colors` — ANSI colors and themes
+- `@outfitter/cli/text` — Text measurement, wrapping, truncation
+- `@outfitter/cli/verbs` — Verb family definitions
 
 ---
 path: docs/packages/cli/HARVEST_MAP.md
@@ -1620,6 +1859,105 @@ if (flags.reset) {
 }
 ```
 
+## NDJSON Streaming (`@outfitter/cli/streaming`)
+
+Real-time progress reporting via newline-delimited JSON. Handlers emit progress events through an optional `ctx.progress` callback; the CLI adapter writes them as NDJSON lines to stdout.
+
+```typescript
+import { streamPreset } from "@outfitter/cli/query";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("deploy")
+  .preset(streamPreset())
+  .action(async ({ flags, input }) => {
+    await runHandler({
+      command: "deploy",
+      handler: async (input, ctx) => {
+        ctx.progress?.({ type: "progress", current: 1, total: 3 });
+        // ... work ...
+        return Result.ok({ status: "deployed" });
+      },
+      input,
+      stream: Boolean(flags.stream),
+    });
+  });
+```
+
+```
+$ mycli deploy --stream
+{"type":"start","command":"deploy","ts":"2025-01-01T00:00:00.000Z"}
+{"type":"progress","current":1,"total":3}
+{"ok":true,"command":"deploy","result":{"status":"deployed"}}
+```
+
+`--stream` is orthogonal to output mode — it controls delivery (streaming vs batch), not serialization. Types live in `@outfitter/contracts/stream`.
+
+Low-level utilities (`writeNdjsonLine`, `writeStreamEnvelope`, `createNdjsonProgress`) are exported from `@outfitter/cli/streaming` for custom setups.
+
+## Output Truncation (`@outfitter/cli/truncation`)
+
+Truncate array output with pagination hints and optional file pointers for very large results.
+
+```typescript
+import { truncateOutput } from "@outfitter/cli/truncation";
+
+const result = truncateOutput(items, {
+  limit: 20,
+  offset: 0,
+  commandName: "list",
+});
+// result.data      — sliced items (length <= 20)
+// result.metadata  — { showing: 20, total: 500, truncated: true }
+// result.hints     — [{ description: "Show next 20 of 480...", command: "list --offset 20 --limit 20" }]
+```
+
+When output exceeds `filePointerThreshold` (default: 1000 items), the full result is written to a temp file and `metadata.full_output` contains the file path. File write failures degrade gracefully with a warning hint instead of crashing.
+
+**Exports:** `truncateOutput`, `TruncationOptions`, `TruncationResult`, `TruncationMetadata`, `DEFAULT_FILE_POINTER_THRESHOLD`
+
+## CommandBuilder
+
+The `command()` builder provides a fluent API for defining CLI commands with typed input schemas, safety metadata, and hint generation:
+
+```typescript
+import { command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+
+command("delete <id>")
+  .description("Delete a resource")
+  .input(z.object({ id: z.string(), force: z.boolean().default(false) }))
+  .destructive(true) // auto-adds --dry-run flag
+  .relatedTo("list", { description: "List remaining resources" })
+  .hints((result, input) => [
+    { description: "Verify", command: `show ${input.id}` },
+  ])
+  .onError((error, input) => [
+    { description: "Check exists", command: `show ${input.id}` },
+  ])
+  .action(async ({ input, flags }) => {
+    await runHandler({
+      command: "delete",
+      handler: deleteHandler,
+      input,
+      dryRun: Boolean(flags.dryRun),
+    });
+  })
+  .build();
+```
+
+**Safety metadata methods:**
+
+| Method              | Effect                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `.destructive()`    | Auto-adds `--dry-run` flag; `runHandler({ dryRun })` generates execution hint |
+| `.readOnly()`       | Surfaces in command tree JSON and maps to MCP `readOnlyHint`                  |
+| `.idempotent()`     | Surfaces in command tree JSON and maps to MCP `idempotentHint`                |
+| `.relatedTo()`      | Declares action graph edges for tier-4 hint generation                        |
+| `.input(schema)`    | Zod schema for auto-derived flags and validation                              |
+| `.context(factory)` | Async factory for handler context construction                                |
+| `.hints(fn)`        | Success hint function called with `(result, input)`                           |
+| `.onError(fn)`      | Error hint function called with `(error, input)`                              |
+
 ## Conventions
 
 Composable flag presets provide typed, reusable CLI flag definitions. See the [full conventions guide](../../cli/conventions.md) for the complete catalog.
@@ -1643,13 +1981,17 @@ command("deploy")
   });
 ```
 
-**Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`
+**Available presets:** `verbosePreset`, `cwdPreset`, `dryRunPreset`, `forcePreset`, `interactionPreset`, `strictPreset`, `colorPreset`, `projectionPreset`, `paginationPreset`, `timeWindowPreset`, `executionPreset`, `outputModePreset`, `jqPreset`, `streamPreset`
 
 **Additional modules:**
 
 - `@outfitter/cli/verbs` — Standard verb families (`create`, `modify`, `remove`, `list`, `show`)
-- `@outfitter/cli/query` — Output mode and jq expression presets
+- `@outfitter/cli/query` — Output mode, jq expression, and streaming presets
 - `@outfitter/cli/completion` — Shell completion script generation
+- `@outfitter/cli/streaming` — NDJSON streaming primitives
+- `@outfitter/cli/truncation` — Output truncation with pagination hints
+- `@outfitter/cli/envelope` — Response envelope construction and `runHandler()` lifecycle
+- `@outfitter/cli/hints` — Hint generation tiers (command tree, error recovery, schema params, action graph)
 
 ## Configuration
 
@@ -2168,6 +2510,173 @@ if (result.isErr()) {
 ## License
 
 MIT
+
+---
+path: docs/packages/contracts/docs/error-handling-patterns.md
+package: contracts
+title: Error Handling Patterns
+---
+
+# Error Handling Patterns
+
+Guidance on when to use Result types vs exceptions, how errors flow through MCP and CLI boundaries, and how to bridge domain errors into the Outfitter taxonomy.
+
+## Error Boundaries
+
+Outfitter distinguishes two error strategies based on where the error originates:
+
+### Results for Domain Errors
+
+All domain logic — handlers, validators, data access — returns `Result<T, E>`. This makes error paths explicit, composable, and testable without try/catch.
+
+```typescript
+import { type Handler, Result, NotFoundError } from "@outfitter/contracts";
+
+const getNote: Handler<{ id: string }, Note, NotFoundError> = async (
+  input,
+  ctx
+) => {
+  const note = await db.notes.find(input.id);
+  if (!note) return Result.err(NotFoundError.create("note", input.id));
+  return Result.ok(note);
+};
+```
+
+**Use Result when:**
+
+- The failure is a known domain condition (not found, validation, conflict, etc.)
+- The caller can meaningfully handle the error
+- The error should propagate through handler composition
+
+### Throws for Protocol Violations and Startup Failures
+
+Throw exceptions only for:
+
+- **Protocol violations** — broken invariants that indicate programmer error (e.g., registering a tool with a duplicate name, calling a method before initialization)
+- **Unrecoverable startup failures** — configuration errors or missing dependencies that prevent the process from starting at all
+
+```typescript
+// Protocol violation: programmer error, not a domain condition
+if (this.tools.has(name)) {
+  throw new Error(`Tool already registered: ${name}`);
+}
+
+// Startup failure: process cannot continue
+const config = loadConfig();
+if (!config) {
+  throw new Error("Missing required configuration file");
+}
+```
+
+These are bugs or environment issues, not domain errors. They should crash early with a clear message rather than propagate through Result chains.
+
+## MCP Boundary Rule
+
+MCP tool handlers **must always return `Result`**. The MCP server translates Results into MCP protocol responses — `Ok` becomes tool content, `Err` becomes an error response with the appropriate message.
+
+```typescript
+import { defineTool } from "@outfitter/mcp";
+import { Result, NotFoundError } from "@outfitter/contracts";
+import { z } from "zod";
+
+const getUserTool = defineTool({
+  name: "get-user",
+  description: "Retrieve a user by ID",
+  inputSchema: z.object({ userId: z.string() }),
+  handler: async (input, ctx) => {
+    const user = await db.users.find(input.userId);
+    if (!user) {
+      return Result.err(NotFoundError.create("user", input.userId));
+    }
+    return Result.ok({ name: user.name, email: user.email });
+  },
+});
+```
+
+Never throw from a tool handler. An unhandled throw bypasses the server's error formatting and produces an opaque internal error for the client.
+
+## Error Taxonomy
+
+All domain errors use one of 10 categories. Each category maps to a CLI exit code and HTTP status code, ensuring consistent behavior across CLI, MCP, and API transports.
+
+| Category     | Exit Code | HTTP Status | When to Use                             |
+| ------------ | --------- | ----------- | --------------------------------------- |
+| `validation` | 1         | 400         | Invalid input, schema violation         |
+| `not_found`  | 2         | 404         | Resource does not exist                 |
+| `conflict`   | 3         | 409         | Duplicate creation, version mismatch    |
+| `permission` | 4         | 403         | Insufficient permissions                |
+| `timeout`    | 5         | 504         | Operation exceeded time limit           |
+| `rate_limit` | 6         | 429         | Request rate exceeded                   |
+| `network`    | 7         | 502         | Network or upstream failure             |
+| `internal`   | 8         | 500         | Unexpected internal error               |
+| `auth`       | 9         | 401         | Missing or invalid credentials          |
+| `cancelled`  | 130       | 499         | User cancellation (POSIX: 128 + SIGINT) |
+
+Use `getExitCode()` and `getStatusCode()` from `@outfitter/contracts` for programmatic lookups. See the full taxonomy reference in [error-taxonomy.md](./error-taxonomy.md).
+
+## The `adaptHandler()` Bridge Pattern
+
+MCP tool definitions constrain `TError extends OutfitterError`. When your handler returns domain-specific errors that extend `Error` but not `OutfitterError`, the types don't align. Use `adaptHandler()` from `@outfitter/mcp` to bridge the gap instead of an unsafe cast.
+
+### When to Use
+
+- Your handler returns errors from a third-party library or domain module that extend `Error` but don't carry a `category` field
+- You want to register the handler as an MCP tool without rewriting its error types
+
+### When Not to Use
+
+- Your handler already returns `OutfitterError` subtypes (e.g., `NotFoundError`, `ValidationError`) — pass it directly
+- You can refactor the handler to use `OutfitterError` — prefer that over bridging
+
+### Example
+
+```typescript
+import { adaptHandler, defineTool } from "@outfitter/mcp";
+import { Result } from "@outfitter/contracts";
+import { z } from "zod";
+
+// Domain handler returns a custom error that extends Error, not OutfitterError
+class GitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GitError";
+  }
+}
+
+async function getCommit(
+  input: { sha: string },
+  ctx: import("@outfitter/contracts").HandlerContext
+): Promise<Result<{ sha: string; message: string }, GitError>> {
+  // ... domain logic returning Result<T, GitError>
+}
+
+// Bridge the type gap with adaptHandler()
+const commitTool = defineTool({
+  name: "get-commit",
+  description: "Look up a git commit by SHA",
+  inputSchema: z.object({ sha: z.string() }),
+  handler: adaptHandler(getCommit),
+});
+```
+
+`adaptHandler()` is a type-level bridge — it performs an `unknown` cast at runtime so the handler's error type satisfies the `OutfitterError` constraint. The actual error values are unchanged; the MCP server serializes whatever it receives.
+
+For more robust error normalization at runtime, pair it with `wrapError()` from `@outfitter/contracts/wrap-error`:
+
+```typescript
+import { wrapError, type ErrorMapper } from "@outfitter/contracts/wrap-error";
+import { NetworkError } from "@outfitter/contracts";
+
+const gitErrorMapper: ErrorMapper = (err) => {
+  if (err instanceof GitError) {
+    return NetworkError.create(err.message);
+  }
+  return undefined;
+};
+
+// Normalize unknown errors into typed OutfitterErrors
+const normalized = wrapError(caughtError, gitErrorMapper);
+```
 
 ---
 path: docs/packages/contracts/docs/error-taxonomy.md
@@ -4030,6 +4539,293 @@ Run `outfitter upgrade --guide` for version-specific migration instructions, or 
 MIT
 
 ---
+path: docs/packages/mcp/docs/adapt-handler.md
+package: mcp
+title: Bridging Domain Errors with `adaptHandler()`
+---
+
+# Bridging Domain Errors with `adaptHandler()`
+
+MCP tool definitions require `TError extends OutfitterError`. When your handler returns domain errors that extend `Error` but not `OutfitterError`, the types don't align. `adaptHandler()` bridges that gap so you can register domain handlers as MCP tools without unsafe casts or error rewriting.
+
+## The Problem
+
+The Outfitter handler contract constrains tool errors to `OutfitterError`:
+
+```typescript
+type Handler<TInput, TOutput, TError extends OutfitterError> = (
+  input: TInput,
+  ctx: HandlerContext
+) => Promise<Result<TOutput, TError>>;
+```
+
+Domain handlers often use their own error hierarchies:
+
+```typescript
+class GitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GitError";
+  }
+}
+
+async function getCommit(
+  input: { sha: string },
+  ctx: HandlerContext
+): Promise<Result<{ sha: string; message: string }, GitError>> {
+  // ...
+}
+```
+
+Passing `getCommit` directly to `defineTool()` produces a TypeScript error because `GitError` doesn't extend `OutfitterError`.
+
+## The Solution
+
+Wrap the handler with `adaptHandler()`:
+
+```typescript
+import { adaptHandler, defineTool } from "@outfitter/mcp";
+import { z } from "zod";
+
+const commitTool = defineTool({
+  name: "get-commit",
+  description: "Look up a git commit by SHA",
+  inputSchema: z.object({ sha: z.string() }),
+  handler: adaptHandler(getCommit),
+});
+```
+
+`adaptHandler()` is a type-level bridge. At runtime it performs an `unknown` cast so the handler's error type satisfies `OutfitterError`. The actual error values are unchanged — the MCP server serializes whatever it receives.
+
+## Signature
+
+```typescript
+function adaptHandler<TInput, TOutput, TError extends Error>(
+  handler: (
+    input: TInput,
+    ctx: HandlerContext
+  ) => Promise<Result<TOutput, TError>>
+): Handler<TInput, TOutput, OutfitterError>;
+```
+
+**Import:**
+
+```typescript
+import { adaptHandler } from "@outfitter/mcp";
+```
+
+## When to Use
+
+- Your handler returns errors from a third-party library or domain module that extend `Error` but don't carry a `category` field
+- You want to register the handler as an MCP tool without rewriting its error types
+- You're integrating existing domain logic that predates the Outfitter error taxonomy
+
+## When Not to Use
+
+- Your handler already returns `OutfitterError` subtypes (e.g., `NotFoundError`, `ValidationError`) — pass it directly to `defineTool()`
+- You can refactor the handler to use `OutfitterError` — prefer that over bridging for new code
+
+## Full Example
+
+```typescript
+import { adaptHandler, defineTool, createMcpServer } from "@outfitter/mcp";
+import { Result } from "@outfitter/contracts";
+import type { HandlerContext } from "@outfitter/contracts";
+import { z } from "zod";
+
+// Domain error that extends Error, not OutfitterError
+class GitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GitError";
+  }
+}
+
+// Domain handler returning Result<T, GitError>
+async function getCommit(
+  input: { sha: string },
+  ctx: HandlerContext
+): Promise<Result<{ sha: string; message: string }, GitError>> {
+  ctx.logger.debug("Looking up commit", { sha: input.sha });
+  const commit = await lookupCommit(input.sha);
+  if (!commit) {
+    return Result.err(new GitError(`Commit not found: ${input.sha}`));
+  }
+  return Result.ok({ sha: commit.sha, message: commit.message });
+}
+
+// Register as MCP tool with adaptHandler()
+const server = createMcpServer({ name: "git-tools", version: "1.0.0" });
+
+server.registerTool(
+  defineTool({
+    name: "get-commit",
+    description: "Look up a git commit by SHA",
+    inputSchema: z.object({ sha: z.string() }),
+    handler: adaptHandler(getCommit),
+  })
+);
+```
+
+## Runtime Error Normalization
+
+`adaptHandler()` only bridges types — it doesn't transform error values at runtime. If you need errors to carry `category` metadata for richer MCP error responses, pair it with `wrapError()` from `@outfitter/contracts/wrap-error`:
+
+```typescript
+import { wrapError, type ErrorMapper } from "@outfitter/contracts/wrap-error";
+import { NotFoundError, NetworkError } from "@outfitter/contracts";
+
+const gitMapper: ErrorMapper = (err) => {
+  if (err instanceof GitError && err.message.includes("not found")) {
+    return NotFoundError.create("commit", "unknown");
+  }
+  if (err instanceof GitError) {
+    return NetworkError.create(err.message);
+  }
+  return undefined;
+};
+
+// Normalize at the call site before returning
+async function getCommitNormalized(
+  input: { sha: string },
+  ctx: HandlerContext
+) {
+  const result = await getCommit(input, ctx);
+  if (result.isErr()) {
+    return Result.err(wrapError(result.error, gitMapper));
+  }
+  return result;
+}
+```
+
+This approach gives you full control over how domain errors map to the Outfitter taxonomy while keeping the domain handler itself transport-agnostic.
+
+## See Also
+
+- [Error Handling Patterns](../../contracts/docs/error-handling-patterns.md) — broader guide covering error boundaries, the MCP boundary rule, and error taxonomy
+- [Error Taxonomy](../../contracts/docs/error-taxonomy.md) — the 10 error categories with exit code and HTTP status mappings
+
+---
+path: docs/packages/mcp/docs/dynamic-tool-registration.md
+package: mcp
+title: Dynamic Tool Registration
+---
+
+# Dynamic Tool Registration
+
+Calling `registerTool()` after `connectStdio()` automatically sends a `tools/list_changed` notification to the connected client. The client then re-fetches the tool list and discovers the new tools — no manual notification step required.
+
+This enables patterns like auth-gated registration, where read-only tools are available immediately and write tools appear only after the caller proves authorization.
+
+## How It Works
+
+`connectStdio()` binds an SDK server internally. Once bound, every `registerTool()` call triggers `sendToolListChanged()` on the SDK server, which the MCP protocol translates into a `notifications/tools/list_changed` message to the client.
+
+Before binding (i.e., before `connectStdio()`), `registerTool()` silently adds the tool with no notification — there's no client to notify yet.
+
+```
+registerTool(readTool)   →  tool stored, no notification (no client yet)
+connectStdio()           →  SDK server bound, client connected
+registerTool(writeTool)  →  tool stored + tools/list_changed sent automatically
+```
+
+**Source reference:** In `server.ts`, `registerTool()` checks whether the SDK server is bound and calls `sendToolListChanged()` if so:
+
+```typescript
+tools.set(tool.name, stored);
+if (sdkServer) {
+  sdkServer.sendToolListChanged?.();
+}
+```
+
+The same auto-notification applies to `registerResource()`, `registerResourceTemplate()`, and `registerPrompt()`.
+
+## Auth-Gated Dynamic Registration
+
+A common pattern is registering base (read-only) tools before connecting, then adding write tools after verifying the caller's authorization:
+
+```typescript
+import {
+  createMcpServer,
+  connectStdio,
+  defineTool,
+  TOOL_ANNOTATIONS,
+} from "@outfitter/mcp";
+import { Result } from "@outfitter/contracts";
+import { z } from "zod";
+
+const server = createMcpServer({ name: "my-server", version: "1.0.0" });
+
+// 1. Register read-only tools before connecting
+server.registerTool(
+  defineTool({
+    name: "list-items",
+    description: "List all items in the workspace",
+    inputSchema: z.object({}),
+    annotations: TOOL_ANNOTATIONS.readOnly,
+    handler: async (input, ctx) => {
+      const items = await db.items.list();
+      return Result.ok({ items });
+    },
+  })
+);
+
+// 2. Connect — client sees only read-only tools initially
+await connectStdio(server);
+
+// 3. Verify authorization (your logic)
+const hasWriteAccess = await checkCallerAuth();
+
+// 4. Conditionally register write tools — client auto-discovers them
+if (hasWriteAccess) {
+  server.registerTool(
+    defineTool({
+      name: "create-item",
+      description: "Create a new item in the workspace",
+      inputSchema: z.object({ title: z.string() }),
+      annotations: TOOL_ANNOTATIONS.write,
+      handler: async (input, ctx) => {
+        const item = await db.items.create({ title: input.title });
+        return Result.ok(item);
+      },
+    })
+  );
+
+  server.registerTool(
+    defineTool({
+      name: "delete-item",
+      description: "Delete an item by ID",
+      inputSchema: z.object({ id: z.string() }),
+      annotations: TOOL_ANNOTATIONS.destructive,
+      handler: async (input, ctx) => {
+        await db.items.delete(input.id);
+        return Result.ok({ deleted: true });
+      },
+    })
+  );
+}
+```
+
+The client receives a `tools/list_changed` notification for each `registerTool()` call after `connectStdio()`, then re-fetches the tool list to discover the newly available tools.
+
+## Manual Notifications
+
+For bulk registration or other scenarios where you want explicit control over when the notification fires, use `notifyToolsChanged()`:
+
+```typescript
+// Register several tools without per-tool notifications
+// (each registerTool still auto-notifies, but you can also trigger manually)
+server.notifyToolsChanged();
+```
+
+The same pattern applies to resources (`notifyResourcesChanged()`) and prompts (`notifyPromptsChanged()`).
+
+## See Also
+
+- [Bridging Domain Errors with `adaptHandler()`](./adapt-handler.md) — registering handlers with non-Outfitter error types
+- [Error Handling Patterns](../../contracts/docs/error-handling-patterns.md) — error boundaries and taxonomy
+
+---
 path: docs/packages/mcp/README.md
 package: mcp
 title: @outfitter/mcp
@@ -4274,6 +5070,47 @@ server.registerResource(configResource);
 const contentResult = await server.readResource("file:///etc/app/config.json");
 ```
 
+### defineResourceTemplate(definition)
+
+Helper for defining MCP resource templates with URI pattern matching and optional Zod validation.
+
+```typescript
+import { defineResourceTemplate } from "@outfitter/mcp";
+import { z } from "zod";
+
+// Basic template with string variables
+const userTemplate = defineResourceTemplate({
+  uriTemplate: "db:///users/{userId}/profile",
+  name: "User Profile",
+  handler: async (uri, variables, ctx) => {
+    const profile = await getProfile(variables.userId);
+    return Result.ok([
+      { uri, text: JSON.stringify(profile), mimeType: "application/json" },
+    ]);
+  },
+});
+
+// Typed template with Zod validation and coercion
+const postTemplate = defineResourceTemplate({
+  uriTemplate: "db:///users/{userId}/posts/{postId}",
+  name: "User Post",
+  paramSchema: z.object({
+    userId: z.string().min(1),
+    postId: z.coerce.number().int().positive(),
+  }),
+  handler: async (uri, params, ctx) => {
+    // params is { userId: string; postId: number } — validated and coerced
+    const post = await getPost(params.userId, params.postId);
+    return Result.ok([{ uri, text: JSON.stringify(post) }]);
+  },
+});
+
+server.registerResourceTemplate(userTemplate);
+server.registerResourceTemplate(postTemplate);
+```
+
+Templates use RFC 6570 Level 1 URI templates (`{param}` placeholders). Typed templates validate extracted variables against a Zod schema before handler invocation.
+
 ### Server Methods
 
 ```typescript
@@ -4313,6 +5150,57 @@ Extended handler context for MCP tools with additional metadata:
 interface McpHandlerContext extends HandlerContext {
   toolName?: string; // Name of the tool being invoked
 }
+```
+
+## Streaming and Progress (`@outfitter/mcp/progress`)
+
+When an MCP client provides a `progressToken` in the tool call params, the server automatically creates a progress callback and injects it into the handler context as `ctx.progress`. Each call emits a `notifications/progress` notification.
+
+```typescript
+const tool = defineTool({
+  name: "index-files",
+  description: "Index workspace files",
+  inputSchema: z.object({ path: z.string() }),
+  handler: async (input, ctx) => {
+    const files = await listFiles(input.path);
+
+    for (let i = 0; i < files.length; i++) {
+      await indexFile(files[i]);
+      ctx.progress?.({ type: "progress", current: i + 1, total: files.length });
+    }
+
+    ctx.progress?.({
+      type: "step",
+      name: "complete",
+      status: "complete",
+      duration_ms: 150,
+    });
+
+    return Result.ok({ indexed: files.length });
+  },
+});
+```
+
+Use optional chaining (`ctx.progress?.()`) so the handler works whether or not the client requested progress tracking. Without a `progressToken`, `ctx.progress` is `undefined` and no notifications are sent.
+
+**Event mapping to MCP notifications:**
+
+| StreamEvent type | MCP `progress` | MCP `total` | MCP `message`             |
+| ---------------- | -------------- | ----------- | ------------------------- |
+| `start`          | `0`            | --          | `[start] {command}`       |
+| `step`           | `0`            | --          | `[step] {name}: {status}` |
+| `progress`       | `current`      | `total`     | `message` (if provided)   |
+
+The progress callback uses the same `StreamEvent` types from `@outfitter/contracts/stream` as the CLI NDJSON adapter, keeping handlers transport-agnostic.
+
+**Programmatic usage** (for custom transport layers):
+
+```typescript
+import { createMcpProgressCallback } from "@outfitter/mcp/progress";
+
+const progress = createMcpProgressCallback("tok-123", (notification) =>
+  sdkServer.notification(notification)
+);
 ```
 
 ## Core Tools
@@ -5582,8 +6470,9 @@ RED phase branches follow these patterns:
 
 Verification order:
 
-1. Run `verify:ci` if present.
-2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
+1. Run `verify:push` if present.
+2. Otherwise run `verify:ci` if present.
+3. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
 
 ```bash
 # Normal usage (in lefthook.yml)
@@ -5614,7 +6503,15 @@ bunx @outfitter/tooling check-bunup-registry
 
 ### `tooling check-changeset`
 
-Validate that PRs touching package source include a changeset.
+Validate that release-relevant package changes in the current PR diff include a
+changeset.
+
+- In GitHub `pull_request` CI, the command diffs against the PR's current
+  `base.sha...head.sha` from the event payload. This keeps stacked PRs valid
+  after lower branches merge and Graphite retargets descendants.
+- Outside `pull_request` CI, it falls back to `origin/main...HEAD`.
+- Test-only package files are ignored: `src/__tests__/`, `src/__snapshots__/`,
+  `*.test.*`, and `*.spec.*`.
 
 ```bash
 bunx @outfitter/tooling check-changeset

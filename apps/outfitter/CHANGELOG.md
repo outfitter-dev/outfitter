@@ -1,5 +1,74 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- 847da96: Add `outfitter check action-registry` command that cross-references command files in `apps/outfitter/src/commands/` against action definition imports in `apps/outfitter/src/actions/`. Reports unregistered command files with file paths. Supports `--output json|jsonl` for structured output. Exits with code 0 when all command files are referenced, code 1 when gaps are found.
+- 847da96: Add `--example <name>` flag to `outfitter init cli` and `outfitter init mcp` commands. `outfitter init cli my-tool --example todo` scaffolds a pattern-rich todo-list CLI demonstrating builder patterns (`.input()`, `.context()`, `.hints()`, `runHandler()`). `outfitter init mcp my-server --example files` scaffolds an MCP server with `defineResource()`, `defineResourceTemplate()`, and `defineTool()` patterns. Examples use real v0.5 patterns — not hello-world stubs.
+- 847da96: Add `outfitter upgrade codemod` command that transforms Commander `.command().action()` patterns to the builder pattern with `.input(schema).action()`. Generates Zod schema skeletons from existing `.option()` / `.argument()` declarations. Commands too complex for automatic transformation (nested subcommands, dynamic patterns) are left as-is and reported as skipped with `cli.register()` fallback. Supports `--dry-run` for previewing changes and `--output json|jsonl` for structured output.
+
+### Patch Changes
+
+- 72a1e71: Fix `resolveDocsOutputMode` to use `hasExplicitOutputFlag` pattern so that `OUTFITTER_JSON=1` and `OUTFITTER_JSONL=1` env vars work for docs commands when no explicit `--output` flag is passed. Commander default values no longer suppress env var fallback.
+- b214e7b: Improve pre-push verification feedback by preferring `verify:push` and
+  streaming hook-oriented output during local push and stack submission flows.
+- cb36241: Land the stacked follow-up fixes across tooling, runtime, and scaffold packages after the repo-shape cleanup.
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [623fef7]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [847da96]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [2eadac8]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [c21b340]
+- Updated dependencies [56594cb]
+- Updated dependencies [2eadac8]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [1359264]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [72a1e71]
+- Updated dependencies [623fef7]
+- Updated dependencies [1359264]
+- Updated dependencies [5079ff4]
+- Updated dependencies [72a1e71]
+- Updated dependencies [b214e7b]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [a151534]
+- Updated dependencies [c21b340]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [72a1e71]
+- Updated dependencies [b976559]
+- Updated dependencies [cc525da]
+- Updated dependencies [2eb44e7]
+- Updated dependencies [5b7a6d2]
+- Updated dependencies [13f3b29]
+- Updated dependencies [f4902f2]
+- Updated dependencies [7f1a076]
+- Updated dependencies [cb36241]
+  - @outfitter/cli@1.0.0
+  - @outfitter/mcp@0.5.0
+  - @outfitter/presets@0.3.0
+  - @outfitter/contracts@0.5.0
+  - @outfitter/config@0.4.0
+  - @outfitter/tooling@0.3.5
+  - @outfitter/daemon@0.2.6
+  - @outfitter/docs@0.2.1
+  - @outfitter/logging@0.4.3
+  - @outfitter/oxlint-plugin@0.2.0
+  - @outfitter/tui@0.2.3
+  - @outfitter/types@0.2.5
+
 ## 0.3.4
 
 ### Patch Changes
@@ -181,6 +250,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -207,6 +277,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

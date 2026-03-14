@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/reference",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Reference project demonstrating v0.4-v0.6 Outfitter integration",
   "type": "module",

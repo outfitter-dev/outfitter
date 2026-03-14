@@ -1,5 +1,42 @@
 # @outfitter/tooling
 
+## 0.3.5
+
+### Patch Changes
+
+- b214e7b: Improve pre-push verification feedback by preferring `verify:push` and
+  streaming hook-oriented output during local push and stack submission flows.
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+- b976559: Add `allowedPackages` option to `no-process-env-in-packages` rule and update default config to exempt `config` package
+- 5b7a6d2: Refresh release metadata for the remaining stacked tooling follow-up PRs after the base changeset merged to `main`.
+- 13f3b29: Make `check-changeset` use the current PR base/head diff in CI and ignore
+  test-only package deltas when enforcing changeset coverage.
+- f4902f2: Simplify check-home-paths scan loop: hoist regex compilation, remove TOCTOU check, extract test helper.
+- 7f1a076: Add home-path leak detection checks and hook coverage to `@outfitter/tooling`.
+- cb36241: Land the stacked follow-up fixes across tooling, runtime, and scaffold packages after the repo-shape cleanup.
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [2eadac8]
+- Updated dependencies [56594cb]
+- Updated dependencies [2eadac8]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [1359264]
+- Updated dependencies [72a1e71]
+- Updated dependencies [72a1e71]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [a151534]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [72a1e71]
+  - @outfitter/cli@1.0.0
+
 ## 0.3.4
 
 ### Patch Changes
@@ -98,6 +135,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -112,6 +150,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

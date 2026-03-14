@@ -1,5 +1,79 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- 109ba72: Add `testCommand()` and `testTool()` wiring test helpers. `testCommand(cli, args, options?)` wraps `captureCLI()` to execute CLI instances and return captured stdout, stderr, and exitCode without side effects. `testTool(tool, input, options?)` validates input against the tool's Zod schema and invokes the handler with a test context — invalid input returns a ValidationError without calling the handler.
+- 847da96: Enhanced testCommand() and testTool() with schema, context, and hints support for v0.5 builder pattern.
+
+  **testCommand() enhancements:**
+
+  - `input` option: Pre-parsed input object auto-converted to CLI args
+  - `context` option: Mock context injectable via `getTestContext()` for context factories
+  - `json` option: Force JSON output mode for envelope parsing
+  - `envelope` field: Parsed `CommandEnvelope` from JSON output for structured assertion
+  - Returns `TestCommandResult` (extends `CliTestResult` with `envelope`)
+
+  **testTool() enhancements:**
+
+  - `context` option: Full `HandlerContext` overrides (takes priority over individual cwd/env/requestId)
+  - `hints` option: Hint generation function for asserting on MCP hints
+  - Returns `TestToolResult` (extends `Result` with `hints`)
+
+  **New exports:**
+
+  - `getTestContext()`: Retrieve injected test context in context factories
+  - `TestCommandResult` type
+  - `TestToolResult` type
+
+  All changes are backward compatible — existing tests continue to work without modification.
+
+- 565c366: Add generic type parameter to `McpHarness.callTool<T>()` and fix default return type
+
+  The previous return type (`Result<McpToolResponse>`) was incorrect — `callTool` returns the raw handler output, not an MCP-wrapped `McpToolResponse`. The new signature defaults to `Result<unknown>` but accepts a type parameter so callers who know the handler shape can write `harness.callTool<MyOutput>("tool", input)` without unsafe casts.
+
+### Patch Changes
+
+- a151534: Document intentional large-file exemptions and remove the remaining package-boundary lint violations that blocked repo verification across the affected runtime packages.
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [623fef7]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [2eadac8]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [c21b340]
+- Updated dependencies [56594cb]
+- Updated dependencies [2eadac8]
+- Updated dependencies [e5ab5d0]
+- Updated dependencies [1359264]
+- Updated dependencies [1359264]
+- Updated dependencies [2d9e5fa]
+- Updated dependencies [72a1e71]
+- Updated dependencies [1359264]
+- Updated dependencies [5079ff4]
+- Updated dependencies [72a1e71]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [f4f5cdf]
+- Updated dependencies [a151534]
+- Updated dependencies [c21b340]
+- Updated dependencies [7e94389]
+- Updated dependencies [c21b340]
+- Updated dependencies [72a1e71]
+- Updated dependencies [cc525da]
+- Updated dependencies [2eb44e7]
+- Updated dependencies [cb36241]
+  - @outfitter/cli@1.0.0
+  - @outfitter/mcp@0.5.0
+  - @outfitter/contracts@0.5.0
+
 ## 0.2.5
 
 ### Patch Changes
@@ -72,6 +146,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit
@@ -95,6 +170,7 @@
   This release graduates from release candidate to stable, consolidating all packages at v0.1.0.
 
   Key changes in this release cycle:
+
   - Plugin system with registry for Claude Code integration
   - Tooling CLI with upgrade-bun and pre-push commands
   - Renamed stack package to kit

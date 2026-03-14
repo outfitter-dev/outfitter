@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/file-ops",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Workspace detection, secure path handling, and file locking for Outfitter",
   "keywords": [
     "file-ops",

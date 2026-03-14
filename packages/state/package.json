@@ -1,6 +1,6 @@
 {
   "name": "@outfitter/state",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Pagination cursor persistence and state management for Outfitter",
   "keywords": [
     "cursor",
