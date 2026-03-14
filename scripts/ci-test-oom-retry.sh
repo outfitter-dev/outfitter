@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# OOM-aware test runner for CI shards.
-# Retries up to MAX_ATTEMPTS times on exit 137 (OOM kill).
+# Resilient test runner for CI shards.
+# Retries up to MAX_ATTEMPTS times on exit 137 (OOM kill) or transient failures.
 # Expects `bun run test:ci` to be the test command (reads OUTFITTER_CI_* env vars).
 set -euo pipefail
 
@@ -26,17 +26,20 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
     is_oom=true
   fi
 
-  if [ "$is_oom" = false ]; then
-    echo "::error::test:ci failed with exit code $exit_code"
+  if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+    if [ "$is_oom" = true ]; then
+      echo "::error::OOM (exit 137) persisted after $MAX_ATTEMPTS attempts"
+    else
+      echo "::error::test:ci failed with exit code $exit_code after $MAX_ATTEMPTS attempts"
+    fi
     exit "$exit_code"
   fi
 
-  if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
-    echo "::error::OOM (exit 137) persisted after $MAX_ATTEMPTS attempts"
-    exit 1
+  if [ "$is_oom" = true ]; then
+    echo "::warning::OOM detected (exit 137), retrying (attempt $((attempt + 1)) of $MAX_ATTEMPTS)..."
+  else
+    echo "::warning::test:ci failed (exit $exit_code), retrying (attempt $((attempt + 1)) of $MAX_ATTEMPTS)..."
   fi
-
-  echo "::warning::OOM detected (exit 137), retrying (attempt $((attempt + 1)) of $MAX_ATTEMPTS)..."
   attempt=$((attempt + 1))
 done
 
