@@ -149,6 +149,23 @@ function runGitCommit(cwd: string, message: string): Result<void, string> {
   }
 }
 
+function runFormat(cwd: string): void {
+  try {
+    const result = Bun.spawnSync(["bunx", "oxfmt", "--write", "."], {
+      cwd,
+      stdout: "ignore",
+      stderr: "pipe",
+    });
+    if (result.exitCode !== 0) {
+      const detail = result.stderr?.toString().trim();
+      const suffix = detail ? `: ${detail}` : "";
+      process.stderr.write(`Warning: oxfmt format step failed${suffix}, skipping.\n`);
+    }
+  } catch {
+    process.stderr.write("Warning: oxfmt not available, skipping format step.\n");
+  }
+}
+
 function computeNextSteps(
   options: PostScaffoldOptions,
   installResult: PostScaffoldResult["installResult"]
@@ -196,6 +213,11 @@ export async function runPostScaffold(
         command: "bun install",
         cwd: options.rootDir,
       });
+      collector?.add({
+        type: "install",
+        command: "bunx oxfmt --write .",
+        cwd: options.projectDir,
+      });
       installResult = "skipped";
     } else {
       const result = await runBunInstall(
@@ -208,6 +230,8 @@ export async function runPostScaffold(
         process.stderr.write(`Warning: bun install failed: ${result.error}\n`);
       } else {
         installResult = "success";
+        // Format the scaffolded project — not the entire workspace root
+        runFormat(options.projectDir);
       }
     }
   }
