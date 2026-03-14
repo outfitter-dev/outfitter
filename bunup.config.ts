@@ -458,8 +458,16 @@ const repairBareBarrelExports = (): BunupPlugin => ({
 const BASE_INTERNAL_EXCLUDE = ["./internal", "./internal/*"];
 
 function withDefaults(config?: {
-  exports?: { exclude?: string[]; customExports?: Record<string, string> };
-}): { exports: { exclude: string[]; customExports?: Record<string, string> } } {
+  exports?: {
+    exclude?: string[];
+    customExports?: Record<string, string> | (() => Record<string, string>);
+  };
+}): {
+  exports: {
+    exclude: string[];
+    customExports?: Record<string, string> | (() => Record<string, string>);
+  };
+} {
   const packageExclude = config?.exports?.exclude ?? [];
   return {
     ...config,
@@ -624,11 +632,11 @@ export default defineWorkspace(
             "./registry/schema",
             "./version",
           ],
-          customExports: {
+          customExports: () => ({
             "./tsconfig.preset.json": "./tsconfig.preset.json",
             "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
             "./lefthook.yml": "./lefthook.yml",
-          },
+          }),
         },
       }),
     },
