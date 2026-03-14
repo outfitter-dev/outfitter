@@ -6,7 +6,11 @@
  * @packageDocumentation
  */
 
-import { Result, ValidationError } from "@outfitter/contracts";
+import {
+  type HandlerContext,
+  Result,
+  ValidationError,
+} from "@outfitter/contracts";
 import { type ZodType, z } from "zod";
 
 export interface GreetingInput {
@@ -21,7 +25,10 @@ export interface Greeting {
   readonly message: string;
 }
 
-export function greet(input: unknown): Result<Greeting, ValidationError> {
+export async function greet(
+  input: unknown,
+  ctx: HandlerContext
+): Promise<Result<Greeting, ValidationError>> {
   const parsed = greetingInputSchema.safeParse(input);
   if (!parsed.success) {
     return Result.err(
@@ -29,5 +36,8 @@ export function greet(input: unknown): Result<Greeting, ValidationError> {
     );
   }
 
+  ctx.logger.info(`Greeting ${parsed.data.name}`, {
+    requestId: ctx.requestId,
+  });
   return Result.ok({ message: `Hello, ${parsed.data.name}!` });
 }
