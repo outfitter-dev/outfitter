@@ -407,7 +407,10 @@
       }
     },
     "./scripts/scaffold-e2e": {
-      "import": "./dist/scripts/scaffold-e2e.js"
+      "import": {
+        "types": "./dist/scripts/scaffold-e2e.d.ts",
+        "default": "./dist/scripts/scaffold-e2e.js"
+      }
     },
     "./targets": {
       "import": {
