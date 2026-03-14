@@ -69,6 +69,9 @@ jobs:
       - name: Version packages
         run: bun run version-packages
 
+      - name: Format generated files
+        run: bunx oxfmt --write .
+
       - name: Compute release title
         id: title
         run: |
