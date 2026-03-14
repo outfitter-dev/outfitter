@@ -16,6 +16,7 @@
     "lint:fix": "bun run --filter '*' lint:fix",
     "format": "bun run --filter '*' format",
     "check": "bun run --filter '*' check",
-    "verify:ci": "bun run typecheck && bun run check && bun run build && bun run test"
+    "clean": "bun run --filter '*' clean:artifacts",
+    "verify:ci": "bun run clean && bun run typecheck && bun run check && bun run build && bun run test"
   }
 }
