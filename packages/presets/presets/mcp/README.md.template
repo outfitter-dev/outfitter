@@ -34,7 +34,7 @@ Say hello to someone.
 
 **Parameters:**
 
-- `name` (string, optional): Name to greet. Default: "World"
+- `name` (string, required): Name to greet
 
 ## Development
 
