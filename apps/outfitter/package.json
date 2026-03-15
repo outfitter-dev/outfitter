@@ -406,9 +406,6 @@
         "default": "./dist/scaffold-e2e/workspace.js"
       }
     },
-    "./scripts/scaffold-e2e": {
-      "import": "./dist/scripts/scaffold-e2e.js"
-    },
     "./targets": {
       "import": {
         "types": "./dist/targets/index.d.ts",

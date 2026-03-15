@@ -7,9 +7,6 @@
  * @packageDocumentation
  */
 
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-
 import type { ExportMap } from "./exports-analysis.js";
 import { entryToSubpath } from "./exports-analysis.js";
 
@@ -59,26 +56,15 @@ function isCliEntrypoint(entry: string): boolean {
 }
 
 /** Build a standard bunup export entry from a source entry path */
-function buildExportValue(
-  entry: string,
-  packageRoot: string
-): { import: { types: string; default: string } | string } {
+function buildExportValue(entry: string): {
+  import: { types: string; default: string };
+} {
   // Strip src/ prefix and .ts extension, keep directory structure
   const distPath = entry.replace(/^src\//, "").replace(/\.[cm]?[jt]sx?$/, "");
-  const dtsPath = `./dist/${distPath}.d.ts`;
-  const jsPath = `./dist/${distPath}.js`;
-
-  // Only include types condition if the .d.ts file exists (or will exist).
-  // Script entries (e.g. src/scripts/*.ts) may not produce declarations.
-  const dtsExists = existsSync(resolve(packageRoot, dtsPath));
-  if (!dtsExists) {
-    return { import: jsPath };
-  }
-
   return {
     import: {
-      types: dtsPath,
-      default: jsPath,
+      types: `./dist/${distPath}.d.ts`,
+      default: `./dist/${distPath}.js`,
     },
   };
 }
@@ -176,7 +162,7 @@ export function computeExpectedExports(
   }
 
   for (const [subpath, entry] of subpathEntries) {
-    expected[subpath] = buildExportValue(entry, packageRoot);
+    expected[subpath] = buildExportValue(entry);
   }
 
   // Custom static exports from bunup config

@@ -645,7 +645,7 @@ export default defineWorkspace(
       root: "apps/outfitter",
       config: withDefaults({
         exports: {
-          exclude: ["./actions/*", "./output-mode"],
+          exclude: ["./actions/*", "./output-mode", "./scripts/*"],
         },
       }),
     },
