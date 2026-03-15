@@ -204,11 +204,11 @@ const logDir = getLogPath("my-daemon");
 ### Checking if Running
 
 ```typescript
-import { isDaemonRunning, getDaemonPid } from "@outfitter/daemon";
+import { isDaemonAlive, getLockPath } from "@outfitter/daemon";
 
-if (await isDaemonRunning("my-daemon")) {
-  const pid = await getDaemonPid("my-daemon");
-  console.log(`Daemon already running (PID: ${pid})`);
+const lockPath = getLockPath("my-daemon");
+if (await isDaemonAlive(lockPath)) {
+  console.log("Daemon already running");
   process.exit(1);
 }
 ```
@@ -221,7 +221,8 @@ if (await isDaemonRunning("my-daemon")) {
 export const startCommand = command("start")
   .option("-d, --detach", "Run in background")
   .action(async ({ flags }) => {
-    if (await isDaemonRunning("my-daemon")) {
+    const lockPath = getLockPath("my-daemon");
+    if (await isDaemonAlive(lockPath)) {
       console.log("Daemon already running");
       return;
     }
