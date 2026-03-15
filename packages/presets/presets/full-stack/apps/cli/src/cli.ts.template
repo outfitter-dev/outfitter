@@ -17,7 +17,7 @@ export async function runCli(
     throw result.error;
   }
 
-  await output(result.value.message, { mode: "human" });
+  await output(result.value.message, "human");
 }
 
 if (import.meta.main) {
