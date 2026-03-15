@@ -38,7 +38,7 @@ describe("createGreeting", () => {
     expect(result.error.name).toBe("ValidationError");
     // Check error field rather than message text — Zod error messages
     // differ between v3 ("Required") and v4 ("Invalid input: ...").
-    const fields = result.error.context?.fields as
+    const fields = result.error.context?.["fields"] as
       | Array<{ path: string }>
       | undefined;
     expect(fields?.some((f) => f.path === "name")).toBe(true);
