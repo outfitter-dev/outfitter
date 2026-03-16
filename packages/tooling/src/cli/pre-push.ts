@@ -82,9 +82,9 @@ function runScript(scriptName: string): boolean {
 
 function maybeSkipForRedPhase(
   reason: "branch" | "context",
-  branch: string
+  branch: string,
+  changedFiles: ReturnType<typeof getChangedFilesForPush>
 ): boolean {
-  const changedFiles = getChangedFilesForPush();
   if (!changedFiles.deterministic) {
     log(
       `${COLORS.yellow}RED-phase bypass denied${COLORS.reset}: could not determine full push diff range`
@@ -175,9 +175,12 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     return;
   }
 
+  // Resolve changed files once — used by RED-phase bypass, change categorization, and TSDoc
+  const changedFiles = getChangedFilesForPush();
+
   // Check for RED phase branch
   if (isRedPhaseBranch(branch)) {
-    if (maybeSkipForRedPhase("branch", branch)) {
+    if (maybeSkipForRedPhase("branch", branch, changedFiles)) {
       process.exitCode = 0;
       return;
     }
@@ -186,7 +189,7 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   // Check for scaffold branch with RED phase context
   if (isScaffoldBranch(branch)) {
     if (hasRedPhaseBranchInContext(branch)) {
-      if (maybeSkipForRedPhase("context", branch)) {
+      if (maybeSkipForRedPhase("context", branch, changedFiles)) {
         process.exitCode = 0;
         return;
       }
@@ -194,7 +197,6 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   }
 
   // Categorize changes to determine verification scope
-  const changedFiles = getChangedFilesForPush();
   const changeCategory = categorizeChangedFiles(changedFiles);
   const scripts = readPackageScripts();
 
