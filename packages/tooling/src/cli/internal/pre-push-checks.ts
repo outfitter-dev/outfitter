@@ -243,6 +243,14 @@ const SCOPE_PATTERNS: ReadonlyArray<{
   { pattern: /^\.github\//, scope: "ci", requiresFullSuite: true },
   { pattern: /^turbo\.json$/, scope: "ci", requiresFullSuite: true },
 
+  // Package-level docs stay lightweight even inside core/runtime packages.
+  {
+    pattern:
+      /^packages\/[^/]+\/(README|CHANGELOG|CONTRIBUTING|MIGRATION)\.md$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+
   // Foundation packages
   { pattern: /^packages\/contracts\//, scope: "core", requiresFullSuite: true },
   { pattern: /^packages\/types\//, scope: "core", requiresFullSuite: true },
@@ -274,16 +282,20 @@ const SCOPE_PATTERNS: ReadonlyArray<{
     requiresFullSuite: true,
   },
 
-  // Plugin executable files (scripts, hooks) need full suite
+  // Plugin docs/metadata are lightweight; everything else is conservative.
   {
-    pattern: /^plugins\/.*\.(ts|tsx|js|jsx|mts|mjs|cjs|cts|sh)$/,
+    pattern: /^plugins\/.*\.(md|json)$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+  {
+    pattern: /^plugins\//,
     scope: "app",
     requiresFullSuite: true,
   },
 
-  // Docs, plugin non-executable files, READMEs
+  // Docs and READMEs
   { pattern: /^docs\//, scope: "docs", requiresFullSuite: false },
-  { pattern: /^plugins\//, scope: "docs", requiresFullSuite: false },
   { pattern: /\.md$/i, scope: "docs", requiresFullSuite: false },
 
   // Root config files
