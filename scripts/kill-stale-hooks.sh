@@ -58,6 +58,32 @@ get_process_start_time() {
   LC_ALL=C ps -o lstart= -p "$1" 2>/dev/null | tr -s ' ' | sed 's/^ //;s/ $//'
 }
 
+find_lefthook_pid() {
+  local pid="${PPID:-$$}"
+  local fallback="$pid"
+  local name=""
+  local parent_pid=""
+
+  for _ in 1 2 3 4; do
+    if [ -z "$pid" ] || [ "$pid" = "0" ] || [ "$pid" = "1" ]; then
+      break
+    fi
+
+    name=$(ps -o comm= -p "$pid" 2>/dev/null | tr -d ' ') || name=""
+    case "$name" in
+      *lefthook*)
+        echo "$pid"
+        return 0
+        ;;
+    esac
+
+    parent_pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ') || parent_pid=""
+    pid="$parent_pid"
+  done
+
+  echo "$fallback"
+}
+
 kill_stale_process() {
   local pid="$1"
   local stored_start="$2"
@@ -130,11 +156,10 @@ if [ -f "$PID_FILE" ]; then
   fi
 fi
 
-# Resolve lefthook's PID. Lefthook invokes run: commands via sh -c, so the
-# process tree is: lefthook → sh → bash (this script). $PPID is sh, not
-# lefthook. Traverse one level up to get lefthook's actual PID.
-lefthook_pid=$(ps -o ppid= -p "${PPID:-$$}" 2>/dev/null | tr -d ' ') || lefthook_pid=""
-target_pid="${lefthook_pid:-${PPID:-$$}}"
+# Resolve lefthook's PID without assuming a fixed wrapper depth. Depending on
+# how lefthook launches the script, the chain may be lefthook → bash or
+# lefthook → sh → bash.
+target_pid=$(find_lefthook_pid)
 
 # Store PID and start time together for identity verification on next run
 start_time=$(get_process_start_time "$target_pid") || start_time=""
