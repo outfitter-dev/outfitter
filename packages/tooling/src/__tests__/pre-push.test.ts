@@ -382,6 +382,7 @@ describe("categorizeChangedFiles", () => {
       source: "upstream",
     });
     expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("core");
   });
 
   test("full suite when files are not deterministic", () => {
