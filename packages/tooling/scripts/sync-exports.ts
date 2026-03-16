@@ -156,7 +156,7 @@ if (import.meta.main) {
 
   if (plan === "format_only") {
     console.log(
-      `[sync-exports] exports are up to date (${configFiles.length} config files); verified oxfmt convergence`
+      `[sync-exports] exports are structurally up to date (${configFiles.length} config files); re-applied oxfmt for format convergence`
     );
     process.exit(0);
   }
