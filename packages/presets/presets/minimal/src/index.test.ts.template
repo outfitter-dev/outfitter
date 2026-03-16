@@ -11,9 +11,12 @@ describe("greet", () => {
     expect(result.value.message).toBe("Hello, World!");
   });
 
-  test("returns error for empty name", () => {
+  test("returns validation error for empty name", () => {
     const result = greet("");
 
     expect(result.isErr()).toBe(true);
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("ValidationError");
+    expect(result.error.message).toBe("name: name is required");
   });
 });
