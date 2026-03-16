@@ -458,7 +458,7 @@ describe("categorizeChangedFiles", () => {
     expect(result.scope).toBe("config");
   });
 
-  test("plugin executable files require full suite", () => {
+  test("plugin source files require full suite", () => {
     const result = categorizeChangedFiles({
       files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.ts"],
       deterministic: true,
@@ -468,7 +468,7 @@ describe("categorizeChangedFiles", () => {
     expect(result.scope).toBe("app");
   });
 
-  test("plugin non-js script files still require full suite", () => {
+  test("plugin non-metadata files require full suite regardless of extension", () => {
     const result = categorizeChangedFiles({
       files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.py"],
       deterministic: true,
@@ -478,7 +478,7 @@ describe("categorizeChangedFiles", () => {
     expect(result.scope).toBe("app");
   });
 
-  test("plugin non-executable files are docs scope", () => {
+  test("plugin markdown and metadata files are docs scope", () => {
     const result = categorizeChangedFiles({
       files: [
         "plugins/fieldguides/skills/tdd/SKILL.md",
