@@ -355,6 +355,16 @@ describe("categorizeChangedFiles", () => {
     expect(result.scope).toBe("docs");
   });
 
+  test("scoped verification for package-level docs", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/cli/README.md", "packages/types/CHANGELOG.md"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("docs");
+  });
+
   test("scoped verification for plugin-only changes", () => {
     const result = categorizeChangedFiles({
       files: ["plugins/fieldguides/skills/tdd/SKILL.md"],
@@ -451,6 +461,16 @@ describe("categorizeChangedFiles", () => {
   test("plugin executable files require full suite", () => {
     const result = categorizeChangedFiles({
       files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("app");
+  });
+
+  test("plugin non-js script files still require full suite", () => {
+    const result = categorizeChangedFiles({
+      files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.py"],
       deterministic: true,
       source: "upstream",
     });
