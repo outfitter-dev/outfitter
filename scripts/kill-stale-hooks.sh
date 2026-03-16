@@ -55,7 +55,7 @@ get_process_age_seconds() {
 # Returns exit code 0 even on empty output (e.g. zombie); callers must check
 # the returned string with [ -z ... ] in addition to the || guard.
 get_process_start_time() {
-  LC_ALL=C ps -o lstart= -p "$1" 2>/dev/null | tr -s ' '
+  LC_ALL=C ps -o lstart= -p "$1" 2>/dev/null | tr -s ' ' | sed 's/^ //;s/ $//'
 }
 
 kill_stale_process() {
