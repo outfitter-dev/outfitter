@@ -282,11 +282,16 @@ const SCOPE_PATTERNS: ReadonlyArray<{
     requiresFullSuite: true,
   },
 
-  // Plugin markdown and JSON metadata are lightweight; every other plugin
-  // path gets the full suite so new script types do not silently bypass
-  // verification.
+  // Plugin markdown plus the canonical plugin.json metadata file are
+  // lightweight; every other plugin path gets the full suite so new script
+  // types and config files do not silently bypass verification.
   {
-    pattern: /^plugins\/.*\.(md|json)$/i,
+    pattern: /^plugins\/.*\.md$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+  {
+    pattern: /^plugins\/(?:.+\/)?plugin\.json$/i,
     scope: "docs",
     requiresFullSuite: false,
   },

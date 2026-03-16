@@ -468,7 +468,7 @@ describe("categorizeChangedFiles", () => {
     expect(result.scope).toBe("app");
   });
 
-  test("plugin non-metadata files require full suite regardless of extension", () => {
+  test("plugin non-metadata source files require full suite regardless of script extension", () => {
     const result = categorizeChangedFiles({
       files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.py"],
       deterministic: true,
@@ -489,6 +489,19 @@ describe("categorizeChangedFiles", () => {
     });
     expect(result.requiresFullSuite).toBe(false);
     expect(result.scope).toBe("docs");
+  });
+
+  test("plugin config json files require full suite", () => {
+    const result = categorizeChangedFiles({
+      files: [
+        "plugins/fieldguides/package.json",
+        "plugins/fieldguides/tsconfig.json",
+      ],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("app");
   });
 
   test("full suite when mix includes plugin executable and docs", () => {
