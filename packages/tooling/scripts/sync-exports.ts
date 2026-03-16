@@ -120,6 +120,23 @@ if (import.meta.main) {
   const plan = planSyncExports({ currentExports, nextExports, isCheckMode });
 
   if (plan === "up_to_date") {
+    // Verify format convergence: exports are structurally correct, but the file
+    // may not yet be in oxfmt's preferred format. "up_to_date" is only returned
+    // in check mode (write mode returns "format_only" instead), so we validate
+    // that the file also passes oxfmt's format check.
+    const fmtCheck = Bun.spawnSync(
+      ["bun", "x", "oxfmt", "--check", pkgPath],
+      {
+        stdio: ["ignore", "ignore", "pipe"],
+      }
+    );
+    if (fmtCheck.exitCode !== 0) {
+      const stderr = fmtCheck.stderr.toString().trim();
+      console.error(
+        `[sync-exports] exports are structurally correct but not formatted. Run: bun run --filter @outfitter/tooling sync:exports${stderr ? `\n${stderr}` : ""}`
+      );
+      process.exit(1);
+    }
     console.log(
       `[sync-exports] exports are up to date (${configFiles.length} config files)`
     );
