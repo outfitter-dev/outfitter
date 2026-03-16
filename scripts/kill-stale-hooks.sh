@@ -81,6 +81,7 @@ find_lefthook_pid() {
     pid="$parent_pid"
   done
 
+  echo "[hooks] Warning: could not find lefthook in the parent chain; falling back to PID ${fallback} ($(ps -o comm= -p "$fallback" 2>/dev/null || echo 'dead')). Stale detection for this run may be ineffective." >&2
   echo "$fallback"
 }
 
@@ -97,11 +98,15 @@ kill_stale_process() {
   # Compare process start time — if it doesn't match, the PID was reused.
   if [ -n "$stored_start" ]; then
     local actual_start
-    actual_start=$(get_process_start_time "$pid") || return 0
-    if [ "$actual_start" != "$stored_start" ]; then
+    actual_start=$(get_process_start_time "$pid") || actual_start=""
+    if [ -z "$actual_start" ]; then
+      echo "[hooks] Warning: could not read process start time for PID $pid; falling back to age-only stale detection." >&2
+    elif [ "$actual_start" != "$stored_start" ]; then
       # PID was recycled to a different process
       return 0
     fi
+  else
+    echo "[hooks] Warning: no stored process start time for PID $pid; falling back to age-only stale detection." >&2
   fi
 
   # Check process age
@@ -150,7 +155,7 @@ if [ -f "$PID_FILE" ]; then
   if [ -n "$stored_pid" ]; then
     if ! kill_stale_process "$stored_pid" "$stored_start"; then
       # Live concurrent process detected — block this push to avoid daemon lock contention
-      echo "[hooks] Aborting: another pre-push is already running (PID $stored_pid). Wait for it to finish or kill it manually."
+      echo "[hooks] Aborting: another pre-push is already running (PID $stored_pid). Wait for it to finish, or if this is stale remove ${PID_FILE} and push again."
       exit 1
     fi
   fi
@@ -163,4 +168,7 @@ target_pid=$(find_lefthook_pid)
 
 # Store PID and start time together for identity verification on next run
 start_time=$(get_process_start_time "$target_pid") || start_time=""
+if [ -z "$start_time" ]; then
+  echo "[hooks] Warning: could not capture process start time for PID $target_pid; stale cleanup will use age-only detection for this run." >&2
+fi
 echo "${target_pid}${start_time:+ ${start_time}}" > "$PID_FILE"
