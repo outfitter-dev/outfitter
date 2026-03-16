@@ -394,19 +394,17 @@ export function buildCheckOrchestratorPlan(
   });
 
   if (tsFiles.length > 0 || !hasStagedFiles) {
-    const ultraciteIdx = preCommitSteps.findIndex((s) => s.id === "ultracite-fix");
+    const ultraciteIdx = preCommitSteps.findIndex(
+      (s) => s.id === "ultracite-fix"
+    );
     const insertAt = ultraciteIdx === -1 ? 0 : ultraciteIdx + 1;
     preCommitSteps.splice(insertAt, 0, {
       id: "typecheck",
       label: "Typecheck",
-      command: ["./scripts/pre-commit-typecheck.sh", ...tsFiles],
-    });
-  } else if (!hasStagedFiles) {
-    // No staged files at all — full typecheck fallback
-    preCommitSteps.splice(1, 0, {
-      id: "typecheck",
-      label: "Typecheck",
-      command: ["bun", "run", "typecheck", "--", "--only"],
+      command:
+        tsFiles.length > 0
+          ? ["./scripts/pre-commit-typecheck.sh", ...tsFiles]
+          : ["bun", "run", "typecheck", "--", "--only"],
     });
   }
 

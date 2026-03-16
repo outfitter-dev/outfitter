@@ -347,6 +347,23 @@ describe("buildCheckOrchestratorPlan", () => {
       stepIds.indexOf("exports") - 1
     );
   });
+
+  test("pre-commit mode includes ultracite-fix and sync-exports but not typecheck for JS tooling file", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/tooling/src/some-util.mjs"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).toContain("ultracite-fix");
+    expect(stepIds).not.toContain("typecheck");
+    expect(stepIds).toContain("tooling-sync-exports");
+    expect(stepIds).toContain("exports");
+    expect(stepIds.indexOf("tooling-sync-exports")).toBe(
+      stepIds.indexOf("exports") - 1
+    );
+  });
 });
 
 describe("parseTreePaths", () => {
