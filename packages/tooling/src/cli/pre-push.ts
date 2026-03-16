@@ -18,9 +18,15 @@ export {
   isTestOnlyPath,
   areFilesTestOnly,
   canBypassRedPhaseByChangedFiles,
+  categorizeChangedFiles,
   hasPackageSourceChanges,
   createVerificationPlan,
   checkBunVersion,
+} from "./internal/pre-push-checks.js";
+
+export type {
+  ChangeScope,
+  ChangeCategory,
 } from "./internal/pre-push-checks.js";
 
 export type {
@@ -31,6 +37,7 @@ export type {
 
 import {
   canBypassRedPhaseByChangedFiles,
+  categorizeChangedFiles,
   checkBunVersion,
   createVerificationPlan,
   getChangedFilesForPush,
@@ -186,7 +193,76 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
     }
   }
 
-  const plan = createVerificationPlan(readPackageScripts());
+  // Categorize changes to determine verification scope
+  const changedFiles = getChangedFilesForPush();
+  const changeCategory = categorizeChangedFiles(changedFiles);
+  const scripts = readPackageScripts();
+
+  if (!changeCategory.requiresFullSuite) {
+    log(
+      `${COLORS.yellow}Scoped verification${COLORS.reset}: changes are ${COLORS.blue}${changeCategory.scope}${COLORS.reset}-only`
+    );
+    log(
+      `Changed files (${changedFiles.files.length}): ${changedFiles.files.slice(0, 5).join(", ")}${changedFiles.files.length > 5 ? ` ...+${changedFiles.files.length - 5} more` : ""}`
+    );
+    log("");
+
+    // Lightweight checks: lint/format only (no typecheck, build, or test)
+    const lightweightScripts: string[] = [];
+
+    // Require at least lint/format — fall through to full suite if not configured
+    if (scripts["check"]) {
+      lightweightScripts.push("check");
+    } else if (scripts["lint"]) {
+      lightweightScripts.push("lint");
+    }
+
+    if (lightweightScripts.length === 0) {
+      log(
+        `${COLORS.yellow}No lint/format script found${COLORS.reset} — falling through to full verification`
+      );
+    } else {
+      // For template changes, also run the full test suite (template guardrails live in app tests)
+      if (changeCategory.scope === "template") {
+        if (scripts["test"]) {
+          lightweightScripts.push("test");
+          log(
+            `Running: lint/format + tests (template changes need template guardrails)`
+          );
+        } else {
+          log(
+            `${COLORS.yellow}Warning${COLORS.reset}: no \`test\` script found — template guardrail tests will not run`
+          );
+          log(`Running: lint/format only`);
+        }
+      } else {
+        log(`Running: lint/format only`);
+      }
+
+      for (const scriptName of lightweightScripts) {
+        if (runScript(scriptName)) {
+          continue;
+        }
+
+        log("");
+        log(
+          `${COLORS.red}Scoped verification failed${COLORS.reset} on: ${scriptName}`
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      log("");
+      log(
+        `${COLORS.green}Scoped verification passed${COLORS.reset} (${changeCategory.scope}-only changes)`
+      );
+      process.exitCode = 0;
+      return;
+    }
+  }
+
+  // Full suite: changes touch core/runtime/tooling/app/CI code, or no lint script available
+  const plan = createVerificationPlan(scripts);
   if (!plan.ok) {
     log(
       `${COLORS.red}Strict pre-push verification is not configured${COLORS.reset}`
@@ -202,8 +278,13 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   }
 
   log(
-    `Running strict verification for branch: ${COLORS.blue}${branch}${COLORS.reset}`
+    `Running ${COLORS.blue}full${COLORS.reset} verification for branch: ${COLORS.blue}${branch}${COLORS.reset}`
   );
+  if (changeCategory.requiresFullSuite) {
+    log(
+      `Change scope: ${COLORS.yellow}${changeCategory.scope}${COLORS.reset} (requires full suite)`
+    );
+  }
   if (plan.source === "verify:push" || plan.source === "verify:ci") {
     log(`Using \`${plan.source}\` script.`);
   } else {
@@ -229,7 +310,6 @@ export async function runPrePush(options: PrePushOptions = {}): Promise<void> {
   }
 
   // TSDoc coverage summary (warning only, does not affect exit code)
-  const changedFiles = getChangedFilesForPush();
   if (hasPackageSourceChanges(changedFiles)) {
     try {
       await printTsdocSummary(log);

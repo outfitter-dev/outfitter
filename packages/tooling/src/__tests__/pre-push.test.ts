@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   areFilesTestOnly,
   canBypassRedPhaseByChangedFiles,
+  categorizeChangedFiles,
   checkBunVersion,
   createVerificationPlan,
   hasPackageSourceChanges,
@@ -277,5 +278,228 @@ describe("checkBunVersion", () => {
     writeFileSync(join(tempDir, ".bun-version"), `  ${Bun.version}  \n`);
     const result = checkBunVersion(tempDir);
     expect(result.matches).toBe(true);
+  });
+});
+
+describe("categorizeChangedFiles", () => {
+  test("requires full suite for core package changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/contracts/src/result.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("core");
+  });
+
+  test("requires full suite for runtime package changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/cli/src/command.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("runtime");
+  });
+
+  test("requires full suite for app changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["apps/outfitter/src/commands/check.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("app");
+  });
+
+  test("requires full suite for CI config changes", () => {
+    const result = categorizeChangedFiles({
+      files: [".github/workflows/ci.yml"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("ci");
+  });
+
+  test("requires full suite for turbo.json changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["turbo.json"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("ci");
+  });
+
+  test("scoped verification for template-only changes", () => {
+    const result = categorizeChangedFiles({
+      files: [
+        "packages/presets/presets/minimal/src/index.ts.template",
+        "packages/presets/presets/minimal/src/index.test.ts.template",
+      ],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("template");
+  });
+
+  test("scoped verification for docs-only changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["docs/reference/patterns.md", "docs/ARCHITECTURE.md"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("docs");
+  });
+
+  test("scoped verification for plugin-only changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["plugins/fieldguides/skills/tdd/SKILL.md"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("docs");
+  });
+
+  test("requires full suite for tooling package changes", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/tooling/src/cli/pre-push.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("tooling");
+  });
+
+  test("full suite when mix includes core files", () => {
+    const result = categorizeChangedFiles({
+      files: ["docs/reference/patterns.md", "packages/contracts/src/result.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+  });
+
+  test("full suite when files are not deterministic", () => {
+    const result = categorizeChangedFiles({
+      files: [],
+      deterministic: false,
+      source: "undetermined",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("config");
+  });
+
+  test("full suite for empty-but-deterministic file list (tag push)", () => {
+    const result = categorizeChangedFiles({
+      files: [],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("config");
+  });
+
+  test("full suite for unknown file paths (conservative)", () => {
+    const result = categorizeChangedFiles({
+      files: ["some-unknown-directory/file.txt"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("config");
+  });
+
+  test("template scope wins over config in mixed lightweight push", () => {
+    const result = categorizeChangedFiles({
+      files: [
+        ".lefthook.yml",
+        "packages/presets/presets/minimal/src/index.ts.template",
+      ],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("template");
+  });
+
+  test("config scope wins over docs in mixed lightweight push", () => {
+    const result = categorizeChangedFiles({
+      files: ["docs/ARCHITECTURE.md", ".lefthook.yml"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("config");
+  });
+
+  test("scoped for config-only changes", () => {
+    const result = categorizeChangedFiles({
+      files: [".lefthook.yml", "scripts/kill-stale-hooks.sh"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("config");
+  });
+
+  test("plugin executable files require full suite", () => {
+    const result = categorizeChangedFiles({
+      files: ["plugins/fieldguides/scripts/validate-skill-frontmatter.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("app");
+  });
+
+  test("plugin non-executable files are docs scope", () => {
+    const result = categorizeChangedFiles({
+      files: [
+        "plugins/fieldguides/skills/tdd/SKILL.md",
+        "plugins/fieldguides/plugin.json",
+      ],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(false);
+    expect(result.scope).toBe("docs");
+  });
+
+  test("full suite when mix includes plugin executable and docs", () => {
+    const result = categorizeChangedFiles({
+      files: [
+        "plugins/fieldguides/skills/tdd/SKILL.md",
+        "plugins/fieldguides/scripts/validate.ts",
+      ],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("app");
+  });
+
+  test("presets non-template files require full suite", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/presets/src/scaffold.ts"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("runtime");
+  });
+
+  test("non-template files in presets/presets/ require full suite", () => {
+    const result = categorizeChangedFiles({
+      files: ["packages/presets/presets/minimal/package.json"],
+      deterministic: true,
+      source: "upstream",
+    });
+    expect(result.requiresFullSuite).toBe(true);
+    expect(result.scope).toBe("runtime");
   });
 });
