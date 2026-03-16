@@ -113,6 +113,21 @@ if (import.meta.main) {
   pkg.exports = nextExports;
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, "\t")}\n`);
 
+  // Run oxfmt to ensure the output survives a format round-trip.
+  // Without this, oxfmt reformats the tab-indented JSON differently,
+  // causing spurious failures in pre-push format checks.
+  const fmtResult = Bun.spawnSync(["bun", "x", "oxfmt", pkgPath], {
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  if (fmtResult.exitCode !== 0) {
+    const stderr = fmtResult.stderr.toString().trim();
+    const code = fmtResult.exitCode ?? `signal ${fmtResult.signalCode ?? "unknown"}`;
+    console.error(
+      `[sync-exports] oxfmt post-format failed (${code})${stderr ? `:\n${stderr}` : ""}`
+    );
+    process.exit(1);
+  }
+
   console.log(
     `[sync-exports] wrote ${Object.keys(nextExports).length} exports (${configFiles.length} config files)`
   );
