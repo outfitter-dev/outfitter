@@ -31,6 +31,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "@outfitter/contracts": "workspace:*",
+    "@outfitter/logging": "workspace:*",
     "@outfitter/mcp": "workspace:*",
     "@outfitter/types": "workspace:*",
     "zod": "catalog:"
