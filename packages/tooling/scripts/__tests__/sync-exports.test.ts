@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { buildSyncedExports, shortAlias, sortExports } from "../sync-exports";
+import {
+  buildSyncedExports,
+  planSyncExports,
+  shortAlias,
+  sortExports,
+} from "../sync-exports";
 
 describe("shortAlias", () => {
   test(".oxlintrc.json returns .oxlintrc", () => {
@@ -94,5 +99,53 @@ describe("buildSyncedExports", () => {
       "./tsconfig.preset.bun.json",
       "./tsconfig.preset.json",
     ]);
+  });
+});
+
+describe("planSyncExports", () => {
+  const syncedExports = { ".": "./dist/index.js" };
+  const changedExports = {
+    ".": "./dist/index.js",
+    "./lefthook": "./lefthook.yml",
+  };
+
+  test("returns up_to_date in check mode when exports already match", () => {
+    expect(
+      planSyncExports({
+        currentExports: syncedExports,
+        nextExports: { ...syncedExports },
+        isCheckMode: true,
+      })
+    ).toBe("up_to_date");
+  });
+
+  test("returns format_only in write mode when exports already match", () => {
+    expect(
+      planSyncExports({
+        currentExports: syncedExports,
+        nextExports: { ...syncedExports },
+        isCheckMode: false,
+      })
+    ).toBe("format_only");
+  });
+
+  test("returns check_failed in check mode when exports drift", () => {
+    expect(
+      planSyncExports({
+        currentExports: syncedExports,
+        nextExports: changedExports,
+        isCheckMode: true,
+      })
+    ).toBe("check_failed");
+  });
+
+  test("returns write_and_format in write mode when exports drift", () => {
+    expect(
+      planSyncExports({
+        currentExports: syncedExports,
+        nextExports: changedExports,
+        isCheckMode: false,
+      })
+    ).toBe("write_and_format");
   });
 });

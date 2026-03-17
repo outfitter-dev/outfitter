@@ -88,6 +88,28 @@ export function buildSyncedExports(
   return sortExports(reconciledExports);
 }
 
+export type SyncExportsPlan =
+  | "check_failed"
+  | "format_only"
+  | "up_to_date"
+  | "write_and_format";
+
+export function planSyncExports(options: {
+  currentExports: Record<string, unknown>;
+  nextExports: Record<string, unknown>;
+  isCheckMode: boolean;
+}): SyncExportsPlan {
+  const hasExportDrift =
+    JSON.stringify(options.currentExports) !==
+    JSON.stringify(options.nextExports);
+
+  if (!hasExportDrift) {
+    return options.isCheckMode ? "up_to_date" : "format_only";
+  }
+
+  return options.isCheckMode ? "check_failed" : "write_and_format";
+}
+
 if (import.meta.main) {
   const isCheckMode = Bun.argv.includes(CHECK_FLAG);
   const pkgPath = join(import.meta.dirname, "../package.json");
@@ -95,23 +117,66 @@ if (import.meta.main) {
   const currentExports = isRecord(pkg.exports) ? pkg.exports : {};
   const nextExports = buildSyncedExports(pkg);
   const configFiles = configFilesFrom(pkg.files);
+  const plan = planSyncExports({ currentExports, nextExports, isCheckMode });
 
-  if (JSON.stringify(currentExports) === JSON.stringify(nextExports)) {
+  if (plan === "up_to_date") {
+    // Verify format convergence: exports are structurally correct, but the file
+    // may not yet be in oxfmt's preferred format. "up_to_date" is only returned
+    // in check mode (write mode returns "format_only" instead), so we validate
+    // that the file also passes oxfmt's format check.
+    const fmtCheck = Bun.spawnSync(
+      ["bun", "x", "oxfmt", "--check", pkgPath],
+      {
+        stdio: ["ignore", "ignore", "pipe"],
+      }
+    );
+    if (fmtCheck.exitCode !== 0) {
+      const stderr = fmtCheck.stderr.toString().trim();
+      console.error(
+        `[sync-exports] exports are structurally correct but not formatted. Run: bun run --filter @outfitter/tooling sync:exports${stderr ? `\n${stderr}` : ""}`
+      );
+      process.exit(1);
+    }
     console.log(
       `[sync-exports] exports are up to date (${configFiles.length} config files)`
     );
     process.exit(0);
   }
 
-  if (isCheckMode) {
+  if (plan === "check_failed") {
     console.error(
       "[sync-exports] exports are out of sync. Run: bun run --filter @outfitter/tooling sync:exports"
     );
     process.exit(1);
   }
 
-  pkg.exports = nextExports;
-  writeFileSync(pkgPath, `${JSON.stringify(pkg, null, "\t")}\n`);
+  if (plan === "write_and_format") {
+    pkg.exports = nextExports;
+    writeFileSync(pkgPath, `${JSON.stringify(pkg, null, "\t")}\n`);
+  }
+
+  // Run oxfmt to ensure the output survives a format round-trip.
+  // Non-check mode always runs this step so a prior formatter failure can
+  // self-heal even when the exports map is already structurally in sync.
+  const fmtResult = Bun.spawnSync(["bun", "x", "oxfmt", pkgPath], {
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  if (fmtResult.exitCode !== 0) {
+    const stderr = fmtResult.stderr.toString().trim();
+    const code =
+      fmtResult.exitCode ?? `signal ${fmtResult.signalCode ?? "unknown"}`;
+    console.error(
+      `[sync-exports] oxfmt post-format failed (${code})${stderr ? `:\n${stderr}` : ""}`
+    );
+    process.exit(1);
+  }
+
+  if (plan === "format_only") {
+    console.log(
+      `[sync-exports] exports are structurally up to date (${configFiles.length} config files); re-applied oxfmt for format convergence`
+    );
+    process.exit(0);
+  }
 
   console.log(
     `[sync-exports] wrote ${Object.keys(nextExports).length} exports (${configFiles.length} config files)`
