@@ -124,12 +124,9 @@ if (import.meta.main) {
     // may not yet be in oxfmt's preferred format. "up_to_date" is only returned
     // in check mode (write mode returns "format_only" instead), so we validate
     // that the file also passes oxfmt's format check.
-    const fmtCheck = Bun.spawnSync(
-      ["bun", "x", "oxfmt", "--check", pkgPath],
-      {
-        stdio: ["ignore", "ignore", "pipe"],
-      }
-    );
+    const fmtCheck = Bun.spawnSync(["bun", "x", "oxfmt", "--check", pkgPath], {
+      stdio: ["ignore", "ignore", "pipe"],
+    });
     if (fmtCheck.exitCode !== 0) {
       const stderr = fmtCheck.stderr.toString().trim();
       console.error(

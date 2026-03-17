@@ -77,3 +77,6 @@ apps/outfitter/.outfitter/surface.json
 
 # Claude runtime locks
 .claude/*.lock
+
+# Trail (agent session notes)
+.trail/

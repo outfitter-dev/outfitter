@@ -19,6 +19,8 @@ on:
         options:
           - prepare
           - publish
+  push:
+    branches: [main]
   pull_request:
     types: [closed]
     branches: [main]
@@ -146,12 +148,16 @@ jobs:
 
   # Canary publish (npm-only)
   # Publishes snapshot versions to npm @canary without creating GitHub releases.
+  # Triggers: manual workflow_dispatch with mode=canary, or automatic on push to main.
   canary:
     name: Publish Canary
     if: >
-      github.event_name == 'workflow_dispatch' &&
-      github.event.inputs.mode == 'canary' &&
-      github.ref == 'refs/heads/main'
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.mode == 'canary' &&
+        github.ref == 'refs/heads/main'
+      )
     concurrency:
       group: canary-release
       cancel-in-progress: false
