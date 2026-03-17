@@ -23,7 +23,7 @@ When an AI agent calls your CLI or MCP tool, it needs:
 - **Predictable exit codes** for scripting and automation
 - **Consistent behavior** across transport surfaces
 
-The stack enforces these properties by design, not discipline.
+Outfitter enforces these properties by design, not discipline.
 
 ### Errors Are Data, Not Exceptions
 
@@ -135,7 +135,7 @@ Dependencies flow one direction: Foundation → Runtime → Tooling.
 
 ## Trail Map: Designing a System
 
-Five things to know when building with the Outfitter stack. For the complete design process with templates, see [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md).
+Five things to know when building with Outfitter. For the complete design process with templates, see [guides/architecture.md](${CLAUDE_PLUGIN_ROOT}/shared/guides/architecture.md).
 
 ### 1. Know Your Terrain
 
@@ -228,7 +228,7 @@ When you need the details, not just the overview.
 | **File Operations**      | Atomic writes, locking, paths                      | [patterns/file-ops.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/file-ops.md)     |
 | **Logging**              | Structured logging, redaction                      | [patterns/logging.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/logging.md)       |
 | **Testing**              | Harnesses, fixtures, mocks                         | [patterns/testing.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/testing.md)       |
-| **Converting Code**      | Migrating to the stack                             | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
+| **Converting Code**      | Migrating to Outfitter conventions                 | [patterns/conversion.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/conversion.md) |
 | **Schema Introspection** | Manifest generation, surface maps, drift detection | [patterns/schema.md](${CLAUDE_PLUGIN_ROOT}/shared/patterns/schema.md)         |
 
 ## Templates: Just Add Code

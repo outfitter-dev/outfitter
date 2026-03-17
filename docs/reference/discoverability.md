@@ -1,6 +1,6 @@
 # Discoverability Guide
 
-How to find what's available in the Outfitter stack: subpath exports, tooling surface, and peer dependency requirements.
+How to find what's available in Outfitter: subpath exports, tooling surface, and peer dependency requirements.
 
 ## Subpath Export Maps
 

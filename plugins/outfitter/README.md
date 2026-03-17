@@ -1,6 +1,6 @@
 # Outfitter
 
-Skills and workflows for working with @outfitter/\* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Dev Kit.
+Skills and workflows for working with @outfitter/\* packages. Patterns, templates, compliance checking, and debugging for the Outfitter.
 
 ## Installation
 
@@ -19,7 +19,7 @@ Skills and workflows for working with @outfitter/\* packages. Patterns, template
 | `outfitter-atlas`   | Complete guide: patterns, templates, architecture, package reference     |
 | `outfitter-start`   | Start with Outfitter — scaffold new projects or adopt existing codebases |
 | `outfitter-upgrade` | Upgrade @outfitter/\* packages with migration guidance                   |
-| `outfitter-check`   | Verify Stack compliance with severity-ranked reports                     |
+| `outfitter-check`   | Verify Outfitter compliance with severity-ranked reports                 |
 | `outfitter-issue`   | Report issues to outfitter-dev/outfitter                                 |
 | `debug-outfitter`   | Systematic debugging with investigation reports                          |
 
@@ -38,17 +38,17 @@ Skills and workflows for working with @outfitter/\* packages. Patterns, template
 
 ## Scripts
 
-| Script                                           | Purpose                                 |
-| ------------------------------------------------ | --------------------------------------- |
-| `skills/outfitter-start/scripts/setup.sh`        | Initialize Stack adoption plan          |
-| `skills/outfitter-issue/scripts/create-issue.ts` | Create GitHub issues for stack feedback |
+| Script                                           | Purpose                           |
+| ------------------------------------------------ | --------------------------------- |
+| `skills/outfitter-start/scripts/setup.sh`        | Initialize adoption plan          |
+| `skills/outfitter-issue/scripts/create-issue.ts` | Create GitHub issues for feedback |
 
 ## Quick Start
 
-### Learn the Stack
+### Learn the Patterns
 
 ```
-Tell me about Outfitter Dev Kit patterns
+Tell me about Outfitter patterns
 ```
 
 The `outfitter-atlas` skill activates automatically.
@@ -64,7 +64,7 @@ The `outfitter-atlas` skill provides patterns and templates.
 ### Review Code
 
 ```
-Audit src/handlers/ for stack compliance
+Audit src/handlers/ for Outfitter compliance
 ```
 
 Or use the command:
@@ -73,10 +73,10 @@ Or use the command:
 /audit src/handlers/
 ```
 
-### Adopt Outfitter Dev Kit
+### Adopt Outfitter
 
 ```
-Help me adopt Outfitter Dev Kit patterns
+Help me adopt Outfitter patterns
 ```
 
 The `outfitter-start` skill orchestrates a phased workflow:
@@ -88,9 +88,9 @@ The `outfitter-start` skill orchestrates a phased workflow:
 5. **Check** — Verify compliance with `outfitter-check`
 6. **Feedback** — Report issues with `outfitter-issue`
 
-## Stack Overview
+## Overview
 
-Outfitter Dev Kit provides transport-agnostic infrastructure:
+Outfitter provides transport-agnostic infrastructure:
 
 - **Handler Contract**: Pure functions returning `Result<T, E>`
 - **Error Taxonomy**: 10 categories with exit/HTTP code mapping
@@ -121,6 +121,6 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 ## Links
 
-- [Outfitter Dev Kit Repository](https://github.com/outfitter-dev/outfitter)
+- [Outfitter Repository](https://github.com/outfitter-dev/outfitter)
 - [Documentation](https://github.com/outfitter-dev/outfitter/tree/main/docs)
 - [npm Packages](https://www.npmjs.com/org/outfitter)

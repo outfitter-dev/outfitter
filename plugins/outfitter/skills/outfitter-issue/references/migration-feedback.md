@@ -1,6 +1,6 @@
 # Migration-Specific Feedback
 
-When migrating existing code to Outfitter Dev Kit, you may discover issues that are particularly relevant to the migration process.
+When migrating existing code to Outfitter, you may discover issues that are particularly relevant to the migration process.
 
 ## Migration-Specific Categories
 
@@ -18,7 +18,7 @@ When creating issues discovered during migration, use this context format:
 ```markdown
 ## Context
 
-Discovered during migration of **{PROJECT_NAME}** to Outfitter Dev Kit.
+Discovered during migration of **{PROJECT_NAME}** to Outfitter.
 
 **Migration stage:** {Foundation | Handlers | Errors | Paths | Adapters}
 **Source pattern:** {What the code looked like before}
@@ -68,7 +68,7 @@ gh issue create \
 When adopting, track feedback in `.outfitter/adopt/plan/99-unknowns.md`:
 
 ```markdown
-## Stack Feedback (Migration)
+## Outfitter Feedback (Migration)
 
 - [ ] #123: Need guidance for async throw patterns — docs
 - [ ] #124: Add wrapLegacy helper — enhancement
