@@ -290,6 +290,80 @@ describe("buildCheckOrchestratorPlan", () => {
       command: ["bun", "run", "typecheck", "--", "--only"],
     });
   });
+
+  test("pre-commit mode includes tooling-sync-exports when tooling files staged", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/tooling/src/cli/pre-push.ts"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).toContain("tooling-sync-exports");
+    // sync-exports should come right before exports
+    const syncIdx = stepIds.indexOf("tooling-sync-exports");
+    const exportsIdx = stepIds.indexOf("exports");
+    expect(syncIdx).toBe(exportsIdx - 1);
+  });
+
+  test("pre-commit mode omits tooling-sync-exports when no tooling files staged", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/cli/src/command.ts"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).not.toContain("tooling-sync-exports");
+    expect(stepIds).toContain("exports");
+  });
+
+  test("pre-commit mode orders typecheck before tooling-sync-exports", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/tooling/src/cli/pre-push.ts"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    const typecheckIdx = stepIds.indexOf("typecheck");
+    const syncIdx = stepIds.indexOf("tooling-sync-exports");
+    expect(typecheckIdx).toBeLessThan(syncIdx);
+  });
+
+  test("pre-commit mode runs only sync-exports + exports when non-TS tooling file staged", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/tooling/lefthook.yml"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).not.toContain("ultracite-fix");
+    expect(stepIds).not.toContain("typecheck");
+    expect(stepIds).toContain("tooling-sync-exports");
+    expect(stepIds).toContain("exports");
+    expect(stepIds.indexOf("tooling-sync-exports")).toBe(
+      stepIds.indexOf("exports") - 1
+    );
+  });
+
+  test("pre-commit mode includes ultracite-fix and sync-exports but not typecheck for JS tooling file", () => {
+    const plan = buildCheckOrchestratorPlan({
+      cwd: process.cwd(),
+      mode: "pre-commit",
+      stagedFiles: ["packages/tooling/src/some-util.mjs"],
+    });
+    const stepIds = plan.map((step) => step.id);
+
+    expect(stepIds).toContain("ultracite-fix");
+    expect(stepIds).not.toContain("typecheck");
+    expect(stepIds).toContain("tooling-sync-exports");
+    expect(stepIds).toContain("exports");
+    expect(stepIds.indexOf("tooling-sync-exports")).toBe(
+      stepIds.indexOf("exports") - 1
+    );
+  });
 });
 
 describe("parseTreePaths", () => {

@@ -393,19 +393,41 @@ export function buildCheckOrchestratorPlan(
     command: ["bun", "run", "check-exports"],
   });
 
-  if (tsFiles.length > 0) {
-    // Insert typecheck before exports (index 1)
-    preCommitSteps.splice(1, 0, {
+  if (tsFiles.length > 0 || !hasStagedFiles) {
+    const ultraciteIdx = preCommitSteps.findIndex(
+      (s) => s.id === "ultracite-fix"
+    );
+    const insertAt = ultraciteIdx === -1 ? 0 : ultraciteIdx + 1;
+    preCommitSteps.splice(insertAt, 0, {
       id: "typecheck",
       label: "Typecheck",
-      command: ["./scripts/pre-commit-typecheck.sh", ...tsFiles],
+      command:
+        tsFiles.length > 0
+          ? ["./scripts/pre-commit-typecheck.sh", ...tsFiles]
+          : ["bun", "run", "typecheck", "--", "--only"],
     });
-  } else if (!hasStagedFiles) {
-    // No staged files at all — full typecheck fallback
-    preCommitSteps.splice(1, 0, {
-      id: "typecheck",
-      label: "Typecheck",
-      command: ["bun", "run", "typecheck", "--", "--only"],
+  }
+
+  // If tooling package files are staged, regenerate config-file exports.
+  // This prevents sync:exports drift from ever being committed.
+  // Inserted right before the exports validation step so the check
+  // sees freshly regenerated config-file exports (typecheck runs earlier).
+  const hasToolingChanges =
+    hasStagedFiles &&
+    stagedFiles.some((f) => f.startsWith("packages/tooling/"));
+  if (hasToolingChanges) {
+    const exportsIndex = preCommitSteps.findIndex((s) => s.id === "exports");
+    // Guard: `exports` is pushed unconditionally above; this throw only fires
+    // if that invariant is broken during a future refactor.
+    if (exportsIndex === -1) {
+      throw new CheckOrchestratorError(
+        "Expected 'exports' step in pre-commit plan but it was not found"
+      );
+    }
+    preCommitSteps.splice(exportsIndex, 0, {
+      id: "tooling-sync-exports",
+      label: "Tooling sync:exports",
+      command: ["bun", "run", "--filter", "@outfitter/tooling", "sync:exports"],
     });
   }
 
