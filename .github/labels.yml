@@ -149,7 +149,7 @@
 
 - name: plugin/outfitter
   color: "7c3aed"
-  description: Outfitter Stack patterns plugin
+  description: Outfitter Dev Kit patterns plugin
 
 - name: plugin/team
   color: "7c3aed"

@@ -70,7 +70,7 @@ interface ParsedArgs {
 
 function showHelp(): void {
   console.log(`
-outfitter-issue: Create GitHub issues for Outfitter Stack feedback
+outfitter-issue: Create GitHub issues for Outfitter Dev Kit feedback
 
 USAGE
   bun scripts/create-issue.ts --type <type> --title <title> [--field value]... [--submit]

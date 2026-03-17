@@ -1,4 +1,4 @@
-# Designing Systems with the Outfitter Stack
+# Designing Systems with the Outfitter Dev Kit
 
 A systematic approach to designing transport-agnostic handler systems with Result types and the error taxonomy.
 
