@@ -149,7 +149,7 @@
 
 - name: plugin/outfitter
   color: "7c3aed"
-  description: Outfitter Dev Kit patterns plugin
+  description: Outfitter patterns plugin
 
 - name: plugin/team
   color: "7c3aed"
@@ -273,7 +273,7 @@
 - name: feedback
   color: "22c55e"
   description: Community feedback
-  aliases: [stack-feedback]
+  aliases: [outfitter-feedback]
 
 # =============================================================================
 # RELEASE & PUBLISH

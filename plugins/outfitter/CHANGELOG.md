@@ -64,7 +64,7 @@ References to deprecated skills have been updated:
 
 #### Skill Restructure: stack-audit → outfitter-init
 
-The `stack-audit` skill has been transformed into `outfitter-init`, a unified skill for both greenfield projects and migrations to Outfitter Dev Kit patterns.
+The `stack-audit` skill has been transformed into `outfitter-init`, a unified skill for both greenfield projects and migrations to Outfitter patterns.
 
 **Key Changes:**
 

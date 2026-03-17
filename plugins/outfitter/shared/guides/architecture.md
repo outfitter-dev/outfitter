@@ -1,4 +1,4 @@
-# Designing Systems with the Outfitter Dev Kit
+# Designing Systems with Outfitter
 
 A systematic approach to designing transport-agnostic handler systems with Result types and the error taxonomy.
 
@@ -91,7 +91,7 @@ Every domain error maps to one of ten categories:
 | Token expired            | `auth`       | `AuthError`       | 9    | 401  |
 | User pressed Ctrl+C      | `cancelled`  | `CancelledError`  | 130  | 499  |
 
-**Design principle**: Domain errors are domain-specific; stack categories are transport-agnostic. The mapping happens once, at handler boundaries.
+**Design principle**: Domain errors are domain-specific; taxonomy categories are transport-agnostic. The mapping happens once, at handler boundaries.
 
 ### Step 4: Choose Packages
 
@@ -207,15 +207,15 @@ Dependencies:
 
 ```
 Project: {PROJECT_NAME}
-Domain Errors → Stack Taxonomy:
+Domain Errors → Error Taxonomy:
 
-{DOMAIN_ERROR_1} → {stack-category} ({ErrorClass})
+{DOMAIN_ERROR_1} → {taxonomy-category} ({ErrorClass})
   Condition: {when this error occurs}
   Exit code: {N}
   HTTP status: {NNN}
   Agent hint: {retry | abort | ask_user}
 
-{DOMAIN_ERROR_2} → {stack-category} ({ErrorClass})
+{DOMAIN_ERROR_2} → {taxonomy-category} ({ErrorClass})
   Condition: {when this error occurs}
   Exit code: {N}
   HTTP status: {NNN}

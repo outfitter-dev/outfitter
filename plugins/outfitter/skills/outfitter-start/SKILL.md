@@ -1,13 +1,13 @@
 ---
 name: outfitter-start
 version: 1.0.1
-description: "Start with Outfitter Dev Kit — scaffold new projects or adopt patterns in existing codebases. Detects context, scans for adoption candidates, and orchestrates phased conversion."
+description: "Start with Outfitter — scaffold new projects or adopt patterns in existing codebases. Detects context, scans for adoption candidates, and orchestrates phased conversion."
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Skill, Task, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # Outfitter Start
 
-Start with Outfitter Dev Kit — new projects or existing codebase adoption.
+Start with Outfitter — new projects or existing codebase adoption.
 
 ## Steps
 
@@ -227,7 +227,7 @@ For fast pattern lookup during execution: [migration/patterns-quick-ref.md](migr
 
 ## Stage 4: Verify
 
-Confirm the codebase follows Outfitter Dev Kit patterns.
+Confirm the codebase follows Outfitter patterns.
 
 ### Verification Commands
 

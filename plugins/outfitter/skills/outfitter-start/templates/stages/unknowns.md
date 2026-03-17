@@ -108,7 +108,7 @@ Errors that don't map cleanly to taxonomy:
 | ID  | Decision | Rationale | Date |
 | --- | -------- | --------- | ---- |
 
-## Stack Feedback
+## Outfitter Feedback
 
 Issues discovered that should be reported to outfitter-dev/outfitter:
 
@@ -124,7 +124,7 @@ Use `outfitter-issue` skill to create GitHub issues.
 - [ ] All unknowns reviewed
 - [ ] Decisions documented
 - [ ] High-priority items resolved
-- [ ] Stack feedback reported
+- [ ] Outfitter feedback reported
 - [ ] Remaining items documented for future
 
 ## Notes

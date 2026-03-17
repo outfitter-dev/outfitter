@@ -1,6 +1,6 @@
 # Conversion Patterns
 
-Patterns for converting existing code to Outfitter Dev Kit conventions.
+Patterns for converting existing code to Outfitter conventions.
 
 ## Exceptions to Result
 
@@ -224,7 +224,7 @@ const processOrder: Handler<{ orderId: string }, Order, OrderError> = async (
 
 ## Conversion Strategy
 
-1. **New code first** - All new code uses stack patterns
+1. **New code first** - All new code uses Outfitter patterns
 2. **Leaf functions** - Start with functions that don't call others
 3. **Bottom-up** - Convert dependencies before dependents
 4. **Feature boundaries** - Complete one feature at a time

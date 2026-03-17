@@ -1,4 +1,4 @@
-# Stack Testing
+# Testing Patterns
 
 Test patterns for @outfitter/\* packages.
 

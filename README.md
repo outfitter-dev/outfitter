@@ -1,6 +1,6 @@
 # Outfitter
 
-The Outfitter Dev Kit is shared infrastructure for building AI-agent-ready tools. CLIs, MCP servers, daemons—with patterns that work for both humans and machines.
+Outfitter is shared infrastructure for building AI-agent-ready tools. CLIs, MCP servers, daemons—with patterns that work for both humans and machines.
 
 **Status: Active Development**
 

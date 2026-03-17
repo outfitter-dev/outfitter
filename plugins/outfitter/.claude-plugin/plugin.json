@@ -1,11 +1,11 @@
 {
   "name": "outfitter",
   "version": "1.5.0",
-  "description": "Skills and workflows for working with @outfitter/* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Dev Kit.",
+  "description": "Skills and workflows for working with @outfitter/* packages. Patterns, templates, compliance checking, and debugging for Outfitter.",
   "author": {
     "name": "Outfitter",
     "email": "team@outfitter.dev"
   },
   "license": "MIT",
-  "keywords": ["result", "handler", "error-taxonomy", "outfitter", "stack"]
+  "keywords": ["result", "handler", "error-taxonomy", "outfitter"]
 }

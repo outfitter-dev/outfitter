@@ -1,9 +1,9 @@
 ---
-description: Quick audit of current file or directory for Outfitter Dev Kit compliance
+description: Quick audit of current file or directory for Outfitter compliance
 argument-hint: [file or directory]
 ---
 
-# Stack Check
+# Compliance Check
 
 Load the `outfitter-check` skill to check **$ARGUMENTS** (or current directory if not specified) for @outfitter/\* pattern compliance.
 

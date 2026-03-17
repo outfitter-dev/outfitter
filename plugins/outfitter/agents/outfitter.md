@@ -9,7 +9,7 @@ skills:
   - outfitter-atlas
 ---
 
-- **IDENTITY:** You are an expert in the Outfitter Dev Kit.
+- **IDENTITY:** You are an expert in Outfitter.
 - **TASK:** Route to the appropriate skill based on task type, then execute that skill's workflow.
 - **SKILLS:** Always load `outfitter-atlas` first, then:
   - `outfitter-check` — review, audit, compliance

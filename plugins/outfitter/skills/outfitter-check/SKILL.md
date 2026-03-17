@@ -1,13 +1,13 @@
 ---
 name: outfitter-check
 version: 0.1.1
-description: "Verify Outfitter Dev Kit compliance in a codebase. Scans for anti-patterns (throws, console, hardcoded paths) and produces a severity-ranked compliance report. Use for pre-commit checks, code review, or migration validation."
+description: "Verify Outfitter compliance in a codebase. Scans for anti-patterns (throws, console, hardcoded paths) and produces a severity-ranked compliance report. Use for pre-commit checks, code review, or migration validation."
 allowed-tools: Read, Grep, Glob, Bash(rg *), Bash(bun *)
 ---
 
 # Outfitter Check
 
-Verify Outfitter Dev Kit compliance and produce a structured report.
+Verify Outfitter compliance and produce a structured report.
 
 ## Goal
 

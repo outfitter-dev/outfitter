@@ -1,6 +1,6 @@
 # New Project Scaffolding
 
-Guide for creating new Outfitter Dev Kit projects from scratch.
+Guide for creating new Outfitter projects from scratch.
 
 ## When This Applies
 
