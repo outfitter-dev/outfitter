@@ -1,5 +1,8 @@
 /**
  * {{projectName}} CLI - Public API.
+ *
+ * The CLI entry point is src/cli.ts (run directly via bun).
+ * This module re-exports core types for programmatic use.
  */
 
-export { runCli } from "./cli.js";
+export { createGreeting } from "{{packageName}}-core";
