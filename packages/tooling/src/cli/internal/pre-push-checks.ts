@@ -201,6 +201,186 @@ export function getChangedFilesForPush(): PushChangedFiles {
 }
 
 // ---------------------------------------------------------------------------
+// Change categorization for scoped verification
+// ---------------------------------------------------------------------------
+
+/**
+ * Change scope categories from most to least impactful.
+ *
+ * - `core`: Foundation packages (contracts, types) — full suite required
+ * - `runtime`: Active packages (cli, mcp, config, etc.) — full suite required
+ * - `ci`: CI/workflow config — full suite required
+ * - `tooling`: Tooling package itself — full suite required
+ * - `app`: apps/ changes — full suite required (actions, commands)
+ * - `template`: Preset templates only — lightweight lint/format + full test suite
+ * - `docs`: Docs, plugins, READMEs — lightweight checks only (lint, format)
+ * - `config`: Root config files (.lefthook.yml, etc.) — lightweight checks
+ */
+export type ChangeScope =
+  | "core"
+  | "runtime"
+  | "ci"
+  | "tooling"
+  | "app"
+  | "template"
+  | "docs"
+  | "config";
+
+/** Result of categorizing changed files by their impact on verification scope. */
+export interface ChangeCategory {
+  /** The highest-impact scope found among the changed files. */
+  readonly scope: ChangeScope;
+  /** Whether any changed file requires running the full verification suite. */
+  readonly requiresFullSuite: boolean;
+}
+
+const SCOPE_PATTERNS: ReadonlyArray<{
+  pattern: RegExp;
+  scope: ChangeScope;
+  requiresFullSuite: boolean;
+}> = [
+  // CI and workflow config — always full suite
+  { pattern: /^\.github\//, scope: "ci", requiresFullSuite: true },
+  { pattern: /^turbo\.json$/, scope: "ci", requiresFullSuite: true },
+
+  // Package-level docs stay lightweight even inside core/runtime packages.
+  {
+    pattern:
+      /^packages\/[^/]+\/(README|CHANGELOG|CONTRIBUTING|MIGRATION)\.md$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+
+  // Foundation packages
+  { pattern: /^packages\/contracts\//, scope: "core", requiresFullSuite: true },
+  { pattern: /^packages\/types\//, scope: "core", requiresFullSuite: true },
+
+  // Tooling package
+  {
+    pattern: /^packages\/tooling\//,
+    scope: "tooling",
+    requiresFullSuite: true,
+  },
+
+  // Apps (CLI, outfitter)
+  { pattern: /^apps\//, scope: "app", requiresFullSuite: true },
+
+  // Runtime packages (everything else in packages/ that isn't templates)
+  {
+    pattern: /^packages\/presets\/presets\/.*\.template$/,
+    scope: "template",
+    requiresFullSuite: false,
+  },
+  {
+    pattern: /^packages\/presets\//,
+    scope: "runtime",
+    requiresFullSuite: true,
+  },
+  {
+    pattern: /^packages\//,
+    scope: "runtime",
+    requiresFullSuite: true,
+  },
+
+  // Plugin markdown plus the canonical plugin.json metadata file are
+  // lightweight; every other plugin path gets the full suite so new script
+  // types and config files do not silently bypass verification.
+  {
+    pattern: /^plugins\/.*\.md$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+  {
+    pattern: /^plugins\/(?:.+\/)?plugin\.json$/i,
+    scope: "docs",
+    requiresFullSuite: false,
+  },
+  {
+    pattern: /^plugins\//,
+    scope: "app",
+    requiresFullSuite: true,
+  },
+
+  // Docs and READMEs
+  { pattern: /^docs\//, scope: "docs", requiresFullSuite: false },
+  { pattern: /\.md$/i, scope: "docs", requiresFullSuite: false },
+
+  // Root config files
+  {
+    pattern: /^\.(lefthook|oxlintrc|oxfmtrc|markdownlint)(\.|$)/,
+    scope: "config",
+    requiresFullSuite: false,
+  },
+  { pattern: /^scripts\//, scope: "config", requiresFullSuite: false },
+];
+
+/** Scoped impact ranking for non-full-suite change categories: template > config > docs. */
+const SCOPE_RANK: Readonly<Partial<Record<ChangeScope, number>>> = {
+  template: 2,
+  config: 1,
+  docs: 0,
+};
+
+/**
+ * Categorize changed files to determine verification scope.
+ *
+ * Returns the highest-impact category found. If any file requires the
+ * full suite, the entire push gets full verification.
+ *
+ * @param changedFiles - Files changed in the current push
+ * @returns Category with scope name and whether full suite is required
+ *
+ * @example
+ * ```typescript
+ * const changed = getChangedFilesForPush();
+ * const category = categorizeChangedFiles(changed);
+ * if (!category.requiresFullSuite) {
+ *   // Run lightweight checks only
+ * }
+ * ```
+ */
+export function categorizeChangedFiles(
+  changedFiles: PushChangedFiles
+): ChangeCategory {
+  if (!changedFiles.deterministic) {
+    // Can't determine changed files — run full suite to be safe.
+    // Scope is "config" (not "core") to avoid misleading logs about core packages.
+    return { scope: "config", requiresFullSuite: true };
+  }
+  if (changedFiles.files.length === 0) {
+    // No files detected (tag push, empty push) — full suite as a conservative default
+    return { scope: "config", requiresFullSuite: true };
+  }
+
+  let highestScope: ChangeScope | null = null;
+  let highestRank = -1;
+
+  for (const file of changedFiles.files) {
+    const matched = SCOPE_PATTERNS.find((p) => p.pattern.test(file));
+    if (!matched) {
+      // Unknown file path — cannot determine scope, run full suite conservatively.
+      // Scope is "config" (not "core") to avoid misleading logs about core packages.
+      return { scope: "config", requiresFullSuite: true };
+    }
+
+    if (matched.requiresFullSuite) {
+      return { scope: matched.scope, requiresFullSuite: true };
+    }
+
+    const rank = SCOPE_RANK[matched.scope] ?? 0;
+    if (rank > highestRank) {
+      highestRank = rank;
+      highestScope = matched.scope;
+    }
+  }
+
+  // highestScope is always non-null here: the files.length === 0 guard above
+  // ensures the loop runs at least once, and highestRank = -1 guarantees the
+  // first matched scope (rank >= 0) overwrites it.
+  return { scope: highestScope as ChangeScope, requiresFullSuite: false };
+}
+
+// ---------------------------------------------------------------------------
 // RED-phase bypass
 // ---------------------------------------------------------------------------
 
