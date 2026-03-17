@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: |
-  Audits code for Outfitter Stack compliance. Checks Result usage, error handling, logging patterns, and path safety. Use for pre-commit reviews, migration validation, or code quality checks.
+  Audits code for Outfitter Dev Kit compliance. Checks Result usage, error handling, logging patterns, and path safety. Use for pre-commit reviews, migration validation, or code quality checks.
 
   <example>
   Context: User wants code reviewed before committing.

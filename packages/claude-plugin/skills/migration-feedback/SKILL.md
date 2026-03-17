@@ -1,7 +1,7 @@
 ---
 name: migration-feedback
 version: 0.1.0
-description: Creates GitHub issues for problems discovered during migration to Outfitter Stack. Use when migration reveals bugs, missing features, unclear documentation, or improvement opportunities in @outfitter/* packages.
+description: Creates GitHub issues for problems discovered during migration to Outfitter Dev Kit. Use when migration reveals bugs, missing features, unclear documentation, or improvement opportunities in @outfitter/* packages.
 allowed-tools: Bash(gh *) Read
 user-invocable: false
 ---
@@ -53,7 +53,7 @@ gh issue create \
   --body "$(cat <<'EOF'
 ## Context
 
-Discovered during migration of **{{PROJECT_NAME}}** to Outfitter Stack.
+Discovered during migration of **{{PROJECT_NAME}}** to Outfitter Dev Kit.
 
 ## Package
 

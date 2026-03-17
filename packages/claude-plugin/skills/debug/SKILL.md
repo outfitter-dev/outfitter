@@ -1,7 +1,7 @@
 ---
 name: debug
 version: 0.1.0
-description: Troubleshoots Outfitter Stack issues including Result handling, MCP problems, CLI output, exit codes, and logging. Use when debugging stack-specific issues, unexpected errors, wrong output modes, or when "debug Result", "MCP not working", "wrong exit code", or "logging issue" are mentioned.
+description: Troubleshoots Outfitter Dev Kit issues including Result handling, MCP problems, CLI output, exit codes, and logging. Use when debugging stack-specific issues, unexpected errors, wrong output modes, or when "debug Result", "MCP not working", "wrong exit code", or "logging issue" are mentioned.
 allowed-tools: Read Grep Glob Bash(rg *) Bash(bun *)
 ---
 

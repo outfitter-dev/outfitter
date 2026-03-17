@@ -1,11 +1,11 @@
 ---
 name: patterns
 version: 0.1.0
-description: Reference for Outfitter Stack conventions including Result types, Handler contract, Error taxonomy, and transport-agnostic patterns. Use when learning the stack, looking up patterns, understanding @outfitter/* packages, or when "Result", "Handler", "error taxonomy", or "OutfitterError" are mentioned.
+description: Reference for Outfitter Dev Kit conventions including Result types, Handler contract, Error taxonomy, and transport-agnostic patterns. Use when learning the stack, looking up patterns, understanding @outfitter/* packages, or when "Result", "Handler", "error taxonomy", or "OutfitterError" are mentioned.
 allowed-tools: Read Grep Glob
 ---
 
-# Outfitter Stack Patterns
+# Outfitter Dev Kit Patterns
 
 Primary reference for @outfitter/\* package conventions.
 

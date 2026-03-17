@@ -1,13 +1,13 @@
 ---
 name: migration
 version: 0.1.0
-description: Audits existing code and recommends migration paths to Outfitter Stack patterns. Use when adopting the stack in an existing project, converting throw to Result, migrating console to structured logging, or when "migrate", "adopt stack", "convert to Result", or "upgrade to outfitter" are mentioned.
+description: Audits existing code and recommends migration paths to Outfitter Dev Kit patterns. Use when adopting the stack in an existing project, converting throw to Result, migrating console to structured logging, or when "migrate", "adopt stack", "convert to Result", or "upgrade to outfitter" are mentioned.
 allowed-tools: Read Write Edit Grep Glob Bash(rg *) Bash(bun *) Bash(mkdir *)
 ---
 
 # Stack Migration
 
-Structured migration from existing patterns to Outfitter Stack.
+Structured migration from existing patterns to Outfitter Dev Kit.
 
 ## Quick Start
 

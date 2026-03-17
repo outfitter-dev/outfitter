@@ -1,6 +1,6 @@
-# Outfitter Stack Plugin
+# Outfitter Dev Kit Plugin
 
-Claude Code plugin for @outfitter/\* packages. Provides skills, agents, and commands for building with the Outfitter Stack.
+Claude Code plugin for @outfitter/\* packages. Provides skills, agents, and commands for building with the Outfitter Dev Kit.
 
 ## Installation
 
@@ -47,7 +47,7 @@ Claude Code plugin for @outfitter/\* packages. Provides skills, agents, and comm
 ### Learn the Stack
 
 ```
-Tell me about Outfitter Stack patterns
+Tell me about Outfitter Dev Kit patterns
 ```
 
 The `stack:patterns` skill activates automatically.
@@ -75,7 +75,7 @@ Or use the command:
 ### Migrate Existing Code
 
 ```
-Audit this project for migration to Outfitter Stack
+Audit this project for migration to Outfitter Dev Kit
 ```
 
 The `stack:migration` skill runs the scanner and generates:
@@ -85,7 +85,7 @@ The `stack:migration` skill runs the scanner and generates:
 
 ## Stack Overview
 
-Outfitter Stack provides transport-agnostic infrastructure:
+Outfitter Dev Kit provides transport-agnostic infrastructure:
 
 - **Handler Contract**: Pure functions returning `Result<T, E>`
 - **Error Taxonomy**: 10 categories with exit/HTTP code mapping
@@ -109,6 +109,6 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 ## Links
 
-- [Outfitter Stack Repository](https://github.com/outfitter-dev/outfitter)
+- [Outfitter Dev Kit Repository](https://github.com/outfitter-dev/outfitter)
 - [Documentation](https://github.com/outfitter-dev/outfitter/tree/main/docs)
 - [npm Packages](https://www.npmjs.com/org/outfitter)
