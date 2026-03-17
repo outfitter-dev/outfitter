@@ -1,5 +1,5 @@
 ---
-description: Quick audit of current file or directory for Outfitter Stack compliance
+description: Quick audit of current file or directory for Outfitter Dev Kit compliance
 argument-hint: [file or directory]
 allowed-tools: Read Grep Glob Bash(rg *)
 ---

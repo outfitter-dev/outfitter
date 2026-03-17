@@ -1,6 +1,6 @@
 # Handler Contract
 
-The core abstraction in Outfitter Stack. Handlers are pure functions that accept typed input and context, returning `Result<TOutput, TError>`.
+The core abstraction in the Outfitter Dev Kit. Handlers are pure functions that accept typed input and context, returning `Result<TOutput, TError>`.
 
 ## Signature
 

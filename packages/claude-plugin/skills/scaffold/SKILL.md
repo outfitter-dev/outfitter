@@ -1,7 +1,7 @@
 ---
 name: scaffold
 version: 0.1.0
-description: Creates handlers, CLI commands, MCP tools, and daemon services following Outfitter Stack conventions. Use when adding new components to a project, scaffolding code, or when "create handler", "new command", "add tool", or "daemon service" are mentioned.
+description: Creates handlers, CLI commands, MCP tools, and daemon services following Outfitter Dev Kit conventions. Use when adding new components to a project, scaffolding code, or when "create handler", "new command", "add tool", or "daemon service" are mentioned.
 allowed-tools: Read Write Edit Glob Grep
 argument-hint: [component type]
 ---

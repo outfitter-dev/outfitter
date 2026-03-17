@@ -1,6 +1,6 @@
 # Outfitter
 
-Skills and workflows for working with @outfitter/\* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Stack.
+Skills and workflows for working with @outfitter/\* packages. Patterns, templates, compliance checking, and debugging for the Outfitter Dev Kit.
 
 ## Installation
 
@@ -48,7 +48,7 @@ Skills and workflows for working with @outfitter/\* packages. Patterns, template
 ### Learn the Stack
 
 ```
-Tell me about Outfitter Stack patterns
+Tell me about Outfitter Dev Kit patterns
 ```
 
 The `outfitter-atlas` skill activates automatically.
@@ -73,10 +73,10 @@ Or use the command:
 /audit src/handlers/
 ```
 
-### Adopt Outfitter Stack
+### Adopt Outfitter Dev Kit
 
 ```
-Help me adopt Outfitter Stack patterns
+Help me adopt Outfitter Dev Kit patterns
 ```
 
 The `outfitter-start` skill orchestrates a phased workflow:
@@ -90,7 +90,7 @@ The `outfitter-start` skill orchestrates a phased workflow:
 
 ## Stack Overview
 
-Outfitter Stack provides transport-agnostic infrastructure:
+Outfitter Dev Kit provides transport-agnostic infrastructure:
 
 - **Handler Contract**: Pure functions returning `Result<T, E>`
 - **Error Taxonomy**: 10 categories with exit/HTTP code mapping
@@ -121,6 +121,6 @@ Write handlers once, expose via CLI, MCP, or HTTP.
 
 ## Links
 
-- [Outfitter Stack Repository](https://github.com/outfitter-dev/outfitter)
+- [Outfitter Dev Kit Repository](https://github.com/outfitter-dev/outfitter)
 - [Documentation](https://github.com/outfitter-dev/outfitter/tree/main/docs)
 - [npm Packages](https://www.npmjs.com/org/outfitter)

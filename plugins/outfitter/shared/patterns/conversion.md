@@ -1,6 +1,6 @@
 # Conversion Patterns
 
-Patterns for converting existing code to Outfitter Stack conventions.
+Patterns for converting existing code to Outfitter Dev Kit conventions.
 
 ## Exceptions to Result
 

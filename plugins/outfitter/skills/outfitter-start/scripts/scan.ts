@@ -2,7 +2,7 @@
 /**
  * Outfitter Start Scanner & Plan Generator
  *
- * Scans a codebase for Outfitter Stack adoption candidates and generates
+ * Scans a codebase for Outfitter Dev Kit adoption candidates and generates
  * a structured plan with stage-specific task files.
  *
  * Usage:

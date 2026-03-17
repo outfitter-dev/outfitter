@@ -1,7 +1,7 @@
 ---
 name: review
 version: 0.1.0
-description: Audits code for Outfitter Stack compliance including Result types, error handling, logging patterns, and path safety. Use for pre-commit reviews, code quality checks, migration validation, or when "audit", "check compliance", "review stack", or "stack patterns" are mentioned.
+description: Audits code for Outfitter Dev Kit compliance including Result types, error handling, logging patterns, and path safety. Use for pre-commit reviews, code quality checks, migration validation, or when "audit", "check compliance", "review stack", or "stack patterns" are mentioned.
 allowed-tools: Read Grep Glob Bash(rg *)
 ---
 

@@ -2,7 +2,7 @@
 #
 # outfitter-start setup script
 #
-# Scans a codebase and generates an Outfitter Stack adoption plan.
+# Scans a codebase and generates an Outfitter Dev Kit adoption plan.
 # Will NOT override an existing .agents/ directory.
 #
 # Usage:

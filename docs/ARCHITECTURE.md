@@ -1,6 +1,6 @@
 # Architecture
 
-Outfitter is a Bun-first monorepo providing shared infrastructure for AI-agent-ready tooling. This document explains how the packages fit together and the design decisions behind them.
+The Outfitter Dev Kit is a Bun-first monorepo providing shared infrastructure for AI-agent-ready tooling. This document explains how the packages fit together and the design decisions behind them.
 
 ## Design Philosophy
 

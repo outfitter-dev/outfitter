@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: |
-  Builds features following Outfitter Stack conventions. Creates handlers, CLI commands, MCP tools with proper Result types, error handling, and TDD methodology.
+  Builds features following Outfitter Dev Kit conventions. Creates handlers, CLI commands, MCP tools with proper Result types, error handling, and TDD methodology.
 
   <example>
   Context: User wants to add a new handler.
