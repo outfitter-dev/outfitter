@@ -8,10 +8,14 @@
 import { spawn } from "node:child_process";
 
 import { createCLI, command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+import {
+  ConflictError,
+  NetworkError,
+  NotFoundError,
+  Result,
+} from "@outfitter/contracts";
 import { getSocketPath, getLockPath, isDaemonAlive } from "@outfitter/daemon";
-import { createLogger } from "@outfitter/logging";
-
-const logger = createLogger({ name: "{{binName}}" });
 
 const TOOL_NAME = "{{binName}}";
 const socketPath = getSocketPath(TOOL_NAME);
@@ -32,28 +36,35 @@ program.register(
         (flags as { foreground?: boolean }).foreground
       );
 
-      if (await isDaemonAlive(lockPath)) {
-        logger.warn("Daemon is already running");
-        process.exit(1);
-      }
-
-      if (foreground) {
-        // Run in foreground - import and run daemon directly
-        const { runDaemon } = await import("./daemon-main.js");
-        await runDaemon();
-      } else {
-        // Spawn daemon in background
-        const daemon = spawn(
-          process.execPath,
-          [import.meta.dir + "/daemon.js"],
-          {
-            detached: true,
-            stdio: "ignore",
+      await runHandler({
+        command: "start",
+        input: { foreground },
+        handler: async ({ foreground: fg }) => {
+          if (await isDaemonAlive(lockPath)) {
+            return Result.err(
+              ConflictError.create("Daemon is already running")
+            );
           }
-        );
-        daemon.unref();
-        logger.info(`Daemon started with PID ${daemon.pid}`);
-      }
+
+          if (fg) {
+            const { runDaemon } = await import("./daemon-main.js");
+            await runDaemon();
+            return Result.ok({ status: "exited", mode: "foreground" });
+          }
+
+          const daemon = spawn(
+            process.execPath,
+            [import.meta.dir + "/daemon.js"],
+            { detached: true, stdio: "ignore" }
+          );
+          daemon.unref();
+          return Result.ok({
+            status: "started",
+            pid: daemon.pid ?? null,
+            mode: "background",
+          });
+        },
+      });
     })
 );
 
@@ -61,42 +72,62 @@ program.register(
   command("stop")
     .description("Stop the daemon")
     .action(async () => {
-      if (!(await isDaemonAlive(lockPath))) {
-        logger.warn("Daemon is not running");
-        process.exit(1);
-      }
-      // Signal daemon to stop via HTTP
-      try {
-        const response = await fetch(`http://unix:${socketPath}:/shutdown`, {
-          method: "POST",
-        });
-        if (response.ok) {
-          logger.info("Daemon stopped");
-        }
-      } catch {
-        logger.error("Failed to stop daemon");
-        process.exit(1);
-      }
+      await runHandler({
+        command: "stop",
+        input: {},
+        handler: async () => {
+          if (!(await isDaemonAlive(lockPath))) {
+            return Result.err(NotFoundError.create("daemon", "process"));
+          }
+
+          let response: Response;
+          try {
+            response = await fetch(`http://unix:${socketPath}:/shutdown`, {
+              method: "POST",
+            });
+          } catch {
+            return Result.err(
+              NetworkError.create("Failed to reach daemon process")
+            );
+          }
+
+          if (!response.ok) {
+            return Result.err(NetworkError.create("Failed to stop daemon"));
+          }
+
+          return Result.ok({ status: "stopped" });
+        },
+      });
     })
 );
 
 program.register(
   command("status")
     .description("Check daemon status")
+    .readOnly(true)
     .action(async () => {
-      if (await isDaemonAlive(lockPath)) {
-        logger.info("Daemon is running");
-        // Fetch health info
-        try {
-          const response = await fetch(`http://unix:${socketPath}:/health`);
-          const health = await response.json();
-          console.log(JSON.stringify(health, null, 2));
-        } catch {
-          logger.warn("Could not fetch health info");
-        }
-      } else {
-        logger.info("Daemon is not running");
-      }
+      await runHandler({
+        command: "status",
+        input: {},
+        handler: async () => {
+          const alive = await isDaemonAlive(lockPath);
+
+          if (!alive) {
+            return Result.ok({ running: false });
+          }
+
+          try {
+            const response = await fetch(`http://unix:${socketPath}:/health`);
+            if (!response.ok) {
+              return Result.ok({ running: true, health: "unknown" });
+            }
+            const health: Record<string, unknown> = await response.json();
+            return Result.ok({ ...health, running: true });
+          } catch {
+            return Result.ok({ running: true, health: "unknown" });
+          }
+        },
+      });
     })
 );
 
