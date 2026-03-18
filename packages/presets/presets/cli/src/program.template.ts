@@ -24,6 +24,12 @@ program.register(
         contextFactory: () =>
           createContext({ cwd: process.cwd(), env: process.env }),
         handler: greet,
+        onError: () => [
+          {
+            description: "Show usage",
+            command: "{{binName}} hello --help",
+          },
+        ],
       });
     })
 );

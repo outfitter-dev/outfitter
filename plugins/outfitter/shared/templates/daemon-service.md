@@ -10,7 +10,7 @@ import {
   createIpcServer,
   createHealthChecker,
   getSocketPath,
-  getLockPath,
+  getPidPath,
   getLogPath,
 } from "@outfitter/daemon";
 import {
@@ -52,7 +52,7 @@ const logger = createLogger({
 
 const daemon = createDaemon({
   name: DAEMON_NAME,
-  pidFile: getLockPath(DAEMON_NAME),
+  pidFile: getPidPath(DAEMON_NAME),
   logger,
   shutdownTimeout: SHUTDOWN_TIMEOUT,
 });
@@ -242,24 +242,26 @@ main().catch((error) => {
 ## CLI Commands
 
 ```typescript
-import { command } from "@outfitter/cli";
+import { command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+import { ConflictError, Result } from "@outfitter/contracts";
 import {
-  createIpcClient,
-  getLockPath,
+  getPidPath,
   getSocketPath,
   isDaemonAlive,
 } from "@outfitter/daemon";
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 
 const DAEMON_NAME = "my-daemon";
-const lockPath = getLockPath(DAEMON_NAME);
+const pidPath = getPidPath(DAEMON_NAME);
+const socketPath = getSocketPath(DAEMON_NAME);
 
 // Start command
 export const startCommand = command("start")
   .description("Start the daemon")
-  .option("-d, --detach", "Run in background")
+  .option("-f, --foreground", "Run in foreground")
   .action(async ({ flags }) => {
-    if (await isDaemonAlive(lockPath)) {
+    if (await isDaemonAlive(pidPath)) {
       console.log("Daemon is already running");
       return;
     }
@@ -361,6 +363,6 @@ export const healthCommand = command("health")
 
 | Function              | Path                                | Example                                   |
 | --------------------- | ----------------------------------- | ----------------------------------------- |
-| `getLockPath(name)`   | `~/.local/state/{name}/{name}.pid`  | `~/.local/state/my-daemon/my-daemon.pid`  |
+| `getPidPath(name)`    | `$XDG_RUNTIME_DIR/{name}/daemon.pid`  | `/run/user/1000/my-daemon/daemon.pid`  |
 | `getSocketPath(name)` | `~/.local/state/{name}/{name}.sock` | `~/.local/state/my-daemon/my-daemon.sock` |
 | `getLogPath(name)`    | `~/.local/state/{name}/logs/`       | `~/.local/state/my-daemon/logs/`          |

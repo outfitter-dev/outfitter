@@ -16,7 +16,11 @@ Add to your Claude Desktop config:
   "mcpServers": {
     "{{projectName}}": {
       "command": "bun",
-      "args": ["run", "/absolute/path/to/{{projectName}}/src/server.ts"]
+      "args": ["run", "/absolute/path/to/{{projectName}}/src/server.ts"],
+      "env": {
+        "OUTFITTER_ENV": "development",
+        "OUTFITTER_LOG_LEVEL": "debug"
+      }
     }
   }
 }
@@ -50,6 +54,9 @@ bun run build
 
 # Run tests
 bun run test
+
+# Full CI validation
+bun run verify:ci
 ```
 
 ## License

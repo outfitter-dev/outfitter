@@ -23,6 +23,9 @@ export async function createGreeting(
   const parsed = greetingInputSchema.safeParse(input);
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0];
+    const field = firstIssue?.path.length
+      ? String(firstIssue.path[0])
+      : "input";
     return Result.err(
       new ValidationError({
         message: firstIssue
