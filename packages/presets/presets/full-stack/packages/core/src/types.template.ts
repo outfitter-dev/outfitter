@@ -14,3 +14,13 @@ export interface Greeting {
   readonly message: string;
   readonly issuedAt: string;
 }
+
+/** Input for finding a greeting by ID. */
+export interface FindGreetingInput {
+  readonly id: string;
+}
+
+/** Zod schema for validating find-greeting input at the boundary. */
+export const findGreetingInputSchema: ZodType<FindGreetingInput> = z.object({
+  id: z.string().min(1, "id is required"),
+});

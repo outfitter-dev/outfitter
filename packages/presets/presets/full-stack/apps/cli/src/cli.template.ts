@@ -8,7 +8,7 @@
 import { createCLI, command } from "@outfitter/cli/command";
 import { runHandler } from "@outfitter/cli/envelope";
 import { createContext } from "@outfitter/contracts";
-import { greetAction } from "{{packageName}}-core";
+import { findAction, greetAction } from "{{packageName}}-core";
 
 const program = createCLI({
   name: "{{projectName}}",
@@ -38,6 +38,37 @@ program.register(
           greetAction.handler(handlerInput, ctx),
         onError: () => [
           { description: "Show help", command: "{{projectName}} greet --help" },
+        ],
+      });
+    })
+);
+
+program.register(
+  command(findAction.cli?.command ?? "find <id>")
+    .description(findAction.cli?.description ?? findAction.description ?? "")
+    .action(async ({ args }) => {
+      const input = findAction.cli?.mapInput?.({
+        args,
+        flags: {},
+      }) ?? { id: args[0] ?? "" };
+
+      await runHandler({
+        command: "find",
+        input,
+        contextFactory: () =>
+          createContext({ cwd: process.cwd(), env: process.env }),
+        handler: async (handlerInput, ctx) =>
+          findAction.handler(handlerInput, ctx),
+        onError: (error) => [
+          { description: "Show help", command: "{{projectName}} find --help" },
+          ...(error.name === "NotFoundError"
+            ? [
+                {
+                  description: "Try a different ID",
+                  command: "{{projectName}} find <id>",
+                },
+              ]
+            : []),
         ],
       });
     })

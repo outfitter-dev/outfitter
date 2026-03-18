@@ -71,3 +71,8 @@ for arg in "$@"; do
   fi
   prev="$arg"
 done
+
+# Fallback: if no --filter was found, reformat package.json in CWD
+if [[ -z "$found_filter" ]] && [[ -f "package.json" ]]; then
+  bunx oxfmt --write "package.json" || printf "Warning: oxfmt failed for package.json\n" >&2
+fi

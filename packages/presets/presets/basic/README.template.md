@@ -15,7 +15,9 @@ if (result.isOk()) {
   console.log(result.value.message);
   // => "Hello, World!"
 } else {
-  console.error(result.error.message);
+  // Error results carry a category and message — no exceptions to catch
+  console.error(result.error.category); // => "validation"
+  console.error(result.error.message); // => "name: name is required"
 }
 ```
 

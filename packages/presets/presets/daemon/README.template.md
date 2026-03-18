@@ -14,6 +14,8 @@ A background daemon with CLI control interface.
 {{binName}} stop               # Stop daemon
 ```
 
+Starting an already-running daemon returns a `conflict` error with a non-zero exit code.
+
 ## Endpoints
 
 The daemon exposes a Unix socket with the following endpoints:

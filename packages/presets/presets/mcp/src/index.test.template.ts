@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { createContext } from "@outfitter/contracts";
 import { createMcpHarness } from "@outfitter/testing";
 
-import { server } from "./mcp.js";
+import { lookupTool, server } from "./mcp.js";
 import { helloTool } from "./tools/hello.js";
 
 describe("server", () => {
@@ -11,6 +11,14 @@ describe("server", () => {
     const harness = createMcpHarness(server);
     const tools = harness.listTools();
     const registered = tools.some((tool) => tool.name === "hello");
+
+    expect(registered).toBe(true);
+  });
+
+  test("registers the lookup tool", () => {
+    const harness = createMcpHarness(server);
+    const tools = harness.listTools();
+    const registered = tools.some((tool) => tool.name === "lookup");
 
     expect(registered).toBe(true);
   });
@@ -39,6 +47,15 @@ describe("versionResource", () => {
   });
 });
 
+describe("greetingTemplate", () => {
+  test("greeting resource template is registered", () => {
+    const templates = server.getResourceTemplates();
+    const registered = templates.some((t) => t.name === "Greeting");
+
+    expect(registered).toBe(true);
+  });
+});
+
 describe("helloTool", () => {
   test("returns greeting for valid input", async () => {
     const ctx = createContext({ cwd: process.cwd(), env: process.env });
@@ -59,5 +76,39 @@ describe("helloTool", () => {
     if (!result.isErr()) return;
     expect(result.error.name).toBe("ValidationError");
     expect(result.error.message).toBe("name: reserved name not allowed");
+  });
+});
+
+describe("lookupTool", () => {
+  test("returns item for valid ID", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
+    const result = await lookupTool.handler({ id: "abc" }, ctx);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) return;
+    expect(result.value.name).toBe("Item abc");
+    expect(result.value.found).toBe(true);
+  });
+
+  test("returns NotFoundError for unknown ID", async () => {
+    const ctx = createContext({ cwd: process.cwd(), env: process.env });
+    const result = await lookupTool.handler({ id: "unknown" }, ctx);
+
+    expect(result.isErr()).toBe(true);
+    if (!result.isErr()) return;
+    expect(result.error.name).toBe("NotFoundError");
+    expect(result.error.message).toContain("unknown");
+  });
+
+  test("can call lookup tool via harness", async () => {
+    const harness = createMcpHarness(server);
+    const result = await harness.callTool<{ name: string; found: boolean }>(
+      "lookup",
+      { id: "abc" }
+    );
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) return;
+    expect(result.value.name).toBe("Item abc");
   });
 });

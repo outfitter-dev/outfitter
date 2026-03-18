@@ -1,5 +1,10 @@
 import { createMcpServer, defineTool } from "@outfitter/mcp";
-import { greetAction, greetingInputSchema } from "{{packageName}}-core";
+import {
+  findAction,
+  findGreetingInputSchema,
+  greetAction,
+  greetingInputSchema,
+} from "{{packageName}}-core";
 
 const server = createMcpServer({
   name: "{{projectName}}-mcp",
@@ -16,5 +21,15 @@ const greetTool = defineTool({
 });
 
 server.registerTool(greetTool);
+
+const findTool = defineTool({
+  name: findAction.mcp?.tool ?? findAction.id,
+  description: findAction.mcp?.description ?? findAction.description ?? "",
+  inputSchema: findGreetingInputSchema,
+  annotations: findAction.mcp?.readOnly ? { readOnlyHint: true } : {},
+  handler: async (input, ctx) => findAction.handler(input, ctx),
+});
+
+server.registerTool(findTool);
 
 export { server };

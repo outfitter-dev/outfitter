@@ -29,6 +29,23 @@
 }
 ```
 
+Invalid input returns an error envelope:
+
+```bash
+{{projectName}} greet ""
+```
+
+```json
+{
+  "ok": false,
+  "command": "greet",
+  "error": {
+    "category": "validation",
+    "message": "name: name is required"
+  }
+}
+```
+
 ### MCP Server
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):

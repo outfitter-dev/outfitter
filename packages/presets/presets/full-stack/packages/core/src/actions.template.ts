@@ -11,11 +11,16 @@ import {
   type ActionRegistry,
   createActionRegistry,
   defineAction,
+  type NotFoundError,
   type ValidationError,
 } from "@outfitter/contracts";
 
-import { createGreeting } from "./handlers.js";
-import { greetingInputSchema, type Greeting } from "./types.js";
+import { createGreeting, findGreeting } from "./handlers.js";
+import {
+  findGreetingInputSchema,
+  greetingInputSchema,
+  type Greeting,
+} from "./types.js";
 
 export const greetAction = defineAction<unknown, Greeting, ValidationError>({
   id: "greet",
@@ -45,8 +50,34 @@ export const greetAction = defineAction<unknown, Greeting, ValidationError>({
   handler: createGreeting,
 });
 
+export const findAction = defineAction<
+  unknown,
+  Greeting,
+  ValidationError | NotFoundError
+>({
+  id: "find",
+  description: "Find a greeting by ID",
+  surfaces: ["cli", "mcp"],
+  input: findGreetingInputSchema,
+  cli: {
+    command: "find <id>",
+    description: "Find a greeting by ID",
+    options: [],
+    mapInput: ({ args }) => ({
+      id: args[0] ?? "",
+    }),
+  },
+  mcp: {
+    tool: "find",
+    description: "Find a greeting by ID via shared core handler",
+    readOnly: true,
+  },
+  handler: findGreeting,
+});
+
 export function createRegistry(): ActionRegistry {
   const registry = createActionRegistry();
   registry.add(greetAction);
+  registry.add(findAction);
   return registry;
 }
