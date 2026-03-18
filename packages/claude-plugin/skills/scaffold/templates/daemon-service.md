@@ -245,19 +245,21 @@ main().catch((error) => {
 import { command } from "@outfitter/cli";
 import {
   createIpcClient,
+  getLockPath,
   getSocketPath,
-  isDaemonRunning,
+  isDaemonAlive,
 } from "@outfitter/daemon";
 import { spawn } from "child_process";
 
 const DAEMON_NAME = "my-daemon";
+const lockPath = getLockPath(DAEMON_NAME);
 
 // Start command
 export const startCommand = command("start")
   .description("Start the daemon")
   .option("-d, --detach", "Run in background")
   .action(async ({ flags }) => {
-    if (await isDaemonRunning(DAEMON_NAME)) {
+    if (await isDaemonAlive(lockPath)) {
       console.log("Daemon is already running");
       return;
     }
