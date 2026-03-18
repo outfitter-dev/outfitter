@@ -133,6 +133,7 @@ function mirrorArtifacts(
 
     mkdirSync(dirname(destinationPath), { recursive: true });
     let content = readFileSync(join(workspaceRoot, sourcePath), "utf-8");
+    // Replace template placeholders so JSON files are valid for oxfmt
     if (
       destinationPath.endsWith(".json") ||
       destinationPath.endsWith(".jsonc")
