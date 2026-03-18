@@ -7,20 +7,11 @@ A background daemon with CLI control interface.
 ## Usage
 
 ```bash
-# Start daemon in background
-{{binName}} start
-
-# Start daemon in foreground (for debugging)
-{{binName}} start --foreground
-
-# Check status
-{{binName}} status
-
-# Check health (returns error if daemon is down)
-{{binName}} health
-
-# Stop daemon
-{{binName}} stop
+{{binName}} start              # Start daemon in background
+{{binName}} start --foreground # Start in foreground (for debugging)
+{{binName}} status             # Check status
+{{binName}} health             # Check health (errors if daemon is down)
+{{binName}} stop               # Stop daemon
 ```
 
 ## Endpoints
@@ -28,8 +19,6 @@ A background daemon with CLI control interface.
 The daemon exposes a Unix socket with the following endpoints:
 
 ### GET /health
-
-Returns daemon health information:
 
 ```json
 {
@@ -43,26 +32,21 @@ Returns daemon health information:
 
 Gracefully shuts down the daemon.
 
+## Architecture
+
+The daemon handler layer is transport-agnostic, returning `Result<T, E>`. The CLI and socket server are thin adapters. See `AGENTS.md` for the full handler contract and project conventions.
+
 ## Development
 
 ```bash
-# Install dependencies
-bun install
-
-# Run from source (foreground only — background spawn requires a build)
-bun run src/cli.ts start --foreground
-bun run src/cli.ts status
-bun run src/cli.ts stop
-
-# Run daemon in foreground (via dev script)
-bun run dev
-
-# Build
-bun run build
-
-# Run tests
-bun run test
+bun install            # Install dependencies
+bun run dev            # Run daemon in foreground
+bun run build          # Build
+bun run test           # Run tests
+bun run verify:ci      # Full CI validation
 ```
+
+> **Note:** Background spawn requires a build. Use `--foreground` or `bun run dev` during development.
 
 ## License
 

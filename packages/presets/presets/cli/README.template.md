@@ -15,26 +15,33 @@ bun add -g {{packageName}}
 ## Usage
 
 ```bash
-{{binName}} hello [name]
+{{binName}} hello World
 ```
+
+```json
+{
+  "ok": true,
+  "command": "hello",
+  "result": { "message": "Hello, World!" }
+}
+```
+
+```bash
+{{binName}} --help
+```
+
+## Architecture
+
+Handlers are pure functions returning `Result<T, E>`. CLI commands are thin adapters. See `AGENTS.md` for the full handler contract and project conventions.
 
 ## Development
 
 ```bash
-# Install dependencies
-bun install
-
-# Run in development
-bun run dev
-
-# Build
-bun run build
-
-# Run tests
-bun run test
-
-# Full CI validation
-bun run verify:ci
+bun install            # Install dependencies
+bun run dev            # Run in development
+bun run build          # Build
+bun run test           # Run tests
+bun run verify:ci      # Full CI validation
 ```
 
 ## License

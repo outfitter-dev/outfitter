@@ -2,20 +2,24 @@
 
 {{description}}
 
-## Quick Start
+## Usage
 
-```bash
-bun install
-bun run dev
+```typescript
+import { greet } from "{{packageName}}";
+
+const message = greet("World");
+// => "Hello, World!"
 ```
 
-## Scripts
+## Development
 
 ```bash
-bun test          # Run tests
-bun run build     # Build
-bun run typecheck # Type checking
-bun run verify:ci # Full CI validation
+bun install            # Install dependencies
+bun run dev            # Run in development
+bun run build          # Build
+bun test               # Run tests
+bun run typecheck      # Type checking
+bun run verify:ci      # Full CI validation
 ```
 
 ## License
