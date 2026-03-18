@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { acquireDaemonLock, releaseDaemonLock } from "@outfitter/daemon";
+import { createDaemon } from "@outfitter/daemon";
 
 import { runDaemon } from "./index.js";
 
@@ -11,21 +11,18 @@ describe("daemon", () => {
     expect(typeof runDaemon).toBe("function");
   });
 
-  test("acquires and releases a lock", async () => {
-    const lockPath = join(tmpdir(), `test-daemon-${Date.now()}.lock`);
-    const result = await acquireDaemonLock(lockPath);
+  test("daemon lifecycle: start and stop", async () => {
+    const pidFile = join(tmpdir(), `test-daemon-${Date.now()}.pid`);
+    const daemon = createDaemon({ name: "test", pidFile });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isErr()) return;
+    expect(daemon.state).toBe("stopped");
 
-    const lock = result.value;
-    await releaseDaemonLock(lock);
+    const startResult = await daemon.start();
+    expect(startResult.isOk()).toBe(true);
+    expect(daemon.state).toBe("running");
 
-    // Lock should be released — acquiring again should succeed
-    const secondResult = await acquireDaemonLock(lockPath);
-    expect(secondResult.isOk()).toBe(true);
-    if (secondResult.isOk()) {
-      await releaseDaemonLock(secondResult.value);
-    }
+    const stopResult = await daemon.stop();
+    expect(stopResult.isOk()).toBe(true);
+    expect(daemon.state).toBe("stopped");
   });
 });

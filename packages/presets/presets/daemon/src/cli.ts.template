@@ -15,10 +15,11 @@ import {
   NotFoundError,
   Result,
 } from "@outfitter/contracts";
-import { getSocketPath, getLockPath, isDaemonAlive } from "@outfitter/daemon";
+import { getSocketPath, getPidPath, isDaemonAlive } from "@outfitter/daemon";
+
 const TOOL_NAME = "{{binName}}";
 const socketPath = getSocketPath(TOOL_NAME);
-const lockPath = getLockPath(TOOL_NAME);
+const pidPath = getPidPath(TOOL_NAME);
 
 const program = createCLI({
   name: "{{binName}}",
@@ -37,7 +38,7 @@ program.register(
         command: "start",
         input: { foreground },
         handler: async ({ foreground: fg }) => {
-          if (await isDaemonAlive(lockPath)) {
+          if (await isDaemonAlive(pidPath)) {
             return Result.err(
               ConflictError.create("Daemon is already running")
             );
@@ -73,7 +74,7 @@ program.register(
         command: "stop",
         input: {},
         handler: async () => {
-          if (!(await isDaemonAlive(lockPath))) {
+          if (!(await isDaemonAlive(pidPath))) {
             return Result.err(NotFoundError.create("daemon", "process"));
           }
 
@@ -107,7 +108,7 @@ program.register(
         command: "status",
         input: {},
         handler: async () => {
-          const alive = await isDaemonAlive(lockPath);
+          const alive = await isDaemonAlive(pidPath);
 
           if (!alive) {
             return Result.ok({ running: false });
@@ -137,7 +138,7 @@ program.register(
         command: "health",
         input: {},
         handler: async () => {
-          if (!(await isDaemonAlive(lockPath))) {
+          if (!(await isDaemonAlive(pidPath))) {
             return Result.err(NotFoundError.create("daemon", "process"));
           }
 
