@@ -33,3 +33,9 @@ Handlers are pure functions returning `Result<T, E>`. Write the handler once, te
 - Runner: Bun test runner
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
+
+## Troubleshooting
+
+- **Type errors after adding a dependency**: Run `bun run typecheck` to see full errors. Check that new deps are in `dependencies`, not just `devDependencies`.
+- **Lint failures**: Run `bun run lint:fix` to auto-fix. For format issues, run `bun run format`.
+- **Tests failing**: Run `bun test` directly for better error output than `verify:ci`.

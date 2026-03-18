@@ -58,3 +58,11 @@ CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@o
 - Runner: Bun test runner
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
+
+## Troubleshooting
+
+- **Type errors after adding a dependency**: Run `bun run typecheck` to see full errors. Check that new deps are in `dependencies`, not just `devDependencies`.
+- **Build fails with missing exports**: Ensure new modules are re-exported from `src/index.ts` and listed in `package.json` exports map.
+- **Command not showing up**: Check that the command is registered in `src/program.ts` and the handler is imported correctly.
+- **Lint failures**: Run `bun run lint:fix` to auto-fix. For format issues, run `bun run format`.
+- **Tests failing**: Run `bun test` directly for better error output than `verify:ci`.

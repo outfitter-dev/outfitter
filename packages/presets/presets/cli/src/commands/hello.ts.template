@@ -9,6 +9,13 @@ import { greetingInputSchema, type GreetingOutput } from "../types.js";
 
 const logger = createLogger({ name: "{{binName}}" });
 
+/**
+ * Generate a greeting for the given name.
+ *
+ * @param input - Raw input to validate against greetingInputSchema
+ * @param ctx - Handler context with request metadata and logger
+ * @returns Greeting message on success, ValidationError on invalid input
+ */
 export async function greet(
   input: unknown,
   ctx: HandlerContext
