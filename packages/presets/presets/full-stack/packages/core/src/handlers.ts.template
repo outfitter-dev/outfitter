@@ -9,16 +9,26 @@ import { greetingInputSchema, type Greeting } from "./types.js";
 
 const logger = createLogger({ name: "{{projectName}}-core" });
 
+/**
+ * Create a greeting from validated input.
+ *
+ * @param input - Raw input to validate against {@link greetingInputSchema}
+ * @param ctx - Handler context with request metadata
+ * @returns Greeting on success, ValidationError on invalid input
+ */
 export async function createGreeting(
   input: unknown,
   ctx: HandlerContext
 ): Promise<Result<Greeting, ValidationError>> {
   const parsed = greetingInputSchema.safeParse(input);
   if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
     return Result.err(
       new ValidationError({
-        message: "Invalid greeting input",
-        field: "name",
+        message: firstIssue
+          ? `${firstIssue.path.join(".") || field}: ${firstIssue.message}`
+          : "Invalid greeting input",
+        field,
       })
     );
   }
