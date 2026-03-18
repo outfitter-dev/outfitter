@@ -50,7 +50,7 @@ export async function runDaemon(): Promise<void> {
   logger.info(`Daemon starting on ${socketPath}`);
 
   // Create HTTP server on Unix socket
-  const server = Bun.serve({
+  server = Bun.serve({
     unix: socketPath,
     fetch(request) {
       const url = new URL(request.url);
