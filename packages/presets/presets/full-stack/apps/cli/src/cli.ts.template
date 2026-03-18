@@ -3,17 +3,34 @@
  * {{projectName}} CLI entry point
  */
 
+import { command, createCLI } from "@outfitter/cli/command";
 import { runHandler } from "@outfitter/cli/envelope";
 import { createContext } from "@outfitter/contracts";
 import { createGreeting } from "{{packageName}}-core";
 
-const args = process.argv.slice(2);
-const name = args.find((arg) => !arg.startsWith("-")) ?? "World";
-const excited = args.includes("--excited");
-
-await runHandler({
-  command: "greet",
-  input: { name, excited },
-  contextFactory: () => createContext({ cwd: process.cwd(), env: process.env }),
-  handler: createGreeting,
+const program = createCLI({
+  name: "{{projectName}}",
+  version: "{{version}}",
+  description: "{{description}}",
 });
+
+program.register(
+  command("greet [name]")
+    .description("Generate a greeting")
+    // Option is hardcoded rather than derived from greetAction.cli.options
+    // to keep the template simple — real projects should use .input() with Zod.
+    .action(async ({ args }) => {
+      const name = args[0] ?? "World";
+      const excited = process.argv.includes("--excited");
+
+      await runHandler({
+        command: "greet",
+        input: { name, excited },
+        contextFactory: () =>
+          createContext({ cwd: process.cwd(), env: process.env }),
+        handler: createGreeting,
+      });
+    })
+);
+
+program.parse(process.argv);
