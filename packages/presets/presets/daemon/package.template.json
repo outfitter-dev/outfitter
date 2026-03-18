@@ -2,6 +2,13 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
+  "keywords": [
+    "background-service",
+    "bun",
+    "daemon",
+    "outfitter",
+    "typescript"
+  ],
   "license": "MIT",
   "bin": {
     "{{binName}}": "./dist/cli.js",

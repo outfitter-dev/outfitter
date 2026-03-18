@@ -13,6 +13,16 @@ import { serializePackageJson } from "./package-json.js";
 import { ScaffoldError } from "./types.js";
 import { getWorkspacePatterns } from "./workspace.js";
 
+const PRESET_KEYWORDS: Record<string, readonly string[]> = {
+  cli: ["typescript", "bun", "cli", "outfitter"],
+  library: ["typescript", "bun", "library", "outfitter"],
+  mcp: ["typescript", "bun", "mcp", "model-context-protocol", "outfitter"],
+  daemon: ["typescript", "bun", "daemon", "background-service", "outfitter"],
+  "full-stack": ["typescript", "bun", "monorepo", "cli", "mcp", "outfitter"],
+  minimal: ["typescript", "bun", "outfitter"],
+  basic: ["typescript", "bun", "outfitter"],
+};
+
 function formatUnresolvedCatalogMessage(
   packageJsonPath: string,
   unresolvedNames: readonly string[]
@@ -86,7 +96,8 @@ function rewriteOutfitterDepsToWorkspace(
 }
 
 export function injectSharedConfig(
-  targetDir: string
+  targetDir: string,
+  presetName?: string
 ): Result<void, ScaffoldError> {
   const packageJsonPath = join(targetDir, "package.json");
   if (!existsSync(packageJsonPath)) {
@@ -115,6 +126,16 @@ export function injectSharedConfig(
           formatUnresolvedCatalogMessage(packageJsonPath, unresolvedRootDeps)
         )
       );
+    }
+
+    // Populate keywords from preset name if empty
+    const existingKeywords = parsed["keywords"] as unknown[] | undefined;
+    if (
+      (!existingKeywords || existingKeywords.length === 0) &&
+      presetName &&
+      presetName in PRESET_KEYWORDS
+    ) {
+      parsed["keywords"] = [...PRESET_KEYWORDS[presetName]!];
     }
 
     const existingDevDeps =
