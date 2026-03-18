@@ -302,7 +302,9 @@ describe("init command file creation", () => {
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     expect(packageJson.bin).toBeUndefined();
-    expect(packageJson.scripts.build).toBe("bunup");
+    expect(packageJson.scripts.build).toBe(
+      "bunup && oxfmt --write package.json"
+    );
     expect(packageJson.dependencies["@outfitter/contracts"]).toBe(
       workspaceVersion("@outfitter/contracts")
     );
