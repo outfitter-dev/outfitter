@@ -22,11 +22,12 @@ program.register(
     .description(greetAction.cli?.description ?? greetAction.description ?? "")
     // Option is hardcoded rather than derived from greetAction.cli.options
     // to keep the template simple — real projects should use .input() with Zod.
-    .action(async ({ args }) => {
+    .option("--excited", "Add excitement to the greeting")
+    .action(async ({ args, flags }) => {
       const input = greetAction.cli?.mapInput?.({
         args,
-        flags: { excited: process.argv.includes("--excited") },
-      }) ?? { name: args[0] ?? "World", excited: false };
+        flags,
+      }) ?? { name: args[0] ?? "World", excited: Boolean(flags["excited"]) };
 
       await runHandler({
         command: "greet",
@@ -35,6 +36,9 @@ program.register(
           createContext({ cwd: process.cwd(), env: process.env }),
         handler: async (handlerInput, ctx) =>
           greetAction.handler(handlerInput, ctx),
+        onError: () => [
+          { description: "Show help", command: "{{projectName}} greet --help" },
+        ],
       });
     })
 );
