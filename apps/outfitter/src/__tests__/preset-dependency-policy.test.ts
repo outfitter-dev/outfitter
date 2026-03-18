@@ -19,7 +19,7 @@ import {
 import { DEPENDENCY_SECTIONS } from "../engine/dependency-versions.js";
 
 function getPresetPackageJsonPaths(rootDir: string): readonly string[] {
-  const glob = new Bun.Glob("**/package.json.template");
+  const glob = new Bun.Glob("**/package.template.json");
   return Array.from(glob.scanSync({ cwd: rootDir, absolute: false }))
     .map((relative) => join(rootDir, relative))
     .toSorted();
@@ -103,7 +103,7 @@ describe("preset dependency policy", () => {
     try {
       mkdirSync(libraryPresetDir, { recursive: true });
       writeFileSync(
-        join(libraryPresetDir, "package.json.template"),
+        join(libraryPresetDir, "package.template.json"),
         JSON.stringify({
           dependencies: {
             "@outfitter/contracts": "workspace:*",
@@ -113,7 +113,7 @@ describe("preset dependency policy", () => {
 
       mkdirSync(legacyRoot, { recursive: true });
       writeFileSync(
-        join(legacyRoot, "package.json.template"),
+        join(legacyRoot, "package.template.json"),
         JSON.stringify({
           dependencies: {
             "@outfitter/contracts": "^9.9.9",
@@ -168,7 +168,7 @@ describe("preset dependency policy", () => {
 
       mkdirSync(presetRoot, { recursive: true });
       writeFileSync(
-        join(presetRoot, "package.json.template"),
+        join(presetRoot, "package.template.json"),
         JSON.stringify({
           dependencies: {
             "@modelcontextprotocol/sdk": sdkVersion,
@@ -180,7 +180,7 @@ describe("preset dependency policy", () => {
       validatePresetDeps(workspaceRoot, resolvedVersions, problems);
 
       expect(problems).toContain(
-        "packages/presets/presets/mcp/package.json.template: @modelcontextprotocol/sdk must use catalog: (found " +
+        "packages/presets/presets/mcp/package.template.json: @modelcontextprotocol/sdk must use catalog: (found " +
           sdkVersion +
           ")"
       );
