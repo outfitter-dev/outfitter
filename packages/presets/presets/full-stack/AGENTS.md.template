@@ -44,13 +44,19 @@ async function handler(
 
 CLI and MCP are thin adapters over shared handlers. Write the handler once in core, expose it everywhere.
 
+### Action Registry
+
+Actions are defined in `packages/core/src/actions.ts` using `defineAction()` from `@outfitter/contracts`. Each action declares its input schema, surfaces (cli, mcp), and handler. CLI and MCP apps wire from the same action definitions.
+
 ### Adding a Feature
 
 1. Define types and Zod schema in `packages/core/src/types.ts`
 2. Implement handler in `packages/core/src/handlers.ts` returning `Result<T, E>`
-3. Add tests in `packages/core/src/<name>.test.ts`
-4. Wire CLI command in `apps/cli/src/` using CommandBuilder
-5. Wire MCP tool in `apps/mcp/src/` using `defineTool()`
+3. Define action in `packages/core/src/actions.ts` with `defineAction()` — specify `cli` and `mcp` surface configs
+4. Register action in `createRegistry()` in `packages/core/src/actions.ts`
+5. Add tests in `packages/core/src/<name>.test.ts`
+6. Wire CLI command in `apps/cli/src/cli.ts` from the action definition
+7. Wire MCP tool in `apps/mcp/src/mcp.ts` from the action definition
 
 ## Development Principles
 
