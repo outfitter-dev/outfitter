@@ -50,7 +50,12 @@ const TOOLING_ARTIFACTS = [
   "packages/tooling/configs/.oxfmtrc.jsonc",
 ] as const;
 
-type GuardrailTool = "oxfmt" | "oxlint" | "schema-annotation" | "ultracite";
+type GuardrailTool =
+  | "oxfmt"
+  | "oxlint"
+  | "readme-typecheck"
+  | "schema-annotation"
+  | "ultracite";
 type ExecutableGuardrailTool = Exclude<GuardrailTool, "schema-annotation">;
 
 export interface TemplateGuardrailFailure {
@@ -205,14 +210,106 @@ function findSchemaAnnotationFailure(
   };
 }
 
+const CODE_BLOCK_RE = /```typescript\n([\s\S]*?)```/g;
+
+function extractTypescriptBlocks(
+  content: string
+): readonly { readonly code: string; readonly line: number }[] {
+  const blocks: { code: string; line: number }[] = [];
+
+  for (const match of content.matchAll(CODE_BLOCK_RE)) {
+    const offset = match.index ?? 0;
+    const lineNumber = content.slice(0, offset).split("\n").length;
+    const captured = match[1];
+    if (captured === undefined) continue;
+    blocks.push({
+      code: replaceTemplatePlaceholders(captured),
+      line: lineNumber,
+    });
+  }
+
+  return blocks;
+}
+
+/** Known anti-patterns in README code examples that indicate API drift. */
+const README_CODE_ANTI_PATTERNS: readonly {
+  readonly pattern: RegExp;
+  readonly message: string;
+}[] = [
+  {
+    pattern: /result\.ok\b(?!\()/,
+    message:
+      "Use result.isOk() instead of result.ok — Result is not a plain object",
+  },
+  {
+    pattern: /result\.err\b(?!\()/,
+    message:
+      "Use result.isErr() instead of result.err — Result is not a plain object",
+  },
+  {
+    pattern: /\.safeParse\(.*\);\s*\n\s*if\s*\(\s*!.*\.success\b/,
+    message:
+      "Consider using Result pattern instead of safeParse().success for consistency",
+  },
+];
+
+/**
+ * Lint README TypeScript code blocks for known API drift patterns.
+ *
+ * Rather than full compilation (which can't resolve template placeholder
+ * imports), this checks for known anti-patterns like `result.ok` instead
+ * of `result.isOk()` that indicate the example drifted from the real API.
+ */
+function findReadmeCodeAntiPatterns(
+  workspaceRoot: string,
+  artifactPaths: readonly string[]
+): TemplateGuardrailFailure | undefined {
+  const mdPaths = artifactPaths.filter(
+    (p) =>
+      (p.endsWith(".md") || p.endsWith(".template.md")) &&
+      (p.includes("README") || p.includes("readme"))
+  );
+
+  const errors: string[] = [];
+
+  for (const mdPath of mdPaths) {
+    const fullPath = join(workspaceRoot, mdPath);
+    const content = readFileSync(fullPath, "utf-8");
+    const blocks = extractTypescriptBlocks(content);
+
+    for (const block of blocks) {
+      const trimmed = block.code.trim();
+      if (trimmed.length < 10 || trimmed.split("\n").length < 3) {
+        continue;
+      }
+
+      for (const check of README_CODE_ANTI_PATTERNS) {
+        if (check.pattern.test(block.code)) {
+          errors.push(`${mdPath}:${block.line} — ${check.message}`);
+        }
+      }
+    }
+  }
+
+  if (errors.length === 0) {
+    return undefined;
+  }
+
+  return {
+    tool: "readme-typecheck",
+    paths: mdPaths,
+    output: errors.join("\n"),
+  };
+}
+
 function runTool(
   workspaceRoot: string,
   cwd: string,
   tool: ExecutableGuardrailTool,
   args: readonly string[]
 ): TemplateGuardrailFailure | undefined {
-  let executable: string;
-  let command: string[];
+  let executable = "";
+  let command: string[] = [];
 
   switch (tool) {
     case "oxfmt":
@@ -286,6 +383,7 @@ export async function runTemplateGuardrails(
 
     const failures = [
       findSchemaAnnotationFailure(workspaceRoot, artifactPaths),
+      findReadmeCodeAntiPatterns(workspaceRoot, artifactPaths),
       oxfmtPaths.length > 0
         ? runTool(workspaceRoot, workspaceRoot, "oxfmt", [
             "--config",
