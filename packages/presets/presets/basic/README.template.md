@@ -9,9 +9,9 @@ import { greet } from "{{packageName}}";
 
 const result = greet("World");
 
-if (result.ok) {
-  console.log(result.value);
-  // => { message: "Hello, World!" }
+if (result.isOk()) {
+  console.log(result.value.message);
+  // => "Hello, World."
 } else {
   console.error(result.error.message);
 }
