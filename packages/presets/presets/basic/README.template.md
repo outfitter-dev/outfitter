@@ -2,20 +2,34 @@
 
 {{description}}
 
-## Getting Started
+## Usage
 
-```bash
-bun install
-bun run dev
+```typescript
+import { greet } from "{{packageName}}";
+
+const result = greet("World");
+
+if (result.ok) {
+  console.log(result.value);
+  // => { message: "Hello, World!" }
+} else {
+  console.error(result.error.message);
+}
 ```
+
+## Architecture
+
+Handlers return `Result<T, E>` instead of throwing exceptions. See `AGENTS.md` for project conventions.
 
 ## Development
 
 ```bash
-bun test          # Run tests
-bun run build     # Build for production
-bun run typecheck # Type checking
-bun run verify:ci # Full CI validation
+bun install            # Install dependencies
+bun run dev            # Run in development
+bun run build          # Build for production
+bun test               # Run tests
+bun run typecheck      # Type checking
+bun run verify:ci      # Full CI validation
 ```
 
 ## License

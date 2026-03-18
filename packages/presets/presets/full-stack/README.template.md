@@ -13,18 +13,54 @@
     └── core/   # Shared handler layer
 ```
 
+## Usage
+
+### CLI
+
+```bash
+{{projectName}}-cli hello World
+```
+
+```json
+{
+  "ok": true,
+  "command": "hello",
+  "result": { "message": "Hello, World!" }
+}
+```
+
+### MCP Server
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "{{projectName}}": {
+      "command": "bun",
+      "args": [
+        "run",
+        "/absolute/path/to/{{projectName}}/apps/mcp/src/server.ts"
+      ]
+    }
+  }
+}
+```
+
+## Architecture
+
+Handlers in `packages/core` are pure functions returning `Result<T, E>`. CLI and MCP are thin adapters over the same logic. See `AGENTS.md` for the full handler contract and project conventions.
+
 ## Development
 
 ```bash
-# Install dependencies for all workspace members
-bun install
-
-# Build all packages
-bun run build
-
-# Typecheck all packages
-bun run typecheck
-
-# Run all tests
-bun run test
+bun install            # Install dependencies for all workspace members
+bun run build          # Build all packages
+bun run typecheck      # Typecheck all packages
+bun run test           # Run all tests
+bun run verify:ci      # Full CI validation
 ```
+
+## License
+
+MIT
