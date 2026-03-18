@@ -2,7 +2,12 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
-  "keywords": [],
+  "keywords": [
+    "typescript",
+    "bun",
+    "library",
+    "outfitter"
+  ],
   "license": "MIT",
   "files": [
     "dist"

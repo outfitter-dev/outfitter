@@ -2,6 +2,12 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
+  "keywords": [
+    "typescript",
+    "bun",
+    "cli",
+    "outfitter"
+  ],
   "license": "MIT",
   "bin": {
     "{{binName}}": "./dist/cli.js"

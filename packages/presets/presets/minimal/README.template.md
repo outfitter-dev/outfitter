@@ -7,8 +7,12 @@
 ```typescript
 import { greet } from "{{packageName}}";
 
-const message = greet("World");
-// => "Hello, World!"
+const result = greet("World");
+
+if (result.isOk()) {
+  console.log(result.value.message);
+  // => "Hello, World!"
+}
 ```
 
 ## Development
