@@ -260,10 +260,11 @@ server.registerDeferredTool({
 ```typescript
 import { createMcpHarness } from "@outfitter/testing";
 
-const harness = createMcpHarness(myTool);
+// Pass the full McpServer instance, not individual tools
+const harness = createMcpHarness(server);
 
 test("tool returns results", async () => {
-  const result = await harness.invoke({ query: "test" });
+  const result = await harness.callTool("my-tool", { query: "test" });
 
   expect(result.isOk()).toBe(true);
   expect(result.value.results).toHaveLength(3);
