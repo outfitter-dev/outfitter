@@ -5,11 +5,10 @@
 import { mkdir } from "node:fs/promises";
 
 import {
-  getSocketPath,
-  getLockPath,
+  createDaemon,
   getDaemonDir,
-  acquireDaemonLock,
-  releaseDaemonLock,
+  getPidPath,
+  getSocketPath,
 } from "@outfitter/daemon";
 import { createLogger } from "@outfitter/logging";
 
@@ -20,19 +19,33 @@ const startTime = Date.now();
 
 export async function runDaemon(): Promise<void> {
   const socketPath = getSocketPath(TOOL_NAME);
-  const lockPath = getLockPath(TOOL_NAME);
+  const pidPath = getPidPath(TOOL_NAME);
   const daemonDir = getDaemonDir(TOOL_NAME);
 
   // Ensure daemon directory exists
   await mkdir(daemonDir, { recursive: true });
 
-  // Acquire lock
-  const lockResult = await acquireDaemonLock(lockPath);
-  if (!lockResult.isOk()) {
-    logger.error(`Failed to acquire lock: ${lockResult.error.message}`);
+  // Create daemon with lifecycle management
+  const daemon = createDaemon({
+    name: TOOL_NAME,
+    pidFile: pidPath,
+    logger,
+  });
+
+  // Declare server reference so onShutdown can close it
+  let server: ReturnType<typeof Bun.serve> | undefined;
+
+  // Register server cleanup before start so signal handlers can reach it
+  daemon.onShutdown(async () => {
+    server?.stop();
+  });
+
+  // Start daemon (writes PID file, registers signal handlers)
+  const startResult = await daemon.start();
+  if (startResult.isErr()) {
+    logger.error(`Failed to start daemon: ${startResult.error.message}`);
     process.exit(1);
   }
-  const lock = lockResult.value;
 
   logger.info(`Daemon starting on ${socketPath}`);
 
@@ -52,29 +65,14 @@ export async function runDaemon(): Promise<void> {
 
       if (url.pathname === "/shutdown" && request.method === "POST") {
         logger.info("Shutdown requested");
-        // Schedule shutdown
-        setTimeout(async () => {
-          await releaseDaemonLock(lock);
-          server.stop();
-          process.exit(0);
-        }, 100);
+        // Trigger graceful shutdown via daemon lifecycle
+        setTimeout(() => void daemon.stop(), 100);
         return new Response("Shutting down");
       }
 
       return new Response("Not found", { status: 404 });
     },
   });
-
-  // Handle signals
-  const shutdown = async () => {
-    logger.info("Received shutdown signal");
-    await releaseDaemonLock(lock);
-    server.stop();
-    process.exit(0);
-  };
-
-  process.on("SIGTERM", shutdown);
-  process.on("SIGINT", shutdown);
 
   logger.info("Daemon running");
 }
