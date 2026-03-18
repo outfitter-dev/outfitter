@@ -241,7 +241,7 @@ describe("init command file creation", () => {
     expect(existsSync(testPath)).toBe(true);
 
     const testContent = readFileSync(testPath, "utf-8");
-    expect(testContent).toContain('import { server } from "./mcp.js";');
+    expect(testContent).toContain('from "./mcp.js"');
     expect(testContent).toContain("createMcpHarness");
   });
 
@@ -535,7 +535,9 @@ describe("init command file creation", () => {
     expect(existsSync(testPath)).toBe(true);
 
     const testContent = readFileSync(testPath, "utf-8");
-    expect(testContent).toContain('import { greet } from "./index.js";');
+    expect(testContent).toContain('from "./index.js"');
+    expect(testContent).toContain("greet");
+    expect(testContent).toContain("find");
     expect(testContent).toContain("greet(");
   });
 });

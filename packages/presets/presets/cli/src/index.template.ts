@@ -5,5 +5,10 @@
  */
 
 export { program } from "./program.js";
-export { greet } from "./commands/hello.js";
-export type { GreetingInput, GreetingOutput } from "./types.js";
+export { greet, lookup } from "./commands/hello.js";
+export type {
+  GreetingInput,
+  GreetingOutput,
+  LookupInput,
+  LookupOutput,
+} from "./types.js";

@@ -6,4 +6,4 @@
 
 export * from "./types.js";
 export * from "./handlers.js";
-export { createRegistry, greetAction } from "./actions.js";
+export { createRegistry, findAction, greetAction } from "./actions.js";

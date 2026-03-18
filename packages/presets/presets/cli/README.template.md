@@ -26,6 +26,23 @@ bun add -g {{packageName}}
 }
 ```
 
+Invalid input returns an error envelope:
+
+```bash
+{{binName}} hello ""
+```
+
+```json
+{
+  "ok": false,
+  "command": "hello",
+  "error": {
+    "category": "validation",
+    "message": "name: name is required"
+  }
+}
+```
+
 ```bash
 {{binName}} --help
 ```

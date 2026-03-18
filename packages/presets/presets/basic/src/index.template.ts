@@ -8,6 +8,7 @@
 
 import {
   type HandlerContext,
+  NotFoundError,
   Result,
   ValidationError,
 } from "@outfitter/contracts";
@@ -47,4 +48,42 @@ export async function greet(
     requestId: ctx.requestId,
   });
   return Result.ok({ message: `Hello, ${parsed.data.name}!` });
+}
+
+/** Input for finding a greeting by ID. */
+export interface FindGreetingInput {
+  readonly id: string;
+}
+
+/** Zod schema for validating find-greeting input at the boundary. */
+export const findGreetingInputSchema: ZodType<FindGreetingInput> = z.object({
+  id: z.string().min(1, "id is required"),
+});
+
+/**
+ * Find a greeting by ID.
+ *
+ * @param input - Raw input to validate against findGreetingInputSchema
+ * @param ctx - Handler context with request metadata and logger
+ * @returns Greeting on success, ValidationError on invalid input, NotFoundError when ID does not exist
+ */
+export async function findGreeting(
+  input: unknown,
+  ctx: HandlerContext
+): Promise<Result<Greeting, ValidationError | NotFoundError>> {
+  const parsed = findGreetingInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return Result.err(
+      new ValidationError({ message: "Invalid input", field: "id" })
+    );
+  }
+
+  if (parsed.data.id === "unknown") {
+    return Result.err(NotFoundError.create("greeting", parsed.data.id));
+  }
+
+  ctx.logger.info(`Found greeting ${parsed.data.id}`, {
+    requestId: ctx.requestId,
+  });
+  return Result.ok({ message: `Hello from greeting ${parsed.data.id}!` });
 }

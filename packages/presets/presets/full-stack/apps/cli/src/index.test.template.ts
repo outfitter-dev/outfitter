@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
 import { createContext } from "@outfitter/contracts";
-import { createGreeting, greetAction } from "{{packageName}}-core";
+import {
+  createGreeting,
+  findAction,
+  findGreeting,
+  greetAction,
+} from "{{packageName}}-core";
 
 describe("cli surface", () => {
   test("greet action has CLI surface config", () => {
@@ -49,5 +54,34 @@ describe("core handler", () => {
     expect(result.isErr()).toBe(true);
     if (result.isOk()) return;
     expect(result.error.name).toBe("ValidationError");
+  });
+});
+
+describe("find action surface", () => {
+  test("find action has CLI surface config", () => {
+    expect(findAction.cli).toBeDefined();
+    expect(findAction.cli?.command).toBe("find <id>");
+  });
+
+  test("find action mapInput resolves args", () => {
+    const input = findAction.cli?.mapInput?.({
+      args: ["abc"],
+      flags: {},
+    });
+
+    expect(input).toEqual({ id: "abc" });
+  });
+});
+
+describe("findGreeting handler", () => {
+  test("returns NotFoundError for unknown ID", async () => {
+    const result = await findGreeting(
+      { id: "unknown" },
+      createContext({ cwd: process.cwd(), env: process.env })
+    );
+
+    expect(result.isErr()).toBe(true);
+    if (result.isOk()) return;
+    expect(result.error.name).toBe("NotFoundError");
   });
 });

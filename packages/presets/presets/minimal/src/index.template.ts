@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { Result, ValidationError } from "@outfitter/contracts";
+import { NotFoundError, Result, ValidationError } from "@outfitter/contracts";
 
 export interface Greeting {
   readonly message: string;
@@ -24,4 +24,18 @@ export function greet(name: string): Result<Greeting, ValidationError> {
   }
 
   return Result.ok({ message: `Hello, ${name}!` });
+}
+
+/**
+ * Find a greeting by ID.
+ *
+ * @param id - Greeting identifier to look up
+ * @returns Greeting on success, NotFoundError when ID does not exist
+ */
+export function find(id: string): Result<Greeting, NotFoundError> {
+  if (!id || id === "unknown") {
+    return Result.err(NotFoundError.create("greeting", id || "<empty>"));
+  }
+
+  return Result.ok({ message: `Hello from greeting ${id}!` });
 }
