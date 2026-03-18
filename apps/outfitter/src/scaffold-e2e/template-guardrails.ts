@@ -78,6 +78,24 @@ interface MissingSchemaAnnotation {
 const EXPORTED_SCHEMA_WITHOUT_ANNOTATION_PATTERN =
   /export const [A-Za-z0-9_]+Schema\s*=\s*z\./;
 
+const TEMPLATE_PLACEHOLDER_DEFAULTS: Record<string, string> = {
+  "{{packageName}}": "scaffold-test",
+  "{{projectName}}": "scaffold-test",
+  "{{binName}}": "scaffold-test",
+  "{{version}}": "0.1.0",
+  "{{description}}": "Test project",
+};
+
+function replaceTemplatePlaceholders(code: string): string {
+  let result = code;
+  for (const [placeholder, value] of Object.entries(
+    TEMPLATE_PLACEHOLDER_DEFAULTS
+  )) {
+    result = result.replaceAll(placeholder, value);
+  }
+  return result;
+}
+
 function stripTemplateSuffix(filePath: string): string {
   return filePath.endsWith(".template")
     ? filePath.slice(0, -".template".length)
@@ -114,10 +132,14 @@ function mirrorArtifacts(
     const destinationPath = join(tempDir, destinationRelativePath);
 
     mkdirSync(dirname(destinationPath), { recursive: true });
-    writeFileSync(
-      destinationPath,
-      readFileSync(join(workspaceRoot, sourcePath), "utf-8")
-    );
+    let content = readFileSync(join(workspaceRoot, sourcePath), "utf-8");
+    if (
+      destinationPath.endsWith(".json") ||
+      destinationPath.endsWith(".jsonc")
+    ) {
+      content = replaceTemplatePlaceholders(content);
+    }
+    writeFileSync(destinationPath, content);
     mirrored.push(destinationPath);
   }
 
