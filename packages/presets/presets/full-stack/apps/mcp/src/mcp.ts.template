@@ -1,20 +1,18 @@
 import { createMcpServer, defineTool } from "@outfitter/mcp";
-import { z } from "zod";
-import { createGreeting } from "{{packageName}}-core";
+import { greetAction, greetingInputSchema } from "{{packageName}}-core";
 
 const server = createMcpServer({
   name: "{{projectName}}-mcp",
   version: "{{version}}",
 });
 
+// Wire MCP tools from action definitions
 const greetTool = defineTool({
-  name: "greet",
-  description: "Generate greeting via shared core handler",
-  inputSchema: z.object({
-    name: z.string().default("World").describe("Name to greet"),
-    excited: z.boolean().default(false),
-  }),
-  handler: async (input, ctx) => createGreeting(input, ctx),
+  name: greetAction.mcp?.tool ?? greetAction.id,
+  description: greetAction.mcp?.description ?? greetAction.description ?? "",
+  inputSchema: greetingInputSchema,
+  annotations: greetAction.mcp?.readOnly ? { readOnlyHint: true } : {},
+  handler: async (input, ctx) => greetAction.handler(input, ctx),
 });
 
 server.registerTool(greetTool);
