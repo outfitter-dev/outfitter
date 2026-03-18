@@ -3,9 +3,9 @@
   "version": "{{version}}",
   "description": "{{description}}",
   "keywords": [
-    "typescript",
     "bun",
-    "outfitter"
+    "outfitter",
+    "typescript"
   ],
   "license": "MIT",
   "files": [

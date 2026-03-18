@@ -3,10 +3,10 @@
   "version": "{{version}}",
   "description": "{{description}}",
   "keywords": [
-    "typescript",
     "bun",
     "cli",
-    "outfitter"
+    "outfitter",
+    "typescript"
   ],
   "license": "MIT",
   "bin": {
