@@ -12,21 +12,18 @@ bun add {{packageName}}
 
 ```typescript
 import { createGreeting } from "{{packageName}}";
+import { createContext } from "@outfitter/contracts";
 
-const result = await createGreeting({ name: "World" });
+const ctx = createContext({ cwd: process.cwd(), env: process.env });
+const result = await createGreeting({ name: "World" }, ctx);
 
-if (result.ok) {
-  console.log(result.value);
-  // => { message: "Hello, World!" }
+if (result.isOk()) {
+  console.log(result.value.message);
+  // => "Hello, World."
 } else {
   console.error(result.error.message);
 }
 ```
-
-### Exports
-
-- `{{packageName}}` — handlers and core logic
-- `{{packageName}}/types` — TypeScript type definitions
 
 ## Architecture
 

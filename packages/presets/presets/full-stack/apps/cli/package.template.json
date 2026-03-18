@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap",
+    "build": "bun build src/cli.ts --outdir dist --target bun && bun build src/index.ts --outdir dist --target bun --sourcemap && tsc --emitDeclarationOnly --outDir dist",
     "dev": "bun --watch src/cli.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
