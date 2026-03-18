@@ -10,7 +10,7 @@ import {
   createIpcServer,
   createHealthChecker,
   getSocketPath,
-  getLockPath,
+  getPidPath,
   getLogPath,
 } from "@outfitter/daemon";
 import {
@@ -52,7 +52,7 @@ const logger = createLogger({
 
 const daemon = createDaemon({
   name: DAEMON_NAME,
-  pidFile: getLockPath(DAEMON_NAME),
+  pidFile: getPidPath(DAEMON_NAME),
   logger,
   shutdownTimeout: SHUTDOWN_TIMEOUT,
 });
@@ -363,6 +363,6 @@ export const healthCommand = command("health")
 
 | Function              | Path                                | Example                                   |
 | --------------------- | ----------------------------------- | ----------------------------------------- |
-| `getLockPath(name)`   | `~/.local/state/{name}/{name}.pid`  | `~/.local/state/my-daemon/my-daemon.pid`  |
+| `getPidPath(name)`    | `$XDG_RUNTIME_DIR/{name}/daemon.pid`  | `/run/user/1000/my-daemon/daemon.pid`  |
 | `getSocketPath(name)` | `~/.local/state/{name}/{name}.sock` | `~/.local/state/my-daemon/my-daemon.sock` |
 | `getLogPath(name)`    | `~/.local/state/{name}/logs/`       | `~/.local/state/my-daemon/logs/`          |
