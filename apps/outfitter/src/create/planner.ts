@@ -8,6 +8,16 @@ import type {
   CreateProjectPlan,
 } from "./types.js";
 
+const DEFAULT_DESCRIPTIONS: Record<string, string> = {
+  cli: "CLI built with @outfitter/cli",
+  library: "TypeScript library built with Outfitter",
+  mcp: "MCP server built with @outfitter/mcp",
+  daemon: "Background daemon built with @outfitter/daemon",
+  "full-stack": "Full-stack project with shared handlers, CLI, and MCP",
+  minimal: "TypeScript project built with Outfitter",
+  basic: "TypeScript project built with Outfitter",
+};
+
 function derivePackageName(input: CreateProjectInput): string {
   return (input.packageName ?? input.name).trim();
 }
@@ -91,7 +101,9 @@ export function planCreateProject(
       projectName,
       version: input.version?.trim() || "0.1.0",
       description:
-        input.description?.trim() || "A new project created with Outfitter",
+        input.description?.trim() ||
+        DEFAULT_DESCRIPTIONS[preset.id] ||
+        "A new project created with Outfitter",
       binName: deriveBinName(projectName),
       year: input.year ?? String(new Date().getFullYear()),
     },
