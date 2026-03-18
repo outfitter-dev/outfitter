@@ -1,0 +1,60 @@
+# AGENTS.md
+
+Bun-first TypeScript CLI. Tests before code. Result types, not exceptions.
+
+## Commands
+
+```bash
+bun run build        # Build CLI + library to dist/
+bun run dev          # Watch mode (auto-restart on changes)
+bun run test         # Run tests
+bun run typecheck    # TypeScript validation
+bun run check        # Lint + format check
+bun run lint:fix     # Auto-fix lint issues
+bun run format       # Auto-fix formatting
+bun run verify:ci    # Full CI validation (typecheck + check + build + test)
+```
+
+## Architecture
+
+CLI application built with Commander and `@outfitter/cli`.
+
+### Project Structure
+
+- `src/cli.ts` — Entry point, creates and runs the program
+- `src/program.ts` — Command registration and wiring
+- `src/commands/` — Command handlers (pure functions returning `Result<T, E>`)
+- `src/types.ts` — Zod schemas and TypeScript interfaces
+
+### Handler Contract
+
+All domain logic uses handlers returning `Result<T, E>`:
+
+```typescript
+function handler(
+  input: Input,
+  ctx: HandlerContext
+): Promise<Result<Output, Error>>;
+```
+
+CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@outfitter/cli/envelope` to wrap handler results in output envelopes.
+
+### Adding a Command
+
+1. Define types and Zod schema in `src/types.ts`
+2. Create handler in `src/commands/<name>.ts` returning `Result<T, E>`
+3. Wire command in `src/program.ts` using the CommandBuilder pattern
+4. Add tests in `src/<name>.test.ts`
+
+## Development Principles
+
+- **TDD-First** — Write the test before the code (Red / Green / Refactor)
+- **Result Types** — Handlers return `Result<T, E>`, not exceptions
+- **Bun-First** — Use Bun-native APIs before npm packages
+- **Strict TypeScript** — No `any`, no `as` casts; narrow instead of assert
+
+## Testing
+
+- Runner: Bun test runner
+- Files: `src/*.test.ts`
+- Run: `bun test` or `bun run test`
