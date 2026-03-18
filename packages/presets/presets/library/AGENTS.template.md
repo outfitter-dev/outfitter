@@ -5,7 +5,7 @@ Bun-first TypeScript library. Tests before code. Result types, not exceptions.
 ## Commands
 
 ```bash
-bun run build        # Build library with bunup (ESM + types)
+bun run build        # Build library with bunup (ESM + CJS + types)
 bun run dev          # Watch mode
 bun run test         # Run tests
 bun run typecheck    # TypeScript validation

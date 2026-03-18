@@ -44,12 +44,14 @@ export async function executePlan(
   try {
     const presetsDir = getPresetsBaseDir();
     let projectDir: string | undefined;
+    let presetName: string | undefined;
     let blocksAdded: ScaffoldResult["blocksAdded"];
 
     for (const change of plan.changes) {
       switch (change.type) {
         case "copy-preset": {
           projectDir = change.targetDir;
+          presetName = change.preset;
           if (!(existsSync(projectDir) || options.collector)) {
             mkdirSync(projectDir, { recursive: true });
           }
@@ -148,7 +150,7 @@ export async function executePlan(
               description: "Inject shared scripts/devDependencies",
             });
           } else {
-            const result = injectSharedConfig(projectDir);
+            const result = injectSharedConfig(projectDir, presetName);
             if (result.isErr()) {
               return result;
             }

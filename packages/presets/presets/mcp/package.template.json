@@ -2,6 +2,13 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
+  "keywords": [
+    "typescript",
+    "bun",
+    "mcp",
+    "model-context-protocol",
+    "outfitter"
+  ],
   "license": "MIT",
   "bin": {
     "{{binName}}": "./dist/server.js"
