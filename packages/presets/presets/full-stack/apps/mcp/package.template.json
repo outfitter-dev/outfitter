@@ -33,5 +33,7 @@
     "{{packageName}}-core": "workspace:*",
     "zod": "catalog:"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@outfitter/testing": "workspace:*"
+  }
 }
