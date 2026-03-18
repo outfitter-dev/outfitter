@@ -50,7 +50,9 @@ export interface CLI {
   /** Get the underlying Commander program */
   readonly program: Command;
   /** Register a command with the CLI */
-  register(command: CommandBuilder | Command): this;
+  register<TInput = undefined, TContext = undefined>(
+    command: CommandBuilder<TInput, TContext> | Command
+  ): this;
 }
 
 /**
