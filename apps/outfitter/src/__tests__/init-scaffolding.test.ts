@@ -22,31 +22,32 @@ setupInitTestHarness();
 const resolvedVersions = getResolvedVersions().all;
 const repoRoot = join(import.meta.dir, "..", "..", "..", "..");
 
-function expectUltraciteCheckToPass(
+/**
+ * Verify a scaffolded file matches oxfmt canonical formatting.
+ *
+ * Uses oxfmt directly from the workspace rather than ultracite, because
+ * ultracite spawns oxfmt as a child process that can't resolve from the
+ * workspace node_modules when CWD is a temp directory without bun install.
+ * The real verify:ci (tested in scaffold trials) runs ultracite correctly
+ * inside installed projects.
+ */
+function expectFormattingCheckToPass(
   projectDir: string,
   relativePath = "package.json"
 ): void {
+  const filePath = join(projectDir, relativePath);
   const result = spawnSync(
-    join(repoRoot, "node_modules/.bin/ultracite"),
-    ["check", relativePath],
+    join(repoRoot, "node_modules/.bin/oxfmt"),
+    ["--check", filePath],
     {
-      cwd: projectDir,
+      cwd: repoRoot,
       encoding: "utf-8",
-      env: {
-        ...process.env,
-        PATH: `${join(repoRoot, "node_modules/.bin")}:${process.env["PATH"] ?? ""}`,
-        NODE_PATH: join(repoRoot, "node_modules"),
-      },
     }
   );
 
   if (result.status !== 0) {
     throw new Error(
-      [
-        `Ultracite check failed for ${join(projectDir, relativePath)}`,
-        result.stdout,
-        result.stderr,
-      ]
+      [`Formatting check failed for ${filePath}`, result.stdout, result.stderr]
         .filter(Boolean)
         .join("\n")
     );
@@ -207,7 +208,7 @@ describe("init command file creation", () => {
     });
 
     expect(result.isOk()).toBe(true);
-    expectUltraciteCheckToPass(tempDir, "src/index.test.ts");
+    expectFormattingCheckToPass(tempDir, "src/index.test.ts");
   });
 
   test("creates MCP template with resolved external dependency versions", async () => {
@@ -352,7 +353,7 @@ describe("init command file creation", () => {
     });
 
     expect(result.isOk()).toBe(true);
-    expectUltraciteCheckToPass(tempDir);
+    expectFormattingCheckToPass(tempDir);
   });
 
   test("writes library test source in ultracite-canonical order when tooling is enabled", async () => {
@@ -369,7 +370,7 @@ describe("init command file creation", () => {
     });
 
     expect(result.isOk()).toBe(true);
-    expectUltraciteCheckToPass(tempDir, "src/index.test.ts");
+    expectFormattingCheckToPass(tempDir, "src/index.test.ts");
   });
 
   test("creates full-stack preset workspace with shared core handler wiring", async () => {
@@ -473,7 +474,7 @@ describe("init command file creation", () => {
     });
 
     expect(result.isOk()).toBe(true);
-    expectUltraciteCheckToPass(tempDir, "apps/mcp/src/mcp.ts");
+    expectFormattingCheckToPass(tempDir, "apps/mcp/src/mcp.ts");
   });
 
   test("applies tooling files at full-stack workspace root only", async () => {

@@ -6,12 +6,14 @@
 
 ```typescript
 import { greet } from "{{packageName}}";
+import { createContext } from "@outfitter/contracts";
 
-const result = greet("World");
+const ctx = createContext({ cwd: process.cwd(), env: process.env });
+const result = await greet({ name: "World" }, ctx);
 
 if (result.isOk()) {
   console.log(result.value.message);
-  // => "Hello, World."
+  // => "Hello, World!"
 } else {
   console.error(result.error.message);
 }
