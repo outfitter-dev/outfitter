@@ -42,7 +42,7 @@ export function validatePresetDeps(
   problems: string[]
 ): void {
   const presetRoot = "packages/presets/presets";
-  const glob = new Bun.Glob("**/package.json.template");
+  const glob = new Bun.Glob("**/package.template.json");
 
   const absoluteRoot = join(workspaceRoot, presetRoot);
   if (!existsSync(absoluteRoot)) {
