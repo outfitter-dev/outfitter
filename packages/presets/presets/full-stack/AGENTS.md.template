@@ -64,3 +64,11 @@ CLI and MCP are thin adapters over shared handlers. Write the handler once in co
 - Runner: Bun test runner
 - Files: `src/*.test.ts` within each package
 - Run: `bun test` (per package) or `bun run test` (all packages from root)
+
+## Troubleshooting
+
+- **Type errors across packages**: Run `bun run typecheck` from the root. Ensure dependent packages are built first (`bun run build`).
+- **Changes in core not reflected in CLI/MCP**: Rebuild core (`bun run --filter={{packageName}}-core build`) or use `bun run dev` for watch mode across all packages.
+- **Workspace dependency not found**: Check that the dependency is listed with `"workspace:*"` in the consuming package's `package.json`.
+- **Lint failures**: Run `bun run lint:fix` from the root to auto-fix all packages. For format issues, run `bun run format`.
+- **Tests failing**: Run `bun test` in the specific package directory for better error output than `verify:ci`.

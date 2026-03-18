@@ -15,6 +15,7 @@ bun run dev
 bun test          # Run tests
 bun run build     # Build for production
 bun run typecheck # Type checking
+bun run verify:ci # Full CI validation
 ```
 
 ## License

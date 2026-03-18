@@ -32,6 +32,9 @@ bun run build
 
 # Run tests
 bun run test
+
+# Full CI validation
+bun run verify:ci
 ```
 
 ## License
