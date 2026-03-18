@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "build": "bunup",
+    "build": "bunup && oxfmt --write package.json",
     "dev": "bun --watch src/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",

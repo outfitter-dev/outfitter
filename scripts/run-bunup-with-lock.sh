@@ -50,3 +50,24 @@ done
 
 printf "%s\n" "$$" > "$pid_file"
 "$@"
+
+# bunup rewrites package.json exports with its own key ordering which may not
+# match oxfmt's canonical format. Re-format so `ultracite check` stays green.
+found_filter=""
+prev=""
+for arg in "$@"; do
+  value=""
+  if [[ "$prev" == "--filter" ]]; then
+    value="$arg"
+  elif [[ "$arg" == --filter=* ]]; then
+    value="${arg#--filter=}"
+  fi
+  if [[ -n "$value" ]]; then
+    found_filter="1"
+    pkg_json=$(grep -rl "\"name\": \"$value\"" packages/*/package.json apps/*/package.json 2>/dev/null | head -1)
+    if [[ -n "$pkg_json" ]]; then
+      bunx oxfmt --write "$pkg_json" || printf "Warning: oxfmt failed for %s\n" "$pkg_json" >&2
+    fi
+  fi
+  prev="$arg"
+done
