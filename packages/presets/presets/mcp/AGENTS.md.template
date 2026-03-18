@@ -95,3 +95,11 @@ Simple, self-contained resources (like `versionResource` in `src/mcp.ts`) can be
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
 - Test tool handlers directly by importing from `src/index.ts`
+
+## Troubleshooting
+
+- **Server not starting in Claude Desktop**: Check that the `command` path in `claude_desktop_config.json` points to the correct `bun` binary (run `which bun` to verify). Use absolute paths.
+- **stdio transport errors**: MCP servers use stdin/stdout for communication. Ensure no stray `console.log` calls in server code — use the structured logger instead.
+- **Tool not appearing in client**: Verify the tool is registered in `src/mcp.ts` via `server.registerTool()` and the server is restarted.
+- **Type errors after adding a dependency**: Run `bun run typecheck` to see full errors. Check that new deps are in `dependencies`, not just `devDependencies`.
+- **Tests failing**: Run `bun test` directly for better error output than `verify:ci`.

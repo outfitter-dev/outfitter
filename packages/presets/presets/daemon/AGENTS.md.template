@@ -51,3 +51,11 @@ CLI commands use `runHandler()` from `@outfitter/cli/envelope` to wrap daemon op
 - Runner: Bun test runner
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
+
+## Troubleshooting
+
+- **Daemon won't start**: Check for stale lock/socket files. Run `{{binName}} status` to check liveness, then `{{binName}} stop` before retrying.
+- **"Address already in use" errors**: Another instance may be running. Check with `{{binName}} status` or look for leftover Unix socket files in the XDG runtime directory.
+- **Background spawn fails but foreground works**: Background mode requires a built binary. Run `bun run build` first, then `{{binName}} start`.
+- **Type errors after adding a dependency**: Run `bun run typecheck` to see full errors. Check that new deps are in `dependencies`, not just `devDependencies`.
+- **Tests failing**: Run `bun test` directly for better error output than `verify:ci`.

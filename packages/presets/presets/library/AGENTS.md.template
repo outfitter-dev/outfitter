@@ -66,3 +66,11 @@ export const inputSchema: ZodType<Input> = z.object({ ... });
 - Files: `src/*.test.ts`
 - Run: `bun test` or `bun run test`
 - Test handlers with `createContext()` from `@outfitter/contracts`
+
+## Troubleshooting
+
+- **Build fails with bunup**: Check `bunup.config.ts` for correct entry points. Ensure `src/index.ts` re-exports everything consumers need.
+- **Type errors after adding a dependency**: Run `bun run typecheck` to see full errors. Check that new deps are in `dependencies`, not just `devDependencies`.
+- **Consumers can't import types**: Verify the package has `"types"` in its `package.json` exports map and that bunup is generating `.d.ts` files.
+- **Lint failures**: Run `bun run lint:fix` to auto-fix. For format issues, run `bun run format`.
+- **Tests failing**: Run `bun test` directly for better error output than `verify:ci`.
