@@ -63,9 +63,15 @@ export function getPresetsBaseDir(): string {
 }
 
 export function getOutputFilename(templateFilename: string): string {
-  return templateFilename.endsWith(".template")
-    ? templateFilename.slice(0, -".template".length)
-    : templateFilename;
+  // Infix convention: foo.template.ts → foo.ts
+  if (templateFilename.includes(".template.")) {
+    return templateFilename.replace(".template.", ".");
+  }
+  // Suffix convention (dotfiles): .gitignore.template → .gitignore
+  if (templateFilename.endsWith(".template")) {
+    return templateFilename.slice(0, -".template".length);
+  }
+  return templateFilename;
 }
 
 export function isBinaryFile(filename: string): boolean {

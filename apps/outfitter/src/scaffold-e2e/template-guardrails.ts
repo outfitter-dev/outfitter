@@ -2,7 +2,7 @@
  * Lightweight guardrails for scaffold source artifacts.
  *
  * These checks mirror preset templates into a temp workspace with their
- * `.template` suffix removed, then run the same format/lint tools we expect
+ * `.template` marker removed, then run the same format/lint tools we expect
  * generated projects to satisfy. This gives us a cheap, always-on safety net
  * without paying the cost of a full install/build cycle for every test run.
  *
@@ -96,14 +96,19 @@ function replaceTemplatePlaceholders(code: string): string {
   return result;
 }
 
-function stripTemplateSuffix(filePath: string): string {
+function stripTemplateMarker(filePath: string): string {
+  if (filePath.includes(".template.")) {
+    return filePath.replace(".template.", ".");
+  }
   return filePath.endsWith(".template")
     ? filePath.slice(0, -".template".length)
     : filePath;
 }
 
 function collectArtifactPaths(workspaceRoot: string): string[] {
-  const templateGlob = new Bun.Glob("packages/presets/presets/**/*.template");
+  const templateGlob = new Bun.Glob(
+    "packages/presets/presets/**/*.template{,.*}"
+  );
   const collected = [
     ...templateGlob.scanSync({
       cwd: workspaceRoot,
@@ -128,7 +133,7 @@ function mirrorArtifacts(
   const mirrored: string[] = [];
 
   for (const sourcePath of artifactPaths) {
-    const destinationRelativePath = stripTemplateSuffix(sourcePath);
+    const destinationRelativePath = stripTemplateMarker(sourcePath);
     const destinationPath = join(tempDir, destinationRelativePath);
 
     mkdirSync(dirname(destinationPath), { recursive: true });
@@ -178,7 +183,7 @@ function findSchemaAnnotationFailure(
   artifactPaths: readonly string[]
 ): TemplateGuardrailFailure | undefined {
   const filesToCheck = artifactPaths
-    .filter((path) => path.endsWith(".ts") || path.endsWith(".ts.template"))
+    .filter((path) => path.endsWith(".ts") || path.endsWith(".template.ts"))
     .map((path) => ({
       path,
       content: readFileSync(join(workspaceRoot, path), "utf-8"),
