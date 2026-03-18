@@ -28,9 +28,11 @@ function createPresetSkipFilter(
     return undefined;
   }
   return (relativePath) => {
-    const normalized = relativePath.endsWith(".template")
-      ? relativePath.slice(0, -".template".length)
-      : relativePath;
+    const normalized = relativePath.includes(".template.")
+      ? relativePath.replace(".template.", ".")
+      : relativePath.endsWith(".template")
+        ? relativePath.slice(0, -".template".length)
+        : relativePath;
     return TOOLING_PRESET_PATHS.has(normalized);
   };
 }
