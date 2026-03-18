@@ -2,8 +2,22 @@ import { describe, expect, test } from "bun:test";
 
 import { greet } from "./index.js";
 
+describe("public API surface", () => {
+  test("exports greet function", () => {
+    expect(typeof greet).toBe("function");
+  });
+});
+
 describe("greet", () => {
-  test("returns greeting for valid name", () => {
+  test("returns Result with isOk/isErr contract", () => {
+    const result = greet("World");
+
+    expect(typeof result.isOk).toBe("function");
+    expect(typeof result.isErr).toBe("function");
+    expect(result.isOk()).toBe(true);
+  });
+
+  test("success result has value with message", () => {
     const result = greet("World");
 
     expect(result.isOk()).toBe(true);
@@ -11,7 +25,7 @@ describe("greet", () => {
     expect(result.value.message).toBe("Hello, World!");
   });
 
-  test("returns validation error for empty name", () => {
+  test("error result has ValidationError", () => {
     const result = greet("");
 
     expect(result.isErr()).toBe(true);

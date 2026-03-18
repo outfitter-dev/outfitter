@@ -4,10 +4,24 @@ import { createContext } from "@outfitter/contracts";
 
 import { greet } from "./index.js";
 
+describe("public API surface", () => {
+  test("exports greet handler", () => {
+    expect(typeof greet).toBe("function");
+  });
+});
+
 describe("greet", () => {
   const ctx = createContext({ cwd: process.cwd(), env: process.env });
 
-  test("returns greeting for valid input", async () => {
+  test("returns Result with isOk/isErr contract", async () => {
+    const result = await greet({ name: "World" }, ctx);
+
+    expect(typeof result.isOk).toBe("function");
+    expect(typeof result.isErr).toBe("function");
+    expect(result.isOk()).toBe(true);
+  });
+
+  test("success result has value property", async () => {
     const result = await greet({ name: "World" }, ctx);
 
     expect(result.isOk()).toBe(true);
@@ -15,12 +29,12 @@ describe("greet", () => {
     expect(result.value.message).toBe("Hello, World!");
   });
 
-  test("returns validation error for empty name", async () => {
+  test("error result has error property with name", async () => {
     const result = await greet({ name: "" }, ctx);
 
     expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.name).toBe("ValidationError");
-    }
+    if (result.isOk()) return;
+    expect(result.error.name).toBe("ValidationError");
+    expect(typeof result.error.message).toBe("string");
   });
 });
