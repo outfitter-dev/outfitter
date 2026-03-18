@@ -2,7 +2,7 @@
 /**
  * {{projectName}} CLI entry point
  *
- * Commands: start, stop, status
+ * Commands: start, stop, status, health
  */
 
 import { spawn } from "node:child_process";
@@ -16,7 +16,6 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { getSocketPath, getLockPath, isDaemonAlive } from "@outfitter/daemon";
-
 const TOOL_NAME = "{{binName}}";
 const socketPath = getSocketPath(TOOL_NAME);
 const lockPath = getLockPath(TOOL_NAME);
@@ -32,9 +31,7 @@ program.register(
     .description("Start the daemon")
     .option("-f, --foreground", "Run in foreground")
     .action(async ({ flags }) => {
-      const foreground = Boolean(
-        (flags as { foreground?: boolean }).foreground
-      );
+      const foreground = Boolean(flags["foreground"]);
 
       await runHandler({
         command: "start",
@@ -125,6 +122,47 @@ program.register(
             return Result.ok({ ...health, running: true });
           } catch {
             return Result.ok({ running: true, health: "unknown" });
+          }
+        },
+      });
+    })
+);
+
+program.register(
+  command("health")
+    .description("Check daemon health")
+    .readOnly(true)
+    .action(async () => {
+      await runHandler({
+        command: "health",
+        input: {},
+        handler: async () => {
+          if (!(await isDaemonAlive(lockPath))) {
+            return Result.err(NotFoundError.create("daemon", "process"));
+          }
+
+          let response: Response;
+          try {
+            response = await fetch(`http://unix:${socketPath}:/health`);
+          } catch {
+            return Result.err(
+              NetworkError.create("Failed to reach daemon health endpoint")
+            );
+          }
+
+          if (!response.ok) {
+            return Result.err(
+              NetworkError.create("Health endpoint returned non-OK")
+            );
+          }
+
+          try {
+            const health: Record<string, unknown> = await response.json();
+            return Result.ok(health);
+          } catch {
+            return Result.err(
+              NetworkError.create("Health endpoint returned invalid JSON")
+            );
           }
         },
       });
