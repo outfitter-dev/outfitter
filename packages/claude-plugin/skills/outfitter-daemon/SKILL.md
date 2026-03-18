@@ -12,45 +12,30 @@ Deep dive into @outfitter/daemon patterns.
 ## Creating a Daemon
 
 ```typescript
-import { createDaemon, getLockPath } from "@outfitter/daemon";
-import { createLogger, createConsoleSink } from "@outfitter/logging";
+import { createDaemon, getPidPath } from "@outfitter/daemon";
+import { createLogger } from "@outfitter/logging";
 
-const logger = createLogger({
-  name: "my-daemon",
-  level: "info",
-  sinks: [createConsoleSink()],
-});
+const logger = createLogger({ name: "my-daemon" });
 
 const daemon = createDaemon({
   name: "my-daemon",
-  pidFile: getLockPath("my-daemon"),
+  pidFile: getPidPath("my-daemon"),
   logger,
   shutdownTimeout: 10000, // 10s graceful shutdown
 });
 ```
 
-## Lifecycle Hooks
+## Lifecycle
 
 ```typescript
-// Called before start
-daemon.onBeforeStart(async () => {
-  logger.info("Preparing to start...");
-  await initializeDatabase();
-});
-
-// Called after start
-daemon.onAfterStart(async () => {
-  logger.info("Daemon started successfully");
-});
-
-// Called on shutdown (SIGTERM, SIGINT)
+// Register shutdown handlers (called on SIGTERM, SIGINT, or daemon.stop())
 daemon.onShutdown(async () => {
   logger.info("Shutting down...");
   await closeConnections();
   await flushBuffers();
 });
 
-// Start the daemon
+// Start the daemon (writes PID file, registers signal handlers)
 const result = await daemon.start();
 if (result.isErr()) {
   logger.error("Failed to start", { error: result.error });
@@ -58,34 +43,77 @@ if (result.isErr()) {
 }
 ```
 
-## IPC Server
+## Communication Patterns
 
-### Setting Up IPC
+Two approaches for daemon communication, each suited to different use cases.
+
+### HTTP on Unix Socket (recommended for scaffolds)
+
+Simpler pattern using `Bun.serve()` on a Unix socket. Standard REST-style endpoints — any tool can `curl` them. Best for health checks, metrics, admin APIs.
+
+```typescript
+import { getSocketPath } from "@outfitter/daemon";
+
+const socketPath = getSocketPath("my-daemon");
+
+const server = Bun.serve({
+  unix: socketPath,
+  fetch(request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/health") {
+      return Response.json({
+        status: "ok",
+        uptime: process.uptime(),
+      });
+    }
+
+    if (url.pathname === "/shutdown" && request.method === "POST") {
+      setTimeout(() => void daemon.stop(), 100);
+      return new Response("Shutting down");
+    }
+
+    return new Response("Not found", { status: 404 });
+  },
+});
+
+// Register server cleanup as a shutdown handler
+daemon.onShutdown(async () => {
+  server.stop();
+});
+```
+
+CLI commands use `fetch` over the Unix socket:
+
+```typescript
+// Stop via HTTP
+await fetch(`http://unix:${socketPath}:/shutdown`, { method: "POST" });
+
+// Health check via HTTP
+const health = await fetch(`http://unix:${socketPath}:/health`);
+```
+
+### IPC (structured messaging)
+
+Lower-level pattern using `createIpcServer`/`createIpcClient` for typed bidirectional messaging over Unix sockets. Best for language servers, editor plugins, agent coordination, or high-frequency communication.
 
 ```typescript
 import { createIpcServer, getSocketPath } from "@outfitter/daemon";
 
 const ipcServer = createIpcServer(getSocketPath("my-daemon"));
 
-// Handle messages
+// Handle typed messages
 ipcServer.onMessage(async (msg) => {
   const message = msg as { type: string; payload?: unknown };
 
   switch (message.type) {
     case "status":
-      return {
-        status: "ok",
-        uptime: process.uptime(),
-        version: "1.0.0",
-      };
-
+      return { status: "ok", uptime: process.uptime() };
     case "reload":
       await reloadConfig();
       return { success: true };
-
     case "metrics":
       return getMetrics();
-
     default:
       return { error: "Unknown command" };
   }
@@ -98,33 +126,35 @@ daemon.onShutdown(async () => {
 
 // Start listening
 await ipcServer.listen();
-logger.info("IPC listening", { socket: getSocketPath("my-daemon") });
 ```
 
-### IPC Client
+CLI commands use the IPC client:
 
 ```typescript
 import { createIpcClient, getSocketPath } from "@outfitter/daemon";
 
 const client = createIpcClient(getSocketPath("my-daemon"));
-
 await client.connect();
 
-// Send message and get response
-const status = await client.send<{
-  status: string;
-  uptime: number;
-}>({ type: "status" });
+const status = await client.send<{ status: string }>({ type: "status" });
+console.log("Status:", status);
 
-console.log("Daemon status:", status);
-
-// Clean up
 client.close();
 ```
 
-## Health Checks
+### When to Use Each
 
-### Defining Checks
+| Concern | HTTP | IPC |
+|---|---|---|
+| Simplicity | Simpler — standard REST patterns | More complex — message framing, correlation |
+| External access | Any tool can `curl` | Requires the IPC client library |
+| Type safety | Untyped (parse JSON manually) | Typed request/response protocol |
+| Bidirectional | Request/response only | Full bidirectional messaging |
+| Best for | Admin APIs, health, metrics | Language servers, editor plugins, agents |
+
+The scaffold `daemon` preset uses HTTP by default. Use `--example ipc` for the IPC pattern.
+
+## Health Checks
 
 ```typescript
 import { createHealthChecker } from "@outfitter/daemon";
@@ -146,49 +176,24 @@ const healthChecker = createHealthChecker([
       try {
         await db.ping();
         return Result.ok(undefined);
-      } catch (error) {
+      } catch {
         return Result.err(new Error("Database unreachable"));
       }
-    },
-  },
-  {
-    name: "disk",
-    check: async () => {
-      const free = await getDiskSpace();
-      return free > 100 * 1024 * 1024 // 100MB
-        ? Result.ok(undefined)
-        : Result.err(new Error("Low disk space"));
     },
   },
 ]);
 ```
 
-### Exposing Health via IPC
+### Exposing Health via HTTP
 
 ```typescript
-ipcServer.onMessage(async (msg) => {
-  if (msg.type === "health") {
-    const result = await healthChecker.check();
-    return {
-      healthy: result.isOk(),
-      checks: result.isOk() ? result.value : result.error,
-    };
-  }
-});
-```
-
-### Periodic Health Checks
-
-```typescript
-const HEALTH_INTERVAL = 30000; // 30 seconds
-
-setInterval(async () => {
+if (url.pathname === "/health") {
   const result = await healthChecker.check();
-
-  if (result.isErr()) {
-    logger.warn("Health check failed", { checks: result.error });
-  }
-}, HEALTH_INTERVAL);
+  return Response.json({
+    healthy: result.isOk(),
+    checks: result.isOk() ? result.value : result.error,
+  });
+}
 ```
 
 ## PID File Management
@@ -196,28 +201,26 @@ setInterval(async () => {
 ### XDG Paths
 
 ```typescript
-import { getLockPath, getSocketPath, getLogPath } from "@outfitter/daemon";
+import { getPidPath, getSocketPath, getDaemonDir } from "@outfitter/daemon";
 
 // PID file: ~/.local/state/my-daemon/my-daemon.pid
-const pidPath = getLockPath("my-daemon");
+const pidPath = getPidPath("my-daemon");
 
 // Socket: ~/.local/state/my-daemon/my-daemon.sock
 const socketPath = getSocketPath("my-daemon");
 
-// Logs: ~/.local/state/my-daemon/logs/
-const logDir = getLogPath("my-daemon");
+// Daemon directory: ~/.local/state/my-daemon/
+const daemonDir = getDaemonDir("my-daemon");
 ```
 
 ### Checking if Running
 
 ```typescript
-import { getLockPath, isDaemonAlive, readLockPid } from "@outfitter/daemon";
+import { isDaemonAlive, getPidPath } from "@outfitter/daemon";
 
-const lockPath = getLockPath("my-daemon");
-
-if (await isDaemonAlive(lockPath)) {
-  const pid = await readLockPid(lockPath);
-  console.log(`Daemon already running (PID: ${pid})`);
+const pidPath = getPidPath("my-daemon");
+if (await isDaemonAlive(pidPath)) {
+  console.log("Daemon already running");
   process.exit(1);
 }
 ```
@@ -227,80 +230,77 @@ if (await isDaemonAlive(lockPath)) {
 ### Start Command
 
 ```typescript
-export const startCommand = command("start")
-  .option("-d, --detach", "Run in background")
+import { command } from "@outfitter/cli/command";
+import { runHandler } from "@outfitter/cli/envelope";
+import { ConflictError, Result } from "@outfitter/contracts";
+import { getPidPath, isDaemonAlive } from "@outfitter/daemon";
+import { spawn } from "node:child_process";
+
+const pidPath = getPidPath("my-daemon");
+
+command("start")
+  .description("Start the daemon")
+  .option("-f, --foreground", "Run in foreground")
   .action(async ({ flags }) => {
-    if (await isDaemonAlive(getLockPath("my-daemon"))) {
-      console.log("Daemon already running");
-      return;
-    }
+    const foreground = Boolean(flags["foreground"]);
 
-    if (flags.detach) {
-      // Spawn detached process
-      spawn("bun", ["run", "src/daemon.ts"], {
-        detached: true,
-        stdio: "ignore",
-      }).unref();
-      console.log("Daemon started in background");
-    } else {
-      // Run in foreground
-      await runDaemon();
-    }
-  })
-  .build();
+    await runHandler({
+      command: "start",
+      input: { foreground },
+      handler: async ({ foreground: fg }) => {
+        if (await isDaemonAlive(pidPath)) {
+          return Result.err(ConflictError.create("Daemon is already running"));
+        }
+
+        if (fg) {
+          const { runDaemon } = await import("./daemon-main.js");
+          await runDaemon();
+          return Result.ok({ status: "exited", mode: "foreground" });
+        }
+
+        const daemon = spawn(process.execPath, [import.meta.dir + "/daemon.js"], {
+          detached: true,
+          stdio: "ignore",
+        });
+        daemon.unref();
+        return Result.ok({ status: "started", pid: daemon.pid ?? null });
+      },
+    });
+  });
 ```
 
-### Stop Command
+### Stop Command (HTTP pattern)
 
 ```typescript
-export const stopCommand = command("stop")
+import { NotFoundError, NetworkError, Result } from "@outfitter/contracts";
+import { getSocketPath, getPidPath, isDaemonAlive } from "@outfitter/daemon";
+
+const socketPath = getSocketPath("my-daemon");
+const pidPath = getPidPath("my-daemon");
+
+command("stop")
+  .description("Stop the daemon")
   .action(async () => {
-    const client = createIpcClient(getSocketPath("my-daemon"));
+    await runHandler({
+      command: "stop",
+      input: {},
+      handler: async () => {
+        if (!(await isDaemonAlive(pidPath))) {
+          return Result.err(NotFoundError.create("daemon", "process"));
+        }
 
-    try {
-      await client.connect();
-      await client.send({ type: "shutdown" });
-      console.log("Daemon stopped");
-    } catch {
-      console.log("Daemon not running");
-    } finally {
-      client.close();
-    }
-  })
-  .build();
+        try {
+          const response = await fetch(`http://unix:${socketPath}:/shutdown`, {
+            method: "POST",
+          });
+          if (!response.ok) {
+            return Result.err(NetworkError.create("Failed to stop daemon"));
+          }
+          return Result.ok({ status: "stopped" });
+        } catch {
+          return Result.err(NetworkError.create("Failed to reach daemon"));
+        }
+      },
+    });
+  });
 ```
-
-### Status Command
-
-```typescript
-export const statusCommand = command("status")
-  .action(async () => {
-    const client = createIpcClient(getSocketPath("my-daemon"));
-
-    try {
-      await client.connect();
-      const status = await client.send<Status>({ type: "status" });
-      console.log("Status:", status);
-    } catch {
-      console.log("Daemon not running");
-    } finally {
-      client.close();
-    }
-  })
-  .build();
-```
-
-## Best Practices
-
-1. **Graceful shutdown** — Register cleanup handlers with `onShutdown`
-2. **Health checks** — Monitor critical dependencies
-3. **IPC protocol** — Use structured message types
-4. **PID files** — Use XDG paths for consistency
-5. **Logging** — Log lifecycle events for debugging
-6. **CLI commands** — Provide start/stop/status commands
-
-## Related Skills
-
-- `stack:patterns` — Handler contract
-- `stack:scaffold` — Daemon template
-- `stack:outfitter-logging` — Structured logging
