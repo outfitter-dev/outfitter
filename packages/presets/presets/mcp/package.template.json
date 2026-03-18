@@ -3,11 +3,11 @@
   "version": "{{version}}",
   "description": "{{description}}",
   "keywords": [
-    "typescript",
     "bun",
     "mcp",
     "model-context-protocol",
-    "outfitter"
+    "outfitter",
+    "typescript"
   ],
   "license": "MIT",
   "bin": {

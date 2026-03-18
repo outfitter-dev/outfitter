@@ -3,11 +3,11 @@
   "version": "{{version}}",
   "description": "{{description}}",
   "keywords": [
-    "typescript",
+    "background-service",
     "bun",
     "daemon",
-    "background-service",
-    "outfitter"
+    "outfitter",
+    "typescript"
   ],
   "license": "MIT",
   "bin": {
