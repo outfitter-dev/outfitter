@@ -56,7 +56,10 @@ type GuardrailTool =
   | "readme-typecheck"
   | "schema-annotation"
   | "ultracite";
-type ExecutableGuardrailTool = Exclude<GuardrailTool, "schema-annotation">;
+type ExecutableGuardrailTool = Exclude<
+  GuardrailTool,
+  "schema-annotation" | "readme-typecheck"
+>;
 
 export interface TemplateGuardrailFailure {
   readonly output: string;

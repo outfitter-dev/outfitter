@@ -18,14 +18,14 @@
 ### CLI
 
 ```bash
-{{projectName}}-cli hello World
+{{projectName}} greet World
 ```
 
 ```json
 {
   "ok": true,
-  "command": "hello",
-  "result": { "message": "Hello, World!" }
+  "command": "greet",
+  "result": { "message": "Hello, World." }
 }
 ```
 
