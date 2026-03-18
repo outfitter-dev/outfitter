@@ -21,7 +21,7 @@ describe("create planner", () => {
       packageName: "hello-cli",
       projectName: "hello-cli",
       version: "0.1.0",
-      description: "A new project created with Outfitter",
+      description: "CLI built with @outfitter/cli",
       binName: "hello-cli",
       year: "2026",
     });

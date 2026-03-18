@@ -22,6 +22,16 @@ import { runPostScaffold } from "../engine/post-scaffold.js";
 import type { TargetDefinition } from "../targets/index.js";
 import type { InitPresetId } from "./init-option-resolution.js";
 
+const DEFAULT_INIT_DESCRIPTIONS: Record<string, string> = {
+  cli: "CLI built with @outfitter/cli",
+  library: "TypeScript library built with Outfitter",
+  mcp: "MCP server built with @outfitter/mcp",
+  daemon: "Background daemon built with @outfitter/daemon",
+  "full-stack": "Full-stack project with shared handlers, CLI, and MCP",
+  minimal: "TypeScript project built with Outfitter",
+  basic: "TypeScript project built with Outfitter",
+};
+
 // =============================================================================
 // Example Overlays
 // =============================================================================
@@ -161,7 +171,9 @@ function buildInitPlan(
       packageName: input.packageName,
       binName: resolvedBinName,
       version: "0.1.0",
-      description: "A new project created with Outfitter",
+      description:
+        DEFAULT_INIT_DESCRIPTIONS[target.id] ??
+        "A new project created with Outfitter",
       author: resolveAuthor(),
       year: resolveYear(),
     },
