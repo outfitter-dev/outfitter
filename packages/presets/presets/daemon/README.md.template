@@ -16,6 +16,9 @@ A background daemon with CLI control interface.
 # Check status
 {{binName}} status
 
+# Check health (returns error if daemon is down)
+{{binName}} health
+
 # Stop daemon
 {{binName}} stop
 ```
