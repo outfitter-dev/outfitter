@@ -16,6 +16,7 @@ import {
   Result,
 } from "@outfitter/contracts";
 import { getSocketPath, getPidPath, isDaemonAlive } from "@outfitter/daemon";
+import { z } from "zod";
 
 const TOOL_NAME = "{{binName}}";
 const socketPath = getSocketPath(TOOL_NAME);
@@ -30,13 +31,21 @@ const program = createCLI({
 program.register(
   command("start")
     .description("Start the daemon")
+    .input(
+      z.object({
+        foreground: z
+          .boolean()
+          .default(false)
+          .describe(
+            "Run in foreground instead of spawning a background process"
+          ),
+      })
+    )
     .option("-f, --foreground", "Run in foreground")
-    .action(async ({ flags }) => {
-      const foreground = Boolean(flags["foreground"]);
-
+    .action(async ({ input }) => {
       await runHandler({
         command: "start",
-        input: { foreground },
+        input,
         handler: async ({ foreground: fg }) => {
           if (await isDaemonAlive(pidPath)) {
             return Result.err(
