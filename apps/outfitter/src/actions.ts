@@ -24,6 +24,7 @@ import { demoAction } from "./actions/demo.js";
 import {
   docsApiAction,
   docsExportAction,
+  docsIndexAction,
   docsListAction,
   docsSearchAction,
   docsShowAction,
@@ -72,4 +73,5 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(docsShowAction)
   .add(docsSearchAction)
   .add(docsApiAction)
-  .add(docsExportAction);
+  .add(docsExportAction)
+  .add(docsIndexAction);

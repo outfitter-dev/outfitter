@@ -105,6 +105,12 @@
         "default": "./dist/commands/docs-export.js"
       }
     },
+    "./commands/docs-index": {
+      "import": {
+        "types": "./dist/commands/docs-index.d.ts",
+        "default": "./dist/commands/docs-index.js"
+      }
+    },
     "./commands/docs-list": {
       "import": {
         "types": "./dist/commands/docs-list.d.ts",
@@ -169,6 +175,12 @@
       "import": {
         "types": "./dist/commands/jq-utils.d.ts",
         "default": "./dist/commands/jq-utils.js"
+      }
+    },
+    "./commands/mcp-start": {
+      "import": {
+        "types": "./dist/commands/mcp-start.d.ts",
+        "default": "./dist/commands/mcp-start.js"
       }
     },
     "./commands/repo": {

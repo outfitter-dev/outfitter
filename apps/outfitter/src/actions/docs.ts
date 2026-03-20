@@ -25,6 +25,11 @@ import {
   runDocsExport,
 } from "../commands/docs-export.js";
 import {
+  type DocsIndexInput,
+  printDocsIndexResults,
+  runDocsIndex,
+} from "../commands/docs-index.js";
+import {
   type DocsListInput,
   printDocsListResults,
   runDocsList,
@@ -168,8 +173,7 @@ export const docsShowAction: DocsShowAction = defineAction({
 const docsSearchInputSchema = z.object({
   query: z.string(),
   cwd: z.string(),
-  kind: z.string().optional(),
-  package: z.string().optional(),
+  limit: z.number().int().positive().optional(),
   jq: z.string().optional(),
   outputMode: outputModeSchema,
 });
@@ -182,25 +186,20 @@ type DocsSearchAction = ReturnType<
   typeof defineAction<DocsSearchInput, unknown>
 >;
 
-/** Search documentation content for a query string. */
+/** Search documentation using qmd hybrid search index. */
 export const docsSearchAction: DocsSearchAction = defineAction({
   id: "docs.search",
-  description: "Search documentation content for a query string",
-  surfaces: ["cli"],
+  description: "Search documentation using hybrid BM25 + vector search",
+  surfaces: ["cli", "mcp"],
   input: docsSearchInputSchema,
   cli: {
     group: "docs",
     command: "search <query>",
-    description: "Search documentation content for a query string",
+    description: "Search documentation using hybrid BM25 + vector search",
     options: [
       {
-        flags: "-k, --kind <kind>",
-        description:
-          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
-      },
-      {
-        flags: "-p, --package <name>",
-        description: "Filter by package name",
+        flags: "-l, --limit <number>",
+        description: "Maximum number of results to return (default: 10)",
       },
       ...docsSearchOutputMode.options,
       ...docsSearchJq.options,
@@ -209,16 +208,16 @@ export const docsSearchAction: DocsSearchAction = defineAction({
     mapInput: (context) => {
       const { jq } = docsSearchJq.resolve(context.flags);
       const { mode: outputMode } = resolveOutputMode(context.flags);
-      const kind = resolveStringFlag(context.flags["kind"]);
-      const pkg = resolveStringFlag(context.flags["package"]);
+      const limitRaw = context.flags["limit"];
+      const limit =
+        typeof limitRaw === "string" ? parseInt(limitRaw, 10) : undefined;
 
       return {
         query: context.args[0] as string,
         cwd: resolveCwdFromPreset(context.flags, docsSearchCwd),
         outputMode,
         jq,
-        ...(kind !== undefined ? { kind } : {}),
-        ...(pkg !== undefined ? { package: pkg } : {}),
+        ...(limit !== undefined && !Number.isNaN(limit) ? { limit } : {}),
       };
     },
   },
@@ -383,6 +382,53 @@ export const docsExportAction: DocsExportAction = defineAction({
     }
 
     await printDocsExportResults(result.value, { mode: outputMode });
+    return Result.ok(result.value);
+  },
+});
+
+// ---------------------------------------------------------------------------
+// docs.index
+// ---------------------------------------------------------------------------
+
+const docsIndexInputSchema = z.object({
+  cwd: z.string(),
+  outputMode: outputModeSchema,
+});
+
+const docsIndexCwd = cwdPreset();
+const docsIndexOutputMode = outputModePreset({ includeJsonl: true });
+
+type DocsIndexAction = ReturnType<typeof defineAction<DocsIndexInput, unknown>>;
+
+/** Assemble docs and build qmd search index. */
+export const docsIndexAction: DocsIndexAction = defineAction({
+  id: "docs.index",
+  description: "Build search index from project documentation",
+  surfaces: ["cli", "mcp"],
+  input: docsIndexInputSchema,
+  cli: {
+    group: "docs",
+    command: "index",
+    description: "Assemble docs and build search index",
+    options: [...docsIndexOutputMode.options, ...docsIndexCwd.options],
+    mapInput: (context) => {
+      const { mode: outputMode } = resolveOutputMode(context.flags);
+
+      return {
+        cwd: resolveCwdFromPreset(context.flags, docsIndexCwd),
+        outputMode,
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode } = input;
+    const result = await runDocsIndex(input);
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsIndexResults(result.value, { mode: outputMode });
     return Result.ok(result.value);
   },
 });

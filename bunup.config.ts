@@ -511,6 +511,10 @@ export default defineWorkspace(
       name: "@outfitter/docs",
       root: "packages/docs",
       config: withDefaults({
+        // Exclude qmd from bundling — it has native dependencies (better-sqlite3,
+        // sqlite-vec, node-llama-cpp) that can't be bundled. It's dynamically
+        // imported at runtime only when search features are used.
+        external: ["@tobilu/qmd"],
         exports: {
           exclude: [
             "./cli",

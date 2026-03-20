@@ -19,6 +19,7 @@ import { createContext, generateRequestId } from "@outfitter/contracts";
 import { createOutfitterLoggerFactory } from "@outfitter/logging";
 
 import { outfitterActions } from "./actions.js";
+import { createMcpCommand } from "./commands/mcp-start.js";
 import { createRepoCommand } from "./commands/repo.js";
 
 // =============================================================================
@@ -72,6 +73,7 @@ function createProgram() {
     cli.register(command);
   }
 
+  cli.register(createMcpCommand());
   cli.register(createRepoCommand());
 
   return cli;

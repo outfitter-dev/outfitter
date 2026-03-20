@@ -15,6 +15,7 @@ describe("docs.search action", () => {
     expect(action?.id).toBe("docs.search");
     expect(action?.description).toBeDefined();
     expect(action?.surfaces).toContain("cli");
+    expect(action?.surfaces).toContain("mcp");
   });
 
   test("has CLI group 'docs' and command 'search <query>'", () => {
@@ -53,24 +54,24 @@ describe("docs.search action", () => {
     expect(mapped.cwd).toBe(process.cwd());
   });
 
-  test("mapInput resolves --kind filter flag", () => {
+  test("mapInput resolves --limit flag as number", () => {
     const action = outfitterActions.get("docs.search");
     const mapped = action?.cli?.mapInput?.({
       args: ["handler"],
-      flags: { kind: "guide" },
-    }) as { kind: string | undefined };
+      flags: { limit: "5" },
+    }) as { limit: number | undefined };
 
-    expect(mapped.kind).toBe("guide");
+    expect(mapped.limit).toBe(5);
   });
 
-  test("mapInput resolves --package filter flag", () => {
+  test("mapInput omits limit when flag not provided", () => {
     const action = outfitterActions.get("docs.search");
     const mapped = action?.cli?.mapInput?.({
       args: ["handler"],
-      flags: { package: "cli" },
-    }) as { package: string | undefined };
+      flags: {},
+    }) as { limit?: number };
 
-    expect(mapped.package).toBe("cli");
+    expect(mapped.limit).toBeUndefined();
   });
 
   test("mapInput resolves output mode from flags", () => {

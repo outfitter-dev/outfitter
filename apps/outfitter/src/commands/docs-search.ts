@@ -1,14 +1,15 @@
 /**
- * `outfitter docs search` - Full-text search across documentation content.
+ * `outfitter docs search` - Hybrid search across documentation via qmd.
  *
- * Generates the docs map from the workspace, reads each matching file,
- * and performs case-insensitive substring search to find matching lines.
+ * Uses the qmd-backed search index for BM25 keyword + vector similarity
+ * search. Falls back to lazy-indexing if no index exists yet.
  *
  * @packageDocumentation
  */
 
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
@@ -16,8 +17,6 @@ import { createTheme } from "@outfitter/tui/render";
 
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
-import { loadDocsModule } from "./docs-module-loader.js";
-import type { DocsMapEntryShape } from "./docs-types.js";
 import { applyJq } from "./jq-utils.js";
 
 // ---------------------------------------------------------------------------
@@ -28,20 +27,16 @@ import { applyJq } from "./jq-utils.js";
 export interface DocsSearchInput {
   readonly cwd: string;
   readonly jq?: string | undefined;
-  readonly kind?: string | undefined;
+  readonly limit?: number | undefined;
   readonly outputMode: CliOutputMode;
-  readonly package?: string | undefined;
   readonly query: string;
 }
 
-/** A single match found in a documentation file. */
+/** A single search hit from the qmd index. */
 export interface DocsSearchMatch {
-  readonly id: string;
-  readonly kind: string;
-  readonly matchLines: string[];
-  readonly outputPath: string;
-  readonly package?: string;
-  readonly sourcePath: string;
+  readonly path: string;
+  readonly score: number;
+  readonly snippet: string;
   readonly title: string;
 }
 
@@ -53,90 +48,95 @@ export interface DocsSearchOutput {
 }
 
 // ---------------------------------------------------------------------------
+// Lazy index path
+// ---------------------------------------------------------------------------
+
+/** Default index database path under `~/.outfitter/docs/`. */
+const DEFAULT_INDEX_PATH = join(
+  homedir(),
+  ".outfitter",
+  "docs",
+  "index.sqlite"
+);
+
+// ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
 
 /**
- * Search documentation content for a query string.
+ * Search documentation using the qmd hybrid search index.
  *
- * Generates the docs map for the workspace, reads each file's content,
- * and performs case-insensitive substring matching to find relevant lines.
+ * If the index does not exist yet, runs `docs.index` first (lazy indexing)
+ * to build the index before searching.
  *
  * @param input - Validated action input
- * @returns Result containing the search matches or an error
+ * @returns Result containing search results or an error
  */
 export async function runDocsSearch(
   input: DocsSearchInput
 ): Promise<Result<DocsSearchOutput, InternalError>> {
   try {
     const cwd = resolve(input.cwd);
-    const docsModule = await loadDocsModule();
-    const mapResult = await docsModule.generateDocsMap({ workspaceRoot: cwd });
 
-    if (mapResult.isErr()) {
-      return Result.err(
-        new InternalError({
-          message: mapResult.error.message,
-          context: { action: "docs.search" },
-        })
-      );
-    }
+    // Lazy-index: build the index if it doesn't exist yet
+    if (!existsSync(DEFAULT_INDEX_PATH)) {
+      const { runDocsIndex } = (await import("./docs-index.js")) as {
+        runDocsIndex: typeof import("./docs-index.js").runDocsIndex;
+      };
 
-    // better-result's Result2 dist alias prevents tsc from narrowing .value;
-    // cast through the known DocsMap shape
-    const rawMap = mapResult.value as {
-      entries: DocsMapEntryShape[];
-    };
+      const indexResult = await runDocsIndex({ cwd, outputMode: "human" });
 
-    let entries = rawMap.entries;
-
-    // Apply kind filter
-    if (input.kind) {
-      entries = entries.filter((entry) => entry.kind === input.kind);
-    }
-
-    // Apply package filter
-    if (input.package) {
-      entries = entries.filter((entry) => entry.package === input.package);
-    }
-
-    const queryLower = input.query.toLowerCase();
-    const matches: DocsSearchMatch[] = [];
-
-    for (const entry of entries) {
-      const sourcePath = resolve(cwd, entry.sourcePath);
-      try {
-        const content = await readFile(sourcePath, "utf8");
-        const lines = content.split("\n");
-        const matchLines: string[] = [];
-
-        for (const line of lines) {
-          if (line.toLowerCase().includes(queryLower)) {
-            matchLines.push(line);
-          }
-        }
-
-        if (matchLines.length > 0) {
-          matches.push({
-            id: entry.id,
-            kind: entry.kind,
-            title: entry.title,
-            sourcePath: entry.sourcePath,
-            outputPath: entry.outputPath,
-            ...(entry.package !== undefined ? { package: entry.package } : {}),
-            matchLines,
-          });
-        }
-      } catch {
-        // Skip files that cannot be read (e.g. deleted since map generation)
+      if (indexResult.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: `Failed to build search index: ${indexResult.error.message}`,
+            context: { action: "docs.search" },
+          })
+        );
       }
     }
 
-    return Result.ok({
-      matches,
-      query: input.query,
-      total: matches.length,
+    // Dynamically import to avoid hard dep at module level
+    const { createDocsSearch } = (await import("@outfitter/docs/search")) as {
+      createDocsSearch: typeof import("@outfitter/docs/search").createDocsSearch;
+    };
+
+    const assemblyPath = join(homedir(), ".outfitter", "docs", "assembled");
+
+    const docs = await createDocsSearch({
+      name: "outfitter",
+      paths: [assemblyPath],
+      assemblyPath,
     });
+
+    try {
+      const limit = input.limit ?? 10;
+      const searchResult = await docs.search(input.query, { limit });
+
+      if (searchResult.isErr()) {
+        return Result.err(
+          new InternalError({
+            message: searchResult.error.message,
+            context: { action: "docs.search" },
+          })
+        );
+      }
+
+      const matches: DocsSearchMatch[] = searchResult.value.map((hit) => ({
+        path: hit.path,
+        score: hit.score,
+        snippet: hit.snippet,
+        title: hit.title,
+      }));
+
+      return Result.ok({
+        matches,
+        query: input.query,
+        total: matches.length,
+      });
+    } finally {
+      await docs.close();
+    }
   } catch (error) {
     return Result.err(
       new InternalError({
@@ -193,20 +193,15 @@ export async function printDocsSearchResults(
   lines.push("");
 
   for (const match of result.matches) {
-    const pkg = match.package ? theme.muted(` [${match.package}]`) : "";
-    const kind = theme.muted(`(${match.kind})`);
-    lines.push(`  ${match.id} ${kind}${pkg}`);
-    lines.push(`    ${match.title}`);
-    lines.push(
-      `    ${theme.muted(`${match.matchLines.length} matching line(s)`)}`
-    );
-    for (const line of match.matchLines.slice(0, 3)) {
-      lines.push(`      ${theme.muted(line.trim())}`);
-    }
-    if (match.matchLines.length > 3) {
-      lines.push(
-        `      ${theme.muted(`... and ${match.matchLines.length - 3} more`)}`
-      );
+    const scoreLabel = theme.muted(`(score: ${match.score.toFixed(2)})`);
+    lines.push(`  ${match.title} ${scoreLabel}`);
+    lines.push(`    ${theme.muted(match.path)}`);
+    if (match.snippet) {
+      // Show first 3 lines of snippet
+      const snippetLines = match.snippet.split("\n").slice(0, 3);
+      for (const line of snippetLines) {
+        lines.push(`      ${theme.muted(line.trim())}`);
+      }
     }
     lines.push("");
   }
