@@ -5,6 +5,8 @@
 import { describe, expect, test } from "bun:test";
 
 import { Command } from "commander";
+import { z } from "zod";
+
 import { command, commandGroup } from "../command.js";
 
 describe("commandGroup", () => {
@@ -44,7 +46,6 @@ describe("commandGroup", () => {
   });
 
   test("children with typed input schemas derive flags", () => {
-    const { z } = require("zod");
     const schema = z.object({ query: z.string().describe("Search query") });
 
     const group = commandGroup("search", "Search commands", [
@@ -55,8 +56,6 @@ describe("commandGroup", () => {
     ]);
 
     const fullCmd = group.commands[0]!;
-    expect(
-      fullCmd.options.some((o: { long?: string }) => o.long === "--query")
-    ).toBe(true);
+    expect(fullCmd.options.some((o) => o.long === "--query")).toBe(true);
   });
 });

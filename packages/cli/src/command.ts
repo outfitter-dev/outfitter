@@ -211,6 +211,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private _idempotent = false;
   private readonly _relatedTo: RelatedToDeclaration[] = [];
   private readonly _subcommands: CommandBuilder<unknown, unknown>[] = [];
+  private subcommandsApplied = false;
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -442,9 +443,12 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       (this.cmd as CommandWithHints).__relatedTo = [...this._relatedTo];
     }
 
-    // Add nested subcommands
-    for (const sub of this._subcommands) {
-      this.cmd.addCommand(sub.build());
+    // Add nested subcommands (guarded against double-build)
+    if (!this.subcommandsApplied) {
+      this.subcommandsApplied = true;
+      for (const sub of this._subcommands) {
+        this.cmd.addCommand(sub.build());
+      }
     }
 
     return this.cmd;
