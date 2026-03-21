@@ -71,6 +71,8 @@ export interface InitOptions {
   readonly example?: string | undefined;
   /** Overwrite existing files without prompting. */
   readonly force: boolean;
+  /** Skip files that already exist instead of failing. */
+  readonly skipExisting?: boolean | undefined;
   /** Timeout in milliseconds for `bun install`. */
   readonly installTimeout?: number | undefined;
   /** Use `workspace:*` protocol for `@outfitter` dependencies. */
@@ -122,6 +124,8 @@ export interface InitResult {
   readonly projectDir: string;
   /** Absolute path to the workspace or project root. */
   readonly rootDir: string;
+  /** Absolute paths of files that were skipped because they already existed (when `--skip-existing` is enabled). */
+  readonly skippedFiles?: readonly string[] | undefined;
   /** Whether a single package or workspace was created. */
   readonly structure: InitStructure;
 }
@@ -433,6 +437,7 @@ export async function runInit(
   const executeResult = await executeInitPipeline(input, targetResult.value, {
     dryRun: Boolean(options.dryRun),
     force: options.force,
+    skipExisting: Boolean(options.skipExisting),
     skipInstall: Boolean(options.skipInstall),
     skipGit: Boolean(options.skipGit),
     skipCommit: Boolean(options.skipCommit),

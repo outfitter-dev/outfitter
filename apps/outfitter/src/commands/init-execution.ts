@@ -126,6 +126,7 @@ export interface InitExecutionOptions {
   readonly force: boolean;
   readonly installTimeout: number;
   readonly skipCommit: boolean;
+  readonly skipExisting: boolean;
   readonly skipGit: boolean;
   readonly skipInstall: boolean;
 }
@@ -144,6 +145,8 @@ export interface InitExecutionResult {
   readonly preset: InitPresetId;
   readonly projectDir: string;
   readonly rootDir: string;
+  /** Absolute paths of files that were skipped because they already existed (when `--skip-existing` is enabled). */
+  readonly skippedFiles?: readonly string[] | undefined;
   readonly structure: InitStructure;
 }
 
@@ -257,10 +260,11 @@ export async function executeInitPipeline(
   if (resolvedInput.structure === "single") {
     if (
       existsSync(join(resolvedInput.rootDir, "package.json")) &&
-      !options.force
+      !options.force &&
+      !options.skipExisting
     ) {
       return Result.err(
-        `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite, or use 'outfitter add' for existing projects.`
+        `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite, --skip-existing to skip existing files, or use 'outfitter add' for existing projects.`
       );
     }
   } else {
@@ -271,9 +275,13 @@ export async function executeInitPipeline(
       "package.json"
     );
     if (options.dryRun) {
-      if (existsSync(workspacePackageJsonPath) && !options.force) {
+      if (
+        existsSync(workspacePackageJsonPath) &&
+        !options.force &&
+        !options.skipExisting
+      ) {
         return Result.err(
-          `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite.`
+          `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite or --skip-existing to skip existing files.`
         );
       }
 
@@ -355,9 +363,12 @@ export async function executeInitPipeline(
     resolvedBinName
   );
 
+  const skippedFiles = options.skipExisting ? new Set<string>() : undefined;
+
   const executeResult = await executePlan(plan, {
     force: options.force,
     ...(collector ? { collector } : {}),
+    ...(options.skipExisting ? { skipExisting: true, skippedFiles } : {}),
   });
 
   if (executeResult.isErr()) {
@@ -392,5 +403,8 @@ export async function executeInitPipeline(
     blocksAdded: executeResult.value.blocksAdded,
     postScaffold: postScaffoldResult.value,
     ...(collector ? { dryRunPlan: collector.toJSON() } : {}),
+    ...(executeResult.value.skippedFiles
+      ? { skippedFiles: executeResult.value.skippedFiles }
+      : {}),
   });
 }

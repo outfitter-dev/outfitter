@@ -58,6 +58,30 @@ Actions are defined in `packages/core/src/actions.ts` using `defineAction()` fro
 6. Wire CLI command in `apps/cli/src/cli.ts` from the action definition
 7. Wire MCP tool in `apps/mcp/src/mcp.ts` from the action definition
 
+### Nested Subcommands
+
+Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
+
+```typescript
+import { command, commandGroup } from "@outfitter/cli/command";
+
+// Fluent style
+program.register(
+  command("entity")
+    .description("Manage entities")
+    .subcommand(command("add").description("Add entity").action(handler))
+    .subcommand(command("show").description("Show entity").action(handler))
+);
+
+// Declarative style
+program.register(
+  commandGroup("entity", "Manage entities", [
+    command("add").description("Add entity").action(handler),
+    command("show").description("Show entity").action(handler),
+  ])
+);
+```
+
 ## Development Principles
 
 - **TDD-First** — Write the test before the code (Red / Green / Refactor)

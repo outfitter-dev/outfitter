@@ -210,6 +210,7 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
   private _readOnly = false;
   private _idempotent = false;
   private readonly _relatedTo: RelatedToDeclaration[] = [];
+  private readonly _subcommands: CommandBuilder<unknown, unknown>[] = [];
 
   constructor(signature: string) {
     const { name, argumentsSpec } = parseCommandSignature(signature);
@@ -308,6 +309,12 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       target,
       ...(options?.description ? { description: options.description } : {}),
     });
+    return this;
+  }
+
+  // eslint-disable-next-line typescript/no-explicit-any -- internal impl; typed at interface level
+  subcommand(sub: CommandBuilder<any, any>): this {
+    this._subcommands.push(sub);
     return this;
   }
 
@@ -435,6 +442,11 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
       (this.cmd as CommandWithHints).__relatedTo = [...this._relatedTo];
     }
 
+    // Add nested subcommands
+    for (const sub of this._subcommands) {
+      this.cmd.addCommand(sub.build());
+    }
+
     return this.cmd;
   }
 
@@ -544,4 +556,38 @@ class CommandBuilderImpl implements CommandBuilder<any, any> {
  */
 export function command(name: string): CommandBuilder {
   return new CommandBuilderImpl(name);
+}
+
+/**
+ * Create a command group — a parent command with child subcommands.
+ *
+ * This is a declarative alternative to chaining `.subcommand()` calls.
+ * Best for at-a-glance definitions where all children are known upfront.
+ *
+ * @param name - Parent command name
+ * @param description - Parent command description
+ * @param children - Array of CommandBuilder instances for subcommands
+ * @returns A Commander Command ready to be registered
+ *
+ * @example
+ * ```typescript
+ * program.register(
+ *   commandGroup("entity", "Manage entities", [
+ *     command("add").description("Add entity").action(handler),
+ *     command("show").description("Show entity").action(handler),
+ *   ])
+ * );
+ * ```
+ */
+export function commandGroup(
+  name: string,
+  description: string,
+  children: readonly CommandBuilder<unknown, unknown>[]
+): Command {
+  const parent = new Command(name);
+  parent.description(description);
+  for (const child of children) {
+    parent.addCommand(child.build());
+  }
+  return parent;
 }

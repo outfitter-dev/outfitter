@@ -297,6 +297,17 @@ export function copyPresetFiles(
           copyOptions.overwritablePaths.has(targetPath));
 
       if (targetExists && !options.force && !canOverlay) {
+        if (options.skipExisting) {
+          options.skippedFiles?.add(targetPath);
+          if (options.collector) {
+            options.collector.add({
+              type: "file-skip",
+              path: targetPath,
+              reason: "exists",
+            });
+          }
+          continue;
+        }
         if (options.collector) {
           options.collector.add({
             type: "file-skip",

@@ -10,7 +10,7 @@
 import { command, createCLI } from "@outfitter/cli/command";
 import { runHandler } from "@outfitter/cli/envelope";
 import type { CLIHint } from "@outfitter/contracts";
-import { Result } from "@outfitter/contracts";
+import { NotFoundError, Result } from "@outfitter/contracts";
 import { createLogger } from "@outfitter/logging";
 import { z } from "zod";
 
@@ -189,13 +189,18 @@ program.register(
           { description: "List available todos", command: "{{binName}} list" },
         ],
         handler: async (inp) => {
-          const todo = store.find((t) => t.id === inp.id);
-          if (!todo) {
-            return Result.err(new Error(`Todo #${inp.id} not found`));
+          const index = store.findIndex((t) => t.id === inp.id);
+          if (index === -1) {
+            return Result.err(NotFoundError.create("todo", String(inp.id)));
           }
-          (todo as { done: boolean }).done = true;
-          logger.info(`Completed todo #${todo.id}: ${todo.title}`);
-          return Result.ok({ id: todo.id, title: todo.title, done: true });
+          const completed = { ...store[index], done: true as const };
+          store[index] = completed;
+          logger.info(`Completed todo #${completed.id}: ${completed.title}`);
+          return Result.ok({
+            id: completed.id,
+            title: completed.title,
+            done: true,
+          });
         },
       });
     })

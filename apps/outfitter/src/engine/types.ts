@@ -56,6 +56,8 @@ export interface ScaffoldPlan {
 export interface ScaffoldResult {
   readonly blocksAdded?: AddBlockResult | undefined;
   readonly projectDir: string;
+  /** Absolute paths of files that were skipped because they already existed (when `skipExisting` is enabled). */
+  readonly skippedFiles?: readonly string[] | undefined;
 }
 
 /**
@@ -71,6 +73,9 @@ export interface EngineCollector {
 export interface EngineOptions {
   readonly collector?: EngineCollector | undefined;
   readonly force: boolean;
+  readonly skipExisting?: boolean | undefined;
+  /** Mutable set populated by the engine with absolute paths of files skipped due to `skipExisting`. */
+  readonly skippedFiles?: Set<string> | undefined;
 }
 
 /**

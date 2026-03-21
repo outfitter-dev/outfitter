@@ -199,7 +199,12 @@ export async function executePlan(
       return Result.err(new ScaffoldError("Plan contains no copy-preset step"));
     }
 
-    return Result.ok({ projectDir, blocksAdded });
+    const skippedFiles =
+      options.skippedFiles && options.skippedFiles.size > 0
+        ? [...options.skippedFiles]
+        : undefined;
+
+    return Result.ok({ projectDir, blocksAdded, skippedFiles });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return Result.err(
