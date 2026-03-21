@@ -131,7 +131,7 @@ export async function executePlan(
             exampleTargetDir,
             plan.values,
             options,
-            { allowOverwrite: true }
+            { allowOverwrite: !options.skipExisting }
           );
           if (exampleResult.isErr()) {
             return exampleResult;
@@ -141,6 +141,13 @@ export async function executePlan(
 
         case "inject-shared-config": {
           if (!projectDir) {
+            break;
+          }
+          // Skip config injection when the package.json pre-existed and skipExisting is set
+          if (
+            options.skipExisting &&
+            options.skippedFiles?.has(join(projectDir, "package.json"))
+          ) {
             break;
           }
           if (options.collector) {

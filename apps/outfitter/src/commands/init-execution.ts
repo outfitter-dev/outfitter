@@ -344,7 +344,8 @@ export async function executeInitPipeline(
       const workspaceResult = scaffoldWorkspaceRoot(
         resolvedInput.rootDir,
         workspaceName,
-        options.force
+        options.force,
+        { skipExisting: options.skipExisting }
       );
       if (workspaceResult.isErr()) {
         return Result.err(workspaceResult.error.message);

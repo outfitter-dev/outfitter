@@ -193,7 +193,11 @@ program.register(
           if (index === -1) {
             return Result.err(NotFoundError.create("todo", String(inp.id)));
           }
-          const completed = { ...store[index], done: true as const };
+          const todo = store[index];
+          if (!todo) {
+            return Result.err(NotFoundError.create("todo", String(inp.id)));
+          }
+          const completed = { ...todo, done: true as const };
           store[index] = completed;
           logger.info(`Completed todo #${completed.id}: ${completed.title}`);
           return Result.ok({

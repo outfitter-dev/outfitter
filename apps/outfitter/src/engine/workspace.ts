@@ -91,11 +91,15 @@ export function buildWorkspaceRootPackageJson(workspaceName: string): string {
 export function scaffoldWorkspaceRoot(
   rootDir: string,
   workspaceName: string,
-  force: boolean
+  force: boolean,
+  options?: { readonly skipExisting?: boolean }
 ): Result<void, ScaffoldError> {
   const packageJsonPath = join(rootDir, "package.json");
 
   if (existsSync(packageJsonPath) && !force) {
+    if (options?.skipExisting) {
+      return Result.ok(undefined);
+    }
     return Result.err(
       new ScaffoldError(
         `Directory '${rootDir}' already has a package.json. Use --force to overwrite.`
