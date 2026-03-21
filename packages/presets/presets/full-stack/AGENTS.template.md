@@ -89,7 +89,7 @@ This produces `mycli entity list` without manually wiring parent/child commands 
 6. Wire CLI command in `apps/cli/src/cli.ts` from the action definition
 7. Wire MCP tool in `apps/mcp/src/mcp.ts` from the action definition
 
-### Nested Subcommands
+### Nested Commands
 
 Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
 

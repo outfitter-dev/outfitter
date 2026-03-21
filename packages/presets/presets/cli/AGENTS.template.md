@@ -71,7 +71,7 @@ defineAction({
 // Produces: mycli entity list
 ```
 
-### Nested Subcommands
+### Nested Commands
 
 Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
 

@@ -171,9 +171,14 @@ import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
 const commands = buildCliCommands(registry, {
   onResult: defaultOnResult,
 });
+```
+
+With a custom context factory (recommended for real apps):
+
+```typescript
+import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
 import { createContext } from "@outfitter/contracts";
 
-// With custom context factory (recommended for real apps)
 const commands = buildCliCommands(registry, {
   onResult: defaultOnResult,
   createContext: ({ action }) => {
@@ -194,6 +199,8 @@ const commands = buildCliCommands(registry, {
 
 ```typescript
 import type { ActionResultContext } from "@outfitter/cli/actions";
+import { output } from "@outfitter/cli";
+import { resolveOutputMode } from "@outfitter/cli/query";
 
 async function myOnResult(ctx: ActionResultContext): Promise<void> {
   if (ctx.result.isErr()) {
