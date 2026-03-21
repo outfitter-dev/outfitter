@@ -308,6 +308,51 @@ function createCommand(
   return command;
 }
 
+/**
+ * Convert an action registry (or array of action specs) into Commander commands.
+ *
+ * Actions with a `cli.group` value are automatically collected into nested
+ * subcommands under a shared parent command — no manual wiring needed.
+ *
+ * **Important**: Without the `onResult` option, handler success values are
+ * silently discarded (only errors are thrown). Pass {@link defaultOnResult} for
+ * automatic output based on CLI flags (`--output`, `--json`, `--jsonl`).
+ *
+ * @param source - An `ActionRegistry` or array of `AnyActionSpec` to convert
+ * @param options - Configuration for context creation, surface filtering, result handling, and schema commands
+ * @param options.onResult - Called after each handler completes. When provided, errors are **not** auto-thrown — the callback is responsible for error handling. Use {@link defaultOnResult} for batteries-included output.
+ * @param options.createContext - Factory for the `HandlerContext` passed to each handler. Defaults to `createContext({ cwd: process.cwd(), env: process.env })`.
+ * @param options.includeSurfaces - Which surfaces to include. Defaults to `["cli"]`.
+ * @param options.schema - Controls the auto-generated `schema` subcommand. Pass `false` to disable.
+ * @returns Array of Commander `Command` instances ready to register on a program
+ *
+ * @example
+ * ```typescript
+ * import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+ *
+ * // Batteries-included: auto-outputs handler results
+ * for (const command of buildCliCommands(registry, {
+ *   onResult: defaultOnResult,
+ * })) {
+ *   program.register(command);
+ * }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Custom onResult for logging + output
+ * for (const command of buildCliCommands(registry, {
+ *   onResult: async (ctx) => {
+ *     if (ctx.result.isErr()) throw ctx.result.error;
+ *     logger.info("success", { action: ctx.action.id });
+ *     const { mode } = resolveOutputMode(ctx.flags);
+ *     await output(ctx.result.value, mode);
+ *   },
+ * })) {
+ *   program.register(command);
+ * }
+ * ```
+ */
 export function buildCliCommands(
   source: ActionSource,
   options: BuildCliCommandsOptions = {}
