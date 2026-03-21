@@ -38,18 +38,17 @@ describe("CommandBuilder.subcommand()", () => {
     expect(names).toEqual(["add", "show"]);
   });
 
-  test("subcommand calls are chainable", () => {
-    const builder = command("parent")
-      .description("Parent")
-      .subcommand(
-        command("a")
-          .description("A")
-          .action(async () => {})
-      );
+  test("subcommand calls are chainable (returns this)", () => {
+    const original = command("parent").description("Parent");
+    const chained = original.subcommand(
+      command("a")
+        .description("A")
+        .action(async () => {})
+    );
 
-    // Should return `this` for chaining
-    expect(builder).toBeDefined();
-    const parent = builder.build();
+    // .subcommand() must return the same builder instance
+    expect(chained).toBe(original);
+    const parent = chained.build();
     expect(parent.commands).toHaveLength(1);
   });
 
