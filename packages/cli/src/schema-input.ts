@@ -166,11 +166,33 @@ export function deriveFlags(
       case "number":
         flagString = `${longFlag} <n>`;
         break;
+      case "string":
       case "enum":
         flagString = `${longFlag} <value>`;
         break;
+      case "array":
+      case "union":
+      case "discriminatedUnion":
+      case "tuple":
+      case "record":
+      case "object":
+      case "intersection":
+      case "date":
+      case "bigint":
+      case "literal":
+      case "map":
+      case "set":
+      case "promise":
+      case "function":
+      case "nan":
+      case "void":
+      case "undefined":
+      case "null":
+      case "never":
+        // Types that cannot be meaningfully represented as a single CLI flag.
+        // Skip to let consumers declare explicit cli.options instead.
+        continue;
       default:
-        // string and any other type
         flagString = `${longFlag} <value>`;
         break;
     }
