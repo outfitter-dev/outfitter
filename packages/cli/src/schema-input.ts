@@ -100,6 +100,16 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
       continue;
     }
 
+    // z.coerce.* wraps in a ZodPipe; walk to the output type
+    if (def.type === "pipe") {
+      const out = (def as { out?: unknown }).out;
+      if (out) {
+        current = out as typeof current;
+        continue;
+      }
+      break;
+    }
+
     // Reached the base type
     return {
       baseType: def.type,
@@ -204,7 +214,8 @@ export function deriveFlags(
       description: desc,
       defaultValue: info.hasDefault ? info.defaultValue : undefined,
       isBoolean,
-      isRequired,
+      // Boolean flags are never mandatory — absence semantically means false.
+      isRequired: isBoolean ? false : isRequired,
     });
   }
 
