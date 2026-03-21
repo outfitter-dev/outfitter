@@ -170,8 +170,10 @@ function applyCliOptions(command: Command, action: AnyActionSpec): void {
     }
   }
 
-  // Auto-derive flags from Zod input schema when it has an object shape
-  if (hasObjectShape(action.input)) {
+  // Auto-derive flags from Zod input schema when it has an object shape.
+  // Skip when mapInput is provided — the action handles its own input mapping
+  // (often from positional args) and auto-derived required flags would conflict.
+  if (hasObjectShape(action.input) && !action.cli?.mapInput) {
     const explicitLongFlags = new Set<string>();
     for (const option of options) {
       const longFlag = extractLongFlag(option.flags);
