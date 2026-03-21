@@ -291,19 +291,27 @@ export async function executeInitPipeline(
         type: "dir-create",
         path: join(resolvedInput.rootDir, "packages"),
       });
-      collector?.add(
-        existsSync(workspacePackageJsonPath)
-          ? {
-              type: "file-overwrite",
-              path: workspacePackageJsonPath,
-              source: "generated",
-            }
-          : {
-              type: "file-create",
-              path: workspacePackageJsonPath,
-              source: "generated",
-            }
-      );
+      if (existsSync(workspacePackageJsonPath) && options.skipExisting && !options.force) {
+        collector?.add({
+          type: "file-skip",
+          path: workspacePackageJsonPath,
+          reason: "exists",
+        });
+      } else {
+        collector?.add(
+          existsSync(workspacePackageJsonPath)
+            ? {
+                type: "file-overwrite",
+                path: workspacePackageJsonPath,
+                source: "generated",
+              }
+            : {
+                type: "file-create",
+                path: workspacePackageJsonPath,
+                source: "generated",
+              }
+        );
+      }
 
       const readmePath = join(resolvedInput.rootDir, "README.md");
       if (options.force || !existsSync(readmePath)) {
