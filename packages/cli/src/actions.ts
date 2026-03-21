@@ -14,6 +14,8 @@ import type { Result } from "better-result";
 import { Command } from "commander";
 
 import { composePresets } from "./flags.js";
+import { output } from "./output.js";
+import { resolveOutputMode } from "./query.js";
 import {
   createCommanderOption,
   deriveFlags,
@@ -424,4 +426,27 @@ export function buildCliCommands(
 }
 function isActionRegistry(source: ActionSource): source is ActionRegistry {
   return "list" in source;
+}
+
+/**
+ * Default `onResult` callback that outputs success values and throws errors.
+ *
+ * Pass this to `buildCliCommands({ onResult: defaultOnResult })` to get
+ * automatic output for all handler results without writing a custom wrapper.
+ *
+ * @example
+ * ```typescript
+ * const commands = buildCliCommands(registry, {
+ *   onResult: defaultOnResult,
+ * });
+ * ```
+ */
+export async function defaultOnResult(ctx: ActionResultContext): Promise<void> {
+  if (ctx.result.isErr()) {
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: consumer boundary
+    throw ctx.result.error;
+  }
+
+  const { mode } = resolveOutputMode(ctx.flags);
+  await output(ctx.result.value, mode);
 }
