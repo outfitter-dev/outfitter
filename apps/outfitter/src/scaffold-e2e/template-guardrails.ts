@@ -371,14 +371,25 @@ export async function runTemplateGuardrails(
       tempDir,
       artifactPaths
     );
-    const oxfmtPaths = mirroredPaths.filter((path) =>
-      OXFMT_EXTENSIONS.has(extname(path))
+    // Exclude template JSON files from format checks — they contain
+    // {{placeholder}} syntax that produces different formatting depending
+    // on the replaced values. These files are validated by scaffold E2E
+    // tests which run verify:ci on actual scaffolded projects.
+    const isTemplateJson = (path: string): boolean =>
+      path.endsWith(".json") &&
+      artifactPaths.some(
+        (a) =>
+          a.includes(".template.") &&
+          path.includes(a.replace(".template.", ".").replace(/.*\//, ""))
+      );
+    const oxfmtPaths = mirroredPaths.filter(
+      (path) => OXFMT_EXTENSIONS.has(extname(path)) && !isTemplateJson(path)
     );
     const oxlintPaths = mirroredPaths.filter((path) =>
       OXLINT_EXTENSIONS.has(extname(path))
     );
-    const ultracitePaths = mirroredPaths.filter((path) =>
-      ULTRACITE_EXTENSIONS.has(extname(path))
+    const ultracitePaths = mirroredPaths.filter(
+      (path) => ULTRACITE_EXTENSIONS.has(extname(path)) && !isTemplateJson(path)
     );
     const relativeOxlintPaths = oxlintPaths.map((path) =>
       relative(tempDir, path)

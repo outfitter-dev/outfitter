@@ -10,11 +10,26 @@ import {
   type HandlerContext,
   validateInput,
 } from "@outfitter/contracts";
+import type { Result } from "better-result";
 import { Command } from "commander";
 
 import { composePresets } from "./flags.js";
+import {
+  createCommanderOption,
+  deriveFlags,
+  validateInput as validateSchemaInput,
+} from "./schema-input.js";
 import { createSchemaCommand, type SchemaCommandOptions } from "./schema.js";
 import type { FlagPreset } from "./types.js";
+
+/** Context passed to the `onResult` callback after a handler completes. */
+export interface ActionResultContext {
+  readonly action: AnyActionSpec;
+  readonly args: readonly string[];
+  readonly flags: Record<string, unknown>;
+  readonly input: unknown;
+  readonly result: Result<unknown, unknown>;
+}
 
 export interface BuildCliCommandsOptions {
   readonly createContext?: (input: {
@@ -23,6 +38,8 @@ export interface BuildCliCommandsOptions {
     flags: Record<string, unknown>;
   }) => HandlerContext;
   readonly includeSurfaces?: readonly ActionSurface[];
+  /** Called after each handler returns. When provided, errors are not thrown. */
+  readonly onResult?: (ctx: ActionResultContext) => void | Promise<void>;
   readonly schema?: boolean | SchemaCommandOptions;
 }
 
@@ -110,6 +127,28 @@ function applyArguments(command: Command, args: string[]): void {
   }
 }
 
+/** Detect whether a Zod schema has a `.shape` property (i.e., is a ZodObject). */
+function hasObjectShape(
+  schema: unknown
+): schema is { shape: Record<string, unknown> } {
+  return (
+    typeof schema === "object" &&
+    schema !== null &&
+    "shape" in schema &&
+    typeof (schema as Record<string, unknown>)["shape"] === "object"
+  );
+}
+
+/**
+ * Extract the long flag (e.g., `--output-dir`) from a Commander flag string.
+ *
+ * Handles formats like `-o, --output <value>`, `--verbose`, `--no-color`.
+ */
+function extractLongFlag(flags: string): string | undefined {
+  const match = /--[\w-]+/.exec(flags);
+  return match ? match[0] : undefined;
+}
+
 function applyCliOptions(command: Command, action: AnyActionSpec): void {
   const options = action.cli?.options ?? [];
   for (const option of options) {
@@ -121,6 +160,29 @@ function applyCliOptions(command: Command, action: AnyActionSpec): void {
       );
     } else {
       command.option(option.flags, option.description, option.defaultValue);
+    }
+  }
+
+  // Auto-derive flags from Zod input schema when it has an object shape
+  if (hasObjectShape(action.input)) {
+    const explicitLongFlags = new Set<string>();
+    for (const option of options) {
+      const longFlag = extractLongFlag(option.flags);
+      if (longFlag) {
+        explicitLongFlags.add(longFlag);
+      }
+    }
+    // Also collect flags already on the Commander command
+    for (const opt of command.options) {
+      if (opt.long) {
+        explicitLongFlags.add(opt.long);
+      }
+    }
+
+    const derived = deriveFlags(action.input, explicitLongFlags);
+    for (const flag of derived) {
+      const commanderOption = createCommanderOption(flag, action.input);
+      command.addOption(commanderOption);
     }
   }
 }
@@ -152,6 +214,11 @@ function resolveInput(
     return action.cli.mapInput(context);
   }
 
+  // When no mapInput and schema has object shape, extract only schema-defined fields
+  if (hasObjectShape(action.input)) {
+    return validateSchemaInput(context.flags, action.input);
+  }
+
   const hasFlags = Object.keys(context.flags).length > 0;
   if (!hasFlags && context.args.length === 0) {
     return {};
@@ -170,7 +237,8 @@ async function runAction(
     action: AnyActionSpec;
     args: readonly string[];
     flags: Record<string, unknown>;
-  }) => HandlerContext
+  }) => HandlerContext,
+  onResult?: (ctx: ActionResultContext) => void | Promise<void>
 ): Promise<void> {
   const flags = resolveFlags(command);
   const args = command.args as string[];
@@ -186,6 +254,12 @@ async function runAction(
   const ctx = createContext({ action, args, flags });
 
   const result = await action.handler(validation.value, ctx);
+
+  if (onResult) {
+    await onResult({ action, args, flags, input: validation.value, result });
+    return;
+  }
+
   if (result.isErr()) {
     // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
     throw result.error;
@@ -199,7 +273,8 @@ function createCommand(
     args: readonly string[];
     flags: Record<string, unknown>;
   }) => HandlerContext,
-  spec?: string
+  spec?: string,
+  onResult?: (ctx: ActionResultContext) => void | Promise<void>
 ): Command {
   const commandSpec = spec ?? resolveCommandSpec(action);
   const { name, args } = splitCommandSpec(commandSpec);
@@ -220,7 +295,7 @@ function createCommand(
 
   command.action(async (...argsList: unknown[]) => {
     const commandInstance = argsList.at(-1) as Command;
-    await runAction(action, commandInstance, createContext);
+    await runAction(action, commandInstance, createContext, onResult);
   });
 
   return command;
@@ -265,7 +340,9 @@ export function buildCliCommands(
   }
 
   for (const action of ungrouped) {
-    commands.push(createCommand(action, createContext));
+    commands.push(
+      createCommand(action, createContext, undefined, options.onResult)
+    );
   }
 
   for (const [groupName, groupActions] of grouped.entries()) {
@@ -295,7 +372,12 @@ export function buildCliCommands(
 
         groupCommand.action(async (...argsList: unknown[]) => {
           const commandInstance = argsList.at(-1) as Command;
-          await runAction(action, commandInstance, createContext);
+          await runAction(
+            action,
+            commandInstance,
+            createContext,
+            options.onResult
+          );
         });
       } else {
         subcommands.push(action);
@@ -311,7 +393,8 @@ export function buildCliCommands(
       const subcommand = createCommand(
         action,
         createContext,
-        [name, ...args].join(" ")
+        [name, ...args].join(" "),
+        options.onResult
       );
       groupCommand.addCommand(subcommand);
     }
