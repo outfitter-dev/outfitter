@@ -255,16 +255,20 @@ Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative group
 import { command, commandGroup } from "@outfitter/cli/command";
 
 // Fluent
-command("entity")
-  .description("Manage entities")
-  .subcommand(command("add").description("Add").input(schema).action(handler))
-  .subcommand(command("show").description("Show").action(handler));
+program.register(
+  command("entity")
+    .description("Manage entities")
+    .subcommand(command("add").description("Add").action(handler))
+    .subcommand(command("show").description("Show").action(handler))
+);
 
 // Declarative
-commandGroup("entity", "Manage entities", [
-  command("add").description("Add").input(schema).action(handler),
-  command("show").description("Show").action(handler),
-]);
+program.register(
+  commandGroup("entity", "Manage entities", [
+    command("add").description("Add").action(handler),
+    command("show").description("Show").action(handler),
+  ])
+);
 ```
 
 ### Streaming
