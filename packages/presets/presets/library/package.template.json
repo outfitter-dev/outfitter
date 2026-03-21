@@ -2,16 +2,9 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
-  "keywords": [
-    "bun",
-    "library",
-    "outfitter",
-    "typescript"
-  ],
+  "keywords": ["bun", "library", "outfitter", "typescript"],
   "license": "MIT",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

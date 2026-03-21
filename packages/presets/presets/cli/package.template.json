@@ -2,12 +2,7 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
-  "keywords": [
-    "bun",
-    "cli",
-    "outfitter",
-    "typescript"
-  ],
+  "keywords": ["bun", "cli", "outfitter", "typescript"],
   "license": "MIT",
   "bin": {
     "{{binName}}": "./dist/cli.js"
@@ -47,9 +42,7 @@
     "template": {
       "kind": "runnable",
       "placement": "apps",
-      "surfaces": [
-        "cli"
-      ]
+      "surfaces": ["cli"]
     }
   }
 }

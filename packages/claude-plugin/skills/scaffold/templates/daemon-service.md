@@ -245,11 +245,7 @@ main().catch((error) => {
 import { command } from "@outfitter/cli/command";
 import { runHandler } from "@outfitter/cli/envelope";
 import { ConflictError, Result } from "@outfitter/contracts";
-import {
-  getPidPath,
-  getSocketPath,
-  isDaemonAlive,
-} from "@outfitter/daemon";
+import { getPidPath, getSocketPath, isDaemonAlive } from "@outfitter/daemon";
 import { spawn } from "node:child_process";
 
 const DAEMON_NAME = "my-daemon";

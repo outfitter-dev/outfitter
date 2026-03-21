@@ -50,9 +50,7 @@
     "template": {
       "kind": "runnable",
       "placement": "apps",
-      "surfaces": [
-        "mcp"
-      ]
+      "surfaces": ["mcp"]
     }
   }
 }

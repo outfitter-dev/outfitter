@@ -2,15 +2,9 @@
   "name": "{{packageName}}",
   "version": "{{version}}",
   "description": "{{description}}",
-  "keywords": [
-    "bun",
-    "outfitter",
-    "typescript"
-  ],
+  "keywords": ["bun", "outfitter", "typescript"],
   "license": "MIT",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

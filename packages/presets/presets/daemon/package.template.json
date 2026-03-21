@@ -51,10 +51,7 @@
     "template": {
       "kind": "runnable",
       "placement": "apps",
-      "surfaces": [
-        "cli",
-        "daemon"
-      ]
+      "surfaces": ["cli", "daemon"]
     }
   }
 }
