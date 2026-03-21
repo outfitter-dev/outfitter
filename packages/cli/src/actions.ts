@@ -188,6 +188,10 @@ function applyCliOptions(command: Command, action: AnyActionSpec): void {
       const longFlag = extractLongFlag(option.flags);
       if (longFlag) {
         explicitLongFlags.add(longFlag);
+        // --no-verbose means --verbose is also covered (Commander registers both)
+        if (longFlag.startsWith("--no-")) {
+          explicitLongFlags.add(`--${longFlag.slice(5)}`);
+        }
       }
     }
     // Also collect flags already on the Commander command
@@ -224,27 +228,40 @@ function resolveFlags(command: Command): Record<string, unknown> {
   >;
 }
 
+interface ResolvedInput {
+  readonly value: unknown;
+  /** When true, the value was already Zod-parsed — skip validateInput(). */
+  readonly validated: boolean;
+}
+
 function resolveInput(
   action: AnyActionSpec,
   context: ActionCliInputContext
-): unknown {
+): ResolvedInput {
   if (action.cli?.mapInput) {
-    return action.cli.mapInput(context);
+    return { value: action.cli.mapInput(context), validated: false };
   }
 
-  // When no mapInput and schema has object shape, extract only schema-defined fields
+  // When no mapInput and schema has object shape, extract and validate via Zod.
+  // Mark as already validated to avoid double-parse in runAction.
   if (hasObjectShape(action.input)) {
-    return validateSchemaInput(context.flags, action.input);
+    return {
+      value: validateSchemaInput(context.flags, action.input),
+      validated: true,
+    };
   }
 
   const hasFlags = Object.keys(context.flags).length > 0;
   if (!hasFlags && context.args.length === 0) {
-    return {};
+    return { value: {}, validated: false };
   }
 
   return {
-    ...context.flags,
-    ...(context.args.length > 0 ? { args: context.args } : {}),
+    value: {
+      ...context.flags,
+      ...(context.args.length > 0 ? { args: context.args } : {}),
+    },
+    validated: false,
   };
 }
 
@@ -261,20 +278,28 @@ async function runAction(
   const flags = resolveFlags(command);
   const args = command.args as string[];
   const inputContext: ActionCliInputContext = { args, flags };
-  const input = resolveInput(action, inputContext);
-  const validation = validateInput(action.input, input);
+  const resolved = resolveInput(action, inputContext);
 
-  if (validation.isErr()) {
-    // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
-    throw validation.error;
+  // When resolveInput already Zod-parsed (schema-backed actions), skip the
+  // second validateInput() pass to avoid redundant parsing.
+  let validatedInput: unknown;
+  if (resolved.validated) {
+    validatedInput = resolved.value;
+  } else {
+    const validation = validateInput(action.input, resolved.value);
+    if (validation.isErr()) {
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
+      throw validation.error;
+    }
+    validatedInput = validation.value;
   }
 
   const ctx = createContext({ action, args, flags });
 
-  const result = await action.handler(validation.value, ctx);
+  const result = await action.handler(validatedInput, ctx);
 
   if (onResult) {
-    await onResult({ action, args, flags, input: validation.value, result });
+    await onResult({ action, args, flags, input: validatedInput, result });
     return;
   }
 
