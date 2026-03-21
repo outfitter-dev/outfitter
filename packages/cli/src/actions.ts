@@ -26,10 +26,15 @@ import type { FlagPreset } from "./types.js";
 
 /** Context passed to the `onResult` callback after a handler completes. */
 export interface ActionResultContext {
+  /** The action spec that was executed. */
   readonly action: AnyActionSpec;
+  /** Positional arguments from the CLI invocation. */
   readonly args: readonly string[];
+  /** Parsed Commander flags (raw, before Zod validation). */
   readonly flags: Record<string, unknown>;
+  /** Validated input passed to the handler (after Zod parsing). */
   readonly input: unknown;
+  /** The handler's return value — check `isOk()` / `isErr()` to branch. */
   readonly result: Result<unknown, unknown>;
 }
 
@@ -173,6 +178,10 @@ function applyCliOptions(command: Command, action: AnyActionSpec): void {
   // Auto-derive flags from Zod input schema when it has an object shape.
   // Skip when mapInput is provided — the action handles its own input mapping
   // (often from positional args) and auto-derived required flags would conflict.
+  //
+  // Note: Derived flags are runtime-only (Commander). They do NOT appear in
+  // manifest output (`outfitter schema`). Actions that need manifest coverage
+  // should declare explicit `cli.options`.
   if (hasObjectShape(action.input) && !action.cli?.mapInput) {
     const explicitLongFlags = new Set<string>();
     for (const option of options) {
