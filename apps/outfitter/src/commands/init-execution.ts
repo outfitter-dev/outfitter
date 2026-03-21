@@ -320,6 +320,12 @@ export async function executeInitPipeline(
                 source: "generated",
               }
         );
+      } else if (options.skipExisting) {
+        collector?.add({
+          type: "file-skip",
+          path: readmePath,
+          reason: "exists",
+        });
       }
 
       const gitignorePath = join(resolvedInput.rootDir, ".gitignore");
@@ -337,6 +343,12 @@ export async function executeInitPipeline(
                 source: "generated",
               }
         );
+      } else if (options.skipExisting) {
+        collector?.add({
+          type: "file-skip",
+          path: gitignorePath,
+          reason: "exists",
+        });
       }
     } else {
       const workspaceResult = scaffoldWorkspaceRoot(
