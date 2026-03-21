@@ -168,9 +168,11 @@ The `onResult` option lets you intercept every handler result (success or failur
 import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
 
 // Minimal — auto-outputs all handler results
-const commands = buildCliCommands(registry, {
+for (const command of buildCliCommands(registry, {
   onResult: defaultOnResult,
-});
+})) {
+  program.register(command);
+}
 ```
 
 With a custom context factory (recommended for real apps):
@@ -179,18 +181,15 @@ With a custom context factory (recommended for real apps):
 import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
 import { createContext } from "@outfitter/contracts";
 
-const commands = buildCliCommands(registry, {
+for (const command of buildCliCommands(registry, {
   onResult: defaultOnResult,
-  createContext: ({ action }) => {
-    const requestId = generateRequestId();
-    return createContext({
-      cwd: process.cwd(),
-      env: process.env,
-      requestId,
-      logger: logger.child({ action: action.id, requestId }),
-    });
-  },
-});
+  createContext: () => createContext({
+    cwd: process.cwd(),
+    env: process.env,
+  }),
+})) {
+  program.register(command);
+}
 ```
 
 **What `defaultOnResult` does**: On success, it calls `resolveOutputMode(flags)` to determine the format (text, JSON, JSONL) from CLI flags, then pipes the value through `output()`. On error, it throws — letting the program's error handler produce the appropriate exit code.
@@ -201,6 +200,9 @@ const commands = buildCliCommands(registry, {
 import type { ActionResultContext } from "@outfitter/cli/actions";
 import { output } from "@outfitter/cli";
 import { resolveOutputMode } from "@outfitter/cli/query";
+import { createLogger } from "@outfitter/logging";
+
+const logger = createLogger({ name: "my-app" });
 
 async function myOnResult(ctx: ActionResultContext): Promise<void> {
   if (ctx.result.isErr()) {
