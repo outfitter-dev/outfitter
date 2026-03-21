@@ -384,6 +384,12 @@ export async function executeInitPipeline(
     return Result.err(toExecutionErrorMessage(executeResult.error));
   }
 
+  // When skip-existing is used, the target directory likely already has git.
+  // Skip git init + commit to avoid auto-committing in an existing repo.
+  const skipGitForExisting = options.skipExisting
+    ? existsSync(join(resolvedInput.rootDir, ".git"))
+    : false;
+
   const postScaffoldResult = await runPostScaffold(
     {
       rootDir: resolvedInput.rootDir,
@@ -392,8 +398,8 @@ export async function executeInitPipeline(
       target: resolvedInput.preset,
       structure: resolvedInput.structure,
       skipInstall: options.skipInstall,
-      skipGit: options.skipGit,
-      skipCommit: options.skipCommit,
+      skipGit: options.skipGit || skipGitForExisting,
+      skipCommit: options.skipCommit || skipGitForExisting,
       dryRun: options.dryRun,
       installTimeoutMs: options.installTimeout,
     },

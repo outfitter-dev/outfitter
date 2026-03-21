@@ -96,16 +96,12 @@ export function scaffoldWorkspaceRoot(
 ): Result<void, ScaffoldError> {
   const packageJsonPath = join(rootDir, "package.json");
 
-  if (existsSync(packageJsonPath) && !force) {
-    if (skipExisting) {
-      // Still create dirs but skip existing files
-    } else {
-      return Result.err(
-        new ScaffoldError(
-          `Directory '${rootDir}' already has a package.json. Use --force to overwrite or --skip-existing to skip.`
-        )
-      );
-    }
+  if (existsSync(packageJsonPath) && !force && !skipExisting) {
+    return Result.err(
+      new ScaffoldError(
+        `Directory '${rootDir}' already has a package.json. Use --force to overwrite or --skip-existing to skip.`
+      )
+    );
   }
 
   try {

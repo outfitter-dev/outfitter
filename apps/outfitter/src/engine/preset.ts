@@ -296,15 +296,26 @@ export function copyPresetFiles(
           !copyOptions?.overwritablePaths ||
           copyOptions.overwritablePaths.has(targetPath));
 
+      // skipExisting takes precedence over overlay — even example overlays
+      // should not overwrite files the user chose to preserve.
+      if (targetExists && options.skipExisting && !options.force) {
+        if (options.collector) {
+          options.collector.add({
+            type: "file-skip",
+            path: targetPath,
+            reason: "exists",
+          });
+        }
+        continue;
+      }
+
       if (targetExists && !options.force && !canOverlay) {
-        if (options.skipExisting || options.collector) {
-          if (options.collector) {
-            options.collector.add({
-              type: "file-skip",
-              path: targetPath,
-              reason: "exists",
-            });
-          }
+        if (options.collector) {
+          options.collector.add({
+            type: "file-skip",
+            path: targetPath,
+            reason: "exists",
+          });
           continue;
         }
         return Result.err(
