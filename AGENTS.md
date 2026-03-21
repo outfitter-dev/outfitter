@@ -195,6 +195,27 @@ command("deploy <env>")
 | `.readOnly(true)`          | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint`              |
 | `.idempotent(true)`        | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint`              |
 | `.relatedTo(target, opts)` | Declares relationship to another command for action graph hints                             |
+| `.subcommand(builder)`     | Register a nested subcommand under this command                                             |
+
+### Nested Commands
+
+Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
+
+```typescript
+import { command, commandGroup } from "@outfitter/cli/command";
+
+// Fluent
+command("entity")
+  .description("Manage entities")
+  .subcommand(command("add").description("Add").input(schema).action(handler))
+  .subcommand(command("show").description("Show").action(handler));
+
+// Declarative
+commandGroup("entity", "Manage entities", [
+  command("add").description("Add").input(schema).action(handler),
+  command("show").description("Show").action(handler),
+]);
+```
 
 ### Streaming
 

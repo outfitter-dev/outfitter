@@ -46,6 +46,30 @@ CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@o
 3. Wire command in `src/program.ts` using the CommandBuilder pattern
 4. Add tests in `src/<name>.test.ts`
 
+### Nested Subcommands
+
+Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
+
+```typescript
+import { command, commandGroup } from "@outfitter/cli/command";
+
+// Fluent style
+program.register(
+  command("entity")
+    .description("Manage entities")
+    .subcommand(command("add").description("Add entity").action(handler))
+    .subcommand(command("show").description("Show entity").action(handler))
+);
+
+// Declarative style
+program.register(
+  commandGroup("entity", "Manage entities", [
+    command("add").description("Add entity").action(handler),
+    command("show").description("Show entity").action(handler),
+  ])
+);
+```
+
 ## Development Principles
 
 - **TDD-First** — Write the test before the code (Red / Green / Refactor)
