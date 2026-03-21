@@ -48,6 +48,37 @@ CLI and MCP are thin adapters over shared handlers. Write the handler once in co
 
 Actions are defined in `packages/core/src/actions.ts` using `defineAction()` from `@outfitter/contracts`. Each action declares its input schema, surfaces (cli, mcp), and handler. CLI and MCP apps wire from the same action definitions.
 
+#### Wiring with `buildCliCommands`
+
+For action-registry projects, `buildCliCommands` from `@outfitter/cli/actions` converts the registry into Commander commands. By default, handler success values are **silently discarded** (only errors throw). Use `defaultOnResult` to auto-output results:
+
+```typescript
+import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+
+// Batteries-included: resolves output mode from flags and prints results
+for (const command of buildCliCommands(registry, {
+  onResult: defaultOnResult,
+})) {
+  program.register(command);
+}
+```
+
+Without `onResult`, handlers succeed silently — a common footgun for new commands.
+
+#### Subcommand Grouping
+
+Setting `cli.group` on action specs groups them into nested subcommands automatically. Actions sharing the same `cli.group` value are collected under a parent command:
+
+```typescript
+defineAction({
+  id: "entity.list",
+  cli: { group: "entity", command: "list", description: "List entities" },
+  // ...
+});
+```
+
+This produces `mycli entity list` without manually wiring parent/child commands — the action-registry equivalent of `commandGroup()`.
+
 ### Adding a Feature
 
 1. Define types and Zod schema in `packages/core/src/types.ts`
