@@ -91,16 +91,21 @@ export function buildWorkspaceRootPackageJson(workspaceName: string): string {
 export function scaffoldWorkspaceRoot(
   rootDir: string,
   workspaceName: string,
-  force: boolean
+  force: boolean,
+  skipExisting?: boolean
 ): Result<void, ScaffoldError> {
   const packageJsonPath = join(rootDir, "package.json");
 
   if (existsSync(packageJsonPath) && !force) {
-    return Result.err(
-      new ScaffoldError(
-        `Directory '${rootDir}' already has a package.json. Use --force to overwrite.`
-      )
-    );
+    if (skipExisting) {
+      // Still create dirs but skip existing files
+    } else {
+      return Result.err(
+        new ScaffoldError(
+          `Directory '${rootDir}' already has a package.json. Use --force to overwrite or --skip-existing to skip.`
+        )
+      );
+    }
   }
 
   try {
@@ -111,11 +116,13 @@ export function scaffoldWorkspaceRoot(
     mkdirSync(join(rootDir, "apps"), { recursive: true });
     mkdirSync(join(rootDir, "packages"), { recursive: true });
 
-    writeFileSync(
-      packageJsonPath,
-      buildWorkspaceRootPackageJson(workspaceName),
-      "utf-8"
-    );
+    if (force || !existsSync(packageJsonPath)) {
+      writeFileSync(
+        packageJsonPath,
+        buildWorkspaceRootPackageJson(workspaceName),
+        "utf-8"
+      );
+    }
 
     const readmePath = join(rootDir, "README.md");
     if (force || !existsSync(readmePath)) {
