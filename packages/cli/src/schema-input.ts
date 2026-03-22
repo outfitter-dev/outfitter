@@ -240,6 +240,10 @@ export function createCommanderOption(
 
   if (flag.defaultValue !== undefined) {
     option.default(flag.defaultValue);
+  } else if (flag.isBoolean) {
+    // Boolean flags without an explicit default get false — Commander needs
+    // a value in opts() so validateSchemaInput sees the field as present.
+    option.default(false);
   }
 
   // For enum fields, set choices
