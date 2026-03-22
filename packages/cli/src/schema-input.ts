@@ -36,6 +36,10 @@ export interface DerivedFlag {
   readonly description: string;
   /** Commander flag string (e.g., "--output-dir <value>"). */
   readonly flagString: string;
+  /** The base Zod type (string, number, boolean, enum). */
+  readonly baseType: string;
+  /** Enum values when baseType is "enum". Omitted for non-enum types. */
+  readonly enumValues?: readonly string[] | undefined;
   /** Whether this is a boolean flag (no value). */
   readonly isBoolean: boolean;
   /** Whether the field is required (no default, not optional). */
@@ -98,6 +102,16 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
       isOptional = true;
       current = def.innerType as typeof current;
       continue;
+    }
+
+    // z.coerce.* wraps in a ZodPipe; walk to the output type
+    if (def.type === "pipe") {
+      const out = (def as { out?: unknown }).out;
+      if (out) {
+        current = out as typeof current;
+        continue;
+      }
+      break;
     }
 
     // Reached the base type
@@ -166,11 +180,33 @@ export function deriveFlags(
       case "number":
         flagString = `${longFlag} <n>`;
         break;
+      case "string":
       case "enum":
         flagString = `${longFlag} <value>`;
         break;
+      case "array":
+      case "union":
+      case "discriminatedUnion":
+      case "tuple":
+      case "record":
+      case "object":
+      case "intersection":
+      case "date":
+      case "bigint":
+      case "literal":
+      case "map":
+      case "set":
+      case "promise":
+      case "function":
+      case "nan":
+      case "void":
+      case "undefined":
+      case "null":
+      case "never":
+        // Types that cannot be meaningfully represented as a single CLI flag.
+        // Skip to let consumers declare explicit cli.options instead.
+        continue;
       default:
-        // string and any other type
         flagString = `${longFlag} <value>`;
         break;
     }
@@ -181,8 +217,11 @@ export function deriveFlags(
       flagString,
       description: desc,
       defaultValue: info.hasDefault ? info.defaultValue : undefined,
+      baseType: info.baseType,
+      enumValues: info.enumValues,
       isBoolean,
-      isRequired,
+      // Boolean flags are never mandatory — absence semantically means false.
+      isRequired: isBoolean ? false : isRequired,
     });
   }
 
@@ -195,22 +234,25 @@ export function deriveFlags(
  */
 export function createCommanderOption(
   flag: DerivedFlag,
-  schema: { shape: Record<string, unknown> }
+  _schema: { shape: Record<string, unknown> }
 ): Option {
   const option = new Option(flag.flagString, flag.description);
 
   if (flag.defaultValue !== undefined) {
     option.default(flag.defaultValue);
+  } else if (flag.isBoolean) {
+    // Boolean flags without an explicit default get false — Commander needs
+    // a value in opts() so validateSchemaInput sees the field as present.
+    option.default(false);
   }
 
   // For enum fields, set choices
-  const fieldInfo = unwrapZodField(schema.shape[flag.name]);
-  if (fieldInfo.baseType === "enum" && fieldInfo.enumValues) {
-    option.choices(fieldInfo.enumValues as string[]);
+  if (flag.baseType === "enum" && flag.enumValues) {
+    option.choices(flag.enumValues as string[]);
   }
 
   // For number fields, add argParser for coercion
-  if (fieldInfo.baseType === "number") {
+  if (flag.baseType === "number") {
     option.argParser(Number);
   }
 

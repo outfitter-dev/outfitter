@@ -10,11 +10,33 @@ import {
   type HandlerContext,
   validateInput,
 } from "@outfitter/contracts";
+import type { Result } from "better-result";
 import { Command } from "commander";
 
 import { composePresets } from "./flags.js";
+import { output } from "./output.js";
+import { resolveOutputMode } from "./query.js";
+import {
+  createCommanderOption,
+  deriveFlags,
+  validateInput as validateSchemaInput,
+} from "./schema-input.js";
 import { createSchemaCommand, type SchemaCommandOptions } from "./schema.js";
 import type { FlagPreset } from "./types.js";
+
+/** Context passed to the `onResult` callback after a handler completes. */
+export interface ActionResultContext {
+  /** The action spec that was executed. */
+  readonly action: AnyActionSpec;
+  /** Positional arguments from the CLI invocation. */
+  readonly args: readonly string[];
+  /** Parsed Commander flags (raw, before Zod validation). */
+  readonly flags: Record<string, unknown>;
+  /** Validated input passed to the handler (after Zod parsing). */
+  readonly input: unknown;
+  /** The handler's return value — check `isOk()` / `isErr()` to branch. */
+  readonly result: Result<unknown, unknown>;
+}
 
 export interface BuildCliCommandsOptions {
   readonly createContext?: (input: {
@@ -23,6 +45,13 @@ export interface BuildCliCommandsOptions {
     flags: Record<string, unknown>;
   }) => HandlerContext;
   readonly includeSurfaces?: readonly ActionSurface[];
+  /**
+   * Called after each handler returns with `Result.ok` or `Result.err`.
+   * When provided, handler errors are not auto-thrown — the callback is
+   * responsible for error handling. Input validation errors still throw
+   * before the handler runs and are not routed through this callback.
+   */
+  readonly onResult?: (ctx: ActionResultContext) => void | Promise<void>;
   readonly schema?: boolean | SchemaCommandOptions;
 }
 
@@ -110,6 +139,28 @@ function applyArguments(command: Command, args: string[]): void {
   }
 }
 
+/** Detect whether a Zod schema has a `.shape` property (i.e., is a ZodObject). */
+function hasObjectShape(
+  schema: unknown
+): schema is { shape: Record<string, unknown> } {
+  return (
+    typeof schema === "object" &&
+    schema !== null &&
+    "shape" in schema &&
+    typeof (schema as Record<string, unknown>)["shape"] === "object"
+  );
+}
+
+/**
+ * Extract the long flag (e.g., `--output-dir`) from a Commander flag string.
+ *
+ * Handles formats like `-o, --output <value>`, `--verbose`, `--no-color`.
+ */
+function extractLongFlag(flags: string): string | undefined {
+  const match = /--[\w-]+/.exec(flags);
+  return match ? match[0] : undefined;
+}
+
 function applyCliOptions(command: Command, action: AnyActionSpec): void {
   const options = action.cli?.options ?? [];
   for (const option of options) {
@@ -121,6 +172,39 @@ function applyCliOptions(command: Command, action: AnyActionSpec): void {
       );
     } else {
       command.option(option.flags, option.description, option.defaultValue);
+    }
+  }
+
+  // Auto-derive flags from Zod input schema when it has an object shape.
+  // Skip when mapInput is provided — the action handles its own input mapping
+  // (often from positional args) and auto-derived required flags would conflict.
+  //
+  // Note: Derived flags are runtime-only (Commander). They do NOT appear in
+  // manifest output (`outfitter schema`). Actions that need manifest coverage
+  // should declare explicit `cli.options`.
+  if (hasObjectShape(action.input) && !action.cli?.mapInput) {
+    const explicitLongFlags = new Set<string>();
+    for (const option of options) {
+      const longFlag = extractLongFlag(option.flags);
+      if (longFlag) {
+        explicitLongFlags.add(longFlag);
+        // --no-verbose means --verbose is also covered (Commander registers both)
+        if (longFlag.startsWith("--no-")) {
+          explicitLongFlags.add(`--${longFlag.slice(5)}`);
+        }
+      }
+    }
+    // Also collect flags already on the Commander command
+    for (const opt of command.options) {
+      if (opt.long) {
+        explicitLongFlags.add(opt.long);
+      }
+    }
+
+    const derived = deriveFlags(action.input, explicitLongFlags);
+    for (const flag of derived) {
+      const commanderOption = createCommanderOption(flag, action.input);
+      command.addOption(commanderOption);
     }
   }
 }
@@ -144,22 +228,40 @@ function resolveFlags(command: Command): Record<string, unknown> {
   >;
 }
 
+interface ResolvedInput {
+  readonly value: unknown;
+  /** When true, the value was already Zod-parsed — skip validateInput(). */
+  readonly validated: boolean;
+}
+
 function resolveInput(
   action: AnyActionSpec,
   context: ActionCliInputContext
-): unknown {
+): ResolvedInput {
   if (action.cli?.mapInput) {
-    return action.cli.mapInput(context);
+    return { value: action.cli.mapInput(context), validated: false };
+  }
+
+  // When no mapInput and schema has object shape, extract and validate via Zod.
+  // Mark as already validated to avoid double-parse in runAction.
+  if (hasObjectShape(action.input)) {
+    return {
+      value: validateSchemaInput(context.flags, action.input),
+      validated: true,
+    };
   }
 
   const hasFlags = Object.keys(context.flags).length > 0;
   if (!hasFlags && context.args.length === 0) {
-    return {};
+    return { value: {}, validated: false };
   }
 
   return {
-    ...context.flags,
-    ...(context.args.length > 0 ? { args: context.args } : {}),
+    value: {
+      ...context.flags,
+      ...(context.args.length > 0 ? { args: context.args } : {}),
+    },
+    validated: false,
   };
 }
 
@@ -170,22 +272,37 @@ async function runAction(
     action: AnyActionSpec;
     args: readonly string[];
     flags: Record<string, unknown>;
-  }) => HandlerContext
+  }) => HandlerContext,
+  onResult?: (ctx: ActionResultContext) => void | Promise<void>
 ): Promise<void> {
   const flags = resolveFlags(command);
   const args = command.args as string[];
   const inputContext: ActionCliInputContext = { args, flags };
-  const input = resolveInput(action, inputContext);
-  const validation = validateInput(action.input, input);
+  const resolved = resolveInput(action, inputContext);
 
-  if (validation.isErr()) {
-    // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
-    throw validation.error;
+  // When resolveInput already Zod-parsed (schema-backed actions), skip the
+  // second validateInput() pass to avoid redundant parsing.
+  let validatedInput: unknown;
+  if (resolved.validated) {
+    validatedInput = resolved.value;
+  } else {
+    const validation = validateInput(action.input, resolved.value);
+    if (validation.isErr()) {
+      // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
+      throw validation.error;
+    }
+    validatedInput = validation.value;
   }
 
   const ctx = createContext({ action, args, flags });
 
-  const result = await action.handler(validation.value, ctx);
+  const result = await action.handler(validatedInput, ctx);
+
+  if (onResult) {
+    await onResult({ action, args, flags, input: validatedInput, result });
+    return;
+  }
+
   if (result.isErr()) {
     // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: outer caller handles error
     throw result.error;
@@ -199,7 +316,8 @@ function createCommand(
     args: readonly string[];
     flags: Record<string, unknown>;
   }) => HandlerContext,
-  spec?: string
+  spec?: string,
+  onResult?: (ctx: ActionResultContext) => void | Promise<void>
 ): Command {
   const commandSpec = spec ?? resolveCommandSpec(action);
   const { name, args } = splitCommandSpec(commandSpec);
@@ -220,12 +338,57 @@ function createCommand(
 
   command.action(async (...argsList: unknown[]) => {
     const commandInstance = argsList.at(-1) as Command;
-    await runAction(action, commandInstance, createContext);
+    await runAction(action, commandInstance, createContext, onResult);
   });
 
   return command;
 }
 
+/**
+ * Convert an action registry (or array of action specs) into Commander commands.
+ *
+ * Actions with a `cli.group` value are automatically collected into nested
+ * subcommands under a shared parent command — no manual wiring needed.
+ *
+ * **Important**: Without the `onResult` option, handler success values are
+ * silently discarded (only errors are thrown). Pass {@link defaultOnResult} for
+ * automatic output based on CLI flags (`--output`, `--json`, `--jsonl`).
+ *
+ * @param source - An `ActionRegistry` or array of `AnyActionSpec` to convert
+ * @param options - Configuration for context creation, surface filtering, result handling, and schema commands
+ * @param options.onResult - Called after each handler completes. When provided, errors are **not** auto-thrown — the callback is responsible for error handling. Use {@link defaultOnResult} for batteries-included output.
+ * @param options.createContext - Factory for the `HandlerContext` passed to each handler. Defaults to `createContext({ cwd: process.cwd(), env: process.env })`.
+ * @param options.includeSurfaces - Which surfaces to include. Defaults to `["cli"]`.
+ * @param options.schema - Controls the auto-generated `schema` subcommand. Pass `false` to disable.
+ * @returns Array of Commander `Command` instances ready to register on a program
+ *
+ * @example
+ * ```typescript
+ * import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+ *
+ * // Batteries-included: auto-outputs handler results
+ * for (const command of buildCliCommands(registry, {
+ *   onResult: defaultOnResult,
+ * })) {
+ *   program.register(command);
+ * }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Custom onResult for logging + output
+ * for (const command of buildCliCommands(registry, {
+ *   onResult: async (ctx) => {
+ *     if (ctx.result.isErr()) throw ctx.result.error;
+ *     logger.info("success", { action: ctx.action.id });
+ *     const { mode } = resolveOutputMode(ctx.flags);
+ *     await output(ctx.result.value, mode);
+ *   },
+ * })) {
+ *   program.register(command);
+ * }
+ * ```
+ */
 export function buildCliCommands(
   source: ActionSource,
   options: BuildCliCommandsOptions = {}
@@ -265,7 +428,9 @@ export function buildCliCommands(
   }
 
   for (const action of ungrouped) {
-    commands.push(createCommand(action, createContext));
+    commands.push(
+      createCommand(action, createContext, undefined, options.onResult)
+    );
   }
 
   for (const [groupName, groupActions] of grouped.entries()) {
@@ -295,7 +460,12 @@ export function buildCliCommands(
 
         groupCommand.action(async (...argsList: unknown[]) => {
           const commandInstance = argsList.at(-1) as Command;
-          await runAction(action, commandInstance, createContext);
+          await runAction(
+            action,
+            commandInstance,
+            createContext,
+            options.onResult
+          );
         });
       } else {
         subcommands.push(action);
@@ -311,7 +481,8 @@ export function buildCliCommands(
       const subcommand = createCommand(
         action,
         createContext,
-        [name, ...args].join(" ")
+        [name, ...args].join(" "),
+        options.onResult
       );
       groupCommand.addCommand(subcommand);
     }
@@ -336,4 +507,27 @@ export function buildCliCommands(
 }
 function isActionRegistry(source: ActionSource): source is ActionRegistry {
   return "list" in source;
+}
+
+/**
+ * Default `onResult` callback that outputs success values and throws errors.
+ *
+ * Pass this to `buildCliCommands({ onResult: defaultOnResult })` to get
+ * automatic output for all handler results without writing a custom wrapper.
+ *
+ * @example
+ * ```typescript
+ * const commands = buildCliCommands(registry, {
+ *   onResult: defaultOnResult,
+ * });
+ * ```
+ */
+export async function defaultOnResult(ctx: ActionResultContext): Promise<void> {
+  if (ctx.result.isErr()) {
+    // oxlint-disable-next-line outfitter/no-throw-in-handler -- catch-rethrow: consumer boundary
+    throw ctx.result.error;
+  }
+
+  const { mode } = resolveOutputMode(ctx.flags);
+  await output(ctx.result.value, mode);
 }
