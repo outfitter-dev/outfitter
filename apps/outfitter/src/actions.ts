@@ -24,6 +24,7 @@ import { demoAction } from "./actions/demo.js";
 import {
   docsApiAction,
   docsExportAction,
+  docsIndexAction,
   docsListAction,
   docsSearchAction,
   docsShowAction,
@@ -40,6 +41,7 @@ import {
   initMcpAction,
 } from "./actions/init.js";
 import {
+  mcpDocsIndexAction,
   mcpDocsListAction,
   mcpDocsSearchAction,
   mcpDocsShowAction,
@@ -78,6 +80,8 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(docsSearchAction)
   .add(docsApiAction)
   .add(docsExportAction)
+  .add(docsIndexAction)
+  .add(mcpDocsIndexAction)
   .add(mcpDocsListAction)
   .add(mcpDocsShowAction)
   .add(mcpDocsSearchAction);

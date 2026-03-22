@@ -60,15 +60,28 @@ describe("buildMcpTools from registry", () => {
   test("tool names match expected MCP tool names", () => {
     const tools = buildMcpTools(outfitterActions);
     const names = tools.map((t) => t.name).toSorted();
-    expect(names).toEqual(["get_doc", "list_docs", "search_docs"]);
+    expect(names).toEqual([
+      "get_doc",
+      "index_docs",
+      "list_docs",
+      "search_docs",
+    ]);
   });
 
-  test("all docs tools have readOnlyHint annotation", () => {
+  test("read-only docs tools have readOnlyHint annotation", () => {
     const tools = buildMcpTools(outfitterActions);
-    for (const tool of tools) {
+    const readOnlyTools = tools.filter((t) => t.name !== "index_docs");
+    for (const tool of readOnlyTools) {
       expect(tool.annotations).toBeDefined();
       expect(tool.annotations?.readOnlyHint).toBe(true);
     }
+  });
+
+  test("index_docs tool has idempotentHint annotation", () => {
+    const tools = buildMcpTools(outfitterActions);
+    const indexTool = tools.find((t) => t.name === "index_docs");
+    expect(indexTool).toBeDefined();
+    expect(indexTool?.annotations?.idempotentHint).toBe(true);
   });
 });
 

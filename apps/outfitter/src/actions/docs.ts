@@ -25,6 +25,10 @@ import {
   runDocsExport,
 } from "../commands/docs-export.js";
 import {
+  printDocsIndexResults,
+  runDocsIndex,
+} from "../commands/docs-index.js";
+import {
   type DocsListInput,
   printDocsListResults,
   runDocsList,
@@ -39,6 +43,7 @@ import {
   printDocsShowResults,
   runDocsShow,
 } from "../commands/docs-show.js";
+import type { CliOutputMode } from "../output-mode.js";
 import { checkTsdocOutputSchema } from "./check.js";
 import {
   outputModeSchema,
@@ -383,6 +388,68 @@ export const docsExportAction: DocsExportAction = defineAction({
     }
 
     await printDocsExportResults(result.value, { mode: outputMode });
+    return Result.ok(result.value);
+  },
+});
+
+interface DocsIndexActionInput {
+  readonly cwd: string;
+  readonly indexPath?: string | undefined;
+  readonly outputMode: CliOutputMode;
+}
+
+const docsIndexInputSchema: z.ZodType<DocsIndexActionInput> = z.object({
+  cwd: z.string(),
+  indexPath: z.string().optional(),
+  outputMode: outputModeSchema,
+});
+
+const docsIndexCwd = cwdPreset();
+const docsIndexOutputMode = outputModePreset({ includeJsonl: true });
+
+type DocsIndexAction = ReturnType<
+  typeof defineAction<DocsIndexActionInput, unknown>
+>;
+
+/** Build an FTS5 search index from workspace documentation. */
+export const docsIndexAction: DocsIndexAction = defineAction({
+  id: "docs.index",
+  description: "Build search index for workspace documentation",
+  surfaces: ["cli"],
+  input: docsIndexInputSchema,
+  cli: {
+    group: "docs",
+    command: "index",
+    description: "Build search index for workspace documentation",
+    options: [
+      {
+        flags: "--index-path <path>",
+        description:
+          "Path to the SQLite index file (default: workspace-scoped under ~/.outfitter/docs/)",
+      },
+      ...docsIndexOutputMode.options,
+      ...docsIndexCwd.options,
+    ],
+    mapInput: (context) => {
+      const { mode: outputMode } = resolveOutputMode(context.flags);
+      const indexPath = resolveStringFlag(context.flags["indexPath"]);
+
+      return {
+        cwd: resolveCwdFromPreset(context.flags, docsIndexCwd),
+        outputMode,
+        ...(indexPath !== undefined ? { indexPath } : {}),
+      };
+    },
+  },
+  handler: async (input) => {
+    const { outputMode } = input;
+    const result = await runDocsIndex(input);
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    await printDocsIndexResults(result.value, { mode: outputMode });
     return Result.ok(result.value);
   },
 });
