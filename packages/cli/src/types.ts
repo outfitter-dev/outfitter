@@ -380,6 +380,32 @@ export interface CommandBuilder<TInput = undefined, TContext = undefined> {
     description: string,
     defaultValue?: unknown
   ): this;
+
+  /**
+   * Register a nested subcommand under this command.
+   *
+   * Subcommands are added as Commander child commands during `build()`.
+   * When a command has subcommands but no `.action()`, it acts as a
+   * parent/group command. When both exist, the parent action serves as
+   * the default and subcommands handle specific sub-paths.
+   *
+   * @param sub - A CommandBuilder to nest under this command
+   *
+   * @example
+   * ```typescript
+   * command("entity")
+   *   .description("Manage entities")
+   *   .subcommand(
+   *     command("add").description("Add entity").action(async () => {})
+   *   )
+   *   .subcommand(
+   *     command("show").description("Show entity").action(async () => {})
+   *   );
+   * ```
+   */
+  subcommand<TSubInput = undefined, TSubContext = undefined>(
+    sub: CommandBuilder<TSubInput, TSubContext>
+  ): this;
 }
 
 /**
