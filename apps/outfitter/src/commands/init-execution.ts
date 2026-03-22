@@ -126,6 +126,7 @@ export interface InitExecutionOptions {
   readonly force: boolean;
   readonly installTimeout: number;
   readonly skipCommit: boolean;
+  readonly skipExisting: boolean;
   readonly skipGit: boolean;
   readonly skipInstall: boolean;
 }
@@ -257,10 +258,11 @@ export async function executeInitPipeline(
   if (resolvedInput.structure === "single") {
     if (
       existsSync(join(resolvedInput.rootDir, "package.json")) &&
-      !options.force
+      !options.force &&
+      !options.skipExisting
     ) {
       return Result.err(
-        `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite, or use 'outfitter add' for existing projects.`
+        `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite, --skip-existing to skip, or use 'outfitter add' for existing projects.`
       );
     }
   } else {
@@ -271,9 +273,13 @@ export async function executeInitPipeline(
       "package.json"
     );
     if (options.dryRun) {
-      if (existsSync(workspacePackageJsonPath) && !options.force) {
+      if (
+        existsSync(workspacePackageJsonPath) &&
+        !options.force &&
+        !options.skipExisting
+      ) {
         return Result.err(
-          `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite.`
+          `Directory '${resolvedInput.rootDir}' already has a package.json. Use --force to overwrite or --skip-existing to skip.`
         );
       }
 
@@ -285,19 +291,27 @@ export async function executeInitPipeline(
         type: "dir-create",
         path: join(resolvedInput.rootDir, "packages"),
       });
-      collector?.add(
-        existsSync(workspacePackageJsonPath)
-          ? {
-              type: "file-overwrite",
-              path: workspacePackageJsonPath,
-              source: "generated",
-            }
-          : {
-              type: "file-create",
-              path: workspacePackageJsonPath,
-              source: "generated",
-            }
-      );
+      if (existsSync(workspacePackageJsonPath) && options.skipExisting && !options.force) {
+        collector?.add({
+          type: "file-skip",
+          path: workspacePackageJsonPath,
+          reason: "exists",
+        });
+      } else {
+        collector?.add(
+          existsSync(workspacePackageJsonPath)
+            ? {
+                type: "file-overwrite",
+                path: workspacePackageJsonPath,
+                source: "generated",
+              }
+            : {
+                type: "file-create",
+                path: workspacePackageJsonPath,
+                source: "generated",
+              }
+        );
+      }
 
       const readmePath = join(resolvedInput.rootDir, "README.md");
       if (options.force || !existsSync(readmePath)) {
@@ -314,6 +328,12 @@ export async function executeInitPipeline(
                 source: "generated",
               }
         );
+      } else if (options.skipExisting) {
+        collector?.add({
+          type: "file-skip",
+          path: readmePath,
+          reason: "exists",
+        });
       }
 
       const gitignorePath = join(resolvedInput.rootDir, ".gitignore");
@@ -331,12 +351,19 @@ export async function executeInitPipeline(
                 source: "generated",
               }
         );
+      } else if (options.skipExisting) {
+        collector?.add({
+          type: "file-skip",
+          path: gitignorePath,
+          reason: "exists",
+        });
       }
     } else {
       const workspaceResult = scaffoldWorkspaceRoot(
         resolvedInput.rootDir,
         workspaceName,
-        options.force
+        options.force,
+        options.skipExisting
       );
       if (workspaceResult.isErr()) {
         return Result.err(workspaceResult.error.message);
@@ -357,12 +384,19 @@ export async function executeInitPipeline(
 
   const executeResult = await executePlan(plan, {
     force: options.force,
+    skipExisting: options.skipExisting,
     ...(collector ? { collector } : {}),
   });
 
   if (executeResult.isErr()) {
     return Result.err(toExecutionErrorMessage(executeResult.error));
   }
+
+  // When skip-existing is used, the target directory likely already has git.
+  // Skip git init + commit to avoid auto-committing in an existing repo.
+  const skipGitForExisting = options.skipExisting
+    ? existsSync(join(resolvedInput.rootDir, ".git"))
+    : false;
 
   const postScaffoldResult = await runPostScaffold(
     {
@@ -372,8 +406,8 @@ export async function executeInitPipeline(
       target: resolvedInput.preset,
       structure: resolvedInput.structure,
       skipInstall: options.skipInstall,
-      skipGit: options.skipGit,
-      skipCommit: options.skipCommit,
+      skipGit: options.skipGit || skipGitForExisting,
+      skipCommit: options.skipCommit || skipGitForExisting,
       dryRun: options.dryRun,
       installTimeoutMs: options.installTimeout,
     },

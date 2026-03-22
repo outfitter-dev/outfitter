@@ -71,6 +71,8 @@ export interface EngineCollector {
 export interface EngineOptions {
   readonly collector?: EngineCollector | undefined;
   readonly force: boolean;
+  /** When true, silently skip files that already exist instead of erroring. */
+  readonly skipExisting?: boolean;
 }
 
 /**

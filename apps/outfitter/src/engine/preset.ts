@@ -296,6 +296,19 @@ export function copyPresetFiles(
           !copyOptions?.overwritablePaths ||
           copyOptions.overwritablePaths.has(targetPath));
 
+      // skipExisting takes precedence over overlay — even example overlays
+      // should not overwrite files the user chose to preserve.
+      if (targetExists && options.skipExisting && !options.force) {
+        if (options.collector) {
+          options.collector.add({
+            type: "file-skip",
+            path: targetPath,
+            reason: "exists",
+          });
+        }
+        continue;
+      }
+
       if (targetExists && !options.force && !canOverlay) {
         if (options.collector) {
           options.collector.add({
@@ -307,7 +320,7 @@ export function copyPresetFiles(
         }
         return Result.err(
           new ScaffoldError(
-            `File '${targetPath}' already exists. Use --force to overwrite.`
+            `File '${targetPath}' already exists. Use --force to overwrite or --skip-existing to skip.`
           )
         );
       }

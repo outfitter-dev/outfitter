@@ -83,6 +83,8 @@ export interface InitOptions {
   readonly preset?: InitPresetId | undefined;
   /** Skip the initial git commit after scaffolding. */
   readonly skipCommit?: boolean | undefined;
+  /** Skip files that already exist instead of failing. */
+  readonly skipExisting?: boolean | undefined;
   /** Skip git init and initial commit entirely. */
   readonly skipGit?: boolean | undefined;
   /** Skip running `bun install` after scaffolding. */
@@ -433,6 +435,7 @@ export async function runInit(
   const executeResult = await executeInitPipeline(input, targetResult.value, {
     dryRun: Boolean(options.dryRun),
     force: options.force,
+    skipExisting: Boolean(options.skipExisting),
     skipInstall: Boolean(options.skipInstall),
     skipGit: Boolean(options.skipGit),
     skipCommit: Boolean(options.skipCommit),
@@ -463,6 +466,7 @@ interface InitCommandFlags {
   opts?: () => InitCommandFlags;
   preset?: InitPresetId;
   skipCommit?: boolean;
+  skipExisting?: boolean;
   skipGit?: boolean;
   skipInstall?: boolean;
   structure?: InitStructure;
@@ -507,6 +511,7 @@ const withCommonOptions = (command: Command): Command =>
     .option("--no-tooling", "Skip default tooling blocks")
     .option("-y, --yes", "Skip prompts and use defaults", false)
     .option("--dry-run", "Preview changes without writing files", false)
+    .option("--skip-existing", "Skip files that already exist", false)
     .option("--skip-install", "Skip bun install", false)
     .option("--skip-git", "Skip git init and initial commit", false)
     .option("--skip-commit", "Skip initial commit only", false)
@@ -556,6 +561,7 @@ export function initCommand(program: Command): void {
         example: resolvedFlags.example,
         yes: resolvedFlags.yes,
         dryRun: Boolean(resolvedFlags.dryRun),
+        skipExisting: Boolean(resolvedFlags.skipExisting),
         skipInstall: Boolean(resolvedFlags.skipInstall),
         skipGit: Boolean(resolvedFlags.skipGit),
         skipCommit: Boolean(resolvedFlags.skipCommit),
@@ -600,6 +606,7 @@ export function initCommand(program: Command): void {
           example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
+          skipExisting: Boolean(resolvedFlags.skipExisting),
           skipInstall: Boolean(resolvedFlags.skipInstall),
           skipGit: Boolean(resolvedFlags.skipGit),
           skipCommit: Boolean(resolvedFlags.skipCommit),
@@ -646,6 +653,7 @@ export function initCommand(program: Command): void {
           example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
+          skipExisting: Boolean(resolvedFlags.skipExisting),
           skipInstall: Boolean(resolvedFlags.skipInstall),
           skipGit: Boolean(resolvedFlags.skipGit),
           skipCommit: Boolean(resolvedFlags.skipCommit),
@@ -694,6 +702,7 @@ export function initCommand(program: Command): void {
           example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
+          skipExisting: Boolean(resolvedFlags.skipExisting),
           skipInstall: Boolean(resolvedFlags.skipInstall),
           skipGit: Boolean(resolvedFlags.skipGit),
           skipCommit: Boolean(resolvedFlags.skipCommit),
@@ -740,6 +749,7 @@ export function initCommand(program: Command): void {
           example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
+          skipExisting: Boolean(resolvedFlags.skipExisting),
           skipInstall: Boolean(resolvedFlags.skipInstall),
           skipGit: Boolean(resolvedFlags.skipGit),
           skipCommit: Boolean(resolvedFlags.skipCommit),
@@ -788,6 +798,7 @@ export function initCommand(program: Command): void {
           example: resolvedFlags.example,
           yes: resolvedFlags.yes,
           dryRun: Boolean(resolvedFlags.dryRun),
+          skipExisting: Boolean(resolvedFlags.skipExisting),
           skipInstall: Boolean(resolvedFlags.skipInstall),
           skipGit: Boolean(resolvedFlags.skipGit),
           skipCommit: Boolean(resolvedFlags.skipCommit),

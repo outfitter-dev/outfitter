@@ -46,6 +46,7 @@ interface InitFlags {
   readonly noTooling?: unknown;
   readonly preset?: unknown;
   readonly skipCommit?: unknown;
+  readonly skipExisting?: unknown;
   readonly skipGit?: unknown;
   readonly skipInstall?: unknown;
   readonly structure?: unknown;
@@ -101,6 +102,7 @@ const initInputSchema = z.object({
   skipInstall: z.boolean().optional(),
   skipGit: z.boolean().optional(),
   skipCommit: z.boolean().optional(),
+  skipExisting: z.boolean().optional(),
   installTimeout: z.number().optional(),
   outputMode: outputModeSchema,
 }) as z.ZodType<InitActionInput>;
@@ -170,6 +172,11 @@ function resolveInitOptions(
   const local = resolveLocalFlag(flags);
   const withBlocks = resolveStringFlag(flags.with);
   const noTooling = resolveNoToolingFlag(flags);
+  const skipExisting = resolveBooleanFlagAlias(
+    context.flags,
+    "skipExisting",
+    "skip-existing"
+  );
   const skipInstall = resolveBooleanFlagAlias(
     context.flags,
     "skipInstall",
@@ -198,6 +205,7 @@ function resolveInitOptions(
     ...(example ? { example } : {}),
     ...(yes ? { yes } : {}),
     ...(dryRun ? { dryRun } : {}),
+    ...(skipExisting ? { skipExisting } : {}),
     ...(skipInstall ? { skipInstall } : {}),
     ...(skipGit ? { skipGit } : {}),
     ...(skipCommit ? { skipCommit } : {}),
@@ -228,6 +236,11 @@ function createInitAction(options: {
   initOptions.push({
     flags: "--workspace-name <name>",
     description: "Workspace root package name",
+  });
+  initOptions.push({
+    flags: "--skip-existing",
+    description: "Skip files that already exist instead of failing",
+    defaultValue: false,
   });
   initOptions.push({
     flags: "--skip-install",
