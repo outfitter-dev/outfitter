@@ -47,7 +47,7 @@ const ULTRACITE_EXTENSIONS = new Set([
 ]);
 const TOOLING_ARTIFACTS = [
   "packages/tooling/configs/.oxlintrc.json",
-  "packages/tooling/configs/.oxfmtrc.jsonc",
+  ".oxfmtrc.jsonc",
 ] as const;
 
 type GuardrailTool =
@@ -390,7 +390,7 @@ export async function runTemplateGuardrails(
       oxfmtPaths.length > 0
         ? runTool(workspaceRoot, workspaceRoot, "oxfmt", [
             "--config",
-            join(workspaceRoot, "packages/tooling/configs/.oxfmtrc.jsonc"),
+            join(workspaceRoot, ".oxfmtrc.jsonc"),
             ...oxfmtPaths,
           ])
         : undefined,
