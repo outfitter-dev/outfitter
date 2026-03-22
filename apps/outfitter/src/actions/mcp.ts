@@ -50,8 +50,7 @@ interface McpDocsShowInput {
 interface McpDocsSearchInput {
   readonly cwd: string;
   readonly indexPath?: string | undefined;
-  readonly kind?: string | undefined;
-  readonly package?: string | undefined;
+  readonly limit?: number | undefined;
   readonly query: string;
 }
 
@@ -226,18 +225,27 @@ export const mcpDocsShowAction: McpDocsShowAction = defineAction({
 /** Search documentation content, exposed as the `search_docs` MCP tool. */
 export const mcpDocsSearchAction: McpDocsSearchAction = defineAction({
   id: "mcp.docs.search",
-  description: "Search documentation content for a query string",
+  description: "Search documentation content using FTS5 BM25-ranked search",
   surfaces: ["mcp"],
   input: z.object({
-    cwd: z.string().default("."),
-    kind: z.string().optional(),
-    package: z.string().optional(),
-    query: z.string(),
+    cwd: z.string().default(".").describe("Workspace root containing docs"),
+    indexPath: z
+      .string()
+      .optional()
+      .describe("Optional path to a custom SQLite docs index"),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe("Maximum number of matches to return"),
+    query: z.string().describe("Full-text query to search for"),
   }),
   output: docsSearchOutputSchema,
   mcp: {
     tool: "search_docs",
-    description: "Search documentation content for a query string",
+    description: "Search documentation content using FTS5 BM25-ranked search",
     readOnly: true,
   },
   handler: async (input) => {

@@ -28,7 +28,7 @@ export interface DocsListInput {
   readonly cwd: string;
   readonly jq?: string | undefined;
   readonly kind?: string | undefined;
-  readonly outputMode: CliOutputMode;
+  readonly outputMode?: CliOutputMode;
   readonly package?: string | undefined;
 }
 
