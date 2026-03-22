@@ -36,6 +36,10 @@ export interface DerivedFlag {
   readonly description: string;
   /** Commander flag string (e.g., "--output-dir <value>"). */
   readonly flagString: string;
+  /** The base Zod type (string, number, boolean, enum). */
+  readonly baseType: string;
+  /** Enum values when baseType is "enum". Omitted for non-enum types. */
+  readonly enumValues?: readonly string[] | undefined;
   /** Whether this is a boolean flag (no value). */
   readonly isBoolean: boolean;
   /** Whether the field is required (no default, not optional). */
@@ -213,6 +217,8 @@ export function deriveFlags(
       flagString,
       description: desc,
       defaultValue: info.hasDefault ? info.defaultValue : undefined,
+      baseType: info.baseType,
+      enumValues: info.enumValues,
       isBoolean,
       // Boolean flags are never mandatory — absence semantically means false.
       isRequired: isBoolean ? false : isRequired,
@@ -228,7 +234,7 @@ export function deriveFlags(
  */
 export function createCommanderOption(
   flag: DerivedFlag,
-  schema: { shape: Record<string, unknown> }
+  _schema: { shape: Record<string, unknown> }
 ): Option {
   const option = new Option(flag.flagString, flag.description);
 
@@ -237,13 +243,12 @@ export function createCommanderOption(
   }
 
   // For enum fields, set choices
-  const fieldInfo = unwrapZodField(schema.shape[flag.name]);
-  if (fieldInfo.baseType === "enum" && fieldInfo.enumValues) {
-    option.choices(fieldInfo.enumValues as string[]);
+  if (flag.baseType === "enum" && flag.enumValues) {
+    option.choices(flag.enumValues as string[]);
   }
 
   // For number fields, add argParser for coercion
-  if (fieldInfo.baseType === "number") {
+  if (flag.baseType === "number") {
     option.argParser(Number);
   }
 
