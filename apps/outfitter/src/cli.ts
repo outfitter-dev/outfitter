@@ -10,8 +10,6 @@
  * @packageDocumentation
  */
 
-import { readFileSync } from "node:fs";
-
 import { exitWithError } from "@outfitter/cli";
 import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
@@ -21,6 +19,7 @@ import { createOutfitterLoggerFactory } from "@outfitter/logging";
 import { outfitterActions } from "./actions.js";
 import { createMcpCommand } from "./commands/mcp-start.js";
 import { createRepoCommand } from "./commands/repo.js";
+import { VERSION } from "./version.js";
 
 // =============================================================================
 // CLI Setup
@@ -32,7 +31,6 @@ import { createRepoCommand } from "./commands/repo.js";
  * @returns Configured Commander program
  */
 function createProgram() {
-  const cliVersion = readCliVersion();
   const loggerFactory = createOutfitterLoggerFactory();
   const logger = loggerFactory.createLogger({
     name: "outfitter",
@@ -40,7 +38,7 @@ function createProgram() {
   });
   const cli = createCLI({
     name: "outfitter",
-    version: cliVersion,
+    version: VERSION,
     description: "Outfitter CLI for scaffolding and project management",
     onError: (error) => {
       const err =
@@ -77,27 +75,6 @@ function createProgram() {
   cli.register(createMcpCommand());
 
   return cli;
-}
-
-const DEFAULT_CLI_VERSION = "0.0.0";
-
-function readCliVersion(): string {
-  try {
-    const packageJson = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
-    ) as { version?: unknown };
-
-    if (
-      typeof packageJson.version === "string" &&
-      packageJson.version.length > 0
-    ) {
-      return packageJson.version;
-    }
-  } catch {
-    // Fall through to default.
-  }
-
-  return DEFAULT_CLI_VERSION;
 }
 
 // =============================================================================
