@@ -46,6 +46,55 @@ CLI commands are thin adapters over shared handlers. Use `runHandler()` from `@o
 3. Wire command in `src/program.ts` using the CommandBuilder pattern
 4. Add tests in `src/<name>.test.ts`
 
+### Action Registry Alternative
+
+For projects that use `defineAction()` with an `ActionRegistry` instead of the CommandBuilder pattern, `buildCliCommands` from `@outfitter/cli/actions` converts the registry into Commander commands. Pass `defaultOnResult` to auto-output handler results — without it, success values are silently discarded:
+
+```typescript
+import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+
+for (const command of buildCliCommands(registry, {
+  onResult: defaultOnResult,
+})) {
+  program.register(command);
+}
+```
+
+Setting `cli.group` on action specs produces automatic subcommand grouping — the action-registry equivalent of `commandGroup()`:
+
+```typescript
+defineAction({
+  id: "entity.list",
+  cli: { group: "entity", command: "list", description: "List entities" },
+  // ...
+});
+// Produces: mycli entity list
+```
+
+### Nested Commands
+
+Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
+
+```typescript
+import { command, commandGroup } from "@outfitter/cli/command";
+
+// Fluent style
+program.register(
+  command("entity")
+    .description("Manage entities")
+    .subcommand(command("add").description("Add entity").action(handler))
+    .subcommand(command("show").description("Show entity").action(handler))
+);
+
+// Declarative style
+program.register(
+  commandGroup("entity", "Manage entities", [
+    command("add").description("Add entity").action(handler),
+    command("show").description("Show entity").action(handler),
+  ])
+);
+```
+
 ## Development Principles
 
 - **TDD-First** — Write the test before the code (Red / Green / Refactor)

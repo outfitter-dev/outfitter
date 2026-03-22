@@ -141,6 +141,8 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 | `cli.mapInput` | Maps CLI args/flags to handler input       |
 | `handler`      | Pure function returning `Result<T, E>`     |
 
+**Subcommand grouping**: Setting `cli.group` on an action spec causes `buildCliCommands` to automatically group actions into nested subcommands. Actions sharing the same `cli.group` value (e.g. `"check"`) are collected under a parent command, with each action's `cli.command` becoming a subcommand. This is the action-registry equivalent of `commandGroup()` in the CommandBuilder pattern — you get the same `mycli check tsdoc` nesting without manually wiring parent/child commands.
+
 **Introspection**: `outfitter schema` shows all registered actions. `outfitter schema <action-id> --output json` returns the full schema including input/output shapes.
 
 **Surface maps**: `outfitter schema generate` writes `.outfitter/surface.json` for drift detection. `outfitter schema diff` compares committed surface map against runtime, exiting non-zero on drift. The committed source of truth is root `.outfitter/surface.json` only; do not commit `apps/outfitter/.outfitter/surface.json`. Surface map formatting is also enforced via `outfitter check surface-map-format`.
@@ -155,6 +157,63 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 6. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
 7. Run `outfitter schema generate` to update `.outfitter/surface.json`
 8. Verify with `outfitter schema diff` (should report no drift after regeneration)
+
+#### `onResult` Callback and `defaultOnResult`
+
+When using `buildCliCommands` to wire an action registry into CLI commands, handler return values are **silently discarded** by default — only errors are thrown. This is a common footgun: the handler runs successfully but nothing is printed.
+
+The `onResult` option lets you intercept every handler result (success or failure). The `defaultOnResult` convenience export is the "batteries included" option — it resolves the output mode from CLI flags (`--output`, `--json`, `--jsonl`) and calls `output()` automatically.
+
+```typescript
+import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+
+// Minimal — auto-outputs all handler results
+for (const command of buildCliCommands(registry, {
+  onResult: defaultOnResult,
+})) {
+  program.register(command);
+}
+```
+
+With a custom context factory (recommended for real apps):
+
+```typescript
+import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+import { createContext } from "@outfitter/contracts";
+
+for (const command of buildCliCommands(registry, {
+  onResult: defaultOnResult,
+  createContext: () => createContext({
+    cwd: process.cwd(),
+    env: process.env,
+  }),
+})) {
+  program.register(command);
+}
+```
+
+**What `defaultOnResult` does**: On success, it calls `resolveOutputMode(flags)` to determine the format (text, JSON, JSONL) from CLI flags, then pipes the value through `output()`. On error, it throws — letting the program's error handler produce the appropriate exit code.
+
+**Custom `onResult`**: For more control (e.g., logging, metrics, or custom formatting), pass your own callback. The `ActionResultContext` includes the action spec, args, flags, validated input, and the `Result`:
+
+```typescript
+import type { ActionResultContext } from "@outfitter/cli/actions";
+import { output } from "@outfitter/cli";
+import { resolveOutputMode } from "@outfitter/cli/query";
+import { createLogger } from "@outfitter/logging";
+
+const logger = createLogger({ name: "my-app" });
+
+async function myOnResult(ctx: ActionResultContext): Promise<void> {
+  if (ctx.result.isErr()) {
+    logger.error("Action failed", { action: ctx.action.id, error: ctx.result.error });
+    throw ctx.result.error;
+  }
+  logger.info("Action succeeded", { action: ctx.action.id });
+  const { mode } = resolveOutputMode(ctx.flags);
+  await output(ctx.result.value, mode);
+}
+```
 
 ### CommandBuilder (v0.6)
 
@@ -195,6 +254,31 @@ command("deploy <env>")
 | `.readOnly(true)`          | Marks command as non-mutating; surfaces in command tree and MCP `readOnlyHint`              |
 | `.idempotent(true)`        | Marks command as idempotent; surfaces in command tree and MCP `idempotentHint`              |
 | `.relatedTo(target, opts)` | Declares relationship to another command for action graph hints                             |
+| `.subcommand(builder)`     | Register a nested subcommand under this command                                             |
+
+### Nested Commands
+
+Use `.subcommand()` for fluent nesting or `commandGroup()` for declarative groups:
+
+```typescript
+import { command, commandGroup } from "@outfitter/cli/command";
+
+// Fluent
+program.register(
+  command("entity")
+    .description("Manage entities")
+    .subcommand(command("add").description("Add").action(handler))
+    .subcommand(command("show").description("Show").action(handler))
+);
+
+// Declarative
+program.register(
+  commandGroup("entity", "Manage entities", [
+    command("add").description("Add").action(handler),
+    command("show").description("Show").action(handler),
+  ])
+);
+```
 
 ### Streaming
 
