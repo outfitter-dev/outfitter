@@ -67,6 +67,7 @@
         "default": "./dist/core/sentinel-generator.js"
       }
     },
+    "./package.json": "./package.json",
     "./search": {
       "import": {
         "types": "./dist/search.d.ts",
