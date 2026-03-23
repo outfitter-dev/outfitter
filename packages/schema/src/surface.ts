@@ -40,8 +40,12 @@ function compareStableKeys(left: string, right: string): number {
 
 function comparableSurfaceMap(
   surfaceMap: SurfaceMap
-): Omit<SurfaceMap, "generatedAt"> {
-  const { generatedAt: _generatedAt, ...comparable } = surfaceMap;
+): Omit<SurfaceMap, "generatedAt" | "generator"> {
+  const {
+    generatedAt: _generatedAt,
+    generator: _generator,
+    ...comparable
+  } = surfaceMap;
   return comparable;
 }
 

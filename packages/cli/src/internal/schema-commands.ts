@@ -311,7 +311,10 @@ export function createSchemaCommand(
               return;
             }
 
-            // Hashes differ: fall through to semantic diff using _surface.json
+            // Hashes differ: report drift. Try to show semantic diff
+            // using _surface.json if available AND its hash matches the
+            // committed lock. A stale _surface.json (from a branch switch
+            // or outdated generate) would produce misleading diffs.
             const detailPath = join(cwd, outputDir, "_surface.json");
             try {
               const candidate = await readSurfaceMap(detailPath);
@@ -322,11 +325,22 @@ export function createSchemaCommand(
               }
               left = candidate;
             } catch {
-              // _surface.json may not exist yet (first run after migration).
-              // Generate a build-mode map as the "committed" side so the
-              // semantic diff still works — the hash mismatch already tells
-              // us there is drift.
-              left = generateSurfaceMap(source, { generator: "build" });
+              // _surface.json is gitignored and may not exist on CI or
+              // fresh clones. Report drift based on hash mismatch alone.
+              if (diffOptions.output === "json") {
+                process.stdout.write(
+                  `${JSON.stringify({ hasChanges: true, hashMismatch: true, committedHash, currentHash }, null, 2)}\n`
+                );
+              } else {
+                process.stderr.write("Schema drift detected:\n");
+                process.stderr.write(`  Committed hash: ${committedHash}\n`);
+                process.stderr.write(`  Current hash:   ${currentHash}\n`);
+                process.stderr.write(
+                  "\nRun 'schema generate' to update surface.lock.\n"
+                );
+              }
+              process.exitCode = 1;
+              return;
             }
             right = currentSurfaceMap;
           }
