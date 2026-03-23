@@ -124,7 +124,7 @@ export async function runCheckSurfaceMapFormat(
     const message =
       error instanceof Error
         ? error.message
-        : "Failed to check surface map formatting";
+        : "Failed to check surface lock format";
     return Result.err(new CheckSurfaceMapFormatError(message));
   }
 }
