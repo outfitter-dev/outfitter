@@ -16,6 +16,7 @@ import { Result } from "@outfitter/contracts";
 import { createIndex } from "@outfitter/index";
 
 import { outfitterActions } from "../actions.js";
+import { resolveIndexPath } from "../commands/docs-index.js";
 import type { DocsModule } from "../commands/docs-module-loader.js";
 import * as docsModuleLoader from "../commands/docs-module-loader.js";
 import type { DocsSearchOutput } from "../commands/docs-search.js";
@@ -542,6 +543,100 @@ describe("runDocsSearch", () => {
       expect(existsSync(indexPath)).toBe(true);
       if (result.isOk()) {
         expect(result.value.matches.length).toBeGreaterThan(0);
+      }
+    } finally {
+      cleanupTmpDir(workspaceDir);
+    }
+  });
+
+  test("refreshes the existing workspace index before searching", async () => {
+    const workspaceDir = createTmpDir();
+    const docsDir = join(workspaceDir, "docs");
+    mkdirSync(docsDir, { recursive: true });
+    const guidePath = join(docsDir, "guide.md");
+    const defaultIndexPath = resolveIndexPath(workspaceDir);
+    await Bun.write(guidePath, "# Guide\n\nHandlers return Result values.");
+    using _loadDocsModuleSpy = spyOn(
+      docsModuleLoader,
+      "loadDocsModule"
+    ).mockResolvedValue(
+      createDocsModuleMock([
+        {
+          id: "docs.guide",
+          kind: "guide",
+          outputPath: "docs/guide.md",
+          sourcePath: "docs/guide.md",
+          title: "Guide",
+        },
+      ])
+    );
+
+    try {
+      const firstResult = await runDocsSearch({
+        cwd: workspaceDir,
+        query: "handlers",
+        outputMode: "json",
+      });
+
+      expect(firstResult.isOk()).toBe(true);
+
+      await Bun.write(
+        guidePath,
+        "# Guide\n\nMigration-v0.6 is covered in this updated guide."
+      );
+
+      const refreshedResult = await runDocsSearch({
+        cwd: workspaceDir,
+        query: "migration-v0.6",
+        outputMode: "json",
+      });
+
+      expect(refreshedResult.isOk()).toBe(true);
+      if (refreshedResult.isOk()) {
+        expect(refreshedResult.value.total).toBe(1);
+        expect(refreshedResult.value.matches[0]?.id).toBe("docs.guide");
+      }
+    } finally {
+      cleanupTmpDir(defaultIndexPath);
+      cleanupTmpDir(workspaceDir);
+    }
+  });
+
+  test("retries punctuation-heavy plain-text queries with quoted FTS terms", async () => {
+    const workspaceDir = createTmpDir();
+    const docsDir = join(workspaceDir, "docs");
+    mkdirSync(docsDir, { recursive: true });
+    await Bun.write(
+      join(docsDir, "guide.md"),
+      "# Guide\n\nMigration-v0.6 and result-api are both documented here."
+    );
+    using _loadDocsModuleSpy = spyOn(
+      docsModuleLoader,
+      "loadDocsModule"
+    ).mockResolvedValue(
+      createDocsModuleMock([
+        {
+          id: "docs.guide",
+          kind: "guide",
+          outputPath: "docs/guide.md",
+          sourcePath: "docs/guide.md",
+          title: "Guide",
+        },
+      ])
+    );
+
+    try {
+      const result = await runDocsSearch({
+        cwd: workspaceDir,
+        query: "migration-v0.6",
+        outputMode: "json",
+        indexPath: join(indexDir, "punctuation.sqlite"),
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.total).toBe(1);
+        expect(result.value.matches[0]?.id).toBe("docs.guide");
       }
     } finally {
       cleanupTmpDir(workspaceDir);

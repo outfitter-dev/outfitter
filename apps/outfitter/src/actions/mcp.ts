@@ -11,16 +11,9 @@
 import { defineAction } from "@outfitter/contracts";
 import { z } from "zod";
 
-import type { DocsIndexOutput } from "../commands/docs-index.js";
 import { runDocsIndex } from "../commands/docs-index.js";
-import type { DocsListEntry, DocsListOutput } from "../commands/docs-list.js";
 import { runDocsList } from "../commands/docs-list.js";
-import type {
-  DocsSearchMatch,
-  DocsSearchOutput,
-} from "../commands/docs-search.js";
 import { runDocsSearch } from "../commands/docs-search.js";
-import type { DocsShowOutput } from "../commands/docs-show.js";
 import { runDocsShow } from "../commands/docs-show.js";
 
 // ---------------------------------------------------------------------------
@@ -59,100 +52,17 @@ interface McpDocsSearchInput {
 // ---------------------------------------------------------------------------
 
 type McpDocsIndexAction = ReturnType<
-  typeof defineAction<McpDocsIndexInput, DocsIndexOutput>
+  typeof defineAction<McpDocsIndexInput, unknown>
 >;
 type McpDocsListAction = ReturnType<
-  typeof defineAction<McpDocsListInput, DocsListOutput>
+  typeof defineAction<McpDocsListInput, unknown>
 >;
 type McpDocsShowAction = ReturnType<
-  typeof defineAction<McpDocsShowInput, DocsShowOutput>
+  typeof defineAction<McpDocsShowInput, unknown>
 >;
 type McpDocsSearchAction = ReturnType<
-  typeof defineAction<McpDocsSearchInput, DocsSearchOutput>
+  typeof defineAction<McpDocsSearchInput, unknown>
 >;
-
-const docsIndexOutputSchema: z.ZodType<DocsIndexOutput> = z.object({
-  failed: z.number(),
-  indexed: z.number(),
-  indexPath: z.string(),
-  removed: z.number(),
-  skipped: z.number(),
-  total: z.number(),
-});
-
-const docsListEntryOutputSchema: z.ZodType<DocsListEntry> = z
-  .object({
-    id: z.string(),
-    kind: z.string(),
-    outputPath: z.string(),
-    package: z.string().optional(),
-    sourcePath: z.string(),
-    title: z.string(),
-  })
-  .transform((entry) => ({
-    id: entry.id,
-    kind: entry.kind,
-    outputPath: entry.outputPath,
-    sourcePath: entry.sourcePath,
-    title: entry.title,
-    ...(entry.package !== undefined ? { package: entry.package } : {}),
-  }));
-
-const docsListOutputSchema: z.ZodType<DocsListOutput> = z.object({
-  entries: z.array(docsListEntryOutputSchema),
-  total: z.number(),
-});
-
-const docsShowEntryOutputSchema: z.ZodType<DocsShowOutput["entry"]> = z
-  .object({
-    id: z.string(),
-    kind: z.string(),
-    outputPath: z.string(),
-    package: z.string().optional(),
-    sourcePath: z.string(),
-    tags: z.array(z.string()),
-    title: z.string(),
-  })
-  .transform((entry) => ({
-    id: entry.id,
-    kind: entry.kind,
-    outputPath: entry.outputPath,
-    sourcePath: entry.sourcePath,
-    tags: entry.tags,
-    title: entry.title,
-    ...(entry.package !== undefined ? { package: entry.package } : {}),
-  }));
-
-const docsShowOutputSchema: z.ZodType<DocsShowOutput> = z.object({
-  content: z.string(),
-  entry: docsShowEntryOutputSchema,
-});
-
-const docsSearchMatchOutputSchema: z.ZodType<DocsSearchMatch> = z
-  .object({
-    id: z.string(),
-    kind: z.string(),
-    matchLines: z.array(z.string()),
-    outputPath: z.string(),
-    package: z.string().optional(),
-    sourcePath: z.string(),
-    title: z.string(),
-  })
-  .transform((match) => ({
-    id: match.id,
-    kind: match.kind,
-    matchLines: match.matchLines,
-    outputPath: match.outputPath,
-    sourcePath: match.sourcePath,
-    title: match.title,
-    ...(match.package !== undefined ? { package: match.package } : {}),
-  }));
-
-const docsSearchOutputSchema: z.ZodType<DocsSearchOutput> = z.object({
-  matches: z.array(docsSearchMatchOutputSchema),
-  query: z.string(),
-  total: z.number(),
-});
 
 // ---------------------------------------------------------------------------
 // Actions
@@ -170,7 +80,6 @@ export const mcpDocsIndexAction: McpDocsIndexAction = defineAction({
       .optional()
       .describe("Optional path to a custom SQLite docs index"),
   }),
-  output: docsIndexOutputSchema,
   mcp: {
     tool: "index_docs",
     description: "Build search index for documentation",
@@ -187,11 +96,10 @@ export const mcpDocsListAction: McpDocsListAction = defineAction({
   description: "List documentation entries from the docs map",
   surfaces: ["mcp"],
   input: z.object({
-    cwd: z.string().default(".").describe("Workspace root containing docs"),
-    kind: z.string().optional().describe("Optional docs-map kind filter"),
-    package: z.string().optional().describe("Optional package-name filter"),
+    cwd: z.string().default("."),
+    kind: z.string().optional(),
+    package: z.string().optional(),
   }),
-  output: docsListOutputSchema,
   mcp: {
     tool: "list_docs",
     description: "List documentation entries from the docs map",
@@ -208,10 +116,9 @@ export const mcpDocsShowAction: McpDocsShowAction = defineAction({
   description: "Get a specific documentation entry and its content",
   surfaces: ["mcp"],
   input: z.object({
-    cwd: z.string().default(".").describe("Workspace root containing docs"),
-    id: z.string().describe("Documentation entry identifier"),
+    cwd: z.string().default("."),
+    id: z.string(),
   }),
-  output: docsShowOutputSchema,
   mcp: {
     tool: "get_doc",
     description: "Get a specific documentation entry and its content",
@@ -228,21 +135,11 @@ export const mcpDocsSearchAction: McpDocsSearchAction = defineAction({
   description: "Search documentation content using FTS5 BM25-ranked search",
   surfaces: ["mcp"],
   input: z.object({
-    cwd: z.string().default(".").describe("Workspace root containing docs"),
-    indexPath: z
-      .string()
-      .optional()
-      .describe("Optional path to a custom SQLite docs index"),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .optional()
-      .describe("Maximum number of matches to return"),
-    query: z.string().describe("Full-text query to search for"),
+    cwd: z.string().default("."),
+    indexPath: z.string().optional(),
+    limit: z.number().int().min(1).max(100).optional(),
+    query: z.string(),
   }),
-  output: docsSearchOutputSchema,
   mcp: {
     tool: "search_docs",
     description: "Search documentation content using FTS5 BM25-ranked search",

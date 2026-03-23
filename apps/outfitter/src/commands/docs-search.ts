@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { Database } from "bun:sqlite";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -61,6 +62,107 @@ export interface DocsSearchOutput {
   readonly matches: DocsSearchMatch[];
   readonly query: string;
   readonly total: number;
+}
+
+const INDEX_DOCUMENTS_TABLE = "documents";
+const FTS_QUERY_ERROR_PATTERN = /(fts5:|no such column:)/i;
+const FTS_SYNTAX_PATTERN = /["*:()]/;
+const FTS_OPERATOR_PATTERN = /(^|[\s(])(AND|OR|NOT|NEAR)(?=$|[\s)])/i;
+
+function shouldRetryAsPlainText(query: string, message: string): boolean {
+  return (
+    FTS_QUERY_ERROR_PATTERN.test(message) &&
+    !FTS_SYNTAX_PATTERN.test(query) &&
+    !FTS_OPERATOR_PATTERN.test(query)
+  );
+}
+
+function buildPlainTextFtsQuery(query: string): string {
+  return query
+    .trim()
+    .split(/\s+/)
+    .filter((term) => term.length > 0)
+    .map((term) => `"${term.replaceAll('"', '""')}"`)
+    .join(" ");
+}
+
+async function searchIndex(
+  index: Index<DocIndexMetadata>,
+  query: string,
+  limit: number
+): Promise<
+  Result<
+    {
+      readonly effectiveQuery: string;
+      readonly matches: SearchResult<DocIndexMetadata>[];
+    },
+    InternalError
+  >
+> {
+  const initialResult = await index.search({ query, limit });
+
+  if (initialResult.isOk()) {
+    return Result.ok({
+      effectiveQuery: query,
+      matches: initialResult.value,
+    });
+  }
+
+  if (!shouldRetryAsPlainText(query, initialResult.error.message)) {
+    return Result.err(
+      new InternalError({
+        message: initialResult.error.message,
+        context: { action: "docs.search" },
+      })
+    );
+  }
+
+  const quotedQuery = buildPlainTextFtsQuery(query);
+  const retryResult = await index.search({ query: quotedQuery, limit });
+
+  if (retryResult.isErr()) {
+    return Result.err(
+      new InternalError({
+        message: retryResult.error.message,
+        context: { action: "docs.search" },
+      })
+    );
+  }
+
+  return Result.ok({
+    effectiveQuery: quotedQuery,
+    matches: retryResult.value,
+  });
+}
+
+function countMatches(
+  indexPath: string,
+  query: string
+): Result<number, InternalError> {
+  let db: Database | undefined;
+
+  try {
+    db = new Database(indexPath, { readonly: true });
+    const row = db
+      .query(
+        `SELECT COUNT(*) as count FROM ${DEFAULT_TABLE_NAME} WHERE ${DEFAULT_TABLE_NAME} MATCH ?`
+      )
+      .get(query) as { count: number } | null;
+
+    return Result.ok(row?.count ?? 0);
+  } catch (error) {
+    return Result.err(
+      new InternalError({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to count docs search matches",
+        context: { action: "docs.search" },
+      })
+    );
+  } finally {
+    db?.close();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -119,6 +221,8 @@ export async function runDocsSearch(
     if (searchResult.isErr()) {
       index.close();
       index = undefined;
+      return searchResult;
+    }
 
     const totalResult = countMatches(
       indexPath,
@@ -212,7 +316,11 @@ export async function printDocsSearchResults(
   }
 
   lines.push("");
-  lines.push(`Search Results for "${result.query}" (${result.total})`);
+  lines.push(
+    result.matches.length < result.total
+      ? `Search Results for "${result.query}" (showing ${result.matches.length} of ${result.total})`
+      : `Search Results for "${result.query}" (${result.total})`
+  );
   lines.push("=".repeat(60));
   lines.push("");
 
