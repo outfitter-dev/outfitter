@@ -59,6 +59,7 @@ temp/
 .outfitter/reports/
 .outfitter/scaffold-e2e/
 .outfitter/_surface.json
+.outfitter/surface.json
 */*/.outfitter/surface.json
 */*/.outfitter/_surface.json
 

@@ -1,5 +1,7 @@
 ---
 "@outfitter/docs": minor
+"@outfitter/index": patch
+"@outfitter/cli": patch
 ---
 
 Add `createDocsSearch()` API for reusable FTS5 full-text search
