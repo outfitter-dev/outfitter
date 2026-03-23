@@ -1,4 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   createActionRegistry,
@@ -7,6 +10,7 @@ import {
 } from "@outfitter/contracts";
 import { z } from "zod";
 
+import { createCLI } from "../command.js";
 import {
   createSchemaCommand,
   formatManifestHuman,
@@ -16,6 +20,42 @@ import {
 // =============================================================================
 // Test Fixtures
 // =============================================================================
+
+interface CapturedOutput {
+  readonly stderr: string;
+  readonly stdout: string;
+}
+
+async function captureOutput(
+  fn: () => void | Promise<void>
+): Promise<CapturedOutput> {
+  let stdout = "";
+  let stderr = "";
+
+  const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+  const originalStderrWrite = process.stderr.write.bind(process.stderr);
+
+  process.stdout.write = (chunk: string | Uint8Array): boolean => {
+    stdout +=
+      typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+    return true;
+  };
+
+  process.stderr.write = (chunk: string | Uint8Array): boolean => {
+    stderr +=
+      typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+    return true;
+  };
+
+  try {
+    await fn();
+  } finally {
+    process.stdout.write = originalStdoutWrite;
+    process.stderr.write = originalStderrWrite;
+  }
+
+  return { stdout, stderr };
+}
 
 function createTestRegistry() {
   return createActionRegistry()
@@ -376,5 +416,136 @@ describe("createSchemaCommand", () => {
     expect(options).toContain("--surface");
     expect(options).toContain("--output-dir");
     expect(options).toContain("--dry-run");
+  });
+
+  it("show subcommand honors --output json when invoked through the parent schema command", async () => {
+    const registry = createTestRegistry();
+    const cmd = createSchemaCommand(registry);
+    const originalExitCode = process.exitCode ?? 0;
+
+    try {
+      process.exitCode = 0;
+      const { stdout, stderr } = await captureOutput(async () => {
+        await cmd.parseAsync(
+          ["node", "schema", "show", "doctor", "--output", "json"],
+          {
+            from: "node",
+          }
+        );
+      });
+      const parsed = JSON.parse(stdout) as {
+        description: string;
+        id: string;
+      };
+
+      expect(parsed.id).toBe("doctor");
+      expect(parsed.description).toBe("Validate environment and dependencies");
+      expect(stderr).toBe("");
+      expect(process.exitCode).toBe(0);
+    } finally {
+      process.exitCode = originalExitCode;
+    }
+  });
+
+  it("schema diff honors --output json when mounted under createCLI()", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "schema-root-diff-"));
+    const outfitterDir = join(tempDir, ".outfitter");
+    await mkdir(outfitterDir, { recursive: true });
+    await writeFile(
+      join(outfitterDir, "surface.lock"),
+      "0000000000000000000000000000000000000000000000000000000000000000\n",
+      "utf-8"
+    );
+
+    const cli = createCLI({ name: "outfitter", version: "0.0.0" });
+    cli.register(
+      createSchemaCommand(createTestRegistry(), {
+        programName: "outfitter",
+        surface: { cwd: tempDir },
+      })
+    );
+    const originalExitCode = process.exitCode ?? 0;
+
+    try {
+      process.exitCode = 0;
+      const { stdout, stderr } = await captureOutput(async () => {
+        await cli.parse([
+          "node",
+          "outfitter",
+          "schema",
+          "diff",
+          "--output",
+          "json",
+        ]);
+      });
+      const parsed = JSON.parse(stdout) as {
+        hasChanges: boolean;
+        hashMismatch: boolean;
+      };
+
+      expect(parsed.hasChanges).toBe(true);
+      expect(parsed.hashMismatch).toBe(true);
+      expect(stderr).toBe("");
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.exitCode = originalExitCode;
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("diff emits structured JSON when surface.lock mismatches and _surface.json is absent", async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), "schema-diff-"));
+    const outfitterDir = join(tempDir, ".outfitter");
+    await mkdir(outfitterDir, { recursive: true });
+    await writeFile(
+      join(outfitterDir, "surface.lock"),
+      "0000000000000000000000000000000000000000000000000000000000000000\n",
+      "utf-8"
+    );
+
+    const registry = createActionRegistry().add(
+      defineAction({
+        id: "doctor",
+        description: "Validate environment and dependencies",
+        surfaces: ["cli", "mcp"],
+        input: z.object({
+          verbose: z.boolean().optional(),
+        }),
+        cli: {
+          command: "doctor",
+          description: "Validate environment and dependencies",
+        },
+        mcp: {
+          tool: "doctor",
+          description: "Validate environment",
+        },
+        handler: async () => Result.ok({ ok: true }),
+      })
+    );
+    const cmd = createSchemaCommand(registry, {
+      surface: { cwd: tempDir },
+    });
+    const originalExitCode = process.exitCode ?? 0;
+
+    try {
+      process.exitCode = 0;
+      const { stdout, stderr } = await captureOutput(async () => {
+        await cmd.parseAsync(["node", "schema", "diff", "--output", "json"], {
+          from: "node",
+        });
+      });
+      const parsed = JSON.parse(stdout) as {
+        hasChanges: boolean;
+        hashMismatch: boolean;
+      };
+
+      expect(parsed.hasChanges).toBe(true);
+      expect(parsed.hashMismatch).toBe(true);
+      expect(stderr).toBe("");
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.exitCode = originalExitCode;
+      await rm(tempDir, { recursive: true, force: true });
+    }
   });
 });

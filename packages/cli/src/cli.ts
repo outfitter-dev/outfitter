@@ -18,6 +18,31 @@ function isCommanderHelp(error: { code?: string }): boolean {
   );
 }
 
+function normalizeGlobalJsonFlag(argv: readonly string[]): string[] {
+  const relocatedJsonFlags: string[] = [];
+  const normalized: string[] = [];
+
+  for (const [index, arg] of argv.entries()) {
+    if (index >= 2 && arg === "--json") {
+      relocatedJsonFlags.push(arg);
+      continue;
+    }
+
+    normalized.push(arg);
+  }
+
+  if (relocatedJsonFlags.length === 0) {
+    return [...argv];
+  }
+
+  const prefixLength = Math.min(2, normalized.length);
+  return [
+    ...normalized.slice(0, prefixLength),
+    ...relocatedJsonFlags,
+    ...normalized.slice(prefixLength),
+  ];
+}
+
 /**
  * Create a new CLI instance with the given configuration.
  *
@@ -72,6 +97,7 @@ export function createCLI(config: CLIConfig): CLI {
   };
 
   program.name(config.name).version(config.version);
+  program.enablePositionalOptions();
   if (config.description) {
     program.description(config.description);
   }
@@ -124,8 +150,10 @@ export function createCLI(config: CLIConfig): CLI {
   });
 
   const parse = async (argv?: readonly string[]): Promise<void> => {
+    const normalizedArgv = normalizeGlobalJsonFlag(argv ?? process.argv);
+
     try {
-      await program.parseAsync(argv ?? process.argv);
+      await program.parseAsync(normalizedArgv);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       if (isCommanderHelp(err as { code?: string })) {

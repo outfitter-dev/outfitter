@@ -94,6 +94,9 @@ export function createSchemaCommand(
 ): Command {
   const cmd = new Command("schema")
     .description("Show CLI schema for machine or human consumption")
+    // Keep `--output` and similar flags attached to the subcommand when users
+    // run `schema diff --output json` or `schema show --output json`.
+    .enablePositionalOptions()
     .argument("[action]", "Show detail for a specific action")
     .option("--output <mode>", "Output mode (human, json)", "human")
     .option("--surface <name>", "Filter by surface (cli, mcp, api, server)")

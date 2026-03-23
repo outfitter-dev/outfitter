@@ -128,6 +128,22 @@ describe("--json flag parse states", () => {
     await cli.parse(["node", "test", "--json", "hello"]);
     expect(jsonValue).toBe(true);
   });
+
+  it("options.json is true when --json is passed after the subcommand", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let jsonValue: unknown;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async ({ flags }) => {
+          jsonValue = flags["json"];
+        })
+    );
+
+    await cli.parse(["node", "test", "hello", "--json"]);
+    expect(jsonValue).toBe(true);
+  });
 });
 
 describe("--json env var bridge", () => {
@@ -159,6 +175,22 @@ describe("--json env var bridge", () => {
     );
 
     await cli.parse(["node", "test", "--json", "hello"]);
+    expect(envValue).toBe("1");
+  });
+
+  it("global --json sets OUTFITTER_JSON when passed after the subcommand", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let envValue: string | undefined;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => {
+          envValue = process.env["OUTFITTER_JSON"];
+        })
+    );
+
+    await cli.parse(["node", "test", "hello", "--json"]);
     expect(envValue).toBe("1");
   });
 
