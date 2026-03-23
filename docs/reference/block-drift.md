@@ -43,4 +43,4 @@ Orchestrator modes use `--manifest-only` so they only check blocks formally trac
 
 - [OS-441](https://linear.app/outfitter/issue/OS-441) — Schema drift detection reliability
 - [OS-442](https://linear.app/outfitter/issue/OS-442) — Registry block drift guardrails (this work)
-- `.outfitter/surface.json` — Schema surface map (separate drift mechanism, see [outfitter-directory.md](./outfitter-directory.md))
+- `.outfitter/surface.lock` — Schema surface hash (separate drift mechanism, see [outfitter-directory.md](./outfitter-directory.md))

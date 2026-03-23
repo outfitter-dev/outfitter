@@ -249,15 +249,15 @@ outfitter schema --surface cli            # Filter by surface
 Subcommands for surface map management:
 
 ```bash
-outfitter schema generate                 # Write .outfitter/surface.json
+outfitter schema generate                 # Write _surface.json + surface.lock
 outfitter schema generate --dry-run       # Print without writing
-outfitter schema diff                     # Compare runtime vs committed
+outfitter schema diff                     # Compare runtime vs committed hash
 outfitter schema diff --output json       # Structured diff as JSON
 ```
 
-Canonical artifact policy: commit root `.outfitter/surface.json` only. Do not
-commit `apps/outfitter/.outfitter/surface.json`.
-Surface map formatting is enforced by `outfitter check surface-map-format`.
+Canonical artifact policy: commit `.outfitter/surface.lock` only. The full
+surface map (`.outfitter/_surface.json`) is gitignored. Do not commit full
+surface map JSON files. Lock format is validated by `outfitter check surface-map-format`.
 
 ### `check`
 

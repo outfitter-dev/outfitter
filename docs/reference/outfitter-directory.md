@@ -4,19 +4,23 @@ Project-level artifacts generated and consumed by the Outfitter CLI. Lives at th
 
 ## Contents
 
-| Path            | Purpose                                                      | Committed                |
-| --------------- | ------------------------------------------------------------ | ------------------------ |
-| `surface.json`  | CLI action surface map for drift detection                   | Yes                      |
-| `docs-map.json` | Generated docs inventory manifest used by docs-map workflows | No (generated on demand) |
-| `migration/`    | Migration audit reports and upgrade plans                    | Yes                      |
-| `reports/`      | Generated analysis reports (link checks, etc.)               | No (gitignored)          |
+| Path             | Purpose                                                      | Committed                |
+| ---------------- | ------------------------------------------------------------ | ------------------------ |
+| `surface.lock`   | SHA-256 content hash of the surface map for drift detection  | Yes                      |
+| `_surface.json`  | Full surface map detail (used for semantic diff on mismatch) | No (gitignored)          |
+| `docs-map.json`  | Generated docs inventory manifest used by docs-map workflows | No (generated on demand) |
+| `migration/`     | Migration audit reports and upgrade plans                    | Yes                      |
+| `reports/`       | Generated analysis reports (link checks, etc.)               | No (gitignored)          |
 
-### `surface.json`
+### `surface.lock`
 
-Snapshot of all registered CLI actions, their input/output schemas, and flag definitions. Used by `outfitter schema diff` to detect drift between the committed surface map and the live runtime.
+A single-line file containing the SHA-256 hex hash of the deterministic surface map content. This is the only committed surface artifact. The hash is computed from the surface map JSON with `generatedAt` stripped and all keys sorted, ensuring deterministic output regardless of generation time or key ordering.
 
-Canonical policy: root `.outfitter/surface.json` is the only committed surface map. Do not commit `apps/outfitter/.outfitter/surface.json`.
-Formatting policy: `.outfitter/surface.json` is serialized by `schema generate` (two-space JSON with trailing newline) and checked by `outfitter check surface-map-format`. Do not run generic formatter rewrites on this file.
+When `schema diff` runs, it hashes the live runtime surface map and compares against this committed hash. If the hashes match, there is no drift. If they differ, it reads `_surface.json` (or generates a fresh map) to show a semantic diff of what changed.
+
+### `_surface.json`
+
+The full surface map JSON, written alongside `surface.lock` by `schema generate`. This file is gitignored and exists only for local debugging and semantic diff output. It is never committed.
 
 ```bash
 # Regenerate after adding or changing actions
@@ -42,13 +46,16 @@ Transient output from analysis commands (e.g., `outfitter repo check markdown-li
 
 ## Git Strategy
 
-Commit `surface.json` and `migration/` -- these are shared artifacts that CI and teammates depend on. The `reports/` directory is gitignored since reports are ephemeral and developer-local.
+Commit `surface.lock` and `migration/` -- these are shared artifacts that CI and teammates depend on. The `_surface.json` and `reports/` directories are gitignored since they are ephemeral and developer-local.
 
-The `.gitignore` entry:
+The `.gitignore` entries:
 
 ```
+.outfitter/_surface.json
 .outfitter/reports/
-apps/outfitter/.outfitter/surface.json
+*/*/.outfitter/surface.json
+*/*/.outfitter/_surface.json
+*/*/.outfitter/surface.lock
 ```
 
 CI/pre-push guard:

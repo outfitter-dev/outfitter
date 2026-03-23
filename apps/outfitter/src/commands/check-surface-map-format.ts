@@ -77,33 +77,48 @@ export async function runCheckSurfaceMapFormat(
   options: CheckSurfaceMapFormatOptions
 ): Promise<Result<CheckSurfaceMapFormatResult, CheckSurfaceMapFormatError>> {
   try {
-    const filePath = join(resolve(options.cwd), ".outfitter", "surface.json");
-    if (!existsSync(filePath)) {
-      return Result.ok({
-        filePath,
-        format: null,
-        ok: false,
-        reason: "missing-file",
-      });
+    const lockPath = join(resolve(options.cwd), ".outfitter", "surface.lock");
+    let lockContent: string;
+    try {
+      lockContent = (await readFile(lockPath, "utf-8")).trim();
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        return Result.ok({
+          filePath: lockPath,
+          format: null,
+          ok: false,
+          reason: "missing-file",
+        });
+      }
+
+      throw error;
     }
 
-    const content = readFileSync(filePath, "utf-8");
-    const formatResult = checkSurfaceMapFormat(content, filePath);
-
-    if (formatResult.ok) {
+    // surface.lock is a single-line hex hash, so validation is just a shape check.
+    if (!/^[0-9a-f]{64}$/.test(lockContent)) {
       return Result.ok({
-        filePath,
-        format: formatResult,
-        ok: true,
-        reason: "ok",
+        filePath: lockPath,
+        format: {
+          filePath: lockPath,
+          actual: lockContent,
+          expected: "<64-char hex SHA-256 hash>",
+          ok: false,
+        },
+        ok: false,
+        reason: "format-drift",
       });
     }
 
     return Result.ok({
-      filePath,
-      format: formatResult,
-      ok: false,
-      reason: "format-drift",
+      filePath: lockPath,
+      format: {
+        filePath: lockPath,
+        actual: lockContent,
+        expected: lockContent,
+        ok: true,
+      },
+      ok: true,
+      reason: "ok",
     });
   } catch (error) {
     const message =
@@ -136,16 +151,14 @@ export async function printCheckSurfaceMapFormatResult(
   }
 
   if (result.reason === "ok") {
-    process.stdout.write(
-      `[surface-map-format] ${result.filePath} matches canonical formatting\n`
-    );
+    process.stdout.write(`[surface-map-format] ${result.filePath} is valid\n`);
     return;
   }
 
   process.stderr.write(
     [
-      `[surface-map-format] ${result.filePath} is not canonically formatted.`,
-      "Run 'bun run apps/outfitter/src/cli.ts schema generate' from repo root to rewrite .outfitter/surface.json.",
+      `[surface-map-format] ${result.filePath} is not a valid surface lock.`,
+      "Run 'bun run apps/outfitter/src/cli.ts schema generate' from repo root to regenerate.",
     ].join("\n")
   );
   process.stderr.write("\n");

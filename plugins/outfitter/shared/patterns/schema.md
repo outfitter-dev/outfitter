@@ -23,7 +23,7 @@ import {
 - `zodToJsonSchema()` lives in `@outfitter/contracts` (moved from `@outfitter/mcp`).
 - `generateManifest()` produces machine-readable action metadata from a registry.
 - `formatManifestMarkdown()` emits docs-friendly markdown.
-- `generateSurfaceMap()` produces `.outfitter/surface.json`-compatible artifacts.
+- `generateSurfaceMap()` produces surface map artifacts; `hashSurfaceMap()` computes the content hash written to `surface.lock`.
 - `diffSurfaceMaps()` reports added/removed/modified actions for drift checks.
 
 ## Zod to JSON Schema
@@ -45,30 +45,45 @@ Use this when exporting transport-neutral schemas for manifests, MCP tool contra
 ## Surface Map Generation
 
 ```typescript
-import { generateSurfaceMap, writeSurfaceMap } from "@outfitter/schema/surface";
+import {
+  generateSurfaceMap,
+  hashSurfaceMap,
+  writeSurfaceMap,
+  writeSurfaceLock,
+} from "@outfitter/schema";
 
 const surfaceMap = generateSurfaceMap(registry, { generator: "build" });
-await writeSurfaceMap(surfaceMap, ".outfitter/surface.json");
+await writeSurfaceMap(surfaceMap, ".outfitter/_surface.json");
+await writeSurfaceLock(hashSurfaceMap(surfaceMap), ".outfitter/surface.lock");
 ```
 
-Surface maps extend action manifests with envelope metadata (`$schema`, generator) and are used as baseline artifacts for CI drift checks.
+Surface maps extend action manifests with envelope metadata (`$schema`, generator). The committed artifact is `.outfitter/surface.lock` (a SHA-256 hash); the full JSON is `.outfitter/_surface.json` (gitignored, used for semantic diffs).
 
 ## Drift Detection
 
 ```typescript
-import { diffSurfaceMaps } from "@outfitter/schema/diff";
+import {
+  generateSurfaceMap,
+  hashSurfaceMap,
+  readSurfaceLock,
+  readSurfaceMap,
+  diffSurfaceMaps,
+} from "@outfitter/schema";
 
-const committed = await readSurfaceMap(".outfitter/surface.json");
+const committedHash = await readSurfaceLock(".outfitter/surface.lock");
 const runtime = generateSurfaceMap(registry, { generator: "runtime" });
-const diff = diffSurfaceMaps(committed, runtime);
+const runtimeHash = hashSurfaceMap(runtime);
 
-if (diff.hasChanges) {
+if (committedHash !== runtimeHash) {
+  // Hashes differ — compute semantic diff
+  const committed = await readSurfaceMap(".outfitter/_surface.json");
+  const diff = diffSurfaceMaps(committed, runtime);
   console.error("Schema drift detected", diff);
   process.exitCode = 1;
 }
 ```
 
-`diffSurfaceMaps()` ignores volatile timestamps and compares structural action capability changes.
+`hashSurfaceMap()` strips volatile timestamps and sorts keys for deterministic hashing. `diffSurfaceMaps()` provides the semantic delta when hashes differ.
 
 ## Action Capability Types
 

@@ -143,18 +143,18 @@ export const checkPresetVersionsAction: CheckAutomationAction = defineAction({
   },
 });
 
-/** Validate that surface map references use the canonical root path only. */
+/** Validate that no legacy surface.json files are tracked in git. */
 export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
   id: "check.surface-map",
   description:
-    "Validate canonical surface map path usage (.outfitter/surface.json only)",
+    "Validate canonical surface artifact path usage (.outfitter/surface.lock only)",
   surfaces: ["cli"],
   input: checkAutomationInputSchema,
   cli: {
     group: "check",
     command: "surface-map",
     description:
-      "Validate canonical surface map path usage (.outfitter/surface.json only)",
+      "Validate canonical surface artifact path usage (.outfitter/surface.lock only)",
     options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
     mapInput: mapCheckAutomationInput,
   },
@@ -176,16 +176,16 @@ export const checkSurfaceMapAction: CheckAutomationAction = defineAction({
   },
 });
 
-/** Validate canonical JSON formatting of `.outfitter/surface.json`. */
+/** Validate format of `.outfitter/surface.lock`. */
 export const checkSurfaceMapFormatAction: CheckAutomationAction = defineAction({
   id: "check.surface-map-format",
-  description: "Validate canonical formatting for .outfitter/surface.json",
+  description: "Validate format of .outfitter/surface.lock",
   surfaces: ["cli"],
   input: checkAutomationInputSchema,
   cli: {
     group: "check",
     command: "surface-map-format",
-    description: "Validate canonical formatting for .outfitter/surface.json",
+    description: "Validate format of .outfitter/surface.lock",
     options: [...checkAutomationOutput.options, ...checkAutomationCwd.options],
     mapInput: mapCheckAutomationInput,
   },

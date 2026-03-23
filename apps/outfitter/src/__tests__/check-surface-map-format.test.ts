@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { afterEach, describe, expect, test } from "bun:test";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -14,6 +14,7 @@ import { z } from "zod";
 import {
   canonicalizeJson,
   checkSurfaceMapFormat,
+  runCheckSurfaceMapFormat,
 } from "../commands/check-surface-map-format.js";
 
 describe("checkSurfaceMapFormat", () => {
@@ -62,6 +63,85 @@ describe("checkSurfaceMapFormat", () => {
       expect(result.ok).toBe(true);
     } finally {
       await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("runCheckSurfaceMapFormat", () => {
+  let tempDir: string;
+
+  afterEach(async () => {
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  test("reports missing-file when surface.lock does not exist", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-format-"));
+
+    const result = await runCheckSurfaceMapFormat({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.ok).toBe(false);
+      expect(result.value.reason).toBe("missing-file");
+    }
+  });
+
+  test("passes for a valid 64-char hex hash", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-format-"));
+    const lockDir = join(tempDir, ".outfitter");
+    await mkdir(lockDir, { recursive: true });
+    await writeFile(
+      join(lockDir, "surface.lock"),
+      "62c1fd1e558df86bdaf14d049b16b0983f050eba511d4aaf31894e0babf414ba\n",
+      "utf-8"
+    );
+
+    const result = await runCheckSurfaceMapFormat({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.ok).toBe(true);
+      expect(result.value.reason).toBe("ok");
+    }
+  });
+
+  test("reports format-drift for an invalid lock file", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-format-"));
+    const lockDir = join(tempDir, ".outfitter");
+    await mkdir(lockDir, { recursive: true });
+    await writeFile(
+      join(lockDir, "surface.lock"),
+      "not-a-valid-hash\n",
+      "utf-8"
+    );
+
+    const result = await runCheckSurfaceMapFormat({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.ok).toBe(false);
+      expect(result.value.reason).toBe("format-drift");
+    }
+  });
+
+  test("reports format-drift for a 63-character hex hash", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-format-"));
+    const lockDir = join(tempDir, ".outfitter");
+    await mkdir(lockDir, { recursive: true });
+    await writeFile(
+      join(lockDir, "surface.lock"),
+      `${"a".repeat(63)}\n`,
+      "utf-8"
+    );
+
+    const result = await runCheckSurfaceMapFormat({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.ok).toBe(false);
+      expect(result.value.reason).toBe("format-drift");
     }
   });
 });

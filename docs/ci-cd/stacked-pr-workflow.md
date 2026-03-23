@@ -8,7 +8,7 @@ Covers schema drift, surface map enforcement, and shared-failure diagnosis.
 During the simplification stack (PRs #607–#621), a TypeScript typing change in
 `apps/outfitter/src/actions/docs.ts` altered the serialized schema shape. The
 change was subtle — `optional` vs `union(undefined)` and readonly array effects
-— but it caused `.outfitter/surface.json` to diverge from the live runtime.
+— but it caused `.outfitter/surface.lock` to diverge from the live runtime.
 
 **Why CI failed everywhere:** Every branch in the stack inherited the stale
 surface map. When CI ran `outfitter schema diff` (via `verify:ci`), it detected
@@ -54,7 +54,7 @@ bun run verify:stack
 
 This script performs three steps:
 
-1. **`outfitter schema generate`** — Regenerates `.outfitter/surface.json`
+1. **`outfitter schema generate`** — Regenerates `.outfitter/surface.lock`
    from the live runtime.
 2. **Git status check** — If the surface map changed, the script exits with an
    error and instructions to commit the updated file.
@@ -65,7 +65,7 @@ If the surface map is stale, the workflow is:
 
 ```bash
 bun run verify:stack          # Fails: surface map changed
-git add .outfitter/surface.json
+git add .outfitter/surface.lock
 git commit -m "chore: regenerate surface map"
 bun run verify:stack          # Should pass now
 gt submit                     # Safe to submit
@@ -99,7 +99,7 @@ Check if all failing PRs report the same error. Common patterns:
 
 | Error pattern                                | Likely cause                                   |
 | -------------------------------------------- | ---------------------------------------------- |
-| `Schema drift detected: ~ <action> (input)`  | Stale `.outfitter/surface.json`                |
+| `Schema drift detected: ~ <action> (input)`  | Stale `.outfitter/surface.lock`                |
 | `Schema drift detected: ~ <action> (output)` | Stale surface map (output shape)               |
 | `Schema drift detected: + <action>`          | New action not in surface map                  |
 | `Schema drift detected: - <action>`          | Removed action still in surface map            |
@@ -114,7 +114,7 @@ For schema drift, the fix is always the same:
 # On the branch that introduced the schema change
 # No build step needed — Bun transpiles TypeScript on the fly
 bun run apps/outfitter/src/cli.ts schema generate
-git add .outfitter/surface.json
+git add .outfitter/surface.lock
 git commit -m "chore: regenerate surface map"
 ```
 
