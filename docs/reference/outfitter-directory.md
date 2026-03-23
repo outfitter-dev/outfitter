@@ -4,13 +4,13 @@ Project-level artifacts generated and consumed by the Outfitter CLI. Lives at th
 
 ## Contents
 
-| Path             | Purpose                                                      | Committed                |
-| ---------------- | ------------------------------------------------------------ | ------------------------ |
-| `surface.lock`   | SHA-256 content hash of the surface map for drift detection  | Yes                      |
-| `_surface.json`  | Full surface map detail (used for semantic diff on mismatch) | No (gitignored)          |
-| `docs-map.json`  | Generated docs inventory manifest used by docs-map workflows | No (generated on demand) |
-| `migration/`     | Migration audit reports and upgrade plans                    | Yes                      |
-| `reports/`       | Generated analysis reports (link checks, etc.)               | No (gitignored)          |
+| Path            | Purpose                                                      | Committed                |
+| --------------- | ------------------------------------------------------------ | ------------------------ |
+| `surface.lock`  | SHA-256 content hash of the surface map for drift detection  | Yes                      |
+| `_surface.json` | Full surface map detail (used for semantic diff on mismatch) | No (gitignored)          |
+| `docs-map.json` | Generated docs inventory manifest used by docs-map workflows | No (generated on demand) |
+| `migration/`    | Migration audit reports and upgrade plans                    | Yes                      |
+| `reports/`      | Generated analysis reports (link checks, etc.)               | No (gitignored)          |
 
 ### `surface.lock`
 

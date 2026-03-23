@@ -183,10 +183,11 @@ import { createContext } from "@outfitter/contracts";
 
 for (const command of buildCliCommands(registry, {
   onResult: defaultOnResult,
-  createContext: () => createContext({
-    cwd: process.cwd(),
-    env: process.env,
-  }),
+  createContext: () =>
+    createContext({
+      cwd: process.cwd(),
+      env: process.env,
+    }),
 })) {
   program.register(command);
 }
@@ -206,7 +207,10 @@ const logger = createLogger({ name: "my-app" });
 
 async function myOnResult(ctx: ActionResultContext): Promise<void> {
   if (ctx.result.isErr()) {
-    logger.error("Action failed", { action: ctx.action.id, error: ctx.result.error });
+    logger.error("Action failed", {
+      action: ctx.action.id,
+      error: ctx.result.error,
+    });
     throw ctx.result.error;
   }
   logger.info("Action succeeded", { action: ctx.action.id });
