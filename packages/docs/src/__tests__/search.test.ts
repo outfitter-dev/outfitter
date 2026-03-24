@@ -359,7 +359,7 @@ describe("createDocsSearch", () => {
 
       await docs.index();
 
-      const result = await docs.search("the", { limit: 1 });
+      const result = await docs.search("your", { limit: 1 });
 
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
