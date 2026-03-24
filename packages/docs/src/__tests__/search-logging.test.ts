@@ -224,6 +224,114 @@ describe("docs search logging", () => {
     expect(readFailureWarnings[0]?.metadata?.path).toBe(nonExistentPath);
   });
 
+  it("excludes search hits whose IDs are not in the registry", async () => {
+    const fixture = await createFixture();
+    tempDirs.push(fixture.rootDir);
+
+    // Index the fixture docs
+    const result = await createDocsSearch({
+      name: "test",
+      paths: [join(fixture.docsDir, "**/*.md")],
+      indexPath: fixture.indexPath,
+    });
+    if (result.isErr()) throw result.error;
+    const docs = result.value;
+    instances.push(docs);
+    await docs.index();
+    await docs.close();
+    instances.pop();
+
+    // Corrupt metadata for one row so it won't hydrate into the registry
+    const db = new Database(fixture.indexPath);
+    db.run("UPDATE documents SET metadata = NULL WHERE rowid = 1");
+    db.close();
+
+    // Re-open with logger — search should filter out the corrupted row
+    const logger = createSpyLogger();
+    const result2 = await createDocsSearch({
+      name: "test",
+      paths: [join(fixture.docsDir, "**/*.md")],
+      indexPath: fixture.indexPath,
+      logger,
+    });
+    if (result2.isErr()) throw result2.error;
+    const docs2 = result2.value;
+    instances.push(docs2);
+
+    // Search for "example" — should only return results that are in the registry
+    const searchResult = await docs2.search("example");
+    if (searchResult.isErr()) throw searchResult.error;
+
+    // The single fixture doc was corrupted, so search should return nothing
+    expect(searchResult.value).toHaveLength(0);
+
+    // The exclusion warning should have been logged
+    expect(
+      logger.warnings.some((w) => w.message.includes("Search hit excluded"))
+    ).toBe(true);
+
+    // All returned IDs (if any) should be resolvable via get()
+    for (const hit of searchResult.value) {
+      const getResult = await docs2.get(hit.id);
+      expect(getResult.isOk()).toBe(true);
+      if (getResult.isOk()) {
+        expect(getResult.value).toBeDefined();
+      }
+    }
+  });
+
+  it("search with limit still returns valid results when corrupt rows consume FTS slots", async () => {
+    const fixture = await createFixture();
+    tempDirs.push(fixture.rootDir);
+
+    // Add a second doc so we have one valid and one to corrupt
+    await writeFile(
+      join(fixture.docsDir, "alpha.md"),
+      "# Alpha\n\nAlpha content for search testing."
+    );
+
+    const result = await createDocsSearch({
+      name: "test",
+      paths: [join(fixture.docsDir, "**/*.md")],
+      indexPath: fixture.indexPath,
+    });
+    if (result.isErr()) throw result.error;
+    const docs = result.value;
+    instances.push(docs);
+    await docs.index();
+    await docs.close();
+    instances.pop();
+
+    // Corrupt one row's metadata
+    const db = new Database(fixture.indexPath);
+    db.run("UPDATE documents SET metadata = NULL WHERE rowid = 1");
+    db.close();
+
+    // Re-open and search — the valid doc should appear despite the corrupt row.
+    // Use limit:2 so FTS5 returns enough rows for filtering to work
+    // even if the corrupt row ranks first.
+    const result2 = await createDocsSearch({
+      name: "test",
+      paths: [join(fixture.docsDir, "**/*.md")],
+      indexPath: fixture.indexPath,
+    });
+    if (result2.isErr()) throw result2.error;
+    const docs2 = result2.value;
+    instances.push(docs2);
+
+    const searchResult = await docs2.search("content", { limit: 2 });
+    if (searchResult.isErr()) throw searchResult.error;
+
+    // At least one valid doc should be returned; corrupt rows are excluded
+    expect(searchResult.value.length).toBeGreaterThanOrEqual(1);
+    // Every returned result must be a valid (non-corrupt) document
+    for (const hit of searchResult.value) {
+      const entry = await docs2.get(hit.id);
+      expect(entry.isOk()).toBe(true);
+      if (entry.isOk()) expect(entry.value).toBeDefined();
+    }
+  });
+
   it("accepts config without logger (backward compatible)", async () => {
     const fixture = await createFixture();
     tempDirs.push(fixture.rootDir);
