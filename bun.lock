@@ -59,6 +59,7 @@
         "@outfitter/contracts": "workspace:*",
         "@outfitter/daemon": "workspace:*",
         "@outfitter/docs": "workspace:*",
+        "@outfitter/index": "workspace:*",
         "@outfitter/logging": "workspace:*",
         "@outfitter/mcp": "workspace:*",
         "@outfitter/oxlint-plugin": "workspace:*",
