@@ -1,3 +1,5 @@
+import { basename, extname } from "node:path";
+
 import type { Index } from "@outfitter/index";
 
 import type {
@@ -61,10 +63,18 @@ export async function prepareIndexDocuments(
 
     try {
       content = await Bun.file(filePath).text();
-    } catch {
-      // Don't add to `seen` — unreadable files should be treated as
-      // absent so stale-removal can clean up their index entries.
+    } catch (err) {
       failed++;
+      // Only treat as absent (stale) if the file is truly gone.
+      // For any other read error (EACCES, lock, etc.) keep it in seen
+      // so it isn't pruned from the index on a transient failure.
+      const isNotFound =
+        err instanceof Error &&
+        "code" in err &&
+        (err as NodeJS.ErrnoException).code === "ENOENT";
+      if (!isNotFound) {
+        seen.add(filePath);
+      }
       continue;
     }
 
@@ -157,9 +167,9 @@ export async function removeStaleDocuments(
   seen: ReadonlySet<string>
 ): Promise<{ readonly failed: number }> {
   // Guard: skip stale removal when no files were successfully read.
-  // This prevents a misconfigured glob or transient read errors from
-  // wiping the entire index. A user who deliberately removes all docs
-  // can delete the index file directly (or call clear() when we add it).
+  // This prevents a misconfigured glob, transient read errors, or
+  // legitimate full-file deletion from wiping the entire index.
+  // Callers who intentionally remove all docs can delete the index file.
   if (seen.size === 0) {
     return { failed: 0 };
   }
@@ -200,5 +210,5 @@ function updateRegistryEntry(
 
 function extractTitle(content: string, fallback: string): string {
   const match = /^#\s+(.+)$/m.exec(content);
-  return match?.[1]?.trim() ?? fallback;
+  return match?.[1]?.trim() ?? basename(fallback, extname(fallback));
 }

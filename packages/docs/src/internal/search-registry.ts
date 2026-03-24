@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+import { basename, extname } from "node:path";
 
 import type { DocRegistryEntry, DocsSearchListEntry } from "./search-types.js";
 
@@ -78,11 +79,11 @@ async function doHydrateRegistry(
 
         docRegistry.set(row.id, {
           sourcePath: row.id,
-          title: meta.title ?? row.id,
+          title: meta.title ?? basename(row.id, extname(row.id)),
           contentHash: meta.contentHash ?? "",
         });
       } catch {
-        /* ignore invalid metadata rows */
+        /* skip rows with invalid metadata JSON */
       }
     }
   } finally {

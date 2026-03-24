@@ -120,9 +120,12 @@ export async function createDocsSearch(
   }
 
   const docRegistry = new Map<string, DocRegistryEntry>();
+  let isClosed = false;
 
   return Result.ok({
     async close(): Promise<Result<void, Error>> {
+      isClosed = true;
+
       try {
         ftsIndex.close();
       } catch (error) {
@@ -140,6 +143,10 @@ export async function createDocsSearch(
     async get(
       id: string
     ): Promise<Result<DocsSearchDocument | undefined, Error>> {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
       try {
         await hydrateRegistry(docRegistry, indexPath);
 
@@ -158,6 +165,10 @@ export async function createDocsSearch(
     },
 
     async index(): Promise<Result<DocsSearchIndexStats, Error>> {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
       try {
         await hydrateRegistry(docRegistry, indexPath);
 
@@ -187,6 +198,10 @@ export async function createDocsSearch(
     },
 
     async list() {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
       try {
         await hydrateRegistry(docRegistry, indexPath);
         return Result.ok(listRegistryEntries(docRegistry));
@@ -201,6 +216,10 @@ export async function createDocsSearch(
       query: string,
       options?: { readonly limit?: number }
     ): Promise<Result<DocsSearchResult[], Error>> {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
       try {
         const limit = options?.limit ?? 25;
         let searchResult = await ftsIndex.search({ query, limit });
