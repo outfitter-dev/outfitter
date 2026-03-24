@@ -64,7 +64,6 @@ export interface DocsSearchOutput {
   readonly total: number;
 }
 
-const INDEX_DOCUMENTS_TABLE = "documents";
 const FTS_QUERY_ERROR_PATTERN = /(fts5:|no such column:)/i;
 const FTS_SYNTAX_PATTERN = /["*:()]/;
 const FTS_OPERATOR_PATTERN = /(^|[\s(])(AND|OR|NOT|NEAR)(?=$|[\s)])/i;
