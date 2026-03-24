@@ -28,7 +28,7 @@ export interface DocsShowInput {
   readonly cwd: string;
   readonly id: string;
   readonly jq?: string | undefined;
-  readonly outputMode: CliOutputMode;
+  readonly outputMode?: CliOutputMode;
 }
 
 /** Output shape for the docs.show action. */

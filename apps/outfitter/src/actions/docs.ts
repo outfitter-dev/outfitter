@@ -24,25 +24,13 @@ import {
   printDocsExportResults,
   runDocsExport,
 } from "../commands/docs-export.js";
+import { printDocsIndexResults, runDocsIndex } from "../commands/docs-index.js";
+import { printDocsListResults, runDocsList } from "../commands/docs-list.js";
 import {
-  printDocsIndexResults,
-  runDocsIndex,
-} from "../commands/docs-index.js";
-import {
-  type DocsListInput,
-  printDocsListResults,
-  runDocsList,
-} from "../commands/docs-list.js";
-import {
-  type DocsSearchInput,
   printDocsSearchResults,
   runDocsSearch,
 } from "../commands/docs-search.js";
-import {
-  type DocsShowInput,
-  printDocsShowResults,
-  runDocsShow,
-} from "../commands/docs-show.js";
+import { printDocsShowResults, runDocsShow } from "../commands/docs-show.js";
 import type { CliOutputMode } from "../output-mode.js";
 import { checkTsdocOutputSchema } from "./check.js";
 import {
@@ -51,7 +39,15 @@ import {
   resolveStringFlag,
 } from "./shared.js";
 
-const docsListInputSchema = z.object({
+interface DocsListActionInput {
+  readonly cwd: string;
+  readonly jq?: string | undefined;
+  readonly kind?: string | undefined;
+  readonly outputMode: CliOutputMode;
+  readonly package?: string | undefined;
+}
+
+const docsListInputSchema: z.ZodType<DocsListActionInput> = z.object({
   cwd: z.string(),
   kind: z.string().optional(),
   package: z.string().optional(),
@@ -63,7 +59,9 @@ const docsListCwd = cwdPreset();
 const docsListOutputMode = outputModePreset({ includeJsonl: true });
 const docsListJq = jqPreset();
 
-type DocsListAction = ReturnType<typeof defineAction<DocsListInput, unknown>>;
+type DocsListAction = ReturnType<
+  typeof defineAction<DocsListActionInput, unknown>
+>;
 
 /** List documentation entries from the workspace docs map. */
 export const docsListAction: DocsListAction = defineAction({
@@ -117,7 +115,14 @@ export const docsListAction: DocsListAction = defineAction({
   },
 });
 
-const docsShowInputSchema = z.object({
+interface DocsShowActionInput {
+  readonly cwd: string;
+  readonly id: string;
+  readonly jq?: string | undefined;
+  readonly outputMode: CliOutputMode;
+}
+
+const docsShowInputSchema: z.ZodType<DocsShowActionInput> = z.object({
   id: z.string(),
   cwd: z.string(),
   jq: z.string().optional(),
@@ -128,7 +133,9 @@ const docsShowCwd = cwdPreset();
 const docsShowOutputMode = outputModePreset({ includeJsonl: true });
 const docsShowJq = jqPreset();
 
-type DocsShowAction = ReturnType<typeof defineAction<DocsShowInput, unknown>>;
+type DocsShowAction = ReturnType<
+  typeof defineAction<DocsShowActionInput, unknown>
+>;
 
 /** Show a specific documentation entry by ID, including its content. */
 export const docsShowAction: DocsShowAction = defineAction({
@@ -170,11 +177,20 @@ export const docsShowAction: DocsShowAction = defineAction({
   },
 });
 
-const docsSearchInputSchema = z.object({
+interface DocsSearchActionInput {
+  readonly cwd: string;
+  readonly indexPath?: string | undefined;
+  readonly jq?: string | undefined;
+  readonly limit?: number | undefined;
+  readonly outputMode: CliOutputMode;
+  readonly query: string;
+}
+
+const docsSearchInputSchema: z.ZodType<DocsSearchActionInput> = z.object({
   query: z.string(),
   cwd: z.string(),
-  kind: z.string().optional(),
-  package: z.string().optional(),
+  indexPath: z.string().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
   jq: z.string().optional(),
   outputMode: outputModeSchema,
 });
@@ -184,28 +200,30 @@ const docsSearchOutputMode = outputModePreset({ includeJsonl: true });
 const docsSearchJq = jqPreset();
 
 type DocsSearchAction = ReturnType<
-  typeof defineAction<DocsSearchInput, unknown>
+  typeof defineAction<DocsSearchActionInput, unknown>
 >;
 
-/** Search documentation content for a query string. */
+/** Search documentation content using FTS5 BM25-ranked search. */
 export const docsSearchAction: DocsSearchAction = defineAction({
   id: "docs.search",
-  description: "Search documentation content for a query string",
+  description:
+    "Search documentation content using FTS5 BM25-ranked full-text search",
   surfaces: ["cli"],
   input: docsSearchInputSchema,
   cli: {
     group: "docs",
     command: "search <query>",
-    description: "Search documentation content for a query string",
+    description:
+      "Search documentation content using FTS5 BM25-ranked full-text search",
     options: [
       {
-        flags: "-k, --kind <kind>",
-        description:
-          "Filter by doc kind (readme, guide, reference, architecture, release, convention, deep, generated)",
+        flags: "-l, --limit <count>",
+        description: "Maximum number of results (default: 10)",
       },
       {
-        flags: "-p, --package <name>",
-        description: "Filter by package name",
+        flags: "--index-path <path>",
+        description:
+          "Path to the SQLite index file (default: workspace-scoped under ~/.outfitter/docs/)",
       },
       ...docsSearchOutputMode.options,
       ...docsSearchJq.options,
@@ -214,16 +232,20 @@ export const docsSearchAction: DocsSearchAction = defineAction({
     mapInput: (context) => {
       const { jq } = docsSearchJq.resolve(context.flags);
       const { mode: outputMode } = resolveOutputMode(context.flags);
-      const kind = resolveStringFlag(context.flags["kind"]);
-      const pkg = resolveStringFlag(context.flags["package"]);
+      const limitRaw = context.flags["limit"];
+      const limit =
+        typeof limitRaw === "string"
+          ? Number.parseInt(limitRaw, 10)
+          : undefined;
+      const indexPath = resolveStringFlag(context.flags["indexPath"]);
 
       return {
         query: context.args[0] as string,
         cwd: resolveCwdFromPreset(context.flags, docsSearchCwd),
         outputMode,
         jq,
-        ...(kind !== undefined ? { kind } : {}),
-        ...(pkg !== undefined ? { package: pkg } : {}),
+        ...(typeof limitRaw === "string" ? { limit } : {}),
+        ...(indexPath !== undefined ? { indexPath } : {}),
       };
     },
   },

@@ -48,7 +48,7 @@ export interface DocsIndexOutput {
 }
 
 /** Metadata stored alongside each indexed document. */
-interface DocIndexMetadata {
+export interface DocIndexMetadata {
   readonly [key: string]: unknown;
   readonly contentHash: string;
   readonly kind: string;
@@ -61,13 +61,14 @@ interface DocIndexMetadata {
 // ---------------------------------------------------------------------------
 
 /**
- * Resolve the default index path scoped to a workspace.
+ * Resolve the default index path scoped to a specific workspace.
  *
- * Hashes the workspace root path to produce a unique index file per workspace,
- * preventing cross-workspace index contamination.
+ * Uses a wyhash fingerprint of the workspace root path to prevent
+ * index collisions across different workspaces sharing the global
+ * `~/.outfitter/docs/` directory.
  *
- * @param cwd - Workspace root directory
- * @returns Path to the workspace-scoped SQLite index file
+ * @param cwd - Workspace root path used to derive the fingerprint
+ * @returns Absolute path to the workspace-scoped SQLite index file
  */
 export function resolveIndexPath(cwd: string): string {
   const workspaceHash = Bun.hash.wyhash(cwd, 0n).toString(16).padStart(16, "0");
@@ -99,6 +100,8 @@ function buildExistingHashMap(indexPath: string): Map<string, string> {
   try {
     db = new Database(indexPath, { readonly: true });
     const rows = db
+      // "documents" is the default FTS5 table name from @outfitter/index.
+      // See packages/index/src/internal/fts5-helpers.ts DEFAULT_TABLE_NAME.
       .query("SELECT id, metadata FROM documents")
       .all() as Array<{
       id: string;
