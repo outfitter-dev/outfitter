@@ -16,5 +16,6 @@ export type {
   DocsSearchDocument,
   DocsSearchIndexStats,
   DocsSearchListEntry,
+  DocsSearchLogger,
   DocsSearchResult,
 } from "./internal/search-types.js";

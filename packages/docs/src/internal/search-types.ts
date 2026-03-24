@@ -14,6 +14,8 @@ import type { Result } from "better-result";
 export interface DocsSearchConfig {
   /** Override the default index path (`~/.{name}/docs/index-{hash}.sqlite`, where the hash is derived from the CWD, tokenizer, and glob patterns). */
   readonly indexPath?: string;
+  /** Optional logger for surfacing warnings during hydration and indexing. */
+  readonly logger?: DocsSearchLogger;
   /** Project name -- used to derive default index and assembly paths. */
   readonly name: string;
   /** Glob patterns for documentation source files. */

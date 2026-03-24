@@ -1,7 +1,11 @@
 import { Database } from "bun:sqlite";
 import { basename, extname } from "node:path";
 
-import type { DocRegistryEntry, DocsSearchListEntry } from "./search-types.js";
+import type {
+  DocRegistryEntry,
+  DocsSearchListEntry,
+  DocsSearchLogger,
+} from "./search-types.js";
 
 /**
  * FTS5 table name used by `@outfitter/index` by default.
@@ -21,7 +25,8 @@ const hydrationPromises = new WeakMap<
  */
 export async function hydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
-  indexPath: string
+  indexPath: string,
+  logger?: DocsSearchLogger
 ): Promise<void> {
   if (docRegistry.size > 0) {
     return;
@@ -33,7 +38,7 @@ export async function hydrateRegistry(
     return;
   }
 
-  const hydrationPromise = doHydrateRegistry(docRegistry, indexPath);
+  const hydrationPromise = doHydrateRegistry(docRegistry, indexPath, logger);
   hydrationPromises.set(docRegistry, hydrationPromise);
 
   try {
@@ -45,7 +50,8 @@ export async function hydrateRegistry(
 
 async function doHydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
-  indexPath: string
+  indexPath: string,
+  logger?: DocsSearchLogger
 ): Promise<void> {
   if (docRegistry.size > 0 || !(await Bun.file(indexPath).exists())) {
     return;
@@ -66,8 +72,16 @@ async function doHydrateRegistry(
       metadata: string | null;
     }>;
 
+    let skipped = 0;
+    const skippedIds: string[] = [];
+
     for (const row of rows) {
       if (!row.metadata) {
+        skipped++;
+        skippedIds.push(row.id);
+        logger?.warn("Skipping row with missing metadata during hydration", {
+          id: row.id,
+        });
         continue;
       }
 
@@ -83,8 +97,25 @@ async function doHydrateRegistry(
           contentHash: meta.contentHash ?? "",
         });
       } catch {
-        /* skip rows with invalid metadata JSON */
+        skipped++;
+        skippedIds.push(row.id);
+        logger?.warn(
+          "Skipping row with invalid metadata JSON during hydration",
+          {
+            id: row.id,
+            error:
+              parseErr instanceof Error ? parseErr.message : String(parseErr),
+          }
+        );
       }
+    }
+
+    if (skipped > 0) {
+      logger?.warn("Registry hydration completed with skipped rows", {
+        hydrated: docRegistry.size,
+        skipped,
+        total: rows.length,
+      });
     }
   } finally {
     db.close();
