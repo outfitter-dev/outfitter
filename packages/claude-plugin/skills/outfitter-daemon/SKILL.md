@@ -144,13 +144,13 @@ client.close();
 
 ### When to Use Each
 
-| Concern | HTTP | IPC |
-|---|---|---|
-| Simplicity | Simpler — standard REST patterns | More complex — message framing, correlation |
-| External access | Any tool can `curl` | Requires the IPC client library |
-| Type safety | Untyped (parse JSON manually) | Typed request/response protocol |
-| Bidirectional | Request/response only | Full bidirectional messaging |
-| Best for | Admin APIs, health, metrics | Language servers, editor plugins, agents |
+| Concern         | HTTP                             | IPC                                         |
+| --------------- | -------------------------------- | ------------------------------------------- |
+| Simplicity      | Simpler — standard REST patterns | More complex — message framing, correlation |
+| External access | Any tool can `curl`              | Requires the IPC client library             |
+| Type safety     | Untyped (parse JSON manually)    | Typed request/response protocol             |
+| Bidirectional   | Request/response only            | Full bidirectional messaging                |
+| Best for        | Admin APIs, health, metrics      | Language servers, editor plugins, agents    |
 
 The scaffold `daemon` preset uses HTTP by default. Use `--example ipc` for the IPC pattern.
 
@@ -258,10 +258,14 @@ command("start")
           return Result.ok({ status: "exited", mode: "foreground" });
         }
 
-        const daemon = spawn(process.execPath, [import.meta.dir + "/daemon.js"], {
-          detached: true,
-          stdio: "ignore",
-        });
+        const daemon = spawn(
+          process.execPath,
+          [import.meta.dir + "/daemon.js"],
+          {
+            detached: true,
+            stdio: "ignore",
+          }
+        );
         daemon.unref();
         return Result.ok({ status: "started", pid: daemon.pid ?? null });
       },

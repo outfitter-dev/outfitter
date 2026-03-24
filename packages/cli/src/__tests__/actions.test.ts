@@ -246,7 +246,15 @@ describe("buildCliCommands Zod flag derivation", () => {
       cli.register(command);
     }
 
-    await cli.parse(["node", "test", "search2", "--query", "hello", "--limit", "50"]);
+    await cli.parse([
+      "node",
+      "test",
+      "search2",
+      "--query",
+      "hello",
+      "--limit",
+      "50",
+    ]);
 
     // Commander's argParser(Number) should coerce "50" to 50
     expect(captured).toEqual({ query: "hello", limit: 50 });

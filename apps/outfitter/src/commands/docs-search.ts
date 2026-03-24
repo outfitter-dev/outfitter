@@ -187,6 +187,10 @@ export async function runDocsSearch(
   let index: Index<DocIndexMetadata> | undefined;
 
   try {
+    // Refresh the index before searching in three cases:
+    // 1. No custom indexPath — using default path, always refresh to stay current
+    // 2. Custom indexPath that doesn't exist yet — must build before we can query
+    // 3. Custom indexPath that already exists — skip refresh, trust the caller's index
     const shouldRefreshIndex =
       input.indexPath === undefined || !existsSync(indexPath);
 
@@ -223,6 +227,9 @@ export async function runDocsSearch(
       return searchResult;
     }
 
+    // Deliberate concurrent WAL-mode read: countMatches opens a separate
+    // read-only connection while the main index connection is still open.
+    // SQLite WAL mode allows concurrent readers, so this is safe.
     const totalResult = countMatches(
       indexPath,
       searchResult.value.effectiveQuery

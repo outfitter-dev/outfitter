@@ -291,7 +291,11 @@ export async function executeInitPipeline(
         type: "dir-create",
         path: join(resolvedInput.rootDir, "packages"),
       });
-      if (existsSync(workspacePackageJsonPath) && options.skipExisting && !options.force) {
+      if (
+        existsSync(workspacePackageJsonPath) &&
+        options.skipExisting &&
+        !options.force
+      ) {
         collector?.add({
           type: "file-skip",
           path: workspacePackageJsonPath,

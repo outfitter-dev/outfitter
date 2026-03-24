@@ -180,6 +180,7 @@ export function createSchemaCommand(
         await writeSurfaceLock(hash, lockPath);
 
         process.stdout.write(`Surface map written to ${detailPath}\n`);
+        process.stdout.write(`Surface lock written to ${lockPath}\n`);
       });
     cmd.addCommand(generateCmd);
 

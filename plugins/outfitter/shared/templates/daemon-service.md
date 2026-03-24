@@ -245,11 +245,7 @@ main().catch((error) => {
 import { command } from "@outfitter/cli/command";
 import { runHandler } from "@outfitter/cli/envelope";
 import { ConflictError, Result } from "@outfitter/contracts";
-import {
-  getPidPath,
-  getSocketPath,
-  isDaemonAlive,
-} from "@outfitter/daemon";
+import { getPidPath, getSocketPath, isDaemonAlive } from "@outfitter/daemon";
 import { spawn } from "node:child_process";
 
 const DAEMON_NAME = "my-daemon";
@@ -361,8 +357,8 @@ export const healthCommand = command("health")
 
 ## XDG Paths
 
-| Function              | Path                                | Example                                   |
-| --------------------- | ----------------------------------- | ----------------------------------------- |
-| `getPidPath(name)`    | `$XDG_RUNTIME_DIR/{name}/daemon.pid`  | `/run/user/1000/my-daemon/daemon.pid`  |
-| `getSocketPath(name)` | `~/.local/state/{name}/{name}.sock` | `~/.local/state/my-daemon/my-daemon.sock` |
-| `getLogPath(name)`    | `~/.local/state/{name}/logs/`       | `~/.local/state/my-daemon/logs/`          |
+| Function              | Path                                 | Example                                   |
+| --------------------- | ------------------------------------ | ----------------------------------------- |
+| `getPidPath(name)`    | `$XDG_RUNTIME_DIR/{name}/daemon.pid` | `/run/user/1000/my-daemon/daemon.pid`     |
+| `getSocketPath(name)` | `~/.local/state/{name}/{name}.sock`  | `~/.local/state/my-daemon/my-daemon.sock` |
+| `getLogPath(name)`    | `~/.local/state/{name}/logs/`        | `~/.local/state/my-daemon/logs/`          |

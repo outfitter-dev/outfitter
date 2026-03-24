@@ -164,6 +164,7 @@
         "outfitter-docs": "./dist/cli.js",
       },
       "dependencies": {
+        "@outfitter/index": "workspace:*",
         "better-result": "catalog:",
         "commander": "catalog:",
         "zod": "catalog:",

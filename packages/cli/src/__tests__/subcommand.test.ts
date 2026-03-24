@@ -133,7 +133,9 @@ describe("CommandBuilder.subcommand()", () => {
     const builder = command("parent")
       .description("Parent")
       .subcommand(
-        command("sub").description("Sub").action(async () => {})
+        command("sub")
+          .description("Sub")
+          .action(async () => {})
       );
 
     const first = builder.build();

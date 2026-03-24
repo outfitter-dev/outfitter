@@ -21,6 +21,7 @@ import {
   type IndexDocument,
   type TokenizerType,
 } from "../index.js";
+import * as publicApi from "../index.js";
 
 // ============================================================================
 // Test Utilities
@@ -166,6 +167,10 @@ describe("Index Creation", () => {
     index.close();
 
     expect(existsSync(nestedPath)).toBe(true);
+  });
+
+  it("does not expose internal table-name constants through the public API", () => {
+    expect("DEFAULT_TABLE_NAME" in publicApi).toBe(false);
   });
 });
 
