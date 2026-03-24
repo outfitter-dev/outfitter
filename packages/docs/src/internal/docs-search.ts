@@ -34,8 +34,8 @@ import type {
  * and retrieving documentation. Call `close()` when done to release
  * the underlying database connection.
  *
- * On the first call to `index()`, `list()`, `get()`, or `search()`, the in-memory
- * document registry is hydrated from the existing FTS5 index (if present).
+ * On the first call to `index()`, `list()`, `get()`, or `search()`, the
+ * in-memory document registry is hydrated from the existing FTS5 index (if present).
  * This enables correct change detection and read access across process
  * restarts without forcing a fresh re-index.
  *
@@ -231,8 +231,6 @@ export async function createDocsSearch(
         );
 
         // Remove corrupt/orphaned FTS rows that hydration skipped.
-        // These rows are invisible to the registry and stale removal,
-        // so they must be cleaned up explicitly by ID.
         const corrupt = await corruptRows.removeAll();
 
         return Result.ok({
