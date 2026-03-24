@@ -1,5 +1,5 @@
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 
 import type { DocsSearchConfig } from "./search-types.js";
 
@@ -26,10 +26,5 @@ export function resolveDocsSearchIndexPath(config: DocsSearchConfig): string {
   const key = [cwd, tokenizer, ...config.paths.toSorted()].join("\0");
   const hash = Bun.hash.wyhash(key, 0n).toString(16).padStart(16, "0");
 
-  return join(
-    homedir(),
-    `.${config.name}`,
-    "docs",
-    `index-${hash}.sqlite`
-  );
+  return join(homedir(), `.${config.name}`, "docs", `index-${hash}.sqlite`);
 }

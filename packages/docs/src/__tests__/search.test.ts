@@ -102,7 +102,13 @@ describe("createDocsSearch", () => {
 
   afterEach(async () => {
     for (const instance of instances) {
-      await instance.close();
+      const closeResult = await instance.close();
+      if (closeResult.isErr()) {
+        console.warn(
+          "close() failed during teardown:",
+          closeResult.error.message
+        );
+      }
     }
     instances.length = 0;
 
@@ -279,7 +285,8 @@ describe("createDocsSearch", () => {
 
       const firstIndex = await indexedSession.index();
       expect(firstIndex.isOk()).toBe(true);
-      await indexedSession.close();
+      const closeResult = await indexedSession.close();
+      expect(closeResult.isOk()).toBe(true);
 
       const misconfiguredSession = await createDocsSearchOrFail({
         name: "test-project",
@@ -400,7 +407,8 @@ describe("createDocsSearch", () => {
 
       const firstIndex = await session1.index();
       expect(firstIndex.isOk()).toBe(true);
-      await session1.close();
+      const closeResult = await session1.close();
+      expect(closeResult.isOk()).toBe(true);
 
       const session2 = await createDocsSearchOrFail({
         name: "test-project",
@@ -460,7 +468,8 @@ describe("createDocsSearch", () => {
 
       const firstIndex = await session1.index();
       expect(firstIndex.isOk()).toBe(true);
-      await session1.close();
+      const closeResult = await session1.close();
+      expect(closeResult.isOk()).toBe(true);
 
       const session2 = await createDocsSearchOrFail({
         name: "test-project",
