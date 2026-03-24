@@ -75,6 +75,18 @@ export interface DocsSearchIndexStats {
   readonly total: number;
 }
 
+/** Freshness status of a docs search index. */
+export interface DocsSearchFreshness {
+  /** Whether the index file exists on disk. */
+  readonly exists: boolean;
+  /** Whether sources have changed since the last index run. When the index doesn't exist, this is always true. */
+  readonly stale: boolean;
+  /** Number of source files that need attention (adds + stale removals + read failures + corrupt rows). Always > 0 when `stale` is true due to source changes; may be 0 when only the index file is missing. */
+  readonly pendingChanges: number;
+  /** Total source files matched by the configured glob patterns. */
+  readonly totalSources: number;
+}
+
 /**
  * Handle to a docs search instance.
  *
@@ -82,6 +94,16 @@ export interface DocsSearchIndexStats {
  * markdown documentation files backed by an FTS5 full-text index.
  */
 export interface DocsSearch {
+  /**
+   * Check whether the index is fresh relative to current doc sources.
+   *
+   * Returns existence, staleness, and pending change counts without
+   * modifying the index. Use this to decide whether to call `index()`
+   * or `refreshIfNeeded()`.
+   *
+   * @returns Result containing freshness status or an error
+   */
+  checkFreshness(): Promise<Result<DocsSearchFreshness, Error>>;
   /**
    * Release resources (database connection).
    * @returns Result indicating whether the connection was closed cleanly
@@ -101,6 +123,15 @@ export interface DocsSearch {
    * Lazily hydrates the in-memory registry from an existing index when needed.
    */
   list(): Promise<Result<DocsSearchListEntry[], Error>>;
+  /**
+   * Re-index only if the index is missing or stale.
+   *
+   * Equivalent to checking `checkFreshness()` and calling `index()` when
+   * needed, but avoids the overhead of a separate freshness check.
+   *
+   * @returns Index stats if indexing occurred, or `undefined` if the index was already fresh
+   */
+  refreshIfNeeded(): Promise<Result<DocsSearchIndexStats | undefined, Error>>;
   /** Search across all indexed docs using FTS5 BM25. */
   search(
     query: string,
