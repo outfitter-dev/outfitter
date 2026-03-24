@@ -12,6 +12,7 @@ import {
   removeStaleDocuments,
 } from "./search-indexing.js";
 import { resolveDocsSearchIndexPath } from "./search-paths.js";
+import { quoteFtsTerms, shouldRetryAsQuoted } from "./search-query.js";
 import { hydrateRegistry, listRegistryEntries } from "./search-registry.js";
 import type {
   DocRegistryEntry,
@@ -22,32 +23,6 @@ import type {
   DocsSearchResult,
   SearchDocMetadata,
 } from "./search-types.js";
-
-// ---------------------------------------------------------------------------
-// FTS5 query helpers — match the retry logic in the CLI's docs-search command
-// ---------------------------------------------------------------------------
-
-const FTS_ERROR_PATTERN = /(fts5:|no such column:)/i;
-const FTS_SYNTAX_PATTERN = /["*:()]/;
-const FTS_OPERATOR_PATTERN = /(^|[\s(])(AND|OR|NOT|NEAR)(?=$|[\s)])/i;
-
-function isFtsParseError(message: string): boolean {
-  return FTS_ERROR_PATTERN.test(message);
-}
-
-function hasFtsSyntax(query: string): boolean {
-  return FTS_SYNTAX_PATTERN.test(query) || FTS_OPERATOR_PATTERN.test(query);
-}
-
-/** Quote each whitespace-delimited term so FTS5 treats punctuation as literal. */
-function quoteFtsTerms(query: string): string {
-  return query
-    .trim()
-    .split(/\s+/)
-    .filter((t) => t.length > 0)
-    .map((t) => `"${t.replaceAll('"', '""')}"`)
-    .join(" ");
-}
 
 /**
  * Create a docs search instance backed by FTS5 full-text search.
@@ -233,10 +208,11 @@ export async function createDocsSearch(
         let searchResult = await ftsIndex.search({ query, limit });
 
         // Retry plain-text queries that trip FTS5 syntax errors.
+        // Punctuation in terms like "result-api" or "async/await" causes
+        // FTS5 parse failures; quoting each term treats them as literals.
         if (
           searchResult.isErr() &&
-          isFtsParseError(searchResult.error.message) &&
-          !hasFtsSyntax(query)
+          shouldRetryAsQuoted(query, searchResult.error.message)
         ) {
           const quoted = quoteFtsTerms(query);
           searchResult = await ftsIndex.search({ query: quoted, limit });

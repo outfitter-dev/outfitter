@@ -13,15 +13,16 @@ import { resolve } from "node:path";
 
 import { output } from "@outfitter/cli";
 import { InternalError, Result } from "@outfitter/contracts";
+import { quoteFtsTerms, shouldRetryAsQuoted } from "@outfitter/docs/search";
 import { createIndex } from "@outfitter/index";
+import type { Index, SearchResult } from "@outfitter/index";
+import { createTheme } from "@outfitter/tui/render";
 
 /**
  * FTS5 table name used by `@outfitter/index` by default.
  * See `packages/index/src/internal/fts5-helpers.ts` for the canonical definition.
  */
 const DEFAULT_TABLE_NAME = "documents";
-import type { Index, SearchResult } from "@outfitter/index";
-import { createTheme } from "@outfitter/tui/render";
 
 import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
@@ -64,27 +65,6 @@ export interface DocsSearchOutput {
   readonly total: number;
 }
 
-const FTS_QUERY_ERROR_PATTERN = /(fts5:|no such column:)/i;
-const FTS_SYNTAX_PATTERN = /["*:()]/;
-const FTS_OPERATOR_PATTERN = /(^|[\s(])(AND|OR|NOT|NEAR)(?=$|[\s)])/i;
-
-function shouldRetryAsPlainText(query: string, message: string): boolean {
-  return (
-    FTS_QUERY_ERROR_PATTERN.test(message) &&
-    !FTS_SYNTAX_PATTERN.test(query) &&
-    !FTS_OPERATOR_PATTERN.test(query)
-  );
-}
-
-function buildPlainTextFtsQuery(query: string): string {
-  return query
-    .trim()
-    .split(/\s+/)
-    .filter((term) => term.length > 0)
-    .map((term) => `"${term.replaceAll('"', '""')}"`)
-    .join(" ");
-}
-
 async function searchIndex(
   index: Index<DocIndexMetadata>,
   query: string,
@@ -107,7 +87,7 @@ async function searchIndex(
     });
   }
 
-  if (!shouldRetryAsPlainText(query, initialResult.error.message)) {
+  if (!shouldRetryAsQuoted(query, initialResult.error.message)) {
     return Result.err(
       new InternalError({
         message: initialResult.error.message,
@@ -116,7 +96,7 @@ async function searchIndex(
     );
   }
 
-  const quotedQuery = buildPlainTextFtsQuery(query);
+  const quotedQuery = quoteFtsTerms(query);
   const retryResult = await index.search({ query: quotedQuery, limit });
 
   if (retryResult.isErr()) {
