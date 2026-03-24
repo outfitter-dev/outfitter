@@ -39,6 +39,11 @@ import {
   initLibraryAction,
   initMcpAction,
 } from "./actions/init.js";
+import {
+  mcpDocsListAction,
+  mcpDocsSearchAction,
+  mcpDocsShowAction,
+} from "./actions/mcp.js";
 import { scaffoldAction } from "./actions/scaffold.js";
 import { upgradeAction, upgradeCodemodAction } from "./actions/upgrade.js";
 
@@ -72,4 +77,7 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(docsShowAction)
   .add(docsSearchAction)
   .add(docsApiAction)
-  .add(docsExportAction);
+  .add(docsExportAction)
+  .add(mcpDocsListAction)
+  .add(mcpDocsShowAction)
+  .add(mcpDocsSearchAction);

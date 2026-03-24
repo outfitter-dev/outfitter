@@ -171,6 +171,12 @@
         "default": "./dist/commands/jq-utils.js"
       }
     },
+    "./commands/mcp-start": {
+      "import": {
+        "types": "./dist/commands/mcp-start.d.ts",
+        "default": "./dist/commands/mcp-start.js"
+      }
+    },
     "./commands/repo": {
       "import": {
         "types": "./dist/commands/repo.d.ts",
@@ -422,6 +428,12 @@
       "import": {
         "types": "./dist/targets/types.d.ts",
         "default": "./dist/targets/types.js"
+      }
+    },
+    "./version": {
+      "import": {
+        "types": "./dist/version.d.ts",
+        "default": "./dist/version.js"
       }
     }
   },
