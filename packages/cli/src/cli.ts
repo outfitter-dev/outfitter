@@ -19,11 +19,14 @@ function isCommanderHelp(error: { code?: string }): boolean {
 }
 
 function normalizeGlobalJsonFlag(argv: readonly string[]): string[] {
+  const dashDashIndex = argv.indexOf("--");
+  const searchBound = dashDashIndex === -1 ? argv.length : dashDashIndex;
+
   const relocatedJsonFlags: string[] = [];
   const normalized: string[] = [];
 
   for (const [index, arg] of argv.entries()) {
-    if (index >= 2 && arg === "--json") {
+    if (index >= 2 && index < searchBound && arg === "--json") {
       relocatedJsonFlags.push(arg);
       continue;
     }
