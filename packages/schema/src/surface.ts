@@ -40,8 +40,12 @@ function compareStableKeys(left: string, right: string): number {
 
 function comparableSurfaceMap(
   surfaceMap: SurfaceMap
-): Omit<SurfaceMap, "generatedAt"> {
-  const { generatedAt: _generatedAt, ...comparable } = surfaceMap;
+): Omit<SurfaceMap, "generatedAt" | "generator"> {
+  const {
+    generatedAt: _generatedAt,
+    generator: _generator,
+    ...comparable
+  } = surfaceMap;
   return comparable;
 }
 
@@ -189,6 +193,83 @@ export async function writeSurfaceMap(
 export async function readSurfaceMap(inputPath: string): Promise<SurfaceMap> {
   const content = await readFile(inputPath, "utf-8");
   return JSON.parse(content) as SurfaceMap;
+}
+
+// =============================================================================
+// Hashing
+// =============================================================================
+
+/**
+ * Compute a deterministic SHA-256 hex hash of a surface map.
+ *
+ * Strips the volatile `generatedAt` field and produces a stable JSON
+ * representation with sorted keys before hashing. Two surface maps with
+ * identical content but different `generatedAt` values or key ordering
+ * will produce the same hash.
+ *
+ * @param surfaceMap - The surface map to hash
+ * @returns 64-character lowercase hex SHA-256 digest
+ *
+ * @example
+ * ```typescript
+ * const surfaceMap = generateSurfaceMap(registry, { generator: "build" });
+ * const hash = hashSurfaceMap(surfaceMap);
+ * await writeSurfaceLock(hash, ".outfitter/surface.lock");
+ * ```
+ */
+export function hashSurfaceMap(surfaceMap: SurfaceMap): string {
+  const comparable = comparableSurfaceMap(surfaceMap);
+  const stable = stableJsonString(comparable);
+  const hasher = new Bun.CryptoHasher("sha256");
+  hasher.update(stable);
+  return hasher.digest("hex");
+}
+
+// =============================================================================
+// Lock File I/O
+// =============================================================================
+
+/**
+ * Write a content hash to a surface lock file.
+ *
+ * Creates parent directories if they don't exist. The file contains
+ * only the hex hash string followed by a newline.
+ *
+ * @param hash - Hex hash string to write
+ * @param lockPath - Absolute path for the lock file
+ *
+ * @example
+ * ```typescript
+ * const surfaceMap = generateSurfaceMap(registry, { generator: "build" });
+ * await writeSurfaceLock(
+ *   hashSurfaceMap(surfaceMap),
+ *   ".outfitter/surface.lock"
+ * );
+ * ```
+ */
+export async function writeSurfaceLock(
+  hash: string,
+  lockPath: string
+): Promise<void> {
+  await mkdir(dirname(lockPath), { recursive: true });
+  await writeFile(lockPath, `${hash}\n`, "utf-8");
+}
+
+/**
+ * Read a content hash from a surface lock file.
+ *
+ * @param lockPath - Absolute path to the lock file
+ * @returns The trimmed hex hash string
+ *
+ * @example
+ * ```typescript
+ * const committedHash = await readSurfaceLock(".outfitter/surface.lock");
+ * console.log(committedHash);
+ * ```
+ */
+export async function readSurfaceLock(lockPath: string): Promise<string> {
+  const content = await readFile(lockPath, "utf-8");
+  return content.trim();
 }
 
 // =============================================================================

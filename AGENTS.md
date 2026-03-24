@@ -145,7 +145,7 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 
 **Introspection**: `outfitter schema` shows all registered actions. `outfitter schema <action-id> --output json` returns the full schema including input/output shapes.
 
-**Surface maps**: `outfitter schema generate` writes `.outfitter/surface.json` for drift detection. `outfitter schema diff` compares committed surface map against runtime, exiting non-zero on drift. The committed source of truth is root `.outfitter/surface.json` only; do not commit `apps/outfitter/.outfitter/surface.json`. Surface map formatting is also enforced via `outfitter check surface-map-format`.
+**Surface maps**: `outfitter schema generate` writes `.outfitter/_surface.json` (gitignored detail) and `.outfitter/surface.lock` (committed SHA-256 hash) for drift detection. `outfitter schema diff` compares the committed hash against the runtime surface map, exiting non-zero on drift. The committed source of truth is `.outfitter/surface.lock` only; do not commit full surface map JSON files. Format validity is checked via `outfitter check surface-map-format`.
 
 #### Adding a New CLI Command
 
@@ -155,7 +155,7 @@ Actions are the canonical unit of CLI and MCP functionality. Each action is defi
 4. Build the command with the CommandBuilder pattern (see below) — use `.input()` for Zod-driven flags, `.preset()` for flag presets, and `.destructive()` / `.readOnly()` / `.idempotent()` for safety metadata
 5. Use flag presets from `@outfitter/cli/query` (`outputModePreset`, `jqPreset`, `streamPreset`) and `@outfitter/cli/flags` (`cwdPreset`, `dryRunPreset`)
 6. Add tests in `apps/outfitter/src/__tests__/<name>.test.ts` — at minimum test action registration and `mapInput`
-7. Run `outfitter schema generate` to update `.outfitter/surface.json`
+7. Run `outfitter schema generate` to update `.outfitter/surface.lock`
 8. Verify with `outfitter schema diff` (should report no drift after regeneration)
 
 #### `onResult` Callback and `defaultOnResult`
@@ -511,7 +511,7 @@ fix(cli): handle missing config gracefully
 - **pre-commit**: Format, lint, typecheck (affected packages)
 - **pre-push**: Full repository verification via `outfitter check --pre-push`, plus block and schema drift checks
   - Block drift (`outfitter check`) fails the push if local config files diverge from the registry (see [block-drift.md](./docs/reference/block-drift.md))
-  - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.json` is stale
+  - Schema drift (`outfitter schema diff`) fails the push if `.outfitter/surface.lock` is stale
   - Docs README sentinel drift (`outfitter check docs-sentinel`) fails the push if `docs/README.md` generated sections are stale
 - **pre-submit (stacked branches)**: Run `bun run verify:stack` before `gt submit` or `gt stack submit` to catch schema drift before it propagates through a stack. See [Stacked PR Workflow](./docs/ci-cd/stacked-pr-workflow.md).
 

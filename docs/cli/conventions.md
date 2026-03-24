@@ -359,7 +359,7 @@ const commands = buildCliCommands(registry, {
 mycli schema                          # show all (backward compat)
 mycli schema init                     # show detail (backward compat)
 mycli schema show [action]            # explicit show subcommand
-mycli schema generate                 # write .outfitter/surface.json
+mycli schema generate                 # write _surface.json + surface.lock
 mycli schema generate --dry-run       # print without writing
 mycli schema generate --snapshot v1   # write .outfitter/snapshots/v1.json
 mycli schema diff                     # compare runtime vs committed
@@ -382,15 +382,15 @@ interface SurfaceMap extends ActionManifest {
 Add drift detection to CI pipelines:
 
 ```bash
-# Check for drift against committed surface.json (exits 1 on changes)
+# Check for drift against committed surface.lock (exits 1 on changes)
 mycli schema diff
 ```
 
-To bootstrap the baseline surface map (run once, then commit):
+To bootstrap the baseline surface lock (run once, then commit):
 
 ```bash
 mycli schema generate
-git add .outfitter/surface.json
+git add .outfitter/surface.lock
 ```
 
 Example GitHub Actions step:
@@ -401,7 +401,7 @@ Example GitHub Actions step:
     mycli schema diff
 ```
 
-The diff compares the committed `.outfitter/surface.json` against the current runtime registry. It ignores volatile fields (`generatedAt`) and reports added, removed, and modified actions.
+The diff compares the committed `.outfitter/surface.lock` hash against the current runtime registry hash. On mismatch, it reads `.outfitter/_surface.json` (or generates a fresh map) to report added, removed, and modified actions.
 
 For cross-version comparison, use snapshots:
 
@@ -418,24 +418,33 @@ mycli schema diff --from v1.0.0 --to v2.0.0
 ```typescript
 import {
   generateSurfaceMap,
+  hashSurfaceMap,
   writeSurfaceMap,
-  readSurfaceMap,
+  writeSurfaceLock,
+  readSurfaceLock,
   diffSurfaceMaps,
 } from "@outfitter/schema";
 
-// Generate and write
+// Generate, write detail and lock
 const surfaceMap = generateSurfaceMap(registry, { generator: "build" });
-await writeSurfaceMap(surfaceMap, ".outfitter/surface.json");
+await writeSurfaceMap(surfaceMap, ".outfitter/_surface.json");
+await writeSurfaceLock(hashSurfaceMap(surfaceMap), ".outfitter/surface.lock");
 
-// Read and diff
-const committed = await readSurfaceMap(".outfitter/surface.json");
+// Hash-based drift check
+const committedHash = await readSurfaceLock(".outfitter/surface.lock");
 const current = generateSurfaceMap(registry, { generator: "runtime" });
-const diff = diffSurfaceMaps(committed, current);
+const currentHash = hashSurfaceMap(current);
 
-if (diff.hasChanges) {
-  console.log("Added:", diff.added);
-  console.log("Removed:", diff.removed);
-  console.log("Modified:", diff.modified);
+if (committedHash !== currentHash) {
+  // Hashes differ — compute semantic diff for reporting
+  const committed = await readSurfaceMap(".outfitter/_surface.json");
+  const diff = diffSurfaceMaps(committed, current);
+
+  if (diff.hasChanges) {
+    console.log("Added:", diff.added);
+    console.log("Removed:", diff.removed);
+    console.log("Modified:", diff.modified);
+  }
 }
 ```
 

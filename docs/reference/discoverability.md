@@ -122,13 +122,13 @@ outfitter schema check.tsdoc
 outfitter schema check.tsdoc --output json
 ```
 
-**`outfitter schema generate`** — Writes `.outfitter/surface.json`, the canonical surface map of all registered actions. Used for drift detection.
+**`outfitter schema generate`** — Writes `.outfitter/_surface.json` (gitignored detail) and `.outfitter/surface.lock` (committed SHA-256 hash) for drift detection.
 
 ```bash
 outfitter schema generate
 ```
 
-**`outfitter schema diff`** — Compares runtime schema against the committed `.outfitter/surface.json`. Exits non-zero on drift. Run this in CI or before pushing to catch unregistered actions or schema changes.
+**`outfitter schema diff`** — Compares runtime schema hash against the committed `.outfitter/surface.lock`. Exits non-zero on drift. On mismatch, shows a semantic delta of added/removed/modified actions.
 
 ```bash
 # In CI or pre-push hook
@@ -180,13 +180,13 @@ outfitter check publish-guardrails
 outfitter check preset-versions
 ```
 
-**`outfitter check surface-map`** — Validates canonical surface map path usage (only `.outfitter/surface.json`).
+**`outfitter check surface-map`** — Validates that no legacy `surface.json` files are tracked (only `.outfitter/surface.lock` should be committed).
 
 ```bash
 outfitter check surface-map
 ```
 
-**`outfitter check surface-map-format`** — Validates canonical formatting for `.outfitter/surface.json`.
+**`outfitter check surface-map-format`** — Validates the format of `.outfitter/surface.lock` (must be a 64-char hex SHA-256 hash).
 
 ```bash
 outfitter check surface-map-format

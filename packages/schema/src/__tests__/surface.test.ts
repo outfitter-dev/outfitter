@@ -13,7 +13,10 @@ import { z } from "zod";
 import type { SurfaceMap } from "../surface.js";
 import {
   generateSurfaceMap,
+  hashSurfaceMap,
+  readSurfaceLock,
   readSurfaceMap,
+  writeSurfaceLock,
   writeSurfaceMap,
 } from "../surface.js";
 
@@ -223,5 +226,148 @@ describe("surface map I/O", () => {
 
     const rewrittenMap = await readSurfaceMap(outputPath);
     expect(rewrittenMap.generatedAt).toBe(existingGeneratedAt);
+  });
+});
+
+// =============================================================================
+// hashSurfaceMap
+// =============================================================================
+
+describe("hashSurfaceMap", () => {
+  it("returns a 64-character hex SHA-256 hash", () => {
+    const registry = createTestRegistry();
+    const surfaceMap = generateSurfaceMap(registry);
+
+    const hash = hashSurfaceMap(surfaceMap);
+
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("produces deterministic output ignoring generatedAt", () => {
+    const registry = createTestRegistry();
+    const map1 = {
+      ...generateSurfaceMap(registry),
+      generatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const map2 = {
+      ...generateSurfaceMap(registry),
+      generatedAt: "2026-12-31T23:59:59.999Z",
+    };
+
+    expect(hashSurfaceMap(map1)).toBe(hashSurfaceMap(map2));
+  });
+
+  it("produces the same hash regardless of generator mode", () => {
+    const registry = createTestRegistry();
+    const buildMap = generateSurfaceMap(registry, { generator: "build" });
+    const runtimeMap = generateSurfaceMap(registry, { generator: "runtime" });
+
+    expect(hashSurfaceMap(buildMap)).toBe(hashSurfaceMap(runtimeMap));
+  });
+
+  it("produces different hashes for different content", () => {
+    const registry1 = createTestRegistry();
+    const map1 = generateSurfaceMap(registry1);
+
+    const registry2 = createActionRegistry().add(
+      defineAction({
+        id: "different",
+        description: "Different action",
+        surfaces: ["cli"],
+        input: z.object({}),
+        cli: { command: "different" },
+        handler: async () => Result.ok({ ok: true }),
+      })
+    );
+    const map2 = generateSurfaceMap(registry2);
+
+    expect(hashSurfaceMap(map1)).not.toBe(hashSurfaceMap(map2));
+  });
+
+  it("produces the same hash regardless of key order", () => {
+    const registry = createTestRegistry();
+    const surfaceMap = generateSurfaceMap(registry);
+
+    const reordered = {
+      generator: surfaceMap.generator,
+      $schema: surfaceMap.$schema,
+      actions: surfaceMap.actions,
+      version: surfaceMap.version,
+      generatedAt: surfaceMap.generatedAt,
+      surfaces: surfaceMap.surfaces,
+      errors: surfaceMap.errors,
+      outputModes: surfaceMap.outputModes,
+    } as SurfaceMap;
+
+    expect(hashSurfaceMap(reordered)).toBe(hashSurfaceMap(surfaceMap));
+  });
+});
+
+// =============================================================================
+// writeSurfaceLock / readSurfaceLock
+// =============================================================================
+
+describe("surface lock I/O", () => {
+  let tempDir: string;
+
+  afterEach(async () => {
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("writes a lock file containing only a hex hash and trailing newline", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-lock-"));
+    const lockPath = join(tempDir, ".outfitter", "surface.lock");
+
+    await writeSurfaceLock("abc123def456", lockPath);
+
+    const content = await readFile(lockPath, "utf-8");
+    expect(content).toBe("abc123def456\n");
+  });
+
+  it("reads a lock file and returns the hash string", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-lock-"));
+    const lockPath = join(tempDir, ".outfitter", "surface.lock");
+    await mkdir(join(tempDir, ".outfitter"), { recursive: true });
+    await writeFile(lockPath, "abc123def456\n", "utf-8");
+
+    const hash = await readSurfaceLock(lockPath);
+
+    expect(hash).toBe("abc123def456");
+  });
+
+  it("trims whitespace when reading the lock file", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-lock-"));
+    const lockPath = join(tempDir, ".outfitter", "surface.lock");
+    await mkdir(join(tempDir, ".outfitter"), { recursive: true });
+    await writeFile(lockPath, "  abc123def456  \n", "utf-8");
+
+    const hash = await readSurfaceLock(lockPath);
+
+    expect(hash).toBe("abc123def456");
+  });
+
+  it("creates parent directories when writing", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-lock-"));
+    const lockPath = join(tempDir, "deep", "nested", "surface.lock");
+
+    await writeSurfaceLock("abc123", lockPath);
+
+    const content = await readFile(lockPath, "utf-8");
+    expect(content).toBe("abc123\n");
+  });
+
+  it("roundtrips with hashSurfaceMap", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "surface-lock-"));
+    const registry = createTestRegistry();
+    const surfaceMap = generateSurfaceMap(registry);
+    const hash = hashSurfaceMap(surfaceMap);
+
+    const lockPath = join(tempDir, ".outfitter", "surface.lock");
+    await writeSurfaceLock(hash, lockPath);
+    const readHash = await readSurfaceLock(lockPath);
+
+    expect(readHash).toBe(hash);
   });
 });

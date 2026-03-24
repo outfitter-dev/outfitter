@@ -6,7 +6,8 @@ import type { CliOutputMode } from "../output-mode.js";
 import { resolveStructuredOutputMode } from "../output-mode.js";
 
 const LEGACY_SURFACE_MAP_PATH = "apps/outfitter/.outfitter/surface.json";
-const CANONICAL_SURFACE_MAP_PATH = ".outfitter/surface.json";
+const LEGACY_ROOT_SURFACE_MAP_PATH = ".outfitter/surface.json";
+const CANONICAL_SURFACE_LOCK_PATH = ".outfitter/surface.lock";
 
 export interface CheckSurfaceMapOptions {
   readonly cwd: string;
@@ -14,7 +15,7 @@ export interface CheckSurfaceMapOptions {
 
 export interface CheckSurfaceMapResult {
   readonly canonicalPath: string;
-  readonly legacyTrackedPath: string;
+  readonly legacyPaths: readonly string[];
   readonly ok: boolean;
 }
 
@@ -27,9 +28,9 @@ export class CheckSurfaceMapError extends Error {
   }
 }
 
-function isLegacySurfaceMapTracked(cwd: string): boolean {
+function isFileTracked(cwd: string, filePath: string): boolean {
   const check = Bun.spawnSync(
-    ["git", "ls-files", "--error-unmatch", LEGACY_SURFACE_MAP_PATH],
+    ["git", "ls-files", "--error-unmatch", filePath],
     {
       cwd,
       stdout: "ignore",
@@ -45,12 +46,20 @@ export async function runCheckSurfaceMap(
 ): Promise<Result<CheckSurfaceMapResult, CheckSurfaceMapError>> {
   try {
     const cwd = resolve(options.cwd);
-    const tracked = isLegacySurfaceMapTracked(cwd);
+    const trackedLegacy: string[] = [];
+    for (const path of [
+      LEGACY_SURFACE_MAP_PATH,
+      LEGACY_ROOT_SURFACE_MAP_PATH,
+    ]) {
+      if (isFileTracked(cwd, path)) {
+        trackedLegacy.push(path);
+      }
+    }
 
     return Result.ok({
-      canonicalPath: CANONICAL_SURFACE_MAP_PATH,
-      legacyTrackedPath: LEGACY_SURFACE_MAP_PATH,
-      ok: !tracked,
+      canonicalPath: CANONICAL_SURFACE_LOCK_PATH,
+      legacyPaths: trackedLegacy,
+      ok: trackedLegacy.length === 0,
     });
   } catch (error) {
     const message =
@@ -79,9 +88,11 @@ export async function printCheckSurfaceMapResult(
     return;
   }
 
-  process.stderr.write(
-    `${result.legacyTrackedPath} must not be tracked. Canonical surface map is ${result.canonicalPath}.\n`
-  );
+  for (const path of result.legacyPaths) {
+    process.stderr.write(
+      `${path} must not be tracked. Canonical surface artifact is ${result.canonicalPath}.\n`
+    );
+  }
 }
 
 interface ParsedCliArgs {

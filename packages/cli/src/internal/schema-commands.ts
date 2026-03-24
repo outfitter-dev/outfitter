@@ -16,8 +16,11 @@ import {
   type GenerateManifestOptions,
   generateManifest,
   generateSurfaceMap,
+  hashSurfaceMap,
+  readSurfaceLock,
   readSurfaceMap,
   resolveSnapshotPath,
+  writeSurfaceLock,
   writeSurfaceMap,
 } from "@outfitter/schema";
 import { Command } from "commander";
@@ -91,6 +94,9 @@ export function createSchemaCommand(
 ): Command {
   const cmd = new Command("schema")
     .description("Show CLI schema for machine or human consumption")
+    // Keep `--output` and similar flags attached to the subcommand when users
+    // run `schema diff --output json` or `schema show --output json`.
+    .enablePositionalOptions()
     .argument("[action]", "Show detail for a specific action")
     .option("--output <mode>", "Output mode (human, json)", "human")
     .option("--surface <name>", "Filter by surface (cli, mcp, api, server)")
@@ -137,7 +143,7 @@ export function createSchemaCommand(
 
     // generate subcommand
     const generateCmd = new Command("generate")
-      .description("Generate surface map and write to disk")
+      .description("Generate surface map, write _surface.json and surface.lock")
       .option("--dry-run", "Print surface map without writing to disk")
       .option(
         "--snapshot <version>",
@@ -164,15 +170,22 @@ export function createSchemaCommand(
           return;
         }
 
-        const outputPath = join(cwd, outputDir, "surface.json");
-        await writeSurfaceMap(surfaceMap, outputPath);
-        process.stdout.write(`Surface map written to ${outputPath}\n`);
+        // Write the full surface map to _surface.json (gitignored)
+        const detailPath = join(cwd, outputDir, "_surface.json");
+        await writeSurfaceMap(surfaceMap, detailPath);
+
+        // Write the content hash to surface.lock (committed)
+        const hash = hashSurfaceMap(surfaceMap);
+        const lockPath = join(cwd, outputDir, "surface.lock");
+        await writeSurfaceLock(hash, lockPath);
+
+        process.stdout.write(`Surface map written to ${detailPath}\n`);
       });
     cmd.addCommand(generateCmd);
 
     // diff subcommand
     const diffCmd = new Command("diff")
-      .description("Compare runtime schema against committed surface map")
+      .description("Compare runtime schema against committed surface.lock")
       .option("--output <mode>", "Output mode (human, json)", "human")
       .option("--against <version>", "Compare runtime against a named snapshot")
       .option("--from <version>", "Base snapshot for snapshot-to-snapshot diff")
@@ -264,27 +277,75 @@ export function createSchemaCommand(
 
             right = generateSurfaceMap(source, { generator: "runtime" });
           } else {
-            // Default: committed surface.json vs runtime
-            const surfacePath = join(cwd, outputDir, "surface.json");
+            // Default: hash-based comparison via surface.lock
+            const lockPath = join(cwd, outputDir, "surface.lock");
+            const currentSurfaceMap = generateSurfaceMap(source, {
+              generator: "runtime",
+            });
+            const currentHash = hashSurfaceMap(currentSurfaceMap);
 
+            let committedHash: string | undefined;
             try {
-              left = await readSurfaceMap(surfacePath);
+              committedHash = await readSurfaceLock(lockPath);
             } catch (err) {
               if ((err as NodeJS.ErrnoException).code === "ENOENT") {
                 process.stderr.write(
-                  `No committed surface map at ${surfacePath}\n`
+                  `No committed surface.lock at ${lockPath}\n`
                 );
                 process.stderr.write("Run 'schema generate' first.\n");
               } else {
                 process.stderr.write(
-                  `Failed to read surface map at ${surfacePath}: ${err instanceof Error ? err.message : String(err)}\n`
+                  `Failed to read surface.lock at ${lockPath}: ${err instanceof Error ? err.message : String(err)}\n`
                 );
               }
               process.exitCode = 1;
               return;
             }
 
-            right = generateSurfaceMap(source, { generator: "runtime" });
+            // Fast path: hashes match, no drift
+            if (committedHash === currentHash) {
+              if (diffOptions.output === "json") {
+                process.stdout.write(
+                  `${JSON.stringify({ hasChanges: false, added: [], removed: [], modified: [], metadataChanges: [] }, null, 2)}\n`
+                );
+              } else {
+                process.stdout.write("No schema drift detected.\n");
+              }
+              return;
+            }
+
+            // Hashes differ: report drift. Try to show semantic diff
+            // using _surface.json if available AND its hash matches the
+            // committed lock. A stale _surface.json (from a branch switch
+            // or outdated generate) would produce misleading diffs.
+            const detailPath = join(cwd, outputDir, "_surface.json");
+            try {
+              const candidate = await readSurfaceMap(detailPath);
+              const candidateHash = hashSurfaceMap(candidate);
+              if (candidateHash !== committedHash) {
+                // _surface.json is stale — don't use it for semantic diff
+                throw new Error("stale _surface.json");
+              }
+              left = candidate;
+            } catch {
+              // _surface.json is gitignored and may not exist on CI or
+              // fresh clones. Report drift based on hash mismatch alone.
+              if (diffOptions.output === "json") {
+                process.stdout.write(
+                  `${JSON.stringify({ hasChanges: true, hashMismatch: true, committedHash, currentHash }, null, 2)}\n`
+                );
+              } else {
+                process.stderr.write("Schema drift detected:\n");
+                process.stderr.write(`  Committed hash: ${committedHash}\n`);
+                process.stderr.write(`  Current hash:   ${currentHash}\n`);
+                process.stderr.write(
+                  "\nRun 'schema generate' to update surface.lock.\n"
+                );
+              }
+              process.exitCode = 1;
+              return;
+            }
+            right = currentSurfaceMap;
           }
 
           const result = diffSurfaceMaps(left, right, { mode: diffMode });

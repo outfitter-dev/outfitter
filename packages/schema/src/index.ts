@@ -34,8 +34,11 @@ export {
 export {
   type GenerateSurfaceMapOptions,
   generateSurfaceMap,
+  hashSurfaceMap,
+  readSurfaceLock,
   readSurfaceMap,
   resolveSnapshotPath,
   type SurfaceMap,
+  writeSurfaceLock,
   writeSurfaceMap,
 } from "./surface.js";

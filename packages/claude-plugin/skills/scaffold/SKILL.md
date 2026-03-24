@@ -273,7 +273,7 @@ main();
 1. **Handler First** — Write handler before adapter (CLI/MCP/API)
 2. **Action Registry First** — Add CLI behavior via `defineAction()` and `mapInput()`
 3. **Preset Composition** — Prefer shared presets over manual flag parsing
-4. **Schema Drift Guard** — Regenerate and diff `.outfitter/surface.json` after CLI changes
+4. **Schema Drift Guard** — Regenerate and diff `.outfitter/surface.lock` after CLI changes
 5. **Validate Early** — Use `createValidator` at handler entry
 6. **Type Errors** — List all error types in handler signature
 7. **Context Propagation** — Pass context through all handler calls

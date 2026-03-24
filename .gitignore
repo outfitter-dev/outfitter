@@ -58,7 +58,9 @@ temp/
 .outfitter/locks/
 .outfitter/reports/
 .outfitter/scaffold-e2e/
+.outfitter/_surface.json
 */*/.outfitter/surface.json
+*/*/.outfitter/_surface.json
 
 # Agent memory
 **/.claude/agent-memory/
