@@ -5,8 +5,9 @@
  * @internal
  */
 
+import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 import type { ActionSurface } from "@outfitter/contracts";
 import {
@@ -138,8 +139,12 @@ export function createSchemaCommand(
   // Add surface subcommands only when surface options are provided
   if (options?.surface) {
     const surfaceOpts = options.surface;
-    const cwd = surfaceOpts.cwd ?? process.cwd();
     const outputDir = surfaceOpts.outputDir ?? ".outfitter";
+
+    // When cwd is explicitly provided, respect it. Otherwise resolve
+    // the workspace root so surface files land at the monorepo root,
+    // not whichever package directory the command happens to run from.
+    const cwd = surfaceOpts.cwd ?? resolveWorkspaceRoot(process.cwd());
 
     // generate subcommand
     const generateCmd = new Command("generate")
@@ -447,4 +452,24 @@ export function createSchemaCommand(
   }
 
   return cmd;
+}
+
+/**
+ * Walk up from `startPath` to find the nearest directory containing `.git`.
+ * Falls back to `startPath` if no `.git` is found (e.g. non-git projects).
+ */
+function resolveWorkspaceRoot(startPath: string): string {
+  let dir = resolve(startPath);
+  const root = resolve("/");
+
+  while (dir !== root) {
+    if (existsSync(join(dir, ".git"))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+
+  return resolve(startPath);
 }
