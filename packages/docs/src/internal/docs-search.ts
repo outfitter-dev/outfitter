@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
-import { createIndex, type Index, type SearchResult } from "@outfitter/index";
+import { createIndex, type Index } from "@outfitter/index";
 import { Result } from "better-result";
 
 import { VERSION } from "../version.js";
@@ -227,12 +227,12 @@ export async function createDocsSearch(
       }
 
       try {
+        await hydrateRegistry(docRegistry, indexPath, logger);
+
         const limit = options?.limit ?? 25;
         let searchResult = await ftsIndex.search({ query, limit });
 
         // Retry plain-text queries that trip FTS5 syntax errors.
-        // Punctuation in terms like "result-api" or "async/await" causes
-        // FTS5 parse failures. Quote each term to treat them as literals.
         if (
           searchResult.isErr() &&
           isFtsParseError(searchResult.error.message) &&
@@ -246,14 +246,27 @@ export async function createDocsSearch(
           return Result.err(new Error(searchResult.error.message));
         }
 
-        return Result.ok(
-          searchResult.value.map((hit: SearchResult<SearchDocMetadata>) => ({
+        // Filter out search hits whose IDs are not in the hydrated
+        // registry (corrupt or orphaned FTS rows).
+        const results: DocsSearchResult[] = [];
+
+        for (const hit of searchResult.value) {
+          if (!docRegistry.has(hit.id)) {
+            logger?.warn("Search hit excluded: ID not in registry", {
+              id: hit.id,
+            });
+            continue;
+          }
+
+          results.push({
             id: hit.id,
             title: hit.metadata?.title ?? hit.id,
             score: hit.score,
             snippet: hit.highlights?.[0] ?? "",
-          }))
-        );
+          });
+        }
+
+        return Result.ok(results);
       } catch (error) {
         return Result.err(
           error instanceof Error ? error : new Error("Search failed")
