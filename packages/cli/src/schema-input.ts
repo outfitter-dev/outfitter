@@ -3,8 +3,8 @@
  * Zod-to-Commander flag derivation.
  *
  * Introspects a Zod object schema and derives Commander option definitions
- * for the 80% case: string, number, boolean, enum. Positional args, aliases,
- * and variadic params require explicit declarations.
+ * for the common case: string, number, boolean, enum, and array. Positional
+ * args and aliases require explicit declarations.
  *
  * @packageDocumentation
  */
@@ -146,6 +146,7 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
  * - z.number() → `--count <n>` (number option with coercion)
  * - z.boolean() → `--verbose` (boolean flag)
  * - z.enum(['a','b']) → `--format <value>` with choices
+ * - z.array(z.string()) → `--tags <value...>` (variadic, repeatable)
  * - .describe() → option description
  * - .default() → option default
  * - .optional() → not required
@@ -185,6 +186,8 @@ export function deriveFlags(
         flagString = `${longFlag} <value>`;
         break;
       case "array":
+        flagString = `${longFlag} <value...>`;
+        break;
       case "union":
       case "discriminatedUnion":
       case "tuple":

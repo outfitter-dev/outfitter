@@ -165,6 +165,36 @@ describe("deriveFlags", () => {
     const flags = deriveFlags(schema, new Set());
     expect(flags[0]?.flagString).toBe("--format <value>");
   });
+
+  it("derives array flags with variadic <value...> placeholder", () => {
+    const schema = z.object({
+      tags: z.array(z.string()).describe("Tags for categorization"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags).toHaveLength(1);
+    expect(flags[0]?.flagString).toBe("--tags <value...>");
+    expect(flags[0]?.description).toBe("Tags for categorization");
+    expect(flags[0]?.isBoolean).toBe(false);
+  });
+
+  it("derives optional array flags as not required", () => {
+    const schema = z.object({
+      refs: z.array(z.string()).optional().describe("References"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags).toHaveLength(1);
+    expect(flags[0]?.flagString).toBe("--refs <value...>");
+    expect(flags[0]?.isRequired).toBe(false);
+  });
+
+  it("derives array flags with defaults as not required", () => {
+    const schema = z.object({
+      tags: z.array(z.string()).default([]).describe("Tags"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags[0]?.isRequired).toBe(false);
+    expect(flags[0]?.defaultValue).toEqual([]);
+  });
 });
 
 // =============================================================================
