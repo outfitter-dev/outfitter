@@ -2,6 +2,7 @@ import { basename, extname } from "node:path";
 
 import type { Index } from "@outfitter/index";
 
+import { quoteFtsTerms, shouldRetryAsQuoted } from "./search-query.js";
 import type {
   DocRegistryEntry,
   DocsSearchLogger,
@@ -170,6 +171,36 @@ export async function applyIndexDocuments(
   return { failed, indexed };
 }
 
+/**
+ * Remove all entries from the index and registry when no source files remain.
+ *
+ * This handles the transition where all matched docs disappear — a case
+ * that `removeStaleDocuments()` intentionally guards against (to prevent
+ * misconfigured globs from wiping the index). This function clears
+ * entries one by one so the index converges to empty.
+ */
+export async function removeAllDocuments(
+  ftsIndex: Index<SearchDocMetadata>,
+  docRegistry: Map<string, DocRegistryEntry>
+): Promise<{ readonly removed: number; readonly failed: number }> {
+  const ids = [...docRegistry.keys()];
+  let removed = 0;
+  let failed = 0;
+
+  for (const id of ids) {
+    const removeResult = await ftsIndex.remove(id);
+
+    if (removeResult.isOk()) {
+      docRegistry.delete(id);
+      removed++;
+    } else {
+      failed++;
+    }
+  }
+
+  return { removed, failed };
+}
+
 /** Remove registry entries whose source files are no longer present. */
 export async function removeStaleDocuments(
   ftsIndex: Index<SearchDocMetadata>,
@@ -221,4 +252,100 @@ function updateRegistryEntry(
 function extractTitle(content: string, fallback: string): string {
   const match = /^#\s+(.+)$/m.exec(content);
   return match?.[1]?.trim() ?? basename(fallback, extname(fallback));
+}
+
+/**
+ * Page through FTS search results, filtering out rows whose IDs are not
+ * in the in-memory registry (corrupt or orphaned rows).
+ *
+ * Retry plain-text queries that trip FTS5 syntax errors.
+ * Punctuation in terms like "result-api" or "async/await" causes
+ * FTS5 parse failures; quoting each term treats them as literals.
+ *
+ * Returns up to `limit` results, fetching additional pages as needed to
+ * fill the limit when some rows are filtered out.
+ */
+export async function executeFilteredSearch(
+  ftsIndex: Index<SearchDocMetadata>,
+  docRegistry: Map<string, DocRegistryEntry>,
+  query: string,
+  limit: number,
+  logger?: DocsSearchLogger
+): Promise<{ id: string; title: string; score: number; snippet: string }[]> {
+  try {
+    return await doFilteredSearch(ftsIndex, docRegistry, query, limit, logger);
+  } catch (err) {
+    if (err instanceof Error && shouldRetryAsQuoted(query, err.message)) {
+      return await doFilteredSearch(
+        ftsIndex,
+        docRegistry,
+        quoteFtsTerms(query),
+        limit,
+        logger
+      );
+    }
+    throw err;
+  }
+}
+
+async function doFilteredSearch(
+  ftsIndex: Index<SearchDocMetadata>,
+  docRegistry: Map<string, DocRegistryEntry>,
+  query: string,
+  limit: number,
+  logger?: DocsSearchLogger
+): Promise<{ id: string; title: string; score: number; snippet: string }[]> {
+  const results: {
+    id: string;
+    title: string;
+    score: number;
+    snippet: string;
+  }[] = [];
+  const pageSize = Math.max(limit, 25);
+  let offset = 0;
+
+  while (results.length < limit) {
+    const searchResult = await ftsIndex.search({
+      query,
+      limit: pageSize,
+      offset,
+    });
+
+    if (searchResult.isErr()) {
+      if (results.length === 0) {
+        throw new Error(searchResult.error.message);
+      }
+      break;
+    }
+
+    const hits = searchResult.value;
+
+    if (hits.length === 0) {
+      break;
+    }
+
+    for (const hit of hits) {
+      if (results.length >= limit) {
+        break;
+      }
+
+      if (!docRegistry.has(hit.id)) {
+        logger?.warn("Search hit excluded: ID not in registry", {
+          id: hit.id,
+        });
+        continue;
+      }
+
+      results.push({
+        id: hit.id,
+        title: hit.metadata?.title ?? hit.id,
+        score: hit.score,
+        snippet: hit.highlights?.[0] ?? "",
+      });
+    }
+
+    offset += hits.length;
+  }
+
+  return results;
 }

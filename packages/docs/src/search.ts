@@ -20,6 +20,7 @@ export type {
   DocsSearch,
   DocsSearchConfig,
   DocsSearchDocument,
+  DocsSearchFreshness,
   DocsSearchIndexStats,
   DocsSearchListEntry,
   DocsSearchLogger,

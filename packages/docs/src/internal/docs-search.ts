@@ -5,20 +5,23 @@ import { createIndex, type Index } from "@outfitter/index";
 import { Result } from "better-result";
 
 import { VERSION } from "../version.js";
+import { createCorruptRowTracker } from "./search-corrupt.js";
 import {
   applyIndexDocuments,
   collectSourceFiles,
+  executeFilteredSearch,
   prepareIndexDocuments,
+  removeAllDocuments,
   removeStaleDocuments,
 } from "./search-indexing.js";
 import { resolveDocsSearchIndexPath } from "./search-paths.js";
-import { quoteFtsTerms, shouldRetryAsQuoted } from "./search-query.js";
 import { hydrateRegistry, listRegistryEntries } from "./search-registry.js";
 import type {
   DocRegistryEntry,
   DocsSearch,
   DocsSearchConfig,
   DocsSearchDocument,
+  DocsSearchFreshness,
   DocsSearchIndexStats,
   DocsSearchResult,
   SearchDocMetadata,
@@ -31,28 +34,21 @@ import type {
  * and retrieving documentation. Call `close()` when done to release
  * the underlying database connection.
  *
- * On the first call to `index()`, `list()`, or `get()`, the in-memory
+ * On the first call to `index()`, `list()`, `get()`, or `search()`, the in-memory
  * document registry is hydrated from the existing FTS5 index (if present).
  * This enables correct change detection and read access across process
  * restarts without forcing a fresh re-index.
  *
  * @example
  * ```typescript
- * const result = await createDocsSearch({
- *   name: "outfitter",
- *   paths: ["docs/*.md"],
- * });
+ * const result = await createDocsSearch({ name: "outfitter", paths: ["docs/*.md"] });
  * if (result.isErr()) throw result.error;
  * const docs = result.value;
  *
- * const indexResult = await docs.index();
- * if (indexResult.isErr()) throw indexResult.error;
- *
- * const searchResult = await docs.search("fts5");
- * if (searchResult.isErr()) throw searchResult.error;
- *
- * const closeResult = await docs.close();
- * if (closeResult.isErr()) throw closeResult.error;
+ * // Refresh only when stale, then search
+ * await docs.refreshIfNeeded();
+ * const hits = await docs.search("fts5");
+ * await docs.close();
  * ```
  */
 export async function createDocsSearch(
@@ -98,7 +94,68 @@ export async function createDocsSearch(
   const logger = config.logger;
   let isClosed = false;
 
+  // Tracks FTS rows with corrupt/missing metadata discovered during hydration.
+  // Persists across calls because hydrateRegistry() short-circuits after the
+  // first call (docRegistry.size > 0), losing visibility into skipped rows.
+  const corruptRows = createCorruptRowTracker(ftsIndex, logger);
+
   return Result.ok({
+    async checkFreshness(): Promise<Result<DocsSearchFreshness, Error>> {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
+      try {
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
+
+        // An index "exists" when the SQLite file has been written to disk
+        // by a previous indexing run. An empty index (zero docs matching
+        // globs) is still a valid, existing index.
+        const exists = await Bun.file(indexPath).exists();
+
+        const filePaths = await collectSourceFiles(config.paths, frozenCwd);
+        const prepared = await prepareIndexDocuments(
+          filePaths,
+          docRegistry,
+          logger
+        );
+
+        // Count stale entries: docs in the registry whose source files
+        // are no longer matched by the configured globs.
+        let staleCount = 0;
+        for (const [, entry] of docRegistry) {
+          if (!prepared.seen.has(entry.sourcePath)) staleCount++;
+        }
+
+        const hasChanges =
+          prepared.docsToAdd.length > 0 ||
+          staleCount > 0 ||
+          prepared.failed > 0 ||
+          corruptRows.count > 0;
+
+        return Result.ok({
+          exists,
+          stale: !exists || hasChanges,
+          pendingChanges:
+            prepared.docsToAdd.length +
+            staleCount +
+            prepared.failed +
+            corruptRows.count,
+          totalSources: filePaths.length,
+        });
+      } catch (error) {
+        return Result.err(
+          error instanceof Error
+            ? error
+            : new Error("Failed to check index freshness")
+        );
+      }
+    },
+
     async close(): Promise<Result<void, Error>> {
       isClosed = true;
 
@@ -124,7 +181,11 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath, logger);
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
 
         const entry = docRegistry.get(id);
         if (!entry) {
@@ -146,7 +207,11 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath, logger);
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
 
         const filePaths = await collectSourceFiles(config.paths, frozenCwd);
         const prepared = await prepareIndexDocuments(
@@ -165,8 +230,14 @@ export async function createDocsSearch(
           prepared.seen
         );
 
+        // Remove corrupt/orphaned FTS rows that hydration skipped.
+        // These rows are invisible to the registry and stale removal,
+        // so they must be cleaned up explicitly by ID.
+        const corrupt = await corruptRows.removeAll();
+
         return Result.ok({
-          failed: prepared.failed + added.failed + stale.failed,
+          failed:
+            prepared.failed + added.failed + stale.failed + corrupt.failed,
           indexed: added.indexed,
           total: prepared.total,
         });
@@ -183,12 +254,114 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath, logger);
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
 
         return Result.ok(listRegistryEntries(docRegistry));
       } catch (error) {
         return Result.err(
           error instanceof Error ? error : new Error("Failed to list documents")
+        );
+      }
+    },
+
+    async refreshIfNeeded(): Promise<
+      Result<DocsSearchIndexStats | undefined, Error>
+    > {
+      if (isClosed) {
+        return Result.err(new Error("DocsSearch instance has been closed"));
+      }
+
+      try {
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
+
+        const exists = await Bun.file(indexPath).exists();
+
+        const filePaths = await collectSourceFiles(config.paths, frozenCwd);
+        const prepared = await prepareIndexDocuments(
+          filePaths,
+          docRegistry,
+          logger
+        );
+
+        let hasStale = false;
+        for (const [, entry] of docRegistry) {
+          if (!prepared.seen.has(entry.sourcePath)) {
+            hasStale = true;
+            break;
+          }
+        }
+
+        if (
+          exists &&
+          prepared.docsToAdd.length === 0 &&
+          !hasStale &&
+          prepared.failed === 0 &&
+          corruptRows.count === 0
+        ) {
+          return Result.ok(undefined);
+        }
+
+        const added = await applyIndexDocuments(
+          ftsIndex,
+          docRegistry,
+          prepared.docsToAdd
+        );
+
+        let staleFailed = 0;
+        let staleRemoved = 0;
+
+        if (prepared.seen.size === 0 && docRegistry.size > 0) {
+          const all = await removeAllDocuments(ftsIndex, docRegistry);
+          staleFailed = all.failed;
+          staleRemoved = all.removed;
+        } else {
+          const registrySizeBefore = docRegistry.size;
+          const stale = await removeStaleDocuments(
+            ftsIndex,
+            docRegistry,
+            prepared.seen
+          );
+          staleFailed = stale.failed;
+          staleRemoved = registrySizeBefore - docRegistry.size;
+        }
+
+        const corrupt = await corruptRows.removeAll();
+        const totalFailed =
+          prepared.failed + added.failed + staleFailed + corrupt.failed;
+        const indexMutated =
+          added.indexed > 0 || staleRemoved > 0 || corrupt.removed > 0;
+
+        // Return undefined when nothing was actually added or removed
+        // and no failures occurred. When failures exist, report them
+        // so callers know something went wrong even though the index
+        // wasn't mutated.
+        if (!indexMutated) {
+          if (totalFailed > 0) {
+            return Result.ok({
+              failed: totalFailed,
+              indexed: 0,
+              total: prepared.total,
+            });
+          }
+          return Result.ok(undefined);
+        }
+
+        return Result.ok({
+          failed: totalFailed,
+          indexed: added.indexed,
+          total: prepared.total,
+        });
+      } catch (error) {
+        return Result.err(
+          error instanceof Error ? error : new Error("Refresh failed")
         );
       }
     },
@@ -202,45 +375,21 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath, logger);
+        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
+
+        if (hydration.skippedIds.length > 0) {
+          corruptRows.merge(hydration.skippedIds);
+        }
 
         const limit = options?.limit ?? 25;
-        let searchResult = await ftsIndex.search({ query, limit });
 
-        // Retry plain-text queries that trip FTS5 syntax errors.
-        // Punctuation in terms like "result-api" or "async/await" causes
-        // FTS5 parse failures; quoting each term treats them as literals.
-        if (
-          searchResult.isErr() &&
-          shouldRetryAsQuoted(query, searchResult.error.message)
-        ) {
-          const quoted = quoteFtsTerms(query);
-          searchResult = await ftsIndex.search({ query: quoted, limit });
-        }
-
-        if (searchResult.isErr()) {
-          return Result.err(new Error(searchResult.error.message));
-        }
-
-        // Filter out search hits whose IDs are not in the hydrated
-        // registry (corrupt or orphaned FTS rows).
-        const results: DocsSearchResult[] = [];
-
-        for (const hit of searchResult.value) {
-          if (!docRegistry.has(hit.id)) {
-            logger?.warn("Search hit excluded: ID not in registry", {
-              id: hit.id,
-            });
-            continue;
-          }
-
-          results.push({
-            id: hit.id,
-            title: hit.metadata?.title ?? hit.id,
-            score: hit.score,
-            snippet: hit.highlights?.[0] ?? "",
-          });
-        }
+        const results = await executeFilteredSearch(
+          ftsIndex,
+          docRegistry,
+          query,
+          limit,
+          logger
+        );
 
         return Result.ok(results);
       } catch (error) {
