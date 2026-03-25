@@ -18,12 +18,32 @@ function isCommanderHelp(error: { code?: string }): boolean {
   );
 }
 
-function normalizeGlobalJsonFlag(argv: readonly string[]): string[] {
+/**
+ * Relocate `--json` flags to the global position (after argv[0..1]).
+ *
+ * Commander requires global flags to appear before the subcommand, but users
+ * naturally place `--json` at the end. This function scans for `--json` tokens
+ * in the subcommand region and moves them immediately after the binary pair
+ * (argv[0] and argv[1]), so Commander sees them as global flags.
+ *
+ * Stops scanning at the `--` end-of-options separator so that
+ * `--json` tokens after `--` are preserved as positional arguments.
+ *
+ * @param argv - Full process.argv-style argument array (e.g. `process.argv`)
+ * @returns A new argv array with any `--json` flags relocated to the global
+ *   position (index 2), preserving relative order of all other arguments
+ *
+ * @internal Exported for unit testing only.
+ */
+export function normalizeGlobalJsonFlag(argv: readonly string[]): string[] {
+  const dashDashIndex = argv.indexOf("--");
+  const searchBound = dashDashIndex === -1 ? argv.length : dashDashIndex;
+
   const relocatedJsonFlags: string[] = [];
   const normalized: string[] = [];
 
   for (const [index, arg] of argv.entries()) {
-    if (index >= 2 && arg === "--json") {
+    if (index >= 2 && index < searchBound && arg === "--json") {
       relocatedJsonFlags.push(arg);
       continue;
     }
