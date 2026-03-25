@@ -471,5 +471,5 @@ function resolveWorkspaceRoot(startPath: string): string {
     dir = parent;
   }
 
-  return startPath;
+  return resolve(startPath);
 }
