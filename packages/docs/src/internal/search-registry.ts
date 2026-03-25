@@ -1,7 +1,11 @@
 import { Database } from "bun:sqlite";
 import { basename, extname } from "node:path";
 
-import type { DocRegistryEntry, DocsSearchListEntry } from "./search-types.js";
+import type {
+  DocRegistryEntry,
+  DocsSearchListEntry,
+  DocsSearchLogger,
+} from "./search-types.js";
 
 /**
  * FTS5 table name used by `@outfitter/index` by default.
@@ -10,34 +14,48 @@ import type { DocRegistryEntry, DocsSearchListEntry } from "./search-types.js";
 const DEFAULT_TABLE_NAME = "documents";
 const hydrationPromises = new WeakMap<
   Map<string, DocRegistryEntry>,
-  Promise<void>
+  Promise<HydrationResult>
 >();
+
+/** Result of hydrating the in-memory registry from an FTS5 index. */
+export interface HydrationResult {
+  /** Number of FTS5 rows with missing or corrupt metadata that were skipped. */
+  readonly skippedRows: number;
+  /** IDs of FTS5 rows that were skipped due to missing or corrupt metadata. */
+  readonly skippedIds: readonly string[];
+}
 
 /**
  * Populate the in-memory registry from an existing FTS5 index if present.
  *
  * The index stores metadata as JSON text, so hydration only needs the `id` and
- * `metadata` columns. Invalid metadata rows are ignored.
+ * `metadata` columns. Rows with missing or unparseable metadata are skipped
+ * and reported via the optional logger.
+ *
+ * @param docRegistry - In-memory map to populate with registry entries
+ * @param indexPath - Absolute path to the SQLite FTS5 index file
+ * @param logger - Optional logger for surfacing warnings about skipped rows
+ * @returns Hydration stats including the count of skipped (corrupt) rows
  */
 export async function hydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
-  indexPath: string
-): Promise<void> {
+  indexPath: string,
+  logger?: DocsSearchLogger
+): Promise<HydrationResult> {
   if (docRegistry.size > 0) {
-    return;
+    return { skippedRows: 0, skippedIds: [] };
   }
 
   const existingPromise = hydrationPromises.get(docRegistry);
   if (existingPromise) {
-    await existingPromise;
-    return;
+    return await existingPromise;
   }
 
-  const hydrationPromise = doHydrateRegistry(docRegistry, indexPath);
+  const hydrationPromise = doHydrateRegistry(docRegistry, indexPath, logger);
   hydrationPromises.set(docRegistry, hydrationPromise);
 
   try {
-    await hydrationPromise;
+    return await hydrationPromise;
   } finally {
     hydrationPromises.delete(docRegistry);
   }
@@ -45,10 +63,11 @@ export async function hydrateRegistry(
 
 async function doHydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
-  indexPath: string
-): Promise<void> {
+  indexPath: string,
+  logger?: DocsSearchLogger
+): Promise<HydrationResult> {
   if (docRegistry.size > 0 || !(await Bun.file(indexPath).exists())) {
-    return;
+    return { skippedRows: 0, skippedIds: [] };
   }
 
   // NOTE: TOCTOU gap — the file could be deleted between the exists() check
@@ -66,8 +85,16 @@ async function doHydrateRegistry(
       metadata: string | null;
     }>;
 
+    let skipped = 0;
+    const skippedIds: string[] = [];
+
     for (const row of rows) {
       if (!row.metadata) {
+        skipped++;
+        skippedIds.push(row.id);
+        logger?.warn("Skipping row with missing metadata during hydration", {
+          id: row.id,
+        });
         continue;
       }
 
@@ -82,10 +109,29 @@ async function doHydrateRegistry(
           title: meta.title ?? basename(row.id, extname(row.id)),
           contentHash: meta.contentHash ?? "",
         });
-      } catch {
-        /* skip rows with invalid metadata JSON */
+      } catch (parseErr) {
+        skipped++;
+        skippedIds.push(row.id);
+        logger?.warn(
+          "Skipping row with invalid metadata JSON during hydration",
+          {
+            id: row.id,
+            error:
+              parseErr instanceof Error ? parseErr.message : String(parseErr),
+          }
+        );
       }
     }
+
+    if (skipped > 0) {
+      logger?.warn("Registry hydration completed with skipped rows", {
+        hydrated: docRegistry.size,
+        skipped,
+        total: rows.length,
+      });
+    }
+
+    return { skippedRows: skipped, skippedIds };
   } finally {
     db.close();
   }

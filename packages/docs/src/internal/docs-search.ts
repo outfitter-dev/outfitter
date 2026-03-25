@@ -120,6 +120,7 @@ export async function createDocsSearch(
   }
 
   const docRegistry = new Map<string, DocRegistryEntry>();
+  const logger = config.logger;
   let isClosed = false;
 
   return Result.ok({
@@ -148,7 +149,7 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath);
+        await hydrateRegistry(docRegistry, indexPath, logger);
 
         const entry = docRegistry.get(id);
         if (!entry) {
@@ -170,10 +171,14 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath);
+        await hydrateRegistry(docRegistry, indexPath, logger);
 
         const filePaths = await collectSourceFiles(config.paths, frozenCwd);
-        const prepared = await prepareIndexDocuments(filePaths, docRegistry);
+        const prepared = await prepareIndexDocuments(
+          filePaths,
+          docRegistry,
+          logger
+        );
         const added = await applyIndexDocuments(
           ftsIndex,
           docRegistry,
@@ -203,7 +208,8 @@ export async function createDocsSearch(
       }
 
       try {
-        await hydrateRegistry(docRegistry, indexPath);
+        await hydrateRegistry(docRegistry, indexPath, logger);
+
         return Result.ok(listRegistryEntries(docRegistry));
       } catch (error) {
         return Result.err(

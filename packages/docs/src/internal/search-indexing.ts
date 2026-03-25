@@ -4,6 +4,7 @@ import type { Index } from "@outfitter/index";
 
 import type {
   DocRegistryEntry,
+  DocsSearchLogger,
   PendingIndexDocument,
   SearchDocMetadata,
 } from "./search-types.js";
@@ -47,7 +48,8 @@ export async function collectSourceFiles(
  */
 export async function prepareIndexDocuments(
   filePaths: readonly string[],
-  docRegistry: Map<string, DocRegistryEntry>
+  docRegistry: Map<string, DocRegistryEntry>,
+  logger?: DocsSearchLogger
 ): Promise<{
   readonly docsToAdd: PendingIndexDocument[];
   readonly failed: number;
@@ -65,13 +67,21 @@ export async function prepareIndexDocuments(
       content = await Bun.file(filePath).text();
     } catch (err) {
       failed++;
+      const errorCode =
+        err instanceof Error && "code" in err
+          ? (err as NodeJS.ErrnoException).code
+          : undefined;
+      const isNotFound = errorCode === "ENOENT";
+
+      logger?.warn("Failed to read file during indexing", {
+        path: filePath,
+        code: errorCode,
+        error: err instanceof Error ? err.message : String(err),
+      });
+
       // Only treat as absent (stale) if the file is truly gone.
       // For any other read error (EACCES, lock, etc.) keep it in seen
       // so it isn't pruned from the index on a transient failure.
-      const isNotFound =
-        err instanceof Error &&
-        "code" in err &&
-        (err as NodeJS.ErrnoException).code === "ENOENT";
       if (!isNotFound) {
         seen.add(filePath);
       }
