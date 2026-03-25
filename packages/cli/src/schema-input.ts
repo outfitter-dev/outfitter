@@ -14,8 +14,10 @@ import { Option } from "commander";
 
 /** Result of unwrapping a Zod field's type chain. */
 export interface ZodFieldInfo {
-  /** The base Zod type name (string, number, boolean, enum). */
+  /** The base Zod type name (string, number, boolean, enum, array). */
   readonly baseType: string;
+  /** For array types, the element type name (e.g., "string", "number"). */
+  readonly arrayElementType: string | undefined;
   /** Default value if .default() was used. */
   readonly defaultValue: unknown;
   /** Description from .describe(). */
@@ -30,13 +32,15 @@ export interface ZodFieldInfo {
 
 /** Derived Commander flag definition from a Zod field. */
 export interface DerivedFlag {
+  /** For array types, the element type (e.g., "string", "number"). */
+  readonly arrayElementType?: string | undefined;
   /** Commander default value. */
   readonly defaultValue: unknown;
   /** Commander option description. */
   readonly description: string;
   /** Commander flag string (e.g., "--output-dir <value>"). */
   readonly flagString: string;
-  /** The base Zod type (string, number, boolean, enum). */
+  /** The base Zod type (string, number, boolean, enum, array). */
   readonly baseType: string;
   /** Enum values when baseType is "enum". Omitted for non-enum types. */
   readonly enumValues?: readonly string[] | undefined;
@@ -117,6 +121,10 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
     // Reached the base type
     return {
       baseType: def.type,
+      arrayElementType:
+        def.type === "array"
+          ? unwrapZodField((def as { element?: unknown }).element).baseType
+          : undefined,
       description,
       hasDefault,
       defaultValue,
@@ -130,6 +138,7 @@ export function unwrapZodField(field: unknown): ZodFieldInfo {
 
   return {
     baseType: "unknown",
+    arrayElementType: undefined,
     description,
     hasDefault,
     defaultValue,
@@ -221,6 +230,7 @@ export function deriveFlags(
       description: desc,
       defaultValue: info.hasDefault ? info.defaultValue : undefined,
       baseType: info.baseType,
+      arrayElementType: info.arrayElementType,
       enumValues: info.enumValues,
       isBoolean,
       // Boolean flags are never mandatory — absence semantically means false.
@@ -233,7 +243,8 @@ export function deriveFlags(
 
 /**
  * Create a Commander Option from a derived flag definition,
- * including choices for enum types and argParser for number types.
+ * including choices for enum types, argParser coercion for number types,
+ * and an accumulating argParser for variadic number array types.
  */
 export function createCommanderOption(
   flag: DerivedFlag,
@@ -241,7 +252,11 @@ export function createCommanderOption(
 ): Option {
   const option = new Option(flag.flagString, flag.description);
 
-  if (flag.defaultValue !== undefined) {
+  // Number arrays handle their own defaults below to prevent accumulator merging.
+  const isNumberArray =
+    flag.baseType === "array" && flag.arrayElementType === "number";
+
+  if (flag.defaultValue !== undefined && !isNumberArray) {
     option.default(flag.defaultValue);
   } else if (flag.isBoolean) {
     // Boolean flags without an explicit default get false — Commander needs
@@ -254,9 +269,28 @@ export function createCommanderOption(
     option.choices(flag.enumValues as string[]);
   }
 
-  // For number fields, add argParser for coercion
+  // For scalar number fields, coerce strings to numbers.
   if (flag.baseType === "number") {
     option.argParser(Number);
+  }
+
+  // For variadic number arrays, coerce each element to a number.
+  // Commander's argParser accumulates: (currentValue, prev) => nextResult.
+  // We always start a fresh array on the first explicit CLI value so that
+  // schema defaults (applied by Zod validation) are replaced, not appended to.
+  if (flag.baseType === "array" && flag.arrayElementType === "number") {
+    option.argParser((val: string, prev: number[]) => {
+      const num = Number(val);
+      return Array.isArray(prev) ? [...prev, num] : [num];
+    });
+    // Don't let Commander set an array default — Zod applies it during
+    // validation. This prevents defaults from merging with explicit values.
+    // Use the description overload so --help still shows the default.
+    if (flag.defaultValue !== undefined) {
+      option.default(undefined, JSON.stringify(flag.defaultValue));
+    } else {
+      option.default(undefined);
+    }
   }
 
   if (flag.isRequired) {
