@@ -367,12 +367,10 @@ function createCommand(
  *
  * @example
  * ```typescript
- * import { buildCliCommands, defaultOnResult } from "@outfitter/cli/actions";
+ * import { buildCliCommands } from "@outfitter/cli/actions";
  *
- * // Batteries-included: auto-outputs handler results
- * for (const command of buildCliCommands(registry, {
- *   onResult: defaultOnResult,
- * })) {
+ * // Batteries-included: results are auto-output by default
+ * for (const command of buildCliCommands(registry)) {
  *   program.register(command);
  * }
  * ```
