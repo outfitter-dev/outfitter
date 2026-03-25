@@ -47,11 +47,14 @@ export interface BuildCliCommandsOptions {
   readonly includeSurfaces?: readonly ActionSurface[];
   /**
    * Called after each handler returns with `Result.ok` or `Result.err`.
-   * When provided, handler errors are not auto-thrown — the callback is
-   * responsible for error handling. Input validation errors still throw
-   * before the handler runs and are not routed through this callback.
+   *
+   * Defaults to {@link defaultOnResult}, which outputs success values
+   * based on CLI flags (`--output`, `--json`, `--jsonl`) and throws errors.
+   * Pass `null` to disable and silently discard success values.
    */
-  readonly onResult?: (ctx: ActionResultContext) => void | Promise<void>;
+  readonly onResult?:
+    | ((ctx: ActionResultContext) => void | Promise<void>)
+    | null;
   readonly schema?: boolean | SchemaCommandOptions;
 }
 
@@ -350,13 +353,13 @@ function createCommand(
  * Actions with a `cli.group` value are automatically collected into nested
  * subcommands under a shared parent command — no manual wiring needed.
  *
- * **Important**: Without the `onResult` option, handler success values are
- * silently discarded (only errors are thrown). Pass {@link defaultOnResult} for
- * automatic output based on CLI flags (`--output`, `--json`, `--jsonl`).
+ * By default, handler results are auto-output via {@link defaultOnResult}
+ * based on CLI flags (`--output`, `--json`, `--jsonl`). Pass `onResult: null`
+ * to disable and silently discard success values.
  *
  * @param source - An `ActionRegistry` or array of `AnyActionSpec` to convert
  * @param options - Configuration for context creation, surface filtering, result handling, and schema commands
- * @param options.onResult - Called after each handler completes. When provided, errors are **not** auto-thrown — the callback is responsible for error handling. Use {@link defaultOnResult} for batteries-included output.
+ * @param options.onResult - Called after each handler completes. Defaults to {@link defaultOnResult}. Pass `null` to disable and silently discard success values (only errors thrown).
  * @param options.createContext - Factory for the `HandlerContext` passed to each handler. Defaults to `createContext({ cwd: process.cwd(), env: process.env })`.
  * @param options.includeSurfaces - Which surfaces to include. Defaults to `["cli"]`.
  * @param options.schema - Controls the auto-generated `schema` subcommand. Pass `false` to disable.
@@ -398,6 +401,14 @@ export function buildCliCommands(
     "cli",
   ];
   const commands: Command[] = [];
+  // Default to defaultOnResult so handler results are auto-output.
+  // Pass null to opt out and silently discard success values.
+  const onResult:
+    | ((ctx: ActionResultContext) => void | Promise<void>)
+    | undefined =
+    options.onResult === null
+      ? undefined
+      : (options.onResult ?? defaultOnResult);
   const createContext =
     options.createContext ??
     ((_input) =>
@@ -428,9 +439,7 @@ export function buildCliCommands(
   }
 
   for (const action of ungrouped) {
-    commands.push(
-      createCommand(action, createContext, undefined, options.onResult)
-    );
+    commands.push(createCommand(action, createContext, undefined, onResult));
   }
 
   for (const [groupName, groupActions] of grouped.entries()) {
@@ -460,12 +469,7 @@ export function buildCliCommands(
 
         groupCommand.action(async (...argsList: unknown[]) => {
           const commandInstance = argsList.at(-1) as Command;
-          await runAction(
-            action,
-            commandInstance,
-            createContext,
-            options.onResult
-          );
+          await runAction(action, commandInstance, createContext, onResult);
         });
       } else {
         subcommands.push(action);
@@ -482,7 +486,7 @@ export function buildCliCommands(
         action,
         createContext,
         [name, ...args].join(" "),
-        options.onResult
+        onResult
       );
       groupCommand.addCommand(subcommand);
     }
