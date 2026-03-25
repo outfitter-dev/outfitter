@@ -23,6 +23,8 @@ export interface RuleModule {
 
 const PACKAGES_SRC_PATTERN = /(?:^|\/)packages\/[^/]+\/src\//u;
 const TEST_FILE_PATTERN = /(?:^|\/)__tests__\/|\.(test|spec)\.[cm]?[jt]sx?$/;
+/** Scaffold template files that should not trigger package-level lint rules. */
+const TEMPLATE_FILE_PATTERN = /\.template\.[cm]?[jt]sx?$/;
 
 interface NodeWithType {
   readonly type: string;
@@ -48,6 +50,14 @@ export function normalizeFilePath(filePath: string): string {
   return filePath.replaceAll("\\", "/");
 }
 
+/**
+ * Returns `true` if `filePath` is a package source file that should be subject
+ * to package-level lint rules. Excludes test files, scaffold template files,
+ * and any path that does not live under `packages/<name>/src/`.
+ *
+ * @param filePath - Absolute or repo-relative path to the file under lint
+ * @returns `true` when the file is genuine package source, `false` otherwise
+ */
 export function isPackageSourceFile(filePath: string | undefined): boolean {
   if (!filePath) {
     return false;
@@ -59,7 +69,11 @@ export function isPackageSourceFile(filePath: string | undefined): boolean {
     return false;
   }
 
-  return !TEST_FILE_PATTERN.test(normalized);
+  if (TEST_FILE_PATTERN.test(normalized)) {
+    return false;
+  }
+
+  return !TEMPLATE_FILE_PATTERN.test(normalized);
 }
 
 const PACKAGE_NAME_PATTERN = /(?:^|\/)packages\/([^/]+)\/src\//u;
