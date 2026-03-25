@@ -10,6 +10,12 @@
  */
 
 export { createDocsSearch } from "./internal/docs-search.js";
+export {
+  hasFtsSyntax,
+  isFtsParseError,
+  quoteFtsTerms,
+  shouldRetryAsQuoted,
+} from "./internal/search-query.js";
 export type {
   DocsSearch,
   DocsSearchConfig,
