@@ -415,14 +415,35 @@ export function buildCheckOrchestratorPlan(
     });
   }
 
-  // Auto-regenerate and normalize exports for ALL packages unconditionally.
-  // This eliminates export drift as a class of problem — developers never
-  // need to remember to run `bun run build` to sync exports. The normalize
-  // step runs before the check so the validation always sees fresh exports.
+  // Normalize exports for ALL packages (cleans the working tree) but only
+  // stage package.json files for packages with staged changes. This means:
+  // - No dirty working tree from export drift (agents/developers don't see it)
+  // - Only relevant package.json files enter the commit
+  // - Drift in unrelated packages is fixed silently without polluting the commit
+  const affectedPackages = hasStagedFiles
+    ? [
+        ...new Set(
+          stagedFiles
+            .filter(
+              (f) =>
+                f.startsWith("packages/") ||
+                f.startsWith("apps/") ||
+                f.startsWith("plugins/") ||
+                f.startsWith("examples/")
+            )
+            .map((f) => f.split("/").slice(0, 2).join("/"))
+        ),
+      ]
+    : [];
+
   preCommitSteps.push({
     id: "normalize-exports",
     label: "Normalize exports",
-    command: ["bun", "scripts/normalize-exports.ts"],
+    command: [
+      "bun",
+      "scripts/normalize-exports.ts",
+      ...(affectedPackages.length > 0 ? ["--stage", ...affectedPackages] : []),
+    ],
   });
 
   preCommitSteps.push({
