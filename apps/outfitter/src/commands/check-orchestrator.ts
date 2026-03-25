@@ -387,12 +387,6 @@ export function buildCheckOrchestratorPlan(
     });
   }
 
-  preCommitSteps.push({
-    id: "exports",
-    label: "Exports",
-    command: ["bun", "run", "check-exports"],
-  });
-
   if (tsFiles.length > 0 || !hasStagedFiles) {
     const ultraciteIdx = preCommitSteps.findIndex(
       (s) => s.id === "ultracite-fix"
@@ -408,28 +402,34 @@ export function buildCheckOrchestratorPlan(
     });
   }
 
-  // If tooling package files are staged, regenerate config-file exports.
-  // This prevents sync:exports drift from ever being committed.
-  // Inserted right before the exports validation step so the check
-  // sees freshly regenerated config-file exports (typecheck runs earlier).
+  // If tooling package files are staged, regenerate config-file exports
+  // before the normalize step sees them.
   const hasToolingChanges =
     hasStagedFiles &&
     stagedFiles.some((f) => f.startsWith("packages/tooling/"));
   if (hasToolingChanges) {
-    const exportsIndex = preCommitSteps.findIndex((s) => s.id === "exports");
-    // Guard: `exports` is pushed unconditionally above; this throw only fires
-    // if that invariant is broken during a future refactor.
-    if (exportsIndex === -1) {
-      throw new CheckOrchestratorError(
-        "Expected 'exports' step in pre-commit plan but it was not found"
-      );
-    }
-    preCommitSteps.splice(exportsIndex, 0, {
+    preCommitSteps.push({
       id: "tooling-sync-exports",
       label: "Tooling sync:exports",
       command: ["bun", "run", "--filter", "@outfitter/tooling", "sync:exports"],
     });
   }
+
+  // Auto-regenerate and normalize exports for ALL packages unconditionally.
+  // This eliminates export drift as a class of problem — developers never
+  // need to remember to run `bun run build` to sync exports. The normalize
+  // step runs before the check so the validation always sees fresh exports.
+  preCommitSteps.push({
+    id: "normalize-exports",
+    label: "Normalize exports",
+    command: ["bun", "scripts/normalize-exports.ts"],
+  });
+
+  preCommitSteps.push({
+    id: "exports",
+    label: "Exports",
+    command: ["bun", "run", "check-exports"],
+  });
 
   return preCommitSteps;
 }
