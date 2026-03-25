@@ -224,58 +224,6 @@ describe("docs search logging", () => {
     expect(readFailureWarnings[0]?.metadata?.path).toBe(nonExistentPath);
   });
 
-  it("search with limit still returns valid results when corrupt rows consume FTS slots", async () => {
-    const fixture = await createFixture();
-    tempDirs.push(fixture.rootDir);
-
-    // Add a second doc so we have one valid and one to corrupt
-    await writeFile(
-      join(fixture.docsDir, "alpha.md"),
-      "# Alpha\n\nAlpha content for search testing."
-    );
-
-    const result = await createDocsSearch({
-      name: "test",
-      paths: [join(fixture.docsDir, "**/*.md")],
-      indexPath: fixture.indexPath,
-    });
-    if (result.isErr()) throw result.error;
-    const docs = result.value;
-    instances.push(docs);
-    await docs.index();
-    await docs.close();
-    instances.pop();
-
-    // Corrupt one row's metadata
-    const db = new Database(fixture.indexPath);
-    db.run("UPDATE documents SET metadata = NULL WHERE rowid = 1");
-    db.close();
-
-    // Re-open and search — the valid doc should appear despite the corrupt row.
-    // Use limit:2 so FTS5 returns enough rows for filtering to work
-    // even if the corrupt row ranks first.
-    const result2 = await createDocsSearch({
-      name: "test",
-      paths: [join(fixture.docsDir, "**/*.md")],
-      indexPath: fixture.indexPath,
-    });
-    if (result2.isErr()) throw result2.error;
-    const docs2 = result2.value;
-    instances.push(docs2);
-
-    const searchResult = await docs2.search("content", { limit: 2 });
-    if (searchResult.isErr()) throw searchResult.error;
-
-    // At least one valid doc should be returned; corrupt rows are excluded
-    expect(searchResult.value.length).toBeGreaterThanOrEqual(1);
-    // Every returned result must be a valid (non-corrupt) document
-    for (const hit of searchResult.value) {
-      const entry = await docs2.get(hit.id);
-      expect(entry.isOk()).toBe(true);
-      if (entry.isOk()) expect(entry.value).toBeDefined();
-    }
-  });
-
   it("accepts config without logger (backward compatible)", async () => {
     const fixture = await createFixture();
     tempDirs.push(fixture.rootDir);

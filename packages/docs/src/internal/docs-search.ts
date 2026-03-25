@@ -149,11 +149,7 @@ export async function createDocsSearch(
       }
 
       try {
-        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
-
-        if (hydration.skippedIds.length > 0) {
-          corruptRows.merge(hydration.skippedIds);
-        }
+        await hydrateRegistry(docRegistry, indexPath, logger);
 
         const entry = docRegistry.get(id);
         if (!entry) {
@@ -175,11 +171,7 @@ export async function createDocsSearch(
       }
 
       try {
-        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
-
-        if (hydration.skippedIds.length > 0) {
-          corruptRows.merge(hydration.skippedIds);
-        }
+        await hydrateRegistry(docRegistry, indexPath, logger);
 
         const filePaths = await collectSourceFiles(config.paths, frozenCwd);
         const prepared = await prepareIndexDocuments(
@@ -216,11 +208,7 @@ export async function createDocsSearch(
       }
 
       try {
-        const hydration = await hydrateRegistry(docRegistry, indexPath, logger);
-
-        if (hydration.skippedIds.length > 0) {
-          corruptRows.merge(hydration.skippedIds);
-        }
+        await hydrateRegistry(docRegistry, indexPath, logger);
 
         return Result.ok(listRegistryEntries(docRegistry));
       } catch (error) {

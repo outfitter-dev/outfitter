@@ -1,6 +1,23 @@
 import type { Result } from "better-result";
 
 /**
+ * Minimal logger interface for docs search internals.
+ *
+ * Callers can pass an `@outfitter/logging` instance or any object
+ * that satisfies this shape.
+ */
+export interface DocsSearchLogger {
+  /**
+   * Log a warning encountered during search operations (e.g. skipped rows,
+   * unreadable files).
+   *
+   * @param message - Human-readable description of the warning
+   * @param metadata - Optional structured context (e.g. file path, row ID)
+   */
+  warn(message: string, metadata?: Record<string, unknown>): void;
+}
+
+/**
  * Configuration for creating a docs search instance.
  *
  * @example

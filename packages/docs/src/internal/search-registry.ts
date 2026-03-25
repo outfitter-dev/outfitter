@@ -14,35 +14,48 @@ import type {
 const DEFAULT_TABLE_NAME = "documents";
 const hydrationPromises = new WeakMap<
   Map<string, DocRegistryEntry>,
-  Promise<void>
+  Promise<HydrationResult>
 >();
+
+/** Result of hydrating the in-memory registry from an FTS5 index. */
+export interface HydrationResult {
+  /** Number of FTS5 rows with missing or corrupt metadata that were skipped. */
+  readonly skippedRows: number;
+  /** IDs of FTS5 rows that were skipped due to missing or corrupt metadata. */
+  readonly skippedIds: readonly string[];
+}
 
 /**
  * Populate the in-memory registry from an existing FTS5 index if present.
  *
  * The index stores metadata as JSON text, so hydration only needs the `id` and
- * `metadata` columns. Invalid metadata rows are ignored.
+ * `metadata` columns. Rows with missing or unparseable metadata are skipped
+ * and reported via the optional logger.
+ *
+ * @param docRegistry - In-memory map to populate with registry entries
+ * @param indexPath - Absolute path to the SQLite FTS5 index file
+ * @param logger - Optional logger for surfacing warnings about skipped rows
+ * @returns Hydration stats including the count of skipped (corrupt) rows
  */
 export async function hydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
   indexPath: string,
   logger?: DocsSearchLogger
-): Promise<void> {
+): Promise<HydrationResult> {
   if (docRegistry.size > 0) {
-    return;
+    return { skippedRows: 0, skippedIds: [] };
   }
 
   const existingPromise = hydrationPromises.get(docRegistry);
   if (existingPromise) {
-    await existingPromise;
-    return;
+    return await existingPromise;
   }
 
   const hydrationPromise = doHydrateRegistry(docRegistry, indexPath, logger);
   hydrationPromises.set(docRegistry, hydrationPromise);
 
   try {
-    await hydrationPromise;
+    return await hydrationPromise;
   } finally {
     hydrationPromises.delete(docRegistry);
   }
@@ -52,9 +65,9 @@ async function doHydrateRegistry(
   docRegistry: Map<string, DocRegistryEntry>,
   indexPath: string,
   logger?: DocsSearchLogger
-): Promise<void> {
+): Promise<HydrationResult> {
   if (docRegistry.size > 0 || !(await Bun.file(indexPath).exists())) {
-    return;
+    return { skippedRows: 0, skippedIds: [] };
   }
 
   // NOTE: TOCTOU gap — the file could be deleted between the exists() check
@@ -96,7 +109,7 @@ async function doHydrateRegistry(
           title: meta.title ?? basename(row.id, extname(row.id)),
           contentHash: meta.contentHash ?? "",
         });
-      } catch {
+      } catch (parseErr) {
         skipped++;
         skippedIds.push(row.id);
         logger?.warn(
@@ -117,6 +130,8 @@ async function doHydrateRegistry(
         total: rows.length,
       });
     }
+
+    return { skippedRows: skipped, skippedIds };
   } finally {
     db.close();
   }
