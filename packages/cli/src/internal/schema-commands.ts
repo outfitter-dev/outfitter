@@ -141,10 +141,10 @@ export function createSchemaCommand(
     const surfaceOpts = options.surface;
     const outputDir = surfaceOpts.outputDir ?? ".outfitter";
 
-    // Resolve workspace root so surface files always land at the monorepo
-    // root, not in whichever package directory the command runs from.
-    // Walk up from the provided cwd (or process.cwd()) looking for .git.
-    const cwd = resolveWorkspaceRoot(surfaceOpts.cwd ?? process.cwd());
+    // When cwd is explicitly provided, respect it. Otherwise resolve
+    // the workspace root so surface files land at the monorepo root,
+    // not whichever package directory the command happens to run from.
+    const cwd = surfaceOpts.cwd ?? resolveWorkspaceRoot(process.cwd());
 
     // generate subcommand
     const generateCmd = new Command("generate")
