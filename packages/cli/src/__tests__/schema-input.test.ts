@@ -165,6 +165,55 @@ describe("deriveFlags", () => {
     const flags = deriveFlags(schema, new Set());
     expect(flags[0]?.flagString).toBe("--format <value>");
   });
+
+  it("derives array flags with variadic <value...> placeholder", () => {
+    const schema = z.object({
+      tags: z.array(z.string()).describe("Tags for categorization"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags).toHaveLength(1);
+    expect(flags[0]?.flagString).toBe("--tags <value...>");
+    expect(flags[0]?.description).toBe("Tags for categorization");
+    expect(flags[0]?.isBoolean).toBe(false);
+    expect(flags[0]?.isRequired).toBe(true);
+  });
+
+  it("derives optional array flags as not required", () => {
+    const schema = z.object({
+      refs: z.array(z.string()).optional().describe("References"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags).toHaveLength(1);
+    expect(flags[0]?.flagString).toBe("--refs <value...>");
+    expect(flags[0]?.isRequired).toBe(false);
+  });
+
+  it("derives array flags with defaults as not required", () => {
+    const schema = z.object({
+      tags: z.array(z.string()).default([]).describe("Tags"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags[0]?.isRequired).toBe(false);
+    expect(flags[0]?.defaultValue).toEqual([]);
+  });
+
+  it("tracks array element type for numeric coercion", () => {
+    const schema = z.object({
+      ids: z.array(z.number()).describe("Numeric IDs"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags[0]?.baseType).toBe("array");
+    expect(flags[0]?.arrayElementType).toBe("number");
+  });
+
+  it("unwraps wrapped element types in arrays", () => {
+    const schema = z.object({
+      ids: z.array(z.coerce.number()).describe("Coerced IDs"),
+    });
+    const flags = deriveFlags(schema, new Set());
+    expect(flags[0]?.baseType).toBe("array");
+    expect(flags[0]?.arrayElementType).toBe("number");
+  });
 });
 
 // =============================================================================
@@ -206,6 +255,30 @@ describe("createCommanderOption", () => {
     expect(option.parseArg).toBeDefined();
     // It should parse "42" → 42
     expect(option.parseArg!("42", undefined as unknown as number)).toBe(42);
+  });
+
+  it("adds accumulating argParser for number array fields", () => {
+    const schema = z.object({ ids: z.array(z.number()) });
+    const flags = deriveFlags(schema, new Set());
+    const option = createCommanderOption(flags[0]!, schema);
+    expect(option.parseArg).toBeDefined();
+    // First value — no previous accumulator
+    const first = option.parseArg!("1", undefined as unknown as number[]);
+    expect(first).toEqual([1]);
+    // Subsequent values accumulate
+    const second = option.parseArg!("2", first as unknown as number[]);
+    expect(second).toEqual([1, 2]);
+    const third = option.parseArg!("3", second as unknown as number[]);
+    expect(third).toEqual([1, 2, 3]);
+  });
+
+  it("creates string array option without custom argParser", () => {
+    const schema = z.object({ tags: z.array(z.string()) });
+    const flags = deriveFlags(schema, new Set());
+    const option = createCommanderOption(flags[0]!, schema);
+    // String arrays use Commander's native variadic collection — no argParser
+    expect(option.parseArg).toBeUndefined();
+    expect(option.flags).toBe("--tags <value...>");
   });
 });
 
