@@ -387,12 +387,6 @@ export function buildCheckOrchestratorPlan(
     });
   }
 
-  preCommitSteps.push({
-    id: "exports",
-    label: "Exports",
-    command: ["bun", "run", "check-exports"],
-  });
-
   if (tsFiles.length > 0 || !hasStagedFiles) {
     const ultraciteIdx = preCommitSteps.findIndex(
       (s) => s.id === "ultracite-fix"
@@ -408,28 +402,55 @@ export function buildCheckOrchestratorPlan(
     });
   }
 
-  // If tooling package files are staged, regenerate config-file exports.
-  // This prevents sync:exports drift from ever being committed.
-  // Inserted right before the exports validation step so the check
-  // sees freshly regenerated config-file exports (typecheck runs earlier).
+  // If tooling package files are staged, regenerate config-file exports
+  // before the normalize step sees them.
   const hasToolingChanges =
     hasStagedFiles &&
     stagedFiles.some((f) => f.startsWith("packages/tooling/"));
   if (hasToolingChanges) {
-    const exportsIndex = preCommitSteps.findIndex((s) => s.id === "exports");
-    // Guard: `exports` is pushed unconditionally above; this throw only fires
-    // if that invariant is broken during a future refactor.
-    if (exportsIndex === -1) {
-      throw new CheckOrchestratorError(
-        "Expected 'exports' step in pre-commit plan but it was not found"
-      );
-    }
-    preCommitSteps.splice(exportsIndex, 0, {
+    preCommitSteps.push({
       id: "tooling-sync-exports",
       label: "Tooling sync:exports",
       command: ["bun", "run", "--filter", "@outfitter/tooling", "sync:exports"],
     });
   }
+
+  // Normalize exports for ALL packages (cleans the working tree) but only
+  // stage package.json files for packages with staged changes. This means:
+  // - No dirty working tree from export drift (agents/developers don't see it)
+  // - Only relevant package.json files enter the commit
+  // - Drift in unrelated packages is fixed silently without polluting the commit
+  const affectedPackages = hasStagedFiles
+    ? [
+        ...new Set(
+          stagedFiles
+            .filter(
+              (f) =>
+                f.startsWith("packages/") ||
+                f.startsWith("apps/") ||
+                f.startsWith("plugins/") ||
+                f.startsWith("examples/")
+            )
+            .map((f) => f.split("/").slice(0, 2).join("/"))
+        ),
+      ]
+    : [];
+
+  preCommitSteps.push({
+    id: "normalize-exports",
+    label: "Normalize exports",
+    command: [
+      "bun",
+      "scripts/normalize-exports.ts",
+      ...(affectedPackages.length > 0 ? ["--stage", ...affectedPackages] : []),
+    ],
+  });
+
+  preCommitSteps.push({
+    id: "exports",
+    label: "Exports",
+    command: ["bun", "run", "check-exports"],
+  });
 
   return preCommitSteps;
 }

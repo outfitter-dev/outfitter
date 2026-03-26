@@ -300,13 +300,16 @@ describe("buildCheckOrchestratorPlan", () => {
     const stepIds = plan.map((step) => step.id);
 
     expect(stepIds).toContain("tooling-sync-exports");
-    // sync-exports should come right before exports
+    expect(stepIds).toContain("normalize-exports");
+    // sync-exports → normalize-exports → exports (in order)
     const syncIdx = stepIds.indexOf("tooling-sync-exports");
+    const normalizeIdx = stepIds.indexOf("normalize-exports");
     const exportsIdx = stepIds.indexOf("exports");
-    expect(syncIdx).toBe(exportsIdx - 1);
+    expect(syncIdx).toBeLessThan(normalizeIdx);
+    expect(normalizeIdx).toBeLessThan(exportsIdx);
   });
 
-  test("pre-commit mode omits tooling-sync-exports when no tooling files staged", () => {
+  test("pre-commit mode omits tooling-sync-exports when no tooling files staged but still normalizes", () => {
     const plan = buildCheckOrchestratorPlan({
       cwd: process.cwd(),
       mode: "pre-commit",
@@ -315,7 +318,11 @@ describe("buildCheckOrchestratorPlan", () => {
     const stepIds = plan.map((step) => step.id);
 
     expect(stepIds).not.toContain("tooling-sync-exports");
+    expect(stepIds).toContain("normalize-exports");
     expect(stepIds).toContain("exports");
+    expect(stepIds.indexOf("normalize-exports")).toBeLessThan(
+      stepIds.indexOf("exports")
+    );
   });
 
   test("pre-commit mode orders typecheck before tooling-sync-exports", () => {
@@ -331,7 +338,7 @@ describe("buildCheckOrchestratorPlan", () => {
     expect(typecheckIdx).toBeLessThan(syncIdx);
   });
 
-  test("pre-commit mode runs only sync-exports + exports when non-TS tooling file staged", () => {
+  test("pre-commit mode runs sync-exports + normalize + exports when non-TS tooling file staged", () => {
     const plan = buildCheckOrchestratorPlan({
       cwd: process.cwd(),
       mode: "pre-commit",
@@ -342,9 +349,13 @@ describe("buildCheckOrchestratorPlan", () => {
     expect(stepIds).not.toContain("ultracite-fix");
     expect(stepIds).not.toContain("typecheck");
     expect(stepIds).toContain("tooling-sync-exports");
+    expect(stepIds).toContain("normalize-exports");
     expect(stepIds).toContain("exports");
-    expect(stepIds.indexOf("tooling-sync-exports")).toBe(
-      stepIds.indexOf("exports") - 1
+    expect(stepIds.indexOf("tooling-sync-exports")).toBeLessThan(
+      stepIds.indexOf("normalize-exports")
+    );
+    expect(stepIds.indexOf("normalize-exports")).toBeLessThan(
+      stepIds.indexOf("exports")
     );
   });
 
@@ -359,9 +370,10 @@ describe("buildCheckOrchestratorPlan", () => {
     expect(stepIds).toContain("ultracite-fix");
     expect(stepIds).not.toContain("typecheck");
     expect(stepIds).toContain("tooling-sync-exports");
+    expect(stepIds).toContain("normalize-exports");
     expect(stepIds).toContain("exports");
-    expect(stepIds.indexOf("tooling-sync-exports")).toBe(
-      stepIds.indexOf("exports") - 1
+    expect(stepIds.indexOf("tooling-sync-exports")).toBeLessThan(
+      stepIds.indexOf("normalize-exports")
     );
   });
 });

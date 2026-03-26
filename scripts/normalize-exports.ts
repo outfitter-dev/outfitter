@@ -1,13 +1,17 @@
 /**
  * Normalizes the `exports` field in package.json files.
  *
- * Two responsibilities:
+ * Three responsibilities:
  * 1. Alphabetize export keys to prevent non-deterministic ordering from causing
  *    spurious merge conflicts in stacked branches.
  * 2. Strip `./internal` and `./internal/*` exports as a safety net — these are
  *    implementation details that should never appear in the public surface.
+ * 3. When called with `--stage <pkg...>`, normalize ALL packages (clean working
+ *    tree) but only `git add` the package.json files for the listed packages.
+ *    This keeps commits scoped to relevant changes while preventing drift from
+ *    confusing agents and developers with a dirty working tree.
  *
- * Runs as a post-build step after bunup writes exports.
+ * Runs as a post-build step and in the pre-commit hook.
  */
 
 import { join, resolve } from "node:path";
@@ -152,7 +156,24 @@ export async function normalizeWorkspaceExports(
 }
 
 async function main(): Promise<void> {
-  const check = Bun.argv.includes("--check");
+  const args = Bun.argv.slice(2);
+  const check = args.includes("--check");
+  const stageIdx = args.indexOf("--stage");
+
+  // --stage <pkg...>: normalize ALL packages (clean working tree) but only
+  // git-add the package.json files for listed packages. This keeps commits
+  // scoped while preventing drift from showing up as a dirty working tree.
+  const stagePackages =
+    stageIdx !== -1
+      ? args.slice(stageIdx + 1).filter((a) => !a.startsWith("--"))
+      : undefined;
+
+  if (check && stageIdx !== -1) {
+    console.warn(
+      "[normalize-exports] --stage is ignored when --check is also set"
+    );
+  }
+
   const result = await normalizeWorkspaceExports({ write: !check });
 
   if (check) {
@@ -174,6 +195,28 @@ async function main(): Promise<void> {
     console.log(
       `[normalize-exports] Normalized exports in ${result.changedPackages.length} package(s)`
     );
+  }
+
+  if (stagePackages !== undefined && result.changedPackages.length > 0) {
+    const toStage = result.changedPackages.filter((pkg) =>
+      stagePackages.some((sp) => pkg === sp)
+    );
+
+    if (toStage.length > 0) {
+      const paths = toStage.map((pkg) => join(pkg, "package.json"));
+      const { exitCode } = Bun.spawnSync(["git", "add", ...paths], {
+        stdio: ["inherit", "inherit", "inherit"],
+      });
+
+      if (exitCode !== 0) {
+        console.error(`[normalize-exports] git add failed (exit ${exitCode})`);
+        process.exit(1);
+      }
+
+      console.log(
+        `[normalize-exports] Staged ${toStage.length} package.json file(s)`
+      );
+    }
   }
 }
 
