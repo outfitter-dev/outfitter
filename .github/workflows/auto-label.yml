@@ -34,7 +34,7 @@ jobs:
 
       - name: Checkout
         if: steps.filter.outputs.changesets == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Detect release type from changesets
         if: steps.filter.outputs.changesets == 'true'
